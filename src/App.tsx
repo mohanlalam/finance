@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Users, User, Heart, LayoutDashboard, RefreshCw, Wifi, WifiOff, AlertCircle, Plus, Loader2,
   TrendingUp, Landmark, Coins, Home as HomeIcon, Shield, FolderOpen, UserPlus, X, Pencil, Check,
@@ -14,6 +14,7 @@ import GoldHoldingView from './components/GoldHoldingView';
 import RealEstateView from './components/RealEstateView';
 import InsuranceView from './components/InsuranceView';
 import DocumentVaultView from './components/DocumentVaultView';
+import PinLockScreen, { isPinConfigured, isSessionVerified } from './components/PinLockScreen';
 import { Portfolio, PortfolioName } from './types/portfolio';
 import { formatINR, formatPercent, pnlColor } from './utils/formatters';
 import { usePortfolioData } from './hooks/usePortfolioData';
@@ -71,6 +72,7 @@ function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null) {
 }
 
 export default function App() {
+  const [pinVerified, setPinVerified] = useState(() => !isPinConfigured() || isSessionVerified());
   const [activeTab, setActiveTab] = useState<PortfolioName>('all');
   const [activeAsset, setActiveAsset] = useState<AssetTab>('stocks');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -172,6 +174,11 @@ export default function App() {
     } finally {
       setRenaming(false);
     }
+  }
+
+  // PIN Lock Gate
+  if (!pinVerified) {
+    return <PinLockScreen onUnlock={() => setPinVerified(true)} />;
   }
 
   if (loadStatus === 'idle' || isLoadingDB) {
