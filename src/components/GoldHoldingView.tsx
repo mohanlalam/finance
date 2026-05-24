@@ -1,0 +1,345 @@
+import { useState } from 'react';
+import { GoldHolding, DocumentMetadata, PortfolioName } from '../types/portfolio';
+import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/formatters';
+import { Plus, Trash2, Edit2, Coins, TrendingUp, Scale, FileText } from 'lucide-react';
+
+interface GoldHoldingViewProps {
+  goldHoldings: GoldHolding[];
+  documents: DocumentMetadata[];
+  portfolioName: PortfolioName;
+  onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
+  onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
+  onDelete: (assetType: string, id: string) => Promise<void>;
+}
+
+const PURITY_OPTIONS = ['24K', '22K', '20K', '18K', '14K'];
+
+export default function GoldHoldingView({
+  goldHoldings,
+  documents,
+  portfolioName,
+  onAdd,
+  onUpdate,
+  onDelete,
+}: GoldHoldingViewProps) {
+  const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState<GoldHolding | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const [itemName, setItemName] = useState('');
+  const [purity, setPurity] = useState('22K');
+  const [weightGrams, setWeightGrams] = useState('');
+  const [purchasePrice, setPurchasePrice] = useState('');
+  const [currentValuation, setCurrentValuation] = useState('');
+  const [purchaseDate, setPurchaseDate] = useState('');
+
+  const totalWeight = goldHoldings.reduce((s, g) => s + Number(g.weight_grams), 0);
+  const totalPurchase = goldHoldings.reduce((s, g) => s + Number(g.purchase_price), 0);
+  const totalCurrent = goldHoldings.reduce((s, g) => s + Number(g.current_valuation), 0);
+  const totalGain = totalCurrent - totalPurchase;
+  const gainPct = totalPurchase > 0 ? (totalGain / totalPurchase) * 100 : 0;
+
+  function handleOpenAdd() {
+    setEditing(null);
+    setItemName('');
+    setPurity('22K');
+    setWeightGrams('');
+    setPurchasePrice('');
+    setCurrentValuation('');
+    setPurchaseDate('');
+    setError('');
+    setShowModal(true);
+  }
+
+  function handleOpenEdit(g: GoldHolding) {
+    setEditing(g);
+    setItemName(g.item_name);
+    setPurity(g.purity);
+    setWeightGrams(String(g.weight_grams));
+    setPurchasePrice(String(g.purchase_price));
+    setCurrentValuation(String(g.current_valuation));
+    setPurchaseDate(g.purchase_date ?? '');
+    setError('');
+    setShowModal(true);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!itemName || !weightGrams || !purchasePrice) {
+      setError('Item name, weight, and purchase price are required.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    const payload = {
+      itemName,
+      purity,
+      weightGrams: parseFloat(weightGrams),
+      purchasePrice: parseFloat(purchasePrice),
+      currentValuation: currentValuation ? parseFloat(currentValuation) : parseFloat(purchasePrice),
+      purchaseDate: purchaseDate || null,
+    };
+    try {
+      if (editing) {
+        await onUpdate('gold', editing.id, payload);
+      } else {
+        await onAdd('gold', portfolioName === 'all' ? 'personal' : portfolioName, payload);
+      }
+      setShowModal(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Operation failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Delete this gold holding?')) return;
+    try {
+      await onDelete('gold', id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Delete failed');
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-gradient-to-tr from-amber-500 to-yellow-600 rounded-2xl p-5 text-white shadow-md flex items-center justify-between">
+          <div>
+            <p className="text-xs text-amber-100 font-semibold uppercase tracking-wider">Total Gold Value</p>
+            <p className="text-2xl font-bold mt-1">{formatINR(totalCurrent)}</p>
+            <p className="text-xs text-amber-200 mt-2">{totalWeight.toFixed(2)} grams</p>
+          </div>
+          <Coins size={40} className="opacity-20 shrink-0" />
+        </div>
+
+        <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Cost Basis</p>
+            <p className="text-2xl font-bold text-slate-800 mt-1">{formatINR(totalPurchase)}</p>
+            <p className="text-xs text-slate-400 mt-2">Purchase price total</p>
+          </div>
+          <Scale size={40} className="text-amber-500/20 shrink-0" />
+        </div>
+
+        <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Appreciation</p>
+            <p className={`text-2xl font-bold mt-1 ${pnlColor(totalGain)}`}>{formatINR(totalGain)}</p>
+            <p className={`text-xs font-semibold mt-2 ${pnlColor(totalGain)}`}>{formatPercent(gainPct)}</p>
+          </div>
+          <TrendingUp size={40} className="text-emerald-500/20 shrink-0" />
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Gold Holdings</h3>
+          <button
+            onClick={handleOpenAdd}
+            className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+          >
+            <Plus size={13} />
+            Add Gold Item
+          </button>
+        </div>
+
+        {goldHoldings.length === 0 ? (
+          <div className="p-12 text-center text-slate-400">
+            <Coins size={32} className="mx-auto text-slate-300 mb-3" />
+            <p className="text-sm font-semibold">No gold holdings yet</p>
+            <p className="text-xs mt-1">Add coins, jewelry, or bars to start tracking.</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {goldHoldings.map((g) => {
+              const gain = Number(g.current_valuation) - Number(g.purchase_price);
+              const pct = Number(g.purchase_price) > 0 ? (gain / Number(g.purchase_price)) * 100 : 0;
+              const docs = documents.filter((d) => d.asset_type === 'gold' && d.asset_id === g.id);
+              return (
+                <div key={g.id} className="p-6 hover:bg-slate-50/50 transition-colors">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <Coins size={20} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="text-sm font-bold text-slate-800">{g.item_name}</h4>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                            {g.purity}
+                          </span>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                            {Number(g.weight_grams).toFixed(2)} g
+                          </span>
+                        </div>
+                        {g.purchase_date && <p className="text-xs text-slate-400 mt-0.5">Purchased: {g.purchase_date}</p>}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 md:text-right">
+                      <div>
+                        <p className="text-xs text-slate-400">Purchase</p>
+                        <p className="text-sm font-bold text-slate-800">{formatINR(Number(g.purchase_price))}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400">Current Value</p>
+                        <p className={`text-sm font-bold ${pnlColor(gain)}`}>{formatINR(Number(g.current_valuation))}</p>
+                        <p className={`text-[10px] ${pnlColor(gain)}`}>{formatPercent(pct)}</p>
+                      </div>
+                      <div className="col-span-2 sm:col-span-1 flex items-center justify-start md:justify-end gap-2">
+                        {docs.map((doc) => (
+                          <a
+                            key={doc.id}
+                            href={getDocumentUrl(doc.file_path)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-amber-600 hover:border-amber-200 transition-colors"
+                            title={doc.name}
+                          >
+                            <FileText size={14} />
+                          </a>
+                        ))}
+                        <button
+                          onClick={() => handleOpenEdit(g)}
+                          className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-colors"
+                          title="Edit"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(g.id)}
+                          className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-200 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+              <div>
+                <h3 className="text-base font-bold text-slate-800">
+                  {editing ? 'Edit Gold Holding' : 'Add Gold Item'}
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">Track coins, jewelry, or bars by weight and purity</p>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors"
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1.5">Item Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 24K Gold Coins, Bridal Necklace"
+                  value={itemName}
+                  onChange={(e) => setItemName(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-colors"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Purity</label>
+                  <select
+                    value={purity}
+                    onChange={(e) => setPurity(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-colors"
+                  >
+                    {PURITY_OPTIONS.map((p) => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Weight (grams)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={weightGrams}
+                    onChange={(e) => setWeightGrams(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Purchase Price (₹)</label>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={purchasePrice}
+                    onChange={(e) => setPurchasePrice(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Current Valuation (₹)</label>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={currentValuation}
+                    onChange={(e) => setCurrentValuation(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1.5">Purchase Date</label>
+                <input
+                  type="date"
+                  value={purchaseDate}
+                  onChange={(e) => setPurchaseDate(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-colors"
+                />
+              </div>
+
+              {error && (
+                <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{error}</p>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 border border-slate-200 text-slate-600 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 bg-amber-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-amber-700 transition-colors disabled:opacity-50"
+                >
+                  {loading ? 'Saving...' : editing ? 'Save Changes' : 'Add Gold'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
