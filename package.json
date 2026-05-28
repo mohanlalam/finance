@@ -8,7 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "mobile:sync": "npm run build && cd ../android/mobile && npx cap sync android",
+    "mobile:run": "npm run build && cd ../android/mobile && npx cap sync android && npx cap run android --target=emulator-5554"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
