@@ -254,6 +254,16 @@ To enable this:
 
 ---
 
+## 🛠️ Troubleshooting
+
+### HTTP 500 / PGRST303 ("JWT issued at future")
+If the dashboard fails to load and displays a `PGRST303` error:
+1. This is a transient clock synchronization (skew) issue between the Supabase Edge Function environment (Deno Deploy) and the database server.
+2. If this occurs, wait a few moments and click **Try Again** or refresh the page. The clocks will automatically resynchronize.
+3. The Edge Function has been updated with detailed error reporting to output the actual database messages instead of a generic `[object Object]` error.
+
+---
+
 ## 📄 License
 
 This is a private family project. All rights reserved.
