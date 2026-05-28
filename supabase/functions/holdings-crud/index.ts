@@ -332,16 +332,27 @@ Deno.serve(async (req: Request) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: unknown) {
+    console.error("Error in holdings-crud function:", e);
     let message: string;
     if (e instanceof Error) {
       message = e.message;
-    } else if (typeof e === 'object' && e !== null && 'message' in e) {
-      message = String((e as { message: unknown }).message);
+    } else if (e && typeof e === 'object') {
+      message = (e as any).message || (e as any).error_description || JSON.stringify(e);
     } else {
-      try { message = JSON.stringify(e); } catch { message = String(e); }
+      message = String(e);
     }
+
+    const details = e && typeof e === 'object' && 'details' in e ? (e as any).details : null;
+    const hint = e && typeof e === 'object' && 'hint' in e ? (e as any).hint : null;
+    const code = e && typeof e === 'object' && 'code' in e ? (e as any).code : null;
+
     return new Response(
-      JSON.stringify({ error: message }),
+      JSON.stringify({
+        error: message,
+        details,
+        hint,
+        code
+      }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -24,6 +24,9 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **Insurances** — Health, term, life, and motor policy registries with automated renewal timers and status alerts.
 - **Document Vault** — A secure digital folder system categorized by asset class. Attach PDF receipts or insurance policies directly to their records.
 
+### 🔒 Security
+- **PIN Lock Screen** — Optional session-based PIN lock screen to prevent unauthorized access to sensitive family wealth data. Configurable via environment variables.
+
 ### ⚙️ General
 - **Responsive Design** — Works seamlessly on desktop, tablet, and mobile.
 - **Offline Resilient** — Gracefully falls back to last known data when the network is unavailable.
@@ -47,6 +50,7 @@ A premium, interactive web application designed to track and manage multi-asset 
   - **Edge Functions (Deno)** — Serverless functions for secure CRUD logic (`holdings-crud`) and server-side live market quotes proxying (`market-data`).
 
 ### Hosting
+- **GitHub Pages** — CI/CD automated deployment on push to `main`.
 - **Firebase Hosting** — Production deployment (project: `finance-5efcd`)
 - **Netlify** — Production deployment option (SPA routing supported)
 
@@ -80,6 +84,7 @@ project antigravity/
 │   ├── types/
 │   │   └── portfolio.ts          # TypeScript interfaces (Holding, FixedDeposit, etc.)
 │   ├── utils/
+│   │   ├── auth.ts               # Session PIN verification and security helpers
 │   │   ├── formatters.ts         # INR formatting, percent formatting, P&L colors, getDocumentUrl
 │   │   └── supabaseClient.ts     # Supabase SDK initialization
 │   └── data/
@@ -130,6 +135,7 @@ Create a `.env` file in the project root:
 ```env
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_APP_PIN=your-4-to-6-digit-pin
 ```
 
 > ⚠️ The `.env` file is git-ignored. Never commit your keys.
@@ -153,6 +159,14 @@ npm run dev
 ```
 
 The app will be available at `http://localhost:5173`.
+
+### 6. Code Quality & Verification
+
+To verify that the code passes linting rules and TypeScript compilation check, run:
+```bash
+npm run lint
+npm run typecheck
+```
 
 ---
 
@@ -193,6 +207,18 @@ npx -y netlify-cli deploy --prod --dir=dist
 npm run build
 npx firebase deploy --only hosting
 ```
+
+### Option C — GitHub Pages (CI/CD Automated)
+
+A GitHub Actions workflow is pre-configured in `.github/workflows/deploy.yml` to automatically build and deploy the app to GitHub Pages when commits are pushed to the `main` branch.
+
+To enable this:
+1. Go to your repository settings on GitHub: **Settings → Pages**.
+2. Under **Build and deployment**, select **GitHub Actions** as the source.
+3. Configure the required secrets under **Settings → Secrets and variables → Actions** with your production environment variables:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_APP_PIN` (optional, 4-6 digit access code)
 
 ---
 

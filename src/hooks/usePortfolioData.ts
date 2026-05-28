@@ -31,6 +31,16 @@ interface QuoteResult {
   todayPct: number | null;
 }
 
+interface DBData {
+  portfolios?: DBPortfolio[];
+  holdings?: DBHolding[];
+  fixed_deposits?: FixedDeposit[];
+  gold_holdings?: GoldHolding[];
+  real_estate?: RealEstate[];
+  insurances?: Insurance[];
+  documents?: DocumentMetadata[];
+}
+
 export type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
 
 function crudHeaders() {
@@ -154,7 +164,7 @@ export function usePortfolioData() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [failedSymbols, setFailedSymbols] = useState<string[]>([]);
 
-  const loadFromDB = useCallback(async (): Promise<Record<string, any> | null> => {
+  const loadFromDB = useCallback(async (): Promise<DBData | null> => {
     if (!SUPABASE_URL) throw new Error('VITE_SUPABASE_URL is not configured');
     const url = `${SUPABASE_URL}/functions/v1/holdings-crud?action=list`;
     const res = await fetch(url, { headers: crudHeaders() });
@@ -298,7 +308,7 @@ export function usePortfolioData() {
     );
   }, []);
 
-  const addAsset = useCallback(async (assetType: string, portfolioName: string, payload: any) => {
+  const addAsset = useCallback(async (assetType: string, portfolioName: string, payload: Record<string, unknown>) => {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/holdings-crud?action=add`, {
       method: 'POST',
       headers: crudHeaders(),
@@ -313,7 +323,7 @@ export function usePortfolioData() {
     await load();
   }, [load]);
 
-  const updateAsset = useCallback(async (assetType: string, id: string, payload: any) => {
+  const updateAsset = useCallback(async (assetType: string, id: string, payload: Record<string, unknown>) => {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/holdings-crud?action=update`, {
       method: 'PATCH',
       headers: crudHeaders(),

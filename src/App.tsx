@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Users, User, Heart, LayoutDashboard, RefreshCw, Wifi, WifiOff, AlertCircle, Plus, Loader2,
   TrendingUp, Landmark, Coins, Home as HomeIcon, Shield, FolderOpen, UserPlus, X, Pencil, Check,
@@ -14,7 +14,8 @@ import GoldHoldingView from './components/GoldHoldingView';
 import RealEstateView from './components/RealEstateView';
 import InsuranceView from './components/InsuranceView';
 import DocumentVaultView from './components/DocumentVaultView';
-import PinLockScreen, { isPinConfigured, isSessionVerified } from './components/PinLockScreen';
+import PinLockScreen from './components/PinLockScreen';
+import { isPinConfigured, isSessionVerified } from './utils/auth';
 import { Portfolio, PortfolioName } from './types/portfolio';
 import { formatINR, formatPercent, pnlColor } from './utils/formatters';
 import { usePortfolioData } from './hooks/usePortfolioData';
@@ -707,7 +708,7 @@ export default function App() {
         <AddHoldingModal
           onClose={() => setShowAddModal(false)}
           onAdd={async (data) => {
-            await addAsset('stock', data.portfolioName, data);
+            await addAsset('stock', data.portfolioName, data as unknown as Record<string, unknown>);
           }}
           portfolioOptions={portfolioOptionsForModal}
           defaultPortfolio={activeTab === 'all' ? portfolioOptionsForModal[0]?.name : activeTab}

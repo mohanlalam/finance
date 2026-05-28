@@ -87,7 +87,7 @@ export default function DocumentVaultView({
     setUploadError('');
     try {
       const ts = Date.now();
-      const safeName = pendingFile.name.replace(/[^\w.\-]/g, '_');
+      const safeName = pendingFile.name.replace(/[^\w.-]/g, '_');
       const storagePath = `${portfolio.name}/${activeFolder}/${ts}_${safeName}`;
 
       const { error: uploadErr } = await supabase.storage
