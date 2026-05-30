@@ -50,6 +50,7 @@ function crudHeaders() {
   return {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    apikey: SUPABASE_ANON_KEY,
     'X-App-Pin': getHashedPin(),
   };
 }
