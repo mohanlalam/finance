@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Users, User, Heart, LayoutDashboard, RefreshCw, Wifi, WifiOff, AlertCircle, Plus, Loader2,
   TrendingUp, Landmark, Coins, Home as HomeIcon, Shield, FolderOpen, UserPlus, X, Pencil, Check,
@@ -97,7 +97,9 @@ export default function App() {
   useEffect(() => {
     load();
     const interval = setInterval(() => {
-      refreshPricesRef.current();
+      if (document.visibilityState === 'visible') {
+        refreshPricesRef.current();
+      }
     }, 30000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -106,24 +108,28 @@ export default function App() {
   const portfolio = getPortfolioByName(portfolios, activeTab);
   const todayPnL = estimateTodayPnL(portfolio, portfolios);
 
-  const liveTotals = {
-    totalInvested: portfolios.reduce((s, p) => s + p.totalInvested, 0),
-    totalCurrentValue: portfolios.reduce((s, p) => s + p.totalCurrentValue, 0),
-    totalPnL: portfolios.reduce((s, p) => s + p.totalPnL, 0),
-    get totalPnLPercent() { return this.totalInvested > 0 ? (this.totalPnL / this.totalInvested) * 100 : 0; },
-  };
+  const liveTotals = useMemo(() => {
+    const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
+    const totalCurrentValue = portfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
+    const totalPnL = totalCurrentValue - totalInvested;
+    const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
+    return { totalInvested, totalCurrentValue, totalPnL, totalPnLPercent };
+  }, [portfolios]);
 
-  const summaryData = portfolio
-    ? { totalInvested: portfolio.totalInvested, totalCurrentValue: portfolio.totalCurrentValue, totalPnL: portfolio.totalPnL, totalPnLPercent: portfolio.totalPnLPercent, label: portfolio.label }
-    : { totalInvested: liveTotals.totalInvested, totalCurrentValue: liveTotals.totalCurrentValue, totalPnL: liveTotals.totalPnL, totalPnLPercent: liveTotals.totalPnLPercent, label: 'Family' };
+  const summaryData = useMemo(() => {
+    return portfolio
+      ? { totalInvested: portfolio.totalInvested, totalCurrentValue: portfolio.totalCurrentValue, totalPnL: portfolio.totalPnL, totalPnLPercent: portfolio.totalPnLPercent, label: portfolio.label }
+      : { totalInvested: liveTotals.totalInvested, totalCurrentValue: liveTotals.totalCurrentValue, totalPnL: liveTotals.totalPnL, totalPnLPercent: liveTotals.totalPnLPercent, label: 'Family' };
+  }, [portfolio, liveTotals]);
 
-  const breakdown = classBreakdown(portfolios, portfolio);
-  const breakdownSlices = [
+  const breakdown = useMemo(() => classBreakdown(portfolios, portfolio), [portfolios, portfolio]);
+
+  const breakdownSlices = useMemo(() => [
     { label: 'Stocks', fullName: 'Stocks & ETFs', value: breakdown.stocks, color: '#3b82f6' },
     { label: 'FD', fullName: 'Fixed Deposits', value: breakdown.fd, color: '#6366f1' },
     { label: 'Gold', fullName: 'Gold Holdings', value: breakdown.gold, color: '#f59e0b' },
     { label: 'Realty', fullName: 'Real Estate', value: breakdown.realEstate, color: '#10b981' },
-  ];
+  ], [breakdown]);
 
   const isLoadingDB = loadStatus === 'loading';
   const isLoadingPrices = priceStatus === 'loading';

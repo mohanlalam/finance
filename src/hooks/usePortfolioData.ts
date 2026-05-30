@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Holding, Portfolio, FixedDeposit, GoldHolding, RealEstate, Insurance, DocumentMetadata } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
+import { getHashedPin } from '../utils/auth';
 
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? '';
 const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? '';
@@ -17,6 +18,8 @@ interface DBHolding {
   week_low_52: number;
   week_high_52: number;
   amount_invested: number;
+  cached_ltp?: number | null;
+  cached_today_pct?: number | null;
 }
 
 interface DBPortfolio {
@@ -47,11 +50,13 @@ function crudHeaders() {
   return {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    'X-App-Pin': getHashedPin(),
   };
 }
 
 function dbToHolding(h: DBHolding): Holding {
-  const ltp = h.avg_price;
+  const ltp = h.cached_ltp !== undefined && h.cached_ltp !== null ? Number(h.cached_ltp) : h.avg_price;
+  const todayPnLPercent = h.cached_today_pct !== undefined && h.cached_today_pct !== null ? Number(h.cached_today_pct) : 0;
   const currentValue = h.qty * ltp;
   const unrealizedPnL = currentValue - h.amount_invested;
   const pnlPercent = h.amount_invested > 0 ? (unrealizedPnL / h.amount_invested) * 100 : 0;
@@ -69,7 +74,7 @@ function dbToHolding(h: DBHolding): Holding {
     amountInvested: h.amount_invested,
     unrealizedPnL,
     pnlPercent,
-    todayPnLPercent: 0,
+    todayPnLPercent,
     currentValue,
   };
 }

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Lock, ShieldCheck, AlertCircle } from 'lucide-react';
-import { markSessionVerified } from '../utils/auth';
+import { markSessionVerified, hashPin } from '../utils/auth';
 
 const APP_PIN = (import.meta.env.VITE_APP_PIN as string | undefined) ?? '';
 const PIN_LENGTH = APP_PIN.length || 4;
@@ -37,8 +37,10 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     if (pin.length === PIN_LENGTH && newDigits.every((d) => d !== '')) {
       if (pin === APP_PIN) {
         setSuccess(true);
-        markSessionVerified();
-        setTimeout(() => onUnlock(), 400);
+        hashPin(pin).then((hash) => {
+          markSessionVerified(hash);
+          setTimeout(() => onUnlock(), 400);
+        });
       } else {
         setShake(true);
         setError('Incorrect PIN. Try again.');
@@ -67,8 +69,10 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
 
       if (pasted === APP_PIN) {
         setSuccess(true);
-        markSessionVerified();
-        setTimeout(() => onUnlock(), 400);
+        hashPin(pasted).then((hash) => {
+          markSessionVerified(hash);
+          setTimeout(() => onUnlock(), 400);
+        });
       } else {
         setShake(true);
         setError('Incorrect PIN. Try again.');

@@ -1,11 +1,19 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin");
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "https://mohanlalam.github.io"
+  ];
+  const allowedOrigin = origin && allowedOrigins.includes(origin) ? origin : "https://mohanlalam.github.io";
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin",
+  };
+}
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -13,8 +21,22 @@ const supabase = createClient(
 );
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
+  }
+
+  // Server-side PIN verification
+  const serverPinHash = Deno.env.get("APP_PIN_HASH");
+  if (serverPinHash) {
+    const clientPin = req.headers.get("X-App-Pin");
+    if (clientPin !== serverPinHash) {
+      return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
   }
 
   try {
@@ -30,6 +52,7 @@ Deno.serve(async (req: Request) => {
         { data: real_estate, error: reErr },
         { data: insurances, error: insErr },
         { data: documents, error: docErr },
+        { data: priceCache, error: cacheErr },
       ] = await Promise.all([
         supabase.from("portfolios").select("*").order("name"),
         supabase.from("holdings").select("*").order("sno"),
@@ -38,6 +61,7 @@ Deno.serve(async (req: Request) => {
         supabase.from("real_estate").select("*").order("created_at"),
         supabase.from("insurances").select("*").order("created_at"),
         supabase.from("documents").select("*").order("created_at"),
+        supabase.from("market_price_cache").select("*"),
       ]);
 
       if (pErr) throw pErr;
@@ -48,7 +72,17 @@ Deno.serve(async (req: Request) => {
       if (insErr) throw insErr;
       if (docErr) throw docErr;
 
-      return new Response(JSON.stringify({ portfolios, holdings, fixed_deposits, gold_holdings, real_estate, insurances, documents }), {
+      // Merge cached prices into holdings
+      const holdingsWithCache = (holdings || []).map(h => {
+        const cached = (priceCache || []).find(c => c.yahoo_symbol === h.yahoo_symbol);
+        return {
+          ...h,
+          cached_ltp: cached?.ltp ?? null,
+          cached_today_pct: cached?.today_pct ?? null
+        };
+      });
+
+      return new Response(JSON.stringify({ portfolios, holdings: holdingsWithCache, fixed_deposits, gold_holdings, real_estate, insurances, documents }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
