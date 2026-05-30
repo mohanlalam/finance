@@ -51,8 +51,6 @@ A premium, interactive web application designed to track and manage multi-asset 
 
 ### Hosting
 - **GitHub Pages** — CI/CD automated deployment on push to `main`.
-- **Firebase Hosting** — Production deployment (project: `finance-5efcd`)
-- **Netlify** — Production deployment option (SPA routing supported)
 
 ---
 
@@ -90,8 +88,6 @@ project antigravity/
 │   └── data/
 │       ├── portfolioData.ts      # Static/seed portfolio data
 │       └── 1.csv                 # Raw CSV data source
-├── firebase.json                 # Firebase Hosting config (SPA rewrites)
-├── .firebaserc                   # Firebase project binding
 ├── tailwind.config.js            # Tailwind configuration
 ├── postcss.config.js             # PostCSS plugins
 ├── vite.config.ts                # Vite build configuration
@@ -100,9 +96,7 @@ project antigravity/
 ├── tsconfig.node.json            # Node/tooling TS config
 ├── eslint.config.js              # ESLint flat config
 ├── package.json                  # Dependencies and scripts
-├── .gitignore                    # Git ignore rules
-└── public/
-    └── _redirects                # Netlify SPA redirect rule
+└── .gitignore                    # Git ignore rules
 ```
 
 ---
@@ -183,32 +177,6 @@ npm run typecheck
 ---
 
 ## 🌐 Deployment
-
-### Option A — Netlify (Recommended)
-
-**CLI:**
-```bash
-npm run build
-npx -y netlify-cli deploy --prod --dir=dist
-```
-
-**Git-connected (auto-deploy on push):**
-1. Push your project to GitHub / GitLab
-2. Connect the repo on Netlify's dashboard
-3. Set **Build command:** `npm run build`
-4. Set **Publish directory:** `dist`
-5. Add your `VITE_SUPABASE_*` environment variables under **Site Settings → Environment Variables**
-
-> 💡 The `public/_redirects` file handles SPA routing automatically.
-
-### Option B — Firebase Hosting
-
-```bash
-npm run build
-npx firebase deploy --only hosting
-```
-
-### Option C — GitHub Pages (CI/CD Automated)
 
 A GitHub Actions workflow is pre-configured in `.github/workflows/deploy.yml` to automatically build and deploy the app to GitHub Pages when commits are pushed to the `main` branch.
 
