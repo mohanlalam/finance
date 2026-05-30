@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Holding, Portfolio, FixedDeposit, GoldHolding, RealEstate, Insurance, DocumentMetadata } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
-import { getHashedPin } from '../utils/auth';
+import { getHashedPin, isPinConfigured, isSessionVerified } from '../utils/auth';
 
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? '';
 const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? '';
@@ -212,6 +212,15 @@ export function usePortfolioData() {
     setLoadStatus('loading');
     setLoadError('');
     try {
+      // Wait for PIN hash to be calculated asynchronously if session is already verified
+      if (isPinConfigured() && isSessionVerified()) {
+        let attempts = 0;
+        while (!getHashedPin() && attempts < 20) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          attempts++;
+        }
+      }
+
       const data = await loadFromDB();
       if (!data || typeof data !== 'object') throw new Error('No data returned from database');
 
