@@ -44,7 +44,34 @@ export default function DocumentVaultView({
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [linkedAssetId, setLinkedAssetId] = useState<string>('');
   const [documentName, setDocumentName] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function renderExpiryBadge(expiryDateStr?: string) {
+    if (!expiryDateStr) return null;
+    const daysLeft = Math.ceil((new Date(expiryDateStr).getTime() - Date.now()) / (1000 * 3600 * 24));
+    const isExpired = daysLeft < 0;
+    const isExpiringSoon = daysLeft >= 0 && daysLeft <= 30;
+
+    let badgeColor = "bg-slate-100 text-slate-600";
+    let text = `Expires ${new Date(expiryDateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+
+    if (isExpired) {
+      badgeColor = "bg-rose-50 text-rose-700 border border-rose-100";
+      text += " (Expired)";
+    } else if (isExpiringSoon) {
+      badgeColor = "bg-amber-50 text-amber-700 border border-amber-100";
+      text += ` (${daysLeft}d left)`;
+    } else {
+      badgeColor = "bg-slate-50 text-slate-500 border border-slate-200";
+    }
+
+    return (
+      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md flex items-center gap-1 ${badgeColor}`}>
+        {text}
+      </span>
+    );
+  }
 
   const assetOptions = useMemo<{ id: string; label: string }[]>(() => {
     if (activeFolder === 'stock') {
@@ -66,7 +93,15 @@ export default function DocumentVaultView({
   }, [activeFolder, portfolio]);
 
   const folderDocs = useMemo(() => {
-    return portfolio.documents.filter((d) => d.asset_type === activeFolder);
+    const docs = portfolio.documents.filter((d) => d.asset_type === activeFolder);
+    return [...docs].sort((a, b) => {
+      if (a.expiry_date && b.expiry_date) {
+        return new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime();
+      }
+      if (a.expiry_date) return -1;
+      if (b.expiry_date) return 1;
+      return 0;
+    });
   }, [portfolio.documents, activeFolder]);
 
   function handleFilePick(e: React.ChangeEvent<HTMLInputElement>) {
@@ -75,6 +110,7 @@ export default function DocumentVaultView({
     setPendingFile(file);
     setDocumentName(file.name);
     setLinkedAssetId('');
+    setExpiryDate('');
     setUploadError('');
     setShowLinkModal(true);
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -104,12 +140,14 @@ export default function DocumentVaultView({
         fileType: pendingFile.type,
         linkedAssetType: activeFolder,
         linkedAssetId: activeFolder === 'general' ? null : linkedAssetId || null,
+        expiryDate: expiryDate || null,
       });
 
       setShowLinkModal(false);
       setPendingFile(null);
       setDocumentName('');
       setLinkedAssetId('');
+      setExpiryDate('');
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
@@ -265,6 +303,7 @@ export default function DocumentVaultView({
                             {linkedLabel}
                           </span>
                         )}
+                        {renderExpiryBadge(doc.expiry_date)}
                       </div>
                     </div>
                   </div>
@@ -310,6 +349,16 @@ export default function DocumentVaultView({
                   value={documentName}
                   onChange={(e) => setDocumentName(e.target.value)}
                   className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1.5">Expiry / Renewal Date (optional)</label>
+                <input
+                  type="date"
+                  value={expiryDate}
+                  onChange={(e) => setExpiryDate(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors bg-white"
                 />
               </div>
 

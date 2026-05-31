@@ -1,6 +1,8 @@
 import { TrendingUp, RefreshCw } from 'lucide-react';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { FetchStatus } from '../hooks/useMarketData';
+import { Portfolio } from '../types/portfolio';
+import ExportPanel, { ImportRow } from './ExportPanel';
 
 interface HeaderProps {
   totalCurrentValue: number;
@@ -9,9 +11,22 @@ interface HeaderProps {
   status: FetchStatus;
   lastUpdated: Date | null;
   onRefresh: () => void;
+  portfolios: Portfolio[];
+  onImportCSV: (rows: ImportRow[], portfolioName: string) => Promise<void>;
+  portfolioOptions: { name: string; label: string }[];
 }
 
-export default function Header({ totalCurrentValue, totalPnL, totalPnLPercent, status, lastUpdated, onRefresh }: HeaderProps) {
+export default function Header({
+  totalCurrentValue,
+  totalPnL,
+  totalPnLPercent,
+  status,
+  lastUpdated,
+  onRefresh,
+  portfolios,
+  onImportCSV,
+  portfolioOptions,
+}: HeaderProps) {
   const isGain = totalPnL >= 0;
   const isLoading = status === 'loading';
 
@@ -49,6 +64,11 @@ export default function Header({ totalCurrentValue, totalPnL, totalPnLPercent, s
               <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
               {isLoading ? 'Fetching...' : lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Fetch live prices'}
             </button>
+            <ExportPanel
+              portfolios={portfolios}
+              onImportCSV={onImportCSV}
+              portfolioOptions={portfolioOptions}
+            />
           </div>
         </div>
       </div>

@@ -77,6 +77,7 @@ export interface DocumentMetadata {
   file_type?: string;
   asset_type: 'stock' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'general';
   asset_id?: string;
+  expiry_date?: string;
   created_at?: string;
 }
 

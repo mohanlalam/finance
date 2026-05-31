@@ -76,6 +76,7 @@ Deno.serve(async (req: Request) => {
         { data: insurances, error: insErr },
         { data: documents, error: docErr },
         { data: priceCache, error: cacheErr },
+        { data: net_worth_history, error: nwErr },
       ] = await Promise.all([
         supabase.from("portfolios").select("*").order("name"),
         supabase.from("holdings").select("*").order("sno"),
@@ -85,6 +86,7 @@ Deno.serve(async (req: Request) => {
         supabase.from("insurances").select("*").order("created_at"),
         supabase.from("documents").select("*").order("created_at"),
         supabase.from("market_price_cache").select("*"),
+        supabase.from("net_worth_history").select("*").order("snapshot_date"),
       ]);
 
       if (pErr) throw pErr;
@@ -94,6 +96,7 @@ Deno.serve(async (req: Request) => {
       if (reErr) throw reErr;
       if (insErr) throw insErr;
       if (docErr) throw docErr;
+      if (nwErr) throw nwErr;
 
       // Merge cached prices into holdings
       const holdingsWithCache = (holdings || []).map(h => {
@@ -105,7 +108,7 @@ Deno.serve(async (req: Request) => {
         };
       });
 
-      return new Response(JSON.stringify({ portfolios, holdings: holdingsWithCache, fixed_deposits, gold_holdings, real_estate, insurances, documents }), {
+      return new Response(JSON.stringify({ portfolios, holdings: holdingsWithCache, fixed_deposits, gold_holdings, real_estate, insurances, documents, net_worth_history }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -258,6 +261,7 @@ Deno.serve(async (req: Request) => {
             file_type: payload.fileType,
             asset_type: payload.linkedAssetType || "general",
             asset_id: payload.linkedAssetId,
+            expiry_date: payload.expiryDate || payload.expiry_date || null,
           })
           .select()
           .single();
@@ -327,6 +331,8 @@ Deno.serve(async (req: Request) => {
       } else if (asset_type === "document") {
         table = "documents";
         if (payload.name !== undefined) updates.name = payload.name;
+        if (payload.expiryDate !== undefined) updates.expiry_date = payload.expiryDate;
+        if (payload.expiry_date !== undefined) updates.expiry_date = payload.expiry_date;
       } else if (asset_type === "portfolio") {
         table = "portfolios";
         if (payload.label !== undefined) updates.label = payload.label;

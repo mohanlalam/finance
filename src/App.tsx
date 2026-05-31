@@ -17,10 +17,20 @@ import DocumentVaultView from './components/DocumentVaultView';
 import PinLockScreen from './components/PinLockScreen';
 import DashboardLoading from './components/DashboardLoading';
 import DashboardError from './components/DashboardError';
+import InsightsPanel from './components/InsightsPanel';
+import HealthScore from './components/HealthScore';
+import SearchBar from './components/SearchBar';
+import MobileBottomNav from './components/MobileBottomNav';
+import NetWorthChart from './components/NetWorthChart';
 import { isPinConfigured, isSessionVerified } from './utils/auth';
 import { Portfolio, PortfolioName } from './types/portfolio';
 import { formatINR, formatPercent, pnlColor } from './utils/formatters';
 import { usePortfolioData } from './hooks/usePortfolioData';
+import { usePortfolioInsights } from './hooks/usePortfolioInsights';
+import { useAlerts } from './hooks/useAlerts';
+import { invokeFunction } from './utils/apiClient';
+import AlertsBanner from './components/AlertsBanner';
+import { ImportRow } from './components/ExportPanel';
 
 type AssetTab = 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents';
 
@@ -95,6 +105,7 @@ export default function App() {
 
   const {
     portfolios,
+    netWorthHistory,
     loadStatus,
     loadError,
     priceStatus,
@@ -129,8 +140,47 @@ export default function App() {
     return () => clearInterval(interval);
   }, [pinVerified, load]);
 
+  // Daily Net Worth Snapshot trigger
+  useEffect(() => {
+    if (loadStatus !== 'success' || portfolios.length === 0) return;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const lastSnapshot = localStorage.getItem('finance_last_snapshot_date');
+    if (lastSnapshot !== todayStr) {
+      invokeFunction('snapshot-net-worth', { method: 'POST' })
+        .then(() => {
+          localStorage.setItem('finance_last_snapshot_date', todayStr);
+          load();
+        })
+        .catch((err) => {
+          console.warn('[portfolio] failed to record daily net worth snapshot:', err);
+        });
+    }
+  }, [loadStatus, portfolios, load]);
+
   const portfolio = getPortfolioByName(portfolios, activeTab);
   const todayPnL = estimateTodayPnL(portfolio, portfolios);
+  const insights = usePortfolioInsights(portfolios);
+  const alerts = useAlerts(portfolios);
+
+  const handleSearchNavigate = useCallback((portfolioName: string, assetTab: string) => {
+    setActiveTab(portfolioName);
+    setActiveAsset(assetTab as AssetTab);
+  }, []);
+
+  const handleImportCSV = useCallback(async (rows: ImportRow[], portfolioName: string) => {
+    for (const row of rows) {
+      await addAsset('stock', portfolioName, {
+        stockName: row.stock_name,
+        ticker: row.ticker.toUpperCase(),
+        yahooSymbol: row.yahoo_symbol,
+        qty: row.qty,
+        avgPrice: row.avg_price,
+        amountInvested: row.qty * row.avg_price,
+        weekLow52: 0,
+        weekHigh52: 0,
+      });
+    }
+  }, [addAsset]);
 
   const liveTotals = useMemo(() => {
     const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
@@ -230,7 +280,7 @@ export default function App() {
   const visiblePortfolio = portfolio;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 pb-16 md:pb-0">
       <Header
         totalCurrentValue={summaryData.totalCurrentValue}
         totalPnLPercent={summaryData.totalPnLPercent}
@@ -238,6 +288,9 @@ export default function App() {
         status={priceStatus}
         lastUpdated={lastUpdated}
         onRefresh={refreshPrices}
+        portfolios={portfolios}
+        onImportCSV={handleImportCSV}
+        portfolioOptions={portfolioOptionsForModal}
       />
 
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -275,6 +328,12 @@ export default function App() {
             </span>
           </div>
         )}
+
+        {/* Alerts Banner */}
+        <AlertsBanner alerts={alerts} />
+
+        {/* Search Bar */}
+        <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
 
         {/* Family Tabs Row */}
         <div className="flex flex-wrap gap-2">
@@ -409,6 +468,18 @@ export default function App() {
           </div>
         )}
 
+        {/* Insights Panel — only on family overview */}
+        {activeTab === 'all' && (
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+            <div className="xl:col-span-2">
+              <InsightsPanel insights={insights} />
+            </div>
+            <div>
+              <HealthScore score={insights.healthScore} />
+            </div>
+          </div>
+        )}
+
         <SummaryCards
           totalInvested={summaryData.totalInvested}
           totalCurrentValue={summaryData.totalCurrentValue}
@@ -423,6 +494,10 @@ export default function App() {
           <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
           <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
         </div>
+
+        {activeTab === 'all' && (
+          <NetWorthChart history={netWorthHistory} />
+        )}
 
         {/* Asset class tabs for selected member */}
         {visiblePortfolio && (
@@ -742,6 +817,9 @@ export default function App() {
           </button>
         </div>
       </footer>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav activeAsset={activeAsset} onChangeAsset={setActiveAsset} />
 
       {showAddModal && (
         <AddHoldingModal

@@ -1,7 +1,17 @@
-import { useState, useRef, useEffect } from 'react';
-import { ArrowUpDown, TrendingUp, TrendingDown, Trash2, Pencil, Loader2, Check, X } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { ArrowUpDown, TrendingUp, TrendingDown, Trash2, Pencil, Loader2, Check, X, SlidersHorizontal } from 'lucide-react';
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent, pnlColor } from '../utils/formatters';
+
+type SortPreset = 'value' | 'pnl' | 'pnlPct' | 'todayPct' | 'allocation';
+
+const SORT_PRESETS: { id: SortPreset; label: string; key: string; asc: boolean }[] = [
+  { id: 'value', label: 'Current Value', key: 'currentValue', asc: false },
+  { id: 'pnl', label: 'P&L Amount', key: 'unrealizedPnL', asc: false },
+  { id: 'pnlPct', label: 'P&L %', key: 'pnlPercent', asc: false },
+  { id: 'todayPct', label: 'Today %', key: 'todayPnLPercent', asc: false },
+  { id: 'allocation', label: 'Allocation %', key: '_allocation', asc: false },
+];
 
 interface PortfolioTableProps {
   holdings: Holding[];
@@ -13,7 +23,7 @@ interface PortfolioTableProps {
   onUpdate?: (holdingId: string, qty: number, avgPrice: number) => Promise<void>;
 }
 
-type SortKey = keyof Holding;
+type SortKey = keyof Holding | '_allocation';
 
 export default function PortfolioTable({
   holdings,
@@ -26,6 +36,7 @@ export default function PortfolioTable({
 }: PortfolioTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('currentValue');
   const [sortAsc, setSortAsc] = useState(false);
+  const [activePreset, setActivePreset] = useState<SortPreset>('value');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -35,15 +46,32 @@ export default function PortfolioTable({
   const [editError, setEditError] = useState('');
   const editInputRef = useRef<HTMLInputElement>(null);
 
-  const sorted = [...holdings].sort((a, b) => {
-    const av = a[sortKey] as number;
-    const bv = b[sortKey] as number;
-    return sortAsc ? av - bv : bv - av;
-  });
+  const holdingsWithAlloc = useMemo(() => {
+    return holdings.map((h) => ({
+      ...h,
+      _allocation: totalCurrentValue > 0 ? (h.currentValue / totalCurrentValue) * 100 : 0,
+    }));
+  }, [holdings, totalCurrentValue]);
+
+  const sorted = useMemo(() => {
+    return [...holdingsWithAlloc].sort((a, b) => {
+      const av = (a as Record<string, unknown>)[sortKey] as number;
+      const bv = (b as Record<string, unknown>)[sortKey] as number;
+      return sortAsc ? av - bv : bv - av;
+    });
+  }, [holdingsWithAlloc, sortKey, sortAsc]);
 
   function handleSort(key: SortKey) {
     if (sortKey === key) setSortAsc(!sortAsc);
     else { setSortKey(key); setSortAsc(false); }
+  }
+
+  function handlePreset(preset: SortPreset) {
+    const p = SORT_PRESETS.find((s) => s.id === preset);
+    if (!p) return;
+    setActivePreset(preset);
+    setSortKey(p.key as SortKey);
+    setSortAsc(p.asc);
   }
 
   async function handleDelete(h: Holding) {
@@ -127,6 +155,24 @@ export default function PortfolioTable({
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      {/* Sorting presets */}
+      <div className="px-4 py-2.5 border-b border-slate-50 flex items-center gap-2 overflow-x-auto">
+        <SlidersHorizontal size={12} className="text-slate-400 shrink-0" />
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider shrink-0">Sort:</span>
+        {SORT_PRESETS.map((preset) => (
+          <button
+            key={preset.id}
+            onClick={() => handlePreset(preset.id)}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
+              activePreset === preset.id
+                ? 'bg-slate-800 text-white shadow-sm'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
+            }`}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead className="bg-slate-50 border-b border-slate-100">
@@ -141,6 +187,7 @@ export default function PortfolioTable({
               <Th label="P&L" k="unrealizedPnL" />
               <Th label="% P&L" k="pnlPercent" />
               <Th label="Today %" k="todayPnLPercent" />
+              <Th label="Alloc %" k={"_allocation" as SortKey} />
               {onDelete && <th className="px-4 py-3 w-10" />}
             </tr>
           </thead>
@@ -249,6 +296,11 @@ export default function PortfolioTable({
                       {formatPercent(h.todayPnLPercent)}
                     </span>
                   </td>
+                  <td className="px-4 py-3 text-right">
+                    <span className="text-xs font-medium text-slate-500">
+                      {((h as Record<string, unknown>)._allocation as number).toFixed(1)}%
+                    </span>
+                  </td>
                   {onDelete && (
                     <td className="px-2 py-3">
                       <button
@@ -278,7 +330,7 @@ export default function PortfolioTable({
               <td className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}
               </td>
-              <td colSpan={onDelete ? 3 : 2} className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <td colSpan={onDelete ? 4 : 3} className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {formatPercent(totalPnLPercent)}
               </td>
             </tr>

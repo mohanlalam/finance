@@ -33,6 +33,16 @@ interface QuoteResult {
   todayPct: number | null;
 }
 
+export interface NetWorthSnapshot {
+  id: string;
+  snapshot_date: string;
+  total_value: number;
+  stocks_value: number;
+  fd_value: number;
+  gold_value: number;
+  real_estate_value: number;
+}
+
 interface DBData {
   portfolios?: DBPortfolio[];
   holdings?: DBHolding[];
@@ -41,12 +51,14 @@ interface DBData {
   real_estate?: RealEstate[];
   insurances?: Insurance[];
   documents?: DocumentMetadata[];
+  net_worth_history?: NetWorthSnapshot[];
 }
 
 export type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
 
 interface PortfolioCache {
   portfolios: Portfolio[];
+  netWorthHistory: NetWorthSnapshot[];
   cachedAt: string;
 }
 
@@ -175,10 +187,11 @@ function readCachedPortfolios(): PortfolioCache | null {
   }
 }
 
-function writeCachedPortfolios(portfolios: Portfolio[]): void {
+function writeCachedPortfolios(portfolios: Portfolio[], netWorthHistory: NetWorthSnapshot[]): void {
   try {
     localStorage.setItem(PORTFOLIO_CACHE_KEY, JSON.stringify({
       portfolios,
+      netWorthHistory,
       cachedAt: new Date().toISOString(),
     }));
   } catch (err) {
@@ -192,6 +205,7 @@ interface UsePortfolioDataOptions {
 
 export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}) {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+  const [netWorthHistory, setNetWorthHistory] = useState<NetWorthSnapshot[]>([]);
   const [loadStatus, setLoadStatus] = useState<LoadStatus>('idle');
   const [loadError, setLoadError] = useState<string>('');
   const [priceStatus, setPriceStatus] = useState<LoadStatus>('idle');
@@ -253,6 +267,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       const dbRealEstate: RealEstate[] = data.real_estate || [];
       const dbInsurances: Insurance[] = data.insurances || [];
       const dbDocuments: DocumentMetadata[] = data.documents || [];
+      const dbNetWorthHistory: NetWorthSnapshot[] = data.net_worth_history || [];
 
       // Sort portfolios: put personal/mother/wife in front, others later
       const order: Record<string, number> = { personal: 0, mother: 1, wife: 2 };
@@ -278,7 +293,8 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       });
 
       setPortfolios(built);
-      writeCachedPortfolios(built);
+      setNetWorthHistory(dbNetWorthHistory);
+      writeCachedPortfolios(built, dbNetWorthHistory);
       setCacheUpdatedAt(new Date());
       setLoadStatus('success');
 
@@ -303,6 +319,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       const cached = err instanceof AppApiError && err.code !== 'auth' ? readCachedPortfolios() : null;
       if (cached) {
         setPortfolios(cached.portfolios);
+        setNetWorthHistory(cached.netWorthHistory || []);
         setCacheUpdatedAt(new Date(cached.cachedAt));
         setIsUsingCachedData(true);
         setLoadError(getFriendlyMessage(err));
@@ -424,6 +441,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
   return {
     portfolios,
+    netWorthHistory,
     loadStatus,
     loadError,
     priceStatus,
