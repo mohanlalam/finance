@@ -1,10 +1,9 @@
 import { useState, useCallback } from 'react';
 import { Holding, Portfolio, FixedDeposit, GoldHolding, RealEstate, Insurance, DocumentMetadata } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
-import { clearSessionVerification, ensureHashedPin } from '../utils/auth';
+import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiClient';
 
-const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? '';
-const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? '';
+const PORTFOLIO_CACHE_KEY = 'finance_portfolio_cache_v1';
 
 interface DBHolding {
   id: string;
@@ -46,22 +45,9 @@ interface DBData {
 
 export type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
 
-async function crudHeaders() {
-  const hashedPin = await ensureHashedPin();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    apikey: SUPABASE_ANON_KEY,
-  };
-
-  if (hashedPin) {
-    headers['X-App-Pin'] = hashedPin;
-  }
-
-  if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.startsWith('eyJ')) {
-    headers['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`;
-  }
-
-  return headers;
+interface PortfolioCache {
+  portfolios: Portfolio[];
+  cachedAt: string;
 }
 
 function dbToHolding(h: DBHolding): Holding {
@@ -171,26 +157,57 @@ function applyLivePrices(portfolios: Portfolio[], priceMap: Record<string, { ltp
   });
 }
 
-export function usePortfolioData() {
+function getFriendlyMessage(err: unknown): string {
+  if (err instanceof AppApiError) return err.message;
+  if (err instanceof Error) return err.message;
+  return 'Something went wrong. Please try again.';
+}
+
+function readCachedPortfolios(): PortfolioCache | null {
+  try {
+    const raw = localStorage.getItem(PORTFOLIO_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PortfolioCache;
+    if (!Array.isArray(parsed.portfolios) || !parsed.cachedAt) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedPortfolios(portfolios: Portfolio[]): void {
+  try {
+    localStorage.setItem(PORTFOLIO_CACHE_KEY, JSON.stringify({
+      portfolios,
+      cachedAt: new Date().toISOString(),
+    }));
+  } catch (err) {
+    console.warn('[portfolio] failed to write local cache:', err);
+  }
+}
+
+interface UsePortfolioDataOptions {
+  onAuthExpired?: () => void;
+}
+
+export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}) {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [loadStatus, setLoadStatus] = useState<LoadStatus>('idle');
   const [loadError, setLoadError] = useState<string>('');
   const [priceStatus, setPriceStatus] = useState<LoadStatus>('idle');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [failedSymbols, setFailedSymbols] = useState<string[]>([]);
+  const [isUsingCachedData, setIsUsingCachedData] = useState(false);
+  const [cacheUpdatedAt, setCacheUpdatedAt] = useState<Date | null>(null);
+  const [isAuthRequired, setIsAuthRequired] = useState(false);
+
+  const handleAuthExpired = useCallback(() => {
+    setIsAuthRequired(true);
+    onAuthExpired?.();
+  }, [onAuthExpired]);
 
   const loadFromDB = useCallback(async (): Promise<DBData | null> => {
-    if (!SUPABASE_URL) throw new Error('VITE_SUPABASE_URL is not configured');
-    const url = `${SUPABASE_URL}/functions/v1/holdings-crud?action=list`;
-    const res = await fetch(url, { headers: await crudHeaders() });
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      if (res.status === 401) {
-        clearSessionVerification();
-      }
-      throw new Error(`HTTP ${res.status} from holdings-crud: ${text.slice(0, 200)}`);
-    }
-    return res.json();
+    return invokeFunction<DBData>('holdings-crud?action=list');
   }, []);
 
   const fetchLivePrices = useCallback(async (holdings: Holding[]): Promise<Record<string, { ltp: number; todayPct: number }>> => {
@@ -198,18 +215,10 @@ export function usePortfolioData() {
     const uniqueSymbols = Array.from(
       new Map(holdings.map((h) => [h.yahooSymbol, { ticker: h.ticker, yahooSymbol: h.yahooSymbol }])).values()
     );
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/market-data`, {
+    const json = await invokeFunction<{ data: QuoteResult[] }>('market-data', {
       method: 'POST',
-      headers: await crudHeaders(),
-      body: JSON.stringify({ symbols: uniqueSymbols }),
+      body: { symbols: uniqueSymbols },
     });
-    if (!res.ok) {
-      if (res.status === 401) {
-        clearSessionVerification();
-      }
-      throw new Error(`HTTP ${res.status}`);
-    }
-    const json: { data: QuoteResult[] } = await res.json();
     const map: Record<string, { ltp: number; todayPct: number }> = {};
     const failed: string[] = [];
     json.data.forEach((r) => {
@@ -228,7 +237,12 @@ export function usePortfolioData() {
   const load = useCallback(async () => {
     setLoadStatus('loading');
     setLoadError('');
+    setIsUsingCachedData(false);
+    setIsAuthRequired(false);
     try {
+      const envIssue = getEnvironmentIssue();
+      if (envIssue) throw new AppApiError(envIssue, 'config');
+
       const data = await loadFromDB();
       if (!data || typeof data !== 'object') throw new Error('No data returned from database');
 
@@ -264,6 +278,8 @@ export function usePortfolioData() {
       });
 
       setPortfolios(built);
+      writeCachedPortfolios(built);
+      setCacheUpdatedAt(new Date());
       setLoadStatus('success');
 
       setPriceStatus('loading');
@@ -277,15 +293,33 @@ export function usePortfolioData() {
         setPriceStatus('success');
       } catch (priceErr: unknown) {
         console.error('[portfolio] price fetch failed:', priceErr);
+        if (priceErr instanceof AppApiError && priceErr.code === 'auth') {
+          handleAuthExpired();
+          return;
+        }
         setPriceStatus('error');
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error('[portfolio] load failed:', msg);
+      const cached = err instanceof AppApiError && err.code !== 'auth' ? readCachedPortfolios() : null;
+      if (cached) {
+        setPortfolios(cached.portfolios);
+        setCacheUpdatedAt(new Date(cached.cachedAt));
+        setIsUsingCachedData(true);
+        setLoadError(getFriendlyMessage(err));
+        setLoadStatus('success');
+        setPriceStatus('error');
+        return;
+      }
+
+      const msg = getFriendlyMessage(err);
+      console.error('[portfolio] load failed:', err);
+      if (err instanceof AppApiError && err.code === 'auth') {
+        handleAuthExpired();
+      }
       setLoadError(msg);
       setLoadStatus('error');
     }
-  }, [loadFromDB, fetchLivePrices]);
+  }, [loadFromDB, fetchLivePrices, handleAuthExpired]);
 
   const refreshPrices = useCallback(async () => {
     if (portfolios.length === 0) return;
@@ -298,82 +332,95 @@ export function usePortfolioData() {
       }
       setLastUpdated(new Date());
       setPriceStatus('success');
-    } catch {
+    } catch (err) {
+      if (err instanceof AppApiError && err.code === 'auth') {
+        handleAuthExpired();
+      }
       setPriceStatus('error');
     }
-  }, [portfolios, fetchLivePrices]);
+  }, [portfolios, fetchLivePrices, handleAuthExpired]);
 
   const addPortfolio = useCallback(async (name: string, label: string) => {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/holdings-crud?action=add_portfolio`, {
-      method: 'POST',
-      headers: await crudHeaders(),
-      body: JSON.stringify({ name, label }),
-    });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error ?? 'Failed to add family member');
-    await load();
-  }, [load]);
+    try {
+      await invokeFunction<unknown>('holdings-crud?action=add_portfolio', {
+        method: 'POST',
+        body: { name, label },
+      });
+      await load();
+    } catch (err) {
+      if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
+      throw err;
+    }
+  }, [load, handleAuthExpired]);
 
   const renamePortfolio = useCallback(async (portfolioId: string, newLabel: string) => {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/holdings-crud?action=update`, {
-      method: 'PATCH',
-      headers: await crudHeaders(),
-      body: JSON.stringify({
-        asset_type: 'portfolio',
-        id: portfolioId,
-        label: newLabel,
-      }),
-    });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error ?? 'Failed to rename portfolio');
-    setPortfolios((prev) =>
-      prev.map((p) => (p.id === portfolioId ? { ...p, label: newLabel } : p))
-    );
-  }, []);
+    try {
+      await invokeFunction<unknown>('holdings-crud?action=update', {
+        method: 'PATCH',
+        body: {
+          asset_type: 'portfolio',
+          id: portfolioId,
+          label: newLabel,
+        },
+      });
+      setPortfolios((prev) =>
+        prev.map((p) => (p.id === portfolioId ? { ...p, label: newLabel } : p))
+      );
+    } catch (err) {
+      if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
+      throw err;
+    }
+  }, [handleAuthExpired]);
 
   const addAsset = useCallback(async (assetType: string, portfolioName: string, payload: Record<string, unknown>) => {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/holdings-crud?action=add`, {
-      method: 'POST',
-      headers: await crudHeaders(),
-      body: JSON.stringify({
-        asset_type: assetType,
-        portfolioName,
-        ...payload,
-      }),
-    });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error ?? `Failed to add ${assetType}`);
-    await load();
-  }, [load]);
+    try {
+      await invokeFunction<unknown>('holdings-crud?action=add', {
+        method: 'POST',
+        body: {
+          asset_type: assetType,
+          portfolioName,
+          ...payload,
+        },
+      });
+      await load();
+    } catch (err) {
+      if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
+      throw err;
+    }
+  }, [load, handleAuthExpired]);
 
   const updateAsset = useCallback(async (assetType: string, id: string, payload: Record<string, unknown>) => {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/holdings-crud?action=update`, {
-      method: 'PATCH',
-      headers: await crudHeaders(),
-      body: JSON.stringify({
-        asset_type: assetType,
-        id,
-        ...payload,
-      }),
-    });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error ?? `Failed to update ${assetType}`);
-    await load();
-  }, [load]);
+    try {
+      await invokeFunction<unknown>('holdings-crud?action=update', {
+        method: 'PATCH',
+        body: {
+          asset_type: assetType,
+          id,
+          ...payload,
+        },
+      });
+      await load();
+    } catch (err) {
+      if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
+      throw err;
+    }
+  }, [load, handleAuthExpired]);
 
   const deleteAsset = useCallback(async (assetType: string, id: string) => {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/holdings-crud?action=delete`, {
-      method: 'DELETE',
-      headers: await crudHeaders(),
-      body: JSON.stringify({
-        asset_type: assetType,
-        id,
-      }),
-    });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error ?? `Failed to delete ${assetType}`);
-    await load();
-  }, [load]);
+    try {
+      await invokeFunction<unknown>('holdings-crud?action=delete', {
+        method: 'DELETE',
+        body: {
+          asset_type: assetType,
+          id,
+        },
+      });
+      await load();
+    } catch (err) {
+      if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
+      throw err;
+    }
+  }, [load, handleAuthExpired]);
 
   return {
     portfolios,
@@ -382,6 +429,9 @@ export function usePortfolioData() {
     priceStatus,
     lastUpdated,
     failedSymbols,
+    isUsingCachedData,
+    cacheUpdatedAt,
+    isAuthRequired,
     load,
     refreshPrices,
     addPortfolio,

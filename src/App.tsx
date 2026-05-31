@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   Users, User, Heart, LayoutDashboard, RefreshCw, Wifi, WifiOff, AlertCircle, Plus, Loader2,
   TrendingUp, Landmark, Coins, Home as HomeIcon, Shield, FolderOpen, UserPlus, X, Pencil, Check,
@@ -15,6 +15,8 @@ import RealEstateView from './components/RealEstateView';
 import InsuranceView from './components/InsuranceView';
 import DocumentVaultView from './components/DocumentVaultView';
 import PinLockScreen from './components/PinLockScreen';
+import DashboardLoading from './components/DashboardLoading';
+import DashboardError from './components/DashboardError';
 import { isPinConfigured, isSessionVerified } from './utils/auth';
 import { Portfolio, PortfolioName } from './types/portfolio';
 import { formatINR, formatPercent, pnlColor } from './utils/formatters';
@@ -87,7 +89,28 @@ export default function App() {
   const [renaming, setRenaming] = useState(false);
   const [renameError, setRenameError] = useState('');
 
-  const { portfolios, loadStatus, loadError, priceStatus, lastUpdated, failedSymbols, load, refreshPrices, addPortfolio, renamePortfolio, addAsset, updateAsset, deleteAsset } = usePortfolioData();
+  const handleAuthExpired = useCallback(() => {
+    setPinVerified(false);
+  }, []);
+
+  const {
+    portfolios,
+    loadStatus,
+    loadError,
+    priceStatus,
+    lastUpdated,
+    failedSymbols,
+    isUsingCachedData,
+    cacheUpdatedAt,
+    isAuthRequired,
+    load,
+    refreshPrices,
+    addPortfolio,
+    renamePortfolio,
+    addAsset,
+    updateAsset,
+    deleteAsset,
+  } = usePortfolioData({ onAuthExpired: handleAuthExpired });
 
   const refreshPricesRef = useRef(refreshPrices);
   useEffect(() => {
@@ -190,26 +213,17 @@ export default function App() {
   }
 
   if (loadStatus === 'idle' || isLoadingDB) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-3">
-        <Loader2 size={32} className="animate-spin text-blue-500" />
-        <p className="text-sm text-slate-400">Loading portfolio data...</p>
-      </div>
-    );
+    return <DashboardLoading />;
   }
 
   if (loadStatus === 'error') {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4 px-4">
-        <AlertCircle size={32} className="text-red-400" />
-        <p className="text-base font-semibold text-slate-700">Failed to load portfolio data</p>
-        {loadError && (
-          <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-2 max-w-md text-center">{loadError}</p>
-        )}
-        <button onClick={load} className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors">
-          Try Again
-        </button>
-      </div>
+      <DashboardError
+        message={loadError}
+        isAuthError={isAuthRequired}
+        onRetry={load}
+        onUnlock={() => setPinVerified(false)}
+      />
     );
   }
 
@@ -227,15 +241,33 @@ export default function App() {
       />
 
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {isUsingCachedData && (
+          <div className="flex flex-col gap-1 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <WifiOff size={16} className="mt-0.5 shrink-0 text-blue-600" />
+              <span>
+                Showing saved portfolio data because the latest database request did not complete.
+                {cacheUpdatedAt ? ` Saved at ${cacheUpdatedAt.toLocaleString('en-IN')}.` : ''}
+              </span>
+            </div>
+            <button
+              onClick={load}
+              className="self-start rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100 sm:self-auto"
+            >
+              Retry sync
+            </button>
+          </div>
+        )}
+
         {priceStatus === 'error' && (
-          <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-3 text-sm">
+          <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-4 py-3 text-sm">
             <AlertCircle size={16} className="shrink-0" />
             <span>Could not reach Yahoo Finance. Showing last known data. Check your connection and try refreshing.</span>
           </div>
         )}
 
         {priceStatus === 'success' && failedSymbols.length > 0 && (
-          <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 text-slate-600 rounded-xl px-4 py-3 text-sm">
+          <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 text-slate-600 rounded-lg px-4 py-3 text-sm">
             <AlertCircle size={16} className="shrink-0 text-slate-400" />
             <span>
               Some symbols did not resolve on Yahoo Finance and show avg price instead:{' '}
