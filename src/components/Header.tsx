@@ -121,56 +121,65 @@ export default function Header({
               <p className="text-xs text-slate-400">Investment Dashboard</p>
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-xs text-slate-400 mb-0.5">Family Net Worth</p>
-              <p className={`text-lg font-bold transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
-                {formatINR(totalCurrentValue)}
-              </p>
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Stats (Desktop Only) */}
+            <div className="hidden sm:flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-xs text-slate-400 mb-0.5">Family Net Worth</p>
+                <p className={`text-lg font-bold transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
+                  {formatINR(totalCurrentValue)}
+                </p>
+              </div>
+              <div className={`text-right px-3 py-1.5 rounded-xl ${isGain ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+                <p className="text-xs text-slate-400 mb-0.5">Total P&amp;L</p>
+                <p className={`text-base font-bold ${isGain ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {formatPercent(totalPnLPercent)}
+                </p>
+              </div>
             </div>
-            <div className={`text-right px-3 py-1.5 rounded-xl ${isGain ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
-              <p className="text-xs text-slate-400 mb-0.5">Total P&amp;L</p>
-              <p className={`text-base font-bold ${isGain ? 'text-emerald-400' : 'text-red-400'}`}>
-                {formatPercent(totalPnLPercent)}
-              </p>
-            </div>
-            <button
-              onClick={onRefresh}
-              disabled={isLoading}
-              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 rounded-lg px-3 py-1.5 disabled:opacity-40"
-            >
-              <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
-              {isLoading ? 'Fetching...' : lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Fetch live prices'}
-            </button>
-            <ExportPanel
-              portfolios={portfolios}
-              onImportCSV={onImportCSV}
-              portfolioOptions={portfolioOptions}
-            />
 
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={onToggleDarkMode}
-              className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 hover:border-slate-600"
-              title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            >
-              {darkMode ? <Sun size={14} /> : <Moon size={14} />}
-            </button>
-
-            {/* Alerts Bell Popover */}
-            <div className="relative">
+            {/* Actions (Mobile & Desktop) */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
-                onClick={() => setOpenAlerts(!openAlerts)}
-                className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 hover:border-slate-600 relative"
-                title="Notifications"
+                onClick={onRefresh}
+                disabled={isLoading}
+                className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 text-xs text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 rounded-lg disabled:opacity-40"
+                title={isLoading ? 'Fetching...' : lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Fetch live prices'}
               >
-                <Bell size={14} />
-                {visibleAlerts.length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse">
-                    {visibleAlerts.length}
-                  </span>
-                )}
+                <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
+                <span className="hidden sm:inline sm:ml-1.5">
+                  {isLoading ? 'Fetching...' : lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Fetch live prices'}
+                </span>
               </button>
+              <ExportPanel
+                portfolios={portfolios}
+                onImportCSV={onImportCSV}
+                portfolioOptions={portfolioOptions}
+              />
+
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={onToggleDarkMode}
+                className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 hover:border-slate-600"
+                title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {darkMode ? <Sun size={14} /> : <Moon size={14} />}
+              </button>
+
+              {/* Alerts Bell Popover */}
+              <div className="relative">
+                <button
+                  onClick={() => setOpenAlerts(!openAlerts)}
+                  className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 hover:border-slate-600 relative"
+                  title="Notifications"
+                >
+                  <Bell size={14} />
+                  {visibleAlerts.length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                      {visibleAlerts.length}
+                    </span>
+                  )}
+                </button>
 
               {openAlerts && (
                 <div className="absolute right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 w-80 sm:w-96 overflow-hidden">
@@ -238,6 +247,7 @@ export default function Header({
           </div>
         </div>
       </div>
-    </header>
+    </div>
+  </header>
   );
 }

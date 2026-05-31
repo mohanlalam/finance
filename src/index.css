@@ -146,6 +146,18 @@ html.dark .bg-emerald-500\/20 {
 html.dark .bg-red-500\/20 {
   background-color: rgba(239, 68, 68, 0.1) !important;
 }
+html.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.08) !important;
+}
+html.dark .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.08) !important;
+}
+html.dark .border-emerald-100 {
+  border-color: rgba(16, 185, 129, 0.2) !important;
+}
+html.dark .border-red-100 {
+  border-color: rgba(239, 68, 68, 0.2) !important;
+}
 html.dark .bg-emerald-100 {
   background-color: rgba(16, 185, 129, 0.15) !important;
   color: #34d399 !important;
@@ -167,6 +179,54 @@ html.dark .bg-rose-100 {
   color: #fb7185 !important;
 }
 
+/* Additional tags & badge colors */
+html.dark .bg-purple-50 {
+  background-color: rgba(168, 85, 247, 0.15) !important;
+  color: #c084fc !important;
+}
+html.dark .bg-orange-50 {
+  background-color: rgba(249, 115, 22, 0.15) !important;
+  color: #fb923c !important;
+}
+html.dark .text-emerald-600,
+html.dark .text-emerald-700 {
+  color: #34d399 !important;
+}
+html.dark .text-red-500,
+html.dark .text-red-600,
+html.dark .text-red-700 {
+  color: #f87171 !important;
+}
+html.dark .text-purple-700 {
+  color: #c084fc !important;
+}
+html.dark .text-orange-700 {
+  color: #fb923c !important;
+}
+
+/* Ring & Focus Shadows */
+html.dark .ring-purple-200 {
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.3) !important;
+}
+html.dark .ring-orange-200 {
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.3) !important;
+}
+html.dark .ring-rose-200 {
+  box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.3) !important;
+}
+html.dark .ring-blue-200 {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+}
+html.dark .ring-slate-200 {
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.3) !important;
+}
+
+/* Hover behaviors */
+html.dark .hover\:bg-blue-50:hover,
+html.dark .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
 /* Charts & SVGs */
 html.dark svg text {
   fill: #94a3b8 !important;
@@ -176,4 +236,20 @@ html.dark svg line[stroke="#f1f5f9"] {
 }
 html.dark svg line[stroke="#e2e8f0"] {
   stroke: #2e3c54 !important;
+}
+
+/* Scrollbars */
+html.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+html.dark ::-webkit-scrollbar-track {
+  background: #090d16;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #2e3c54;
 }

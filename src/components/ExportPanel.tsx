@@ -208,10 +208,11 @@ export default function ExportPanel({ portfolios, onImportCSV, portfolioOptions 
       <div className="relative">
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 rounded-lg px-3 py-1.5"
+          className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 text-xs text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 rounded-lg"
+          title="Import/Export Options"
         >
           <Database size={12} />
-          Import/Export
+          <span className="hidden sm:inline sm:ml-1.5">Import/Export</span>
         </button>
 
         {open && (
