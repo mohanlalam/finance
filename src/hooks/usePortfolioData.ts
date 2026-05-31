@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Holding, Portfolio, FixedDeposit, GoldHolding, RealEstate, Insurance, DocumentMetadata } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
-import { getHashedPin, isPinConfigured, isSessionVerified } from '../utils/auth';
+import { clearSessionVerification, ensureHashedPin } from '../utils/auth';
 
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? '';
 const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? '';
@@ -46,12 +46,16 @@ interface DBData {
 
 export type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
 
-function crudHeaders() {
+async function crudHeaders() {
+  const hashedPin = await ensureHashedPin();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     apikey: SUPABASE_ANON_KEY,
-    'X-App-Pin': getHashedPin(),
   };
+
+  if (hashedPin) {
+    headers['X-App-Pin'] = hashedPin;
+  }
 
   if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.startsWith('eyJ')) {
     headers['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`;
@@ -178,9 +182,12 @@ export function usePortfolioData() {
   const loadFromDB = useCallback(async (): Promise<DBData | null> => {
     if (!SUPABASE_URL) throw new Error('VITE_SUPABASE_URL is not configured');
     const url = `${SUPABASE_URL}/functions/v1/holdings-crud?action=list`;
-    const res = await fetch(url, { headers: crudHeaders() });
+    const res = await fetch(url, { headers: await crudHeaders() });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
+      if (res.status === 401) {
+        clearSessionVerification();
+      }
       throw new Error(`HTTP ${res.status} from holdings-crud: ${text.slice(0, 200)}`);
     }
     return res.json();
@@ -193,10 +200,15 @@ export function usePortfolioData() {
     );
     const res = await fetch(`${SUPABASE_URL}/functions/v1/market-data`, {
       method: 'POST',
-      headers: crudHeaders(),
+      headers: await crudHeaders(),
       body: JSON.stringify({ symbols: uniqueSymbols }),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      if (res.status === 401) {
+        clearSessionVerification();
+      }
+      throw new Error(`HTTP ${res.status}`);
+    }
     const json: { data: QuoteResult[] } = await res.json();
     const map: Record<string, { ltp: number; todayPct: number }> = {};
     const failed: string[] = [];
@@ -217,15 +229,6 @@ export function usePortfolioData() {
     setLoadStatus('loading');
     setLoadError('');
     try {
-      // Wait for PIN hash to be calculated asynchronously if session is already verified
-      if (isPinConfigured() && isSessionVerified()) {
-        let attempts = 0;
-        while (!getHashedPin() && attempts < 20) {
-          await new Promise((resolve) => setTimeout(resolve, 50));
-          attempts++;
-        }
-      }
-
       const data = await loadFromDB();
       if (!data || typeof data !== 'object') throw new Error('No data returned from database');
 
@@ -303,7 +306,7 @@ export function usePortfolioData() {
   const addPortfolio = useCallback(async (name: string, label: string) => {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/holdings-crud?action=add_portfolio`, {
       method: 'POST',
-      headers: crudHeaders(),
+      headers: await crudHeaders(),
       body: JSON.stringify({ name, label }),
     });
     const json = await res.json();
@@ -314,7 +317,7 @@ export function usePortfolioData() {
   const renamePortfolio = useCallback(async (portfolioId: string, newLabel: string) => {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/holdings-crud?action=update`, {
       method: 'PATCH',
-      headers: crudHeaders(),
+      headers: await crudHeaders(),
       body: JSON.stringify({
         asset_type: 'portfolio',
         id: portfolioId,
@@ -331,7 +334,7 @@ export function usePortfolioData() {
   const addAsset = useCallback(async (assetType: string, portfolioName: string, payload: Record<string, unknown>) => {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/holdings-crud?action=add`, {
       method: 'POST',
-      headers: crudHeaders(),
+      headers: await crudHeaders(),
       body: JSON.stringify({
         asset_type: assetType,
         portfolioName,
@@ -346,7 +349,7 @@ export function usePortfolioData() {
   const updateAsset = useCallback(async (assetType: string, id: string, payload: Record<string, unknown>) => {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/holdings-crud?action=update`, {
       method: 'PATCH',
-      headers: crudHeaders(),
+      headers: await crudHeaders(),
       body: JSON.stringify({
         asset_type: assetType,
         id,
@@ -361,7 +364,7 @@ export function usePortfolioData() {
   const deleteAsset = useCallback(async (assetType: string, id: string) => {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/holdings-crud?action=delete`, {
       method: 'DELETE',
-      headers: crudHeaders(),
+      headers: await crudHeaders(),
       body: JSON.stringify({
         asset_type: assetType,
         id,

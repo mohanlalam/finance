@@ -95,6 +95,8 @@ export default function App() {
   }, [refreshPrices]);
 
   useEffect(() => {
+    if (!pinVerified) return;
+
     load();
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
@@ -102,8 +104,7 @@ export default function App() {
       }
     }, 30000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pinVerified, load]);
 
   const portfolio = getPortfolioByName(portfolios, activeTab);
   const todayPnL = estimateTodayPnL(portfolio, portfolios);

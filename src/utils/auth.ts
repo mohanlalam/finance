@@ -17,6 +17,11 @@ export function markSessionVerified(hashedPin?: string): void {
   }
 }
 
+export function clearSessionVerification(): void {
+  sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(HASH_KEY);
+}
+
 export function getHashedPin(): string {
   return sessionStorage.getItem(HASH_KEY) ?? '';
 }
@@ -28,12 +33,13 @@ export async function hashPin(pin: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Auto-recover hash if already verified in session
-if (isPinConfigured() && isSessionVerified() && !sessionStorage.getItem(HASH_KEY)) {
-  hashPin(APP_PIN).then(hash => {
-    sessionStorage.setItem(HASH_KEY, hash);
-  }).catch(err => {
-    console.error('Failed to auto-recover PIN hash:', err);
-  });
-}
+export async function ensureHashedPin(): Promise<string> {
+  if (!isPinConfigured()) return '';
+  if (!isSessionVerified()) return '';
 
+  const hash = await hashPin(APP_PIN);
+  if (sessionStorage.getItem(HASH_KEY) !== hash) {
+    sessionStorage.setItem(HASH_KEY, hash);
+  }
+  return hash;
+}
