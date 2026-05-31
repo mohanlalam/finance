@@ -29,7 +29,6 @@ import { usePortfolioData } from './hooks/usePortfolioData';
 import { usePortfolioInsights } from './hooks/usePortfolioInsights';
 import { useAlerts } from './hooks/useAlerts';
 import { invokeFunction } from './utils/apiClient';
-import AlertsBanner from './components/AlertsBanner';
 import { ImportRow } from './components/ExportPanel';
 
 type AssetTab = 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents';
@@ -291,6 +290,7 @@ export default function App() {
         portfolios={portfolios}
         onImportCSV={handleImportCSV}
         portfolioOptions={portfolioOptionsForModal}
+        alerts={alerts}
       />
 
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -328,9 +328,6 @@ export default function App() {
             </span>
           </div>
         )}
-
-        {/* Alerts Banner */}
-        <AlertsBanner alerts={alerts} />
 
         {/* Search Bar */}
         <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
