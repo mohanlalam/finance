@@ -37,10 +37,16 @@ function applyLivePrices(portfolios: Portfolio[], livePrices: LivePrices): Portf
 }
 
 function crudHeaders() {
-  return {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    apikey: SUPABASE_ANON_KEY,
   };
+
+  if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.startsWith('eyJ')) {
+    headers['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`;
+  }
+
+  return headers;
 }
 
 async function fetchLivePricesFromSupabase(symbols: { ticker: string; yahooSymbol: string }[]): Promise<QuoteResult[]> {

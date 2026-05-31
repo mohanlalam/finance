@@ -75,7 +75,30 @@ Deno.serve(async (req: Request) => {
   const serverPinHash = Deno.env.get("APP_PIN_HASH");
   if (serverPinHash) {
     const clientPin = req.headers.get("X-App-Pin");
-    if (clientPin !== serverPinHash) {
+    
+    let isValid = false;
+    if (clientPin) {
+      if (clientPin === serverPinHash) {
+        isValid = true;
+      } else {
+        // If serverPinHash is raw (e.g. 4-6 digits) and clientPin is hashed, check SHA-256 hash of serverPinHash
+        try {
+          const msgBuffer = new TextEncoder().encode(serverPinHash);
+          const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          const hashedServerPin = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+          if (clientPin === hashedServerPin) {
+            isValid = true;
+          }
+        } catch (e) {
+          console.error("Error hashing server PIN:", e);
+        }
+      }
+    }
+
+    console.log(`PIN verification: clientPin=${clientPin ? "[provided]" : "[empty]"}, serverPinHash=${serverPinHash ? "[configured]" : "[empty]"}, isValid=${isValid}`);
+
+    if (!isValid) {
       return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" }

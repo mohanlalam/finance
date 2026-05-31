@@ -47,12 +47,17 @@ interface DBData {
 export type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
 
 function crudHeaders() {
-  return {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
     apikey: SUPABASE_ANON_KEY,
     'X-App-Pin': getHashedPin(),
   };
+
+  if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.startsWith('eyJ')) {
+    headers['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`;
+  }
+
+  return headers;
 }
 
 function dbToHolding(h: DBHolding): Holding {
