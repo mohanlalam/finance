@@ -182,7 +182,7 @@ export default function Header({
                 </button>
 
               {openAlerts && (
-                <div className="absolute right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 w-80 sm:w-96 overflow-hidden">
+                <div className="fixed left-3 right-3 top-16 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96">
                   <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                       Active Alerts ({visibleAlerts.length})

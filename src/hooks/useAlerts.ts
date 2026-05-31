@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Portfolio } from '../types/portfolio';
 
 export type AlertSeverity = 'critical' | 'warning' | 'info';
@@ -31,9 +31,21 @@ function setLastPnlPct(pct: number): void {
 }
 
 export function useAlerts(portfolios: Portfolio[]): Alert[] {
+  const baselinePnlPctRef = useRef<number | null>(getLastPnlPct());
+
+  const currentPct = useMemo(() => {
+    const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
+    const totalCurrent = portfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
+    return totalInvested > 0 ? ((totalCurrent - totalInvested) / totalInvested) * 100 : 0;
+  }, [portfolios]);
+
+  useEffect(() => {
+    baselinePnlPctRef.current = currentPct;
+    setLastPnlPct(currentPct);
+  }, [currentPct]);
+
   return useMemo(() => {
     const alerts: Alert[] = [];
-    let alertId = 0;
 
     for (const p of portfolios) {
       // ── 52-week high/low alerts ──
@@ -43,7 +55,7 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
         // Within 2% of 52-week high
         if (h.ltp >= h.weekHigh52 * 0.98) {
           alerts.push({
-            id: `alert-${alertId++}`,
+            id: `52w-high-${p.name}-${h.id ?? h.ticker}`,
             type: '52w_high',
             severity: 'info',
             title: `${h.ticker} near 52-week high`,
@@ -55,7 +67,7 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
         // Within 2% of 52-week low
         if (h.ltp <= h.weekLow52 * 1.02 && h.weekLow52 > 0) {
           alerts.push({
-            id: `alert-${alertId++}`,
+            id: `52w-low-${p.name}-${h.id ?? h.ticker}`,
             type: '52w_low',
             severity: 'warning',
             title: `${h.ticker} near 52-week low`,
@@ -71,7 +83,7 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
         const days = Math.ceil((new Date(fd.maturity_date).getTime() - Date.now()) / (1000 * 3600 * 24));
         if (days >= 0 && days <= 15) {
           alerts.push({
-            id: `alert-${alertId++}`,
+            id: `fd-maturity-${p.name}-${fd.id}`,
             type: 'fd_maturity',
             severity: days <= 5 ? 'critical' : 'warning',
             title: `FD maturing ${days === 0 ? 'today' : `in ${days} days`}`,
@@ -87,7 +99,7 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
         const days = Math.ceil((new Date(ins.renewal_date).getTime() - Date.now()) / (1000 * 3600 * 24));
         if (days >= 0 && days <= 30) {
           alerts.push({
-            id: `alert-${alertId++}`,
+            id: `insurance-renewal-${p.name}-${ins.id}`,
             type: 'insurance_renewal',
             severity: days <= 7 ? 'critical' : 'warning',
             title: `Insurance renewal ${days === 0 ? 'today' : `in ${days} days`}`,
@@ -99,16 +111,13 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
     }
 
     // ── Portfolio swing alerts ──
-    const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
-    const totalCurrent = portfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
-    const currentPct = totalInvested > 0 ? ((totalCurrent - totalInvested) / totalInvested) * 100 : 0;
-    const lastPct = getLastPnlPct();
+    const lastPct = baselinePnlPctRef.current;
 
     if (lastPct !== null) {
       const diff = currentPct - lastPct;
       if (Math.abs(diff) >= 5) {
         alerts.push({
-          id: `alert-${alertId++}`,
+          id: `portfolio-swing-${lastPct.toFixed(2)}-${currentPct.toFixed(2)}`,
           type: 'portfolio_swing',
           severity: diff < 0 ? 'critical' : 'info',
           title: `Portfolio ${diff > 0 ? 'up' : 'down'} ${Math.abs(diff).toFixed(1)}% since last session`,
@@ -116,12 +125,10 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
         });
       }
     }
-    setLastPnlPct(currentPct);
-
     // Sort: critical first, then warning, then info
     const order: Record<AlertSeverity, number> = { critical: 0, warning: 1, info: 2 };
     alerts.sort((a, b) => order[a.severity] - order[b.severity]);
 
     return alerts;
-  }, [portfolios]);
+  }, [portfolios, currentPct]);
 }

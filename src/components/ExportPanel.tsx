@@ -35,51 +35,63 @@ function downloadFile(content: string, filename: string, mime: string) {
   URL.revokeObjectURL(url);
 }
 
+function csvCell(value: unknown): string {
+  const text = value === null || value === undefined ? '' : String(value);
+  if (/[",\r\n]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+}
+
+function csvRow(values: unknown[]): string {
+  return values.map(csvCell).join(',');
+}
+
 function allAssetsToCSV(portfolios: Portfolio[]): string {
   const sections: string[] = [];
 
   // Stocks
   sections.push('=== STOCKS ===');
-  sections.push('Portfolio,Ticker,Stock Name,Qty,Avg Price,LTP,Current Value,P&L,P&L %');
+  sections.push(csvRow(['Portfolio', 'Ticker', 'Stock Name', 'Qty', 'Avg Price', 'LTP', 'Current Value', 'P&L', 'P&L %']));
   for (const p of portfolios) {
     for (const h of p.holdings) {
-      sections.push(`${p.label},${h.ticker},"${h.stockName}",${h.qty},${h.avgPrice},${h.ltp},${h.currentValue},${h.unrealizedPnL},${h.pnlPercent.toFixed(2)}`);
+      sections.push(csvRow([p.label, h.ticker, h.stockName, h.qty, h.avgPrice, h.ltp, h.currentValue, h.unrealizedPnL, h.pnlPercent.toFixed(2)]));
     }
   }
 
   // FDs
   sections.push('\n=== FIXED DEPOSITS ===');
-  sections.push('Portfolio,Bank,Principal,Rate %,Start Date,Maturity Date,Current Value,Status');
+  sections.push(csvRow(['Portfolio', 'Bank', 'Principal', 'Rate %', 'Start Date', 'Maturity Date', 'Current Value', 'Status']));
   for (const p of portfolios) {
     for (const f of p.fixedDeposits) {
-      sections.push(`${p.label},"${f.bank_name}",${f.principal_amount},${f.interest_rate},${f.start_date},${f.maturity_date || 'N/A'},${getFDEffectiveValue(f).toFixed(2)},${f.status}`);
+      sections.push(csvRow([p.label, f.bank_name, f.principal_amount, f.interest_rate, f.start_date, f.maturity_date || 'N/A', getFDEffectiveValue(f).toFixed(2), f.status]));
     }
   }
 
   // Gold
   sections.push('\n=== GOLD ===');
-  sections.push('Portfolio,Item,Purity,Weight(g),Purchase Price,Current Valuation');
+  sections.push(csvRow(['Portfolio', 'Item', 'Purity', 'Weight(g)', 'Purchase Price', 'Current Valuation']));
   for (const p of portfolios) {
     for (const g of p.goldHoldings) {
-      sections.push(`${p.label},"${g.item_name}",${g.purity},${g.weight_grams},${g.purchase_price},${g.current_valuation}`);
+      sections.push(csvRow([p.label, g.item_name, g.purity, g.weight_grams, g.purchase_price, g.current_valuation]));
     }
   }
 
   // Real Estate
   sections.push('\n=== REAL ESTATE ===');
-  sections.push('Portfolio,Property,Type,Location,Purchase Price,Current Valuation,Monthly Rent');
+  sections.push(csvRow(['Portfolio', 'Property', 'Type', 'Location', 'Purchase Price', 'Current Valuation', 'Monthly Rent']));
   for (const p of portfolios) {
     for (const r of p.realEstate) {
-      sections.push(`${p.label},"${r.property_name}",${r.property_type},"${r.location || ''}",${r.purchase_price},${r.current_valuation},${r.monthly_rent}`);
+      sections.push(csvRow([p.label, r.property_name, r.property_type, r.location || '', r.purchase_price, r.current_valuation, r.monthly_rent]));
     }
   }
 
   // Insurance
   sections.push('\n=== INSURANCE ===');
-  sections.push('Portfolio,Policy Name,Provider,Type,Sum Assured,Premium,Renewal Date');
+  sections.push(csvRow(['Portfolio', 'Policy Name', 'Provider', 'Type', 'Sum Assured', 'Premium', 'Renewal Date']));
   for (const p of portfolios) {
     for (const i of p.insurances) {
-      sections.push(`${p.label},"${i.policy_name}","${i.provider}",${i.insurance_type},${i.sum_assured},${i.premium_amount},${i.renewal_date || 'N/A'}`);
+      sections.push(csvRow([p.label, i.policy_name, i.provider, i.insurance_type, i.sum_assured, i.premium_amount, i.renewal_date || 'N/A']));
     }
   }
 
@@ -94,8 +106,17 @@ function parseCSV(text: string): string[][] {
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
-    for (const char of line) {
-      if (char === '"') { inQuotes = !inQuotes; continue; }
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+        continue;
+      }
       if (char === ',' && !inQuotes) { result.push(current.trim()); current = ''; continue; }
       current += char;
     }

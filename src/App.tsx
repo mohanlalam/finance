@@ -196,9 +196,10 @@ export default function App() {
         amountInvested: row.qty * row.avg_price,
         weekLow52: 0,
         weekHigh52: 0,
-      });
+      }, { reload: false });
     }
-  }, [addAsset]);
+    await load();
+  }, [addAsset, load]);
 
   const liveTotals = useMemo(() => {
     const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);

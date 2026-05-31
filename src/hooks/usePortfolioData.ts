@@ -203,6 +203,10 @@ interface UsePortfolioDataOptions {
   onAuthExpired?: () => void;
 }
 
+interface AssetMutationOptions {
+  reload?: boolean;
+}
+
 export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}) {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [netWorthHistory, setNetWorthHistory] = useState<NetWorthSnapshot[]>([]);
@@ -389,7 +393,12 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     }
   }, [handleAuthExpired]);
 
-  const addAsset = useCallback(async (assetType: string, portfolioName: string, payload: Record<string, unknown>) => {
+  const addAsset = useCallback(async (
+    assetType: string,
+    portfolioName: string,
+    payload: Record<string, unknown>,
+    options: AssetMutationOptions = {}
+  ) => {
     try {
       await invokeFunction<unknown>('holdings-crud?action=add', {
         method: 'POST',
@@ -399,7 +408,9 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           ...payload,
         },
       });
-      await load();
+      if (options.reload !== false) {
+        await load();
+      }
     } catch (err) {
       if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
       throw err;

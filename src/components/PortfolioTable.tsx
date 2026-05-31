@@ -36,7 +36,7 @@ export default function PortfolioTable({
 }: PortfolioTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('currentValue');
   const [sortAsc, setSortAsc] = useState(false);
-  const [activePreset, setActivePreset] = useState<SortPreset>('value');
+  const [activePreset, setActivePreset] = useState<SortPreset | null>('value');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -55,13 +55,25 @@ export default function PortfolioTable({
 
   const sorted = useMemo(() => {
     return [...holdingsWithAlloc].sort((a, b) => {
-      const av = (a as Record<string, unknown>)[sortKey] as number;
-      const bv = (b as Record<string, unknown>)[sortKey] as number;
-      return sortAsc ? av - bv : bv - av;
+      const av = (a as Record<string, unknown>)[sortKey];
+      const bv = (b as Record<string, unknown>)[sortKey];
+
+      if (typeof av === 'string' || typeof bv === 'string') {
+        const result = String(av ?? '').localeCompare(String(bv ?? ''), undefined, {
+          numeric: true,
+          sensitivity: 'base',
+        });
+        return sortAsc ? result : -result;
+      }
+
+      const aNum = Number(av ?? 0);
+      const bNum = Number(bv ?? 0);
+      return sortAsc ? aNum - bNum : bNum - aNum;
     });
   }, [holdingsWithAlloc, sortKey, sortAsc]);
 
   function handleSort(key: SortKey) {
+    setActivePreset(null);
     if (sortKey === key) setSortAsc(!sortAsc);
     else { setSortKey(key); setSortAsc(false); }
   }
