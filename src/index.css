@@ -1,3 +1,179 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Premium Dark Mode Overrides ── */
+
+html.dark body {
+  background-color: #090d16;
+  color: #f8fafc;
+}
+
+html.dark .bg-white {
+  background-color: #101622 !important;
+}
+
+html.dark .bg-slate-50 {
+  background-color: #090d16 !important;
+}
+
+html.dark .bg-slate-100 {
+  background-color: #1e293b !important;
+  color: #94a3b8 !important;
+}
+
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-slate-300 {
+  border-color: #1e293b !important;
+}
+
+html.dark .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-700 {
+  color: #e2e8f0 !important;
+}
+
+html.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+html.dark .text-slate-400 {
+  color: #64748b !important;
+}
+
+/* Modals & Inputs */
+html.dark select,
+html.dark input,
+html.dark textarea {
+  background-color: #1a2333 !important;
+  color: #f8fafc !important;
+  border-color: #2e3c54 !important;
+}
+
+html.dark select:focus,
+html.dark input:focus,
+html.dark textarea:focus {
+  border-color: #3b82f6 !important;
+  outline: none;
+}
+
+html.dark option {
+  background-color: #101622 !important;
+  color: #f8fafc !important;
+}
+
+/* Hover behaviors */
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-slate-50\/50:hover {
+  background-color: #151d2d !important;
+}
+
+html.dark .bg-slate-50\/50 {
+  background-color: rgba(21, 29, 45, 0.5) !important;
+}
+
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1e293b !important;
+}
+
+/* Alert badge colors in dark mode */
+html.dark .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+}
+html.dark .border-blue-200 {
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+html.dark .text-blue-700 {
+  color: #60a5fa !important;
+}
+
+html.dark .bg-amber-50 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+}
+html.dark .border-amber-200 {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+html.dark .text-amber-700 {
+  color: #fbbf24 !important;
+}
+
+html.dark .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  color: #818cf8 !important;
+}
+html.dark .border-indigo-200 {
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+html.dark .text-indigo-700 {
+  color: #818cf8 !important;
+}
+
+html.dark .bg-rose-50 {
+  background-color: rgba(244, 63, 94, 0.15) !important;
+  color: #fb7185 !important;
+}
+html.dark .border-rose-200 {
+  border-color: rgba(244, 63, 94, 0.3) !important;
+}
+html.dark .text-rose-700 {
+  color: #fb7185 !important;
+}
+
+html.dark .bg-violet-50 {
+  background-color: rgba(139, 92, 246, 0.15) !important;
+  color: #a78bfa !important;
+}
+html.dark .border-violet-200 {
+  border-color: rgba(139, 92, 246, 0.3) !important;
+}
+html.dark .text-violet-700 {
+  color: #a78bfa !important;
+}
+
+/* RLS error or pricing alerts */
+html.dark .bg-emerald-500\/20 {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+html.dark .bg-red-500\/20 {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+html.dark .bg-emerald-100 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+}
+html.dark .bg-red-100 {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+}
+html.dark .bg-blue-100 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+}
+html.dark .bg-indigo-100 {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  color: #818cf8 !important;
+}
+html.dark .bg-rose-100 {
+  background-color: rgba(244, 63, 94, 0.15) !important;
+  color: #fb7185 !important;
+}
+
+/* Charts & SVGs */
+html.dark svg text {
+  fill: #94a3b8 !important;
+}
+html.dark svg line[stroke="#f1f5f9"] {
+  stroke: #1e293b !important;
+}
+html.dark svg line[stroke="#e2e8f0"] {
+  stroke: #2e3c54 !important;
+}

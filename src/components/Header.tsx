@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Check } from 'lucide-react';
+import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Check, Sun, Moon } from 'lucide-react';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { FetchStatus } from '../hooks/useMarketData';
 import { Portfolio } from '../types/portfolio';
@@ -17,6 +17,8 @@ interface HeaderProps {
   onImportCSV: (rows: ImportRow[], portfolioName: string) => Promise<void>;
   portfolioOptions: { name: string; label: string }[];
   alerts: Alert[];
+  darkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 
 const ALERTS_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
@@ -69,6 +71,8 @@ export default function Header({
   onImportCSV,
   portfolioOptions,
   alerts,
+  darkMode,
+  onToggleDarkMode,
 }: HeaderProps) {
   const isGain = totalPnL >= 0;
   const isLoading = status === 'loading';
@@ -143,6 +147,15 @@ export default function Header({
               onImportCSV={onImportCSV}
               portfolioOptions={portfolioOptions}
             />
+
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={onToggleDarkMode}
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 hover:border-slate-600"
+              title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {darkMode ? <Sun size={14} /> : <Moon size={14} />}
+            </button>
 
             {/* Alerts Bell Popover */}
             <div className="relative">

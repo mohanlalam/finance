@@ -88,6 +88,25 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<PortfolioName>('all');
   const [activeAsset, setActiveAsset] = useState<AssetTab>('stocks');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      return localStorage.getItem('theme') === 'dark';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (darkMode) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+    } catch { /* ignore */ }
+  }, [darkMode]);
   const [showAddFamily, setShowAddFamily] = useState(false);
   const [newFamilyLabel, setNewFamilyLabel] = useState('');
   const [newFamilyName, setNewFamilyName] = useState('');
@@ -291,6 +310,8 @@ export default function App() {
         onImportCSV={handleImportCSV}
         portfolioOptions={portfolioOptionsForModal}
         alerts={alerts}
+        darkMode={darkMode}
+        onToggleDarkMode={() => setDarkMode(!darkMode)}
       />
 
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
