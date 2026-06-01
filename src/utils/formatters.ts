@@ -59,11 +59,10 @@ export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()
   const timeDiff = end.getTime() - s.getTime();
   const years = timeDiff / (1000 * 3600 * 24 * 365.25);
   
-  if (years > 0 && !isNaN(p) && !isNaN(r) && !isNaN(s.getTime())) {
-    if (f.fd_type === 'ssy') {
-      return p * Math.pow(1 + r / 100, years);
+  if (years > 0 && !isNaN(r) && !isNaN(s.getTime())) {
+    if (!isNaN(p)) {
+      return p * Math.pow(1 + r / 400, 4 * years);
     }
-    return p * Math.pow(1 + r / 400, 4 * years);
   }
   return p;
 }

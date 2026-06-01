@@ -197,6 +197,7 @@ Deno.serve(async (req: Request) => {
             maturity_amount: Number(payload.maturityAmount),
             status: payload.status || "active",
             fd_type: payload.fdType || "regular",
+            contributions: payload.contributions || [],
           })
           .select()
           .single();
@@ -304,6 +305,7 @@ Deno.serve(async (req: Request) => {
         if (payload.maturityAmount !== undefined) updates.maturity_amount = Number(payload.maturityAmount);
         if (payload.status !== undefined) updates.status = payload.status;
         if (payload.fdType !== undefined) updates.fd_type = payload.fdType;
+        if (payload.contributions !== undefined) updates.contributions = payload.contributions;
       } else if (asset_type === "gold") {
         table = "gold_holdings";
         if (payload.itemName !== undefined) updates.item_name = payload.itemName;
