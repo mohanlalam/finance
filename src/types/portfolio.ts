@@ -29,6 +29,7 @@ export interface FixedDeposit {
   maturity_amount: number;
   status: 'active' | 'matured';
   created_at?: string;
+  fd_type?: string;
 }
 
 export interface GoldHolding {

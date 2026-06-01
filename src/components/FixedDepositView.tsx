@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../utils/formatters';
 import { Plus, Trash2, Edit2, Calendar, TrendingUp, Landmark, FileText, CheckCircle, Clock } from 'lucide-react';
@@ -33,15 +33,9 @@ function FixedDepositView({
   const [maturityDate, setMaturityDate] = useState('');
   const [maturityAmount, setMaturityAmount] = useState('');
   const [status, setStatus] = useState<'active' | 'matured'>('active');
+  const [fdType, setFdType] = useState<'regular' | 'ssy'>('regular');
 
-  // Math
-  const totalPrincipal = fixedDeposits.reduce((s, f) => s + Number(f.principal_amount), 0);
-  const totalMaturity = fixedDeposits.reduce((s, f) => s + getFDEffectiveValue(f), 0);
-  const avgRate = fixedDeposits.length
-    ? fixedDeposits.reduce((s, f) => s + Number(f.interest_rate) * Number(f.principal_amount), 0) / totalPrincipal
-    : 0;
-
-  function calculateMaturity() {
+  const calculateMaturity = useCallback(() => {
     const p = parseFloat(principalAmount);
     const r = parseFloat(interestRate);
     const s = new Date(startDate);
@@ -50,14 +44,31 @@ function FixedDepositView({
       const timeDiff = m.getTime() - s.getTime();
       const years = timeDiff / (1000 * 3600 * 24 * 365.25);
       if (years > 0) {
-        // Quarter compounding standard (A = P(1 + r/4)^4n)
-        const amt = p * Math.pow(1 + r / 400, 4 * years);
+        let amt = 0;
+        if (fdType === 'ssy') {
+          // Annual compounding for SSY
+          amt = p * Math.pow(1 + r / 100, years);
+        } else {
+          // Quarter compounding standard (A = P(1 + r/4)^4n)
+          amt = p * Math.pow(1 + r / 400, 4 * years);
+        }
         setMaturityAmount(amt.toFixed(2));
       } else {
         setMaturityAmount(p.toFixed(2));
       }
     }
-  }
+  }, [principalAmount, interestRate, startDate, maturityDate, fdType]);
+
+  React.useEffect(() => {
+    calculateMaturity();
+  }, [fdType, calculateMaturity]);
+
+  // Math
+  const totalPrincipal = fixedDeposits.reduce((s, f) => s + Number(f.principal_amount), 0);
+  const totalMaturity = fixedDeposits.reduce((s, f) => s + getFDEffectiveValue(f), 0);
+  const avgRate = fixedDeposits.length
+    ? fixedDeposits.reduce((s, f) => s + Number(f.interest_rate) * Number(f.principal_amount), 0) / totalPrincipal
+    : 0;
 
   function handleOpenAdd() {
     setEditingFd(null);
@@ -68,6 +79,7 @@ function FixedDepositView({
     setMaturityDate('');
     setMaturityAmount('');
     setStatus('active');
+    setFdType('regular');
     setError('');
     setShowModal(true);
   }
@@ -81,6 +93,7 @@ function FixedDepositView({
     setMaturityDate(fd.maturity_date || '');
     setMaturityAmount(fd.maturity_amount.toString());
     setStatus(fd.status);
+    setFdType((fd.fd_type as 'regular' | 'ssy') || 'regular');
     setError('');
     setShowModal(true);
   }
@@ -102,6 +115,7 @@ function FixedDepositView({
       maturityDate: maturityDate || null,
       maturityAmount: parseFloat(maturityAmount),
       status,
+      fdType,
     };
 
     try {
@@ -211,6 +225,11 @@ function FixedDepositView({
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">{fd.bank_name}</h4>
+                          {fd.fd_type === 'ssy' && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
+                              SSY Scheme
+                            </span>
+                          )}
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isMatured ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'}`}>
                             {isMatured ? 'Matured' : `${fd.interest_rate}% p.a.`}
                           </span>
@@ -371,7 +390,7 @@ function FixedDepositView({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Maturity Amount (₹)</label>
                   <input
@@ -381,6 +400,17 @@ function FixedDepositView({
                     onChange={(e) => setMaturityAmount(e.target.value)}
                     className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
                   />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">FD Type</label>
+                  <select
+                    value={fdType}
+                    onChange={(e) => setFdType(e.target.value as 'regular' | 'ssy')}
+                    className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+                  >
+                    <option value="regular">Regular FD</option>
+                    <option value="ssy">Sukanya Samriddhi (SSY)</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Status</label>

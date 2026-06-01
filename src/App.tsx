@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { WifiOff, AlertCircle, RefreshCw } from 'lucide-react';
+import { WifiOff, AlertCircle, RefreshCw, TrendingUp, Landmark, Coins, Home, Shield, FolderOpen } from 'lucide-react';
 import Header from './components/Header';
 import SummaryCards from './components/SummaryCards';
 import PieChart from './components/PieChart';
@@ -79,6 +79,7 @@ export default function App() {
     refreshPrices,
     addPortfolio,
     renamePortfolio,
+    deletePortfolio,
     addAsset,
     updateAsset,
     deleteAsset,
@@ -201,6 +202,19 @@ export default function App() {
     setRenameTarget(target);
   }, []);
 
+  const handleDeletePortfolio = useCallback(async (target: { id: string; name: string; label: string }) => {
+    if (confirm(`Are you sure you want to delete ${target.label} and all of their holdings, fixed deposits, and other assets? This action cannot be undone.`)) {
+      try {
+        await deletePortfolio(target.id);
+        if (activeTab === target.name) {
+          setActiveTab('all');
+        }
+      } catch (err) {
+        alert(err instanceof Error ? err.message : 'Failed to delete family member');
+      }
+    }
+  }, [deletePortfolio, activeTab]);
+
   const handleAddHolding = useCallback(async (data: AddHoldingPayload) => {
     const { portfolioName, ...payload } = data;
     await addAsset('stock', portfolioName, payload as unknown as Record<string, unknown>);
@@ -291,6 +305,7 @@ export default function App() {
           onTabChange={handleTabChange}
           onAddFamilyClick={handleAddFamilyClick}
           onRenameClick={handleRenameClick}
+          onDeleteClick={handleDeletePortfolio}
         />
 
         {/* Family Overview - drill-down cards */}
@@ -411,6 +426,34 @@ export default function App() {
             <NetWorthChart history={netWorthHistory} />
           </SectionErrorBoundary>
         )}
+
+        {/* Desktop Asset Switcher */}
+        <div className="hidden md:flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-px mb-2">
+          {([
+            { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={16} /> },
+            { id: 'fd', label: 'Fixed Deposits', icon: <Landmark size={16} /> },
+            { id: 'gold', label: 'Gold Holdings', icon: <Coins size={16} /> },
+            { id: 'real_estate', label: 'Real Estate', icon: <Home size={16} /> },
+            { id: 'insurance', label: 'Insurance Cover', icon: <Shield size={16} /> },
+            { id: 'documents', label: 'Document Vault', icon: <FolderOpen size={16} /> },
+          ] as const).map((tab) => {
+            const isActive = activeAsset === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveAsset(tab.id)}
+                className={`flex items-center gap-2 px-4 py-2.5 border-b-2 font-semibold text-sm transition-all duration-150 outline-none -mb-px ${
+                  isActive
+                    ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400 font-bold'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:border-slate-750'
+                }`}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
 
         {/* Asset Tab Views */}
         <SectionErrorBoundary sectionName="Asset Tab Content">

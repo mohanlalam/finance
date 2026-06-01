@@ -196,6 +196,7 @@ Deno.serve(async (req: Request) => {
             maturity_date: payload.maturityDate,
             maturity_amount: Number(payload.maturityAmount),
             status: payload.status || "active",
+            fd_type: payload.fdType || "regular",
           })
           .select()
           .single();
@@ -302,6 +303,7 @@ Deno.serve(async (req: Request) => {
         if (payload.maturityDate !== undefined) updates.maturity_date = payload.maturityDate;
         if (payload.maturityAmount !== undefined) updates.maturity_amount = Number(payload.maturityAmount);
         if (payload.status !== undefined) updates.status = payload.status;
+        if (payload.fdType !== undefined) updates.fd_type = payload.fdType;
       } else if (asset_type === "gold") {
         table = "gold_holdings";
         if (payload.itemName !== undefined) updates.item_name = payload.itemName;
@@ -376,6 +378,8 @@ Deno.serve(async (req: Request) => {
         table = "insurances";
       } else if (asset_type === "document") {
         table = "documents";
+      } else if (asset_type === "portfolio") {
+        table = "portfolios";
       }
 
       const { error } = await supabase

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Pencil, UserPlus, User, Heart, Users } from 'lucide-react';
+import { LayoutDashboard, Pencil, Trash2, UserPlus, User, Heart, Users } from 'lucide-react';
 import { Portfolio, PortfolioName } from '../types/portfolio';
 import { formatPercent } from '../utils/formatters';
 
@@ -9,6 +9,7 @@ interface FamilyTabBarProps {
   onTabChange: (tab: PortfolioName) => void;
   onAddFamilyClick: () => void;
   onRenameClick: (portfolio: { id: string; name: string; label: string }) => void;
+  onDeleteClick: (portfolio: { id: string; name: string; label: string }) => void;
 }
 
 const familyIcons: Record<string, React.ReactNode> = {
@@ -37,6 +38,7 @@ export default React.memo(function FamilyTabBar({
   onTabChange,
   onAddFamilyClick,
   onRenameClick,
+  onDeleteClick,
 }: FamilyTabBarProps) {
   return (
     <div
@@ -95,11 +97,22 @@ export default React.memo(function FamilyTabBar({
                 e.stopPropagation();
                 onRenameClick({ id: p.id, name: p.name, label: p.label });
               }}
-              className="ml-1 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-150 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:text-slate-500 dark:hover:text-slate-300 dark:hover:bg-slate-800 opacity-0 group-hover:opacity-100 focus:opacity-100"
+              className="ml-1 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-150 text-slate-400 hover:text-slate-650 hover:bg-slate-100 dark:text-slate-500 dark:hover:text-slate-300 dark:hover:bg-slate-800 opacity-0 group-hover:opacity-100 focus:opacity-100"
               title={`Rename ${p.label}`}
               aria-label={`Rename portfolio ${p.label}`}
             >
               <Pencil size={12} />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteClick({ id: p.id, name: p.name, label: p.label });
+              }}
+              className="ml-0.5 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-150 text-slate-400 hover:text-red-650 hover:bg-red-50 dark:text-slate-500 dark:hover:text-red-400 dark:hover:bg-red-950/20 opacity-0 group-hover:opacity-100 focus:opacity-100"
+              title={`Delete ${p.label}`}
+              aria-label={`Delete portfolio ${p.label}`}
+            >
+              <Trash2 size={12} />
             </button>
           </div>
         );

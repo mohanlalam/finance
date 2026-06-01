@@ -450,6 +450,22 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     }
   }, [load, handleAuthExpired]);
 
+  const deletePortfolio = useCallback(async (portfolioId: string) => {
+    try {
+      await invokeFunction<unknown>('holdings-crud?action=delete', {
+        method: 'DELETE',
+        body: {
+          asset_type: 'portfolio',
+          id: portfolioId,
+        },
+      });
+      await load();
+    } catch (err) {
+      if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
+      throw err;
+    }
+  }, [load, handleAuthExpired]);
+
   return {
     portfolios,
     netWorthHistory,
@@ -465,6 +481,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     refreshPrices,
     addPortfolio,
     renamePortfolio,
+    deletePortfolio,
     addAsset,
     updateAsset,
     deleteAsset,
