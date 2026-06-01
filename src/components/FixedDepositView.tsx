@@ -60,8 +60,15 @@ function FixedDepositView({
   }, [principalAmount, interestRate, startDate, maturityDate, fdType]);
 
   React.useEffect(() => {
+    if (fdType === 'ssy' && startDate) {
+      const date = new Date(startDate);
+      if (!isNaN(date.getTime())) {
+        date.setFullYear(date.getFullYear() + 21);
+        setMaturityDate(date.toISOString().split('T')[0]);
+      }
+    }
     calculateMaturity();
-  }, [fdType, calculateMaturity]);
+  }, [fdType, startDate, calculateMaturity]);
 
   // Math
   const totalPrincipal = fixedDeposits.reduce((s, f) => s + Number(f.principal_amount), 0);
@@ -103,6 +110,13 @@ function FixedDepositView({
     if (!bankName || !principalAmount || !interestRate || !startDate || !maturityAmount) {
       setError('All fields except Maturity Date are required.');
       return;
+    }
+    if (fdType === 'ssy') {
+      const principal = parseFloat(principalAmount);
+      if (principal < 500 || principal > 150000) {
+        setError('SSY annual deposit amount must be between ₹500 and ₹1,50,000.');
+        return;
+      }
     }
     setLoading(true);
     setError('');
@@ -352,6 +366,11 @@ function FixedDepositView({
                     onBlur={calculateMaturity}
                     className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
                   />
+                  {fdType === 'ssy' && (
+                    <p className="text-[10px] text-purple-600 dark:text-purple-400 mt-1 font-medium">
+                      SSY Limit: Min ₹500 / Max ₹1,50,000 per yr
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Interest Rate (% p.a.)</label>
@@ -387,6 +406,11 @@ function FixedDepositView({
                     onBlur={calculateMaturity}
                     className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
                   />
+                  {fdType === 'ssy' && (
+                    <p className="text-[10px] text-purple-600 dark:text-purple-400 mt-1 font-medium">
+                      Matures in 21 years (Auto-calculated)
+                    </p>
+                  )}
                 </div>
               </div>
 
