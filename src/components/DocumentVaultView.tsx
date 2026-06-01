@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   DocumentMetadata,
   Portfolio,
@@ -10,8 +10,9 @@ import {
   Holding,
 } from '../types/portfolio';
 import { supabase } from '../utils/supabaseClient';
-import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip } from 'lucide-react';
+import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X } from 'lucide-react';
 import { getDocumentUrl } from '../utils/formatters';
+import Modal from './Modal';
 
 type AssetType = 'general' | 'stock' | 'fd' | 'gold' | 'real_estate' | 'insurance';
 
@@ -23,15 +24,15 @@ interface DocumentVaultViewProps {
 }
 
 const FOLDERS: { key: AssetType; label: string; color: string }[] = [
-  { key: 'general', label: 'General', color: 'bg-slate-100 text-slate-600' },
-  { key: 'stock', label: 'Stocks', color: 'bg-blue-100 text-blue-700' },
-  { key: 'fd', label: 'Fixed Deposits', color: 'bg-indigo-100 text-indigo-700' },
-  { key: 'gold', label: 'Gold', color: 'bg-amber-100 text-amber-700' },
-  { key: 'real_estate', label: 'Real Estate', color: 'bg-emerald-100 text-emerald-700' },
-  { key: 'insurance', label: 'Insurance', color: 'bg-rose-100 text-rose-700' },
+  { key: 'general', label: 'General', color: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300' },
+  { key: 'stock', label: 'Stocks', color: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400' },
+  { key: 'fd', label: 'Fixed Deposits', color: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400' },
+  { key: 'gold', label: 'Gold', color: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400' },
+  { key: 'real_estate', label: 'Real Estate', color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' },
+  { key: 'insurance', label: 'Insurance', color: 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-450' },
 ];
 
-export default function DocumentVaultView({
+export default React.memo(function DocumentVaultView({
   portfolio,
   portfolioName,
   onAdd,
@@ -53,17 +54,17 @@ export default function DocumentVaultView({
     const isExpired = daysLeft < 0;
     const isExpiringSoon = daysLeft >= 0 && daysLeft <= 30;
 
-    let badgeColor = "bg-slate-100 text-slate-600";
+    let badgeColor = "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300";
     let text = `Expires ${new Date(expiryDateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 
     if (isExpired) {
-      badgeColor = "bg-rose-50 text-rose-700 border border-rose-100";
+      badgeColor = "bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border border-rose-100 dark:border-rose-900/50";
       text += " (Expired)";
     } else if (isExpiringSoon) {
-      badgeColor = "bg-amber-50 text-amber-700 border border-amber-100";
+      badgeColor = "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50";
       text += ` (${daysLeft}d left)`;
     } else {
-      badgeColor = "bg-slate-50 text-slate-500 border border-slate-200";
+      badgeColor = "bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700";
     }
 
     return (
@@ -209,31 +210,31 @@ export default function DocumentVaultView({
           <FileText size={40} className="opacity-20 shrink-0" />
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Linked Documents</p>
-            <p className="text-2xl font-bold text-slate-800 mt-1">
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Linked Documents</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
               {portfolio.documents.filter((d) => d.asset_type !== 'general').length}
             </p>
-            <p className="text-xs text-slate-400 mt-2">Attached to assets</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Attached to assets</p>
           </div>
           <Paperclip size={40} className="text-blue-500/20 shrink-0" />
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">General Files</p>
-            <p className="text-2xl font-bold text-slate-800 mt-1">
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">General Files</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
               {portfolio.documents.filter((d) => d.asset_type === 'general').length}
             </p>
-            <p className="text-xs text-slate-400 mt-2">Unfiled / reference</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Unfiled / reference</p>
           </div>
           <Folder size={40} className="text-amber-500/20 shrink-0" />
         </div>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-3">
+      <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2 flex-wrap">
             {FOLDERS.map((f) => {
               const count = portfolio.documents.filter((d) => d.asset_type === f.key).length;
@@ -244,13 +245,13 @@ export default function DocumentVaultView({
                   onClick={() => setActiveFolder(f.key)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${isActive
                     ? f.color + ' ring-1 ring-current/20'
-                    : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300'
+                    : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600'
                     }`}
                 >
                   {isActive ? <FolderOpen size={13} /> : <Folder size={13} />}
                   {f.label}
                   {count > 0 && (
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${isActive ? 'bg-white/60' : 'bg-slate-100'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${isActive ? 'bg-white/60 dark:bg-slate-800/80' : 'bg-slate-100 dark:bg-slate-700'}`}>
                       {count}
                     </span>
                   )}
@@ -276,29 +277,29 @@ export default function DocumentVaultView({
         </div>
 
         {folderDocs.length === 0 ? (
-          <div className="p-12 text-center text-slate-400">
-            <Folder size={32} className="mx-auto text-slate-300 mb-3" />
+          <div className="p-12 text-center text-slate-400 dark:text-slate-500">
+            <Folder size={32} className="mx-auto text-slate-300 dark:text-slate-655 mb-3" />
             <p className="text-sm font-semibold">No documents in this folder</p>
             <p className="text-xs mt-1">Upload PDF, image, or other files to keep records here.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
             {folderDocs.map((doc) => {
               const linkedLabel = getAssetLabel(doc);
               return (
-                <div key={doc.id} className="px-6 py-4 hover:bg-slate-50/50 transition-colors flex items-center justify-between gap-4">
+                <div key={doc.id} className="px-6 py-4 hover:bg-slate-50/50 dark:hover:bg-slate-750/30 transition-colors flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
                       <FileText size={18} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 truncate" title={doc.name}>{doc.name}</p>
+                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate" title={doc.name}>{doc.name}</p>
                       <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         {doc.file_type && (
-                          <span className="text-[10px] text-slate-400 font-mono">{doc.file_type}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-550 font-mono">{doc.file_type}</span>
                         )}
                         {linkedLabel && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 flex items-center gap-1">
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-955/20 text-blue-700 dark:text-blue-400 flex items-center gap-1">
                             <Paperclip size={9} />
                             {linkedLabel}
                           </span>
@@ -312,14 +313,14 @@ export default function DocumentVaultView({
                       href={getDocumentUrl(doc.file_path)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-colors"
+                      className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-450 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
                       title="Open"
                     >
                       <ExternalLink size={14} />
                     </a>
                     <button
                       onClick={() => handleDelete(doc)}
-                      className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-200 transition-colors"
+                      className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
                       title="Delete"
                     >
                       <Trash2 size={14} />
@@ -332,43 +333,56 @@ export default function DocumentVaultView({
         )}
       </div>
 
-      {showLinkModal && pendingFile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => !uploading && setShowLinkModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100">
-              <h3 className="text-base font-bold text-slate-800">Upload to {FOLDERS.find((f) => f.key === activeFolder)?.label}</h3>
-              <p className="text-xs text-slate-400 mt-0.5 truncate">File: {pendingFile.name}</p>
+      <Modal
+        isOpen={showLinkModal && !!pendingFile}
+        onClose={() => !uploading && setShowLinkModal(false)}
+        ariaLabel={`Upload to ${FOLDERS.find((f) => f.key === activeFolder)?.label}`}
+        preventClose={uploading}
+      >
+        {pendingFile && (
+          <>
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+              <div>
+                <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Upload to {FOLDERS.find((f) => f.key === activeFolder)?.label}</h3>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate max-w-xs">File: {pendingFile.name}</p>
+              </div>
+              <button
+                onClick={() => !uploading && setShowLinkModal(false)}
+                className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
+                aria-label="Close dialog"
+              >
+                <X size={16} />
+              </button>
             </div>
 
             <form onSubmit={handleUpload} className="px-6 py-5 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5">Document Name</label>
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Document Name</label>
                 <input
                   type="text"
                   value={documentName}
                   onChange={(e) => setDocumentName(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5">Expiry / Renewal Date (optional)</label>
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Expiry / Renewal Date (optional)</label>
                 <input
                   type="date"
                   value={expiryDate}
                   onChange={(e) => setExpiryDate(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors bg-white"
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors bg-white dark:bg-slate-900"
                 />
               </div>
 
               {activeFolder !== 'general' && assetOptions.length > 0 && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Link to Asset (optional)</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Link to Asset (optional)</label>
                   <select
                     value={linkedAssetId}
                     onChange={(e) => setLinkedAssetId(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
+                    className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
                   >
                     <option value="">— Not linked —</option>
                     {assetOptions.map((opt) => (
@@ -379,7 +393,7 @@ export default function DocumentVaultView({
               )}
 
               {uploadError && (
-                <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{uploadError}</p>
+                <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl px-3 py-2" role="alert">{uploadError}</p>
               )}
 
               <div className="flex gap-3 pt-2">
@@ -387,7 +401,7 @@ export default function DocumentVaultView({
                   type="button"
                   disabled={uploading}
                   onClick={() => setShowLinkModal(false)}
-                  className="flex-1 border border-slate-200 text-slate-600 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                  className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -401,9 +415,9 @@ export default function DocumentVaultView({
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
     </div>
   );
-}
+});

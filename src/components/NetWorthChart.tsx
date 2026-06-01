@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { formatINR } from '../utils/formatters';
 
@@ -6,14 +6,14 @@ interface NetWorthChartProps {
   history: NetWorthSnapshot[];
 }
 
-export default function NetWorthChart({ history }: NetWorthChartProps) {
+export default React.memo(function NetWorthChart({ history }: NetWorthChartProps) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   if (!history || history.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col justify-center items-center h-64 text-center">
-        <p className="text-sm font-semibold text-slate-400">No Historical Data Available</p>
-        <p className="text-xs text-slate-300 mt-1">Daily net worth tracking snapshots will accumulate on dashboard load.</p>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 flex flex-col justify-center items-center h-64 text-center">
+        <p className="text-sm font-semibold text-slate-400 dark:text-slate-500">No Historical Data Available</p>
+        <p className="text-xs text-slate-300 dark:text-slate-500 mt-1">Daily net worth tracking snapshots will accumulate on dashboard load.</p>
       </div>
     );
   }
@@ -61,22 +61,26 @@ export default function NetWorthChart({ history }: NetWorthChartProps) {
   const hoveredData = hoveredIdx !== null ? history[hoveredIdx] : null;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
+    <div
+      role="region"
+      aria-label="Historical Net Worth Chart"
+      className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 space-y-4"
+    >
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-0.5">Historical Net Worth</h3>
-          <p className="text-xs text-slate-400">Total wealth growth and asset breakdown</p>
+          <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-200 uppercase tracking-wider mb-0.5">Historical Net Worth</h3>
+          <p className="text-xs text-slate-400 dark:text-slate-500">Total wealth growth and asset breakdown</p>
         </div>
 
         {hoveredData ? (
           <div className="text-right">
-            <p className="text-[10px] text-slate-400 font-semibold uppercase">{new Date(hoveredData.snapshot_date).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
-            <p className="text-sm font-bold text-slate-800">{formatINR(hoveredData.total_value)}</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase">{new Date(hoveredData.snapshot_date).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatINR(hoveredData.total_value)}</p>
           </div>
         ) : (
           <div className="text-right">
-            <p className="text-[10px] text-slate-400 font-semibold uppercase">Current Net Worth</p>
-            <p className="text-sm font-bold text-blue-600">{formatINR(history[history.length - 1].total_value)}</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase">Current Net Worth</p>
+            <p className="text-sm font-bold text-blue-600 dark:text-blue-450">{formatINR(history[history.length - 1].total_value)}</p>
           </div>
         )}
       </div>
@@ -87,7 +91,10 @@ export default function NetWorthChart({ history }: NetWorthChartProps) {
           width="100%"
           height="100%"
           className="min-w-[500px] overflow-visible"
+          role="img"
+          aria-label="Line chart showing historical net worth and asset allocations over time."
         >
+          <title>Historical Net Worth Trend</title>
           <defs>
             {/* Gradients */}
             <linearGradient id="totalGrad" x1="0" y1="0" x2="0" y2="1">
@@ -102,8 +109,8 @@ export default function NetWorthChart({ history }: NetWorthChartProps) {
             const y = getY(val);
             return (
               <g key={i}>
-                <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} stroke="#f1f5f9" strokeWidth={1} />
-                <text x={paddingLeft - 10} y={y + 3} textAnchor="end" fill="#94a3b8" fontSize={9} fontWeight={500}>
+                <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} className="stroke-slate-100 dark:stroke-slate-700" strokeWidth={1} />
+                <text x={paddingLeft - 10} y={y + 3} textAnchor="end" className="fill-slate-400 dark:fill-slate-500" fontSize={9} fontWeight={500}>
                   {val >= 10000000 ? `${(val / 10000000).toFixed(1)}Cr` : val >= 100000 ? `${(val / 100000).toFixed(0)}L` : val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val.toFixed(0)}
                 </text>
               </g>
@@ -116,7 +123,7 @@ export default function NetWorthChart({ history }: NetWorthChartProps) {
             const shouldShowLabel = history.length <= 6 || i === 0 || i === history.length - 1 || i === Math.floor(history.length / 2) || i % Math.ceil(history.length / 5) === 0;
             if (!shouldShowLabel) return null;
             return (
-              <text key={i} x={getX(i)} y={paddingTop + chartHeight + 18} textAnchor="middle" fill="#94a3b8" fontSize={9} fontWeight={500}>
+              <text key={i} x={getX(i)} y={paddingTop + chartHeight + 18} textAnchor="middle" className="fill-slate-400 dark:fill-slate-500" fontSize={9} fontWeight={500}>
                 {new Date(d.snapshot_date).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' })}
               </text>
             );
@@ -180,51 +187,51 @@ export default function NetWorthChart({ history }: NetWorthChartProps) {
 
       {/* Legend & Breakdown values */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2 text-xs">
-        <div className="flex items-center gap-2 border border-slate-100 rounded-xl p-2 bg-slate-50/50">
+        <div className="flex items-center gap-2 border border-slate-100 dark:border-slate-700 rounded-xl p-2 bg-slate-50/50 dark:bg-slate-700/30">
           <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0" />
           <div className="min-w-0">
-            <p className="text-[9px] text-slate-400 font-semibold uppercase truncate">Total</p>
-            <p className="font-bold text-slate-700 truncate">
+            <p className="text-[9px] text-slate-400 dark:text-slate-550 font-semibold uppercase truncate">Total</p>
+            <p className="font-bold text-slate-700 dark:text-slate-200 truncate">
               {hoveredData ? formatINR(hoveredData.total_value) : formatINR(history[history.length - 1].total_value)}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 border border-slate-100 rounded-xl p-2">
+        <div className="flex items-center gap-2 border border-slate-100 dark:border-slate-700 rounded-xl p-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#60a5fa] shrink-0" />
           <div className="min-w-0">
-            <p className="text-[9px] text-slate-400 font-semibold uppercase truncate">Stocks</p>
-            <p className="font-bold text-slate-700 truncate">
+            <p className="text-[9px] text-slate-400 dark:text-slate-550 font-semibold uppercase truncate">Stocks</p>
+            <p className="font-bold text-slate-700 dark:text-slate-200 truncate">
               {hoveredData ? formatINR(hoveredData.stocks_value) : formatINR(history[history.length - 1].stocks_value)}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 border border-slate-100 rounded-xl p-2">
+        <div className="flex items-center gap-2 border border-slate-100 dark:border-slate-700 rounded-xl p-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#818cf8] shrink-0" />
           <div className="min-w-0">
-            <p className="text-[9px] text-slate-400 font-semibold uppercase truncate">FDs</p>
-            <p className="font-bold text-slate-700 truncate">
+            <p className="text-[9px] text-slate-400 dark:text-slate-550 font-semibold uppercase truncate">FDs</p>
+            <p className="font-bold text-slate-700 dark:text-slate-200 truncate">
               {hoveredData ? formatINR(hoveredData.fd_value) : formatINR(history[history.length - 1].fd_value)}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 border border-slate-100 rounded-xl p-2">
+        <div className="flex items-center gap-2 border border-slate-100 dark:border-slate-700 rounded-xl p-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#fbbf24] shrink-0" />
           <div className="min-w-0">
-            <p className="text-[9px] text-slate-400 font-semibold uppercase truncate">Gold</p>
-            <p className="font-bold text-slate-700 truncate">
+            <p className="text-[9px] text-slate-400 dark:text-slate-550 font-semibold uppercase truncate">Gold</p>
+            <p className="font-bold text-slate-700 dark:text-slate-200 truncate">
               {hoveredData ? formatINR(hoveredData.gold_value) : formatINR(history[history.length - 1].gold_value)}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 border border-slate-100 rounded-xl p-2">
+        <div className="flex items-center gap-2 border border-slate-100 dark:border-slate-700 rounded-xl p-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#34d399] shrink-0" />
           <div className="min-w-0">
-            <p className="text-[9px] text-slate-400 font-semibold uppercase truncate">Realty</p>
-            <p className="font-bold text-slate-700 truncate">
+            <p className="text-[9px] text-slate-400 dark:text-slate-550 font-semibold uppercase truncate">Realty</p>
+            <p className="font-bold text-slate-700 dark:text-slate-200 truncate">
               {hoveredData ? formatINR(hoveredData.real_estate_value) : formatINR(history[history.length - 1].real_estate_value)}
             </p>
           </div>
@@ -232,4 +239,4 @@ export default function NetWorthChart({ history }: NetWorthChartProps) {
       </div>
     </div>
   );
-}
+});

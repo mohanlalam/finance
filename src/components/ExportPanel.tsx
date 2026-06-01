@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, FileSpreadsheet, FileText, Database, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { Portfolio } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
+import Modal from './Modal';
 
 interface ExportPanelProps {
   portfolios: Portfolio[];
@@ -166,7 +167,7 @@ function csvToImportRows(rows: string[][]): { parsed: ImportRow[]; errors: strin
 
 /* ── Component ── */
 
-export default function ExportPanel({ portfolios, onImportCSV, portfolioOptions }: ExportPanelProps) {
+export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfolioOptions }: ExportPanelProps) {
   const [open, setOpen] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [importTarget, setImportTarget] = useState(portfolioOptions[0]?.name || '');
@@ -176,6 +177,19 @@ export default function ExportPanel({ portfolios, onImportCSV, portfolioOptions 
   const [importDone, setImportDone] = useState(false);
   const [importError, setImportError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   function handleExportCSV() {
     downloadFile(allAssetsToCSV(portfolios), `portfolio-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
@@ -226,43 +240,45 @@ export default function ExportPanel({ portfolios, onImportCSV, portfolioOptions 
 
   return (
     <>
-      <div className="relative">
+      <div className="relative" ref={containerRef}>
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 text-xs text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 rounded-lg"
+          className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 text-xs text-slate-400 dark:text-slate-350 hover:text-blue-450 border border-slate-700 dark:border-slate-600 rounded-lg hover:border-slate-500 transition-colors"
           title="Import/Export Options"
+          aria-expanded={open}
+          aria-haspopup="true"
         >
           <Database size={12} />
-          <span className="hidden sm:inline sm:ml-1.5">Import/Export</span>
+          <span className="hidden sm:inline sm:ml-1.5 font-semibold">Import/Export</span>
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 w-56 py-1">
+          <div className="absolute right-0 top-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 w-56 py-1">
             <button
               onClick={handleExportCSV}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
             >
               <FileSpreadsheet size={14} className="text-emerald-500" />
               Export to Excel (CSV)
             </button>
             <button
               onClick={handleExportPDF}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
             >
               <FileText size={14} className="text-red-500" />
               Export to PDF (Print)
             </button>
             <button
               onClick={handleExportJSON}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
             >
               <Database size={14} className="text-blue-500" />
               Backup JSON
             </button>
-            <div className="border-t border-slate-100 my-1" />
+            <div className="border-t border-slate-100 dark:border-slate-700 my-1" />
             <button
               onClick={() => { setShowImport(true); setOpen(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
             >
               <Upload size={14} className="text-violet-500" />
               Import from CSV
@@ -271,112 +287,114 @@ export default function ExportPanel({ portfolios, onImportCSV, portfolioOptions 
         )}
       </div>
 
-      {/* Import Modal */}
-      {showImport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => !importing && setShowImport(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-              <div>
-                <h3 className="text-base font-bold text-slate-800">Import Holdings from CSV</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Columns: stock_name, ticker, yahoo_symbol, qty, avg_price</p>
-              </div>
-              <button
-                onClick={() => !importing && setShowImport(false)}
-                className="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors"
-              >
-                <X size={16} />
-              </button>
+      {/* Import Modal using standard Modal wrapper */}
+      <Modal
+        isOpen={showImport}
+        onClose={() => !importing && setShowImport(false)}
+        ariaLabel="Import Holdings from CSV"
+        preventClose={importing}
+        maxWidth="max-w-lg"
+      >
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+          <div>
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Import Holdings from CSV</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Columns: stock_name, ticker, yahoo_symbol, qty, avg_price</p>
+          </div>
+          <button
+            onClick={() => !importing && setShowImport(false)}
+            className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 transition-colors"
+            aria-label="Close dialog"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="px-6 py-5 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Target Portfolio</label>
+            <select
+              value={importTarget}
+              onChange={(e) => setImportTarget(e.target.value)}
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
+            >
+              {portfolioOptions.map((o) => (
+                <option key={o.name} value={o.name}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">CSV File</label>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".csv"
+              onChange={handleFileSelect}
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 file:mr-3 file:border-0 file:bg-blue-50 dark:file:bg-blue-950/40 file:text-blue-700 dark:file:text-blue-400 file:text-xs file:font-semibold file:rounded-lg file:px-3 file:py-1 cursor-pointer"
+            />
+          </div>
+
+          {importErrors.length > 0 && (
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl px-3 py-2 text-xs text-amber-700 dark:text-amber-400 max-h-24 overflow-y-auto">
+              {importErrors.map((e, i) => <p key={i}>{e}</p>)}
             </div>
+          )}
 
-            <div className="px-6 py-5 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5">Target Portfolio</label>
-                <select
-                  value={importTarget}
-                  onChange={(e) => setImportTarget(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
-                >
-                  {portfolioOptions.map((o) => (
-                    <option key={o.name} value={o.name}>{o.label}</option>
-                  ))}
-                </select>
+          {importRows.length > 0 && (
+            <div className="bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-750 rounded-xl overflow-hidden">
+              <div className="px-3 py-2 bg-slate-100 dark:bg-slate-800/80 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Preview — {importRows.length} holdings
               </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5">CSV File</label>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileSelect}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 file:mr-3 file:border-0 file:bg-blue-50 file:text-blue-700 file:text-xs file:font-semibold file:rounded-lg file:px-3 file:py-1 cursor-pointer"
-                />
-              </div>
-
-              {importErrors.length > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-xs text-amber-700 max-h-24 overflow-y-auto">
-                  {importErrors.map((e, i) => <p key={i}>{e}</p>)}
-                </div>
-              )}
-
-              {importRows.length > 0 && (
-                <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
-                  <div className="px-3 py-2 bg-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                    Preview — {importRows.length} holdings
+              <div className="max-h-40 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50">
+                {importRows.slice(0, 20).map((r, i) => (
+                  <div key={i} className="px-3 py-1.5 flex items-center gap-3 text-xs dark:text-slate-300">
+                    <span className="font-bold text-slate-700 dark:text-slate-200 w-16 truncate">{r.ticker}</span>
+                    <span className="text-slate-500 dark:text-slate-400 flex-1 truncate">{r.stock_name}</span>
+                    <span className="text-slate-400 dark:text-slate-500">×{r.qty}</span>
+                    <span className="text-slate-400 dark:text-slate-500">₹{r.avg_price.toLocaleString('en-IN')}</span>
                   </div>
-                  <div className="max-h-40 overflow-y-auto divide-y divide-slate-100">
-                    {importRows.slice(0, 20).map((r, i) => (
-                      <div key={i} className="px-3 py-1.5 flex items-center gap-3 text-xs">
-                        <span className="font-bold text-slate-700 w-16 truncate">{r.ticker}</span>
-                        <span className="text-slate-500 flex-1 truncate">{r.stock_name}</span>
-                        <span className="text-slate-400">×{r.qty}</span>
-                        <span className="text-slate-400">₹{r.avg_price.toLocaleString('en-IN')}</span>
-                      </div>
-                    ))}
-                    {importRows.length > 20 && (
-                      <div className="px-3 py-1.5 text-[10px] text-slate-400 text-center">
-                        +{importRows.length - 20} more rows
-                      </div>
-                    )}
+                ))}
+                {importRows.length > 20 && (
+                  <div className="px-3 py-1.5 text-[10px] text-slate-400 dark:text-slate-500 text-center">
+                    +{importRows.length - 20} more rows
                   </div>
-                </div>
-              )}
-
-              {importDone && (
-                <div className="flex items-center gap-2 text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-                  <CheckCircle size={14} /> Import successful!
-                </div>
-              )}
-
-              {importError && (
-                <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
-                  <AlertCircle size={14} /> {importError}
-                </div>
-              )}
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  disabled={importing}
-                  onClick={() => setShowImport(false)}
-                  className="flex-1 border border-slate-200 text-slate-600 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 transition-colors disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleImport}
-                  disabled={importing || importRows.length === 0}
-                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
-                  {importing ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                  {importing ? 'Importing...' : `Import ${importRows.length} holdings`}
-                </button>
+                )}
               </div>
             </div>
+          )}
+
+          {importDone && (
+            <div className="flex items-center gap-2 text-xs text-emerald-650 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 rounded-xl px-3 py-2">
+              <CheckCircle size={14} /> Import successful!
+            </div>
+          )}
+
+          {importError && (
+            <div className="flex items-center gap-2 text-xs text-red-650 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-xl px-3 py-2">
+              <AlertCircle size={14} /> {importError}
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              disabled={importing}
+              onClick={() => setShowImport(false)}
+              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-350 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleImport}
+              disabled={importing || importRows.length === 0}
+              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              {importing ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+              {importing ? 'Importing...' : `Import ${importRows.length} holdings`}
+            </button>
           </div>
         </div>
-      )}
+      </Modal>
     </>
   );
-}
+});

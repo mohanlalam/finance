@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Holding } from '../types/portfolio';
 import { formatINR, formatPercent } from '../utils/formatters';
 
@@ -22,7 +22,7 @@ const COLORS = [
   '#22c55e', '#eab308', '#dc2626',
 ];
 
-export default function PieChart({ holdings, slices: customSlices, title = 'Asset Allocation' }: PieChartProps) {
+function PieChart({ holdings, slices: customSlices, title = 'Asset Allocation' }: PieChartProps) {
   const [hovered, setHovered] = useState<number | null>(null);
 
   let total: number;
@@ -104,16 +104,23 @@ export default function PieChart({ holdings, slices: customSlices, title = 'Asse
   const hoverSlice = hovered !== null ? slices[hovered] : null;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-      <h3 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4">{title}</h3>
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
+      <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-4">{title}</h3>
       {slices.length === 0 || total === 0 ? (
-        <div className="flex items-center justify-center h-[240px] text-sm text-slate-400">
+        <div className="flex items-center justify-center h-[240px] text-sm text-slate-400 dark:text-slate-500">
           No data to chart yet
         </div>
       ) : (
         <div className="flex flex-col lg:flex-row gap-6 items-center">
           <div className="relative shrink-0">
-            <svg width={240} height={240} viewBox="0 0 240 240">
+            <svg
+              width={240}
+              height={240}
+              viewBox="0 0 240 240"
+              role="img"
+              aria-label={`${title} donut chart showing ${slices.length} segments totalling ${formatINR(total)}`}
+            >
+              <title>{title}</title>
               {paths.map(({ d, color, i }) => (
                 <path
                   key={i}
@@ -121,30 +128,30 @@ export default function PieChart({ holdings, slices: customSlices, title = 'Asse
                   fill={color}
                   stroke="white"
                   strokeWidth={2}
-                  className="cursor-pointer transition-all duration-150"
+                  className="cursor-pointer transition-all duration-150 dark:stroke-slate-800"
                   onMouseEnter={() => setHovered(i)}
                   onMouseLeave={() => setHovered(null)}
                 />
               ))}
-              <circle cx={cx} cy={cy} r={innerR - 2} fill="white" />
+              <circle cx={cx} cy={cy} r={innerR - 2} className="fill-white dark:fill-slate-800" />
               {hoverSlice ? (
                 <>
-                  <text x={cx} y={cy - 10} textAnchor="middle" className="text-xs" fill="#334155" fontSize={11} fontWeight={600}>
+                  <text x={cx} y={cy - 10} textAnchor="middle" className="text-xs fill-slate-700 dark:fill-slate-200" fontSize={11} fontWeight={600}>
                     {hoverSlice.label}
                   </text>
-                  <text x={cx} y={cy + 6} textAnchor="middle" fill="#3b82f6" fontSize={13} fontWeight={700}>
+                  <text x={cx} y={cy + 6} textAnchor="middle" className="fill-blue-500 dark:fill-blue-400" fontSize={13} fontWeight={700}>
                     {hoverSlice.pct.toFixed(1)}%
                   </text>
-                  <text x={cx} y={cy + 22} textAnchor="middle" fill="#64748b" fontSize={9}>
+                  <text x={cx} y={cy + 22} textAnchor="middle" className="fill-slate-500 dark:fill-slate-400" fontSize={9}>
                     {formatINR(hoverSlice.value)}
                   </text>
                 </>
               ) : (
                 <>
-                  <text x={cx} y={cy - 6} textAnchor="middle" fill="#94a3b8" fontSize={9} fontWeight={500}>
+                  <text x={cx} y={cy - 6} textAnchor="middle" className="fill-slate-400 dark:fill-slate-500" fontSize={9} fontWeight={500}>
                     TOTAL VALUE
                   </text>
-                  <text x={cx} y={cy + 12} textAnchor="middle" fill="#1e293b" fontSize={12} fontWeight={700}>
+                  <text x={cx} y={cy + 12} textAnchor="middle" className="fill-slate-800 dark:fill-slate-100" fontSize={12} fontWeight={700}>
                     {formatINR(total)}
                   </text>
                 </>
@@ -155,13 +162,13 @@ export default function PieChart({ holdings, slices: customSlices, title = 'Asse
             {slices.map((slice, i) => (
               <div
                 key={i}
-                className={`flex items-center gap-2 px-2 py-1 rounded-lg cursor-pointer transition-colors ${hovered === i ? 'bg-slate-100' : 'hover:bg-slate-50'}`}
+                className={`flex items-center gap-2 px-2 py-1 rounded-lg cursor-pointer transition-colors ${hovered === i ? 'bg-slate-100 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}
                 onMouseEnter={() => setHovered(i)}
                 onMouseLeave={() => setHovered(null)}
               >
                 <span className="w-3 h-3 rounded-sm shrink-0" style={{ background: slice.color }} />
-                <span className="text-xs text-slate-600 flex-1 truncate" title={slice.fullName}>{slice.fullName}</span>
-                <span className="text-xs font-bold text-slate-700 shrink-0">{formatPercent(slice.pct, 1)}</span>
+                <span className="text-xs text-slate-600 dark:text-slate-300 flex-1 truncate" title={slice.fullName}>{slice.fullName}</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 shrink-0">{formatPercent(slice.pct, 1)}</span>
               </div>
             ))}
           </div>
@@ -170,3 +177,5 @@ export default function PieChart({ holdings, slices: customSlices, title = 'Asse
     </div>
   );
 }
+
+export default React.memo(PieChart);

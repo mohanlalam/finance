@@ -2,254 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Premium Dark Mode Overrides ── */
-
-html.dark body {
-  background-color: #090d16;
-  color: #f8fafc;
-}
-
-html.dark .bg-white {
-  background-color: #101622 !important;
-}
-
-html.dark .bg-slate-50 {
-  background-color: #090d16 !important;
-}
-
-html.dark .bg-slate-100 {
-  background-color: #1e293b !important;
-  color: #94a3b8 !important;
-}
-
-html.dark .border-slate-100,
-html.dark .border-slate-200,
-html.dark .border-slate-300 {
-  border-color: #1e293b !important;
-}
-
-html.dark .text-slate-800 {
-  color: #f8fafc !important;
-}
-
-html.dark .text-slate-700 {
-  color: #e2e8f0 !important;
-}
-
-html.dark .text-slate-600 {
-  color: #cbd5e1 !important;
-}
-
-html.dark .text-slate-500 {
-  color: #94a3b8 !important;
-}
-
-html.dark .text-slate-400 {
-  color: #64748b !important;
-}
-
-/* Modals & Inputs */
-html.dark select,
-html.dark input,
-html.dark textarea {
-  background-color: #1a2333 !important;
-  color: #f8fafc !important;
-  border-color: #2e3c54 !important;
-}
-
-html.dark select:focus,
-html.dark input:focus,
-html.dark textarea:focus {
-  border-color: #3b82f6 !important;
-  outline: none;
-}
-
-html.dark option {
-  background-color: #101622 !important;
-  color: #f8fafc !important;
-}
-
-/* Hover behaviors */
-html.dark .hover\:bg-slate-50:hover,
-html.dark .hover\:bg-slate-50\/50:hover {
-  background-color: #151d2d !important;
-}
-
-html.dark .bg-slate-50\/50 {
-  background-color: rgba(21, 29, 45, 0.5) !important;
-}
-
-html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
-  border-color: #1e293b !important;
-}
-
-/* Alert badge colors in dark mode */
-html.dark .bg-blue-50 {
-  background-color: rgba(59, 130, 246, 0.15) !important;
-  color: #60a5fa !important;
-}
-html.dark .border-blue-200 {
-  border-color: rgba(59, 130, 246, 0.3) !important;
-}
-html.dark .text-blue-700 {
-  color: #60a5fa !important;
-}
-
-html.dark .bg-amber-50 {
-  background-color: rgba(245, 158, 11, 0.15) !important;
-  color: #fbbf24 !important;
-}
-html.dark .border-amber-200 {
-  border-color: rgba(245, 158, 11, 0.3) !important;
-}
-html.dark .text-amber-700 {
-  color: #fbbf24 !important;
-}
-
-html.dark .bg-indigo-50 {
-  background-color: rgba(99, 102, 241, 0.15) !important;
-  color: #818cf8 !important;
-}
-html.dark .border-indigo-200 {
-  border-color: rgba(99, 102, 241, 0.3) !important;
-}
-html.dark .text-indigo-700 {
-  color: #818cf8 !important;
-}
-
-html.dark .bg-rose-50 {
-  background-color: rgba(244, 63, 94, 0.15) !important;
-  color: #fb7185 !important;
-}
-html.dark .border-rose-200 {
-  border-color: rgba(244, 63, 94, 0.3) !important;
-}
-html.dark .text-rose-700 {
-  color: #fb7185 !important;
-}
-
-html.dark .bg-violet-50 {
-  background-color: rgba(139, 92, 246, 0.15) !important;
-  color: #a78bfa !important;
-}
-html.dark .border-violet-200 {
-  border-color: rgba(139, 92, 246, 0.3) !important;
-}
-html.dark .text-violet-700 {
-  color: #a78bfa !important;
-}
-
-/* RLS error or pricing alerts */
-html.dark .bg-emerald-500\/20 {
-  background-color: rgba(16, 185, 129, 0.1) !important;
-}
-html.dark .bg-red-500\/20 {
-  background-color: rgba(239, 68, 68, 0.1) !important;
-}
-html.dark .bg-emerald-50 {
-  background-color: rgba(16, 185, 129, 0.08) !important;
-}
-html.dark .bg-red-50 {
-  background-color: rgba(239, 68, 68, 0.08) !important;
-}
-html.dark .border-emerald-100 {
-  border-color: rgba(16, 185, 129, 0.2) !important;
-}
-html.dark .border-red-100 {
-  border-color: rgba(239, 68, 68, 0.2) !important;
-}
-html.dark .bg-emerald-100 {
-  background-color: rgba(16, 185, 129, 0.15) !important;
-  color: #34d399 !important;
-}
-html.dark .bg-red-100 {
-  background-color: rgba(239, 68, 68, 0.15) !important;
-  color: #f87171 !important;
-}
-html.dark .bg-blue-100 {
-  background-color: rgba(59, 130, 246, 0.15) !important;
-  color: #60a5fa !important;
-}
-html.dark .bg-indigo-100 {
-  background-color: rgba(99, 102, 241, 0.15) !important;
-  color: #818cf8 !important;
-}
-html.dark .bg-rose-100 {
-  background-color: rgba(244, 63, 94, 0.15) !important;
-  color: #fb7185 !important;
-}
-
-/* Additional tags & badge colors */
-html.dark .bg-purple-50 {
-  background-color: rgba(168, 85, 247, 0.15) !important;
-  color: #c084fc !important;
-}
-html.dark .bg-orange-50 {
-  background-color: rgba(249, 115, 22, 0.15) !important;
-  color: #fb923c !important;
-}
-html.dark .text-emerald-600,
-html.dark .text-emerald-700 {
-  color: #34d399 !important;
-}
-html.dark .text-red-500,
-html.dark .text-red-600,
-html.dark .text-red-700 {
-  color: #f87171 !important;
-}
-html.dark .text-purple-700 {
-  color: #c084fc !important;
-}
-html.dark .text-orange-700 {
-  color: #fb923c !important;
-}
-
-/* Ring & Focus Shadows */
-html.dark .ring-purple-200 {
-  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.3) !important;
-}
-html.dark .ring-orange-200 {
-  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.3) !important;
-}
-html.dark .ring-rose-200 {
-  box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.3) !important;
-}
-html.dark .ring-blue-200 {
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
-}
-html.dark .ring-slate-200 {
-  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.3) !important;
-}
-
-/* Hover behaviors */
-html.dark .hover\:bg-blue-50:hover,
-html.dark .bg-blue-50 {
-  background-color: rgba(59, 130, 246, 0.15) !important;
-}
-
-/* Charts & SVGs */
-html.dark svg text {
-  fill: #94a3b8 !important;
-}
-html.dark svg line[stroke="#f1f5f9"] {
-  stroke: #1e293b !important;
-}
-html.dark svg line[stroke="#e2e8f0"] {
-  stroke: #2e3c54 !important;
+/* Global scrollbars and transitions */
+body {
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Scrollbars */
-html.dark ::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-html.dark ::-webkit-scrollbar-track {
-  background: #090d16;
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
 }
-html.dark ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 4px;
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 dark:bg-slate-700 rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors;
 }
-html.dark ::-webkit-scrollbar-thumb:hover {
-  background: #2e3c54;
+
+/* Premium Modal animations */
+@keyframes modalOverlay {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+}
+
+@keyframes modalContent {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-modal-overlay {
+  animation: modalOverlay 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-modal-content {
+  animation: modalContent 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

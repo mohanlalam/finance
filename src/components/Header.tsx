@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Check, Sun, Moon } from 'lucide-react';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { FetchStatus } from '../hooks/useMarketData';
@@ -24,43 +24,43 @@ interface HeaderProps {
 const ALERTS_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
   '52w_high': {
     icon: <TrendingUp size={13} />,
-    color: 'text-blue-700',
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
+    color: 'text-blue-700 dark:text-blue-400',
+    bg: 'bg-blue-50 dark:bg-blue-900/20',
+    border: 'border-blue-200 dark:border-blue-800',
   },
   '52w_low': {
     icon: <TrendingDown size={13} />,
-    color: 'text-amber-700',
-    bg: 'bg-amber-50',
-    border: 'border-amber-200',
+    color: 'text-amber-700 dark:text-amber-400',
+    bg: 'bg-amber-50 dark:bg-amber-900/20',
+    border: 'border-amber-200 dark:border-amber-800',
   },
   fd_maturity: {
     icon: <Landmark size={13} />,
-    color: 'text-indigo-700',
-    bg: 'bg-indigo-50',
-    border: 'border-indigo-200',
+    color: 'text-indigo-700 dark:text-indigo-400',
+    bg: 'bg-indigo-50 dark:bg-indigo-900/20',
+    border: 'border-indigo-200 dark:border-indigo-800',
   },
   insurance_renewal: {
     icon: <Shield size={13} />,
-    color: 'text-rose-700',
-    bg: 'bg-rose-50',
-    border: 'border-rose-200',
+    color: 'text-rose-700 dark:text-rose-400',
+    bg: 'bg-rose-50 dark:bg-rose-900/20',
+    border: 'border-rose-200 dark:border-rose-800',
   },
   portfolio_swing: {
     icon: <Activity size={13} />,
-    color: 'text-violet-700',
-    bg: 'bg-violet-50',
-    border: 'border-violet-200',
+    color: 'text-violet-700 dark:text-violet-400',
+    bg: 'bg-violet-50 dark:bg-violet-900/20',
+    border: 'border-violet-200 dark:border-violet-800',
   },
 };
 
 const SEVERITY_BADGE: Record<string, string> = {
   critical: 'bg-red-500 text-white',
-  warning: 'bg-amber-100 text-amber-700',
-  info: 'bg-blue-100 text-blue-700',
+  warning: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+  info: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
 };
 
-export default function Header({
+function Header({
   totalCurrentValue,
   totalPnL,
   totalPnLPercent,
@@ -143,6 +143,7 @@ export default function Header({
               <button
                 onClick={onRefresh}
                 disabled={isLoading}
+                aria-label={isLoading ? 'Fetching live prices' : 'Refresh live prices'}
                 className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 text-xs text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 rounded-lg disabled:opacity-40"
                 title={isLoading ? 'Fetching...' : lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Fetch live prices'}
               >
@@ -160,6 +161,7 @@ export default function Header({
               {/* Dark Mode Toggle */}
               <button
                 onClick={onToggleDarkMode}
+                aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
                 className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 hover:border-slate-600"
                 title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
               >
@@ -170,6 +172,9 @@ export default function Header({
               <div className="relative">
                 <button
                   onClick={() => setOpenAlerts(!openAlerts)}
+                  aria-expanded={openAlerts}
+                  aria-haspopup="true"
+                  aria-label={`Notifications${visibleAlerts.length > 0 ? `, ${visibleAlerts.length} active` : ''}`}
                   className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 hover:border-slate-600 relative"
                   title="Notifications"
                 >
@@ -182,24 +187,28 @@ export default function Header({
                 </button>
 
               {openAlerts && (
-                <div className="fixed left-3 right-3 top-16 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96">
-                  <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <div
+                  role="region"
+                  aria-label="Notifications panel"
+                  className="fixed left-3 right-3 top-16 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96"
+                >
+                  <div className="px-4 py-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                       Active Alerts ({visibleAlerts.length})
                     </span>
                     {visibleAlerts.length > 1 && (
                       <button
                         onClick={handleDismissAll}
-                        className="text-[10px] font-semibold text-slate-400 hover:text-slate-600 transition-colors"
+                        className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                       >
                         Dismiss all
                       </button>
                     )}
                   </div>
 
-                  <div className="max-h-[300px] overflow-y-auto divide-y divide-slate-100">
+                  <div className="max-h-[300px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
                     {visibleAlerts.length === 0 ? (
-                      <div className="px-4 py-8 text-center text-slate-400">
+                      <div className="px-4 py-8 text-center text-slate-400 dark:text-slate-500">
                         <Check size={20} className="mx-auto text-emerald-500 mb-2" />
                         <p className="text-xs font-semibold">All caught up!</p>
                         <p className="text-[10px] mt-0.5">No active portfolio alerts.</p>
@@ -208,31 +217,32 @@ export default function Header({
                       visibleAlerts.map((alert) => {
                         const config = ALERTS_TYPE_CONFIG[alert.type] || {
                           icon: <Bell size={13} />,
-                          color: 'text-slate-600',
-                          bg: 'bg-slate-50',
-                          border: 'border-slate-200',
+                          color: 'text-slate-600 dark:text-slate-300',
+                          bg: 'bg-slate-50 dark:bg-slate-900',
+                          border: 'border-slate-200 dark:border-slate-700',
                         };
 
                         return (
-                          <div key={alert.id} className="p-3 hover:bg-slate-50/50 transition-colors flex items-start gap-2.5">
+                          <div key={alert.id} className="p-3 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors flex items-start gap-2.5">
                             <span className={`shrink-0 p-1.5 rounded-lg border ${config.bg} ${config.border} ${config.color} mt-0.5`}>
                               {config.icon}
                             </span>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <p className="text-xs font-bold text-slate-700 truncate">{alert.title}</p>
+                                <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{alert.title}</p>
                                 <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${SEVERITY_BADGE[alert.severity]}`}>
                                   {alert.severity}
                                 </span>
                               </div>
-                              <p className="text-[10px] text-slate-500 mt-0.5">{alert.message}</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{alert.message}</p>
                               {alert.portfolioLabel && (
-                                <p className="text-[9px] text-slate-400 mt-0.5 font-medium">Portfolio: {alert.portfolioLabel}</p>
+                                <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 font-medium">Portfolio: {alert.portfolioLabel}</p>
                               )}
                             </div>
                             <button
                               onClick={() => handleDismissAlert(alert.id)}
-                              className="shrink-0 p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                              aria-label={`Dismiss alert: ${alert.title}`}
+                              className="shrink-0 p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                             >
                               <X size={12} />
                             </button>
@@ -251,3 +261,5 @@ export default function Header({
   </header>
   );
 }
+
+export default React.memo(Header);

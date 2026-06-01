@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Lock, ShieldCheck, AlertCircle } from 'lucide-react';
 import { markSessionVerified, hashPin } from '../utils/auth';
 
@@ -9,7 +9,7 @@ interface PinLockScreenProps {
   onUnlock: () => void;
 }
 
-export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
+function PinLockScreen({ onUnlock }: PinLockScreenProps) {
   const [digits, setDigits] = useState<string[]>(Array(PIN_LENGTH).fill(''));
   const [error, setError] = useState('');
   const [shake, setShake] = useState(false);
@@ -91,6 +91,8 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
         className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 sm:p-10 w-full max-w-sm text-center transition-all duration-300 ${
           shake ? 'animate-shake' : ''
         } ${success ? 'scale-105 opacity-90' : ''}`}
+        role="form"
+        aria-label="PIN verification"
       >
         {/* Lock Icon */}
         <div
@@ -101,16 +103,24 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
               ? 'bg-red-500/20 text-red-400'
               : 'bg-blue-500/20 text-blue-400'
           }`}
+          aria-hidden="true"
         >
           {success ? <ShieldCheck size={28} /> : <Lock size={28} />}
         </div>
 
         {/* Title */}
         <h1 className="text-xl font-bold text-white mb-1">Family Wealth Tracker</h1>
-        <p className="text-sm text-slate-400 mb-8">Enter your {PIN_LENGTH}-digit PIN to continue</p>
+        <p id="pin-instructions" className="text-sm text-slate-400 mb-8">
+          Enter your {PIN_LENGTH}-digit PIN to continue
+        </p>
 
         {/* PIN Input */}
-        <div className="flex justify-center gap-3 mb-6" onPaste={handlePaste}>
+        <div
+          className="flex justify-center gap-3 mb-6"
+          role="group"
+          aria-labelledby="pin-instructions"
+          onPaste={handlePaste}
+        >
           {digits.map((digit, i) => (
             <input
               key={i}
@@ -121,6 +131,8 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
               value={digit}
               onChange={(e) => handleChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
+              aria-label={`PIN digit ${i + 1} of ${PIN_LENGTH}`}
+              aria-invalid={!!error}
               className={`w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold rounded-xl border-2 transition-all duration-200 outline-none
                 ${digit ? 'border-blue-400 bg-blue-500/10 text-white' : 'border-white/20 bg-white/5 text-white'}
                 ${error ? 'border-red-400 bg-red-500/10' : ''}
@@ -133,16 +145,16 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
 
         {/* Error Message */}
         {error && (
-          <div className="flex items-center justify-center gap-2 text-red-400 text-sm mb-4">
-            <AlertCircle size={14} />
+          <div className="flex items-center justify-center gap-2 text-red-400 text-sm mb-4" role="alert" aria-live="assertive">
+            <AlertCircle size={14} aria-hidden="true" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Success Message */}
         {success && (
-          <div className="flex items-center justify-center gap-2 text-emerald-400 text-sm mb-4">
-            <ShieldCheck size={14} />
+          <div className="flex items-center justify-center gap-2 text-emerald-400 text-sm mb-4" role="status" aria-live="polite">
+            <ShieldCheck size={14} aria-hidden="true" />
             <span>Access granted</span>
           </div>
         )}
@@ -166,3 +178,5 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     </div>
   );
 }
+
+export default React.memo(PinLockScreen);

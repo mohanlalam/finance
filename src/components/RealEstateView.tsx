@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { RealEstate, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/formatters';
-import { Plus, Trash2, Edit2, Home, MapPin, TrendingUp, Building2, FileText } from 'lucide-react';
+import { Plus, Trash2, Edit2, Home, MapPin, TrendingUp, Building2, FileText, X } from 'lucide-react';
+import Modal from './Modal';
 
 interface RealEstateViewProps {
   realEstate: RealEstate[];
@@ -14,7 +15,7 @@ interface RealEstateViewProps {
 
 const TYPE_OPTIONS: Array<RealEstate['property_type']> = ['apartment', 'house', 'plot', 'commercial'];
 
-export default function RealEstateView({
+export default React.memo(function RealEstateView({
   realEstate,
   documents,
   portfolioName,
@@ -120,37 +121,37 @@ export default function RealEstateView({
           <Building2 size={40} className="opacity-20 shrink-0" />
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Capital Appreciation</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Capital Appreciation</p>
             <p className={`text-2xl font-bold mt-1 ${pnlColor(totalGain)}`}>{formatINR(totalGain)}</p>
-            <p className="text-xs text-slate-400 mt-2">vs cost basis</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">vs cost basis</p>
           </div>
           <TrendingUp size={40} className="text-emerald-500/20 shrink-0" />
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Monthly Rent</p>
-            <p className="text-2xl font-bold text-slate-800 mt-1">{formatINR(totalMonthlyRent)}</p>
-            <p className="text-xs text-slate-400 mt-2">{formatINR(annualRent)}/yr</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Monthly Rent</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(totalMonthlyRent)}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">{formatINR(annualRent)}/yr</p>
           </div>
           <Home size={40} className="text-blue-500/20 shrink-0" />
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Rental Yield</p>
-            <p className="text-2xl font-bold text-slate-800 mt-1">{yieldPct.toFixed(2)}%</p>
-            <p className="text-xs text-slate-400 mt-2">Annual / current value</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Rental Yield</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{yieldPct.toFixed(2)}%</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Annual / current value</p>
           </div>
           <MapPin size={40} className="text-amber-500/20 shrink-0" />
         </div>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Properties</h3>
+      <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Properties</h3>
           <button
             onClick={handleOpenAdd}
             className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
@@ -161,34 +162,34 @@ export default function RealEstateView({
         </div>
 
         {realEstate.length === 0 ? (
-          <div className="p-12 text-center text-slate-400">
-            <Building2 size={32} className="mx-auto text-slate-300 mb-3" />
+          <div className="p-12 text-center text-slate-400 dark:text-slate-500">
+            <Building2 size={32} className="mx-auto text-slate-300 dark:text-slate-650 mb-3" />
             <p className="text-sm font-semibold">No properties tracked</p>
             <p className="text-xs mt-1">Add your first property to start tracking value & rent.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
             {realEstate.map((r) => {
               const gain = Number(r.current_valuation) - Number(r.purchase_price);
               const gainPct = Number(r.purchase_price) > 0 ? (gain / Number(r.purchase_price)) * 100 : 0;
               const propertyYield = Number(r.current_valuation) > 0 ? ((Number(r.monthly_rent) * 12) / Number(r.current_valuation)) * 100 : 0;
               const docs = documents.filter((d) => d.asset_type === 'real_estate' && d.asset_id === r.id);
               return (
-                <div key={r.id} className="p-6 hover:bg-slate-50/50 transition-colors">
+                <div key={r.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-750/30 transition-colors">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-450 flex items-center justify-center shrink-0">
                         <Home size={20} />
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-sm font-bold text-slate-800">{r.property_name}</h4>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 capitalize">
+                          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">{r.property_name}</h4>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 capitalize">
                             {r.property_type}
                           </span>
                         </div>
                         {r.location && (
-                          <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-1">
                             <MapPin size={11} /> {r.location}
                           </p>
                         )}
@@ -197,18 +198,18 @@ export default function RealEstateView({
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:text-right">
                       <div>
-                        <p className="text-xs text-slate-400">Purchase</p>
-                        <p className="text-sm font-bold text-slate-800">{formatINR(Number(r.purchase_price))}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">Purchase</p>
+                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{formatINR(Number(r.purchase_price))}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-slate-400">Current</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">Current</p>
                         <p className={`text-sm font-bold ${pnlColor(gain)}`}>{formatINR(Number(r.current_valuation))}</p>
                         <p className={`text-[10px] ${pnlColor(gain)}`}>{formatPercent(gainPct)}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-slate-400">Rent/mo</p>
-                        <p className="text-sm font-bold text-slate-800">{formatINR(Number(r.monthly_rent))}</p>
-                        <p className="text-[10px] text-slate-400">{propertyYield.toFixed(2)}% yield</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">Rent/mo</p>
+                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{formatINR(Number(r.monthly_rent))}</p>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500">{propertyYield.toFixed(2)}% yield</p>
                       </div>
                       <div className="col-span-2 sm:col-span-1 flex items-center justify-start md:justify-end gap-2">
                         {docs.map((doc) => (
@@ -217,7 +218,7 @@ export default function RealEstateView({
                             href={getDocumentUrl(doc.file_path)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:border-emerald-200 transition-colors"
+                            className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-650 dark:hover:text-emerald-400 hover:border-emerald-200 dark:hover:border-emerald-800 transition-colors"
                             title={doc.name}
                           >
                             <FileText size={14} />
@@ -225,14 +226,14 @@ export default function RealEstateView({
                         ))}
                         <button
                           onClick={() => handleOpenEdit(r)}
-                          className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-colors"
+                          className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-650 dark:hover:text-blue-450 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
                           title="Edit"
                         >
                           <Edit2 size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(r.id)}
-                          className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-200 transition-colors"
+                          className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
                           title="Delete"
                         >
                           <Trash2 size={14} />
@@ -247,131 +248,132 @@ export default function RealEstateView({
         )}
       </div>
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-              <div>
-                <h3 className="text-base font-bold text-slate-800">
-                  {editing ? 'Edit Property' : 'Add Property'}
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">Track property value, rent, and yield</p>
-              </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors"
-              >
-                &times;
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5">Property Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 2BHK Apartment (Whitefield)"
-                  value={propertyName}
-                  onChange={(e) => setPropertyName(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Type</label>
-                  <select
-                    value={propertyType}
-                    onChange={(e) => setPropertyType(e.target.value as RealEstate['property_type'])}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors capitalize"
-                  >
-                    {TYPE_OPTIONS.map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Location</label>
-                  <input
-                    type="text"
-                    placeholder="City, State"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Purchase Price (₹)</label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={purchasePrice}
-                    onChange={(e) => setPurchasePrice(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Current Valuation (₹)</label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={currentValuation}
-                    onChange={(e) => setCurrentValuation(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Purchase Date</label>
-                  <input
-                    type="date"
-                    value={purchaseDate}
-                    onChange={(e) => setPurchaseDate(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Monthly Rent (₹)</label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={monthlyRent}
-                    onChange={(e) => setMonthlyRent(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors"
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{error}</p>
-              )}
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 border border-slate-200 text-slate-600 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-emerald-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-emerald-700 transition-colors disabled:opacity-50"
-                >
-                  {loading ? 'Saving...' : editing ? 'Save Changes' : 'Add Property'}
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={showModal}
+        onClose={() => !loading && setShowModal(false)}
+        ariaLabel={editing ? 'Edit Property' : 'Add Property'}
+        preventClose={loading}
+      >
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+          <div>
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">
+              {editing ? 'Edit Property' : 'Add Property'}
+            </h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Track property value, rent, and yield</p>
           </div>
+          <button
+            onClick={() => !loading && setShowModal(false)}
+            className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
+            aria-label="Close dialog"
+          >
+            <X size={16} />
+          </button>
         </div>
-      )}
+
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Property Name</label>
+            <input
+              type="text"
+              placeholder="e.g. 2BHK Apartment (Whitefield)"
+              value={propertyName}
+              onChange={(e) => setPropertyName(e.target.value)}
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Type</label>
+              <select
+                value={propertyType}
+                onChange={(e) => setPropertyType(e.target.value as RealEstate['property_type'])}
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors capitalize"
+              >
+                {TYPE_OPTIONS.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Location</label>
+              <input
+                type="text"
+                placeholder="City, State"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-755 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Purchase Price (₹)</label>
+              <input
+                type="number"
+                placeholder="0"
+                value={purchasePrice}
+                onChange={(e) => setPurchasePrice(e.target.value)}
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Current Valuation (₹)</label>
+              <input
+                type="number"
+                placeholder="0"
+                value={currentValuation}
+                onChange={(e) => setCurrentValuation(e.target.value)}
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Purchase Date</label>
+              <input
+                type="date"
+                value={purchaseDate}
+                onChange={(e) => setPurchaseDate(e.target.value)}
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Monthly Rent (₹)</label>
+              <input
+                type="number"
+                placeholder="0"
+                value={monthlyRent}
+                onChange={(e) => setMonthlyRent(e.target.value)}
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors"
+              />
+            </div>
+          </div>
+
+          {error && (
+            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl px-3 py-2" role="alert">{error}</p>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowModal(false)}
+              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-emerald-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-emerald-700 transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : editing ? 'Save Changes' : 'Add Property'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
-}
+});

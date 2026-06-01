@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { X, TrendingUp, TrendingDown, Landmark, Shield, Activity, AlertTriangle } from 'lucide-react';
 import { Alert, AlertType } from '../hooks/useAlerts';
 
@@ -9,43 +9,43 @@ interface AlertsBannerProps {
 const TYPE_CONFIG: Record<AlertType, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
   '52w_high': {
     icon: <TrendingUp size={14} />,
-    color: 'text-blue-700',
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
+    color: 'text-blue-700 dark:text-blue-400',
+    bg: 'bg-blue-50 dark:bg-blue-900/20',
+    border: 'border-blue-200 dark:border-blue-800',
   },
   '52w_low': {
     icon: <TrendingDown size={14} />,
-    color: 'text-amber-700',
-    bg: 'bg-amber-50',
-    border: 'border-amber-200',
+    color: 'text-amber-700 dark:text-amber-400',
+    bg: 'bg-amber-50 dark:bg-amber-900/20',
+    border: 'border-amber-200 dark:border-amber-800',
   },
   fd_maturity: {
     icon: <Landmark size={14} />,
-    color: 'text-indigo-700',
-    bg: 'bg-indigo-50',
-    border: 'border-indigo-200',
+    color: 'text-indigo-700 dark:text-indigo-400',
+    bg: 'bg-indigo-50 dark:bg-indigo-900/20',
+    border: 'border-indigo-200 dark:border-indigo-800',
   },
   insurance_renewal: {
     icon: <Shield size={14} />,
-    color: 'text-rose-700',
-    bg: 'bg-rose-50',
-    border: 'border-rose-200',
+    color: 'text-rose-700 dark:text-rose-400',
+    bg: 'bg-rose-50 dark:bg-rose-900/20',
+    border: 'border-rose-200 dark:border-rose-800',
   },
   portfolio_swing: {
     icon: <Activity size={14} />,
-    color: 'text-violet-700',
-    bg: 'bg-violet-50',
-    border: 'border-violet-200',
+    color: 'text-violet-700 dark:text-violet-400',
+    bg: 'bg-violet-50 dark:bg-violet-900/20',
+    border: 'border-violet-200 dark:border-violet-800',
   },
 };
 
 const SEVERITY_BADGE: Record<string, string> = {
   critical: 'bg-red-500 text-white',
-  warning: 'bg-amber-100 text-amber-700',
-  info: 'bg-blue-100 text-blue-700',
+  warning: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+  info: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
 };
 
-export default function AlertsBanner({ alerts }: AlertsBannerProps) {
+function AlertsBanner({ alerts }: AlertsBannerProps) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
   const dismiss = useCallback((id: string) => {
@@ -61,18 +61,18 @@ export default function AlertsBanner({ alerts }: AlertsBannerProps) {
   if (visible.length === 0) return null;
 
   return (
-    <div className="space-y-2">
+    <div role="alert" aria-live="polite" className="space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <AlertTriangle size={14} className="text-amber-500" />
-          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+          <span className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
             {visible.length} Alert{visible.length > 1 ? 's' : ''}
           </span>
         </div>
         {visible.length > 1 && (
           <button
             onClick={dismissAll}
-            className="text-[10px] font-semibold text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
           >
             Dismiss all
           </button>
@@ -100,6 +100,7 @@ export default function AlertsBanner({ alerts }: AlertsBannerProps) {
               </span>
               <button
                 onClick={() => dismiss(alert.id)}
+                aria-label={`Dismiss alert: ${alert.title}`}
                 className="shrink-0 opacity-50 hover:opacity-100 transition-opacity"
               >
                 <X size={12} />
@@ -108,7 +109,7 @@ export default function AlertsBanner({ alerts }: AlertsBannerProps) {
           );
         })}
         {visible.length > 8 && (
-          <span className="flex items-center text-[10px] font-semibold text-slate-400 px-2">
+          <span className="flex items-center text-[10px] font-semibold text-slate-400 dark:text-slate-500 px-2">
             +{visible.length - 8} more
           </span>
         )}
@@ -116,3 +117,5 @@ export default function AlertsBanner({ alerts }: AlertsBannerProps) {
     </div>
   );
 }
+
+export default React.memo(AlertsBanner);

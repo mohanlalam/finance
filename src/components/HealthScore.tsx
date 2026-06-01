@@ -1,3 +1,4 @@
+import React from 'react';
 import { HealthScoreBreakdown } from '../hooks/usePortfolioInsights';
 
 interface HealthScoreProps {
@@ -25,7 +26,7 @@ function scoreLabel(total: number): string {
   return 'Needs Work';
 }
 
-export default function HealthScore({ score }: HealthScoreProps) {
+function HealthScore({ score }: HealthScoreProps) {
   const cx = 80;
   const cy = 80;
   const r = 64;
@@ -36,13 +37,19 @@ export default function HealthScore({ score }: HealthScoreProps) {
   const color = scoreColor(score.total);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-      <h3 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4">Portfolio Health</h3>
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
+      <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-4">Portfolio Health</h3>
 
       <div className="flex flex-col sm:flex-row items-center gap-6">
         {/* Circular gauge */}
         <div className="relative shrink-0">
-          <svg width={160} height={160} viewBox="0 0 160 160">
+          <svg
+            width={160}
+            height={160}
+            viewBox="0 0 160 160"
+            role="img"
+            aria-label={`Portfolio health score: ${score.total} out of 100, rated ${scoreLabel(score.total)}`}
+          >
             <circle
               cx={cx}
               cy={cy}
@@ -50,6 +57,7 @@ export default function HealthScore({ score }: HealthScoreProps) {
               fill="none"
               stroke="#f1f5f9"
               strokeWidth={stroke}
+              className="dark:stroke-slate-700"
             />
             <circle
               cx={cx}
@@ -95,10 +103,10 @@ export default function HealthScore({ score }: HealthScoreProps) {
             return (
               <div key={key}>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium text-slate-600">{label}</span>
-                  <span className="text-xs font-bold text-slate-500">{val}/{max}</span>
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{label}</span>
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{val}/{max}</span>
                 </div>
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${barPct}%`, backgroundColor: barColor }}
@@ -112,3 +120,5 @@ export default function HealthScore({ score }: HealthScoreProps) {
     </div>
   );
 }
+
+export default React.memo(HealthScore);
