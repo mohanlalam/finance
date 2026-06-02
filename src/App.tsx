@@ -462,21 +462,52 @@ export default function App() {
             </div>
 
             {activeAsset === 'home' ? (
-              <MobileHomeSummary
-                summaryData={summaryData}
-                todayPnL={todayPnL}
-                todayPnLPercent={todayPnLPercent}
-                breakdown={breakdown}
-                alertCount={visibleAlerts.length}
-                lastUpdated={lastUpdated}
-                priceStatus={priceStatus}
-                onRefresh={refreshPrices}
-                isLoadingPrices={isLoadingPrices}
-                onNavigateAsset={setActiveAsset}
-                onOpenAlerts={() => setShowMobileAlerts(true)}
-                portfolios={portfolios}
-                activePortfolio={portfolio}
-              />
+              <div className="space-y-4">
+                <MobileHomeSummary
+                  summaryData={summaryData}
+                  todayPnL={todayPnL}
+                  todayPnLPercent={todayPnLPercent}
+                  breakdown={breakdown}
+                  alertCount={visibleAlerts.length}
+                  lastUpdated={lastUpdated}
+                  priceStatus={priceStatus}
+                  onRefresh={refreshPrices}
+                  isLoadingPrices={isLoadingPrices}
+                  onNavigateAsset={setActiveAsset}
+                  onOpenAlerts={() => setShowMobileAlerts(true)}
+                  portfolios={portfolios}
+                  activePortfolio={portfolio}
+                />
+
+                {/* Mobile Dashboards - Insights & Health Score */}
+                {activeTab === 'all' && (
+                  <div className="space-y-4">
+                    <SectionErrorBoundary sectionName="Portfolio Insights">
+                      <InsightsPanel insights={insights} />
+                    </SectionErrorBoundary>
+                    <SectionErrorBoundary sectionName="Health Score Breakdown">
+                      <HealthScore score={insights.healthScore} />
+                    </SectionErrorBoundary>
+                  </div>
+                )}
+
+                {/* Mobile Dashboards - Allocation Charts */}
+                <div className="space-y-4">
+                  <SectionErrorBoundary sectionName="Asset Class Pie Chart">
+                    <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
+                  </SectionErrorBoundary>
+                  <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
+                    <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
+                  </SectionErrorBoundary>
+                </div>
+
+                {/* Mobile Dashboards - Historical Net Worth */}
+                {activeTab === 'all' && (
+                  <SectionErrorBoundary sectionName="Historical Net Worth Chart">
+                    <NetWorthChart history={netWorthHistory} />
+                  </SectionErrorBoundary>
+                )}
+              </div>
             ) : (
               <div className="space-y-4">
                 {/* Sticky Mini Refresh Status Bar for other tabs too */}
