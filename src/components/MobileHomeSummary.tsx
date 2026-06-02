@@ -127,17 +127,25 @@ export default function MobileHomeSummary({
         <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-800 dark:border-slate-850">
           <div>
             <p className="text-[10px] text-slate-450 dark:text-slate-505 font-bold uppercase tracking-wider">Today's P&amp;L</p>
-            <p className={`text-base font-bold mt-0.5 ${todayPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              {todayPnL >= 0 ? '+' : ''}{formatINR(todayPnL)}
-              <span className="text-xs font-semibold ml-1">({formatPercent(todayPnLPercent)})</span>
-            </p>
+            <div className={`flex flex-wrap items-baseline gap-x-1 mt-0.5 ${todayPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span className="text-base font-bold whitespace-nowrap">
+                {todayPnL >= 0 ? '+' : ''}{formatINR(todayPnL)}
+              </span>
+              <span className="text-xs font-semibold whitespace-nowrap opacity-90">
+                ({formatPercent(todayPnLPercent)})
+              </span>
+            </div>
           </div>
           <div>
             <p className="text-[10px] text-slate-450 dark:text-slate-505 font-bold uppercase tracking-wider">Total P&amp;L</p>
-            <p className={`text-base font-bold mt-0.5 ${summaryData.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              {summaryData.totalPnL >= 0 ? '+' : ''}{formatINR(summaryData.totalPnL)}
-              <span className="text-xs font-semibold ml-1">({formatPercent(summaryData.totalPnLPercent)})</span>
-            </p>
+            <div className={`flex flex-wrap items-baseline gap-x-1 mt-0.5 ${summaryData.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span className="text-base font-bold whitespace-nowrap">
+                {summaryData.totalPnL >= 0 ? '+' : ''}{formatINR(summaryData.totalPnL)}
+              </span>
+              <span className="text-xs font-semibold whitespace-nowrap opacity-90">
+                ({formatPercent(summaryData.totalPnLPercent)})
+              </span>
+            </div>
           </div>
         </div>
       </div>

@@ -44,7 +44,7 @@ export default React.memo(function FamilyTabBar({
     <div
       role="tablist"
       aria-label="Family members portfolios"
-      className="flex flex-wrap gap-2"
+      className="flex flex-nowrap md:flex-wrap gap-2 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-none -mx-4 px-4 md:mx-0 md:px-0"
     >
       <button
         role="tab"

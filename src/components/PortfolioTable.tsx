@@ -194,11 +194,33 @@ export default React.memo(function PortfolioTable({
       </div>
 
       {/* Mobile Card View */}
-      <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-700/50 p-3 space-y-3">
-        {sorted.length === 0 ? (
-          <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-4">No stock holdings yet.</p>
-        ) : (
-          sorted.map((h) => {
+      <div className="md:hidden">
+        {sorted.length > 0 && (
+          <div className="px-4 py-3 bg-slate-50/50 dark:bg-slate-900/30 border-b border-slate-100 dark:border-slate-750/50 grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase tracking-wider">Total Value</p>
+              <p className="text-base font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 whitespace-nowrap">{formatINR(totalCurrentValue)}</p>
+              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 whitespace-nowrap">Invested: {formatINR(totalInvested)}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase tracking-wider">Total P&amp;L</p>
+              <div className="flex flex-wrap items-baseline gap-x-1 mt-0.5">
+                <span className={`text-base font-extrabold whitespace-nowrap ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                  {totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}
+                </span>
+                <span className={`text-xs font-semibold whitespace-nowrap opacity-90 ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                  ({formatPercent(totalPnLPercent)})
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="divide-y divide-slate-100 dark:divide-slate-700/50 p-3 space-y-3">
+          {sorted.length === 0 ? (
+            <p className="text-xs text-slate-400 dark:text-slate-505 text-center py-4">No stock holdings yet.</p>
+          ) : (
+            sorted.map((h) => {
             const isDeleting = deletingId === h.id;
             const isConfirming = confirmId === h.id;
             const isEditing = editingId === h.id;
@@ -281,10 +303,10 @@ export default React.memo(function PortfolioTable({
                       {formatINR(h.currentValue)}
                     </p>
                     <div className="flex items-center gap-1 justify-end mt-0.5 flex-wrap">
-                      <span className={`text-[10px] font-bold ${pnlColor(h.unrealizedPnL)}`}>
+                      <span className={`text-[10px] font-bold whitespace-nowrap ${pnlColor(h.unrealizedPnL)}`}>
                         {h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}
                       </span>
-                      <span className={`inline-flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.2 rounded-full ${h.pnlPercent >= 0 ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400'}`}>
+                      <span className={`inline-flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.2 rounded-full whitespace-nowrap ${h.pnlPercent >= 0 ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400'}`}>
                         {formatPercent(h.pnlPercent)}
                       </span>
                     </div>
@@ -328,6 +350,7 @@ export default React.memo(function PortfolioTable({
             );
           })
         )}
+        </div>
       </div>
 
       {/* Desktop Table View */}
