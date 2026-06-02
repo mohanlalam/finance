@@ -16,6 +16,9 @@ import AssetTabContent from './components/AssetTabContent';
 import SectionErrorBoundary from './components/SectionErrorBoundary';
 import InsightsPanel from './components/InsightsPanel';
 import QuickActions from './components/QuickActions';
+import FloatingAddMenu from './components/FloatingAddMenu';
+import MobileHomeSummary from './components/MobileHomeSummary';
+import MobileAlertsView from './components/MobileAlertsView';
 import { ImportRow } from './components/ExportPanel';
 import { AddHoldingPayload } from './components/AddHoldingModal';
 
@@ -31,7 +34,7 @@ import PinLockScreen from './components/PinLockScreen';
 import DashboardLoading from './components/DashboardLoading';
 import DashboardError from './components/DashboardError';
 
-type AssetTab = 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents';
 
 export default function App() {
   const [pinVerified, setPinVerified] = useState(() => !isPinConfigured() || isSessionVerified());
@@ -44,12 +47,14 @@ export default function App() {
   });
   const [activeAsset, setActiveAsset] = useState<AssetTab>(() => {
     try {
-      return (localStorage.getItem('finance_last_asset_tab') as AssetTab) || 'stocks';
+      const stored = localStorage.getItem('finance_last_asset_tab');
+      if (stored) return stored as AssetTab;
+      return window.innerWidth < 768 ? 'home' : 'stocks';
     } catch {
-      return 'stocks';
+      return window.innerWidth < 768 ? 'home' : 'stocks';
     }
   });
-  const [quickAddTarget, setQuickAddTarget] = useState<'fd' | 'gold' | null>(null);
+  const [quickAddTarget, setQuickAddTarget] = useState<'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddFamily, setShowAddFamily] = useState(false);
   const [renameTarget, setRenameTarget] = useState<{ id: string; name: string; label: string } | null>(null);
@@ -74,6 +79,17 @@ export default function App() {
     } catch { /* ignore */ }
   }, [darkMode]);
 
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const [showMobileAlerts, setShowMobileAlerts] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Persist active tabs
   useEffect(() => {
     try { localStorage.setItem('finance_last_family_tab', activeTab); } catch { /* ignore */ }
@@ -95,6 +111,48 @@ export default function App() {
     window.addEventListener('keydown', handleKeyboard);
     return () => window.removeEventListener('keydown', handleKeyboard);
   }, []);
+
+  // Swipe tab navigation
+  const touchStart = useRef({ x: 0, y: 0 });
+  const touchEnd = useRef({ x: 0, y: 0 });
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStart.current = {
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    };
+    touchEnd.current = {
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    };
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    touchEnd.current = {
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    };
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    const diffX = touchStart.current.x - touchEnd.current.x;
+    const diffY = touchStart.current.y - touchEnd.current.y;
+
+    if (Math.abs(diffX) > 70 && Math.abs(diffY) < 40) {
+      const tabOrder: AssetTab[] = ['home', 'stocks', 'fd', 'gold', 'real_estate', 'insurance', 'documents'];
+      const currentIndex = tabOrder.indexOf(activeAsset);
+
+      if (diffX > 0) {
+        if (currentIndex < tabOrder.length - 1) {
+          setActiveAsset(tabOrder[currentIndex + 1]);
+        }
+      } else {
+        if (currentIndex > 0) {
+          setActiveAsset(tabOrder[currentIndex - 1]);
+        }
+      }
+    }
+  }, [activeAsset]);
 
   const handleAuthExpired = useCallback(() => {
     setPinVerified(false);
@@ -157,8 +215,52 @@ export default function App() {
 
   const portfolio = useMemo(() => getPortfolioByName(portfolios, activeTab), [portfolios, activeTab]);
   const todayPnL = useMemo(() => estimateTodayPnL(portfolio, portfolios), [portfolio, portfolios]);
+  const todayPnLPercent = useMemo(() => {
+    const totalCurrentStocks = portfolio
+      ? portfolio.holdings.reduce((sum, h) => sum + h.currentValue, 0)
+      : portfolios.reduce((sum, p) => sum + p.holdings.reduce((s, h) => s + h.currentValue, 0), 0);
+    const prevCurrentStocks = totalCurrentStocks - todayPnL;
+    return prevCurrentStocks > 0 ? (todayPnL / prevCurrentStocks) * 100 : 0;
+  }, [portfolio, portfolios, todayPnL]);
+
+  const effectiveAsset = activeAsset === 'home' && !isMobile ? 'stocks' : activeAsset;
   const insights = usePortfolioInsights(portfolios);
   const alerts = useAlerts(portfolios);
+
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(() => {
+    try {
+      const saved = sessionStorage.getItem('finance_dismissed_alerts');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  const handleDismissAlert = useCallback((id: string) => {
+    setDismissedAlerts((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      try {
+        sessionStorage.setItem('finance_dismissed_alerts', JSON.stringify(Array.from(next)));
+      } catch { /* ignore */ }
+      return next;
+    });
+  }, []);
+
+  const handleDismissAll = useCallback(() => {
+    setDismissedAlerts((prev) => {
+      const next = new Set(prev);
+      alerts.forEach((a) => next.add(a.id));
+      try {
+        sessionStorage.setItem('finance_dismissed_alerts', JSON.stringify(Array.from(next)));
+      } catch { /* ignore */ }
+      return next;
+    });
+  }, [alerts]);
+
+  const visibleAlerts = useMemo(() => {
+    return alerts.filter((a) => !dismissedAlerts.has(a.id));
+  }, [alerts, dismissedAlerts]);
 
   const handleSearchNavigate = useCallback((portfolioName: string, assetTab: string) => {
     setActiveTab(portfolioName);
@@ -279,7 +381,12 @@ export default function App() {
   const visiblePortfolio = portfolio;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-safe-content md:pb-0 text-slate-800 dark:text-slate-100 transition-colors">
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-safe-content md:pb-0 text-slate-800 dark:text-slate-100 transition-colors"
+    >
       {/* Print-only report header */}
       <div className="print-report-header hidden items-center justify-between px-8 py-6 border-b-2 border-slate-200 mb-6">
         <div>
@@ -304,7 +411,9 @@ export default function App() {
         portfolios={portfolios}
         onImportCSV={handleImportCSV}
         portfolioOptions={portfolioOptionsForModal}
-        alerts={alerts}
+        alerts={visibleAlerts}
+        onDismissAlert={handleDismissAlert}
+        onDismissAll={handleDismissAll}
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode(!darkMode)}
       />
@@ -345,194 +454,260 @@ export default function App() {
           </div>
         )}
 
-        {/* Search Bar */}
-        <div data-search-bar>
-          <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
-        </div>
+        {isMobile ? (
+          <div className="space-y-4">
+            {/* Search Bar on Mobile */}
+            <div data-search-bar className="px-0.5">
+              <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
+            </div>
 
-        {/* Quick Actions */}
-        <QuickActions
-          onAddStock={() => setShowAddModal(true)}
-          onAddFD={() => { setActiveAsset('fd'); setQuickAddTarget('fd'); }}
-          onAddGold={() => { setActiveAsset('gold'); setQuickAddTarget('gold'); }}
-          onRefresh={refreshPrices}
-          isRefreshing={isLoadingPrices}
-        />
-
-        {/* Family Tabs Row */}
-        <FamilyTabBar
-          portfolios={portfolios}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          onAddFamilyClick={handleAddFamilyClick}
-          onRenameClick={handleRenameClick}
-          onDeleteClick={handleDeletePortfolio}
-        />
-
-        {/* Family Overview - drill-down cards */}
-        {activeTab === 'all' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {portfolios.map((p) => (
-              <button
-                key={p.name}
-                onClick={() => setActiveTab(p.name)}
-                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 text-left hover:shadow-md hover:border-slate-250 dark:hover:border-slate-600 transition-all duration-150 group"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{p.label}</span>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${p.totalPnL >= 0 ? 'bg-emerald-105 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' : 'bg-red-100 text-red-650 dark:bg-red-955 dark:text-red-400'}`}>
-                    {formatPercent(p.totalPnLPercent, 1)}
-                  </span>
+            {activeAsset === 'home' ? (
+              <MobileHomeSummary
+                summaryData={summaryData}
+                todayPnL={todayPnL}
+                todayPnLPercent={todayPnLPercent}
+                breakdown={breakdown}
+                alertCount={visibleAlerts.length}
+                lastUpdated={lastUpdated}
+                priceStatus={priceStatus}
+                onRefresh={refreshPrices}
+                isLoadingPrices={isLoadingPrices}
+                onNavigateAsset={setActiveAsset}
+                onOpenAlerts={() => setShowMobileAlerts(true)}
+                portfolios={portfolios}
+                activePortfolio={portfolio}
+              />
+            ) : (
+              <div className="space-y-4">
+                {/* Sticky Mini Refresh Status Bar for other tabs too */}
+                <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/70 dark:bg-slate-800/70 border border-slate-200/50 dark:border-slate-750/30 rounded-2xl text-[11px] text-slate-500 dark:text-slate-450 backdrop-blur shadow-sm">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${priceStatus === 'success' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                    <span className="font-semibold shrink-0">{priceStatus === 'success' ? 'Live Prices' : 'Snapshot'}</span>
+                    <span className="text-slate-350 dark:text-slate-700 shrink-0">•</span>
+                    <span className="truncate">Updated {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Never'}</span>
+                  </div>
+                  <button
+                    onClick={refreshPrices}
+                    disabled={isLoadingPrices}
+                    className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 active:scale-95 transition-all shrink-0 ml-2"
+                  >
+                    <RefreshCw size={11} className={isLoadingPrices ? 'animate-spin' : ''} />
+                    Refresh
+                  </button>
                 </div>
-                <p className={`text-xl font-bold text-slate-800 dark:text-slate-100 mb-1 transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>
-                  {formatINR(p.totalCurrentValue)}
-                </p>
-                <p className="text-xs text-slate-400 dark:text-slate-500">Invested: {formatINR(p.totalInvested)}</p>
-                <p className={`text-sm font-semibold mt-1 ${pnlColor(p.totalPnL)}`}>
-                  {p.totalPnL >= 0 ? '+' : ''}{formatINR(p.totalPnL)} P&L
-                </p>
-                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 grid grid-cols-3 gap-1 text-[10px] text-slate-500 dark:text-slate-400">
-                  <div>
-                    <p className="text-slate-400 dark:text-slate-500">Stocks</p>
-                    <p className="font-semibold text-slate-700 dark:text-slate-300">{p.holdings.length}</p>
+
+                <SectionErrorBoundary sectionName="Asset Tab Content">
+                  <AssetTabContent
+                    activeAsset={activeAsset}
+                    visiblePortfolio={visiblePortfolio}
+                    portfolios={portfolios}
+                    priceStatus={priceStatus}
+                    onAddHoldingClick={() => setShowAddModal(true)}
+                    onDeleteStock={tableDeleteHandler}
+                    onUpdateStock={tableUpdateHandler}
+                    onAddAsset={addAsset}
+                    onUpdateAsset={updateAsset}
+                    onDeleteAsset={deleteAsset}
+                    quickAddTarget={quickAddTarget}
+                    onQuickAddComplete={() => setQuickAddTarget(null)}
+                  />
+                </SectionErrorBoundary>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Search Bar */}
+            <div data-search-bar>
+              <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
+            </div>
+
+            {/* Quick Actions */}
+            <QuickActions
+              onAddStock={() => setShowAddModal(true)}
+              onAddFD={() => { setActiveAsset('fd'); setQuickAddTarget('fd'); }}
+              onAddGold={() => { setActiveAsset('gold'); setQuickAddTarget('gold'); }}
+              onRefresh={refreshPrices}
+              isRefreshing={isLoadingPrices}
+            />
+
+            {/* Family Tabs Row */}
+            <FamilyTabBar
+              portfolios={portfolios}
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              onAddFamilyClick={handleAddFamilyClick}
+              onRenameClick={handleRenameClick}
+              onDeleteClick={handleDeletePortfolio}
+            />
+
+            {/* Family Overview - drill-down cards */}
+            {activeTab === 'all' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {portfolios.map((p) => (
+                  <button
+                    key={p.name}
+                    onClick={() => setActiveTab(p.name)}
+                    className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 text-left hover:shadow-md hover:border-slate-250 dark:hover:border-slate-600 transition-all duration-150 group"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{p.label}</span>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${p.totalPnL >= 0 ? 'bg-emerald-105 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' : 'bg-red-100 text-red-650 dark:bg-red-955 dark:text-red-400'}`}>
+                        {formatPercent(p.totalPnLPercent, 1)}
+                      </span>
+                    </div>
+                    <p className={`text-xl font-bold text-slate-800 dark:text-slate-100 mb-1 transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>
+                      {formatINR(p.totalCurrentValue)}
+                    </p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">Invested: {formatINR(p.totalInvested)}</p>
+                    <p className={`text-sm font-semibold mt-1 ${pnlColor(p.totalPnL)}`}>
+                      {p.totalPnL >= 0 ? '+' : ''}{formatINR(p.totalPnL)} P&L
+                    </p>
+                    <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 grid grid-cols-3 gap-1 text-[10px] text-slate-500 dark:text-slate-400">
+                      <div>
+                        <p className="text-slate-400 dark:text-slate-500">Stocks</p>
+                        <p className="font-semibold text-slate-700 dark:text-slate-300">{p.holdings.length}</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-400 dark:text-slate-500">FDs</p>
+                        <p className="font-semibold text-slate-700 dark:text-slate-300">{p.fixedDeposits.length}</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-400 dark:text-slate-500">Properties</p>
+                        <p className="font-semibold text-slate-700 dark:text-slate-300">{p.realEstate.length}</p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Wealth Mosaic for All view */}
+            {activeTab === 'all' && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
+                    Stocks
                   </div>
-                  <div>
-                    <p className="text-slate-400 dark:text-slate-500">FDs</p>
-                    <p className="font-semibold text-slate-700 dark:text-slate-300">{p.fixedDeposits.length}</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-400 dark:text-slate-500">Properties</p>
-                    <p className="font-semibold text-slate-700 dark:text-slate-300">{p.realEstate.length}</p>
-                  </div>
+                  <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.stocks)}</p>
                 </div>
-              </button>
-            ))}
-          </div>
-        )}
+                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
+                    FDs
+                  </div>
+                  <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.fd)}</p>
+                </div>
+                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
+                    Gold
+                  </div>
+                  <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.gold)}</p>
+                </div>
+                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
+                    Real Estate
+                  </div>
+                  <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.realEstate)}</p>
+                </div>
+                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
+                    Insurance Cover
+                  </div>
+                  <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.insuranceCover)}</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{formatINR(breakdown.insurancePremium)}/yr premium</p>
+                </div>
+              </div>
+            )}
 
-        {/* Wealth Mosaic for All view */}
-        {activeTab === 'all' && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
-              <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
-                Stocks
+            {/* Insights Panel — only on family overview */}
+            {activeTab === 'all' && (
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+                <div className="xl:col-span-2">
+                  <SectionErrorBoundary sectionName="Portfolio Insights">
+                    <InsightsPanel insights={insights} />
+                  </SectionErrorBoundary>
+                </div>
+                <div>
+                  <SectionErrorBoundary sectionName="Health Score Breakdown">
+                    <HealthScore score={insights.healthScore} />
+                  </SectionErrorBoundary>
+                </div>
               </div>
-              <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.stocks)}</p>
-            </div>
-            <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
-              <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
-                FDs
-              </div>
-              <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.fd)}</p>
-            </div>
-            <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
-              <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
-                Gold
-              </div>
-              <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.gold)}</p>
-            </div>
-            <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
-              <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
-                Real Estate
-              </div>
-              <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.realEstate)}</p>
-            </div>
-            <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
-              <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
-                Insurance Cover
-              </div>
-              <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.insuranceCover)}</p>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{formatINR(breakdown.insurancePremium)}/yr premium</p>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* Insights Panel — only on family overview */}
-        {activeTab === 'all' && (
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-            <div className="xl:col-span-2">
-              <SectionErrorBoundary sectionName="Portfolio Insights">
-                <InsightsPanel insights={insights} />
+            <SummaryCards
+              totalInvested={summaryData.totalInvested}
+              totalCurrentValue={summaryData.totalCurrentValue}
+              totalPnL={summaryData.totalPnL}
+              totalPnLPercent={summaryData.totalPnLPercent}
+              todayPnL={todayPnL}
+              label={summaryData.label}
+              isLoading={isLoading}
+            />
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              <SectionErrorBoundary sectionName="Asset Class Pie Chart">
+                <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
+              </SectionErrorBoundary>
+              <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
+                <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
               </SectionErrorBoundary>
             </div>
-            <div>
-              <SectionErrorBoundary sectionName="Health Score Breakdown">
-                <HealthScore score={insights.healthScore} />
+
+            {activeTab === 'all' && (
+              <SectionErrorBoundary sectionName="Historical Net Worth Chart">
+                <NetWorthChart history={netWorthHistory} />
               </SectionErrorBoundary>
+            )}
+
+            {/* Desktop Asset Switcher */}
+            <div className="hidden md:flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-px mb-2">
+              {([
+                { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={16} /> },
+                { id: 'fd', label: 'Fixed Deposits', icon: <Landmark size={16} /> },
+                { id: 'gold', label: 'Gold Holdings', icon: <Coins size={16} /> },
+                { id: 'real_estate', label: 'Real Estate', icon: <Home size={16} /> },
+                { id: 'insurance', label: 'Insurance Cover', icon: <Shield size={16} /> },
+                { id: 'documents', label: 'Document Vault', icon: <FolderOpen size={16} /> },
+              ] as const).map((tab) => {
+                const isActive = effectiveAsset === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveAsset(tab.id)}
+                    className={`flex items-center gap-2 px-4 py-2.5 border-b-2 font-semibold text-sm transition-all duration-150 outline-none -mb-px ${
+                      isActive
+                        ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400 font-bold'
+                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:border-slate-750'
+                    }`}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
             </div>
-          </div>
+
+            {/* Asset Tab Views */}
+            <SectionErrorBoundary sectionName="Asset Tab Content">
+              <AssetTabContent
+                activeAsset={effectiveAsset}
+                visiblePortfolio={visiblePortfolio}
+                portfolios={portfolios}
+                priceStatus={priceStatus}
+                onAddHoldingClick={() => setShowAddModal(true)}
+                onDeleteStock={tableDeleteHandler}
+                onUpdateStock={tableUpdateHandler}
+                onAddAsset={addAsset}
+                onUpdateAsset={updateAsset}
+                onDeleteAsset={deleteAsset}
+                quickAddTarget={quickAddTarget}
+                onQuickAddComplete={() => setQuickAddTarget(null)}
+              />
+            </SectionErrorBoundary>
+          </>
         )}
-
-        <SummaryCards
-          totalInvested={summaryData.totalInvested}
-          totalCurrentValue={summaryData.totalCurrentValue}
-          totalPnL={summaryData.totalPnL}
-          totalPnLPercent={summaryData.totalPnLPercent}
-          todayPnL={todayPnL}
-          label={summaryData.label}
-          isLoading={isLoading}
-        />
-
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-          <SectionErrorBoundary sectionName="Asset Class Pie Chart">
-            <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
-          </SectionErrorBoundary>
-          <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
-            <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
-          </SectionErrorBoundary>
-        </div>
-
-        {activeTab === 'all' && (
-          <SectionErrorBoundary sectionName="Historical Net Worth Chart">
-            <NetWorthChart history={netWorthHistory} />
-          </SectionErrorBoundary>
-        )}
-
-        {/* Desktop Asset Switcher */}
-        <div className="hidden md:flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-px mb-2">
-          {([
-            { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={16} /> },
-            { id: 'fd', label: 'Fixed Deposits', icon: <Landmark size={16} /> },
-            { id: 'gold', label: 'Gold Holdings', icon: <Coins size={16} /> },
-            { id: 'real_estate', label: 'Real Estate', icon: <Home size={16} /> },
-            { id: 'insurance', label: 'Insurance Cover', icon: <Shield size={16} /> },
-            { id: 'documents', label: 'Document Vault', icon: <FolderOpen size={16} /> },
-          ] as const).map((tab) => {
-            const isActive = activeAsset === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveAsset(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 border-b-2 font-semibold text-sm transition-all duration-150 outline-none -mb-px ${
-                  isActive
-                    ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400 font-bold'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:border-slate-750'
-                }`}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Asset Tab Views */}
-        <SectionErrorBoundary sectionName="Asset Tab Content">
-          <AssetTabContent
-            activeAsset={activeAsset}
-            visiblePortfolio={visiblePortfolio}
-            portfolios={portfolios}
-            priceStatus={priceStatus}
-            onAddHoldingClick={() => setShowAddModal(true)}
-            onDeleteStock={tableDeleteHandler}
-            onUpdateStock={tableUpdateHandler}
-            onAddAsset={addAsset}
-            onUpdateAsset={updateAsset}
-            onDeleteAsset={deleteAsset}
-            quickAddTarget={quickAddTarget}
-            onQuickAddComplete={() => setQuickAddTarget(null)}
-          />
-        </SectionErrorBoundary>
       </div>
 
       <footer className="mt-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
@@ -559,6 +734,15 @@ export default function App() {
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav activeAsset={activeAsset} onChangeAsset={setActiveAsset} />
 
+      {/* Floating Add Menu (FAB) */}
+      <FloatingAddMenu
+        onAddStock={() => setShowAddModal(true)}
+        onAddAsset={(type) => {
+          setActiveAsset(type);
+          setQuickAddTarget(type);
+        }}
+      />
+
       {/* Add Holding Modal */}
       {showAddModal && (
         <AddHoldingModal
@@ -583,6 +767,16 @@ export default function App() {
         onClose={() => setRenameTarget(null)}
         onSubmit={handleRenameSubmit}
       />
+
+      {/* Mobile Alerts Full-Screen View */}
+      {showMobileAlerts && (
+        <MobileAlertsView
+          alerts={visibleAlerts}
+          onClose={() => setShowMobileAlerts(false)}
+          onDismissAlert={handleDismissAlert}
+          onDismissAll={handleDismissAll}
+        />
+      )}
     </div>
   );
 }

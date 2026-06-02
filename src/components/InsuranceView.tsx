@@ -11,6 +11,7 @@ interface InsuranceViewProps {
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
+  autoOpenAddModal?: boolean;
 }
 
 const TYPE_OPTIONS: Array<Insurance['insurance_type']> = ['health', 'term', 'life', 'motor', 'other'];
@@ -37,6 +38,7 @@ export default React.memo(function InsuranceView({
   onAdd,
   onUpdate,
   onDelete,
+  autoOpenAddModal,
 }: InsuranceViewProps) {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Insurance | null>(null);
@@ -70,6 +72,12 @@ export default React.memo(function InsuranceView({
     setError('');
     setShowModal(true);
   }
+
+  React.useEffect(() => {
+    if (autoOpenAddModal) {
+      handleOpenAdd();
+    }
+  }, [autoOpenAddModal]);
 
   function handleOpenEdit(i: Insurance) {
     setEditing(i);

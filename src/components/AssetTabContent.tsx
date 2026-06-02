@@ -10,7 +10,7 @@ import InsuranceView from './InsuranceView';
 import DocumentVaultView from './DocumentVaultView';
 import { pnlColor, formatPercent, formatINR } from '../utils/formatters';
 
-type AssetTab = 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents';
 
 interface AssetTabContentProps {
   activeAsset: AssetTab;
@@ -23,7 +23,7 @@ interface AssetTabContentProps {
   onAddAsset: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onUpdateAsset: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDeleteAsset: (assetType: string, id: string) => Promise<void>;
-  quickAddTarget?: 'fd' | 'gold' | null;
+  quickAddTarget?: 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null;
   onQuickAddComplete?: () => void;
 }
 
@@ -130,6 +130,7 @@ export default React.memo(function AssetTabContent({
             onAdd={onAddAsset}
             onUpdate={onUpdateAsset}
             onDelete={onDeleteAsset}
+            autoOpenAddModal={quickAddTarget === 'real_estate'}
           />
         )}
 
@@ -141,6 +142,7 @@ export default React.memo(function AssetTabContent({
             onAdd={onAddAsset}
             onUpdate={onUpdateAsset}
             onDelete={onDeleteAsset}
+            autoOpenAddModal={quickAddTarget === 'insurance'}
           />
         )}
 
@@ -150,6 +152,7 @@ export default React.memo(function AssetTabContent({
             portfolioName={visiblePortfolio.name}
             onAdd={onAddAsset}
             onDelete={onDeleteAsset}
+            autoOpenAddModal={quickAddTarget === 'documents'}
           />
         )}
       </div>
@@ -256,7 +259,7 @@ export default React.memo(function AssetTabContent({
 
       {activeAsset === 'real_estate' && (
         <div className="space-y-8">
-          {portfolios.map((p) => (
+          {portfolios.map((p, index) => (
             <div key={p.name}>
               <div className="flex items-center gap-3 mb-3">
                 <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
@@ -269,6 +272,7 @@ export default React.memo(function AssetTabContent({
                 onAdd={onAddAsset}
                 onUpdate={onUpdateAsset}
                 onDelete={onDeleteAsset}
+                autoOpenAddModal={index === 0 && quickAddTarget === 'real_estate'}
               />
             </div>
           ))}
@@ -277,7 +281,7 @@ export default React.memo(function AssetTabContent({
 
       {activeAsset === 'insurance' && (
         <div className="space-y-8">
-          {portfolios.map((p) => (
+          {portfolios.map((p, index) => (
             <div key={p.name}>
               <div className="flex items-center gap-3 mb-3">
                 <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
@@ -290,6 +294,7 @@ export default React.memo(function AssetTabContent({
                 onAdd={onAddAsset}
                 onUpdate={onUpdateAsset}
                 onDelete={onDeleteAsset}
+                autoOpenAddModal={index === 0 && quickAddTarget === 'insurance'}
               />
             </div>
           ))}
@@ -298,7 +303,7 @@ export default React.memo(function AssetTabContent({
 
       {activeAsset === 'documents' && (
         <div className="space-y-8">
-          {portfolios.map((p) => (
+          {portfolios.map((p, index) => (
             <div key={p.name}>
               <div className="flex items-center gap-3 mb-3">
                 <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
@@ -309,6 +314,7 @@ export default React.memo(function AssetTabContent({
                 portfolioName={p.name}
                 onAdd={onAddAsset}
                 onDelete={onDeleteAsset}
+                autoOpenAddModal={index === 0 && quickAddTarget === 'documents'}
               />
             </div>
           ))}

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Portfolio } from '../types/portfolio';
 
 export type AlertSeverity = 'critical' | 'warning' | 'info';
-export type AlertType = '52w_high' | '52w_low' | 'fd_maturity' | 'insurance_renewal' | 'portfolio_swing';
+export type AlertType = '52w_high' | '52w_low' | 'fd_maturity' | 'insurance_renewal' | 'portfolio_swing' | 'document_expiry';
 
 export interface Alert {
   id: string;
@@ -104,6 +104,22 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
             severity: days <= 7 ? 'critical' : 'warning',
             title: `Insurance renewal ${days === 0 ? 'today' : `in ${days} days`}`,
             message: `${ins.policy_name} — ${ins.provider}`,
+            portfolioLabel: p.label,
+          });
+        }
+      }
+
+      // ── Document expiry within 30 days ──
+      for (const doc of p.documents) {
+        if (!doc.expiry_date) continue;
+        const days = Math.ceil((new Date(doc.expiry_date).getTime() - Date.now()) / (1000 * 3600 * 24));
+        if (days >= 0 && days <= 30) {
+          alerts.push({
+            id: `document-expiry-${p.name}-${doc.id}`,
+            type: 'document_expiry',
+            severity: days <= 7 ? 'critical' : 'warning',
+            title: `Document expiring ${days === 0 ? 'today' : `in ${days} days`}`,
+            message: `${doc.name}`,
             portfolioLabel: p.label,
           });
         }

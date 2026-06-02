@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { X, TrendingUp, TrendingDown, Landmark, Shield, Activity, AlertTriangle } from 'lucide-react';
+import { X, TrendingUp, TrendingDown, Landmark, Shield, Activity, AlertTriangle, FileText } from 'lucide-react';
 import { Alert, AlertType } from '../hooks/useAlerts';
 
 interface AlertsBannerProps {
@@ -36,6 +36,12 @@ const TYPE_CONFIG: Record<AlertType, { icon: React.ReactNode; color: string; bg:
     color: 'text-violet-700 dark:text-violet-400',
     bg: 'bg-violet-50 dark:bg-violet-900/20',
     border: 'border-violet-200 dark:border-violet-800',
+  },
+  document_expiry: {
+    icon: <FileText size={14} />,
+    color: 'text-slate-700 dark:text-slate-350',
+    bg: 'bg-slate-50 dark:bg-slate-800/40',
+    border: 'border-slate-200 dark:border-slate-700',
   },
 };
 

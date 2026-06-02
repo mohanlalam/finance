@@ -11,6 +11,7 @@ interface RealEstateViewProps {
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
+  autoOpenAddModal?: boolean;
 }
 
 const TYPE_OPTIONS: Array<RealEstate['property_type']> = ['apartment', 'house', 'plot', 'commercial'];
@@ -22,6 +23,7 @@ export default React.memo(function RealEstateView({
   onAdd,
   onUpdate,
   onDelete,
+  autoOpenAddModal,
 }: RealEstateViewProps) {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<RealEstate | null>(null);
@@ -55,6 +57,12 @@ export default React.memo(function RealEstateView({
     setError('');
     setShowModal(true);
   }
+
+  React.useEffect(() => {
+    if (autoOpenAddModal) {
+      handleOpenAdd();
+    }
+  }, [autoOpenAddModal]);
 
   function handleOpenEdit(r: RealEstate) {
     setEditing(r);

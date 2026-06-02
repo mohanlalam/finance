@@ -21,6 +21,7 @@ interface DocumentVaultViewProps {
   portfolioName: PortfolioName;
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
+  autoOpenAddModal?: boolean;
 }
 
 const FOLDERS: { key: AssetType; label: string; color: string }[] = [
@@ -29,7 +30,7 @@ const FOLDERS: { key: AssetType; label: string; color: string }[] = [
   { key: 'fd', label: 'Fixed Deposits', color: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400' },
   { key: 'gold', label: 'Gold', color: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400' },
   { key: 'real_estate', label: 'Real Estate', color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' },
-  { key: 'insurance', label: 'Insurance', color: 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-450' },
+  { key: 'insurance', label: 'Insurance', color: 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-455' },
 ];
 
 export default React.memo(function DocumentVaultView({
@@ -37,6 +38,7 @@ export default React.memo(function DocumentVaultView({
   portfolioName,
   onAdd,
   onDelete,
+  autoOpenAddModal,
 }: DocumentVaultViewProps) {
   const [activeFolder, setActiveFolder] = useState<AssetType>('general');
   const [uploading, setUploading] = useState(false);
@@ -47,6 +49,12 @@ export default React.memo(function DocumentVaultView({
   const [documentName, setDocumentName] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (autoOpenAddModal) {
+      fileInputRef.current?.click();
+    }
+  }, [autoOpenAddModal]);
 
   function renderExpiryBadge(expiryDateStr?: string) {
     if (!expiryDateStr) return null;

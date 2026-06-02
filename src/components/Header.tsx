@@ -17,6 +17,8 @@ interface HeaderProps {
   onImportCSV: (rows: ImportRow[], portfolioName: string) => Promise<void>;
   portfolioOptions: { name: string; label: string }[];
   alerts: Alert[];
+  onDismissAlert: (id: string) => void;
+  onDismissAll: () => void;
   darkMode: boolean;
   onToggleDarkMode: () => void;
 }
@@ -83,6 +85,8 @@ function Header({
   onImportCSV,
   portfolioOptions,
   alerts,
+  onDismissAlert,
+  onDismissAll,
   darkMode,
   onToggleDarkMode,
 }: HeaderProps) {
@@ -90,35 +94,10 @@ function Header({
   const isLoading = status === 'loading';
   const [openAlerts, setOpenAlerts] = useState(false);
 
-  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(() => {
-    try {
-      const saved = sessionStorage.getItem('finance_dismissed_alerts');
-      return saved ? new Set(JSON.parse(saved)) : new Set();
-    } catch {
-      return new Set();
-    }
-  });
+  const visibleAlerts = alerts;
 
-  const saveDismissed = (newSet: Set<string>) => {
-    setDismissedAlerts(newSet);
-    try {
-      sessionStorage.setItem('finance_dismissed_alerts', JSON.stringify(Array.from(newSet)));
-    } catch { /* ignore */ }
-  };
-
-  const handleDismissAlert = (id: string) => {
-    const next = new Set(dismissedAlerts);
-    next.add(id);
-    saveDismissed(next);
-  };
-
-  const handleDismissAll = () => {
-    const next = new Set(dismissedAlerts);
-    alerts.forEach((a) => next.add(a.id));
-    saveDismissed(next);
-  };
-
-  const visibleAlerts = alerts.filter((a) => !dismissedAlerts.has(a.id));
+  const handleDismissAlert = onDismissAlert;
+  const handleDismissAll = onDismissAll;
 
   return (
     <header className="bg-slate-900 text-white relative z-40">
