@@ -60,6 +60,18 @@ const SEVERITY_BADGE: Record<string, string> = {
   info: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
 };
 
+function formatRelativeTime(date: Date | null): string {
+  if (!date) return '';
+  const diffMs = Date.now() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  if (diffSec < 30) return 'just now';
+  if (diffSec < 60) return `${diffSec}s ago`;
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  return `${diffHr}h ago`;
+}
+
 function Header({
   totalCurrentValue,
   totalPnL,
@@ -152,6 +164,13 @@ function Header({
                   {isLoading ? 'Fetching...' : lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Fetch live prices'}
                 </span>
               </button>
+              {/* Last synced badge — always visible */}
+              {lastUpdated && !isLoading && (
+                <span className="text-[10px] font-medium text-slate-500 bg-slate-800 border border-slate-700 px-2 py-1 rounded-md hidden sm:inline-flex items-center gap-1" title={lastUpdated.toLocaleString('en-IN')}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Synced {formatRelativeTime(lastUpdated)}
+                </span>
+              )}
               <ExportPanel
                 portfolios={portfolios}
                 onImportCSV={onImportCSV}

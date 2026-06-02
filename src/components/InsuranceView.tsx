@@ -168,10 +168,21 @@ export default React.memo(function InsuranceView({
         </div>
 
         {insurances.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 dark:text-slate-500">
-            <Shield size={32} className="mx-auto text-slate-300 dark:text-slate-650 mb-3" />
-            <p className="text-sm font-semibold">No insurance policies tracked</p>
-            <p className="text-xs mt-1">Add a health, life, term, or motor policy.</p>
+          <div className="p-16 text-center">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-950/30 dark:to-pink-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
+              <Shield size={36} className="text-rose-400 dark:text-rose-500" />
+            </div>
+            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">No Insurance Policies Yet</h4>
+            <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
+              Register health, term, life, or motor policies to track coverage, premiums, and renewal deadlines.
+            </p>
+            <button
+              onClick={handleOpenAdd}
+              className="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-rose-500/20"
+            >
+              <Plus size={15} />
+              Add Your First Policy
+            </button>
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700/50">

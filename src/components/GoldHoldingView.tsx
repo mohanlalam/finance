@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { GoldHolding, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/formatters';
 import { Plus, Trash2, Edit2, Coins, TrendingUp, Scale, FileText, X } from 'lucide-react';
@@ -11,6 +11,7 @@ interface GoldHoldingViewProps {
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
+  autoOpenAddModal?: boolean;
 }
 
 const PURITY_OPTIONS = ['24K', '22K', '20K', '18K', '14K'];
@@ -22,6 +23,7 @@ export default React.memo(function GoldHoldingView({
   onAdd,
   onUpdate,
   onDelete,
+  autoOpenAddModal,
 }: GoldHoldingViewProps) {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<GoldHolding | null>(null);
@@ -41,7 +43,7 @@ export default React.memo(function GoldHoldingView({
   const totalGain = totalCurrent - totalPurchase;
   const gainPct = totalPurchase > 0 ? (totalGain / totalPurchase) * 100 : 0;
 
-  function handleOpenAdd() {
+  const handleOpenAdd = useCallback(() => {
     setEditing(null);
     setItemName('');
     setPurity('22K');
@@ -51,7 +53,13 @@ export default React.memo(function GoldHoldingView({
     setPurchaseDate('');
     setError('');
     setShowModal(true);
-  }
+  }, []);
+
+  React.useEffect(() => {
+    if (autoOpenAddModal) {
+      handleOpenAdd();
+    }
+  }, [autoOpenAddModal, handleOpenAdd]);
 
   function handleOpenEdit(g: GoldHolding) {
     setEditing(g);
@@ -148,10 +156,21 @@ export default React.memo(function GoldHoldingView({
         </div>
 
         {goldHoldings.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 dark:text-slate-500">
-            <Coins size={32} className="mx-auto text-slate-300 dark:text-slate-655 mb-3" />
-            <p className="text-sm font-semibold">No gold holdings yet</p>
-            <p className="text-xs mt-1">Add coins, jewelry, or bars to start tracking.</p>
+          <div className="p-16 text-center">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-950/30 dark:to-yellow-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
+              <Coins size={36} className="text-amber-400 dark:text-amber-500" />
+            </div>
+            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">No Gold Holdings Yet</h4>
+            <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
+              Track coins, jewelry, or bars by weight and purity to monitor appreciation over time.
+            </p>
+            <button
+              onClick={handleOpenAdd}
+              className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-amber-500/20"
+            >
+              <Plus size={15} />
+              Add Your First Gold Item
+            </button>
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700/50">

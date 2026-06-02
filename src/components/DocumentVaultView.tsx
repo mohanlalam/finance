@@ -277,10 +277,21 @@ export default React.memo(function DocumentVaultView({
         </div>
 
         {folderDocs.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 dark:text-slate-500">
-            <Folder size={32} className="mx-auto text-slate-300 dark:text-slate-655 mb-3" />
-            <p className="text-sm font-semibold">No documents in this folder</p>
-            <p className="text-xs mt-1">Upload PDF, image, or other files to keep records here.</p>
+          <div className="p-16 text-center">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center mx-auto mb-5 shadow-sm">
+              <Folder size={36} className="text-slate-400 dark:text-slate-500" />
+            </div>
+            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">No Documents in This Folder</h4>
+            <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
+              Upload PDFs, receipts, or policy documents to keep a secure digital record of your assets.
+            </p>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-600 dark:hover:bg-slate-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+            >
+              <Upload size={15} />
+              Upload Your First Document
+            </button>
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700/50">

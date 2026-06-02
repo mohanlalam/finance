@@ -1,5 +1,5 @@
-import React from 'react';
-import { TrendingUp, TrendingDown, AlertTriangle, Landmark, Shield, Activity, Crown, Target, BarChart3 } from 'lucide-react';
+import React, { useState } from 'react';
+import { TrendingUp, TrendingDown, AlertTriangle, Landmark, Shield, Activity, Crown, Target, BarChart3, Filter } from 'lucide-react';
 import { formatINR, formatPercent } from '../utils/formatters';
 import {
   PortfolioInsights,
@@ -252,100 +252,159 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
 
 /* ── Main Component ── */
 
+type InsightFilter = 'all' | 'stocks' | 'fds' | 'insurance' | 'high_risk' | 'due_soon';
+
+const FILTERS: { id: InsightFilter; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'stocks', label: 'Stocks' },
+  { id: 'fds', label: 'FDs' },
+  { id: 'insurance', label: 'Insurance' },
+  { id: 'high_risk', label: 'High Risk' },
+  { id: 'due_soon', label: 'Due Soon' },
+];
+
 export default React.memo(function InsightsPanel({ insights }: InsightsPanelProps) {
+  const [activeFilter, setActiveFilter] = useState<InsightFilter>('all');
+
+  const f = activeFilter;
+  const showStocks = f === 'all' || f === 'stocks' || f === 'high_risk';
+  const showFDs = f === 'all' || f === 'fds' || f === 'due_soon';
+  const showInsurance = f === 'all' || f === 'insurance' || f === 'due_soon';
+  const showRisk = f === 'all' || f === 'high_risk';
+  const showDrift = f === 'all' || f === 'high_risk' || f === 'fds';
+
   return (
     <div
       role="region"
       aria-label="Portfolio Insights"
       className="space-y-4"
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm">
           <BarChart3 size={14} className="text-white" />
         </div>
         <h2 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Portfolio Insights</h2>
       </div>
 
-      {/* Row 1 — Biggest Mover + Top Holdings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card
-          title="Today's Biggest Mover"
-          icon={<Activity size={14} className="text-amber-500 dark:text-amber-405" />}
-          accent="amber"
-        >
-          <BiggestMover mover={insights.biggestMover} />
-        </Card>
-
-        <Card
-          title="Top 5 by Value"
-          icon={<Crown size={14} className="text-blue-500" />}
-          accent="blue"
-        >
-          <TopHoldings items={insights.topByValue} />
-        </Card>
-
-        <Card
-          title="Best / Worst by Member"
-          icon={<Target size={14} className="text-violet-500" />}
-          accent="violet"
-        >
-          <BestWorstPerformers items={insights.portfolioBestWorst} />
-        </Card>
+      {/* Filter pills */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 -mb-1 scrollbar-none">
+        <Filter size={13} className="text-slate-400 dark:text-slate-500 shrink-0" />
+        {FILTERS.map((filter) => {
+          const isActive = activeFilter === filter.id;
+          return (
+            <button
+              key={filter.id}
+              onClick={() => setActiveFilter(filter.id)}
+              className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
+                isActive
+                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20'
+                  : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              {filter.label}
+            </button>
+          );
+        })}
       </div>
+
+      {/* Row 1 — Biggest Mover + Top Holdings */}
+      {showStocks && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card
+            title="Today's Biggest Mover"
+            icon={<Activity size={14} className="text-amber-500 dark:text-amber-405" />}
+            accent="amber"
+          >
+            <BiggestMover mover={insights.biggestMover} />
+          </Card>
+
+          <Card
+            title="Top 5 by Value"
+            icon={<Crown size={14} className="text-blue-500" />}
+            accent="blue"
+          >
+            <TopHoldings items={insights.topByValue} />
+          </Card>
+
+          <Card
+            title="Best / Worst by Member"
+            icon={<Target size={14} className="text-violet-500" />}
+            accent="violet"
+          >
+            <BestWorstPerformers items={insights.portfolioBestWorst} />
+          </Card>
+        </div>
+      )}
 
       {/* Row 2 — Gainers, Losers, Allocation Drift */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card
-          title="Top Gainers"
-          icon={<TrendingUp size={14} className="text-emerald-500" />}
-          accent="emerald"
-        >
-          <GainersList items={insights.topGainers} type="gain" />
-        </Card>
+      {(showStocks || showDrift) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {showStocks && (
+            <Card
+              title="Top Gainers"
+              icon={<TrendingUp size={14} className="text-emerald-500" />}
+              accent="emerald"
+            >
+              <GainersList items={insights.topGainers} type="gain" />
+            </Card>
+          )}
 
-        <Card
-          title="Top Losers"
-          icon={<TrendingDown size={14} className="text-red-500" />}
-          accent="red"
-        >
-          <GainersList items={insights.topLosers} type="loss" />
-        </Card>
+          {showStocks && (
+            <Card
+              title="Top Losers"
+              icon={<TrendingDown size={14} className="text-red-500" />}
+              accent="red"
+            >
+              <GainersList items={insights.topLosers} type="loss" />
+            </Card>
+          )}
 
-        <Card
-          title="Asset Allocation Drift"
-          icon={<Target size={14} className="text-slate-500" />}
-          accent="slate"
-        >
-          <AllocationDrift slices={insights.allocationSlices} />
-        </Card>
-      </div>
+          {showDrift && (
+            <Card
+              title="Asset Allocation Drift"
+              icon={<Target size={14} className="text-slate-500" />}
+              accent="slate"
+            >
+              <AllocationDrift slices={insights.allocationSlices} />
+            </Card>
+          )}
+        </div>
+      )}
 
       {/* Row 3 — Concentration + Reminders */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card
-          title="Concentration Risk"
-          icon={<AlertTriangle size={14} className="text-amber-500" />}
-          accent="amber"
-        >
-          <ConcentrationRisk warnings={insights.concentrationWarnings} />
-        </Card>
+      {(showRisk || showFDs || showInsurance) && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {showRisk && (
+            <Card
+              title="Concentration Risk"
+              icon={<AlertTriangle size={14} className="text-amber-500" />}
+              accent="amber"
+            >
+              <ConcentrationRisk warnings={insights.concentrationWarnings} />
+            </Card>
+          )}
 
-        <Card
-          title="FD Maturity (30d)"
-          icon={<Landmark size={14} className="text-blue-500" />}
-          accent="blue"
-        >
-          <FDReminders alerts={insights.fdMaturityAlerts} />
-        </Card>
+          {showFDs && (
+            <Card
+              title="FD Maturity (30d)"
+              icon={<Landmark size={14} className="text-blue-500" />}
+              accent="blue"
+            >
+              <FDReminders alerts={insights.fdMaturityAlerts} />
+            </Card>
+          )}
 
-        <Card
-          title="Insurance Renewal (60d)"
-          icon={<Shield size={14} className="text-rose-500" />}
-          accent="rose"
-        >
-          <InsuranceReminders alerts={insights.insuranceRenewalAlerts} />
-        </Card>
-      </div>
+          {showInsurance && (
+            <Card
+              title="Insurance Renewal (60d)"
+              icon={<Shield size={14} className="text-rose-500" />}
+              accent="rose"
+            >
+              <InsuranceReminders alerts={insights.insuranceRenewalAlerts} />
+            </Card>
+          )}
+        </div>
+      )}
     </div>
   );
 });

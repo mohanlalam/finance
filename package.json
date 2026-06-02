@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "verify": "npm run lint && npm run typecheck && npm run build",
     "mobile:sync": "npm run build && cd ../android/mobile && npx cap sync android",
     "mobile:run": "npm run build && cd ../android/mobile && npx cap sync android && npx cap run android --target=emulator-5554"
   },

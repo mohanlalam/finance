@@ -10,6 +10,7 @@ interface FixedDepositViewProps {
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
+  autoOpenAddModal?: boolean;
 }
 
 function FixedDepositView({
@@ -19,6 +20,7 @@ function FixedDepositView({
   onAdd,
   onUpdate,
   onDelete,
+  autoOpenAddModal,
 }: FixedDepositViewProps) {
   const [showModal, setShowModal] = useState(false);
   const [editingFd, setEditingFd] = useState<FixedDeposit | null>(null);
@@ -63,7 +65,7 @@ function FixedDepositView({
     ? fixedDeposits.reduce((s, f) => s + Number(f.interest_rate) * Number(f.principal_amount), 0) / totalPrincipal
     : 0;
 
-  function handleOpenAdd() {
+  const handleOpenAdd = useCallback(() => {
     setEditingFd(null);
     setBankName('');
     setPrincipalAmount('');
@@ -74,7 +76,13 @@ function FixedDepositView({
     setStatus('active');
     setError('');
     setShowModal(true);
-  }
+  }, []);
+
+  React.useEffect(() => {
+    if (autoOpenAddModal) {
+      handleOpenAdd();
+    }
+  }, [autoOpenAddModal, handleOpenAdd]);
 
   function handleOpenEdit(fd: FixedDeposit) {
     setEditingFd(fd);
@@ -193,10 +201,21 @@ function FixedDepositView({
         </div>
 
         {fixedDeposits.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 dark:text-slate-500">
-            <Landmark size={32} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" aria-hidden="true" />
-            <p className="text-sm font-semibold">No Fixed Deposits found</p>
-            <p className="text-xs mt-1">Add your first FD to begin tracking interest returns.</p>
+          <div className="p-16 text-center">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
+              <Landmark size={36} className="text-indigo-400 dark:text-indigo-500" aria-hidden="true" />
+            </div>
+            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">No Fixed Deposits Yet</h4>
+            <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
+              Start tracking your FDs to monitor maturity timelines, interest accrual, and upcoming deadlines.
+            </p>
+            <button
+              onClick={handleOpenAdd}
+              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-indigo-500/20"
+            >
+              <Plus size={15} aria-hidden="true" />
+              Create Your First FD
+            </button>
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label="Fixed deposits list">

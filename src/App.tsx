@@ -15,6 +15,7 @@ import RenamePortfolioModal from './components/RenamePortfolioModal';
 import AssetTabContent from './components/AssetTabContent';
 import SectionErrorBoundary from './components/SectionErrorBoundary';
 import InsightsPanel from './components/InsightsPanel';
+import QuickActions from './components/QuickActions';
 import { ImportRow } from './components/ExportPanel';
 import { AddHoldingPayload } from './components/AddHoldingModal';
 
@@ -34,8 +35,21 @@ type AssetTab = 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'docume
 
 export default function App() {
   const [pinVerified, setPinVerified] = useState(() => !isPinConfigured() || isSessionVerified());
-  const [activeTab, setActiveTab] = useState<PortfolioName>('all');
-  const [activeAsset, setActiveAsset] = useState<AssetTab>('stocks');
+  const [activeTab, setActiveTab] = useState<PortfolioName>(() => {
+    try {
+      return localStorage.getItem('finance_last_family_tab') || 'all';
+    } catch {
+      return 'all';
+    }
+  });
+  const [activeAsset, setActiveAsset] = useState<AssetTab>(() => {
+    try {
+      return (localStorage.getItem('finance_last_asset_tab') as AssetTab) || 'stocks';
+    } catch {
+      return 'stocks';
+    }
+  });
+  const [quickAddTarget, setQuickAddTarget] = useState<'fd' | 'gold' | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddFamily, setShowAddFamily] = useState(false);
   const [renameTarget, setRenameTarget] = useState<{ id: string; name: string; label: string } | null>(null);
@@ -59,6 +73,28 @@ export default function App() {
       }
     } catch { /* ignore */ }
   }, [darkMode]);
+
+  // Persist active tabs
+  useEffect(() => {
+    try { localStorage.setItem('finance_last_family_tab', activeTab); } catch { /* ignore */ }
+  }, [activeTab]);
+
+  useEffect(() => {
+    try { localStorage.setItem('finance_last_asset_tab', activeAsset); } catch { /* ignore */ }
+  }, [activeAsset]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    function handleKeyboard(e: KeyboardEvent) {
+      // Ctrl+Shift+R — Refresh prices
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
+        e.preventDefault();
+        refreshPricesRef.current();
+      }
+    }
+    window.addEventListener('keydown', handleKeyboard);
+    return () => window.removeEventListener('keydown', handleKeyboard);
+  }, []);
 
   const handleAuthExpired = useCallback(() => {
     setPinVerified(false);
@@ -244,6 +280,20 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-16 md:pb-0 text-slate-800 dark:text-slate-100 transition-colors">
+      {/* Print-only report header */}
+      <div className="print-report-header hidden items-center justify-between px-8 py-6 border-b-2 border-slate-200 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Family Wealth Report</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Generated on {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-lg font-bold text-slate-800">{formatINR(summaryData.totalCurrentValue)}</p>
+          <p className={`text-sm font-semibold ${summaryData.totalPnL >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+            {summaryData.totalPnL >= 0 ? '+' : ''}{formatINR(summaryData.totalPnL)} ({formatPercent(summaryData.totalPnLPercent)})
+          </p>
+        </div>
+      </div>
+
       <Header
         totalCurrentValue={summaryData.totalCurrentValue}
         totalPnLPercent={summaryData.totalPnLPercent}
@@ -296,7 +346,18 @@ export default function App() {
         )}
 
         {/* Search Bar */}
-        <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
+        <div data-search-bar>
+          <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
+        </div>
+
+        {/* Quick Actions */}
+        <QuickActions
+          onAddStock={() => setShowAddModal(true)}
+          onAddFD={() => { setActiveAsset('fd'); setQuickAddTarget('fd'); }}
+          onAddGold={() => { setActiveAsset('gold'); setQuickAddTarget('gold'); }}
+          onRefresh={refreshPrices}
+          isRefreshing={isLoadingPrices}
+        />
 
         {/* Family Tabs Row */}
         <FamilyTabBar
@@ -468,6 +529,8 @@ export default function App() {
             onAddAsset={addAsset}
             onUpdateAsset={updateAsset}
             onDeleteAsset={deleteAsset}
+            quickAddTarget={quickAddTarget}
+            onQuickAddComplete={() => setQuickAddTarget(null)}
           />
         </SectionErrorBoundary>
       </div>

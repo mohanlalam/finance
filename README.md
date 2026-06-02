@@ -184,6 +184,10 @@ The app will be available at `http://localhost:5173`.
 ### 6. Code Quality & Verification
 To verify that the code passes linting rules and TypeScript compilation check, run:
 ```bash
+npm run verify
+```
+This runs lint, typecheck, and a production build in sequence. You can also run individual checks:
+```bash
 npm run lint
 npm run typecheck
 ```
@@ -199,6 +203,7 @@ npm run typecheck
 | **Preview** | `npm run preview` | Preview the production build locally |
 | **Lint** | `npm run lint` | Run ESLint checks |
 | **Type Check** | `npm run typecheck` | Run TypeScript compiler checks (no emit) |
+| **Verify All** | `npm run verify` | Run lint + typecheck + build in sequence |
 
 ---
 

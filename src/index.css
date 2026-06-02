@@ -49,3 +49,113 @@ body {
 .animate-modal-content {
   animation: modalContent 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ── Mobile spacing refinements ── */
+@media (max-width: 640px) {
+  .max-w-screen-2xl {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+}
+
+/* ── Print / PDF Report Layout ── */
+@media print {
+  /* Show print-only header */
+  .print-report-header {
+    display: flex !important;
+  }
+
+  /* Hide all interactive / navigation chrome */
+  header,
+  nav,
+  footer,
+  .print\\:hidden,
+  [role="navigation"],
+  [aria-label="Asset navigation"],
+  button,
+  input,
+  select,
+  [data-quick-actions],
+  [data-search-bar],
+  [data-alerts-banner] {
+    display: none !important;
+  }
+
+  /* Force light mode colors */
+  * {
+    color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body,
+  .dark body {
+    background: white !important;
+    color: #1e293b !important;
+  }
+
+  .dark .bg-slate-900,
+  .dark .bg-slate-800,
+  .bg-slate-900,
+  .bg-slate-50 {
+    background: white !important;
+  }
+
+  .dark .text-slate-100,
+  .dark .text-slate-200,
+  .dark .text-slate-300 {
+    color: #1e293b !important;
+  }
+
+  .dark .text-slate-400,
+  .dark .text-slate-500 {
+    color: #64748b !important;
+  }
+
+  .dark .border-slate-700,
+  .dark .border-slate-800 {
+    border-color: #e2e8f0 !important;
+  }
+
+  /* Remove shadows and rounded corners for print */
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg,
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: none !important;
+  }
+
+  /* Page breaks */
+  .rounded-2xl,
+  [role="region"],
+  [role="tabpanel"] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Remove bottom padding for mobile nav */
+  .pb-16 {
+    padding-bottom: 0 !important;
+  }
+
+  /* Ensure tables fit on page */
+  table {
+    font-size: 10px !important;
+  }
+
+  /* Gradient cards — flatten for print */
+  [class*="bg-gradient"] {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+  }
+  [class*="bg-gradient"] * {
+    color: #1e293b !important;
+  }
+
+  /* Page setup */
+  @page {
+    margin: 1.5cm;
+    size: A4;
+  }
+}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, FileSpreadsheet, FileText, Database, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, FileSpreadsheet, FileText, Database, X, Loader2, CheckCircle, AlertCircle, TrendingUp, Landmark, FolderOpen } from 'lucide-react';
 import { Portfolio } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
 import Modal from './Modal';
@@ -97,6 +97,39 @@ function allAssetsToCSV(portfolios: Portfolio[]): string {
   }
 
   return sections.join('\n');
+}
+
+function stocksToCSV(portfolios: Portfolio[]): string {
+  const lines: string[] = [];
+  lines.push(csvRow(['Portfolio', 'Ticker', 'Stock Name', 'Qty', 'Avg Price', 'LTP', 'Current Value', 'P&L', 'P&L %']));
+  for (const p of portfolios) {
+    for (const h of p.holdings) {
+      lines.push(csvRow([p.label, h.ticker, h.stockName, h.qty, h.avgPrice, h.ltp, h.currentValue, h.unrealizedPnL, h.pnlPercent.toFixed(2)]));
+    }
+  }
+  return lines.join('\n');
+}
+
+function fdsToCSV(portfolios: Portfolio[]): string {
+  const lines: string[] = [];
+  lines.push(csvRow(['Portfolio', 'Bank', 'Principal', 'Rate %', 'Start Date', 'Maturity Date', 'Current Value', 'Status']));
+  for (const p of portfolios) {
+    for (const f of p.fixedDeposits) {
+      lines.push(csvRow([p.label, f.bank_name, f.principal_amount, f.interest_rate, f.start_date, f.maturity_date || 'N/A', getFDEffectiveValue(f).toFixed(2), f.status]));
+    }
+  }
+  return lines.join('\n');
+}
+
+function documentsToCSV(portfolios: Portfolio[]): string {
+  const lines: string[] = [];
+  lines.push(csvRow(['Portfolio', 'Document Name', 'Asset Type', 'File Type', 'Expiry Date', 'File Path']));
+  for (const p of portfolios) {
+    for (const d of p.documents) {
+      lines.push(csvRow([p.label, d.name, d.asset_type, d.file_type || '', d.expiry_date || '', d.file_path]));
+    }
+  }
+  return lines.join('\n');
 }
 
 /* ── CSV Parser ── */
@@ -253,29 +286,56 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 w-56 py-1">
+          <div className="absolute right-0 top-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 w-60 py-1">
+            <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Export All</div>
             <button
               onClick={handleExportCSV}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
             >
               <FileSpreadsheet size={14} className="text-emerald-500" />
-              Export to Excel (CSV)
+              Full Export (CSV)
             </button>
             <button
               onClick={handleExportPDF}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
             >
               <FileText size={14} className="text-red-500" />
-              Export to PDF (Print)
+              PDF Report (Print)
             </button>
             <button
               onClick={handleExportJSON}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
             >
               <Database size={14} className="text-blue-500" />
-              Backup JSON
+              Full Backup (JSON)
             </button>
+
             <div className="border-t border-slate-100 dark:border-slate-700 my-1" />
+            <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Export Specific</div>
+            <button
+              onClick={() => { downloadFile(stocksToCSV(portfolios), `stocks-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv'); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+            >
+              <TrendingUp size={14} className="text-blue-500" />
+              Stocks Only (CSV)
+            </button>
+            <button
+              onClick={() => { downloadFile(fdsToCSV(portfolios), `fds-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv'); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+            >
+              <Landmark size={14} className="text-indigo-500" />
+              FDs Only (CSV)
+            </button>
+            <button
+              onClick={() => { downloadFile(documentsToCSV(portfolios), `documents-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv'); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+            >
+              <FolderOpen size={14} className="text-slate-500" />
+              Documents Only (CSV)
+            </button>
+
+            <div className="border-t border-slate-100 dark:border-slate-700 my-1" />
+            <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Import</div>
             <button
               onClick={() => { setShowImport(true); setOpen(false); }}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"

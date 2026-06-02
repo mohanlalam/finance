@@ -23,6 +23,8 @@ interface AssetTabContentProps {
   onAddAsset: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onUpdateAsset: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDeleteAsset: (assetType: string, id: string) => Promise<void>;
+  quickAddTarget?: 'fd' | 'gold' | null;
+  onQuickAddComplete?: () => void;
 }
 
 export default React.memo(function AssetTabContent({
@@ -36,7 +38,15 @@ export default React.memo(function AssetTabContent({
   onAddAsset,
   onUpdateAsset,
   onDeleteAsset,
+  quickAddTarget,
+  onQuickAddComplete,
 }: AssetTabContentProps) {
+  
+  React.useEffect(() => {
+    if (quickAddTarget && quickAddTarget === activeAsset) {
+      onQuickAddComplete?.();
+    }
+  }, [quickAddTarget, activeAsset, onQuickAddComplete]);
   
   if (visiblePortfolio) {
     // ─── Single Portfolio View ───
@@ -96,6 +106,7 @@ export default React.memo(function AssetTabContent({
             onAdd={onAddAsset}
             onUpdate={onUpdateAsset}
             onDelete={onDeleteAsset}
+            autoOpenAddModal={quickAddTarget === 'fd'}
           />
         )}
 
@@ -107,6 +118,7 @@ export default React.memo(function AssetTabContent({
             onAdd={onAddAsset}
             onUpdate={onUpdateAsset}
             onDelete={onDeleteAsset}
+            autoOpenAddModal={quickAddTarget === 'gold'}
           />
         )}
 
@@ -170,8 +182,12 @@ export default React.memo(function AssetTabContent({
                   </span>
                 </div>
                 {p.holdings.length === 0 ? (
-                  <div className="bg-white dark:bg-slate-800 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl py-6 text-center text-xs text-slate-400 dark:text-slate-500">
-                    No stock holdings yet.
+                  <div className="bg-white dark:bg-slate-800 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl py-10 text-center">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 flex items-center justify-center mx-auto mb-4 shadow-sm">
+                      <Wifi size={24} className="text-blue-400 dark:text-blue-500" />
+                    </div>
+                    <p className="text-sm font-bold text-slate-600 dark:text-slate-300 mb-1">No stock holdings yet</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">Add stocks or ETFs to start tracking live prices and P&amp;L.</p>
                   </div>
                 ) : (
                   <PortfolioTable
@@ -196,7 +212,7 @@ export default React.memo(function AssetTabContent({
 
       {activeAsset === 'fd' && (
         <div className="space-y-8">
-          {portfolios.map((p) => (
+          {portfolios.map((p, index) => (
             <div key={p.name}>
               <div className="flex items-center gap-3 mb-3">
                 <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
@@ -209,6 +225,7 @@ export default React.memo(function AssetTabContent({
                 onAdd={onAddAsset}
                 onUpdate={onUpdateAsset}
                 onDelete={onDeleteAsset}
+                autoOpenAddModal={index === 0 && quickAddTarget === 'fd'}
               />
             </div>
           ))}
@@ -217,7 +234,7 @@ export default React.memo(function AssetTabContent({
 
       {activeAsset === 'gold' && (
         <div className="space-y-8">
-          {portfolios.map((p) => (
+          {portfolios.map((p, index) => (
             <div key={p.name}>
               <div className="flex items-center gap-3 mb-3">
                 <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
@@ -230,6 +247,7 @@ export default React.memo(function AssetTabContent({
                 onAdd={onAddAsset}
                 onUpdate={onUpdateAsset}
                 onDelete={onDeleteAsset}
+                autoOpenAddModal={index === 0 && quickAddTarget === 'gold'}
               />
             </div>
           ))}
