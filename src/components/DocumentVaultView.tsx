@@ -16,9 +16,16 @@ import Modal from './Modal';
 
 type AssetType = 'general' | 'stock' | 'fd' | 'gold' | 'real_estate' | 'insurance';
 
+interface PortfolioOption {
+  name: string;
+  label: string;
+}
+
 interface DocumentVaultViewProps {
   portfolio: Portfolio;
   portfolioName: PortfolioName;
+  portfolioOptions: PortfolioOption[];
+  portfolios: Portfolio[];
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
@@ -36,6 +43,8 @@ const FOLDERS: { key: AssetType; label: string; color: string }[] = [
 export default React.memo(function DocumentVaultView({
   portfolio,
   portfolioName,
+  portfolioOptions,
+  portfolios,
   onAdd,
   onDelete,
   autoOpenAddModal,
@@ -45,6 +54,7 @@ export default React.memo(function DocumentVaultView({
   const [uploadError, setUploadError] = useState('');
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [formPortfolio, setFormPortfolio] = useState(() => portfolioName);
   const [linkedAssetId, setLinkedAssetId] = useState<string>('');
   const [documentName, setDocumentName] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
@@ -55,6 +65,10 @@ export default React.memo(function DocumentVaultView({
       fileInputRef.current?.click();
     }
   }, [autoOpenAddModal]);
+
+  const selectedPortfolioObj = useMemo(() => {
+    return portfolios.find((p) => p.name === formPortfolio) || portfolio;
+  }, [portfolios, formPortfolio, portfolio]);
 
   function renderExpiryBadge(expiryDateStr?: string) {
     if (!expiryDateStr) return null;
@@ -84,22 +98,22 @@ export default React.memo(function DocumentVaultView({
 
   const assetOptions = useMemo<{ id: string; label: string }[]>(() => {
     if (activeFolder === 'stock') {
-      return portfolio.holdings.filter((h): h is Holding & { id: string } => !!h.id).map((h) => ({ id: h.id, label: `${h.ticker} — ${h.stockName}` }));
+      return selectedPortfolioObj.holdings.filter((h): h is Holding & { id: string } => !!h.id).map((h) => ({ id: h.id, label: `${h.ticker} — ${h.stockName}` }));
     }
     if (activeFolder === 'fd') {
-      return portfolio.fixedDeposits.map((f: FixedDeposit) => ({ id: f.id, label: f.bank_name }));
+      return selectedPortfolioObj.fixedDeposits.map((f: FixedDeposit) => ({ id: f.id, label: f.bank_name }));
     }
     if (activeFolder === 'gold') {
-      return portfolio.goldHoldings.map((g: GoldHolding) => ({ id: g.id, label: g.item_name }));
+      return selectedPortfolioObj.goldHoldings.map((g: GoldHolding) => ({ id: g.id, label: g.item_name }));
     }
     if (activeFolder === 'real_estate') {
-      return portfolio.realEstate.map((r: RealEstate) => ({ id: r.id, label: r.property_name }));
+      return selectedPortfolioObj.realEstate.map((r: RealEstate) => ({ id: r.id, label: r.property_name }));
     }
     if (activeFolder === 'insurance') {
-      return portfolio.insurances.map((i: Insurance) => ({ id: i.id, label: `${i.provider} — ${i.policy_name}` }));
+      return selectedPortfolioObj.insurances.map((i: Insurance) => ({ id: i.id, label: `${i.provider} — ${i.policy_name}` }));
     }
     return [];
-  }, [activeFolder, portfolio]);
+  }, [activeFolder, selectedPortfolioObj]);
 
   const folderDocs = useMemo(() => {
     const docs = portfolio.documents.filter((d) => d.asset_type === activeFolder);
@@ -118,6 +132,7 @@ export default React.memo(function DocumentVaultView({
     if (!file) return;
     setPendingFile(file);
     setDocumentName(file.name);
+    setFormPortfolio(portfolioName);
     setLinkedAssetId('');
     setExpiryDate('');
     setUploadError('');
@@ -133,7 +148,7 @@ export default React.memo(function DocumentVaultView({
     try {
       const ts = Date.now();
       const safeName = pendingFile.name.replace(/[^\w.-]/g, '_');
-      const storagePath = `${portfolio.name}/${activeFolder}/${ts}_${safeName}`;
+      const storagePath = `${formPortfolio}/${activeFolder}/${ts}_${safeName}`;
 
       const { error: uploadErr } = await supabase.storage
         .from('investment-documents')
@@ -143,7 +158,7 @@ export default React.memo(function DocumentVaultView({
         throw uploadErr;
       }
 
-      await onAdd('document', portfolioName === 'all' ? portfolio.name : portfolioName, {
+      await onAdd('document', formPortfolio, {
         name: documentName || pendingFile.name,
         filePath: storagePath,
         fileType: pendingFile.type,
@@ -376,12 +391,25 @@ export default React.memo(function DocumentVaultView({
 
             <form onSubmit={handleUpload} className="px-6 py-5 space-y-4">
               <div>
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
+                <select
+                  value={formPortfolio}
+                  onChange={(e) => setFormPortfolio(e.target.value)}
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
+                >
+                  {portfolioOptions.map((o) => (
+                    <option key={o.name} value={o.name}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Document Name</label>
                 <input
                   type="text"
                   value={documentName}
                   onChange={(e) => setDocumentName(e.target.value)}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-455 transition-colors"
                 />
               </div>
 

@@ -3,10 +3,16 @@ import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfoli
 import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../utils/formatters';
 import { Plus, Trash2, Edit2, Calendar, TrendingUp, Landmark, FileText, CheckCircle, Clock } from 'lucide-react';
 
+interface PortfolioOption {
+  name: string;
+  label: string;
+}
+
 interface FixedDepositViewProps {
   fixedDeposits: FixedDeposit[];
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
+  portfolioOptions: PortfolioOption[];
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
@@ -17,6 +23,7 @@ function FixedDepositView({
   fixedDeposits,
   documents,
   portfolioName,
+  portfolioOptions,
   onAdd,
   onUpdate,
   onDelete,
@@ -28,6 +35,7 @@ function FixedDepositView({
   const [error, setError] = useState('');
 
   // Form State
+  const [formPortfolio, setFormPortfolio] = useState(() => portfolioName);
   const [bankName, setBankName] = useState('');
   const [principalAmount, setPrincipalAmount] = useState('');
   const [interestRate, setInterestRate] = useState('');
@@ -67,6 +75,7 @@ function FixedDepositView({
 
   const handleOpenAdd = useCallback(() => {
     setEditingFd(null);
+    setFormPortfolio(portfolioName);
     setBankName('');
     setPrincipalAmount('');
     setInterestRate('');
@@ -76,7 +85,7 @@ function FixedDepositView({
     setStatus('active');
     setError('');
     setShowModal(true);
-  }, []);
+  }, [portfolioName]);
 
   React.useEffect(() => {
     if (autoOpenAddModal) {
@@ -86,6 +95,7 @@ function FixedDepositView({
 
   function handleOpenEdit(fd: FixedDeposit) {
     setEditingFd(fd);
+    setFormPortfolio(portfolioName);
     setBankName(fd.bank_name);
     setPrincipalAmount(fd.principal_amount.toString());
     setInterestRate(fd.interest_rate.toString());
@@ -120,7 +130,7 @@ function FixedDepositView({
       if (editingFd) {
         await onUpdate('fd', editingFd.id, payload);
       } else {
-        await onAdd('fd', portfolioName === 'all' ? 'personal' : portfolioName, payload);
+        await onAdd('fd', formPortfolio, payload);
       }
       setShowModal(false);
     } catch (err) {
@@ -334,6 +344,20 @@ function FixedDepositView({
             </div>
 
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
+                <select
+                  value={formPortfolio}
+                  onChange={(e) => setFormPortfolio(e.target.value)}
+                  disabled={!!editingFd}
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors disabled:opacity-50"
+                >
+                  {portfolioOptions.map((o) => (
+                    <option key={o.name} value={o.name}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Bank / Issuer Name</label>
                 <input

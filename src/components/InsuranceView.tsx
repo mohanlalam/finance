@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Insurance, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, getDocumentUrl } from '../utils/formatters';
 import { Plus, Trash2, Edit2, Shield, ShieldAlert, FileText, Calendar, Clock, X } from 'lucide-react';
 import Modal from './Modal';
 
+interface PortfolioOption {
+  name: string;
+  label: string;
+}
+
 interface InsuranceViewProps {
   insurances: Insurance[];
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
+  portfolioOptions: PortfolioOption[];
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
@@ -35,6 +41,7 @@ export default React.memo(function InsuranceView({
   insurances,
   documents,
   portfolioName,
+  portfolioOptions,
   onAdd,
   onUpdate,
   onDelete,
@@ -45,6 +52,7 @@ export default React.memo(function InsuranceView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [formPortfolio, setFormPortfolio] = useState(() => portfolioName);
   const [insuranceType, setInsuranceType] = useState<Insurance['insurance_type']>('health');
   const [provider, setProvider] = useState('');
   const [policyName, setPolicyName] = useState('');
@@ -60,8 +68,9 @@ export default React.memo(function InsuranceView({
     return d !== null && d >= 0 && d <= 60;
   }).length;
 
-  function handleOpenAdd() {
+  const handleOpenAdd = useCallback(() => {
     setEditing(null);
+    setFormPortfolio(portfolioName);
     setInsuranceType('health');
     setProvider('');
     setPolicyName('');
@@ -71,16 +80,17 @@ export default React.memo(function InsuranceView({
     setRenewalDate('');
     setError('');
     setShowModal(true);
-  }
+  }, [portfolioName]);
 
   React.useEffect(() => {
     if (autoOpenAddModal) {
       handleOpenAdd();
     }
-  }, [autoOpenAddModal]);
+  }, [autoOpenAddModal, handleOpenAdd]);
 
   function handleOpenEdit(i: Insurance) {
     setEditing(i);
+    setFormPortfolio(portfolioName);
     setInsuranceType(i.insurance_type);
     setProvider(i.provider);
     setPolicyName(i.policy_name);
@@ -113,7 +123,7 @@ export default React.memo(function InsuranceView({
       if (editing) {
         await onUpdate('insurance', editing.id, payload);
       } else {
-        await onAdd('insurance', portfolioName === 'all' ? 'personal' : portfolioName, payload);
+        await onAdd('insurance', formPortfolio, payload);
       }
       setShowModal(false);
     } catch (err) {
@@ -307,13 +317,27 @@ export default React.memo(function InsuranceView({
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
+            <select
+              value={formPortfolio}
+              onChange={(e) => setFormPortfolio(e.target.value)}
+              disabled={!!editing}
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-450 transition-colors disabled:opacity-50"
+            >
+              {portfolioOptions.map((o) => (
+                <option key={o.name} value={o.name}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Type</label>
               <select
                 value={insuranceType}
                 onChange={(e) => setInsuranceType(e.target.value as Insurance['insurance_type'])}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-450 transition-colors capitalize"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-355 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-450 transition-colors capitalize"
               >
                 {TYPE_OPTIONS.map((t) => (
                   <option key={t} value={t}>{t}</option>

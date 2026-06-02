@@ -12,6 +12,11 @@ import { pnlColor, formatPercent, formatINR } from '../utils/formatters';
 
 type AssetTab = 'home' | 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents';
 
+interface PortfolioOption {
+  name: string;
+  label: string;
+}
+
 interface AssetTabContentProps {
   activeAsset: AssetTab;
   visiblePortfolio: Portfolio | null; // if null, we render the "all" view
@@ -25,6 +30,7 @@ interface AssetTabContentProps {
   onDeleteAsset: (assetType: string, id: string) => Promise<void>;
   quickAddTarget?: 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null;
   onQuickAddComplete?: () => void;
+  portfolioOptions: PortfolioOption[];
 }
 
 export default React.memo(function AssetTabContent({
@@ -40,6 +46,7 @@ export default React.memo(function AssetTabContent({
   onDeleteAsset,
   quickAddTarget,
   onQuickAddComplete,
+  portfolioOptions,
 }: AssetTabContentProps) {
   
   React.useEffect(() => {
@@ -103,6 +110,7 @@ export default React.memo(function AssetTabContent({
             fixedDeposits={visiblePortfolio.fixedDeposits}
             documents={visiblePortfolio.documents}
             portfolioName={visiblePortfolio.name}
+            portfolioOptions={portfolioOptions}
             onAdd={onAddAsset}
             onUpdate={onUpdateAsset}
             onDelete={onDeleteAsset}
@@ -115,6 +123,7 @@ export default React.memo(function AssetTabContent({
             goldHoldings={visiblePortfolio.goldHoldings}
             documents={visiblePortfolio.documents}
             portfolioName={visiblePortfolio.name}
+            portfolioOptions={portfolioOptions}
             onAdd={onAddAsset}
             onUpdate={onUpdateAsset}
             onDelete={onDeleteAsset}
@@ -127,6 +136,7 @@ export default React.memo(function AssetTabContent({
             realEstate={visiblePortfolio.realEstate}
             documents={visiblePortfolio.documents}
             portfolioName={visiblePortfolio.name}
+            portfolioOptions={portfolioOptions}
             onAdd={onAddAsset}
             onUpdate={onUpdateAsset}
             onDelete={onDeleteAsset}
@@ -139,6 +149,7 @@ export default React.memo(function AssetTabContent({
             insurances={visiblePortfolio.insurances}
             documents={visiblePortfolio.documents}
             portfolioName={visiblePortfolio.name}
+            portfolioOptions={portfolioOptions}
             onAdd={onAddAsset}
             onUpdate={onUpdateAsset}
             onDelete={onDeleteAsset}
@@ -150,6 +161,8 @@ export default React.memo(function AssetTabContent({
           <DocumentVaultView
             portfolio={visiblePortfolio}
             portfolioName={visiblePortfolio.name}
+            portfolioOptions={portfolioOptions}
+            portfolios={portfolios}
             onAdd={onAddAsset}
             onDelete={onDeleteAsset}
             autoOpenAddModal={quickAddTarget === 'documents'}
@@ -225,6 +238,7 @@ export default React.memo(function AssetTabContent({
                 fixedDeposits={p.fixedDeposits}
                 documents={p.documents}
                 portfolioName={p.name}
+                portfolioOptions={portfolioOptions}
                 onAdd={onAddAsset}
                 onUpdate={onUpdateAsset}
                 onDelete={onDeleteAsset}
@@ -247,6 +261,7 @@ export default React.memo(function AssetTabContent({
                 goldHoldings={p.goldHoldings}
                 documents={p.documents}
                 portfolioName={p.name}
+                portfolioOptions={portfolioOptions}
                 onAdd={onAddAsset}
                 onUpdate={onUpdateAsset}
                 onDelete={onDeleteAsset}
@@ -269,6 +284,7 @@ export default React.memo(function AssetTabContent({
                 realEstate={p.realEstate}
                 documents={p.documents}
                 portfolioName={p.name}
+                portfolioOptions={portfolioOptions}
                 onAdd={onAddAsset}
                 onUpdate={onUpdateAsset}
                 onDelete={onDeleteAsset}
@@ -291,6 +307,7 @@ export default React.memo(function AssetTabContent({
                 insurances={p.insurances}
                 documents={p.documents}
                 portfolioName={p.name}
+                portfolioOptions={portfolioOptions}
                 onAdd={onAddAsset}
                 onUpdate={onUpdateAsset}
                 onDelete={onDeleteAsset}
@@ -312,6 +329,8 @@ export default React.memo(function AssetTabContent({
               <DocumentVaultView
                 portfolio={p}
                 portfolioName={p.name}
+                portfolioOptions={portfolioOptions}
+                portfolios={portfolios}
                 onAdd={onAddAsset}
                 onDelete={onDeleteAsset}
                 autoOpenAddModal={index === 0 && quickAddTarget === 'documents'}

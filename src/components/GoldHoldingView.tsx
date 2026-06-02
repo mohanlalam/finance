@@ -4,10 +4,16 @@ import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/for
 import { Plus, Trash2, Edit2, Coins, TrendingUp, Scale, FileText, X } from 'lucide-react';
 import Modal from './Modal';
 
+interface PortfolioOption {
+  name: string;
+  label: string;
+}
+
 interface GoldHoldingViewProps {
   goldHoldings: GoldHolding[];
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
+  portfolioOptions: PortfolioOption[];
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
@@ -20,6 +26,7 @@ export default React.memo(function GoldHoldingView({
   goldHoldings,
   documents,
   portfolioName,
+  portfolioOptions,
   onAdd,
   onUpdate,
   onDelete,
@@ -30,6 +37,7 @@ export default React.memo(function GoldHoldingView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [formPortfolio, setFormPortfolio] = useState(() => portfolioName);
   const [itemName, setItemName] = useState('');
   const [purity, setPurity] = useState('22K');
   const [weightGrams, setWeightGrams] = useState('');
@@ -45,6 +53,7 @@ export default React.memo(function GoldHoldingView({
 
   const handleOpenAdd = useCallback(() => {
     setEditing(null);
+    setFormPortfolio(portfolioName);
     setItemName('');
     setPurity('22K');
     setWeightGrams('');
@@ -53,7 +62,7 @@ export default React.memo(function GoldHoldingView({
     setPurchaseDate('');
     setError('');
     setShowModal(true);
-  }, []);
+  }, [portfolioName]);
 
   React.useEffect(() => {
     if (autoOpenAddModal) {
@@ -63,6 +72,7 @@ export default React.memo(function GoldHoldingView({
 
   function handleOpenEdit(g: GoldHolding) {
     setEditing(g);
+    setFormPortfolio(portfolioName);
     setItemName(g.item_name);
     setPurity(g.purity);
     setWeightGrams(String(g.weight_grams));
@@ -93,7 +103,7 @@ export default React.memo(function GoldHoldingView({
       if (editing) {
         await onUpdate('gold', editing.id, payload);
       } else {
-        await onAdd('gold', portfolioName === 'all' ? 'personal' : portfolioName, payload);
+        await onAdd('gold', formPortfolio, payload);
       }
       setShowModal(false);
     } catch (err) {
@@ -269,6 +279,20 @@ export default React.memo(function GoldHoldingView({
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
+            <select
+              value={formPortfolio}
+              onChange={(e) => setFormPortfolio(e.target.value)}
+              disabled={!!editing}
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-colors disabled:opacity-50"
+            >
+              {portfolioOptions.map((o) => (
+                <option key={o.name} value={o.name}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Item Name</label>
             <input

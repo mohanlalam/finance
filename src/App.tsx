@@ -542,6 +542,7 @@ export default function App() {
                     onDeleteAsset={deleteAsset}
                     quickAddTarget={quickAddTarget}
                     onQuickAddComplete={() => setQuickAddTarget(null)}
+                    portfolioOptions={portfolioOptionsForModal}
                   />
                 </SectionErrorBoundary>
               </div>
@@ -735,6 +736,7 @@ export default function App() {
                 onDeleteAsset={deleteAsset}
                 quickAddTarget={quickAddTarget}
                 onQuickAddComplete={() => setQuickAddTarget(null)}
+                portfolioOptions={portfolioOptionsForModal}
               />
             </SectionErrorBoundary>
           </>

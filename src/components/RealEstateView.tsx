@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { RealEstate, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/formatters';
 import { Plus, Trash2, Edit2, Home, MapPin, TrendingUp, Building2, FileText, X } from 'lucide-react';
 import Modal from './Modal';
 
+interface PortfolioOption {
+  name: string;
+  label: string;
+}
+
 interface RealEstateViewProps {
   realEstate: RealEstate[];
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
+  portfolioOptions: PortfolioOption[];
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
@@ -20,6 +26,7 @@ export default React.memo(function RealEstateView({
   realEstate,
   documents,
   portfolioName,
+  portfolioOptions,
   onAdd,
   onUpdate,
   onDelete,
@@ -30,6 +37,7 @@ export default React.memo(function RealEstateView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [formPortfolio, setFormPortfolio] = useState(() => portfolioName);
   const [propertyName, setPropertyName] = useState('');
   const [propertyType, setPropertyType] = useState<RealEstate['property_type']>('apartment');
   const [location, setLocation] = useState('');
@@ -45,8 +53,9 @@ export default React.memo(function RealEstateView({
   const totalGain = totalCurrent - totalPurchase;
   const yieldPct = totalCurrent > 0 ? (annualRent / totalCurrent) * 100 : 0;
 
-  function handleOpenAdd() {
+  const handleOpenAdd = useCallback(() => {
     setEditing(null);
+    setFormPortfolio(portfolioName);
     setPropertyName('');
     setPropertyType('apartment');
     setLocation('');
@@ -56,16 +65,17 @@ export default React.memo(function RealEstateView({
     setMonthlyRent('');
     setError('');
     setShowModal(true);
-  }
+  }, [portfolioName]);
 
   React.useEffect(() => {
     if (autoOpenAddModal) {
       handleOpenAdd();
     }
-  }, [autoOpenAddModal]);
+  }, [autoOpenAddModal, handleOpenAdd]);
 
   function handleOpenEdit(r: RealEstate) {
     setEditing(r);
+    setFormPortfolio(portfolioName);
     setPropertyName(r.property_name);
     setPropertyType(r.property_type);
     setLocation(r.location ?? '');
@@ -98,7 +108,7 @@ export default React.memo(function RealEstateView({
       if (editing) {
         await onUpdate('real_estate', editing.id, payload);
       } else {
-        await onAdd('real_estate', portfolioName === 'all' ? 'personal' : portfolioName, payload);
+        await onAdd('real_estate', formPortfolio, payload);
       }
       setShowModal(false);
     } catch (err) {
@@ -279,6 +289,20 @@ export default React.memo(function RealEstateView({
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
+            <select
+              value={formPortfolio}
+              onChange={(e) => setFormPortfolio(e.target.value)}
+              disabled={!!editing}
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors disabled:opacity-50"
+            >
+              {portfolioOptions.map((o) => (
+                <option key={o.name} value={o.name}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Property Name</label>
             <input
