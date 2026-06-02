@@ -58,6 +58,17 @@ body {
   }
 }
 
+/* Mobile bottom nav safe-area padding */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 8px);
+}
+
+@media (max-width: 767px) {
+  .pb-safe-content {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 8px) + 16px) !important;
+  }
+}
+
 /* ── Print / PDF Report Layout ── */
 @media print {
   /* Show print-only header */
@@ -135,7 +146,8 @@ body {
   }
 
   /* Remove bottom padding for mobile nav */
-  .pb-16 {
+  .pb-16,
+  .pb-safe-content {
     padding-bottom: 0 !important;
   }
 

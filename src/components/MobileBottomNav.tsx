@@ -22,7 +22,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset }: MobileBottomNavProps) {
     <nav
       role="navigation"
       aria-label="Asset navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 md:hidden safe-area-bottom"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 md:hidden pb-safe"
     >
       <div className="grid grid-cols-6 h-14">
         {tabs.map((tab) => {
@@ -32,16 +32,16 @@ function MobileBottomNav({ activeAsset, onChangeAsset }: MobileBottomNavProps) {
               key={tab.id}
               onClick={() => onChangeAsset(tab.id)}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex flex-col items-center justify-center gap-0.5 transition-colors ${
+              className={`relative flex flex-col items-center justify-center gap-1 transition-all duration-150 active:scale-95 outline-none ${
                 isActive
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-slate-400 dark:text-slate-500 active:text-slate-600 dark:active:text-slate-300'
+                  ? 'text-blue-600 dark:text-blue-400 font-bold'
+                  : 'text-slate-400 dark:text-slate-500 active:text-slate-600 dark:active:text-slate-350'
               }`}
             >
-              <div className={`transition-transform duration-150 ${isActive ? 'scale-110' : ''}`}>
+              <div className={`transition-transform duration-200 ${isActive ? 'scale-110 -translate-y-0.5' : ''}`}>
                 {tab.icon}
               </div>
-              <span className={`text-[9px] font-semibold leading-none ${
+              <span className={`text-[9px] font-semibold tracking-wide leading-none transition-all duration-150 ${
                 isActive
                   ? 'text-blue-600 dark:text-blue-400'
                   : 'text-slate-400 dark:text-slate-500'
@@ -49,7 +49,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset }: MobileBottomNavProps) {
                 {tab.label}
               </span>
               {isActive && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-full" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse" />
               )}
             </button>
           );

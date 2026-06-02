@@ -279,7 +279,7 @@ export default function App() {
   const visiblePortfolio = portfolio;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-16 md:pb-0 text-slate-800 dark:text-slate-100 transition-colors">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-safe-content md:pb-0 text-slate-800 dark:text-slate-100 transition-colors">
       {/* Print-only report header */}
       <div className="print-report-header hidden items-center justify-between px-8 py-6 border-b-2 border-slate-200 mb-6">
         <div>
