@@ -381,6 +381,16 @@ export default function App() {
               <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
             </div>
 
+            {/* Family Tabs Row on Mobile */}
+            <FamilyTabBar
+              portfolios={portfolios}
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              onAddFamilyClick={handleAddFamilyClick}
+              onRenameClick={handleRenameClick}
+              onDeleteClick={handleDeletePortfolio}
+            />
+
             {activeAsset === 'home' ? (
               <div className="space-y-4">
                 <MobileHomeSummary
