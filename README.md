@@ -7,14 +7,12 @@ A premium, interactive web application designed to track and manage multi-asset 
 ## ✨ Features
 
 ### 📊 Financial Dashboard & Analytics
-- **Historical Net Worth Chart** — Interactive SVG line and area chart plotting the growth of family net worth over time with toggleable categories (Stocks, FDs, Gold, Real Estate) and detailed cursor hover tooltips.
 - **Asset Allocation Chart** — Interactive donut chart showcasing distribution across Stocks, FDs, Gold, and Real Estate.
 - **P&L Visuals** — Direct indications of profits and losses with custom positive/negative indicators and INR formatting.
 - **Comparison Engine** — Multi-dimensional bar chart comparing total invested vs. current value per family member.
 - **Live Prices** — Live feeds for stock and ETF holdings (every 30 seconds) showing intraday changes and overall returns.
 
-### 💡 Portfolio Insights & Health Score
-- **Portfolio Health Score** — Circular gauge widget evaluating portfolio quality (0–100) across diversification, target asset balance, concentration risk, and insurance coverage.
+### 💡 Portfolio Insights
 - **Performance Highlights** — Instantly view top stock holdings, top gainers, top losers, and today's biggest absolute price movement.
 - **Asset Allocation Drift & Targets** — Tracks deviations between actual asset splits and targets. Features **User-Configurable Allocation Targets** via a settings modal.
 - **Portfolio Concentration Alerts** — Warnings if any single equity exceeds 15% of the total portfolio value.
@@ -80,7 +78,7 @@ A premium, interactive web application designed to track and manage multi-asset 
 project antigravity/
 ├── index.html                    # HTML entry point
 ├── src/
-│   ├── App.tsx                   # Root component — tabs, layout, data orchestration
+│   ├── App.tsx                   # Root component — layout, custom hooks coordination, desktop/mobile routing
 │   ├── main.tsx                  # React DOM mount
 │   ├── index.css                 # Global styles / Tailwind imports
 │   ├── vite-env.d.ts             # Vite type declarations
@@ -90,7 +88,11 @@ project antigravity/
 │   │   ├── PortfolioTable.tsx    # Sortable holdings table with preset selectors & allocation column
 │   │   ├── PieChart.tsx          # Asset allocation donut chart
 │   │   ├── BarChart.tsx          # Portfolio comparison bar chart
-│   │   ├── NetWorthChart.tsx     # Historical net worth SVG area and line chart
+│   │   ├── fd/                   # Modular sub-components for FDs/RDs/SSY/SIPs
+│   │   │   ├── DepositDetailsCard.tsx # Renders timelines, documents, and notes for holdings
+│   │   │   ├── RDInstallmentSchedule.tsx # Interactive month-by-month RD installment tracking
+│   │   │   ├── SIPFormFields.tsx # Form inputs and NAV validation triggers for SIPs
+│   │   │   └── StandardFormFields.tsx # Form inputs for regular FDs, RDs, and SSY portfolios
 │   │   ├── AddHoldingModal.tsx   # Modal form to add new stock holdings
 │   │   ├── AddFamilyModal.tsx    # Modal form to add new family members
 │   │   ├── RenamePortfolioModal.tsx # Modal form to rename family member portfolios
@@ -102,7 +104,6 @@ project antigravity/
 │   │   ├── SearchBar.tsx         # Fuzzy global search bar component (fuzzy match with tab jumping)
 │   │   ├── AlertsBanner.tsx      # Banners showing active notifications (52w high/low, FD due, etc.)
 │   │   ├── ExportPanel.tsx       # Export (CSV, PDF, JSON) and CSV Import dialog box
-│   │   ├── HealthScore.tsx       # Gauge widget visualizing portfolio quality metrics
 │   │   ├── InsightsPanel.tsx     # Detailed drift, gainer, loser, and performer panels
 │   │   ├── AllocationTargetsSettings.tsx # Configurator modal for custom asset allocation target splits
 │   │   ├── ConfirmModal.tsx      # Custom styled backdrop modal replacing native browser confirm/alert
@@ -120,14 +121,17 @@ project antigravity/
 │   │   └── DashboardError.tsx    # Full-page retry UI for API/Supabase connection failures
 │   ├── hooks/
 │   │   ├── usePortfolioData.ts   # Core data hook — Edge Function list, CRUD operations, local cache, live prices
-│   │   ├── usePortfolioInsights.ts # Computes health, allocation, performer, and reminder insights
+│   │   ├── usePortfolioInsights.ts # Computes allocation, performer, and reminder insights
 │   │   ├── useMarketData.ts      # Standalone market price fetcher (CORS proxied)
-│   │   └── useAlerts.ts          # Evaluates portfolios to output active notification triggers
+│   │   ├── useAlerts.ts          # Evaluates warnings, contains visible/dismissed states
+│   │   ├── useSwipeNavigation.ts # Touch swipe gesture tracking for mobile tab layout
+│   │   └── useKeyboardShortcuts.ts # Global hotkey listeners for desktop window
 │   ├── types/
 │   │   └── portfolio.ts          # TypeScript interfaces (Holding, NetWorthSnapshot, etc.)
 │   ├── utils/
 │   │   ├── apiClient.ts          # Safe wrapper client around Supabase edge functions
 │   │   ├── auth.ts               # Session PIN verification and security helpers
+│   │   ├── chartHelpers.ts       # Groups color configuration hex values and slices formatting
 │   │   ├── formatters.ts         # INR formatting, percent formatting, P&L colors, getDocumentUrl
 │   │   ├── portfolioCalcs.ts     # Compounded/simple interest calculators & portfolio aggregation calculations
 │   │   └── supabaseClient.ts     # Supabase SDK initialization
