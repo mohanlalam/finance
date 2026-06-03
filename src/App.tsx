@@ -6,8 +6,6 @@ import PieChart from './components/PieChart';
 import BarChart from './components/BarChart';
 import AddHoldingModal from './components/AddHoldingModal';
 import MobileBottomNav from './components/MobileBottomNav';
-import NetWorthChart from './components/NetWorthChart';
-import HealthScore from './components/HealthScore';
 import SearchBar from './components/SearchBar';
 import FamilyTabBar from './components/FamilyTabBar';
 import AddFamilyModal from './components/AddFamilyModal';
@@ -108,7 +106,6 @@ export default function App() {
 
   const {
     portfolios,
-    netWorthHistory,
     loadStatus,
     loadError,
     priceStatus,
@@ -402,16 +399,11 @@ export default function App() {
                   activePortfolio={portfolio}
                 />
 
-                {/* Mobile Dashboards - Insights & Health Score */}
+                {/* Mobile Dashboards - Insights */}
                 {activeTab === 'all' && (
-                  <div className="space-y-4">
-                    <SectionErrorBoundary sectionName="Portfolio Insights">
-                      <InsightsPanel insights={insights} />
-                    </SectionErrorBoundary>
-                    <SectionErrorBoundary sectionName="Health Score Breakdown">
-                      <HealthScore score={insights.healthScore} />
-                    </SectionErrorBoundary>
-                  </div>
+                  <SectionErrorBoundary sectionName="Portfolio Insights">
+                    <InsightsPanel insights={insights} />
+                  </SectionErrorBoundary>
                 )}
 
                 {/* Mobile Dashboards - Allocation Charts */}
@@ -423,13 +415,6 @@ export default function App() {
                     <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
                   </SectionErrorBoundary>
                 </div>
-
-                {/* Mobile Dashboards - Historical Net Worth */}
-                {activeTab === 'all' && (
-                  <SectionErrorBoundary sectionName="Historical Net Worth Chart">
-                    <NetWorthChart history={netWorthHistory} />
-                  </SectionErrorBoundary>
-                )}
               </div>
             ) : (
               <div className="space-y-4">
@@ -595,18 +580,9 @@ export default function App() {
 
             {/* Insights Panel — only on family overview */}
             {activeTab === 'all' && (
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-                <div className="xl:col-span-2">
-                  <SectionErrorBoundary sectionName="Portfolio Insights">
-                    <InsightsPanel insights={insights} />
-                  </SectionErrorBoundary>
-                </div>
-                <div>
-                  <SectionErrorBoundary sectionName="Health Score Breakdown">
-                    <HealthScore score={insights.healthScore} />
-                  </SectionErrorBoundary>
-                </div>
-              </div>
+              <SectionErrorBoundary sectionName="Portfolio Insights">
+                <InsightsPanel insights={insights} />
+              </SectionErrorBoundary>
             )}
 
             <SummaryCards
@@ -627,12 +603,6 @@ export default function App() {
                 <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
               </SectionErrorBoundary>
             </div>
-
-            {activeTab === 'all' && (
-              <SectionErrorBoundary sectionName="Historical Net Worth Chart">
-                <NetWorthChart history={netWorthHistory} />
-              </SectionErrorBoundary>
-            )}
 
             {/* Desktop Asset Switcher */}
             <div className="hidden md:flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-px mb-2">
