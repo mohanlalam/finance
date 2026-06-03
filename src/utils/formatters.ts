@@ -66,8 +66,36 @@ export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()
   if (years > 0 && !isNaN(r) && !isNaN(s.getTime())) {
     if (!isNaN(p)) {
       if (f.fd_type === 'ssy') {
-        // SSY compounds annually
-        return p * Math.pow(1 + r / 100, years);
+        // SSY interest compounds on every April 1st (end of Indian financial year)
+        const rate = r / 100;
+        const startYear = s.getUTCFullYear();
+        const endYear = end.getUTCFullYear();
+        const aprilFirsts: Date[] = [];
+        
+        for (let year = startYear - 1; year <= endYear + 1; year++) {
+          const april1 = new Date(Date.UTC(year, 3, 1));
+          if (april1.getTime() > s.getTime() && april1.getTime() <= end.getTime()) {
+            aprilFirsts.push(april1);
+          }
+        }
+        
+        aprilFirsts.sort((a, b) => a.getTime() - b.getTime());
+        
+        let currentPrincipal = p;
+        let currentDate = s;
+        const millisecondsPerYear = 1000 * 3600 * 24 * 365.25;
+        
+        for (const april1 of aprilFirsts) {
+          const t = (april1.getTime() - currentDate.getTime()) / millisecondsPerYear;
+          const interest = currentPrincipal * rate * t;
+          currentPrincipal += interest;
+          currentDate = april1;
+        }
+        
+        const finalT = (end.getTime() - currentDate.getTime()) / millisecondsPerYear;
+        const finalInterest = currentPrincipal * rate * finalT;
+        
+        return currentPrincipal + finalInterest;
       }
       // FDs and RDs compound quarterly
       return p * Math.pow(1 + r / 400, 4 * years);
