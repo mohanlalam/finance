@@ -331,7 +331,7 @@ function FixedDepositView({
     const actualEnd = end.getTime() < limit.getTime() ? end : limit;
     
     const months: Date[] = [];
-    let current = new Date(start.getFullYear(), start.getMonth(), 1);
+    const current = new Date(start.getFullYear(), start.getMonth(), 1);
     const endCompare = new Date(actualEnd.getFullYear(), actualEnd.getMonth(), 1);
     
     while (current.getTime() <= endCompare.getTime()) {

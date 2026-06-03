@@ -427,7 +427,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       setLoadError(msg);
       setLoadStatus('error');
     }
-  }, [loadFromDB, fetchLivePrices, handleAuthExpired]);
+  }, [loadFromDB, fetchLivePrices, fetchLiveMFNavs, handleAuthExpired]);
 
   const refreshPrices = useCallback(async () => {
     if (portfolios.length === 0) return;
