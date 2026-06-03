@@ -100,7 +100,7 @@ function Header({
   const handleDismissAll = onDismissAll;
 
   return (
-    <header className="bg-slate-900 text-white relative z-40">
+    <header className="bg-slate-900/95 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-800/65 text-white relative z-40">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-3">

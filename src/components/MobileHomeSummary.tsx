@@ -1,4 +1,4 @@
-import { TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight } from 'lucide-react';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 
@@ -109,42 +109,61 @@ export default function MobileHomeSummary({
   return (
     <div className="space-y-5 md:hidden">
       {/* Net Worth Summary Card */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-850 dark:from-slate-950 dark:to-slate-900 text-white rounded-2xl p-5 border border-slate-800 dark:border-slate-800/80 shadow-md">
-        <div className="flex items-center justify-between opacity-70">
-          <span className="text-[10px] font-bold uppercase tracking-wider">
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-white rounded-3xl p-6 border border-slate-800 dark:border-slate-800/80 shadow-xl">
+        {/* Glowing background accent elements */}
+        <div className="absolute top-0 right-0 w-36 h-36 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="flex items-center justify-between relative z-10">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
             {summaryData.label} Net Worth
           </span>
-          <span className="text-[10px] font-medium bg-slate-800 dark:bg-slate-900 px-2 py-0.5 rounded-full border border-slate-750">
+          <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-sm">
+            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
             Intraday Live
           </span>
         </div>
 
-        <h2 className="text-3xl font-extrabold tracking-tight mt-1.5">
+        <h2 className="text-4xl font-extrabold tracking-tight mt-3 bg-gradient-to-r from-white via-slate-100 to-slate-350 bg-clip-text text-transparent relative z-10">
           {formatINR(summaryData.totalCurrentValue)}
         </h2>
 
         {/* PNL Grid */}
-        <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-800 dark:border-slate-850">
-          <div>
-            <p className="text-[10px] text-slate-450 dark:text-slate-505 font-bold uppercase tracking-wider">Today's P&amp;L</p>
-            <div className={`flex flex-wrap items-baseline gap-x-1 mt-0.5 ${todayPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              <span className="text-base font-bold whitespace-nowrap">
-                {todayPnL >= 0 ? '+' : ''}{formatINR(todayPnL)}
-              </span>
-              <span className="text-xs font-semibold whitespace-nowrap opacity-90">
-                ({formatPercent(todayPnLPercent)})
-              </span>
+        <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-white/10 relative z-10">
+          <div className="space-y-1">
+            <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Today's P&amp;L</p>
+            <div className={`flex items-start gap-1.5 ${todayPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              {todayPnL >= 0 ? (
+                <TrendingUp size={16} className="shrink-0 mt-0.5" />
+              ) : (
+                <TrendingDown size={16} className="shrink-0 mt-0.5" />
+              )}
+              <div className="flex flex-col">
+                <span className="text-base font-bold whitespace-nowrap leading-tight">
+                  {todayPnL >= 0 ? '+' : ''}{formatINR(todayPnL)}
+                </span>
+                <span className="text-[11px] font-semibold whitespace-nowrap opacity-90 leading-none mt-0.5">
+                  ({todayPnL >= 0 ? '+' : ''}{formatPercent(todayPnLPercent)})
+                </span>
+              </div>
             </div>
           </div>
-          <div>
-            <p className="text-[10px] text-slate-450 dark:text-slate-505 font-bold uppercase tracking-wider">Total P&amp;L</p>
-            <div className={`flex flex-wrap items-baseline gap-x-1 mt-0.5 ${summaryData.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              <span className="text-base font-bold whitespace-nowrap">
-                {summaryData.totalPnL >= 0 ? '+' : ''}{formatINR(summaryData.totalPnL)}
-              </span>
-              <span className="text-xs font-semibold whitespace-nowrap opacity-90">
-                ({formatPercent(summaryData.totalPnLPercent)})
-              </span>
+          <div className="space-y-1">
+            <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Total P&amp;L</p>
+            <div className={`flex items-start gap-1.5 ${summaryData.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              {summaryData.totalPnL >= 0 ? (
+                <TrendingUp size={16} className="shrink-0 mt-0.5" />
+              ) : (
+                <TrendingDown size={16} className="shrink-0 mt-0.5" />
+              )}
+              <div className="flex flex-col">
+                <span className="text-base font-bold whitespace-nowrap leading-tight">
+                  {summaryData.totalPnL >= 0 ? '+' : ''}{formatINR(summaryData.totalPnL)}
+                </span>
+                <span className="text-[11px] font-semibold whitespace-nowrap opacity-90 leading-none mt-0.5">
+                  ({summaryData.totalPnL >= 0 ? '+' : ''}{formatPercent(summaryData.totalPnLPercent)})
+                </span>
+              </div>
             </div>
           </div>
         </div>
