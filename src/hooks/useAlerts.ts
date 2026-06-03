@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Portfolio } from '../types/portfolio';
 
 export type AlertSeverity = 'critical' | 'warning' | 'info';
@@ -147,4 +147,49 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
 
     return alerts;
   }, [portfolios, currentPct]);
+}
+
+export function useDismissibleAlerts(portfolios: Portfolio[]) {
+  const alerts = useAlerts(portfolios);
+
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(() => {
+    try {
+      const saved = sessionStorage.getItem('finance_dismissed_alerts');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  const handleDismissAlert = useCallback((id: string) => {
+    setDismissedAlerts((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      try {
+        sessionStorage.setItem('finance_dismissed_alerts', JSON.stringify(Array.from(next)));
+      } catch { /* ignore */ }
+      return next;
+    });
+  }, []);
+
+  const handleDismissAll = useCallback(() => {
+    setDismissedAlerts((prev) => {
+      const next = new Set(prev);
+      alerts.forEach((a) => next.add(a.id));
+      try {
+        sessionStorage.setItem('finance_dismissed_alerts', JSON.stringify(Array.from(next)));
+      } catch { /* ignore */ }
+      return next;
+    });
+  }, [alerts]);
+
+  const visibleAlerts = useMemo(() => {
+    return alerts.filter((a) => !dismissedAlerts.has(a.id));
+  }, [alerts, dismissedAlerts]);
+
+  return {
+    visibleAlerts,
+    handleDismissAlert,
+    handleDismissAll,
+  };
 }

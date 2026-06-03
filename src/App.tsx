@@ -27,7 +27,10 @@ import { PortfolioName } from './types/portfolio';
 import { formatINR, formatPercent, pnlColor } from './utils/formatters';
 import { usePortfolioData } from './hooks/usePortfolioData';
 import { usePortfolioInsights } from './hooks/usePortfolioInsights';
-import { useAlerts } from './hooks/useAlerts';
+import { useDismissibleAlerts } from './hooks/useAlerts';
+import { useSwipeNavigation } from './hooks/useSwipeNavigation';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { getBreakdownSlices } from './utils/chartHelpers';
 import { invokeFunction } from './utils/apiClient';
 import { classBreakdown, estimateTodayPnL, getPortfolioByName } from './utils/portfolioCalcs';
 import PinLockScreen from './components/PinLockScreen';
@@ -99,61 +102,6 @@ export default function App() {
     try { localStorage.setItem('finance_last_asset_tab', activeAsset); } catch { /* ignore */ }
   }, [activeAsset]);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    function handleKeyboard(e: KeyboardEvent) {
-      // Ctrl+Shift+R — Refresh prices
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
-        e.preventDefault();
-        refreshPricesRef.current();
-      }
-    }
-    window.addEventListener('keydown', handleKeyboard);
-    return () => window.removeEventListener('keydown', handleKeyboard);
-  }, []);
-
-  // Swipe tab navigation
-  const touchStart = useRef({ x: 0, y: 0 });
-  const touchEnd = useRef({ x: 0, y: 0 });
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStart.current = {
-      x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY,
-    };
-    touchEnd.current = {
-      x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY,
-    };
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    touchEnd.current = {
-      x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY,
-    };
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    const diffX = touchStart.current.x - touchEnd.current.x;
-    const diffY = touchStart.current.y - touchEnd.current.y;
-
-    if (Math.abs(diffX) > 70 && Math.abs(diffY) < 40) {
-      const tabOrder: AssetTab[] = ['home', 'stocks', 'fd', 'rd', 'ssy', 'sip', 'gold', 'real_estate', 'insurance', 'documents'];
-      const currentIndex = tabOrder.indexOf(activeAsset);
-
-      if (diffX > 0) {
-        if (currentIndex < tabOrder.length - 1) {
-          setActiveAsset(tabOrder[currentIndex + 1]);
-        }
-      } else {
-        if (currentIndex > 0) {
-          setActiveAsset(tabOrder[currentIndex - 1]);
-        }
-      }
-    }
-  }, [activeAsset]);
-
   const handleAuthExpired = useCallback(() => {
     setPinVerified(false);
   }, []);
@@ -183,6 +131,15 @@ export default function App() {
   useEffect(() => {
     refreshPricesRef.current = refreshPrices;
   }, [refreshPrices]);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts(useCallback(() => refreshPricesRef.current(), []));
+
+  // Swipe tab navigation
+  const { handleTouchStart, handleTouchMove, handleTouchEnd } = useSwipeNavigation({
+    activeAsset,
+    setActiveAsset,
+  });
 
   useEffect(() => {
     if (!pinVerified) return;
@@ -225,42 +182,9 @@ export default function App() {
 
   const effectiveAsset = activeAsset === 'home' && !isMobile ? 'stocks' : activeAsset;
   const insights = usePortfolioInsights(portfolios);
-  const alerts = useAlerts(portfolios);
-
-  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(() => {
-    try {
-      const saved = sessionStorage.getItem('finance_dismissed_alerts');
-      return saved ? new Set(JSON.parse(saved)) : new Set();
-    } catch {
-      return new Set();
-    }
-  });
-
-  const handleDismissAlert = useCallback((id: string) => {
-    setDismissedAlerts((prev) => {
-      const next = new Set(prev);
-      next.add(id);
-      try {
-        sessionStorage.setItem('finance_dismissed_alerts', JSON.stringify(Array.from(next)));
-      } catch { /* ignore */ }
-      return next;
-    });
-  }, []);
-
-  const handleDismissAll = useCallback(() => {
-    setDismissedAlerts((prev) => {
-      const next = new Set(prev);
-      alerts.forEach((a) => next.add(a.id));
-      try {
-        sessionStorage.setItem('finance_dismissed_alerts', JSON.stringify(Array.from(next)));
-      } catch { /* ignore */ }
-      return next;
-    });
-  }, [alerts]);
-
-  const visibleAlerts = useMemo(() => {
-    return alerts.filter((a) => !dismissedAlerts.has(a.id));
-  }, [alerts, dismissedAlerts]);
+  
+  // Custom Hook for Dismissible Alerts
+  const { visibleAlerts, handleDismissAlert, handleDismissAll } = useDismissibleAlerts(portfolios);
 
   const handleSearchNavigate = useCallback((portfolioName: string, assetTab: string) => {
     setActiveTab(portfolioName);
@@ -299,15 +223,7 @@ export default function App() {
 
   const breakdown = useMemo(() => classBreakdown(portfolios, portfolio), [portfolios, portfolio]);
 
-  const breakdownSlices = useMemo(() => [
-    { label: 'Stocks', fullName: 'Stocks & ETFs', value: breakdown.stocks, color: '#3b82f6' },
-    { label: 'FD', fullName: 'Fixed Deposits', value: breakdown.fd, color: '#6366f1' },
-    { label: 'RD', fullName: 'Recurring Deposits', value: breakdown.rd, color: '#ec4899' },
-    { label: 'SSY', fullName: 'Sukanya Samriddhi', value: breakdown.ssy, color: '#a855f7' },
-    { label: 'SIP', fullName: 'SIP Mutual Funds', value: breakdown.sip, color: '#0ea5e9' },
-    { label: 'Gold', fullName: 'Gold Holdings', value: breakdown.gold, color: '#f59e0b' },
-    { label: 'Realty', fullName: 'Real Estate', value: breakdown.realEstate, color: '#10b981' },
-  ], [breakdown]);
+  const breakdownSlices = useMemo(() => getBreakdownSlices(breakdown), [breakdown]);
 
   const isLoadingDB = loadStatus === 'loading';
   const isLoadingPrices = priceStatus === 'loading';

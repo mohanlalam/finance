@@ -1,8 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfolio';
-import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../utils/formatters';
-import { Plus, Trash2, Edit2, Calendar, TrendingUp, Landmark, FileText, CheckCircle, Clock, StickyNote, Heart, AlertCircle } from 'lucide-react';
+import { formatINR, getFDEffectiveValue } from '../utils/formatters';
+import { Plus, TrendingUp, Landmark, Calendar, Clock, Heart } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
+import SIPFormFields from './fd/SIPFormFields';
+import StandardFormFields from './fd/StandardFormFields';
+import DepositDetailsCard from './fd/DepositDetailsCard';
 
 interface PortfolioOption {
   name: string;
@@ -149,10 +152,9 @@ function FixedDepositView({
   const [mfSchemeCode, setMfSchemeCode] = useState('');
   const [units, setUnits] = useState('');
   const [isValidatingScheme, setIsValidatingScheme] = useState(false);
-  const [expandedRd, setExpandedRd] = useState<Record<string, boolean>>({});
 
   const calculateMaturity = useCallback(() => {
-    if (mode === 'sip') return; // For SIP, current value is fully manual
+    if (mode === 'sip') return;
 
     if (mode === 'ssy' && startDate && !maturityDate) {
       const start = new Date(startDate);
@@ -173,11 +175,9 @@ function FixedDepositView({
       const years = timeDiff / (1000 * 3600 * 24 * 365.25);
       if (years > 0) {
         if (mode === 'ssy') {
-          // Annual compounding for SSY
           const amt = p * Math.pow(1 + r / 100, years);
           setMaturityAmount(amt.toFixed(2));
         } else {
-          // Quarter compounding standard (A = P(1 + r/4)^4n)
           const amt = p * Math.pow(1 + r / 400, 4 * years);
           setMaturityAmount(amt.toFixed(2));
         }
@@ -187,7 +187,7 @@ function FixedDepositView({
     }
   }, [principalAmount, interestRate, startDate, maturityDate, mode]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     calculateMaturity();
   }, [startDate, calculateMaturity]);
 
@@ -215,7 +215,7 @@ function FixedDepositView({
     setShowModal(true);
   }, [portfolioName, mode]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (autoOpenAddModal) {
       handleOpenAdd();
     }
@@ -321,75 +321,6 @@ function FixedDepositView({
     }
   }
 
-  // Helper for RD installment calculation
-  const getRDInstallmentMonths = useCallback((startDateStr: string, maturityDateStr: string | null): Date[] => {
-    const start = new Date(startDateStr);
-    if (isNaN(start.getTime())) return [];
-    
-    const end = maturityDateStr ? new Date(maturityDateStr) : new Date();
-    const limit = new Date();
-    const actualEnd = end.getTime() < limit.getTime() ? end : limit;
-    
-    const months: Date[] = [];
-    const current = new Date(start.getFullYear(), start.getMonth(), 1);
-    const endCompare = new Date(actualEnd.getFullYear(), actualEnd.getMonth(), 1);
-    
-    while (current.getTime() <= endCompare.getTime()) {
-      months.push(new Date(current));
-      current.setMonth(current.getMonth() + 1);
-    }
-    
-    return months;
-  }, []);
-
-  const isRDMonthPaid = useCallback((monthDate: Date, contributions?: { date: string; amount: number }[]): boolean => {
-    if (!contributions) return false;
-    const targetYear = monthDate.getFullYear();
-    const targetMonth = monthDate.getMonth();
-    
-    return contributions.some((c) => {
-      const cDate = new Date(c.date);
-      return !isNaN(cDate.getTime()) && cDate.getFullYear() === targetYear && cDate.getMonth() === targetMonth;
-    });
-  }, []);
-
-  async function handleRecordInstallment(fd: FixedDeposit, targetMonth: Date) {
-    const year = targetMonth.getFullYear();
-    const month = String(targetMonth.getMonth() + 1).padStart(2, '0');
-    const today = new Date();
-    let dateStr = `${year}-${month}-01`;
-    if (today.getFullYear() === year && today.getMonth() === targetMonth.getMonth()) {
-      dateStr = today.toISOString().split('T')[0];
-    }
-    
-    const existing = fd.contributions || [];
-    const updated = [...existing, { date: dateStr, amount: fd.principal_amount }].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-    
-    try {
-      await onUpdate('fd', fd.id, { contributions: updated });
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to record installment');
-    }
-  }
-
-  const toggleExpandRd = useCallback((id: string) => {
-    setExpandedRd((prev) => ({ ...prev, [id]: !prev[id] }));
-  }, []);
-
-  // Helper to compute progress bar percentage
-  function getProgressPercent(fd: FixedDeposit) {
-    if (fd.status === 'matured') return 100;
-    if (!fd.maturity_date) return 100;
-    const start = new Date(fd.start_date).getTime();
-    const end = new Date(fd.maturity_date).getTime();
-    const now = Date.now();
-    if (now >= end) return 100;
-    if (now <= start) return 0;
-    return ((now - start) / (end - start)) * 100;
-  }
-
   return (
     <div className="space-y-6">
       {/* Metrics Summary */}
@@ -462,173 +393,18 @@ function FixedDepositView({
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label={`${cfg.titlePlural} list`}>
-            {fixedDeposits.map((fd) => {
-              const progress = getProgressPercent(fd);
-              const fdDocs = documents.filter((d) => d.asset_type === 'fd' && d.asset_id === fd.id);
-              const isMatured = fd.status === 'matured' || (mode !== 'sip' && progress >= 100);
-
-              return (
-                <div key={fd.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors" role="listitem">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isMatured ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' : cfg.iconBg}`}>
-                        {isMatured ? <CheckCircle size={20} aria-hidden="true" /> : <IconComponent size={20} aria-hidden="true" />}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">{fd.bank_name}</h4>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isMatured ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'}`}>
-                            {isMatured ? 'Matured' : `${fd.interest_rate}% ${mode === 'sip' ? 'Expected CAGR' : 'p.a.'}`}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                          {fd.start_date} &rarr; {fd.maturity_date || (mode === 'sip' ? 'Ongoing SIP' : 'Ongoing')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 md:text-right">
-                      <div>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">{cfg.principalLabel.replace(' (₹)', '')}</p>
-                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatINR(Number(fd.principal_amount))}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">{mode === 'sip' ? 'Current Valuation' : (fd.maturity_date ? 'Maturity Value' : 'Current Value')}</p>
-                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatINR(getFDEffectiveValue(fd))}</p>
-                      </div>
-                      <div className="col-span-2 sm:col-span-1 flex items-center justify-start md:justify-end gap-2">
-                        {fdDocs.map((doc) => (
-                          <a
-                            key={doc.id}
-                            href={getDocumentUrl(doc.file_path)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-800 transition-colors"
-                            title={doc.name}
-                            aria-label={`Open document: ${doc.name}`}
-                          >
-                            <FileText size={14} aria-hidden="true" />
-                          </a>
-                        ))}
-                        <button
-                          onClick={() => handleOpenEdit(fd)}
-                          className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
-                          title={`Edit ${cfg.title}`}
-                          aria-label={`Edit ${cfg.title} at ${fd.bank_name}`}
-                        >
-                          <Edit2 size={14} aria-hidden="true" />
-                        </button>
-                        <button
-                          onClick={() => setConfirmDelete(fd)}
-                          className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
-                          title={`Delete ${cfg.title}`}
-                          aria-label={`Delete ${cfg.title} at ${fd.bank_name}`}
-                        >
-                          <Trash2 size={14} aria-hidden="true" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar / Next SIP Due Date details */}
-                  {mode !== 'sip' ? (
-                    <div className="mt-4 space-y-4">
-                      <div>
-                        <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 mb-1">
-                          <span className="flex items-center gap-1">
-                            <Clock size={10} aria-hidden="true" />
-                            Maturity Timeline
-                          </span>
-                          <span>{fd.maturity_date ? `${progress.toFixed(0)}% elapsed` : 'Ongoing accumulation'}</span>
-                        </div>
-                        {fd.maturity_date && (
-                          <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Maturity timeline progress">
-                            <div
-                              className={`h-full rounded-full transition-all duration-300 ${isMatured ? 'bg-emerald-500' : 'bg-blue-500'}`}
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                      
-                      {mode === 'ssy' && (Number(fd.principal_amount) < 250 || Number(fd.principal_amount) > 150000) && (
-                        <div className="bg-amber-50/50 dark:bg-amber-950/20 border border-amber-250/50 dark:border-amber-900/30 text-amber-800 dark:text-amber-400 rounded-xl p-3 text-[11px] flex items-start gap-2">
-                          <AlertCircle size={14} className="mt-0.5 shrink-0" />
-                          <span>SSY guidelines: Annual deposits must be between ₹250 and ₹1,50,000 per financial year. Adjust this account's annual contribution to conform.</span>
-                        </div>
-                      )}
-                      
-                      {mode === 'rd' && (
-                        <div className="pt-2 border-t border-slate-100 dark:border-slate-700/50">
-                          <button
-                            type="button"
-                            onClick={() => toggleExpandRd(fd.id)}
-                            className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
-                          >
-                            {expandedRd[fd.id] ? 'Hide Installment Schedule' : 'Show Installment Schedule'}
-                          </button>
-                          
-                          {expandedRd[fd.id] && (
-                            <div className="mt-3 space-y-2">
-                              <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
-                                Monthly Installments
-                              </p>
-                              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                                {getRDInstallmentMonths(fd.start_date, fd.maturity_date).map((monthDate, idx) => {
-                                  const isPaid = isRDMonthPaid(monthDate, fd.contributions);
-                                  const label = monthDate.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
-                                  return (
-                                    <div
-                                      key={idx}
-                                      className={`rounded-xl border p-2 flex flex-col items-center justify-between text-center gap-1.5 transition-all ${
-                                        isPaid
-                                          ? 'bg-emerald-50/30 border-emerald-250 dark:bg-emerald-950/10 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-400'
-                                          : 'bg-slate-50/50 border-slate-200 dark:bg-slate-900/20 dark:border-slate-750 text-slate-500 dark:text-slate-450'
-                                      }`}
-                                    >
-                                      <span className="text-[10px] font-bold tracking-wide">{label}</span>
-                                      {isPaid ? (
-                                        <span className="text-[9px] font-semibold bg-emerald-100 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded-md">
-                                          ✓ Paid
-                                        </span>
-                                      ) : (
-                                        <button
-                                          type="button"
-                                          onClick={() => void handleRecordInstallment(fd, monthDate)}
-                                          className="text-[9px] font-extrabold bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-0.5 rounded-md transition-all active:scale-95 shadow-xs"
-                                        >
-                                          + Pay
-                                        </button>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {fd.notes && (
-                        <p className="text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5">
-                          <StickyNote size={11} className="shrink-0 mt-0.5" />
-                          <span className="italic">{fd.notes}</span>
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="mt-2 space-y-2">
-                      {fd.notes && (
-                        <p className="text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5">
-                          <StickyNote size={11} className="shrink-0 mt-0.5" />
-                          <span className="italic">{fd.notes}</span>
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {fixedDeposits.map((fd) => (
+              <DepositDetailsCard
+                key={fd.id}
+                fd={fd}
+                mode={mode}
+                cfg={cfg}
+                documents={documents}
+                onOpenEdit={handleOpenEdit}
+                onConfirmDelete={setConfirmDelete}
+                onUpdate={onUpdate}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -647,7 +423,7 @@ function FixedDepositView({
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
+                className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors text-xl font-bold"
                 aria-label="Close modal"
               >
                 &times;
@@ -670,194 +446,45 @@ function FixedDepositView({
               </div>
 
               {mode === 'sip' ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">MF Scheme Code</label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="e.g. 102867"
-                        value={mfSchemeCode}
-                        onChange={(e) => setMfSchemeCode(e.target.value)}
-                        className="flex-1 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleValidateScheme}
-                        disabled={isValidatingScheme}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all disabled:opacity-50 shrink-0"
-                      >
-                        {isValidatingScheme ? 'Validating...' : 'Fetch Fund'}
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Mutual Fund Name</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. HDFC Top 100 Mutual Fund"
-                      value={bankName}
-                      onChange={(e) => setBankName(e.target.value)}
-                      className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Monthly SIP (₹)</label>
-                      <input
-                        type="number"
-                        placeholder="0"
-                        value={principalAmount}
-                        onChange={(e) => setPrincipalAmount(e.target.value)}
-                        className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Expected CAGR (%)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        placeholder="e.g. 12.00"
-                        value={interestRate}
-                        onChange={(e) => setInterestRate(e.target.value)}
-                        className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Units Owned</label>
-                      <input
-                        type="number"
-                        step="0.001"
-                        placeholder="0.000"
-                        value={units}
-                        onChange={(e) => setUnits(e.target.value)}
-                        className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Start Date</label>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Next SIP Date <span className="font-normal text-slate-400">(optional)</span></label>
-                      <input
-                        type="date"
-                        value={maturityDate}
-                        onChange={(e) => setMaturityDate(e.target.value)}
-                        className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Current / Fallback Valuation (₹)</label>
-                    <input
-                      type="number"
-                      placeholder="Manual / Fallback valuation"
-                      value={maturityAmount}
-                      onChange={(e) => setMaturityAmount(e.target.value)}
-                      className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                    />
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-                      Note: If a valid Scheme Code is set, live valuation is auto-calculated using the fetched NAV. Otherwise, this manual value is used.
-                    </p>
-                  </div>
-                </div>
+                <SIPFormFields
+                  mfSchemeCode={mfSchemeCode}
+                  setMfSchemeCode={setMfSchemeCode}
+                  bankName={bankName}
+                  setBankName={setBankName}
+                  principalAmount={principalAmount}
+                  setPrincipalAmount={setPrincipalAmount}
+                  interestRate={interestRate}
+                  setInterestRate={setInterestRate}
+                  units={units}
+                  setUnits={setUnits}
+                  startDate={startDate}
+                  setStartDate={setStartDate}
+                  maturityDate={maturityDate}
+                  setMaturityDate={setMaturityDate}
+                  maturityAmount={maturityAmount}
+                  setMaturityAmount={setMaturityAmount}
+                  isValidatingScheme={isValidatingScheme}
+                  onValidateScheme={handleValidateScheme}
+                />
               ) : (
-                <>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.issuerLabel}</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. SBI Bank, Post Office"
-                      value={bankName}
-                      onChange={(e) => setBankName(e.target.value)}
-                      className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.principalLabel}</label>
-                      <input
-                        type="number"
-                        placeholder="0"
-                        value={principalAmount}
-                        onChange={(e) => setPrincipalAmount(e.target.value)}
-                        onBlur={calculateMaturity}
-                        className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.rateLabel}</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        placeholder="e.g. 7.10"
-                        value={interestRate}
-                        onChange={(e) => setInterestRate(e.target.value)}
-                        onBlur={calculateMaturity}
-                        className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.startLabel}</label>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        onBlur={calculateMaturity}
-                        className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.maturityDateLabel}</label>
-                      <input
-                        type="date"
-                        value={maturityDate}
-                        onChange={(e) => setMaturityDate(e.target.value)}
-                        onBlur={calculateMaturity}
-                        className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.maturityLabel}</label>
-                      <input
-                        type="number"
-                        placeholder="Auto-computed"
-                        value={maturityAmount}
-                        onChange={(e) => setMaturityAmount(e.target.value)}
-                        className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Status</label>
-                      <select
-                        value={status}
-                        onChange={(e) => setStatus(e.target.value as 'active' | 'matured')}
-                        className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                      >
-                        <option value="active">Active</option>
-                        <option value="matured">Matured</option>
-                      </select>
-                    </div>
-                  </div>
-                </>
+                <StandardFormFields
+                  cfg={cfg}
+                  bankName={bankName}
+                  setBankName={setBankName}
+                  principalAmount={principalAmount}
+                  setPrincipalAmount={setPrincipalAmount}
+                  interestRate={interestRate}
+                  setInterestRate={setInterestRate}
+                  startDate={startDate}
+                  setStartDate={setStartDate}
+                  maturityDate={maturityDate}
+                  setMaturityDate={setMaturityDate}
+                  maturityAmount={maturityAmount}
+                  setMaturityAmount={setMaturityAmount}
+                  status={status}
+                  setStatus={setStatus}
+                  calculateMaturity={calculateMaturity}
+                />
               )}
 
               <div>
