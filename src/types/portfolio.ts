@@ -33,6 +33,8 @@ export interface FixedDeposit {
   /** JSONB array of contribution records for recurring deposits */
   contributions?: { date: string; amount: number }[];
   notes?: string;
+  mf_scheme_code?: string;
+  units?: number;
   created_at?: string;
 }
 

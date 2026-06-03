@@ -198,6 +198,8 @@ Deno.serve(async (req: Request) => {
             status: payload.status || "active",
             fd_type: payload.fdType || "regular",
             contributions: payload.contributions || [],
+            mf_scheme_code: payload.mfSchemeCode || null,
+            units: payload.units !== undefined && payload.units !== null ? Number(payload.units) : null,
           })
           .select()
           .single();
@@ -306,6 +308,8 @@ Deno.serve(async (req: Request) => {
         if (payload.status !== undefined) updates.status = payload.status;
         if (payload.fdType !== undefined) updates.fd_type = payload.fdType;
         if (payload.contributions !== undefined) updates.contributions = payload.contributions;
+        if (payload.mfSchemeCode !== undefined) updates.mf_scheme_code = payload.mfSchemeCode;
+        if (payload.units !== undefined) updates.units = payload.units !== null ? Number(payload.units) : null;
       } else if (asset_type === "gold") {
         table = "gold_holdings";
         if (payload.itemName !== undefined) updates.item_name = payload.itemName;

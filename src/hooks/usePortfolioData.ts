@@ -169,6 +169,46 @@ function applyLivePrices(portfolios: Portfolio[], priceMap: Record<string, { ltp
   });
 }
 
+function applyLiveMFNavs(portfolios: Portfolio[], navMap: Record<string, number>): Portfolio[] {
+  return portfolios.map((portfolio) => {
+    const updatedFDs = portfolio.fixedDeposits.map((f) => {
+      if (f.fd_type === 'sip' && f.mf_scheme_code && navMap[f.mf_scheme_code] !== undefined) {
+        const nav = navMap[f.mf_scheme_code];
+        const units = Number(f.units || 0);
+        const currentValue = units * nav;
+        return { ...f, maturity_amount: currentValue };
+      }
+      return f;
+    });
+
+    const stockInvested = portfolio.holdings.reduce((sum, h) => sum + h.amountInvested, 0);
+    const stockCurrent = portfolio.holdings.reduce((sum, h) => sum + h.currentValue, 0);
+
+    const fdInvested = updatedFDs.reduce((sum, f) => sum + Number(f.principal_amount), 0);
+    const fdCurrent = updatedFDs.reduce((sum, f) => sum + getFDEffectiveValue(f), 0);
+
+    const goldInvested = portfolio.goldHoldings.reduce((sum, g) => sum + Number(g.purchase_price), 0);
+    const goldCurrent = portfolio.goldHoldings.reduce((sum, g) => sum + Number(g.current_valuation), 0);
+
+    const reInvested = portfolio.realEstate.reduce((sum, r) => sum + Number(r.purchase_price), 0);
+    const reCurrent = portfolio.realEstate.reduce((sum, r) => sum + Number(r.current_valuation), 0);
+
+    const totalInvested = stockInvested + fdInvested + goldInvested + reInvested;
+    const totalCurrentValue = stockCurrent + fdCurrent + goldCurrent + reCurrent;
+    const totalPnL = totalCurrentValue - totalInvested;
+    const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
+
+    return {
+      ...portfolio,
+      fixedDeposits: updatedFDs,
+      totalInvested,
+      totalCurrentValue,
+      totalPnL,
+      totalPnLPercent,
+    };
+  });
+}
+
 function getFriendlyMessage(err: unknown): string {
   if (err instanceof AppApiError) return err.message;
   if (err instanceof Error) return err.message;
@@ -252,6 +292,45 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     return map;
   }, []);
 
+  const fetchLiveMFNavs = useCallback(async (fds: FixedDeposit[]): Promise<Record<string, number>> => {
+    const sipFds = fds.filter((f) => f.fd_type === 'sip' && f.mf_scheme_code);
+    if (sipFds.length === 0) return {};
+
+    const uniqueSchemeCodes = Array.from(new Set(sipFds.map((f) => f.mf_scheme_code!)));
+    const navMap: Record<string, number> = {};
+
+    await Promise.all(
+      uniqueSchemeCodes.map(async (code) => {
+        try {
+          const cacheKey = `mf_nav_${code}`;
+          const cached = sessionStorage.getItem(cacheKey);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Date.now() - parsed.timestamp < 4 * 60 * 60 * 1000) {
+              navMap[code] = parsed.nav;
+              return;
+            }
+          }
+
+          const res = await fetch(`https://api.mfapi.in/mf/${code}`);
+          if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+          const json = await res.json();
+          if (json.data && json.data.length > 0) {
+            const nav = parseFloat(json.data[0].nav);
+            if (!isNaN(nav)) {
+              navMap[code] = nav;
+              sessionStorage.setItem(cacheKey, JSON.stringify({ nav, timestamp: Date.now() }));
+            }
+          }
+        } catch (err) {
+          console.warn(`[portfolio] Failed to fetch NAV for mutual fund scheme ${code}:`, err);
+        }
+      })
+    );
+
+    return navMap;
+  }, []);
+
   const load = useCallback(async () => {
     setLoadStatus('loading');
     setLoadError('');
@@ -305,10 +384,18 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       setPriceStatus('loading');
       try {
         const allHoldings = built.flatMap((p) => p.holdings);
-        if (allHoldings.length > 0) {
-          const priceMap = await fetchLivePrices(allHoldings);
-          setPortfolios((prev) => applyLivePrices(prev, priceMap));
-        }
+        const allFDs = built.flatMap((p) => p.fixedDeposits);
+
+        const [priceMap, navMap] = await Promise.all([
+          allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
+          fetchLiveMFNavs(allFDs),
+        ]);
+
+        setPortfolios((prev) => {
+          const withPrices = applyLivePrices(prev, priceMap);
+          return applyLiveMFNavs(withPrices, navMap);
+        });
+
         setLastUpdated(new Date());
         setPriceStatus('success');
       } catch (priceErr: unknown) {
@@ -347,10 +434,18 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     setPriceStatus('loading');
     try {
       const allHoldings = portfolios.flatMap((p) => p.holdings);
-      if (allHoldings.length > 0) {
-        const priceMap = await fetchLivePrices(allHoldings);
-        setPortfolios((prev) => applyLivePrices(prev, priceMap));
-      }
+      const allFDs = portfolios.flatMap((p) => p.fixedDeposits);
+
+      const [priceMap, navMap] = await Promise.all([
+        allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
+        fetchLiveMFNavs(allFDs),
+      ]);
+
+      setPortfolios((prev) => {
+        const withPrices = applyLivePrices(prev, priceMap);
+        return applyLiveMFNavs(withPrices, navMap);
+      });
+
       setLastUpdated(new Date());
       setPriceStatus('success');
     } catch (err) {
@@ -359,7 +454,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       }
       setPriceStatus('error');
     }
-  }, [portfolios, fetchLivePrices, handleAuthExpired]);
+  }, [portfolios, fetchLivePrices, fetchLiveMFNavs, handleAuthExpired]);
 
   const addPortfolio = useCallback(async (name: string, label: string) => {
     try {
