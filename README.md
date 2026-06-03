@@ -7,47 +7,45 @@ A premium, interactive web application designed to track and manage multi-asset 
 ## ✨ Features
 
 ### 📊 Financial Dashboard & Analytics
-- **Historical Net Worth Chart [NEW]** — Interactive SVG line and area chart plotting the growth of family net worth over time with toggleable categories (Stocks, FDs, Gold, Real Estate) and detailed cursor hover tooltips.
+- **Historical Net Worth Chart** — Interactive SVG line and area chart plotting the growth of family net worth over time with toggleable categories (Stocks, FDs, Gold, Real Estate) and detailed cursor hover tooltips.
 - **Asset Allocation Chart** — Interactive donut chart showcasing distribution across Stocks, FDs, Gold, and Real Estate.
 - **P&L Visuals** — Direct indications of profits and losses with custom positive/negative indicators and INR formatting.
 - **Comparison Engine** — Multi-dimensional bar chart comparing total invested vs. current value per family member.
 - **Live Prices** — Live feeds for stock and ETF holdings (every 30 seconds) showing intraday changes and overall returns.
 
-### 💡 Portfolio Insights & Health Score [NEW]
+### 💡 Portfolio Insights & Health Score
 - **Portfolio Health Score** — Circular gauge widget evaluating portfolio quality (0–100) across diversification, target asset balance, concentration risk, and insurance coverage.
 - **Performance Highlights** — Instantly view top stock holdings, top gainers, top losers, and today's biggest absolute price movement.
-- **Asset Allocation Drift** — Tracks deviations between actual asset splits and default targets.
+- **Asset Allocation Drift & Targets** — Tracks deviations between actual asset splits and targets. Features **User-Configurable Allocation Targets** via a settings modal.
 - **Portfolio Concentration Alerts** — Warnings if any single equity exceeds 15% of the total portfolio value.
 
 ### 💼 Portfolio Management & Navigation
-- **Global Cross-Asset Search [NEW]** — Live fuzzy search bar across stocks, banks, gold items, properties, and documents. Instantly jump to the tab and scroll directly to the matching asset.
+- **Global Cross-Asset Search** — Live fuzzy search bar across stocks, banks, gold items, properties, and documents. Instantly jump to the tab and scroll directly to the matching asset.
 - **Family View Switcher** — Toggle between **Family Overview** (combined family wealth) and individual member pages (My Portfolio, Mother's Portfolio, Wife's Portfolio).
 - **Portfolio Renaming** — Easily change family display labels directly from the UI.
 - **Dynamic Add/Edit** — Create and edit asset entries dynamically with live calculations.
-- **Holdings Table Sorting Presets [NEW]** — Quick presets to sort holdings by current value, total P&L, today's percent movement, or overall allocation percent.
-- **Mobile Bottom Navigation [NEW]** — Fixed bottom bar for quick tabs swapping on narrow mobile viewports.
+- **Holdings Table Sorting Presets** — Quick presets to sort holdings by current value, total P&L, today's percent movement, or overall allocation percent.
+- **Mobile Bottom Navigation** — Fixed bottom bar for quick tabs swapping on narrow mobile viewports, featuring an **Alert Count Badge** on the Home tab.
 
 ### 📂 Multi-Asset Registry & Reminders
-- **Fixed Deposits** — Real-time compounded interest tracking, optional maturity dates for ongoing deposits, timeline progress bars, and document attachments.
+- **Fixed Deposits** — Real-time compounded interest tracking, optional maturity dates for ongoing deposits, timeline progress bars, and document attachments. Exposes UI settings for `fd_type` and recurring contributions.
 - **Gold Holdings** — Weight tracking, purity selection (24K, 22K, etc.), cost basis vs. current valuation appreciation.
-- **Real Estate** — Property value trackers, locations, acquisition dates, and monthly rental yield calculations.
+- **Real Estate** — Property value trackers, locations, acquisition dates, monthly rental yield calculations, and empty-state CTA redirection.
 - **Insurances** — Health, term, life, and motor policy registries with automated renewal timers and status alerts.
-- **Document Vault & Reminders [NEW]** — Secure file manager linked by asset class. Enter optional document expiry dates to see warning badges, track upcoming deadlines, and sort expiring files first.
+- **Document Vault & Reminders** — Secure file manager linked by asset class. Enter optional document expiry dates to see warning badges, track upcoming deadlines, and sort expiring files first.
+- **Notes & Remarks Field** — Support for notes on all asset registries (FDs, Gold, Real Estate, Insurance) with a StickyNote icon representation in the dashboard list.
 
-### 🔔 In-App Smart Alerts [NEW]
-- Dismissible alerts banner displaying warning alerts for stocks hitting 52-week highs/lows, FDs maturing within 15 days, insurance premiums due within 30 days, and family portfolio total swings of ±5% since the last session.
+### 🔔 Custom Modals & In-App Smart Alerts
+- **Dismissible Alerts Banner** — Displaying warning alerts for stocks hitting 52-week highs/lows, FDs maturing within 15 days, insurance premiums due within 30 days, and family portfolio swings.
+- **Custom Confirmation Modals** — Eliminates native browser alert/confirm blocking popups, replacing them with custom-styled, theme-aware overlays.
 
-### 📥 Import / Export Controls [NEW]
+### 📥 Import / Export Controls
 - **CSV Import Modal** — Bulk import stock holdings from any CSV file with field column-mapping, error logs, and a dry-run preview before committing to database.
 - **Backup & Export Options** — Standardized Excel/CSV export for all assets, formatted JSON backups, and print-ready styled PDF reports.
 
-### 🔒 Security
+### 🔒 Security & Reliability
 - **PIN Lock Screen** — Optional session-based PIN lock screen to prevent unauthorized access to sensitive family wealth data. Configurable via environment variables.
-
-### ⚙️ General
-- **Responsive Design** — Works seamlessly on desktop, tablet, and mobile.
-- **Offline Resilient** — Gracefully falls back to last known data when the network is unavailable.
-- **INR Formatting** — All values formatted in Indian Rupee with lakh/crore notation.
+- **Error Boundaries & Loaders** — App-wide and component-specific React error boundaries coupled with custom skeleton loaders to enhance resilience.
 
 ---
 
@@ -58,7 +56,7 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **TypeScript** — End-to-end type safety
 - **Vite 5** — Lightning-fast dev server and optimized builds
 - **Tailwind CSS 3** — Utility-first styling
-- **Lucide React** — Clean, consistent iconography
+- **Lucide React ^0.511.0** — Modern, consistent iconography
 
 ### Backend (Supabase)
 - **PostgreSQL** — Relational database tables for portfolios, holdings, FDs, gold, real estate, insurances, documents, and net worth history.
@@ -66,10 +64,10 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **Edge Functions (Deno)** — Serverless functions for:
   - `holdings-crud` — Secure DB access and operations (PIN-locked).
   - `market-data` — Yahoo Finance live quotes lookup and server-side caching.
-  - `snapshot-net-worth` [NEW] — Automated daily net worth calculation and logging.
+  - `snapshot-net-worth` — Automated daily net worth calculation and logging.
 
-### Hosting
-- **GitHub Pages** — CI/CD automated deployment on push to `main`.
+### Mobile & Hybrid
+- **Capacitor** — Package and sync assets to run natively on mobile platforms (Android).
 
 ---
 
@@ -89,18 +87,34 @@ project antigravity/
 │   │   ├── PortfolioTable.tsx    # Sortable holdings table with preset selectors & allocation column
 │   │   ├── PieChart.tsx          # Asset allocation donut chart
 │   │   ├── BarChart.tsx          # Portfolio comparison bar chart
+│   │   ├── NetWorthChart.tsx     # Historical net worth SVG area and line chart
 │   │   ├── AddHoldingModal.tsx   # Modal form to add new stock holdings
+│   │   ├── AddFamilyModal.tsx    # Modal form to add new family members
+│   │   ├── RenamePortfolioModal.tsx # Modal form to rename family member portfolios
 │   │   ├── FixedDepositView.tsx  # FD management — list, add, edit, delete
 │   │   ├── GoldHoldingView.tsx   # Gold holdings management
 │   │   ├── RealEstateView.tsx    # Real estate property management
 │   │   ├── InsuranceView.tsx     # Insurance policy management
 │   │   ├── DocumentVaultView.tsx # Document vault view with expiry fields and sorted indicators
-│   │   ├── SearchBar.tsx         # Fuzzy global search bar component
+│   │   ├── SearchBar.tsx         # Fuzzy global search bar component (fuzzy match with tab jumping)
 │   │   ├── AlertsBanner.tsx      # Banners showing active notifications (52w high/low, FD due, etc.)
 │   │   ├── ExportPanel.tsx       # Export (CSV, PDF, JSON) and CSV Import dialog box
 │   │   ├── HealthScore.tsx       # Gauge widget visualizing portfolio quality metrics
 │   │   ├── InsightsPanel.tsx     # Detailed drift, gainer, loser, and performer panels
-│   │   └── MobileBottomNav.tsx   # Sticky mobile tabs navigation bar
+│   │   ├── AllocationTargetsSettings.tsx # Configurator modal for custom asset allocation target splits
+│   │   ├── ConfirmModal.tsx      # Custom styled backdrop modal replacing native browser confirm/alert
+│   │   ├── Modal.tsx             # Core reusable styled backdrop modal wrapper
+│   │   ├── FloatingAddMenu.tsx   # Quick floating menu to add assets
+│   │   ├── QuickActions.tsx      # Grid of quick action buttons for mobile layout
+│   │   ├── AssetTabContent.tsx   # Orchestrator component rendering the active asset registry view
+│   │   ├── FamilyTabBar.tsx      # Top tab bar switcher for family member portfolios
+│   │   ├── MobileAlertsView.tsx  # Mobile view display for dismissed/active portfolio alerts
+│   │   ├── MobileBottomNav.tsx   # Sticky mobile tabs navigation bar with alert badge count
+│   │   ├── MobileHomeSummary.tsx # Mobile view dashboard summary
+│   │   ├── AppErrorBoundary.tsx  # Global React error boundary component
+│   │   ├── SectionErrorBoundary.tsx # Nested React error boundary for asset-specific dashboard components
+│   │   ├── DashboardLoading.tsx  # Skeleton loader states for dashboard fetch
+│   │   └── DashboardError.tsx    # Full-page retry UI for API/Supabase connection failures
 │   ├── hooks/
 │   │   ├── usePortfolioData.ts   # Core data hook — Edge Function list, CRUD operations, local cache, live prices
 │   │   ├── usePortfolioInsights.ts # Computes health, allocation, performer, and reminder insights
@@ -109,8 +123,10 @@ project antigravity/
 │   ├── types/
 │   │   └── portfolio.ts          # TypeScript interfaces (Holding, NetWorthSnapshot, etc.)
 │   ├── utils/
+│   │   ├── apiClient.ts          # Safe wrapper client around Supabase edge functions
 │   │   ├── auth.ts               # Session PIN verification and security helpers
 │   │   ├── formatters.ts         # INR formatting, percent formatting, P&L colors, getDocumentUrl
+│   │   ├── portfolioCalcs.ts     # Compounded/simple interest calculators & portfolio aggregation calculations
 │   │   └── supabaseClient.ts     # Supabase SDK initialization
 │   └── data/
 │       ├── portfolioData.ts      # Static/seed portfolio data
@@ -126,7 +142,7 @@ project antigravity/
 ├── postcss.config.js             # PostCSS plugins
 ├── vite.config.ts                # Vite build configuration
 ├── tsconfig.json                 # TypeScript root config
-└── package.json                  # Dependencies and scripts
+└── package.json                  # Dependencies, script configurations, and engines
 ```
 
 ---
@@ -204,6 +220,8 @@ npm run typecheck
 | **Lint** | `npm run lint` | Run ESLint checks |
 | **Type Check** | `npm run typecheck` | Run TypeScript compiler checks (no emit) |
 | **Verify All** | `npm run verify` | Run lint + typecheck + build in sequence |
+| **Mobile Sync** | `npm run mobile:sync` | Build web assets and sync Capacitor configuration for Android |
+| **Mobile Run** | `npm run mobile:run` | Build, sync, and launch the Capacitor Android app in emulator |
 
 ---
 

@@ -1,5 +1,5 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "family-portfolio-tracker",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -14,8 +14,8 @@
     "mobile:run": "npm run build && cd ../android/mobile && npx cap sync android && npx cap run android --target=emulator-5554"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.57.4",
-    "lucide-react": "^0.344.0",
+    "@supabase/supabase-js": "^2.49.4",
+    "lucide-react": "^0.511.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -34,5 +34,8 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
     "vite": "^5.4.2"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

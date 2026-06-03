@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { RealEstate, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/formatters';
-import { Plus, Trash2, Edit2, Home, MapPin, TrendingUp, Building2, FileText, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, Home, MapPin, TrendingUp, Building2, FileText, X, StickyNote } from 'lucide-react';
 import Modal from './Modal';
+import ConfirmModal from './ConfirmModal';
 
 interface PortfolioOption {
   name: string;
@@ -45,6 +46,10 @@ export default React.memo(function RealEstateView({
   const [currentValuation, setCurrentValuation] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
   const [monthlyRent, setMonthlyRent] = useState('');
+  const [notes, setNotes] = useState('');
+
+  // Confirm-delete state
+  const [confirmDelete, setConfirmDelete] = useState<RealEstate | null>(null);
 
   const totalPurchase = realEstate.reduce((s, r) => s + Number(r.purchase_price), 0);
   const totalCurrent = realEstate.reduce((s, r) => s + Number(r.current_valuation), 0);
@@ -63,6 +68,7 @@ export default React.memo(function RealEstateView({
     setCurrentValuation('');
     setPurchaseDate('');
     setMonthlyRent('');
+    setNotes('');
     setError('');
     setShowModal(true);
   }, [portfolioName]);
@@ -83,6 +89,7 @@ export default React.memo(function RealEstateView({
     setCurrentValuation(String(r.current_valuation));
     setPurchaseDate(r.purchase_date ?? '');
     setMonthlyRent(String(r.monthly_rent));
+    setNotes(r.notes ?? '');
     setError('');
     setShowModal(true);
   }
@@ -103,6 +110,7 @@ export default React.memo(function RealEstateView({
       currentValuation: parseFloat(currentValuation),
       purchaseDate: purchaseDate || null,
       monthlyRent: monthlyRent ? parseFloat(monthlyRent) : 0,
+      notes: notes || null,
     };
     try {
       if (editing) {
@@ -119,11 +127,12 @@ export default React.memo(function RealEstateView({
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this real estate property?')) return;
     try {
       await onDelete('real_estate', id);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Delete failed');
+    } finally {
+      setConfirmDelete(null);
     }
   }
 
@@ -180,10 +189,21 @@ export default React.memo(function RealEstateView({
         </div>
 
         {realEstate.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 dark:text-slate-500">
-            <Building2 size={32} className="mx-auto text-slate-300 dark:text-slate-650 mb-3" />
-            <p className="text-sm font-semibold">No properties tracked</p>
-            <p className="text-xs mt-1">Add your first property to start tracking value & rent.</p>
+          <div className="p-16 text-center">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950/30 dark:to-teal-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
+              <Building2 size={36} className="text-emerald-400 dark:text-emerald-500" />
+            </div>
+            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">No Properties Yet</h4>
+            <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
+              Add your first property to track value, capital appreciation, and rental yield.
+            </p>
+            <button
+              onClick={handleOpenAdd}
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-emerald-500/20"
+            >
+              <Plus size={15} />
+              Add Your First Property
+            </button>
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
@@ -250,7 +270,7 @@ export default React.memo(function RealEstateView({
                           <Edit2 size={14} />
                         </button>
                         <button
-                          onClick={() => handleDelete(r.id)}
+                          onClick={() => setConfirmDelete(r)}
                           className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
                           title="Delete"
                         >
@@ -259,6 +279,12 @@ export default React.memo(function RealEstateView({
                       </div>
                     </div>
                   </div>
+                  {r.notes && (
+                    <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5">
+                      <StickyNote size={11} className="shrink-0 mt-0.5" />
+                      <span className="italic">{r.notes}</span>
+                    </p>
+                  )}
                 </div>
               );
             })}
@@ -384,6 +410,17 @@ export default React.memo(function RealEstateView({
             </div>
           </div>
 
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Notes <span className="font-normal text-slate-400">(optional)</span></label>
+            <textarea
+              rows={2}
+              placeholder="e.g. Disputed title, under renovation, used as collateral"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors resize-none"
+            />
+          </div>
+
           {error && (
             <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl px-3 py-2" role="alert">{error}</p>
           )}
@@ -406,6 +443,16 @@ export default React.memo(function RealEstateView({
           </div>
         </form>
       </Modal>
+
+      {/* Confirm delete dialog */}
+      <ConfirmModal
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={() => { if (confirmDelete) void handleDelete(confirmDelete.id); }}
+        title="Delete Property"
+        message={confirmDelete ? `Are you sure you want to delete "${confirmDelete.property_name}"? This cannot be undone.` : ''}
+        confirmLabel="Delete"
+      />
     </div>
   );
 });

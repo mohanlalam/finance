@@ -28,6 +28,11 @@ export interface FixedDeposit {
   maturity_date: string | null;
   maturity_amount: number;
   status: 'active' | 'matured';
+  /** FD sub-type: 'regular' | 'recurring' | 'ssy' | 'nsc' | 'ppf' (default: 'regular') */
+  fd_type?: string;
+  /** JSONB array of contribution records for recurring deposits */
+  contributions?: { date: string; amount: number }[];
+  notes?: string;
   created_at?: string;
 }
 
@@ -40,6 +45,7 @@ export interface GoldHolding {
   purchase_price: number;
   current_valuation: number;
   purchase_date?: string;
+  notes?: string;
   created_at?: string;
 }
 
@@ -53,6 +59,7 @@ export interface RealEstate {
   current_valuation: number;
   purchase_date?: string;
   monthly_rent: number;
+  notes?: string;
   created_at?: string;
 }
 
@@ -66,6 +73,7 @@ export interface Insurance {
   sum_assured: number;
   premium_amount: number;
   renewal_date?: string;
+  notes?: string;
   created_at?: string;
 }
 

@@ -2,6 +2,41 @@ import { useMemo } from 'react';
 import { Portfolio, Holding, FixedDeposit, Insurance } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
 
+/* ── Allocation Targets ── */
+
+export interface AllocationTargets {
+  stocks: number;
+  fd: number;
+  gold: number;
+  realEstate: number;
+}
+
+export const DEFAULT_ALLOCATION_TARGETS: AllocationTargets = {
+  stocks: 60,
+  fd: 20,
+  gold: 10,
+  realEstate: 10,
+};
+
+export const ALLOCATION_TARGETS_KEY = 'finance_allocation_targets';
+
+export function getAllocationTargets(): AllocationTargets {
+  try {
+    const stored = localStorage.getItem(ALLOCATION_TARGETS_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as Partial<AllocationTargets>;
+      const t: AllocationTargets = {
+        stocks: typeof parsed.stocks === 'number' ? parsed.stocks : DEFAULT_ALLOCATION_TARGETS.stocks,
+        fd: typeof parsed.fd === 'number' ? parsed.fd : DEFAULT_ALLOCATION_TARGETS.fd,
+        gold: typeof parsed.gold === 'number' ? parsed.gold : DEFAULT_ALLOCATION_TARGETS.gold,
+        realEstate: typeof parsed.realEstate === 'number' ? parsed.realEstate : DEFAULT_ALLOCATION_TARGETS.realEstate,
+      };
+      return t;
+    }
+  } catch { /* ignore */ }
+  return { ...DEFAULT_ALLOCATION_TARGETS };
+}
+
 /* ── Alert / Insight types ── */
 
 export interface HoldingInsight {
@@ -79,7 +114,7 @@ function allHoldingsWithMeta(portfolios: Portfolio[]): HoldingInsight[] {
   );
 }
 
-const TARGET_ALLOCATION = { stocks: 60, fd: 20, gold: 10, realEstate: 10 };
+const TARGET_ALLOCATION = getAllocationTargets();
 
 /* ── Score calculators ── */
 

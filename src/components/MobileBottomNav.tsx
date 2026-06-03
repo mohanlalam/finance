@@ -6,6 +6,8 @@ type AssetTab = 'home' | 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' 
 interface MobileBottomNavProps {
   activeAsset: AssetTab;
   onChangeAsset: (tab: AssetTab) => void;
+  /** Number of active (non-dismissed) alerts to show as a badge on the Home tab */
+  alertCount?: number;
 }
 
 const tabs: { id: AssetTab; label: string; icon: React.ReactNode }[] = [
@@ -18,7 +20,7 @@ const tabs: { id: AssetTab; label: string; icon: React.ReactNode }[] = [
   { id: 'documents', label: 'Docs', icon: <FolderOpen size={18} /> },
 ];
 
-function MobileBottomNav({ activeAsset, onChangeAsset }: MobileBottomNavProps) {
+function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileBottomNavProps) {
   return (
     <nav
       role="navigation"
@@ -39,8 +41,13 @@ function MobileBottomNav({ activeAsset, onChangeAsset }: MobileBottomNavProps) {
                   : 'text-slate-400 dark:text-slate-500 active:text-slate-600 dark:active:text-slate-350'
               }`}
             >
-              <div className={`transition-transform duration-200 ${isActive ? 'scale-110 -translate-y-0.5' : ''}`}>
+              <div className={`transition-transform duration-200 ${isActive ? 'scale-110 -translate-y-0.5' : ''} relative`}>
                 {tab.icon}
+                {tab.id === 'home' && alertCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] rounded-full bg-red-500 text-white text-[8px] font-bold flex items-center justify-center px-0.5 leading-none">
+                    {alertCount > 9 ? '9+' : alertCount}
+                  </span>
+                )}
               </div>
               <span className={`text-[9px] font-semibold tracking-wide leading-none transition-all duration-150 ${
                 isActive

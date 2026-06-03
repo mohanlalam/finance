@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { GoldHolding, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/formatters';
-import { Plus, Trash2, Edit2, Coins, TrendingUp, Scale, FileText, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, Coins, TrendingUp, Scale, FileText, X, StickyNote } from 'lucide-react';
 import Modal from './Modal';
+import ConfirmModal from './ConfirmModal';
 
 interface PortfolioOption {
   name: string;
@@ -44,6 +45,10 @@ export default React.memo(function GoldHoldingView({
   const [purchasePrice, setPurchasePrice] = useState('');
   const [currentValuation, setCurrentValuation] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
+  const [notes, setNotes] = useState('');
+
+  // Confirm-delete state
+  const [confirmDelete, setConfirmDelete] = useState<GoldHolding | null>(null);
 
   const totalWeight = goldHoldings.reduce((s, g) => s + Number(g.weight_grams), 0);
   const totalPurchase = goldHoldings.reduce((s, g) => s + Number(g.purchase_price), 0);
@@ -60,6 +65,7 @@ export default React.memo(function GoldHoldingView({
     setPurchasePrice('');
     setCurrentValuation('');
     setPurchaseDate('');
+    setNotes('');
     setError('');
     setShowModal(true);
   }, [portfolioName]);
@@ -79,6 +85,7 @@ export default React.memo(function GoldHoldingView({
     setPurchasePrice(String(g.purchase_price));
     setCurrentValuation(String(g.current_valuation));
     setPurchaseDate(g.purchase_date ?? '');
+    setNotes(g.notes ?? '');
     setError('');
     setShowModal(true);
   }
@@ -98,6 +105,7 @@ export default React.memo(function GoldHoldingView({
       purchasePrice: parseFloat(purchasePrice),
       currentValuation: currentValuation ? parseFloat(currentValuation) : parseFloat(purchasePrice),
       purchaseDate: purchaseDate || null,
+      notes: notes || null,
     };
     try {
       if (editing) {
@@ -114,11 +122,12 @@ export default React.memo(function GoldHoldingView({
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this gold holding?')) return;
     try {
       await onDelete('gold', id);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Delete failed');
+    } finally {
+      setConfirmDelete(null);
     }
   }
 
@@ -240,7 +249,7 @@ export default React.memo(function GoldHoldingView({
                           <Edit2 size={14} />
                         </button>
                         <button
-                          onClick={() => handleDelete(g.id)}
+                          onClick={() => setConfirmDelete(g)}
                           className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
                           title="Delete"
                         >
@@ -249,6 +258,12 @@ export default React.memo(function GoldHoldingView({
                       </div>
                     </div>
                   </div>
+                  {g.notes && (
+                    <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5 px-0">
+                      <StickyNote size={11} className="shrink-0 mt-0.5" />
+                      <span className="italic">{g.notes}</span>
+                    </p>
+                  )}
                 </div>
               );
             })}
@@ -363,6 +378,17 @@ export default React.memo(function GoldHoldingView({
             />
           </div>
 
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Notes <span className="font-normal text-slate-400">(optional)</span></label>
+            <textarea
+              rows={2}
+              placeholder="e.g. Inherited from grandfather, stored in locker"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-455 transition-colors resize-none"
+            />
+          </div>
+
           {error && (
             <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl px-3 py-2" role="alert">{error}</p>
           )}
@@ -385,6 +411,16 @@ export default React.memo(function GoldHoldingView({
           </div>
         </form>
       </Modal>
+
+      {/* Confirm delete dialog */}
+      <ConfirmModal
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={() => { if (confirmDelete) void handleDelete(confirmDelete.id); }}
+        title="Delete Gold Holding"
+        message={confirmDelete ? `Are you sure you want to delete "${confirmDelete.item_name}"? This cannot be undone.` : ''}
+        confirmLabel="Delete"
+      />
     </div>
   );
 });

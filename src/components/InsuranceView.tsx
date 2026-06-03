@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { Insurance, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, getDocumentUrl } from '../utils/formatters';
-import { Plus, Trash2, Edit2, Shield, ShieldAlert, FileText, Calendar, Clock, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, Shield, ShieldAlert, FileText, Calendar, Clock, X, StickyNote } from 'lucide-react';
 import Modal from './Modal';
+import ConfirmModal from './ConfirmModal';
 
 interface PortfolioOption {
   name: string;
@@ -60,6 +61,10 @@ export default React.memo(function InsuranceView({
   const [sumAssured, setSumAssured] = useState('');
   const [premiumAmount, setPremiumAmount] = useState('');
   const [renewalDate, setRenewalDate] = useState('');
+  const [notes, setNotes] = useState('');
+
+  // Confirm-delete state
+  const [confirmDelete, setConfirmDelete] = useState<Insurance | null>(null);
 
   const totalCoverage = insurances.reduce((s, i) => s + Number(i.sum_assured), 0);
   const totalPremium = insurances.reduce((s, i) => s + Number(i.premium_amount), 0);
@@ -78,6 +83,7 @@ export default React.memo(function InsuranceView({
     setSumAssured('');
     setPremiumAmount('');
     setRenewalDate('');
+    setNotes('');
     setError('');
     setShowModal(true);
   }, [portfolioName]);
@@ -98,6 +104,7 @@ export default React.memo(function InsuranceView({
     setSumAssured(String(i.sum_assured));
     setPremiumAmount(String(i.premium_amount));
     setRenewalDate(i.renewal_date ?? '');
+    setNotes(i.notes ?? '');
     setError('');
     setShowModal(true);
   }
@@ -118,6 +125,7 @@ export default React.memo(function InsuranceView({
       sumAssured: parseFloat(sumAssured),
       premiumAmount: parseFloat(premiumAmount),
       renewalDate: renewalDate || null,
+      notes: notes || null,
     };
     try {
       if (editing) {
@@ -134,11 +142,12 @@ export default React.memo(function InsuranceView({
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this insurance policy?')) return;
     try {
       await onDelete('insurance', id);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Delete failed');
+    } finally {
+      setConfirmDelete(null);
     }
   }
 
@@ -278,7 +287,7 @@ export default React.memo(function InsuranceView({
                           <Edit2 size={14} />
                         </button>
                         <button
-                          onClick={() => handleDelete(i.id)}
+                          onClick={() => setConfirmDelete(i)}
                           className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
                           title="Delete"
                         >
@@ -287,6 +296,12 @@ export default React.memo(function InsuranceView({
                       </div>
                     </div>
                   </div>
+                  {i.notes && (
+                    <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5">
+                      <StickyNote size={11} className="shrink-0 mt-0.5" />
+                      <span className="italic">{i.notes}</span>
+                    </p>
+                  )}
                 </div>
               );
             })}
@@ -411,6 +426,17 @@ export default React.memo(function InsuranceView({
             />
           </div>
 
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Notes <span className="font-normal text-slate-400">(optional)</span></label>
+            <textarea
+              rows={2}
+              placeholder="e.g. Family floater plan, covers 4 members"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-455 transition-colors resize-none"
+            />
+          </div>
+
           {error && (
             <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl px-3 py-2">{error}</p>
           )}
@@ -433,6 +459,16 @@ export default React.memo(function InsuranceView({
           </div>
         </form>
       </Modal>
+
+      {/* Confirm delete dialog */}
+      <ConfirmModal
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={() => { if (confirmDelete) void handleDelete(confirmDelete.id); }}
+        title="Delete Insurance Policy"
+        message={confirmDelete ? `Are you sure you want to delete "${confirmDelete.policy_name}"? This cannot be undone.` : ''}
+        confirmLabel="Delete"
+      />
     </div>
   );
 });

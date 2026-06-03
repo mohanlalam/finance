@@ -1,12 +1,21 @@
 import React, { useState, useCallback } from 'react';
 import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../utils/formatters';
-import { Plus, Trash2, Edit2, Calendar, TrendingUp, Landmark, FileText, CheckCircle, Clock } from 'lucide-react';
+import { Plus, Trash2, Edit2, Calendar, TrendingUp, Landmark, FileText, CheckCircle, Clock, StickyNote } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
 
 interface PortfolioOption {
   name: string;
   label: string;
 }
+
+const FD_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'regular', label: 'Regular FD' },
+  { value: 'recurring', label: 'Recurring Deposit (RD)' },
+  { value: 'ssy', label: 'Sukanya Samriddhi (SSY)' },
+  { value: 'ppf', label: 'PPF' },
+  { value: 'nsc', label: 'NSC' },
+];
 
 interface FixedDepositViewProps {
   fixedDeposits: FixedDeposit[];
@@ -33,6 +42,7 @@ function FixedDepositView({
   const [editingFd, setEditingFd] = useState<FixedDeposit | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<FixedDeposit | null>(null);
 
   // Form State
   const [formPortfolio, setFormPortfolio] = useState(() => portfolioName);
@@ -43,6 +53,8 @@ function FixedDepositView({
   const [maturityDate, setMaturityDate] = useState('');
   const [maturityAmount, setMaturityAmount] = useState('');
   const [status, setStatus] = useState<'active' | 'matured'>('active');
+  const [fdType, setFdType] = useState('regular');
+  const [notes, setNotes] = useState('');
 
   const calculateMaturity = useCallback(() => {
     const p = parseFloat(principalAmount);
@@ -83,6 +95,8 @@ function FixedDepositView({
     setMaturityDate('');
     setMaturityAmount('');
     setStatus('active');
+    setFdType('regular');
+    setNotes('');
     setError('');
     setShowModal(true);
   }, [portfolioName]);
@@ -103,6 +117,8 @@ function FixedDepositView({
     setMaturityDate(fd.maturity_date || '');
     setMaturityAmount(fd.maturity_amount.toString());
     setStatus(fd.status);
+    setFdType(fd.fd_type ?? 'regular');
+    setNotes(fd.notes ?? '');
     setError('');
     setShowModal(true);
   }
@@ -124,6 +140,8 @@ function FixedDepositView({
       maturityDate: maturityDate || null,
       maturityAmount: parseFloat(maturityAmount),
       status,
+      fdType,
+      notes: notes || null,
     };
 
     try {
@@ -141,12 +159,12 @@ function FixedDepositView({
   }
 
   async function handleDelete(id: string) {
-    if (confirm('Are you sure you want to delete this Fixed Deposit?')) {
-      try {
-        await onDelete('fd', id);
-      } catch (err) {
-        alert(err instanceof Error ? err.message : 'Deletion failed');
-      }
+    try {
+      await onDelete('fd', id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Deletion failed');
+    } finally {
+      setConfirmDelete(null);
     }
   }
 
@@ -286,7 +304,7 @@ function FixedDepositView({
                           <Edit2 size={14} aria-hidden="true" />
                         </button>
                         <button
-                          onClick={() => handleDelete(fd.id)}
+                          onClick={() => setConfirmDelete(fd)}
                           className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
                           title="Delete FD"
                           aria-label={`Delete fixed deposit at ${fd.bank_name}`}
@@ -313,6 +331,12 @@ function FixedDepositView({
                           style={{ width: `${progress}%` }}
                         />
                       </div>
+                    )}
+                    {fd.notes && (
+                      <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5">
+                        <StickyNote size={11} className="shrink-0 mt-0.5" />
+                        <span className="italic">{fd.notes}</span>
+                      </p>
                     )}
                   </div>
                 </div>
@@ -442,6 +466,30 @@ function FixedDepositView({
                 </div>
               </div>
 
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">FD Type</label>
+                <select
+                  value={fdType}
+                  onChange={(e) => setFdType(e.target.value)}
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+                >
+                  {FD_TYPE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Notes <span className="font-normal text-slate-400">(optional)</span></label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Auto-renew on maturity, linked to home loan"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors resize-none"
+                />
+              </div>
+
               {error && (
                 <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-3 py-2" role="alert">{error}</p>
               )}
@@ -466,6 +514,16 @@ function FixedDepositView({
           </div>
         </div>
       )}
+
+      {/* Confirm delete dialog */}
+      <ConfirmModal
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={() => { if (confirmDelete) void handleDelete(confirmDelete.id); }}
+        title="Delete Fixed Deposit"
+        message={confirmDelete ? `Are you sure you want to delete the FD at "${confirmDelete.bank_name}"? This cannot be undone.` : ''}
+        confirmLabel="Delete"
+      />
     </div>
   );
 }

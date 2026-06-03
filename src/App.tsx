@@ -765,7 +765,7 @@ export default function App() {
       </footer>
 
       {/* Mobile Bottom Navigation */}
-      <MobileBottomNav activeAsset={activeAsset} onChangeAsset={setActiveAsset} />
+      <MobileBottomNav activeAsset={activeAsset} onChangeAsset={setActiveAsset} alertCount={visibleAlerts.length} />
 
       {/* Floating Add Menu (FAB) */}
       <FloatingAddMenu

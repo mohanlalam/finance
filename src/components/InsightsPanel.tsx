@@ -10,17 +10,21 @@ import {
   InsuranceRenewalAlert,
   PortfolioBestWorst,
 } from '../hooks/usePortfolioInsights';
+import AllocationTargetsSettings from './AllocationTargetsSettings';
 
 interface InsightsPanelProps {
   insights: PortfolioInsights;
+  /** Called when allocation targets change so the parent re-fetches insights */
+  onTargetsChanged?: () => void;
 }
 
 /* ── Tiny reusable card wrapper ── */
-const Card = React.memo(function Card({ title, icon, children, accent = 'slate' }: {
+const Card = React.memo(function Card({ title, icon, children, accent = 'slate', action }: {
   title: string;
   icon: React.ReactNode;
   children: React.ReactNode;
   accent?: string;
+  action?: React.ReactNode;
 }) {
   const borderMap: Record<string, string> = {
     slate: 'border-slate-100 dark:border-slate-700',
@@ -35,7 +39,8 @@ const Card = React.memo(function Card({ title, icon, children, accent = 'slate' 
     <div className={`bg-white dark:bg-slate-800 rounded-2xl border ${borderMap[accent] ?? borderMap.slate} shadow-sm p-4 hover:shadow-md transition-shadow duration-200`}>
       <div className="flex items-center gap-2 mb-3">
         {icon}
-        <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{title}</h4>
+        <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex-1">{title}</h4>
+        {action}
       </div>
       {children}
     </div>
@@ -263,7 +268,7 @@ const FILTERS: { id: InsightFilter; label: string }[] = [
   { id: 'due_soon', label: 'Due Soon' },
 ];
 
-export default React.memo(function InsightsPanel({ insights }: InsightsPanelProps) {
+export default React.memo(function InsightsPanel({ insights, onTargetsChanged }: InsightsPanelProps) {
   const [activeFilter, setActiveFilter] = useState<InsightFilter>('all');
 
   const f = activeFilter;
@@ -364,6 +369,7 @@ export default React.memo(function InsightsPanel({ insights }: InsightsPanelProp
               title="Asset Allocation Drift"
               icon={<Target size={14} className="text-slate-500" />}
               accent="slate"
+              action={<AllocationTargetsSettings onSaved={onTargetsChanged} />}
             >
               <AllocationDrift slices={insights.allocationSlices} />
             </Card>
