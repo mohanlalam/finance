@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock, Heart } from 'lucide-react';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 
@@ -15,6 +15,9 @@ interface MobileHomeSummaryProps {
   breakdown: {
     stocks: number;
     fd: number;
+    rd: number;
+    ssy: number;
+    sip: number;
     gold: number;
     realEstate: number;
     insuranceCover: number;
@@ -25,7 +28,7 @@ interface MobileHomeSummaryProps {
   priceStatus: string;
   onRefresh: () => void;
   isLoadingPrices: boolean;
-  onNavigateAsset: (asset: 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
+  onNavigateAsset: (asset: 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
   onOpenAlerts: () => void;
   portfolios: Portfolio[];
   activePortfolio: Portfolio | null;
@@ -49,7 +52,10 @@ export default function MobileHomeSummary({
   // Count items
   const currentPortfolios = activePortfolio ? [activePortfolio] : portfolios;
   const stockCount = currentPortfolios.reduce((s, p) => s + p.holdings.length, 0);
-  const fdCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.length, 0);
+  const fdCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'regular' || !f.fd_type).length, 0);
+  const rdCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'recurring' || f.fd_type === 'rd').length, 0);
+  const ssyCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'ssy').length, 0);
+  const sipCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'sip').length, 0);
   const goldCount = currentPortfolios.reduce((s, p) => s + p.goldHoldings.length, 0);
   const propertyCount = currentPortfolios.reduce((s, p) => s + p.realEstate.length, 0);
   const insuranceCount = currentPortfolios.reduce((s, p) => s + p.insurances.length, 0);
@@ -71,6 +77,30 @@ export default function MobileHomeSummary({
       subtext: `${fdCount} Active FDs`,
       icon: <Landmark size={20} className="text-indigo-500" />,
       bg: 'from-indigo-50/50 to-purple-50/20 dark:from-indigo-950/20 dark:to-purple-950/5 border-indigo-100/50 dark:border-indigo-900/30',
+    },
+    {
+      id: 'rd' as const,
+      label: 'Recurring Deposits',
+      value: breakdown.rd,
+      subtext: `${rdCount} Active RDs`,
+      icon: <Clock size={20} className="text-pink-500" />,
+      bg: 'from-pink-50/50 to-rose-50/20 dark:from-pink-950/20 dark:to-rose-950/5 border-pink-100/50 dark:border-pink-900/30',
+    },
+    {
+      id: 'ssy' as const,
+      label: 'Sukanya Samriddhi',
+      value: breakdown.ssy,
+      subtext: `${ssyCount} Accounts`,
+      icon: <Heart size={20} className="text-purple-500" />,
+      bg: 'from-purple-50/50 to-fuchsia-50/20 dark:from-purple-950/20 dark:to-fuchsia-950/5 border-purple-100/50 dark:border-purple-900/30',
+    },
+    {
+      id: 'sip' as const,
+      label: 'SIP Mutual Funds',
+      value: breakdown.sip,
+      subtext: `${sipCount} SIPs`,
+      icon: <TrendingUp size={20} className="text-sky-500" />,
+      bg: 'from-sky-50/50 to-cyan-50/20 dark:from-sky-950/20 dark:to-cyan-950/5 border-sky-100/50 dark:border-sky-900/30',
     },
     {
       id: 'gold' as const,
@@ -174,7 +204,7 @@ export default function MobileHomeSummary({
         <div className="flex items-center gap-1.5 min-w-0">
           <span className={`w-2 h-2 rounded-full shrink-0 ${priceStatus === 'success' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
           <span className="font-semibold shrink-0">{priceStatus === 'success' ? 'Live Prices' : 'Snapshot'}</span>
-          <span className="text-slate-300 dark:text-slate-700 shrink-0">•</span>
+          <span className="text-slate-350 dark:text-slate-700 shrink-0">•</span>
           <span className="truncate">Updated {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Never'}</span>
         </div>
         <button
@@ -223,16 +253,16 @@ export default function MobileHomeSummary({
             <button
               key={card.id}
               onClick={() => onNavigateAsset(card.id)}
-              className={`bg-gradient-to-br ${card.bg} border rounded-2xl p-4 text-left shadow-sm hover:shadow hover:scale-[1.02] active:scale-98 transition-all flex flex-col justify-between h-28`}
+              className="relative overflow-hidden bg-white dark:bg-slate-850 border border-slate-150 dark:border-slate-800/80 rounded-2xl p-4 text-left shadow-sm hover:shadow active:scale-98 transition-all flex flex-col justify-between h-28"
             >
               <div className="flex items-center justify-between w-full">
-                <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 shadow-xs flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-750 flex items-center justify-center">
                   {card.icon}
                 </div>
                 <ChevronRight size={13} className="text-slate-350 dark:text-slate-650" />
               </div>
-              <div>
-                <p className="text-[10.5px] font-bold text-slate-450 dark:text-slate-400 truncate uppercase tracking-wide">
+              <div className="mt-2">
+                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 truncate uppercase tracking-wide">
                   {card.label}
                 </p>
                 <p className="text-[14px] font-extrabold text-slate-850 dark:text-slate-100 mt-0.5">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { WifiOff, AlertCircle, RefreshCw, TrendingUp, Landmark, Coins, Home, Shield, FolderOpen } from 'lucide-react';
+import { WifiOff, AlertCircle, RefreshCw, TrendingUp, Landmark, Coins, Home, Shield, FolderOpen, Clock, Heart } from 'lucide-react';
 import Header from './components/Header';
 import SummaryCards from './components/SummaryCards';
 import PieChart from './components/PieChart';
@@ -34,7 +34,7 @@ import PinLockScreen from './components/PinLockScreen';
 import DashboardLoading from './components/DashboardLoading';
 import DashboardError from './components/DashboardError';
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents';
 
 export default function App() {
   const [pinVerified, setPinVerified] = useState(() => !isPinConfigured() || isSessionVerified());
@@ -54,7 +54,7 @@ export default function App() {
       return window.innerWidth < 768 ? 'home' : 'stocks';
     }
   });
-  const [quickAddTarget, setQuickAddTarget] = useState<'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null>(null);
+  const [quickAddTarget, setQuickAddTarget] = useState<'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddFamily, setShowAddFamily] = useState(false);
   const [renameTarget, setRenameTarget] = useState<{ id: string; name: string; label: string } | null>(null);
@@ -139,7 +139,7 @@ export default function App() {
     const diffY = touchStart.current.y - touchEnd.current.y;
 
     if (Math.abs(diffX) > 70 && Math.abs(diffY) < 40) {
-      const tabOrder: AssetTab[] = ['home', 'stocks', 'fd', 'gold', 'real_estate', 'insurance', 'documents'];
+      const tabOrder: AssetTab[] = ['home', 'stocks', 'fd', 'rd', 'ssy', 'sip', 'gold', 'real_estate', 'insurance', 'documents'];
       const currentIndex = tabOrder.indexOf(activeAsset);
 
       if (diffX > 0) {
@@ -302,6 +302,9 @@ export default function App() {
   const breakdownSlices = useMemo(() => [
     { label: 'Stocks', fullName: 'Stocks & ETFs', value: breakdown.stocks, color: '#3b82f6' },
     { label: 'FD', fullName: 'Fixed Deposits', value: breakdown.fd, color: '#6366f1' },
+    { label: 'RD', fullName: 'Recurring Deposits', value: breakdown.rd, color: '#ec4899' },
+    { label: 'SSY', fullName: 'Sukanya Samriddhi', value: breakdown.ssy, color: '#a855f7' },
+    { label: 'SIP', fullName: 'SIP Mutual Funds', value: breakdown.sip, color: '#0ea5e9' },
     { label: 'Gold', fullName: 'Gold Holdings', value: breakdown.gold, color: '#f59e0b' },
     { label: 'Realty', fullName: 'Real Estate', value: breakdown.realEstate, color: '#10b981' },
   ], [breakdown]);
@@ -621,7 +624,7 @@ export default function App() {
 
             {/* Wealth Mosaic for All view */}
             {activeTab === 'all' && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
                 <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
                   <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
                     Stocks
@@ -633,6 +636,24 @@ export default function App() {
                     FDs
                   </div>
                   <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.fd)}</p>
+                </div>
+                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
+                    RDs
+                  </div>
+                  <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.rd)}</p>
+                </div>
+                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
+                    SSY
+                  </div>
+                  <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.ssy)}</p>
+                </div>
+                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
+                    SIPs
+                  </div>
+                  <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.sip)}</p>
                 </div>
                 <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
                   <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
@@ -648,10 +669,10 @@ export default function App() {
                 </div>
                 <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
                   <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
-                    Insurance Cover
+                    Insurance
                   </div>
                   <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.insuranceCover)}</p>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{formatINR(breakdown.insurancePremium)}/yr premium</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{formatINR(breakdown.insurancePremium)}/yr prem</p>
                 </div>
               </div>
             )}
@@ -702,6 +723,9 @@ export default function App() {
               {([
                 { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={16} /> },
                 { id: 'fd', label: 'Fixed Deposits', icon: <Landmark size={16} /> },
+                { id: 'rd', label: 'Recurring Deposits', icon: <Clock size={16} /> },
+                { id: 'ssy', label: 'Sukanya Samriddhi', icon: <Heart size={16} /> },
+                { id: 'sip', label: 'SIP Mutual Funds', icon: <TrendingUp size={16} /> },
                 { id: 'gold', label: 'Gold Holdings', icon: <Coins size={16} /> },
                 { id: 'real_estate', label: 'Real Estate', icon: <Home size={16} /> },
                 { id: 'insurance', label: 'Insurance Cover', icon: <Shield size={16} /> },

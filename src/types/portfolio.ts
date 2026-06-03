@@ -28,7 +28,7 @@ export interface FixedDeposit {
   maturity_date: string | null;
   maturity_amount: number;
   status: 'active' | 'matured';
-  /** FD sub-type: 'regular' | 'recurring' | 'ssy' | 'nsc' | 'ppf' (default: 'regular') */
+  /** FD sub-type: 'regular' | 'recurring' | 'ssy' | 'nsc' | 'ppf' | 'sip' (default: 'regular') */
   fd_type?: string;
   /** JSONB array of contribution records for recurring deposits */
   contributions?: { date: string; amount: number }[];

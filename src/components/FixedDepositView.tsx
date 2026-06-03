@@ -1,21 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../utils/formatters';
-import { Plus, Trash2, Edit2, Calendar, TrendingUp, Landmark, FileText, CheckCircle, Clock, StickyNote } from 'lucide-react';
+import { Plus, Trash2, Edit2, Calendar, TrendingUp, Landmark, FileText, CheckCircle, Clock, StickyNote, Heart } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 
 interface PortfolioOption {
   name: string;
   label: string;
 }
-
-const FD_TYPE_OPTIONS: { value: string; label: string }[] = [
-  { value: 'regular', label: 'Regular FD' },
-  { value: 'recurring', label: 'Recurring Deposit (RD)' },
-  { value: 'ssy', label: 'Sukanya Samriddhi (SSY)' },
-  { value: 'ppf', label: 'PPF' },
-  { value: 'nsc', label: 'NSC' },
-];
 
 interface FixedDepositViewProps {
   fixedDeposits: FixedDeposit[];
@@ -26,7 +18,103 @@ interface FixedDepositViewProps {
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
+  mode?: 'fd' | 'rd' | 'ssy' | 'sip';
 }
+
+const MODE_CONFIG = {
+  fd: {
+    title: 'Fixed Deposit',
+    titlePlural: 'Fixed Deposits',
+    registryTitle: 'FD Registry',
+    createBtn: 'Create Fixed Deposit',
+    firstBtn: 'Create Your First FD',
+    issuerLabel: 'Bank / Issuer Name',
+    principalLabel: 'Principal Amount (₹)',
+    maturityLabel: 'Maturity Amount (₹)',
+    editTitle: 'Edit Fixed Deposit',
+    createTitle: 'Create Fixed Deposit',
+    rateLabel: 'Interest Rate (% p.a.)',
+    rateSub: 'Across all FDs',
+    startLabel: 'Start Date',
+    maturityDateLabel: 'Maturity Date',
+    noActiveText: 'No Fixed Deposits Yet',
+    subText: 'Start tracking your FDs to monitor maturity timelines, interest accrual, and upcoming deadlines.',
+    totalLabel: 'Total FD Balance',
+    estMaturityLabel: 'Est. Maturity Value',
+    iconClass: Landmark,
+    themeColor: 'from-blue-600 to-indigo-600',
+    iconBg: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+  },
+  rd: {
+    title: 'Recurring Deposit',
+    titlePlural: 'Recurring Deposits',
+    registryTitle: 'RD Registry',
+    createBtn: 'Create Recurring Deposit',
+    firstBtn: 'Create Your First RD',
+    issuerLabel: 'Bank / Post Office Name',
+    principalLabel: 'Monthly Deposit Amount (₹)',
+    maturityLabel: 'Maturity Amount (₹)',
+    editTitle: 'Edit Recurring Deposit',
+    createTitle: 'Create Recurring Deposit',
+    rateLabel: 'Interest Rate (% p.a.)',
+    rateSub: 'Across all RDs',
+    startLabel: 'Start Date',
+    maturityDateLabel: 'Maturity Date',
+    noActiveText: 'No Recurring Deposits Yet',
+    subText: 'Start tracking your RDs to monitor recurring timelines, interest accrual, and upcoming deadlines.',
+    totalLabel: 'Total RD Invested',
+    estMaturityLabel: 'Est. Maturity Value',
+    iconClass: Clock,
+    themeColor: 'from-pink-600 to-rose-600',
+    iconBg: 'bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400',
+  },
+  ssy: {
+    title: 'Sukanya Samriddhi (SSY)',
+    titlePlural: 'Sukanya Samriddhi Accounts',
+    registryTitle: 'SSY Registry',
+    createBtn: 'Create SSY Account',
+    firstBtn: 'Create Your First SSY',
+    issuerLabel: 'Post Office / Bank Name',
+    principalLabel: 'Annual Deposit Amount (₹)',
+    maturityLabel: 'Est. Maturity Amount (₹)',
+    editTitle: 'Edit SSY Account',
+    createTitle: 'Create SSY Account',
+    rateLabel: 'Interest Rate (% p.a.)',
+    rateSub: 'Across all SSY accounts',
+    startLabel: 'Start Date',
+    maturityDateLabel: 'Maturity Date',
+    noActiveText: 'No SSY Accounts Yet',
+    subText: 'Start tracking your SSY accounts to monitor maturity timelines and interest accrual.',
+    totalLabel: 'Total SSY Invested',
+    estMaturityLabel: 'Est. Maturity Value',
+    iconClass: Heart,
+    themeColor: 'from-purple-600 to-fuchsia-600',
+    iconBg: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
+  },
+  sip: {
+    title: 'SIP Mutual Fund',
+    titlePlural: 'SIP Mutual Funds',
+    registryTitle: 'SIP Registry',
+    createBtn: 'Create SIP',
+    firstBtn: 'Create Your First SIP',
+    issuerLabel: 'Mutual Fund / Stock Name',
+    principalLabel: 'Monthly SIP Amount (₹)',
+    maturityLabel: 'Current Valuation (₹)',
+    editTitle: 'Edit SIP',
+    createTitle: 'Create SIP',
+    rateLabel: 'Expected Return (% CAGR)',
+    rateSub: 'Expected returns',
+    startLabel: 'Start Date',
+    maturityDateLabel: 'Next SIP Date',
+    noActiveText: 'No SIPs Yet',
+    subText: 'Start tracking your SIPs to monitor fund growth, total investment, and current valuation.',
+    totalLabel: 'Total SIP Invested',
+    estMaturityLabel: 'Current Portfolio Value',
+    iconClass: TrendingUp,
+    themeColor: 'from-sky-600 to-cyan-600',
+    iconBg: 'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
+  },
+};
 
 function FixedDepositView({
   fixedDeposits,
@@ -37,7 +125,11 @@ function FixedDepositView({
   onUpdate,
   onDelete,
   autoOpenAddModal,
+  mode = 'fd',
 }: FixedDepositViewProps) {
+  const cfg = MODE_CONFIG[mode];
+  const IconComponent = cfg.iconClass;
+
   const [showModal, setShowModal] = useState(false);
   const [editingFd, setEditingFd] = useState<FixedDeposit | null>(null);
   const [loading, setLoading] = useState(false);
@@ -53,10 +145,11 @@ function FixedDepositView({
   const [maturityDate, setMaturityDate] = useState('');
   const [maturityAmount, setMaturityAmount] = useState('');
   const [status, setStatus] = useState<'active' | 'matured'>('active');
-  const [fdType, setFdType] = useState('regular');
   const [notes, setNotes] = useState('');
 
   const calculateMaturity = useCallback(() => {
+    if (mode === 'sip') return; // For SIP, current value is fully manual
+
     const p = parseFloat(principalAmount);
     const r = parseFloat(interestRate);
     const s = new Date(startDate);
@@ -65,14 +158,20 @@ function FixedDepositView({
       const timeDiff = m.getTime() - s.getTime();
       const years = timeDiff / (1000 * 3600 * 24 * 365.25);
       if (years > 0) {
-        // Quarter compounding standard (A = P(1 + r/4)^4n)
-        const amt = p * Math.pow(1 + r / 400, 4 * years);
-        setMaturityAmount(amt.toFixed(2));
+        if (mode === 'ssy') {
+          // Annual compounding for SSY
+          const amt = p * Math.pow(1 + r / 100, years);
+          setMaturityAmount(amt.toFixed(2));
+        } else {
+          // Quarter compounding standard (A = P(1 + r/4)^4n)
+          const amt = p * Math.pow(1 + r / 400, 4 * years);
+          setMaturityAmount(amt.toFixed(2));
+        }
       } else {
         setMaturityAmount(p.toFixed(2));
       }
     }
-  }, [principalAmount, interestRate, startDate, maturityDate]);
+  }, [principalAmount, interestRate, startDate, maturityDate, mode]);
 
   React.useEffect(() => {
     calculateMaturity();
@@ -90,16 +189,15 @@ function FixedDepositView({
     setFormPortfolio(portfolioName);
     setBankName('');
     setPrincipalAmount('');
-    setInterestRate('');
+    setInterestRate(mode === 'sip' ? '0' : '');
     setStartDate('');
     setMaturityDate('');
     setMaturityAmount('');
     setStatus('active');
-    setFdType('regular');
     setNotes('');
     setError('');
     setShowModal(true);
-  }, [portfolioName]);
+  }, [portfolioName, mode]);
 
   React.useEffect(() => {
     if (autoOpenAddModal) {
@@ -117,7 +215,6 @@ function FixedDepositView({
     setMaturityDate(fd.maturity_date || '');
     setMaturityAmount(fd.maturity_amount.toString());
     setStatus(fd.status);
-    setFdType(fd.fd_type ?? 'regular');
     setNotes(fd.notes ?? '');
     setError('');
     setShowModal(true);
@@ -126,7 +223,7 @@ function FixedDepositView({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!bankName || !principalAmount || !interestRate || !startDate || !maturityAmount) {
-      setError('All fields except Maturity Date are required.');
+      setError('All fields except Maturity Date/Next SIP Date are required.');
       return;
     }
     setLoading(true);
@@ -140,7 +237,7 @@ function FixedDepositView({
       maturityDate: maturityDate || null,
       maturityAmount: parseFloat(maturityAmount),
       status,
-      fdType,
+      fdType: mode === 'rd' ? 'recurring' : mode === 'ssy' ? 'ssy' : mode === 'sip' ? 'sip' : 'regular',
       notes: notes || null,
     };
 
@@ -183,22 +280,25 @@ function FixedDepositView({
   return (
     <div className="space-y-6">
       {/* Metrics Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="region" aria-label="Fixed deposit summary metrics">
-        <div className="bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl p-5 text-white shadow-md flex items-center justify-between">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="region" aria-label={`${cfg.title} summary metrics`}>
+        <div className={`bg-gradient-to-tr ${cfg.themeColor} rounded-2xl p-5 text-white shadow-md flex items-center justify-between`}>
           <div>
-            <p className="text-xs text-blue-100 font-semibold uppercase tracking-wider">Total FD Balance</p>
+            <p className="text-xs text-white/80 font-semibold uppercase tracking-wider">{cfg.totalLabel}</p>
             <p className="text-2xl font-bold mt-1">{formatINR(totalPrincipal)}</p>
-            <p className="text-xs text-blue-200 mt-2">Active Capital Locked</p>
+            <p className="text-xs text-white/70 mt-2">Active Capital Locked</p>
           </div>
-          <Landmark size={40} className="opacity-20 shrink-0" aria-hidden="true" />
+          <IconComponent size={40} className="opacity-20 shrink-0" aria-hidden="true" />
         </div>
 
         <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Est. Maturity Value</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">{cfg.estMaturityLabel}</p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(totalMaturity)}</p>
             <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-2">
-              +{formatINR(totalMaturity - totalPrincipal)} Total Earnings
+              {mode === 'sip' 
+                ? `${totalMaturity >= totalPrincipal ? '+' : ''}${formatINR(totalMaturity - totalPrincipal)} Net Returns` 
+                : `+${formatINR(totalMaturity - totalPrincipal)} Total Earnings`
+              }
             </p>
           </div>
           <TrendingUp size={40} className="text-emerald-500/20 shrink-0" aria-hidden="true" />
@@ -206,79 +306,81 @@ function FixedDepositView({
 
         <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Weighted Interest Rate</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">
+              {mode === 'sip' ? 'Average Return rate' : 'Weighted Interest Rate'}
+            </p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{avgRate.toFixed(2)}%</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Across all FDs</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">{cfg.rateSub}</p>
           </div>
           <Calendar size={40} className="text-blue-500/20 shrink-0" aria-hidden="true" />
         </div>
       </div>
 
-      {/* FD Grid/List */}
+      {/* Grid/List */}
       <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">FD Registry</h3>
+          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">{cfg.registryTitle}</h3>
           <button
             onClick={handleOpenAdd}
-            aria-label="Create a new Fixed Deposit"
+            aria-label={cfg.createBtn}
             className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
           >
             <Plus size={13} aria-hidden="true" />
-            Create Fixed Deposit
+            {cfg.createBtn}
           </button>
         </div>
 
         {fixedDeposits.length === 0 ? (
           <div className="p-16 text-center">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
-              <Landmark size={36} className="text-indigo-400 dark:text-indigo-500" aria-hidden="true" />
+              <IconComponent size={36} className="text-indigo-400 dark:text-indigo-500" aria-hidden="true" />
             </div>
-            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">No Fixed Deposits Yet</h4>
+            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">{cfg.noActiveText}</h4>
             <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
-              Start tracking your FDs to monitor maturity timelines, interest accrual, and upcoming deadlines.
+              {cfg.subText}
             </p>
             <button
               onClick={handleOpenAdd}
               className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-indigo-500/20"
             >
               <Plus size={15} aria-hidden="true" />
-              Create Your First FD
+              {cfg.firstBtn}
             </button>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label="Fixed deposits list">
+          <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label={`${cfg.titlePlural} list`}>
             {fixedDeposits.map((fd) => {
               const progress = getProgressPercent(fd);
               const fdDocs = documents.filter((d) => d.asset_type === 'fd' && d.asset_id === fd.id);
-              const isMatured = fd.status === 'matured' || progress >= 100;
+              const isMatured = fd.status === 'matured' || (mode !== 'sip' && progress >= 100);
 
               return (
                 <div key={fd.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors" role="listitem">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isMatured ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'}`}>
-                        {isMatured ? <CheckCircle size={20} aria-hidden="true" /> : <Landmark size={20} aria-hidden="true" />}
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isMatured ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' : cfg.iconBg}`}>
+                        {isMatured ? <CheckCircle size={20} aria-hidden="true" /> : <IconComponent size={20} aria-hidden="true" />}
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">{fd.bank_name}</h4>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isMatured ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'}`}>
-                            {isMatured ? 'Matured' : `${fd.interest_rate}% p.a.`}
+                            {isMatured ? 'Matured' : `${fd.interest_rate}% ${mode === 'sip' ? 'Expected CAGR' : 'p.a.'}`}
                           </span>
                         </div>
                         <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                          {fd.start_date} &rarr; {fd.maturity_date || 'Ongoing'}
+                          {fd.start_date} &rarr; {fd.maturity_date || (mode === 'sip' ? 'Ongoing SIP' : 'Ongoing')}
                         </p>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 md:text-right">
                       <div>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">Principal</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">{cfg.principalLabel.replace(' (₹)', '')}</p>
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatINR(Number(fd.principal_amount))}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">{fd.maturity_date ? 'Maturity Value' : 'Current Value'}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">{mode === 'sip' ? 'Current Valuation' : (fd.maturity_date ? 'Maturity Value' : 'Current Value')}</p>
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatINR(getFDEffectiveValue(fd))}</p>
                       </div>
                       <div className="col-span-2 sm:col-span-1 flex items-center justify-start md:justify-end gap-2">
@@ -298,16 +400,16 @@ function FixedDepositView({
                         <button
                           onClick={() => handleOpenEdit(fd)}
                           className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
-                          title="Edit FD"
-                          aria-label={`Edit fixed deposit at ${fd.bank_name}`}
+                          title={`Edit ${cfg.title}`}
+                          aria-label={`Edit ${cfg.title} at ${fd.bank_name}`}
                         >
                           <Edit2 size={14} aria-hidden="true" />
                         </button>
                         <button
                           onClick={() => setConfirmDelete(fd)}
                           className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
-                          title="Delete FD"
-                          aria-label={`Delete fixed deposit at ${fd.bank_name}`}
+                          title={`Delete ${cfg.title}`}
+                          aria-label={`Delete ${cfg.title} at ${fd.bank_name}`}
                         >
                           <Trash2 size={14} aria-hidden="true" />
                         </button>
@@ -315,30 +417,39 @@ function FixedDepositView({
                     </div>
                   </div>
 
-                  {/* Progress Bar */}
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 mb-1">
-                      <span className="flex items-center gap-1">
-                        <Clock size={10} aria-hidden="true" />
-                        Maturity Timeline
-                      </span>
-                      <span>{fd.maturity_date ? `${progress.toFixed(0)}% elapsed` : 'Ongoing accumulation'}</span>
-                    </div>
-                    {fd.maturity_date && (
-                      <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Maturity timeline progress">
-                        <div
-                          className={`h-full rounded-full transition-all duration-300 ${isMatured ? 'bg-emerald-500' : 'bg-blue-500'}`}
-                          style={{ width: `${progress}%` }}
-                        />
+                  {/* Progress Bar / Next SIP Due Date details */}
+                  {mode !== 'sip' ? (
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 mb-1">
+                        <span className="flex items-center gap-1">
+                          <Clock size={10} aria-hidden="true" />
+                          Maturity Timeline
+                        </span>
+                        <span>{fd.maturity_date ? `${progress.toFixed(0)}% elapsed` : 'Ongoing accumulation'}</span>
                       </div>
-                    )}
-                    {fd.notes && (
+                      {fd.maturity_date && (
+                        <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Maturity timeline progress">
+                          <div
+                            className={`h-full rounded-full transition-all duration-300 ${isMatured ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      )}
+                      {fd.notes && (
+                        <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5">
+                          <StickyNote size={11} className="shrink-0 mt-0.5" />
+                          <span className="italic">{fd.notes}</span>
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    fd.notes && (
                       <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5">
                         <StickyNote size={11} className="shrink-0 mt-0.5" />
                         <span className="italic">{fd.notes}</span>
                       </p>
-                    )}
-                  </div>
+                    )
+                  )}
                 </div>
               );
             })}
@@ -346,7 +457,7 @@ function FixedDepositView({
         )}
       </div>
 
-      {/* FD Modal Form */}
+      {/* Modal Form */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="fd-modal-title">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowModal(false)} aria-hidden="true" />
@@ -354,9 +465,9 @@ function FixedDepositView({
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
               <div>
                 <h3 id="fd-modal-title" className="text-base font-bold text-slate-800 dark:text-slate-100">
-                  {editingFd ? 'Edit Fixed Deposit' : 'Create Fixed Deposit'}
+                  {editingFd ? cfg.editTitle : cfg.createTitle}
                 </h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Enter details to lock and calculate returns</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Enter details to track valuation and timeline</p>
               </div>
               <button
                 onClick={() => setShowModal(false)}
@@ -383,10 +494,10 @@ function FixedDepositView({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Bank / Issuer Name</label>
+                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.issuerLabel}</label>
                 <input
                   type="text"
-                  placeholder="e.g. HDFC Bank, SBI"
+                  placeholder={`e.g. ${mode === 'sip' ? 'HDFC Top 100 Mutual Fund' : 'SBI Bank, Post Office'}`}
                   value={bankName}
                   onChange={(e) => setBankName(e.target.value)}
                   className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
@@ -395,7 +506,7 @@ function FixedDepositView({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Principal Amount (₹)</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.principalLabel}</label>
                   <input
                     type="number"
                     placeholder="0"
@@ -406,7 +517,7 @@ function FixedDepositView({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Interest Rate (% p.a.)</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.rateLabel}</label>
                   <input
                     type="number"
                     step="0.01"
@@ -421,7 +532,7 @@ function FixedDepositView({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Start Date</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.startLabel}</label>
                   <input
                     type="date"
                     value={startDate}
@@ -431,7 +542,7 @@ function FixedDepositView({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Maturity Date</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.maturityDateLabel} <span className="font-normal text-slate-400">{mode === 'sip' ? '(optional)' : ''}</span></label>
                   <input
                     type="date"
                     value={maturityDate}
@@ -444,10 +555,10 @@ function FixedDepositView({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Maturity Amount (₹)</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.maturityLabel}</label>
                   <input
                     type="number"
-                    placeholder="Auto-computed"
+                    placeholder={mode === 'sip' ? 'Current Value' : 'Auto-computed'}
                     value={maturityAmount}
                     onChange={(e) => setMaturityAmount(e.target.value)}
                     className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
@@ -467,23 +578,10 @@ function FixedDepositView({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">FD Type</label>
-                <select
-                  value={fdType}
-                  onChange={(e) => setFdType(e.target.value)}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-                >
-                  {FD_TYPE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Notes <span className="font-normal text-slate-400">(optional)</span></label>
                 <textarea
                   rows={2}
-                  placeholder="e.g. Auto-renew on maturity, linked to home loan"
+                  placeholder={`e.g. Linked to child education, monthly auto-debit`}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors resize-none"
@@ -507,7 +605,7 @@ function FixedDepositView({
                   disabled={loading}
                   className="flex-1 bg-indigo-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-indigo-700 transition-colors disabled:opacity-50"
                 >
-                  {loading ? 'Saving...' : editingFd ? 'Save Changes' : 'Create FD'}
+                  {loading ? 'Saving...' : editingFd ? 'Save Changes' : `Create ${cfg.title}`}
                 </button>
               </div>
             </form>
@@ -520,8 +618,8 @@ function FixedDepositView({
         isOpen={!!confirmDelete}
         onClose={() => setConfirmDelete(null)}
         onConfirm={() => { if (confirmDelete) void handleDelete(confirmDelete.id); }}
-        title="Delete Fixed Deposit"
-        message={confirmDelete ? `Are you sure you want to delete the FD at "${confirmDelete.bank_name}"? This cannot be undone.` : ''}
+        title={`Delete ${cfg.title}`}
+        message={confirmDelete ? `Are you sure you want to delete the ${cfg.title.toLowerCase()} at "${confirmDelete.bank_name}"? This cannot be undone.` : ''}
         confirmLabel="Delete"
       />
     </div>

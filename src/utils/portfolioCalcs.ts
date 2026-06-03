@@ -1,4 +1,5 @@
 import { Holding, Portfolio } from '../types/portfolio';
+import { getFDEffectiveValue } from './formatters';
 
 /** Sum invested amounts across holdings */
 export function calcTotalInvested(holdings: Holding[]): number {
@@ -35,12 +36,29 @@ export function holdingsTotals(holdings: Holding[]) {
 export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null) {
   const target = scope ? [scope] : portfolios;
   const stocks = target.reduce((s, p) => s + p.holdings.reduce((a, h) => a + h.currentValue, 0), 0);
-  const fd = target.reduce((s, p) => s + p.fixedDeposits.reduce((a, f) => a + (f.status === 'matured' ? Number(f.maturity_amount) : Number(f.principal_amount)), 0), 0);
+  
+  const fd = target.reduce((s, p) => s + p.fixedDeposits
+    .filter(f => f.fd_type === 'regular' || !f.fd_type)
+    .reduce((a, f) => a + getFDEffectiveValue(f), 0), 0);
+    
+  const rd = target.reduce((s, p) => s + p.fixedDeposits
+    .filter(f => f.fd_type === 'recurring' || f.fd_type === 'rd')
+    .reduce((a, f) => a + getFDEffectiveValue(f), 0), 0);
+    
+  const ssy = target.reduce((s, p) => s + p.fixedDeposits
+    .filter(f => f.fd_type === 'ssy')
+    .reduce((a, f) => a + getFDEffectiveValue(f), 0), 0);
+    
+  const sip = target.reduce((s, p) => s + p.fixedDeposits
+    .filter(f => f.fd_type === 'sip')
+    .reduce((a, f) => a + getFDEffectiveValue(f), 0), 0);
+
   const gold = target.reduce((s, p) => s + p.goldHoldings.reduce((a, g) => a + Number(g.current_valuation), 0), 0);
   const realEstate = target.reduce((s, p) => s + p.realEstate.reduce((a, r) => a + Number(r.current_valuation), 0), 0);
   const insuranceCover = target.reduce((s, p) => s + p.insurances.reduce((a, i) => a + Number(i.sum_assured), 0), 0);
   const insurancePremium = target.reduce((s, p) => s + p.insurances.reduce((a, i) => a + Number(i.premium_amount), 0), 0);
-  return { stocks, fd, gold, realEstate, insuranceCover, insurancePremium };
+  
+  return { stocks, fd, rd, ssy, sip, gold, realEstate, insuranceCover, insurancePremium };
 }
 
 /** Estimate today's P&L from intraday movement */

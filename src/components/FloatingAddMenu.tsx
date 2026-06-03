@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Plus, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen } from 'lucide-react';
+import { Plus, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, Heart } from 'lucide-react';
 
 interface FloatingAddMenuProps {
   onAddStock: () => void;
-  onAddAsset: (type: 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
+  onAddAsset: (type: 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
 }
 
 export default function FloatingAddMenu({ onAddStock, onAddAsset }: FloatingAddMenuProps) {
@@ -12,6 +12,9 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset }: FloatingAddM
   const menuItems = [
     { label: 'Add Stock / ETF', icon: <TrendingUp size={16} />, onClick: () => { onAddStock(); setIsOpen(false); }, color: 'bg-blue-500 dark:bg-blue-600' },
     { label: 'Add Fixed Deposit', icon: <Landmark size={16} />, onClick: () => { onAddAsset('fd'); setIsOpen(false); }, color: 'bg-indigo-500 dark:bg-indigo-600' },
+    { label: 'Add Recurring Deposit', icon: <Clock size={16} />, onClick: () => { onAddAsset('rd'); setIsOpen(false); }, color: 'bg-pink-500 dark:bg-pink-600' },
+    { label: 'Add Sukanya Samriddhi', icon: <Heart size={16} />, onClick: () => { onAddAsset('ssy'); setIsOpen(false); }, color: 'bg-purple-500 dark:bg-purple-600' },
+    { label: 'Add SIP Mutual Fund', icon: <TrendingUp size={16} />, onClick: () => { onAddAsset('sip'); setIsOpen(false); }, color: 'bg-sky-500 dark:bg-sky-600' },
     { label: 'Add Gold Holding', icon: <Coins size={16} />, onClick: () => { onAddAsset('gold'); setIsOpen(false); }, color: 'bg-amber-500 dark:bg-amber-600' },
     { label: 'Add Property', icon: <Building2 size={16} />, onClick: () => { onAddAsset('real_estate'); setIsOpen(false); }, color: 'bg-emerald-500 dark:bg-emerald-600' },
     { label: 'Add Insurance policy', icon: <Shield size={16} />, onClick: () => { onAddAsset('insurance'); setIsOpen(false); }, color: 'bg-rose-500 dark:bg-rose-600' },
@@ -32,7 +35,7 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset }: FloatingAddM
       <div className="fixed bottom-20 right-5 z-50 flex flex-col items-end gap-3 pointer-events-none">
         {/* Menu Items list */}
         {isOpen && (
-          <div className="flex flex-col items-end gap-2.5 mb-2 pointer-events-auto">
+          <div className="flex flex-col items-end gap-2.5 mb-2 pointer-events-auto max-h-[70vh] overflow-y-auto scrollbar-none pr-1">
             {menuItems.map((item, idx) => (
               <button
                 key={idx}

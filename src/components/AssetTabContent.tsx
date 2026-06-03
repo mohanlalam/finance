@@ -10,7 +10,7 @@ import InsuranceView from './InsuranceView';
 import DocumentVaultView from './DocumentVaultView';
 import { pnlColor, formatPercent, formatINR } from '../utils/formatters';
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents';
 
 interface PortfolioOption {
   name: string;
@@ -28,7 +28,7 @@ interface AssetTabContentProps {
   onAddAsset: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
   onUpdateAsset: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDeleteAsset: (assetType: string, id: string) => Promise<void>;
-  quickAddTarget?: 'stocks' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null;
+  quickAddTarget?: 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null;
   onQuickAddComplete?: () => void;
   portfolioOptions: PortfolioOption[];
 }
@@ -107,7 +107,7 @@ export default React.memo(function AssetTabContent({
 
         {activeAsset === 'fd' && (
           <FixedDepositView
-            fixedDeposits={visiblePortfolio.fixedDeposits}
+            fixedDeposits={visiblePortfolio.fixedDeposits.filter(f => f.fd_type === 'regular' || !f.fd_type)}
             documents={visiblePortfolio.documents}
             portfolioName={visiblePortfolio.name}
             portfolioOptions={portfolioOptions}
@@ -115,6 +115,49 @@ export default React.memo(function AssetTabContent({
             onUpdate={onUpdateAsset}
             onDelete={onDeleteAsset}
             autoOpenAddModal={quickAddTarget === 'fd'}
+            mode="fd"
+          />
+        )}
+
+        {activeAsset === 'rd' && (
+          <FixedDepositView
+            fixedDeposits={visiblePortfolio.fixedDeposits.filter(f => f.fd_type === 'recurring' || f.fd_type === 'rd')}
+            documents={visiblePortfolio.documents}
+            portfolioName={visiblePortfolio.name}
+            portfolioOptions={portfolioOptions}
+            onAdd={onAddAsset}
+            onUpdate={onUpdateAsset}
+            onDelete={onDeleteAsset}
+            autoOpenAddModal={quickAddTarget === 'rd'}
+            mode="rd"
+          />
+        )}
+
+        {activeAsset === 'ssy' && (
+          <FixedDepositView
+            fixedDeposits={visiblePortfolio.fixedDeposits.filter(f => f.fd_type === 'ssy')}
+            documents={visiblePortfolio.documents}
+            portfolioName={visiblePortfolio.name}
+            portfolioOptions={portfolioOptions}
+            onAdd={onAddAsset}
+            onUpdate={onUpdateAsset}
+            onDelete={onDeleteAsset}
+            autoOpenAddModal={quickAddTarget === 'ssy'}
+            mode="ssy"
+          />
+        )}
+
+        {activeAsset === 'sip' && (
+          <FixedDepositView
+            fixedDeposits={visiblePortfolio.fixedDeposits.filter(f => f.fd_type === 'sip')}
+            documents={visiblePortfolio.documents}
+            portfolioName={visiblePortfolio.name}
+            portfolioOptions={portfolioOptions}
+            onAdd={onAddAsset}
+            onUpdate={onUpdateAsset}
+            onDelete={onDeleteAsset}
+            autoOpenAddModal={quickAddTarget === 'sip'}
+            mode="sip"
           />
         )}
 
@@ -203,7 +246,7 @@ export default React.memo(function AssetTabContent({
                       <Wifi size={24} className="text-blue-400 dark:text-blue-500" />
                     </div>
                     <p className="text-sm font-bold text-slate-600 dark:text-slate-300 mb-1">No stock holdings yet</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">Add stocks or ETFs to start tracking live prices and P&amp;L.</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-505">Add stocks or ETFs to start tracking live prices and P&amp;L.</p>
                   </div>
                 ) : (
                   <PortfolioTable
@@ -235,7 +278,7 @@ export default React.memo(function AssetTabContent({
                 <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
               </div>
               <FixedDepositView
-                fixedDeposits={p.fixedDeposits}
+                fixedDeposits={p.fixedDeposits.filter(f => f.fd_type === 'regular' || !f.fd_type)}
                 documents={p.documents}
                 portfolioName={p.name}
                 portfolioOptions={portfolioOptions}
@@ -243,6 +286,79 @@ export default React.memo(function AssetTabContent({
                 onUpdate={onUpdateAsset}
                 onDelete={onDeleteAsset}
                 autoOpenAddModal={index === 0 && quickAddTarget === 'fd'}
+                mode="fd"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeAsset === 'rd' && (
+        <div className="space-y-8">
+          {portfolios.map((p, index) => (
+            <div key={p.name}>
+              <div className="flex items-center gap-3 mb-3">
+                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
+                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+              </div>
+              <FixedDepositView
+                fixedDeposits={p.fixedDeposits.filter(f => f.fd_type === 'recurring' || f.fd_type === 'rd')}
+                documents={p.documents}
+                portfolioName={p.name}
+                portfolioOptions={portfolioOptions}
+                onAdd={onAddAsset}
+                onUpdate={onUpdateAsset}
+                onDelete={onDeleteAsset}
+                autoOpenAddModal={index === 0 && quickAddTarget === 'rd'}
+                mode="rd"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeAsset === 'ssy' && (
+        <div className="space-y-8">
+          {portfolios.map((p, index) => (
+            <div key={p.name}>
+              <div className="flex items-center gap-3 mb-3">
+                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
+                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+              </div>
+              <FixedDepositView
+                fixedDeposits={p.fixedDeposits.filter(f => f.fd_type === 'ssy')}
+                documents={p.documents}
+                portfolioName={p.name}
+                portfolioOptions={portfolioOptions}
+                onAdd={onAddAsset}
+                onUpdate={onUpdateAsset}
+                onDelete={onDeleteAsset}
+                autoOpenAddModal={index === 0 && quickAddTarget === 'ssy'}
+                mode="ssy"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeAsset === 'sip' && (
+        <div className="space-y-8">
+          {portfolios.map((p, index) => (
+            <div key={p.name}>
+              <div className="flex items-center gap-3 mb-3">
+                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
+                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+              </div>
+              <FixedDepositView
+                fixedDeposits={p.fixedDeposits.filter(f => f.fd_type === 'sip')}
+                documents={p.documents}
+                portfolioName={p.name}
+                portfolioOptions={portfolioOptions}
+                onAdd={onAddAsset}
+                onUpdate={onUpdateAsset}
+                onDelete={onDeleteAsset}
+                autoOpenAddModal={index === 0 && quickAddTarget === 'sip'}
+                mode="sip"
               />
             </div>
           ))}

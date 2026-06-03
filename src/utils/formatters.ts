@@ -48,6 +48,10 @@ export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()
   const r = Number(f.interest_rate);
   const s = new Date(f.start_date);
   
+  if (f.fd_type === 'sip') {
+    return Number(f.maturity_amount);
+  }
+  
   if (f.status === 'matured') {
     return Number(f.maturity_amount);
   }
@@ -61,6 +65,11 @@ export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()
   
   if (years > 0 && !isNaN(r) && !isNaN(s.getTime())) {
     if (!isNaN(p)) {
+      if (f.fd_type === 'ssy') {
+        // SSY compounds annually
+        return p * Math.pow(1 + r / 100, years);
+      }
+      // FDs and RDs compound quarterly
       return p * Math.pow(1 + r / 400, 4 * years);
     }
   }
