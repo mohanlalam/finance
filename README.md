@@ -60,7 +60,7 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **Lucide React ^0.511.0** — Modern, consistent iconography
 
 ### Backend (Supabase)
-- **PostgreSQL** — Relational database tables for portfolios, holdings, FDs, gold, real estate, insurances, documents, and net worth history.
+- **PostgreSQL** — Relational database tables for portfolios, holdings, FDs (`fixed_deposits`), RDs (`rd_accounts`), Mutual Funds (`sip_accounts`), SSY (`ssy_accounts`), gold, real estate, insurances, documents, and net worth history.
 - **Supabase Storage** — Secure file storage for financial and insurance document attachments.
 - **Edge Functions (Deno)** — Serverless functions for:
   - `holdings-crud` — Secure DB access and operations (PIN-locked).
@@ -88,11 +88,24 @@ project antigravity/
 │   │   ├── PortfolioTable.tsx    # Sortable holdings table with preset selectors & allocation column
 │   │   ├── PieChart.tsx          # Asset allocation donut chart
 │   │   ├── BarChart.tsx          # Portfolio comparison bar chart
-│   │   ├── fd/                   # Modular sub-components for FDs/RDs/SSY/SIPs
-│   │   │   ├── DepositDetailsCard.tsx # Renders timelines, documents, and notes for holdings
-│   │   │   ├── RDInstallmentSchedule.tsx # Interactive month-by-month RD installment tracking
-│   │   │   ├── SIPFormFields.tsx # Form inputs and NAV validation triggers for SIPs
-│   │   │   └── StandardFormFields.tsx # Form inputs for regular FDs, RDs, and SSY portfolios
+│   │   ├── fd/                   # Standard Fixed Deposits
+│   │   │   ├── DepositDetailsCard.tsx # Renders timelines, documents, and notes for FDs
+│   │   │   └── StandardFormFields.tsx # Form inputs for standard FDs
+│   │   ├── rd/                   # Recurring Deposits
+│   │   │   ├── RDAccountCard.tsx     # Card layout for individual RDs
+│   │   │   ├── RDFormModal.tsx       # Create/Edit RD form dialog
+│   │   │   ├── RDInstallmentSchedule.tsx # Month-by-month RD contribution ledger tracking
+│   │   │   └── RDView.tsx            # Main dashboard registry for RDs
+│   │   ├── sip/                  # Mutual Fund SIPs
+│   │   │   ├── SIPAccountCard.tsx    # Card layout showing live/manual valuation for SIPs
+│   │   │   ├── SIPFormFields.tsx     # Inputs for scheme code lookup and unit holdings
+│   │   │   ├── SIPFormModal.tsx      # Create/Edit SIP form dialog
+│   │   │   └── SIPView.tsx           # Main dashboard registry for Mutual Funds (SIP)
+│   │   ├── ssy/                  # Sukanya Samriddhi Yojana (SSY)
+│   │   │   ├── SSYAccountCard.tsx    # Card layout for SSY registry
+│   │   │   ├── SSYFormModal.tsx      # Create/Edit SSY account form dialog
+│   │   │   ├── SSYSchedule.tsx       # Compounding yearly ledger breakdown
+│   │   │   └── SSYView.tsx           # Main dashboard registry for SSY accounts
 │   │   ├── AddHoldingModal.tsx   # Modal form to add new stock holdings
 │   │   ├── AddFamilyModal.tsx    # Modal form to add new family members
 │   │   ├── RenamePortfolioModal.tsx # Modal form to rename family member portfolios
@@ -121,6 +134,9 @@ project antigravity/
 │   │   └── DashboardError.tsx    # Full-page retry UI for API/Supabase connection failures
 │   ├── hooks/
 │   │   ├── usePortfolioData.ts   # Core data hook — Edge Function list, CRUD operations, local cache, live prices
+│   │   ├── useRDData.ts          # Standalone hook for Recurring Deposits CRUD
+│   │   ├── useSIPData.ts         # Standalone hook for Mutual Fund SIPs CRUD
+│   │   ├── useSSYData.ts         # Standalone hook for Sukanya Samriddhi Yojana CRUD
 │   │   ├── usePortfolioInsights.ts # Computes allocation, performer, and reminder insights
 │   │   ├── useMarketData.ts      # Standalone market price fetcher (CORS proxied)
 │   │   ├── useAlerts.ts          # Evaluates warnings, contains visible/dismissed states
@@ -132,8 +148,11 @@ project antigravity/
 │   │   ├── apiClient.ts          # Safe wrapper client around Supabase edge functions
 │   │   ├── auth.ts               # Session PIN verification and security helpers
 │   │   ├── chartHelpers.ts       # Groups color configuration hex values and slices formatting
-│   │   ├── formatters.ts         # INR formatting, percent formatting, P&L colors, getDocumentUrl
-│   │   ├── portfolioCalcs.ts     # Compounded/simple interest calculators & portfolio aggregation calculations
+│   │   ├── formatters.ts         # INR formatting, percent formatting, P&L colors, getDocumentUrl, and FD compounding
+│   │   ├── portfolioCalcs.ts     # Computes aggregate values and drift splits across all assets
+│   │   ├── rdUtils.ts            # Recurring Deposit installment & compounding calculators
+│   │   ├── sipUtils.ts           # SIP contribution & manual valuation helpers
+│   │   ├── ssyUtils.ts           # SSY Financial Year and annual compounding calculators
 │   │   └── supabaseClient.ts     # Supabase SDK initialization
 │   └── data/
 │       ├── portfolioData.ts      # Static/seed portfolio data
