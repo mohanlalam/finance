@@ -5,6 +5,7 @@ import { getRDInvestedAmount, getRDEffectiveValue } from '../utils/rdUtils';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../utils/sipUtils';
 import { getSSYInvestedAmount, getSSYEffectiveValue } from '../utils/ssyUtils';
 import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiClient';
+import { fetchAMFIScheme } from '../utils/amfiClient';
 
 const PORTFOLIO_CACHE_KEY = 'finance_portfolio_cache_v1';
 
@@ -327,15 +328,10 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
               }
             }
 
-            const res = await fetch(`https://api.mfapi.in/mf/${code}`);
-            if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-            const json = await res.json();
-            if (json.data && json.data.length > 0) {
-              const nav = parseFloat(json.data[0].nav);
-              if (!isNaN(nav)) {
-                navMap[code] = nav;
-                sessionStorage.setItem(cacheKey, JSON.stringify({ nav, timestamp: Date.now() }));
-              }
+            const details = await fetchAMFIScheme(code);
+            if (details.latestNav !== null) {
+              navMap[code] = details.latestNav;
+              sessionStorage.setItem(cacheKey, JSON.stringify({ nav: details.latestNav, timestamp: Date.now() }));
             }
           } catch (err) {
             console.warn(`[portfolio] Failed to fetch NAV for mutual fund scheme ${code}:`, err);

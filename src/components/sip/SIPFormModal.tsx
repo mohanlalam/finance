@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SIPAccount, SIPPayload } from '../../types/portfolio';
 import SIPFormFields from './SIPFormFields';
+import { fetchAMFIScheme } from '../../utils/amfiClient';
 
 interface PortfolioOption {
   name: string;
@@ -76,19 +77,10 @@ export function SIPFormModal({
     setIsValidatingScheme(true);
     setError('');
     try {
-      const res = await fetch(`https://api.mfapi.in/mf/${mfSchemeCode}`);
-      if (!res.ok) throw new Error(`Scheme not found (HTTP ${res.status})`);
-      const json = await res.json();
-      if (json.meta && json.meta.scheme_name) {
-        setFundName(json.meta.scheme_name);
-        if (json.data && json.data.length > 0) {
-          const latestNav = parseFloat(json.data[0].nav);
-          if (!isNaN(latestNav) && units) {
-            setFallbackValuation((parseFloat(units) * latestNav).toFixed(2));
-          }
-        }
-      } else {
-        throw new Error('Invalid scheme code or details not found');
+      const details = await fetchAMFIScheme(mfSchemeCode);
+      setFundName(details.schemeName);
+      if (details.latestNav !== null && units) {
+        setFallbackValuation((parseFloat(units) * details.latestNav).toFixed(2));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Validation failed');
