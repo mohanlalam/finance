@@ -332,9 +332,18 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       const dbPortfolios: DBPortfolio[] = data.portfolios || [];
       const dbHoldings: DBHolding[] = data.holdings || [];
       const dbFixedDeposits: FixedDeposit[] = data.fixed_deposits || [];
-      // Normalize fd_type: 'rd' → 'recurring' for consistency
+      // Normalize fd_type: 'rd' → 'recurring' for consistency, and extract ssy dob
       dbFixedDeposits.forEach(f => {
         if (f.fd_type === 'rd') f.fd_type = 'recurring';
+        if (f.fd_type === 'ssy') {
+          if (f.notes && f.notes.startsWith('[DOB:')) {
+            const match = f.notes.match(/^\[DOB:([\d-]+)\]\s*(.*)$/);
+            if (match) {
+              f.girl_dob = match[1];
+              f.notes = match[2];
+            }
+          }
+        }
       });
       const dbGoldHoldings: GoldHolding[] = data.gold_holdings || [];
       const dbRealEstate: RealEstate[] = data.real_estate || [];
@@ -485,12 +494,19 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     options: AssetMutationOptions = {}
   ) => {
     try {
+      const finalPayload = { ...payload } as Record<string, unknown>;
+      if (assetType === 'fd' && finalPayload.fdType === 'ssy') {
+        if (finalPayload.girlDob) {
+          const cleanNotes = (finalPayload.notes as string) || '';
+          finalPayload.notes = `[DOB:${finalPayload.girlDob}] ${cleanNotes}`.trim();
+        }
+      }
       await invokeFunction<unknown>('holdings-crud?action=add', {
         method: 'POST',
         body: {
           asset_type: assetType,
           portfolioName,
-          ...payload,
+          ...finalPayload,
         },
       });
       if (options.reload !== false) {
@@ -504,12 +520,27 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
   const updateAsset = useCallback(async (assetType: string, id: string, payload: Partial<AssetPayload>) => {
     try {
+      const finalPayload = { ...payload } as Record<string, unknown>;
+      if (assetType === 'fd') {
+        const existingFd = portfolios
+          .flatMap((p) => p.fixedDeposits)
+          .find((f) => f.id === id);
+
+        if (existingFd && (existingFd.fd_type === 'ssy' || finalPayload.fdType === 'ssy')) {
+          const currentGirlDob = finalPayload.girlDob !== undefined ? finalPayload.girlDob : existingFd.girl_dob;
+          const currentNotes = finalPayload.notes !== undefined ? finalPayload.notes : existingFd.notes;
+
+          if (currentGirlDob) {
+            finalPayload.notes = `[DOB:${currentGirlDob}] ${currentNotes || ''}`.trim();
+          }
+        }
+      }
       await invokeFunction<unknown>('holdings-crud?action=update', {
         method: 'PATCH',
         body: {
           asset_type: assetType,
           id,
-          ...payload,
+          ...finalPayload,
         },
       });
       await load();
@@ -517,7 +548,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
       throw err;
     }
-  }, [load, handleAuthExpired]);
+  }, [load, handleAuthExpired, portfolios]);
 
   const deleteAsset = useCallback(async (assetType: string, id: string) => {
     try {

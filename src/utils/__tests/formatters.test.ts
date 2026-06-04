@@ -109,4 +109,45 @@ describe('getFDEffectiveValue', () => {
     expect(val).toBeGreaterThan(120000);
     expect(val).toBeLessThan(129000);
   });
+
+  it('calculates Sukanya Samriddhi Yojana (SSY) compounding correctly with default contributions', () => {
+    const ssy: FixedDeposit = {
+      id: 'ssy-1',
+      portfolio_id: 'p1',
+      bank_name: 'SBI',
+      principal_amount: 100000,
+      interest_rate: 8.2,
+      start_date: '2026-01-01',
+      maturity_date: '2047-01-01',
+      maturity_amount: 0,
+      status: 'active',
+      fd_type: 'ssy',
+    };
+    const val = getFDEffectiveValue(ssy, new Date('2047-01-01'));
+    expect(val).toBeGreaterThan(3000000);
+    expect(val).toBeLessThan(7000000);
+  });
+
+  it('calculates SSY compounding correctly with custom contributions', () => {
+    const ssy: FixedDeposit = {
+      id: 'ssy-2',
+      portfolio_id: 'p1',
+      bank_name: 'SBI',
+      principal_amount: 100000,
+      interest_rate: 8.2,
+      start_date: '2026-01-01',
+      maturity_date: '2047-01-01',
+      maturity_amount: 0,
+      status: 'active',
+      fd_type: 'ssy',
+      contributions: [
+        { date: '2026-01-01', amount: 50000 },
+        { date: '2027-01-01', amount: 50000 },
+      ]
+    };
+    const val = getFDEffectiveValue(ssy, new Date('2028-01-01'));
+    expect(val).toBeGreaterThan(100000);
+    expect(val).toBeLessThan(125000);
+  });
 });
+

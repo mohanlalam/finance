@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfolio';
-import { formatINR, getFDEffectiveValue } from '../utils/formatters';
+import { formatINR, getFDEffectiveValue, getCompoundedDepositValue } from '../utils/formatters';
 import { Plus, TrendingUp, Landmark, Calendar, Clock, Heart } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import SIPFormFields from './fd/SIPFormFields';
@@ -17,8 +17,8 @@ interface FixedDepositViewProps {
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<void>;
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: unknown) => Promise<void>;
+  onUpdate: (assetType: string, id: string, payload: unknown) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
   mode?: 'fd' | 'rd' | 'ssy' | 'sip';
@@ -152,6 +152,7 @@ function FixedDepositView({
   const [mfSchemeCode, setMfSchemeCode] = useState('');
   const [units, setUnits] = useState('');
   const [isValidatingScheme, setIsValidatingScheme] = useState(false);
+  const [girlDob, setGirlDob] = useState('');
 
   const calculateMaturity = useCallback(() => {
     if (mode === 'sip') return;
@@ -175,8 +176,18 @@ function FixedDepositView({
       const years = timeDiff / (1000 * 3600 * 24 * 365.25);
       if (years > 0) {
         if (mode === 'ssy') {
-          const amt = p * Math.pow(1 + r / 100, years);
-          setMaturityAmount(amt.toFixed(2));
+          const start = new Date(startDate);
+          const end = maturityDate ? new Date(maturityDate) : new Date(start.getFullYear() + 21, start.getMonth(), start.getDate());
+          if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+            let total = 0;
+            for (let i = 0; i < 15; i++) {
+              const depDate = new Date(start.getFullYear() + i, start.getMonth(), start.getDate());
+              if (depDate.getTime() <= end.getTime()) {
+                total += getCompoundedDepositValue(p, depDate, end, r);
+              }
+            }
+            setMaturityAmount(total.toFixed(2));
+          }
         } else {
           const amt = p * Math.pow(1 + r / 400, 4 * years);
           setMaturityAmount(amt.toFixed(2));
@@ -211,6 +222,7 @@ function FixedDepositView({
     setNotes('');
     setMfSchemeCode('');
     setUnits('');
+    setGirlDob('');
     setError('');
     setShowModal(true);
   }, [portfolioName, mode]);
@@ -263,6 +275,7 @@ function FixedDepositView({
     setNotes(fd.notes ?? '');
     setMfSchemeCode(fd.mf_scheme_code ?? '');
     setUnits(fd.units?.toString() ?? '');
+    setGirlDob(fd.girl_dob ?? '');
     setError('');
     setShowModal(true);
   }
@@ -280,6 +293,31 @@ function FixedDepositView({
         return;
       }
     }
+
+    if (mode === 'ssy') {
+      if (!girlDob) {
+        setError("Girl child's Date of Birth is required for SSY accounts.");
+        return;
+      }
+      const start = new Date(startDate);
+      const dob = new Date(girlDob);
+      if (!isNaN(start.getTime()) && !isNaN(dob.getTime())) {
+        let age = start.getFullYear() - dob.getFullYear();
+        const monthDiff = start.getMonth() - dob.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && start.getDate() < dob.getDate())) {
+          age--;
+        }
+        if (age < 0) {
+          setError("Girl's Date of Birth cannot be after the start date.");
+          return;
+        }
+        if (age > 10 || (age === 10 && (monthDiff > 0 || (monthDiff === 0 && start.getDate() > dob.getDate())))) {
+          setError("Girl child must be 10 years or younger at the account start date.");
+          return;
+        }
+      }
+    }
+
     setLoading(true);
     setError('');
 
@@ -295,6 +333,7 @@ function FixedDepositView({
       notes: notes || null,
       mfSchemeCode: mode === 'sip' ? (mfSchemeCode || null) : null,
       units: mode === 'sip' ? (parseFloat(units) || null) : null,
+      girlDob: mode === 'ssy' ? (girlDob || null) : null,
     };
 
     try {
@@ -484,6 +523,9 @@ function FixedDepositView({
                   status={status}
                   setStatus={setStatus}
                   calculateMaturity={calculateMaturity}
+                  girlDob={girlDob}
+                  setGirlDob={setGirlDob}
+                  mode={mode}
                 />
               )}
 

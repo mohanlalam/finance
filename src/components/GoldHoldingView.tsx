@@ -15,8 +15,8 @@ interface GoldHoldingViewProps {
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<void>;
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: unknown) => Promise<void>;
+  onUpdate: (assetType: string, id: string, payload: unknown) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }

@@ -200,6 +200,8 @@ Deno.serve(async (req: Request) => {
             contributions: payload.contributions || [],
             mf_scheme_code: payload.mfSchemeCode || null,
             units: payload.units !== undefined && payload.units !== null ? Number(payload.units) : null,
+            notes: payload.notes || null,
+            girl_dob: payload.girlDob || null,
           })
           .select()
           .single();
@@ -216,6 +218,7 @@ Deno.serve(async (req: Request) => {
             purchase_price: Number(payload.purchasePrice),
             current_valuation: Number(payload.currentValuation ?? payload.purchasePrice),
             purchase_date: payload.purchaseDate,
+            notes: payload.notes || null,
           })
           .select()
           .single();
@@ -233,6 +236,7 @@ Deno.serve(async (req: Request) => {
             current_valuation: Number(payload.currentValuation),
             purchase_date: payload.purchaseDate,
             monthly_rent: Number(payload.monthlyRent ?? 0),
+            notes: payload.notes || null,
           })
           .select()
           .single();
@@ -250,6 +254,7 @@ Deno.serve(async (req: Request) => {
             sum_assured: Number(payload.sumAssured),
             premium_amount: Number(payload.premiumAmount),
             renewal_date: payload.renewalDate,
+            notes: payload.notes || null,
           })
           .select()
           .single();
@@ -310,6 +315,8 @@ Deno.serve(async (req: Request) => {
         if (payload.contributions !== undefined) updates.contributions = payload.contributions;
         if (payload.mfSchemeCode !== undefined) updates.mf_scheme_code = payload.mfSchemeCode;
         if (payload.units !== undefined) updates.units = payload.units !== null ? Number(payload.units) : null;
+        if (payload.notes !== undefined) updates.notes = payload.notes;
+        if (payload.girlDob !== undefined) updates.girl_dob = payload.girlDob;
       } else if (asset_type === "gold") {
         table = "gold_holdings";
         if (payload.itemName !== undefined) updates.item_name = payload.itemName;
@@ -318,6 +325,7 @@ Deno.serve(async (req: Request) => {
         if (payload.purchasePrice !== undefined) updates.purchase_price = Number(payload.purchasePrice);
         if (payload.currentValuation !== undefined) updates.current_valuation = Number(payload.currentValuation);
         if (payload.purchaseDate !== undefined) updates.purchase_date = payload.purchaseDate;
+        if (payload.notes !== undefined) updates.notes = payload.notes;
       } else if (asset_type === "real_estate") {
         table = "real_estate";
         if (payload.propertyName !== undefined) updates.property_name = payload.propertyName;
@@ -327,6 +335,7 @@ Deno.serve(async (req: Request) => {
         if (payload.currentValuation !== undefined) updates.current_valuation = Number(payload.currentValuation);
         if (payload.purchaseDate !== undefined) updates.purchase_date = payload.purchaseDate;
         if (payload.monthlyRent !== undefined) updates.monthly_rent = Number(payload.monthlyRent);
+        if (payload.notes !== undefined) updates.notes = payload.notes;
       } else if (asset_type === "insurance") {
         table = "insurances";
         if (payload.insuranceType !== undefined) updates.insurance_type = payload.insuranceType;
@@ -336,6 +345,7 @@ Deno.serve(async (req: Request) => {
         if (payload.sumAssured !== undefined) updates.sum_assured = Number(payload.sumAssured);
         if (payload.premiumAmount !== undefined) updates.premium_amount = Number(payload.premiumAmount);
         if (payload.renewalDate !== undefined) updates.renewal_date = payload.renewalDate;
+        if (payload.notes !== undefined) updates.notes = payload.notes;
       } else if (asset_type === "document") {
         table = "documents";
         if (payload.name !== undefined) updates.name = payload.name;

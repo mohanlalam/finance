@@ -27,7 +27,7 @@ interface DocumentVaultViewProps {
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
   portfolios: Portfolio[];
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: unknown) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }

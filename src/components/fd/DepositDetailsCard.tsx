@@ -3,13 +3,14 @@ import { FixedDeposit, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../../utils/formatters';
 import { CheckCircle, FileText, Edit2, Trash2, Clock, AlertCircle, StickyNote } from 'lucide-react';
 import RDInstallmentSchedule from './RDInstallmentSchedule';
+import SSYInstallmentSchedule from './SSYInstallmentSchedule';
 
 interface ModeConfig {
   title: string;
   principalLabel: string;
   themeColor: string;
   iconBg: string;
-  iconClass: React.ComponentType<any>;
+  iconClass: React.ComponentType;
 }
 
 interface DepositDetailsCardProps {
@@ -19,7 +20,19 @@ interface DepositDetailsCardProps {
   documents: DocumentMetadata[];
   onOpenEdit: (fd: FixedDeposit) => void;
   onConfirmDelete: (fd: FixedDeposit) => void;
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onUpdate: (assetType: string, id: string, payload: unknown) => Promise<void>;
+}
+
+function calculateCurrentAge(dobString: string): number {
+  const dob = new Date(dobString);
+  const today = new Date();
+  if (isNaN(dob.getTime())) return 0;
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+    age--;
+  }
+  return age;
 }
 
 export function DepositDetailsCard({
@@ -66,6 +79,11 @@ export function DepositDetailsCard({
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
               {fd.start_date} &rarr; {fd.maturity_date || (mode === 'sip' ? 'Ongoing SIP' : 'Ongoing')}
             </p>
+            {mode === 'ssy' && fd.girl_dob && (
+              <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-1 flex items-center gap-1">
+                <span>Girl Child DOB: {fd.girl_dob} (Current Age: {calculateCurrentAge(fd.girl_dob)} years)</span>
+              </p>
+            )}
           </div>
         </div>
 
@@ -142,6 +160,10 @@ export function DepositDetailsCard({
           
           {mode === 'rd' && (
             <RDInstallmentSchedule fd={fd} onUpdate={onUpdate} />
+          )}
+
+          {mode === 'ssy' && (
+            <SSYInstallmentSchedule fd={fd} onUpdate={onUpdate} />
           )}
 
           {fd.notes && (

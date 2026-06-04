@@ -43,6 +43,60 @@ export function getDocumentUrl(filePath: string): string {
   return `${base}/storage/v1/object/public/investment-documents/${filePath}`;
 }
 
+export function getCompoundedDepositValue(amount: number, depositDate: Date, endDate: Date, ratePercent: number): number {
+  if (endDate.getTime() <= depositDate.getTime()) return amount;
+  
+  const r = ratePercent / 100;
+  const startYear = depositDate.getUTCFullYear();
+  const endYear = endDate.getUTCFullYear();
+  const aprilFirsts: Date[] = [];
+  
+  for (let y = startYear - 1; y <= endYear + 1; y++) {
+    const april1 = new Date(Date.UTC(y, 3, 1));
+    if (april1.getTime() > depositDate.getTime() && april1.getTime() <= endDate.getTime()) {
+      aprilFirsts.push(april1);
+    }
+  }
+  
+  aprilFirsts.sort((a, b) => a.getTime() - b.getTime());
+  
+  const millisecondsPerYear = 1000 * 3600 * 24 * 365.25;
+  let balance = amount;
+  let currentDate = depositDate;
+  
+  for (const april1 of aprilFirsts) {
+    const t = (april1.getTime() - currentDate.getTime()) / millisecondsPerYear;
+    const interest = balance * r * t;
+    balance += interest;
+    currentDate = april1;
+  }
+  
+  const finalT = (endDate.getTime() - currentDate.getTime()) / millisecondsPerYear;
+  const finalInterest = balance * r * finalT;
+  return balance + finalInterest;
+}
+
+export function getSSYContributions(f: FixedDeposit, end: Date): { date: string; amount: number }[] {
+  if (f.contributions && f.contributions.length > 0) {
+    return f.contributions;
+  }
+  
+  const list: { date: string; amount: number }[] = [];
+  const start = new Date(f.start_date);
+  const p = Number(f.principal_amount);
+  
+  for (let i = 0; i < 15; i++) {
+    const depDate = new Date(start.getFullYear() + i, start.getMonth(), start.getDate());
+    if (depDate.getTime() <= end.getTime()) {
+      list.push({
+        date: depDate.toISOString().split('T')[0],
+        amount: p
+      });
+    }
+  }
+  return list;
+}
+
 export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()): number {
   const p = Number(f.principal_amount);
   const r = Number(f.interest_rate);
@@ -66,36 +120,11 @@ export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()
   if (years > 0 && !isNaN(r) && !isNaN(s.getTime())) {
     if (!isNaN(p)) {
       if (f.fd_type === 'ssy') {
-        // SSY interest compounds on every April 1st (end of Indian financial year)
-        const rate = r / 100;
-        const startYear = s.getUTCFullYear();
-        const endYear = end.getUTCFullYear();
-        const aprilFirsts: Date[] = [];
-        
-        for (let year = startYear - 1; year <= endYear + 1; year++) {
-          const april1 = new Date(Date.UTC(year, 3, 1));
-          if (april1.getTime() > s.getTime() && april1.getTime() <= end.getTime()) {
-            aprilFirsts.push(april1);
-          }
-        }
-        
-        aprilFirsts.sort((a, b) => a.getTime() - b.getTime());
-        
-        let currentPrincipal = p;
-        let currentDate = s;
-        const millisecondsPerYear = 1000 * 3600 * 24 * 365.25;
-        
-        for (const april1 of aprilFirsts) {
-          const t = (april1.getTime() - currentDate.getTime()) / millisecondsPerYear;
-          const interest = currentPrincipal * rate * t;
-          currentPrincipal += interest;
-          currentDate = april1;
-        }
-        
-        const finalT = (end.getTime() - currentDate.getTime()) / millisecondsPerYear;
-        const finalInterest = currentPrincipal * rate * finalT;
-        
-        return currentPrincipal + finalInterest;
+        const contributions = getSSYContributions(f, end);
+        const totalValue = contributions.reduce((sum, c) => {
+          return sum + getCompoundedDepositValue(c.amount, new Date(c.date), end, r);
+        }, 0);
+        return totalValue;
       }
 
       if (f.fd_type === 'recurring') {

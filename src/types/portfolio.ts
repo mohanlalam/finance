@@ -35,6 +35,7 @@ export interface FixedDeposit {
   notes?: string;
   mf_scheme_code?: string;
   units?: number;
+  girl_dob?: string;
   created_at?: string;
 }
 
@@ -131,6 +132,7 @@ export interface FDPayload {
   notes?: string;
   mf_scheme_code?: string;
   units?: number;
+  girl_dob?: string;
 }
 
 export interface GoldPayload {
