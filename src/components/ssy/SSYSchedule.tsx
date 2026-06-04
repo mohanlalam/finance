@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import { FixedDeposit } from '../../types/portfolio';
-import { calculateSSYMaturityWithRates, SSY_HISTORICAL_RATES } from '../../utils/formatters';
+import { SSYAccount } from '../../types/portfolio';
+import { calculateSSYMaturityWithRates, SSY_HISTORICAL_RATES } from '../../utils/ssyUtils';
 import { Edit2, Check, X, AlertTriangle } from 'lucide-react';
 
-interface SSYInstallmentScheduleProps {
-  fd: FixedDeposit;
+interface SSYScheduleProps {
+  account: SSYAccount;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onUpdate: (id: string, payload: any) => Promise<void>;
 }
 
 const SSY_MIN_FINANCIAL_YEAR_DEPOSIT = 250;
@@ -41,9 +41,7 @@ function formatFinancialYear(start: Date): string {
   return `FY ${start.getUTCFullYear()}-${String(start.getUTCFullYear() + 1).slice(-2)}`;
 }
 
-function getFYStartYear(date: Date): number {
-  return date.getUTCMonth() >= 3 ? date.getUTCFullYear() : date.getUTCFullYear() - 1;
-}
+
 
 function getTodayUTCDate(): Date {
   const today = new Date();
@@ -57,7 +55,7 @@ function formatINRCompact(value: number): string {
 
 const LAST_KNOWN_FY = Math.max(...Object.keys(SSY_HISTORICAL_RATES).map(Number));
 
-export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleProps) {
+export function SSYSchedule({ account, onUpdate }: SSYScheduleProps) {
   const [expanded, setExpanded] = useState(false);
   const [payingSlot, setPayingSlot] = useState<{ start: Date; end: Date; index: number } | null>(null);
   const [depositDate, setDepositDate] = useState('');
@@ -111,10 +109,10 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
       setDepositDate(formatISODateUTC(win.start));
     }
 
-    const paidContribs = getPaidContributionsForWindow(win.start, win.end, fd.contributions);
+    const paidContribs = getPaidContributionsForWindow(win.start, win.end, account.contributions);
     const totalPaid = paidContribs.reduce((sum, c) => sum + c.amount, 0);
     const remaining = SSY_MAX_FINANCIAL_YEAR_DEPOSIT - totalPaid;
-    const defaultAmount = Math.min(Number(fd.principal_amount || 150000), Math.max(0, remaining));
+    const defaultAmount = Math.min(Number(account.annual_deposit || 150000), Math.max(0, remaining));
     setDepositAmount(defaultAmount.toString());
     setModalError('');
   };
@@ -146,7 +144,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
       return;
     }
 
-    const paidContribs = getPaidContributionsForWindow(payingSlot.start, payingSlot.end, fd.contributions);
+    const paidContribs = getPaidContributionsForWindow(payingSlot.start, payingSlot.end, account.contributions);
     const totalPaid = paidContribs.reduce((sum, c) => sum + c.amount, 0);
 
     if (totalPaid + amt > SSY_MAX_FINANCIAL_YEAR_DEPOSIT) {
@@ -156,21 +154,21 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
       return;
     }
 
-    const existing = fd.contributions || [];
+    const existing = account.contributions || [];
     const updated = [...existing, { date: depositDate, amount: amt }].sort(
       (a, b) => (parseISODateUTC(a.date)?.getTime() ?? 0) - (parseISODateUTC(b.date)?.getTime() ?? 0)
     );
 
     const { maturityAmount } = calculateSSYMaturityWithRates(
-      fd.start_date,
-      Number(fd.principal_amount || 150000),
+      account.start_date,
+      Number(account.annual_deposit || 150000),
       updated,
-      fd.rate_schedule,
-      Number(fd.interest_rate) > 0 ? Number(fd.interest_rate) : 8.2
+      account.rate_schedule,
+      Number(account.interest_rate) > 0 ? Number(account.interest_rate) : 8.2
     );
 
     try {
-      await onUpdate('fd', fd.id, { contributions: updated, maturityAmount });
+      await onUpdate(account.id, { contributions: updated, maturity_amount: maturityAmount });
       setPayingSlot(null);
     } catch (err) {
       setModalError(err instanceof Error ? err.message : 'Failed to record installment');
@@ -178,7 +176,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
   };
 
   const handleDeleteContribution = async (contribToDelete: { date: string; amount: number }) => {
-    const existing = fd.contributions || [];
+    const existing = account.contributions || [];
     let found = false;
     const updated = existing.filter((c) => {
       if (!found && c.date === contribToDelete.date && c.amount === contribToDelete.amount) {
@@ -189,15 +187,15 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     });
 
     const { maturityAmount } = calculateSSYMaturityWithRates(
-      fd.start_date,
-      Number(fd.principal_amount || 150000),
+      account.start_date,
+      Number(account.annual_deposit || 150000),
       updated,
-      fd.rate_schedule,
-      Number(fd.interest_rate) > 0 ? Number(fd.interest_rate) : 8.2
+      account.rate_schedule,
+      Number(account.interest_rate) > 0 ? Number(account.interest_rate) : 8.2
     );
 
     try {
-      await onUpdate('fd', fd.id, { contributions: updated, maturityAmount });
+      await onUpdate(account.id, { contributions: updated, maturity_amount: maturityAmount });
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete contribution');
     }
@@ -221,21 +219,20 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
       return;
     }
     setSavingRate(true);
-    const existing = fd.rate_schedule || [];
-    // Remove any existing override for this FY then add new one
+    const existing = account.rate_schedule || [];
     const updated = existing.filter((r) => r.fyStartYear !== fyStartYear);
     updated.push({ fyStartYear, rate: parseFloat(newRate.toFixed(2)) });
 
     const { maturityAmount } = calculateSSYMaturityWithRates(
-      fd.start_date,
-      Number(fd.principal_amount),
-      fd.contributions,
+      account.start_date,
+      Number(account.annual_deposit),
+      account.contributions,
       updated,
-      Number(fd.interest_rate) > 0 ? Number(fd.interest_rate) : 8.2
+      Number(account.interest_rate) > 0 ? Number(account.interest_rate) : 8.2
     );
 
     try {
-      await onUpdate('fd', fd.id, { rateSchedule: updated, maturityAmount });
+      await onUpdate(account.id, { rate_schedule: updated, maturity_amount: maturityAmount });
       setEditingRateFY(null);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to save rate');
@@ -245,19 +242,19 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
   };
 
   const removeRateOverride = async (fyStartYear: number) => {
-    const existing = fd.rate_schedule || [];
+    const existing = account.rate_schedule || [];
     const updated = existing.filter((r) => r.fyStartYear !== fyStartYear);
 
     const { maturityAmount } = calculateSSYMaturityWithRates(
-      fd.start_date,
-      Number(fd.principal_amount),
-      fd.contributions,
+      account.start_date,
+      Number(account.annual_deposit),
+      account.contributions,
       updated,
-      Number(fd.interest_rate) > 0 ? Number(fd.interest_rate) : 8.2
+      Number(account.interest_rate) > 0 ? Number(account.interest_rate) : 8.2
     );
 
     try {
-      await onUpdate('fd', fd.id, { rateSchedule: updated, maturityAmount });
+      await onUpdate(account.id, { rate_schedule: updated, maturity_amount: maturityAmount });
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to remove rate override');
     }
@@ -273,15 +270,15 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     return 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/50';
   };
 
-  const windows = getSSYWindows(fd.start_date);
+  const windows = getSSYWindows(account.start_date);
   const now = new Date();
 
   const { yearlyBreakdown } = calculateSSYMaturityWithRates(
-    fd.start_date,
-    Number(fd.principal_amount),
-    fd.contributions,
-    fd.rate_schedule,
-    Number(fd.interest_rate) > 0 ? Number(fd.interest_rate) : 8.2
+    account.start_date,
+    Number(account.annual_deposit),
+    account.contributions,
+    account.rate_schedule,
+    Number(account.interest_rate) > 0 ? Number(account.interest_rate) : 8.2
   );
 
   return (
@@ -304,7 +301,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
               {windows.map((win) => {
-                const paidContribs = getPaidContributionsForWindow(win.start, win.end, fd.contributions);
+                const paidContribs = getPaidContributionsForWindow(win.start, win.end, account.contributions);
                 const totalPaid = paidContribs.reduce((sum, c) => sum + c.amount, 0);
                 const label = formatFinancialYear(getFinancialYearStartUTC(win.start));
                 const yearRange = `${formatISODateUTC(win.start)} to ${formatISODateUTC(win.end)}`;
@@ -312,9 +309,9 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
                 const isCompliant = totalPaid >= SSY_MIN_FINANCIAL_YEAR_DEPOSIT;
                 const isFullyPaid = totalPaid >= SSY_MAX_FINANCIAL_YEAR_DEPOSIT;
                 const exceedsMax = totalPaid > SSY_MAX_FINANCIAL_YEAR_DEPOSIT;
-                const fyYear = getFYStartYear(win.start);
-                const override = fd.rate_schedule?.find((r) => r.fyStartYear === fyYear);
-                const fyRate = override?.rate ?? (SSY_HISTORICAL_RATES[fyYear] ?? (Number(fd.interest_rate) || 8.2));
+                const fyYear = getFinancialYearStartUTC(win.start).getUTCFullYear();
+                const override = account.rate_schedule?.find((r) => r.fyStartYear === fyYear);
+                const fyRate = override?.rate ?? (SSY_HISTORICAL_RATES[fyYear] ?? (Number(account.interest_rate) || 8.2));
 
                 return (
                   <div
@@ -382,7 +379,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
                       const isContributionYear = idx < SSY_CONTRIBUTION_YEARS;
                       const isMaturityYear = idx === yearlyBreakdown.length - 1;
                       const isEditing = editingRateFY === row.fyStartYear;
-                      const hasOverride = fd.rate_schedule?.some((r) => r.fyStartYear === row.fyStartYear);
+                      const hasOverride = account.rate_schedule?.some((r) => r.fyStartYear === row.fyStartYear);
                       const canEditRate = row.fyStartYear > LAST_KNOWN_FY || hasOverride;
 
                       return (
@@ -499,7 +496,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
                 </table>
               </div>
               <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1.5 italic leading-snug">
-                * Projected using ₹{Number(fd.principal_amount).toLocaleString('en-IN')} target deposit.
+                * Projected using ₹{Number(account.annual_deposit).toLocaleString('en-IN')} target deposit.
                 Historical rates used for past FYs (non-editable). Future FY rates use the default interest rate or your overrides.
                 Hover a rate to edit it.
               </p>
@@ -520,9 +517,9 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
               Window: {formatISODateUTC(payingSlot.start)} to {formatISODateUTC(payingSlot.end)}
             </p>
             {(() => {
-              const fyYear = getFYStartYear(payingSlot.start);
-              const override = fd.rate_schedule?.find((r) => r.fyStartYear === fyYear);
-              const rate = override?.rate ?? (SSY_HISTORICAL_RATES[fyYear] ?? (Number(fd.interest_rate) || 8.2));
+              const fyYear = getFinancialYearStartUTC(payingSlot.start).getUTCFullYear();
+              const override = account.rate_schedule?.find((r) => r.fyStartYear === fyYear);
+              const rate = override?.rate ?? (SSY_HISTORICAL_RATES[fyYear] ?? (Number(account.interest_rate) || 8.2));
               return (
                 <p className="text-[11px] font-bold text-purple-600 dark:text-purple-400 mb-4">
                   Rate this FY: {rate}% p.a.
@@ -532,7 +529,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
 
             {/* Existing contributions for this window */}
             {(() => {
-              const paidContribs = getPaidContributionsForWindow(payingSlot.start, payingSlot.end, fd.contributions);
+              const paidContribs = getPaidContributionsForWindow(payingSlot.start, payingSlot.end, account.contributions);
               const totalPaid = paidContribs.reduce((s, c) => s + c.amount, 0);
               if (paidContribs.length === 0) return null;
 
@@ -576,7 +573,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
 
             <div className="space-y-3">
               {/* Only show add form if there's room */}
-              {(getPaidContributionsForWindow(payingSlot.start, payingSlot.end, fd.contributions)
+              {(getPaidContributionsForWindow(payingSlot.start, payingSlot.end, account.contributions)
                 .reduce((s, c) => s + c.amount, 0)) < SSY_MAX_FINANCIAL_YEAR_DEPOSIT && (
                 <>
                   <div>
@@ -618,7 +615,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
                 <button type="button" onClick={() => setPayingSlot(null)} className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-xl py-2 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all">
                   Close
                 </button>
-                {(getPaidContributionsForWindow(payingSlot.start, payingSlot.end, fd.contributions)
+                {(getPaidContributionsForWindow(payingSlot.start, payingSlot.end, account.contributions)
                   .reduce((s, c) => s + c.amount, 0)) < SSY_MAX_FINANCIAL_YEAR_DEPOSIT && (
                   <button type="button" onClick={() => void handleRecordInstallment()} className="flex-1 bg-purple-600 text-white text-xs font-semibold rounded-xl py-2 hover:bg-purple-700 transition-all">
                     Save Deposit
@@ -633,4 +630,4 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
   );
 }
 
-export default React.memo(SSYInstallmentSchedule);
+export default React.memo(SSYSchedule);

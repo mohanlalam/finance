@@ -1,9 +1,8 @@
 import React from 'react';
 import { FixedDeposit, DocumentMetadata } from '../../types/portfolio';
-import { formatINR, getDocumentUrl, getFDEffectiveValue, getSSYMaturityValue } from '../../utils/formatters';
-import { CheckCircle, FileText, Edit2, Trash2, Clock, AlertCircle, StickyNote } from 'lucide-react';
+import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../../utils/formatters';
+import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote } from 'lucide-react';
 import RDInstallmentSchedule from './RDInstallmentSchedule';
-import SSYInstallmentSchedule from './SSYInstallmentSchedule';
 
 interface ModeConfig {
   title: string;
@@ -15,7 +14,7 @@ interface ModeConfig {
 
 interface DepositDetailsCardProps {
   fd: FixedDeposit;
-  mode: 'fd' | 'rd' | 'ssy' | 'sip';
+  mode: 'fd' | 'rd' | 'sip';
   cfg: ModeConfig;
   documents: DocumentMetadata[];
   onOpenEdit: (fd: FixedDeposit) => void;
@@ -24,17 +23,7 @@ interface DepositDetailsCardProps {
   onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
 }
 
-function calculateCurrentAge(dobString: string): number {
-  const dob = new Date(dobString);
-  const today = new Date();
-  if (isNaN(dob.getTime())) return 0;
-  let age = today.getFullYear() - dob.getFullYear();
-  const m = today.getMonth() - dob.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-    age--;
-  }
-  return age;
-}
+
 
 export function DepositDetailsCard({
   fd,
@@ -80,11 +69,6 @@ export function DepositDetailsCard({
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
               {fd.start_date} &rarr; {fd.maturity_date || (mode === 'sip' ? 'Ongoing SIP' : 'Ongoing')}
             </p>
-            {mode === 'ssy' && fd.girl_dob && (
-              <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-1 flex items-center gap-1">
-                <span>Girl Child DOB: {fd.girl_dob} (Current Age: {calculateCurrentAge(fd.girl_dob)} years)</span>
-              </p>
-            )}
           </div>
         </div>
 
@@ -95,7 +79,7 @@ export function DepositDetailsCard({
           </div>
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500">{mode === 'sip' ? 'Current Valuation' : (fd.maturity_date ? 'Maturity Value' : 'Current Value')}</p>
-            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatINR(mode === 'ssy' ? getSSYMaturityValue(fd) : getFDEffectiveValue(fd))}</p>
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatINR(getFDEffectiveValue(fd))}</p>
           </div>
           <div className="col-span-2 sm:col-span-1 flex items-center justify-start md:justify-end gap-2">
             {fdDocs.map((doc) => (
@@ -152,19 +136,8 @@ export function DepositDetailsCard({
             )}
           </div>
           
-          {mode === 'ssy' && (Number(fd.principal_amount) < 250 || Number(fd.principal_amount) > 150000) && (
-            <div className="bg-amber-50/50 dark:bg-amber-950/20 border border-amber-250/50 dark:border-amber-900/30 text-amber-800 dark:text-amber-400 rounded-xl p-3 text-[11px] flex items-start gap-2">
-              <AlertCircle size={14} className="mt-0.5 shrink-0" />
-              <span>SSY guidelines: Annual deposits must be between ₹250 and ₹1,50,000 per financial year. Adjust this account's annual contribution to conform.</span>
-            </div>
-          )}
-          
           {mode === 'rd' && (
             <RDInstallmentSchedule fd={fd} onUpdate={onUpdate} />
-          )}
-
-          {mode === 'ssy' && (
-            <SSYInstallmentSchedule fd={fd} onUpdate={onUpdate} />
           )}
 
           {fd.notes && (

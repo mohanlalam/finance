@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfolio';
-import { formatINR, getFDInvestedAmount, getFDEffectiveValue, getSSYMaturityValue, calculateSSYMaturityWithRates } from '../utils/formatters';
-import { Plus, TrendingUp, Landmark, Calendar, Clock, Heart } from 'lucide-react';
+import { formatINR, getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
+import { Plus, TrendingUp, Landmark, Calendar, Clock } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import SIPFormFields from './fd/SIPFormFields';
 import StandardFormFields from './fd/StandardFormFields';
@@ -23,7 +23,7 @@ interface FixedDepositViewProps {
   onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
-  mode?: 'fd' | 'rd' | 'ssy' | 'sip';
+  mode?: 'fd' | 'rd' | 'sip';
 }
 
 const MODE_CONFIG = {
@@ -72,29 +72,6 @@ const MODE_CONFIG = {
     iconClass: Clock,
     themeColor: 'from-pink-600 to-rose-600',
     iconBg: 'bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400',
-  },
-  ssy: {
-    title: 'Sukanya Samriddhi (SSY)',
-    titlePlural: 'Sukanya Samriddhi Accounts',
-    registryTitle: 'SSY Registry',
-    createBtn: 'Create SSY Account',
-    firstBtn: 'Create Your First SSY',
-    issuerLabel: 'Post Office / Bank Name',
-    principalLabel: 'Annual Deposit Amount (₹)',
-    maturityLabel: 'Est. Maturity Amount (₹)',
-    editTitle: 'Edit SSY Account',
-    createTitle: 'Create SSY Account',
-    rateLabel: 'Interest Rate (% p.a.)',
-    rateSub: 'Across all SSY accounts',
-    startLabel: 'Start Date',
-    maturityDateLabel: 'Maturity Date',
-    noActiveText: 'No SSY Accounts Yet',
-    subText: 'Start tracking your SSY accounts to monitor maturity timelines and interest accrual.',
-    totalLabel: 'Total SSY Invested',
-    estMaturityLabel: 'Est. Maturity Value',
-    iconClass: Heart,
-    themeColor: 'from-purple-600 to-fuchsia-600',
-    iconBg: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
   },
   sip: {
     title: 'SIP Mutual Fund',
@@ -154,20 +131,9 @@ function FixedDepositView({
   const [mfSchemeCode, setMfSchemeCode] = useState('');
   const [units, setUnits] = useState('');
   const [isValidatingScheme, setIsValidatingScheme] = useState(false);
-  const [girlDob, setGirlDob] = useState('');
 
   const calculateMaturity = useCallback(() => {
     if (mode === 'sip') return;
-
-    if (mode === 'ssy' && startDate && !maturityDate) {
-      const start = new Date(startDate);
-      if (!isNaN(start.getTime())) {
-        const matYear = start.getFullYear() + 21;
-        const matMonth = String(start.getMonth() + 1).padStart(2, '0');
-        const matDay = String(start.getDate()).padStart(2, '0');
-        setMaturityDate(`${matYear}-${matMonth}-${matDay}`);
-      }
-    }
 
     const p = parseFloat(principalAmount);
     const r = parseFloat(interestRate);
@@ -177,21 +143,8 @@ function FixedDepositView({
       const timeDiff = m.getTime() - s.getTime();
       const years = timeDiff / (1000 * 3600 * 24 * 365.25);
       if (years > 0) {
-        if (mode === 'ssy') {
-          // Use the accurate SSY annual-compounding engine;
-          // editingFd may have rate_schedule overrides — preserve them
-          const { maturityAmount: ssyAmt } = calculateSSYMaturityWithRates(
-            startDate,
-            p,
-            editingFd?.contributions,
-            editingFd?.rate_schedule,
-            r  // user-supplied rate as futureRate
-          );
-          setMaturityAmount(ssyAmt.toFixed(2));
-        } else {
-          const amt = p * Math.pow(1 + r / 400, 4 * years);
-          setMaturityAmount(amt.toFixed(2));
-        }
+        const amt = p * Math.pow(1 + r / 400, 4 * years);
+        setMaturityAmount(amt.toFixed(2));
       } else {
         setMaturityAmount(p.toFixed(2));
       }
@@ -204,7 +157,7 @@ function FixedDepositView({
 
   // Math
   const totalPrincipal = fixedDeposits.reduce((s, f) => s + getFDInvestedAmount(f), 0);
-  const totalMaturity = fixedDeposits.reduce((s, f) => s + (mode === 'ssy' ? getSSYMaturityValue(f) : getFDEffectiveValue(f)), 0);
+  const totalMaturity = fixedDeposits.reduce((s, f) => s + getFDEffectiveValue(f), 0);
   const avgRate = fixedDeposits.length && totalPrincipal > 0
     ? fixedDeposits.reduce((s, f) => s + Number(f.interest_rate) * getFDInvestedAmount(f), 0) / totalPrincipal
     : 0;
@@ -222,7 +175,6 @@ function FixedDepositView({
     setNotes('');
     setMfSchemeCode('');
     setUnits('');
-    setGirlDob('');
     setError('');
     setShowModal(true);
   }, [portfolioName, mode]);
@@ -275,7 +227,6 @@ function FixedDepositView({
     setNotes(fd.notes ?? '');
     setMfSchemeCode(fd.mf_scheme_code ?? '');
     setUnits(fd.units?.toString() ?? '');
-    setGirlDob(fd.girl_dob ?? '');
     setError('');
     setShowModal(true);
   }
@@ -294,30 +245,6 @@ function FixedDepositView({
       }
     }
 
-    if (mode === 'ssy') {
-      if (!girlDob) {
-        setError("Girl child's Date of Birth is required for SSY accounts.");
-        return;
-      }
-      const start = new Date(startDate);
-      const dob = new Date(girlDob);
-      if (!isNaN(start.getTime()) && !isNaN(dob.getTime())) {
-        let age = start.getFullYear() - dob.getFullYear();
-        const monthDiff = start.getMonth() - dob.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && start.getDate() < dob.getDate())) {
-          age--;
-        }
-        if (age < 0) {
-          setError("Girl's Date of Birth cannot be after the start date.");
-          return;
-        }
-        if (age > 10 || (age === 10 && (monthDiff > 0 || (monthDiff === 0 && start.getDate() > dob.getDate())))) {
-          setError("Girl child must be 10 years or younger at the account start date.");
-          return;
-        }
-      }
-    }
-
     setLoading(true);
     setError('');
 
@@ -329,13 +256,10 @@ function FixedDepositView({
       maturityDate: maturityDate || null,
       maturityAmount: parseFloat(maturityAmount || '0'),
       status,
-      fdType: mode === 'rd' ? 'recurring' : mode === 'ssy' ? 'ssy' : mode === 'sip' ? 'sip' : 'regular',
+      fdType: mode === 'rd' ? 'recurring' : mode === 'sip' ? 'sip' : 'regular',
       notes: notes || null,
       mfSchemeCode: mode === 'sip' ? (mfSchemeCode || null) : null,
       units: mode === 'sip' ? (parseFloat(units) || null) : null,
-      girlDob: mode === 'ssy' ? (girlDob || null) : null,
-      // Preserve existing rate_schedule when editing an SSY account
-      rateSchedule: mode === 'ssy' ? (editingFd?.rate_schedule ?? null) : null,
     };
 
     try {
@@ -525,9 +449,6 @@ function FixedDepositView({
                   status={status}
                   setStatus={setStatus}
                   calculateMaturity={calculateMaturity}
-                  girlDob={girlDob}
-                  setGirlDob={setGirlDob}
-                  mode={mode}
                 />
               )}
 

@@ -1,5 +1,6 @@
 import { Holding, Portfolio } from '../types/portfolio';
 import { getFDEffectiveValue } from './formatters';
+import { getSSYEffectiveValue } from './ssyUtils';
 
 /** Sum invested amounts across holdings */
 export function calcTotalInvested(holdings: Holding[]): number {
@@ -45,9 +46,8 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
     .filter(f => f.fd_type === 'recurring')
     .reduce((a, f) => a + getFDEffectiveValue(f), 0), 0);
     
-  const ssy = target.reduce((s, p) => s + p.fixedDeposits
-    .filter(f => f.fd_type === 'ssy')
-    .reduce((a, f) => a + getFDEffectiveValue(f), 0), 0);
+  const ssy = target.reduce((s, p) => s + (p.ssyAccounts || [])
+    .reduce((a, acc) => a + getSSYEffectiveValue(acc), 0), 0);
     
   const sip = target.reduce((s, p) => s + p.fixedDeposits
     .filter(f => f.fd_type === 'sip')

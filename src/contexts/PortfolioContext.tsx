@@ -104,11 +104,11 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
 
   const activePortfolio = useMemo(() => {
     if (activeTab === 'all') return null;
-    return portfolios.find((p) => p.name === activeTab) ?? null;
+    return portfolios.find((p: Portfolio) => p.name === activeTab) ?? null;
   }, [portfolios, activeTab]);
 
   const portfolioOptionsForModal = useMemo(() => {
-    return portfolios.map((p) => ({ name: p.name, label: p.label }));
+    return portfolios.map((p: Portfolio) => ({ name: p.name, label: p.label }));
   }, [portfolios]);
 
   // Keep a stable ref for polling

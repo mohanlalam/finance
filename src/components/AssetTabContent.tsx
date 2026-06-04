@@ -4,6 +4,7 @@ import { Portfolio, AssetPayload } from '../types/portfolio';
 import { FetchStatus } from '../hooks/useMarketData';
 import PortfolioTable from './PortfolioTable';
 import FixedDepositView from './FixedDepositView';
+import SSYView from './ssy/SSYView';
 import GoldHoldingView from './GoldHoldingView';
 import RealEstateView from './RealEstateView';
 import InsuranceView from './InsuranceView';
@@ -134,16 +135,11 @@ export default React.memo(function AssetTabContent({
         )}
 
         {activeAsset === 'ssy' && (
-          <FixedDepositView
-            fixedDeposits={visiblePortfolio.fixedDeposits.filter(f => f.fd_type === 'ssy')}
+          <SSYView
             documents={visiblePortfolio.documents}
             portfolioName={visiblePortfolio.name}
             portfolioOptions={portfolioOptions}
-            onAdd={onAddAsset}
-            onUpdate={onUpdateAsset}
-            onDelete={onDeleteAsset}
             autoOpenAddModal={quickAddTarget === 'ssy'}
-            mode="ssy"
           />
         )}
 
@@ -325,16 +321,11 @@ export default React.memo(function AssetTabContent({
                 <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
                 <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
               </div>
-              <FixedDepositView
-                fixedDeposits={p.fixedDeposits.filter(f => f.fd_type === 'ssy')}
+              <SSYView
                 documents={p.documents}
                 portfolioName={p.name}
                 portfolioOptions={portfolioOptions}
-                onAdd={onAddAsset}
-                onUpdate={onUpdateAsset}
-                onDelete={onDeleteAsset}
                 autoOpenAddModal={index === 0 && quickAddTarget === 'ssy'}
-                mode="ssy"
               />
             </div>
           ))}

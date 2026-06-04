@@ -41,6 +41,23 @@ export interface FixedDeposit {
   created_at?: string;
 }
 
+export interface SSYAccount {
+  id: string;
+  portfolio_id: string;
+  bank_name: string;
+  girl_dob: string;
+  annual_deposit: number;
+  interest_rate: number;
+  start_date: string;
+  maturity_date: string;
+  maturity_amount: number;
+  status: 'active' | 'matured';
+  contributions: { date: string; amount: number }[];
+  rate_schedule: { fyStartYear: number; rate: number }[];
+  notes?: string;
+  created_at?: string;
+}
+
 export interface GoldHolding {
   id: string;
   portfolio_id: string;
@@ -88,7 +105,7 @@ export interface DocumentMetadata {
   name: string;
   file_path: string;
   file_type?: string;
-  asset_type: 'stock' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'general';
+  asset_type: 'stock' | 'fd' | 'ssy' | 'gold' | 'real_estate' | 'insurance' | 'general';
   asset_id?: string;
   expiry_date?: string;
   created_at?: string;
@@ -100,6 +117,7 @@ export interface Portfolio {
   label: string;
   holdings: Holding[];
   fixedDeposits: FixedDeposit[];
+  ssyAccounts?: SSYAccount[];
   goldHoldings: GoldHolding[];
   realEstate: RealEstate[];
   insurances: Insurance[];
@@ -136,6 +154,20 @@ export interface FDPayload {
   units?: number;
   girl_dob?: string;
   rate_schedule?: { fyStartYear: number; rate: number }[];
+}
+
+export interface SSYPayload {
+  bank_name: string;
+  girl_dob: string;
+  annual_deposit: number;
+  interest_rate: number;
+  start_date: string;
+  maturity_date: string;
+  maturity_amount: number;
+  status: 'active' | 'matured';
+  contributions?: { date: string; amount: number }[];
+  rate_schedule?: { fyStartYear: number; rate: number }[];
+  notes?: string;
 }
 
 export interface GoldPayload {
@@ -179,5 +211,5 @@ export interface DocumentPayload {
   expiryDate: string | null;
 }
 
-export type AssetPayload = StockPayload | FDPayload | GoldPayload | RealEstatePayload | InsurancePayload | DocumentPayload;
+export type AssetPayload = StockPayload | FDPayload | SSYPayload | GoldPayload | RealEstatePayload | InsurancePayload | DocumentPayload;
 
