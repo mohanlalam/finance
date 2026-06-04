@@ -45,19 +45,12 @@ function getTodayUTCDate(): Date {
   return new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
 }
 
-/**
- * Recalculates the total cumulative investments and projected compounding maturity amount
- * based on active ledger histories using the standard SSY 21-year rules.
- */
 function recalculateSSYMetrics(
   startDateStr: string,
   interestRate: number,
   contributions: { date: string; amount: number }[]
 ) {
-  // 1. Calculate cumulative investments
   const totalInvested = contributions.reduce((sum, c) => sum + c.amount, 0);
-
-  // 2. Compute true SSY compounding interest across the statutory 21-year timeline
   const accountStart = parseISODateUTC(startDateStr);
   if (!accountStart) return { totalInvested, maturityAmount: 0 };
 
@@ -65,11 +58,8 @@ function recalculateSSYMetrics(
   let runningBalance = 0;
   let currentFyStart = getFinancialYearStartUTC(accountStart);
 
-  // Track compounding step-by-step for 21 consecutive financial years
   for (let yearIdx = 0; yearIdx < SSY_MATURITY_YEARS; yearIdx++) {
     const fyEnd = addDaysUTC(addYearsUTC(currentFyStart, 1), -1);
-
-    // Filter contributions that occurred within this specific financial year window
     const fyContributions = contributions.filter((c) => {
       const cDate = parseISODateUTC(c.date);
       if (!cDate) return false;
@@ -77,16 +67,10 @@ function recalculateSSYMetrics(
     });
 
     const annualDeposit = fyContributions.reduce((sum, c) => sum + c.amount, 0);
-
-    // Apply deposits (only valid during active contribution years context)
     if (yearIdx < SSY_CONTRIBUTION_YEARS) {
       runningBalance += annualDeposit;
     }
-
-    // SSY interest compounds at the end of every financial year
     runningBalance = runningBalance * (1 + rate);
-
-    // Increment financial year cursor
     currentFyStart = addDaysUTC(fyEnd, 1);
   }
 
@@ -107,7 +91,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     const accountStart = parseISODateUTC(startDateStr);
     if (!accountStart) return [];
     const contributionEnd = addDaysUTC(addYearsUTC(accountStart, SSY_CONTRIBUTION_YEARS), -1);
-
+    
     const windows: { start: Date; end: Date; index: number }[] = [];
     let fyStart = getFinancialYearStartUTC(accountStart);
     let index = 0;
@@ -144,11 +128,10 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     } else {
       setDepositDate(formatISODateUTC(win.start));
     }
-
+    
     const paidContribs = getPaidContributionsForWindow(win.start, win.end, fd.contributions);
     const totalPaid = paidContribs.reduce((sum, c) => sum + c.amount, 0);
     const remaining = SSY_MAX_FINANCIAL_YEAR_DEPOSIT - totalPaid;
-    // Default to configuration principal value capped at maximum remaining headroom
     const defaultAmount = Math.min(Number(fd.principal_amount || 150000), remaining);
     setDepositAmount(defaultAmount.toString());
     setModalError('');
@@ -203,17 +186,14 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
       (a, b) => (parseISODateUTC(a.date)?.getTime() ?? 0) - (parseISODateUTC(b.date)?.getTime() ?? 0)
     );
 
-    // Dynamically recalculate master properties to fix dashboard metrics components out of sync
     const metrics = recalculateSSYMetrics(fd.start_date, Number(fd.interest_rate || 8.2), updated);
 
     try {
-      await onUpdate('fd', fd.id, {
+      await onUpdate('fd', fd.id, { 
         contributions: updated,
-        // Syncs the Dashboard "TOTAL SSY INVESTED" card
-        principal_amount: metrics.totalInvested,
-        // Syncs the Dashboard "EST. MATURITY VALUE" card
+        principal_amount: metrics.totalInvested, 
         maturity_amount: metrics.maturityAmount,
-        estMaturityAmount: metrics.maturityAmount
+        estMaturityAmount: metrics.maturityAmount 
       });
       setPayingSlot(null);
     } catch (err) {
@@ -235,7 +215,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     const metrics = recalculateSSYMetrics(fd.start_date, Number(fd.interest_rate || 8.2), updated);
 
     try {
-      await onUpdate('fd', fd.id, {
+      await onUpdate('fd', fd.id, { 
         contributions: updated,
         principal_amount: metrics.totalInvested,
         maturity_amount: metrics.maturityAmount,
@@ -244,6 +224,16 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete contribution');
     }
+  };
+
+  const getContainerClassName = (totalPaid: number, isFuture: boolean): string => {
+    if (totalPaid > 0) {
+      return 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50';
+    }
+    if (isFuture) {
+      return 'bg-slate-50/50 dark:bg-slate-800/20 border-slate-100 dark:border-slate-800';
+    }
+    return 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/50';
   };
 
   const windows = getSSYWindows(fd.start_date);
@@ -258,6 +248,14 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
       >
         {expanded ? 'Hide Deposit Schedule' : 'Show Annual Deposit Schedule'}
       </button>
-
+      
       {expanded && (
         <div className="mt-3 space-y-2">
+          <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+            Financial Year Contribution Ledgers
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+            {windows.map((win) => {
+              const paidContribs = getPaidContributionsForWindow(win.start, win.end, fd.contributions);
+              const totalPaid = paidContribs.reduce((sum, c) => sum + c.amount, 0);
+              const label = formatFinancialYear(getFinancialYearStartUTC(win.start));
