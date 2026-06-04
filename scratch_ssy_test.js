@@ -33,4 +33,4 @@ const maturity = calculateSSYMaturityWithRates(
 console.log("Invested:", invested);
 console.log("Valuation (as of 2026-06-05):", val);
 console.log("Yearly breakdown in simulation:");
-console.log(JSON.stringify(maturity.yearlyBreakdown.slice(0, 5), null, 2));
+console.log(JSON.stringify(maturity.yearlyBreakdown, null, 2));

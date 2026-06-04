@@ -87,6 +87,7 @@ export function calculateSSYMaturityWithRates(
 
   const acctFYStart = getFYStartYear(accountStart);
   const maturityYear = accountStart.getUTCFullYear() + 21;
+  const maturityDate = new Date(Date.UTC(accountStart.getUTCFullYear() + 21, accountStart.getUTCMonth(), accountStart.getUTCDate()));
   const nowMs = Date.now();
 
   let balance = 0;
@@ -162,6 +163,12 @@ export function calculateSSYMaturityWithRates(
     for (let m = 0; m < 12; m++) {
       const calYear = m < 9 ? fyStart : fyStart + 1;
       const calMonth = m < 9 ? m + 3 : m - 9;
+      
+      const monthStart = new Date(Date.UTC(calYear, calMonth, 1));
+      if (monthStart.getTime() > maturityDate.getTime()) {
+        continue;
+      }
+
       // Cutoff date is the 5th of that month
       const cutoff = new Date(Date.UTC(calYear, calMonth, 5, 23, 59, 59));
 

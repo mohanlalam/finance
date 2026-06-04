@@ -67,8 +67,9 @@ export function SSYFormModal({
     setError('');
   }, [editingAccount, isOpen, portfolioName]);
 
-  const calculateMaturity = useCallback(() => {
-    if (startDate && !maturityDate && !editingAccount) {
+  // Auto-calculate maturity date when start date changes
+  useEffect(() => {
+    if (startDate) {
       const start = new Date(startDate);
       if (!isNaN(start.getTime())) {
         const matYear = start.getFullYear() + 21;
@@ -77,13 +78,15 @@ export function SSYFormModal({
         setMaturityDate(`${matYear}-${matMonth}-${matDay}`);
       }
     }
+  }, [startDate]);
 
+  const calculateMaturity = useCallback(() => {
     const p = parseFloat(annualDeposit);
     const r = parseFloat(interestRate);
     const s = new Date(startDate);
-    const m = maturityDate ? new Date(maturityDate) : new Date();
+    const m = maturityDate ? new Date(maturityDate) : null;
 
-    if (!isNaN(p) && !isNaN(r) && !isNaN(s.getTime()) && !isNaN(m.getTime())) {
+    if (!isNaN(p) && !isNaN(r) && !isNaN(s.getTime()) && m && !isNaN(m.getTime())) {
       const { maturityAmount: ssyAmt } = calculateSSYMaturityWithRates(
         startDate,
         p,
@@ -298,9 +301,8 @@ export function SSYFormModal({
               <input
                 type="date"
                 value={maturityDate}
-                onChange={(e) => setMaturityDate(e.target.value)}
-                onBlur={calculateMaturity}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors"
+                readOnly
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 cursor-not-allowed"
               />
             </div>
           </div>
@@ -310,11 +312,11 @@ export function SSYFormModal({
             <div>
               <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Est. Maturity Amount (₹)</label>
               <input
-                type="number"
+                type="text"
                 placeholder="Auto-computed"
                 value={maturityAmount}
-                onChange={(e) => setMaturityAmount(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors"
+                readOnly
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 cursor-not-allowed font-medium"
               />
             </div>
             <div>
