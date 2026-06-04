@@ -36,6 +36,8 @@ export interface FixedDeposit {
   mf_scheme_code?: string;
   units?: number;
   girl_dob?: string;
+  /** Per-FY rate overrides for SSY: [{ fyStartYear: 2026, rate: 8.5 }, ...] */
+  rate_schedule?: { fyStartYear: number; rate: number }[];
   created_at?: string;
 }
 
@@ -133,6 +135,7 @@ export interface FDPayload {
   mf_scheme_code?: string;
   units?: number;
   girl_dob?: string;
+  rate_schedule?: { fyStartYear: number; rate: number }[];
 }
 
 export interface GoldPayload {

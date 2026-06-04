@@ -49,51 +49,136 @@ export function getSSYRateForFY(fyStartYear: number): number {
  * @param contributions Optional array of actual contribution records
  * @param overrideRate  Single fixed rate to use instead of historical rates (optional)
  */
+const SSY_MAX_FY_DEPOSIT = 150000;
+const SSY_MIN_FY_DEPOSIT = 250;
+
+/** Returns the SSY rate applicable for a given FY, checking overrides first. */
+export function getSSYRateForFY(
+  fyStartYear: number,
+  rateSchedule?: { fyStartYear: number; rate: number }[]
+): number {
+  // Check user-supplied per-FY override first
+  if (rateSchedule && rateSchedule.length > 0) {
+    const override = rateSchedule.find((r) => r.fyStartYear === fyStartYear);
+    if (override !== undefined) return override.rate;
+  }
+  // Exact match in historical table
+  if (SSY_HISTORICAL_RATES[fyStartYear] !== undefined) {
+    return SSY_HISTORICAL_RATES[fyStartYear];
+  }
+  // Before first known FY – use earliest
+  const years = Object.keys(SSY_HISTORICAL_RATES).map(Number).sort((a, b) => a - b);
+  if (fyStartYear < years[0]) return SSY_HISTORICAL_RATES[years[0]];
+  // After last known FY – use latest known
+  const latestYear = years[years.length - 1];
+  if (fyStartYear > latestYear) return SSY_HISTORICAL_RATES[latestYear];
+  return 8.2;
+}
+
+/**
+ * Compute SSY maturity using correct annual compounding.
+ *
+ * Rules (per scheme):
+ *  - Deposits: first 15 FYs from account-opening FY, capped at ₹1.5L/FY.
+ *  - Interest: credited annually on 31 March for all 21 years.
+ *  - Rate per FY: from rateSchedule overrides → SSY_HISTORICAL_RATES → futureRate fallback.
+ *
+ * @param startDateStr   ISO date of account opening
+ * @param annualDeposit  Default/target annual deposit (used for future unrecorded FYs)
+ * @param contributions  Actual recorded deposits
+ * @param rateSchedule   Per-FY rate overrides [{fyStartYear, rate}, ...]
+ * @param futureRate     Rate to use for future FYs with no historical/override data
+ */
 export function calculateSSYMaturityWithRates(
   startDateStr: string,
   annualDeposit: number,
   contributions?: { date: string; amount: number }[],
-  overrideRate?: number
-): { maturityAmount: number; yearlyBreakdown: { fy: string; fyStartYear: number; deposit: number; interestRate: number; interestEarned: number; closingBalance: number }[] } {
+  rateSchedule?: { fyStartYear: number; rate: number }[],
+  futureRate?: number
+): {
+  maturityAmount: number;
+  yearlyBreakdown: {
+    fy: string;
+    fyStartYear: number;
+    deposit: number;
+    actualDeposit: number;   // raw sum from contributions (may exceed cap)
+    depositCapped: boolean;  // true if actual > SSY_MAX
+    interestRate: number;
+    interestEarned: number;
+    closingBalance: number;
+    isFuture: boolean;
+  }[];
+} {
   const accountStart = parseISODateForSSY(startDateStr);
   if (!accountStart) return { maturityAmount: 0, yearlyBreakdown: [] };
 
-  // Find the FY that contains the account start date
   const acctFYStart = getFYStartYear(accountStart);
   const maturityYear = accountStart.getUTCFullYear() + 21;
+  const nowMs = Date.now();
 
   let balance = 0;
-  const breakdown: { fy: string; fyStartYear: number; deposit: number; interestRate: number; interestEarned: number; closingBalance: number }[] = [];
+  const breakdown: ReturnType<typeof calculateSSYMaturityWithRates>['yearlyBreakdown'] = [];
 
   for (let fyStart = acctFYStart; fyStart < maturityYear; fyStart++) {
     const fyStartDate = new Date(Date.UTC(fyStart, 3, 1));    // April 1
     const fyEndDate   = new Date(Date.UTC(fyStart + 1, 2, 31)); // March 31
-    const fyYear      = fyStart;
+    const depositYear = fyStart - acctFYStart;                 // 0-indexed
+    const isFutureFY  = fyStartDate.getTime() > nowMs;
 
-    // Contributions happen only in first 15 years
-    const depositYear = fyStart - acctFYStart; // 0-indexed
+    let rawDeposit = 0;
     let deposit = 0;
+    let depositCapped = false;
+
     if (depositYear < 15) {
       if (contributions && contributions.length > 0) {
-        // Sum actual contributions that fall within this FY
-        deposit = contributions
+        // Sum actual contributions that fall in this FY
+        rawDeposit = contributions
           .filter((c) => {
             const d = parseISODateForSSY(c.date);
             if (!d) return false;
             return d.getTime() >= fyStartDate.getTime() && d.getTime() <= fyEndDate.getTime();
           })
           .reduce((s, c) => s + c.amount, 0);
-        // If no contributions recorded yet for this future FY, use default
-        if (deposit === 0 && fyStartDate.getTime() > Date.now()) {
-          deposit = annualDeposit;
+
+        // For past FYs with no contributions, deposit = 0 (not yet paid)
+        // For future FYs with no contributions, use the target annual deposit
+        if (rawDeposit === 0 && isFutureFY) {
+          rawDeposit = annualDeposit;
+        }
+
+        // Cap at SSY maximum per financial year
+        if (rawDeposit > SSY_MAX_FY_DEPOSIT) {
+          deposit = SSY_MAX_FY_DEPOSIT;
+          depositCapped = true;
+        } else {
+          deposit = rawDeposit;
         }
       } else {
-        deposit = annualDeposit;
+        // No contributions recorded at all — use target for all years
+        rawDeposit = annualDeposit;
+        deposit = Math.min(annualDeposit, SSY_MAX_FY_DEPOSIT);
       }
     }
 
     balance += deposit;
-    const rate = overrideRate !== undefined ? overrideRate : getSSYRateForFY(fyYear);
+
+    // Rate resolution: override → historical → futureRate fallback
+    let rate: number;
+    if (rateSchedule && rateSchedule.length > 0) {
+      const override = rateSchedule.find((r) => r.fyStartYear === fyStart);
+      if (override !== undefined) {
+        rate = override.rate;
+      } else {
+        rate = SSY_HISTORICAL_RATES[fyStart] !== undefined
+          ? SSY_HISTORICAL_RATES[fyStart]
+          : (futureRate ?? 8.2);
+      }
+    } else {
+      rate = SSY_HISTORICAL_RATES[fyStart] !== undefined
+        ? SSY_HISTORICAL_RATES[fyStart]
+        : (futureRate ?? 8.2);
+    }
+
     const interest = parseFloat((balance * rate / 100).toFixed(2));
     balance = parseFloat((balance + interest).toFixed(2));
 
@@ -101,9 +186,12 @@ export function calculateSSYMaturityWithRates(
       fy: `FY ${fyStart}-${String(fyStart + 1).slice(-2)}`,
       fyStartYear: fyStart,
       deposit,
+      actualDeposit: rawDeposit,
+      depositCapped,
       interestRate: rate,
       interestEarned: interest,
       closingBalance: balance,
+      isFuture: isFutureFY,
     });
   }
 
@@ -225,9 +313,29 @@ export function getSSYContributions(f: FixedDeposit, end: Date): { date: string;
   return list;
 }
 
+/**
+ * Returns the total amount actually invested in an SSY account.
+ * For SSY: sums only actual contributions per FY, capped at SSY max (₹1.5L/FY).
+ * Prevents data anomalies (duplicate entries) from inflating the invested display.
+ * If no contributions are recorded, returns principal_amount (the annual target) as a placeholder.
+ */
 export function getFDInvestedAmount(f: FixedDeposit): number {
-  if (f.fd_type === 'ssy' && f.contributions && f.contributions.length > 0) {
-    return f.contributions.reduce((sum, c) => sum + Number(c.amount), 0);
+  if (f.fd_type === 'ssy') {
+    if (f.contributions && f.contributions.length > 0) {
+      // Group by FY and cap each FY at SSY_MAX_FY_DEPOSIT
+      const fyTotals: Record<number, number> = {};
+      for (const c of f.contributions) {
+        const d = new Date(c.date);
+        if (isNaN(d.getTime())) continue;
+        const m = d.getUTCMonth();
+        const fyStartYear = m >= 3 ? d.getUTCFullYear() : d.getUTCFullYear() - 1;
+        fyTotals[fyStartYear] = (fyTotals[fyStartYear] ?? 0) + c.amount;
+      }
+      return Object.values(fyTotals)
+        .reduce((sum, amt) => sum + Math.min(amt, SSY_MAX_FY_DEPOSIT), 0);
+    }
+    // No contributions recorded yet — return 0 (nothing actually deposited)
+    return 0;
   }
   return Number(f.principal_amount);
 }
@@ -236,14 +344,12 @@ export function getSSYMaturityValue(f: FixedDeposit): number {
   if (f.fd_type !== 'ssy') {
     return getFDEffectiveValue(f);
   }
-  // Always recalculate using the accurate rate-aware engine so the stored
-  // maturity_amount (which may use a single rate) is upgraded if needed.
   const { maturityAmount } = calculateSSYMaturityWithRates(
     f.start_date,
     Number(f.principal_amount),
     f.contributions,
-    // Use the stored rate only if it differs from 0 – lets user override
-    Number(f.interest_rate) > 0 ? undefined : 8.2
+    f.rate_schedule,
+    Number(f.interest_rate) > 0 ? Number(f.interest_rate) : 8.2
   );
   return maturityAmount > 0 ? maturityAmount : Number(f.maturity_amount) || 0;
 }

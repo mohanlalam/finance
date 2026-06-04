@@ -202,6 +202,7 @@ Deno.serve(async (req: Request) => {
             units: payload.units !== undefined && payload.units !== null ? Number(payload.units) : null,
             notes: payload.notes || null,
             girl_dob: payload.girlDob || null,
+            rate_schedule: payload.rateSchedule || null,
           })
           .select()
           .single();
@@ -317,6 +318,7 @@ Deno.serve(async (req: Request) => {
         if (payload.units !== undefined) updates.units = payload.units !== null ? Number(payload.units) : null;
         if (payload.notes !== undefined) updates.notes = payload.notes;
         if (payload.girlDob !== undefined) updates.girl_dob = payload.girlDob;
+        if (payload.rateSchedule !== undefined) updates.rate_schedule = payload.rateSchedule;
       } else if (asset_type === "gold") {
         table = "gold_holdings";
         if (payload.itemName !== undefined) updates.item_name = payload.itemName;

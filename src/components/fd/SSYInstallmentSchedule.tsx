@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { FixedDeposit } from '../../types/portfolio';
-import { calculateSSYMaturityWithRates, getSSYRateForFY } from '../../utils/formatters';
+import { calculateSSYMaturityWithRates, SSY_HISTORICAL_RATES } from '../../utils/formatters';
+import { Edit2, Check, X, AlertTriangle } from 'lucide-react';
 
 interface SSYInstallmentScheduleProps {
   fd: FixedDeposit;
@@ -11,7 +12,6 @@ interface SSYInstallmentScheduleProps {
 const SSY_MIN_FINANCIAL_YEAR_DEPOSIT = 250;
 const SSY_MAX_FINANCIAL_YEAR_DEPOSIT = 150000;
 const SSY_CONTRIBUTION_YEARS = 15;
-const SSY_MATURITY_YEARS = 21;
 
 function parseISODateUTC(value: string): Date | null {
   const [year, month, day] = value.split('-').map(Number);
@@ -55,12 +55,19 @@ function formatINRCompact(value: number): string {
   return `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 }
 
+const LAST_KNOWN_FY = Math.max(...Object.keys(SSY_HISTORICAL_RATES).map(Number));
+
 export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleProps) {
   const [expanded, setExpanded] = useState(false);
   const [payingSlot, setPayingSlot] = useState<{ start: Date; end: Date; index: number } | null>(null);
   const [depositDate, setDepositDate] = useState('');
   const [depositAmount, setDepositAmount] = useState('');
   const [modalError, setModalError] = useState('');
+
+  // Rate editing state
+  const [editingRateFY, setEditingRateFY] = useState<number | null>(null);
+  const [editRateValue, setEditRateValue] = useState('');
+  const [savingRate, setSavingRate] = useState(false);
 
   const getSSYWindows = useCallback((startDateStr: string): { start: Date; end: Date; index: number }[] => {
     const accountStart = parseISODateUTC(startDateStr);
@@ -107,7 +114,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     const paidContribs = getPaidContributionsForWindow(win.start, win.end, fd.contributions);
     const totalPaid = paidContribs.reduce((sum, c) => sum + c.amount, 0);
     const remaining = SSY_MAX_FINANCIAL_YEAR_DEPOSIT - totalPaid;
-    const defaultAmount = Math.min(Number(fd.principal_amount || 150000), remaining);
+    const defaultAmount = Math.min(Number(fd.principal_amount || 150000), Math.max(0, remaining));
     setDepositAmount(defaultAmount.toString());
     setModalError('');
   };
@@ -129,15 +136,13 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
       return;
     }
     if (amt % 50 !== 0) {
-      setModalError('SSY deposits must be in multiples of Rs. 50.');
+      setModalError('SSY deposits must be in multiples of ₹50.');
       return;
     }
 
     const checkTime = depDate.getTime();
     if (checkTime < payingSlot.start.getTime() || checkTime > payingSlot.end.getTime()) {
-      const startStr = formatISODateUTC(payingSlot.start);
-      const endStr = formatISODateUTC(payingSlot.end);
-      setModalError(`Deposit date must be within this SSY contribution window (${startStr} to ${endStr}).`);
+      setModalError(`Deposit date must be within this SSY contribution window (${formatISODateUTC(payingSlot.start)} to ${formatISODateUTC(payingSlot.end)}).`);
       return;
     }
 
@@ -146,9 +151,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
 
     if (totalPaid + amt > SSY_MAX_FINANCIAL_YEAR_DEPOSIT) {
       setModalError(
-        `Total contributions for a financial year cannot exceed ₹1,50,000. Currently paid: ₹${totalPaid.toLocaleString(
-          'en-IN'
-        )}. Max remaining: ₹${(SSY_MAX_FINANCIAL_YEAR_DEPOSIT - totalPaid).toLocaleString('en-IN')}.`
+        `Total contributions for a financial year cannot exceed ₹1,50,000. Already paid: ₹${totalPaid.toLocaleString('en-IN')}. Remaining: ₹${(SSY_MAX_FINANCIAL_YEAR_DEPOSIT - totalPaid).toLocaleString('en-IN')}.`
       );
       return;
     }
@@ -158,18 +161,16 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
       (a, b) => (parseISODateUTC(a.date)?.getTime() ?? 0) - (parseISODateUTC(b.date)?.getTime() ?? 0)
     );
 
-    // Recalculate using the accurate rate-aware engine
     const { maturityAmount } = calculateSSYMaturityWithRates(
       fd.start_date,
       Number(fd.principal_amount || 150000),
-      updated
+      updated,
+      fd.rate_schedule,
+      Number(fd.interest_rate) > 0 ? Number(fd.interest_rate) : 8.2
     );
 
     try {
-      await onUpdate('fd', fd.id, {
-        contributions: updated,
-        maturityAmount,
-      });
+      await onUpdate('fd', fd.id, { contributions: updated, maturityAmount });
       setPayingSlot(null);
     } catch (err) {
       setModalError(err instanceof Error ? err.message : 'Failed to record installment');
@@ -190,21 +191,80 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     const { maturityAmount } = calculateSSYMaturityWithRates(
       fd.start_date,
       Number(fd.principal_amount || 150000),
-      updated
+      updated,
+      fd.rate_schedule,
+      Number(fd.interest_rate) > 0 ? Number(fd.interest_rate) : 8.2
     );
 
     try {
-      await onUpdate('fd', fd.id, {
-        contributions: updated,
-        maturityAmount,
-      });
+      await onUpdate('fd', fd.id, { contributions: updated, maturityAmount });
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete contribution');
     }
   };
 
+  // ── Rate editing ──
+  const startEditRate = (fyStartYear: number, currentRate: number) => {
+    setEditingRateFY(fyStartYear);
+    setEditRateValue(currentRate.toString());
+  };
+
+  const cancelEditRate = () => {
+    setEditingRateFY(null);
+    setEditRateValue('');
+  };
+
+  const saveRateOverride = async (fyStartYear: number) => {
+    const newRate = parseFloat(editRateValue);
+    if (isNaN(newRate) || newRate <= 0 || newRate > 20) {
+      alert('Please enter a valid rate between 0.01% and 20%.');
+      return;
+    }
+    setSavingRate(true);
+    const existing = fd.rate_schedule || [];
+    // Remove any existing override for this FY then add new one
+    const updated = existing.filter((r) => r.fyStartYear !== fyStartYear);
+    updated.push({ fyStartYear, rate: parseFloat(newRate.toFixed(2)) });
+
+    const { maturityAmount } = calculateSSYMaturityWithRates(
+      fd.start_date,
+      Number(fd.principal_amount),
+      fd.contributions,
+      updated,
+      Number(fd.interest_rate) > 0 ? Number(fd.interest_rate) : 8.2
+    );
+
+    try {
+      await onUpdate('fd', fd.id, { rateSchedule: updated, maturityAmount });
+      setEditingRateFY(null);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to save rate');
+    } finally {
+      setSavingRate(false);
+    }
+  };
+
+  const removeRateOverride = async (fyStartYear: number) => {
+    const existing = fd.rate_schedule || [];
+    const updated = existing.filter((r) => r.fyStartYear !== fyStartYear);
+
+    const { maturityAmount } = calculateSSYMaturityWithRates(
+      fd.start_date,
+      Number(fd.principal_amount),
+      fd.contributions,
+      updated,
+      Number(fd.interest_rate) > 0 ? Number(fd.interest_rate) : 8.2
+    );
+
+    try {
+      await onUpdate('fd', fd.id, { rateSchedule: updated, maturityAmount });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to remove rate override');
+    }
+  };
+
   const getContainerClassName = (totalPaid: number, isFuture: boolean): string => {
-    if (totalPaid > 0) {
+    if (totalPaid >= SSY_MIN_FINANCIAL_YEAR_DEPOSIT) {
       return 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50';
     }
     if (isFuture) {
@@ -216,11 +276,12 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
   const windows = getSSYWindows(fd.start_date);
   const now = new Date();
 
-  // Build the yearly breakdown using the accurate engine
   const { yearlyBreakdown } = calculateSSYMaturityWithRates(
     fd.start_date,
     Number(fd.principal_amount),
-    fd.contributions
+    fd.contributions,
+    fd.rate_schedule,
+    Number(fd.interest_rate) > 0 ? Number(fd.interest_rate) : 8.2
   );
 
   return (
@@ -236,7 +297,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
       {expanded && (
         <div className="mt-3 space-y-4">
 
-          {/* ─── Deposit Windows (contribution tracking) ─── */}
+          {/* ─── Contribution Windows (FY ledger tiles) ─── */}
           <div>
             <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-2">
               Financial Year Contribution Ledgers
@@ -250,7 +311,10 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
                 const isFuture = win.start.getTime() > now.getTime();
                 const isCompliant = totalPaid >= SSY_MIN_FINANCIAL_YEAR_DEPOSIT;
                 const isFullyPaid = totalPaid >= SSY_MAX_FINANCIAL_YEAR_DEPOSIT;
-                const fyRate = getSSYRateForFY(getFYStartYear(win.start));
+                const exceedsMax = totalPaid > SSY_MAX_FINANCIAL_YEAR_DEPOSIT;
+                const fyYear = getFYStartYear(win.start);
+                const override = fd.rate_schedule?.find((r) => r.fyStartYear === fyYear);
+                const fyRate = override?.rate ?? (SSY_HISTORICAL_RATES[fyYear] ?? (Number(fd.interest_rate) || 8.2));
 
                 return (
                   <div
@@ -262,38 +326,33 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
                       <span className="text-[8px] text-slate-400 dark:text-slate-500 font-semibold">{yearRange}</span>
                       <span className="text-[9px] font-bold text-purple-600 dark:text-purple-400 mt-0.5">{fyRate}% p.a.</span>
                     </div>
-                    {totalPaid > 0 ? (
+                    {exceedsMax && (
+                      <span className="text-[8px] font-bold text-red-600 dark:text-red-400 flex items-center gap-0.5">
+                        <AlertTriangle size={8} /> ₹{totalPaid.toLocaleString('en-IN')} (Over limit)
+                      </span>
+                    )}
+                    {!exceedsMax && totalPaid > 0 ? (
                       <div className="flex flex-col items-center gap-1">
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isFullyPaid ? 'bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400' : 'bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400'}`}>
                           ₹{totalPaid.toLocaleString('en-IN')}
                         </span>
                         {!isCompliant && (
-                          <span className="text-[8px] font-semibold text-amber-600 dark:text-amber-400">
-                            Min ₹250
-                          </span>
+                          <span className="text-[8px] font-semibold text-amber-600 dark:text-amber-400">Min ₹250</span>
                         )}
                         {!isFuture && (
-                          <button
-                            type="button"
-                            onClick={() => openPaymentModal(win)}
-                            className="text-[9px] text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-bold hover:underline"
-                          >
+                          <button type="button" onClick={() => openPaymentModal(win)} className="text-[9px] text-purple-600 dark:text-purple-400 hover:text-purple-800 font-bold hover:underline">
                             Manage
                           </button>
                         )}
                       </div>
                     ) : isFuture ? (
-                      <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-600 italic">
-                        Scheduled
-                      </span>
+                      <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-600 italic">Scheduled</span>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => openPaymentModal(win)}
-                        className="text-[9px] font-extrabold bg-purple-600 hover:bg-purple-700 text-white px-2 py-0.5 rounded-md transition-all active:scale-95 shadow-xs"
-                      >
-                        + Pay
-                      </button>
+                      !exceedsMax && (
+                        <button type="button" onClick={() => openPaymentModal(win)} className="text-[9px] font-extrabold bg-purple-600 hover:bg-purple-700 text-white px-2 py-0.5 rounded-md transition-all active:scale-95">
+                          + Pay
+                        </button>
+                      )
                     )}
                   </div>
                 );
@@ -301,11 +360,11 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
             </div>
           </div>
 
-          {/* ─── Year-by-Year Compounding Breakdown ─── */}
+          {/* ─── Year-by-Year Growth Table ─── */}
           {yearlyBreakdown.length > 0 && (
             <div>
               <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-2">
-                Year-by-Year Growth (Annual Compounding)
+                Year-by-Year Growth — click rate to edit future FY rates
               </p>
               <div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-700">
                 <table className="w-full text-[10px]">
@@ -321,7 +380,11 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                     {yearlyBreakdown.map((row, idx) => {
                       const isContributionYear = idx < SSY_CONTRIBUTION_YEARS;
-                      const isMaturityYear = idx === SSY_MATURITY_YEARS - 1;
+                      const isMaturityYear = idx === yearlyBreakdown.length - 1;
+                      const isEditing = editingRateFY === row.fyStartYear;
+                      const hasOverride = fd.rate_schedule?.some((r) => r.fyStartYear === row.fyStartYear);
+                      const canEditRate = row.fyStartYear > LAST_KNOWN_FY || hasOverride;
+
                       return (
                         <tr
                           key={row.fy}
@@ -336,28 +399,93 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
                           <td className="px-3 py-1.5 text-left">
                             <span className="font-semibold">{row.fy}</span>
                             {isMaturityYear && (
-                              <span className="ml-1 text-[8px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-1 py-0.5 rounded-full font-bold">
-                                Maturity
-                              </span>
+                              <span className="ml-1 text-[8px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-1 py-0.5 rounded-full font-bold">Maturity</span>
                             )}
                             {isContributionYear && !isMaturityYear && (
-                              <span className="ml-1 text-[8px] text-purple-500 dark:text-purple-400">
-                                Yr {idx + 1}/15
-                              </span>
+                              <span className="ml-1 text-[8px] text-purple-500 dark:text-purple-400">Yr {idx + 1}/15</span>
                             )}
                           </td>
-                          <td className="px-3 py-1.5 text-right font-bold text-purple-600 dark:text-purple-400">
-                            {row.interestRate}%
-                          </td>
+
+                          {/* Rate cell — editable for future/overridden FYs */}
                           <td className="px-3 py-1.5 text-right">
-                            {row.deposit > 0 ? (
-                              <span className="text-blue-600 dark:text-blue-400 font-semibold">
+                            {isEditing ? (
+                              <div className="flex items-center justify-end gap-1">
+                                <input
+                                  type="number"
+                                  step="0.1"
+                                  min="1"
+                                  max="20"
+                                  value={editRateValue}
+                                  onChange={(e) => setEditRateValue(e.target.value)}
+                                  className="w-14 text-right border border-purple-300 dark:border-purple-700 rounded-md px-1 py-0.5 text-[10px] bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-purple-400"
+                                  autoFocus
+                                />
+                                <button
+                                  type="button"
+                                  disabled={savingRate}
+                                  onClick={() => void saveRateOverride(row.fyStartYear)}
+                                  className="text-emerald-600 hover:text-emerald-700 disabled:opacity-50"
+                                  title="Save"
+                                >
+                                  <Check size={11} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={cancelEditRate}
+                                  className="text-slate-400 hover:text-slate-600"
+                                  title="Cancel"
+                                >
+                                  <X size={11} />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-end gap-1 group">
+                                <span className={`font-bold ${hasOverride ? 'text-amber-600 dark:text-amber-400' : 'text-purple-600 dark:text-purple-400'}`}>
+                                  {row.interestRate}%
+                                </span>
+                                {hasOverride && (
+                                  <button
+                                    type="button"
+                                    onClick={() => void removeRateOverride(row.fyStartYear)}
+                                    className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="Remove override"
+                                  >
+                                    <X size={9} />
+                                  </button>
+                                )}
+                                {/* Show edit button for future FYs and history-overridden ones */}
+                                {(canEditRate || row.isFuture) && (
+                                  <button
+                                    type="button"
+                                    onClick={() => startEditRate(row.fyStartYear, row.interestRate)}
+                                    className="text-slate-300 dark:text-slate-600 hover:text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="Edit rate for this FY"
+                                  >
+                                    <Edit2 size={9} />
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Deposit cell */}
+                          <td className="px-3 py-1.5 text-right">
+                            {row.depositCapped ? (
+                              <span className="text-red-500 dark:text-red-400 font-semibold flex items-center justify-end gap-1">
+                                <AlertTriangle size={9} />
                                 {formatINRCompact(row.deposit)}
+                                <span className="text-[8px] text-red-400">(capped)</span>
+                              </span>
+                            ) : row.deposit > 0 ? (
+                              <span className={`font-semibold ${row.isFuture ? 'text-slate-400 dark:text-slate-500 italic' : 'text-blue-600 dark:text-blue-400'}`}>
+                                {formatINRCompact(row.deposit)}
+                                {row.isFuture && <span className="ml-0.5 text-[8px]">*</span>}
                               </span>
                             ) : (
                               <span className="text-slate-300 dark:text-slate-600">—</span>
                             )}
                           </td>
+
                           <td className="px-3 py-1.5 text-right text-emerald-600 dark:text-emerald-400 font-semibold">
                             {formatINRCompact(row.interestEarned)}
                           </td>
@@ -370,8 +498,10 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
                   </tbody>
                 </table>
               </div>
-              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1.5 italic">
-                * Historical rates used for past FYs. Future FYs use the latest notified rate. Interest credited annually on 31 March.
+              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1.5 italic leading-snug">
+                * Projected using ₹{Number(fd.principal_amount).toLocaleString('en-IN')} target deposit.
+                Historical rates used for past FYs (non-editable). Future FY rates use the default interest rate or your overrides.
+                Hover a rate to edit it.
               </p>
             </div>
           )}
@@ -389,19 +519,39 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
             <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-1">
               Window: {formatISODateUTC(payingSlot.start)} to {formatISODateUTC(payingSlot.end)}
             </p>
-            <p className="text-[11px] font-bold text-purple-600 dark:text-purple-400 mb-4">
-              Rate this FY: {getSSYRateForFY(getFYStartYear(payingSlot.start))}% p.a.
-            </p>
+            {(() => {
+              const fyYear = getFYStartYear(payingSlot.start);
+              const override = fd.rate_schedule?.find((r) => r.fyStartYear === fyYear);
+              const rate = override?.rate ?? (SSY_HISTORICAL_RATES[fyYear] ?? (Number(fd.interest_rate) || 8.2));
+              return (
+                <p className="text-[11px] font-bold text-purple-600 dark:text-purple-400 mb-4">
+                  Rate this FY: {rate}% p.a.
+                </p>
+              );
+            })()}
 
+            {/* Existing contributions for this window */}
             {(() => {
               const paidContribs = getPaidContributionsForWindow(payingSlot.start, payingSlot.end, fd.contributions);
+              const totalPaid = paidContribs.reduce((s, c) => s + c.amount, 0);
               if (paidContribs.length === 0) return null;
 
+              const exceedsMax = totalPaid > SSY_MAX_FINANCIAL_YEAR_DEPOSIT;
+
               return (
-                <div className="mb-4 space-y-1.5 max-h-32 overflow-y-auto border-b border-slate-100 dark:border-slate-700/50 pb-3">
-                  <p className="text-[9px] font-bold text-slate-400 dark:text-slate-550 uppercase tracking-wide">
-                    Contributions for this Year:
-                  </p>
+                <div className="mb-4 space-y-1.5 max-h-36 overflow-y-auto border-b border-slate-100 dark:border-slate-700/50 pb-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Deposits recorded this year:</p>
+                    <span className={`text-[9px] font-bold ${exceedsMax ? 'text-red-500' : 'text-slate-500'}`}>
+                      Total: ₹{totalPaid.toLocaleString('en-IN')} / ₹1,50,000
+                    </span>
+                  </div>
+                  {exceedsMax && (
+                    <p className="text-[9px] text-red-500 bg-red-50 dark:bg-red-950/20 rounded-lg px-2 py-1 flex items-center gap-1">
+                      <AlertTriangle size={9} />
+                      Exceeds annual SSY limit! Delete duplicate entries below.
+                    </p>
+                  )}
                   {paidContribs.map((contrib, idx) => (
                     <div key={`${contrib.date}-${contrib.amount}-${idx}`} className="flex justify-between items-center text-xs bg-slate-50 dark:bg-slate-900/40 px-2.5 py-1 rounded-lg">
                       <span className="font-semibold text-slate-600 dark:text-slate-400">{contrib.date}</span>
@@ -425,34 +575,38 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
             })()}
 
             <div className="space-y-3">
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                  Deposit Date
-                </label>
-                <input
-                  type="date"
-                  value={depositDate}
-                  min={formatISODateUTC(payingSlot.start)}
-                  max={formatISODateUTC(payingSlot.end)}
-                  onChange={(e) => setDepositDate(e.target.value)}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                  Amount (₹) — must be multiple of ₹50
-                </label>
-                <input
-                  type="number"
-                  min="50"
-                  step="50"
-                  value={depositAmount}
-                  placeholder="e.g. 10000"
-                  onChange={(e) => setDepositAmount(e.target.value)}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors"
-                />
-              </div>
+              {/* Only show add form if there's room */}
+              {(getPaidContributionsForWindow(payingSlot.start, payingSlot.end, fd.contributions)
+                .reduce((s, c) => s + c.amount, 0)) < SSY_MAX_FINANCIAL_YEAR_DEPOSIT && (
+                <>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Deposit Date</label>
+                    <input
+                      type="date"
+                      value={depositDate}
+                      min={formatISODateUTC(payingSlot.start)}
+                      max={formatISODateUTC(payingSlot.end)}
+                      onChange={(e) => setDepositDate(e.target.value)}
+                      className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                      Amount (₹) — multiples of ₹50, max ₹1,50,000/year
+                    </label>
+                    <input
+                      type="number"
+                      min="50"
+                      step="50"
+                      max={SSY_MAX_FINANCIAL_YEAR_DEPOSIT}
+                      value={depositAmount}
+                      placeholder="e.g. 10000"
+                      onChange={(e) => setDepositAmount(e.target.value)}
+                      className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors"
+                    />
+                  </div>
+                </>
+              )}
 
               {modalError && (
                 <p className="text-[10px] text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 rounded-xl px-2.5 py-1.5">
@@ -461,20 +615,15 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
               )}
 
               <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setPayingSlot(null)}
-                  className="flex-1 border border-slate-200 dark:border-slate-750 text-slate-650 dark:text-slate-350 text-xs font-semibold rounded-xl py-2 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all"
-                >
-                  Cancel
+                <button type="button" onClick={() => setPayingSlot(null)} className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-xl py-2 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all">
+                  Close
                 </button>
-                <button
-                  type="button"
-                  onClick={() => void handleRecordInstallment()}
-                  className="flex-1 bg-purple-600 text-white text-xs font-semibold rounded-xl py-2 hover:bg-purple-700 transition-all"
-                >
-                  Save Deposit
-                </button>
+                {(getPaidContributionsForWindow(payingSlot.start, payingSlot.end, fd.contributions)
+                  .reduce((s, c) => s + c.amount, 0)) < SSY_MAX_FINANCIAL_YEAR_DEPOSIT && (
+                  <button type="button" onClick={() => void handleRecordInstallment()} className="flex-1 bg-purple-600 text-white text-xs font-semibold rounded-xl py-2 hover:bg-purple-700 transition-all">
+                    Save Deposit
+                  </button>
+                )}
               </div>
             </div>
           </div>

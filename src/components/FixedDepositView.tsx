@@ -178,14 +178,16 @@ function FixedDepositView({
       const years = timeDiff / (1000 * 3600 * 24 * 365.25);
       if (years > 0) {
         if (mode === 'ssy') {
-          // Use the accurate SSY annual-compounding engine with the user-supplied rate
-          const { maturityAmount } = calculateSSYMaturityWithRates(
+          // Use the accurate SSY annual-compounding engine;
+          // editingFd may have rate_schedule overrides — preserve them
+          const { maturityAmount: ssyAmt } = calculateSSYMaturityWithRates(
             startDate,
             p,
-            undefined,   // no actual contributions yet when creating
-            r            // override rate = what user typed in the form
+            editingFd?.contributions,
+            editingFd?.rate_schedule,
+            r  // user-supplied rate as futureRate
           );
-          setMaturityAmount(maturityAmount.toFixed(2));
+          setMaturityAmount(ssyAmt.toFixed(2));
         } else {
           const amt = p * Math.pow(1 + r / 400, 4 * years);
           setMaturityAmount(amt.toFixed(2));
@@ -194,7 +196,7 @@ function FixedDepositView({
         setMaturityAmount(p.toFixed(2));
       }
     }
-  }, [principalAmount, interestRate, startDate, maturityDate, mode]);
+  }, [principalAmount, interestRate, startDate, maturityDate, mode, editingFd]);
 
   useEffect(() => {
     calculateMaturity();
@@ -332,6 +334,8 @@ function FixedDepositView({
       mfSchemeCode: mode === 'sip' ? (mfSchemeCode || null) : null,
       units: mode === 'sip' ? (parseFloat(units) || null) : null,
       girlDob: mode === 'ssy' ? (girlDob || null) : null,
+      // Preserve existing rate_schedule when editing an SSY account
+      rateSchedule: mode === 'ssy' ? (editingFd?.rate_schedule ?? null) : null,
     };
 
     try {
