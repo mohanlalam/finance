@@ -18,37 +18,7 @@ export const SSY_HISTORICAL_RATES: Record<number, number> = {
   2025: 8.2,
 };
 
-/** Returns the SSY rate applicable for a financial year starting at `fyStartYear`. */
-export function getSSYRateForFY(fyStartYear: number): number {
-  // Exact match
-  if (SSY_HISTORICAL_RATES[fyStartYear] !== undefined) {
-    return SSY_HISTORICAL_RATES[fyStartYear];
-  }
-  // Before first known FY – use earliest
-  const years = Object.keys(SSY_HISTORICAL_RATES).map(Number).sort((a, b) => a - b);
-  if (fyStartYear < years[0]) return SSY_HISTORICAL_RATES[years[0]];
-  // After last known FY – use latest
-  const latestYear = years[years.length - 1];
-  if (fyStartYear > latestYear) return SSY_HISTORICAL_RATES[latestYear];
-  // Fallback
-  return 8.2;
-}
 
-/**
- * Compute SSY maturity amount using correct annual compounding.
- *
- * Rules:
- *  - Deposits are made for the first 15 financial years from account opening.
- *  - Interest compounds annually (credited on 31 March each year).
- *  - The rate for each FY is looked up from SSY_HISTORICAL_RATES.
- *  - If `overrideRate` is provided it overrides the historical lookup.
- *  - Account matures 21 years from account start date.
- *
- * @param startDateStr  ISO date of account opening
- * @param annualDeposit Default annual contribution amount
- * @param contributions Optional array of actual contribution records
- * @param overrideRate  Single fixed rate to use instead of historical rates (optional)
- */
 const SSY_MAX_FY_DEPOSIT = 150000;
 const SSY_MIN_FY_DEPOSIT = 250;
 
