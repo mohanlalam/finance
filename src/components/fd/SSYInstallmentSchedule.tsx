@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { FixedDeposit } from '../../types/portfolio';
+import { calculateSSYMaturityWithRates, getSSYRateForFY } from '../../utils/formatters';
 
 interface SSYInstallmentScheduleProps {
   fd: FixedDeposit;
@@ -40,44 +41,18 @@ function formatFinancialYear(start: Date): string {
   return `FY ${start.getUTCFullYear()}-${String(start.getUTCFullYear() + 1).slice(-2)}`;
 }
 
+function getFYStartYear(date: Date): number {
+  return date.getUTCMonth() >= 3 ? date.getUTCFullYear() : date.getUTCFullYear() - 1;
+}
+
 function getTodayUTCDate(): Date {
   const today = new Date();
   return new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
 }
 
-function recalculateSSYMetrics(
-  startDateStr: string,
-  interestRate: number,
-  contributions: { date: string; amount: number }[]
-) {
-  const totalInvested = contributions.reduce((sum, c) => sum + c.amount, 0);
-  const accountStart = parseISODateUTC(startDateStr);
-  if (!accountStart) return { totalInvested, maturityAmount: 0 };
-
-  const rate = interestRate / 100;
-  let runningBalance = 0;
-  let currentFyStart = getFinancialYearStartUTC(accountStart);
-
-  for (let yearIdx = 0; yearIdx < SSY_MATURITY_YEARS; yearIdx++) {
-    const fyEnd = addDaysUTC(addYearsUTC(currentFyStart, 1), -1);
-    const fyContributions = contributions.filter((c) => {
-      const cDate = parseISODateUTC(c.date);
-      if (!cDate) return false;
-      return cDate.getTime() >= currentFyStart.getTime() && cDate.getTime() <= fyEnd.getTime();
-    });
-
-    const annualDeposit = fyContributions.reduce((sum, c) => sum + c.amount, 0);
-    if (yearIdx < SSY_CONTRIBUTION_YEARS) {
-      runningBalance += annualDeposit;
-    }
-    runningBalance = runningBalance * (1 + rate);
-    currentFyStart = addDaysUTC(fyEnd, 1);
-  }
-
-  return {
-    totalInvested,
-    maturityAmount: parseFloat(runningBalance.toFixed(2)),
-  };
+function formatINRCompact(value: number): string {
+  if (value >= 100000) return `₹${(value / 100000).toFixed(2)}L`;
+  return `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 }
 
 export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleProps) {
@@ -91,7 +66,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     const accountStart = parseISODateUTC(startDateStr);
     if (!accountStart) return [];
     const contributionEnd = addDaysUTC(addYearsUTC(accountStart, SSY_CONTRIBUTION_YEARS), -1);
-    
+
     const windows: { start: Date; end: Date; index: number }[] = [];
     let fyStart = getFinancialYearStartUTC(accountStart);
     let index = 0;
@@ -128,7 +103,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     } else {
       setDepositDate(formatISODateUTC(win.start));
     }
-    
+
     const paidContribs = getPaidContributionsForWindow(win.start, win.end, fd.contributions);
     const totalPaid = paidContribs.reduce((sum, c) => sum + c.amount, 0);
     const remaining = SSY_MAX_FINANCIAL_YEAR_DEPOSIT - totalPaid;
@@ -159,10 +134,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     }
 
     const checkTime = depDate.getTime();
-    const startCheck = payingSlot.start.getTime();
-    const endCheck = payingSlot.end.getTime();
-
-    if (checkTime < startCheck || checkTime > endCheck) {
+    if (checkTime < payingSlot.start.getTime() || checkTime > payingSlot.end.getTime()) {
       const startStr = formatISODateUTC(payingSlot.start);
       const endStr = formatISODateUTC(payingSlot.end);
       setModalError(`Deposit date must be within this SSY contribution window (${startStr} to ${endStr}).`);
@@ -186,12 +158,17 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
       (a, b) => (parseISODateUTC(a.date)?.getTime() ?? 0) - (parseISODateUTC(b.date)?.getTime() ?? 0)
     );
 
-    const metrics = recalculateSSYMetrics(fd.start_date, Number(fd.interest_rate || 8.2), updated);
+    // Recalculate using the accurate rate-aware engine
+    const { maturityAmount } = calculateSSYMaturityWithRates(
+      fd.start_date,
+      Number(fd.principal_amount || 150000),
+      updated
+    );
 
     try {
-      await onUpdate('fd', fd.id, { 
+      await onUpdate('fd', fd.id, {
         contributions: updated,
-        maturityAmount: metrics.maturityAmount,
+        maturityAmount,
       });
       setPayingSlot(null);
     } catch (err) {
@@ -210,12 +187,16 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
       return true;
     });
 
-    const metrics = recalculateSSYMetrics(fd.start_date, Number(fd.interest_rate || 8.2), updated);
+    const { maturityAmount } = calculateSSYMaturityWithRates(
+      fd.start_date,
+      Number(fd.principal_amount || 150000),
+      updated
+    );
 
     try {
-      await onUpdate('fd', fd.id, { 
+      await onUpdate('fd', fd.id, {
         contributions: updated,
-        maturityAmount: metrics.maturityAmount,
+        maturityAmount,
       });
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete contribution');
@@ -235,6 +216,13 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
   const windows = getSSYWindows(fd.start_date);
   const now = new Date();
 
+  // Build the yearly breakdown using the accurate engine
+  const { yearlyBreakdown } = calculateSSYMaturityWithRates(
+    fd.start_date,
+    Number(fd.principal_amount),
+    fd.contributions
+  );
+
   return (
     <div className="pt-2 border-t border-slate-100 dark:border-slate-700/50">
       <button
@@ -242,73 +230,155 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
         onClick={() => setExpanded(!expanded)}
         className="flex items-center gap-1 text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline"
       >
-        {expanded ? 'Hide Deposit Schedule' : 'Show Annual Deposit Schedule'}
+        {expanded ? '▲ Hide Deposit Schedule' : '▼ Show Annual Deposit Schedule'}
       </button>
-      
-      {expanded && (
-        <div className="mt-3 space-y-2">
-          <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
-            Financial Year Contribution Ledgers
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-            {windows.map((win) => {
-              const paidContribs = getPaidContributionsForWindow(win.start, win.end, fd.contributions);
-              const totalPaid = paidContribs.reduce((sum, c) => sum + c.amount, 0);
-              const label = formatFinancialYear(getFinancialYearStartUTC(win.start));
-              const yearRange = `${formatISODateUTC(win.start)} to ${formatISODateUTC(win.end)}`;
-              const isFuture = win.start.getTime() > now.getTime();
-              const isCompliant = totalPaid >= SSY_MIN_FINANCIAL_YEAR_DEPOSIT;
-              const isFullyPaid = totalPaid >= SSY_MAX_FINANCIAL_YEAR_DEPOSIT;
 
-              return (
-                <div
-                  key={win.index}
-                  className={`rounded-xl border p-2 flex flex-col items-center justify-between text-center gap-1.5 transition-all ${getContainerClassName(totalPaid, isFuture)}`}
-                >
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-bold tracking-wide">{label}</span>
-                    <span className="text-[8px] text-slate-400 dark:text-slate-500 font-semibold">{yearRange}</span>
-                  </div>
-                  {totalPaid > 0 ? (
-                    <div className="flex flex-col items-center gap-1">
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isFullyPaid ? 'bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-450' : 'bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-450'}`}>
-                        ₹{totalPaid.toLocaleString('en-IN')}
-                      </span>
-                      {!isCompliant && (
-                        <span className="text-[8px] font-semibold text-amber-600 dark:text-amber-400">
-                          Min ₹250
-                        </span>
-                      )}
-                      {!isFuture && (
-                        <button
-                          type="button"
-                          onClick={() => openPaymentModal(win)}
-                          className="text-[9px] text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-bold hover:underline"
-                        >
-                          Manage
-                        </button>
-                      )}
+      {expanded && (
+        <div className="mt-3 space-y-4">
+
+          {/* ─── Deposit Windows (contribution tracking) ─── */}
+          <div>
+            <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-2">
+              Financial Year Contribution Ledgers
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+              {windows.map((win) => {
+                const paidContribs = getPaidContributionsForWindow(win.start, win.end, fd.contributions);
+                const totalPaid = paidContribs.reduce((sum, c) => sum + c.amount, 0);
+                const label = formatFinancialYear(getFinancialYearStartUTC(win.start));
+                const yearRange = `${formatISODateUTC(win.start)} to ${formatISODateUTC(win.end)}`;
+                const isFuture = win.start.getTime() > now.getTime();
+                const isCompliant = totalPaid >= SSY_MIN_FINANCIAL_YEAR_DEPOSIT;
+                const isFullyPaid = totalPaid >= SSY_MAX_FINANCIAL_YEAR_DEPOSIT;
+                const fyRate = getSSYRateForFY(getFYStartYear(win.start));
+
+                return (
+                  <div
+                    key={win.index}
+                    className={`rounded-xl border p-2 flex flex-col items-center justify-between text-center gap-1.5 transition-all ${getContainerClassName(totalPaid, isFuture)}`}
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold tracking-wide">{label}</span>
+                      <span className="text-[8px] text-slate-400 dark:text-slate-500 font-semibold">{yearRange}</span>
+                      <span className="text-[9px] font-bold text-purple-600 dark:text-purple-400 mt-0.5">{fyRate}% p.a.</span>
                     </div>
-                  ) : isFuture ? (
-                    <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-600 italic">
-                      Scheduled
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => openPaymentModal(win)}
-                      className="text-[9px] font-extrabold bg-purple-600 hover:bg-purple-700 text-white px-2 py-0.5 rounded-md transition-all active:scale-95 shadow-xs"
-                    >
-                      + Pay
-                    </button>
-                  )}
-                </div>
-              );
-            })}
+                    {totalPaid > 0 ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isFullyPaid ? 'bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400' : 'bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400'}`}>
+                          ₹{totalPaid.toLocaleString('en-IN')}
+                        </span>
+                        {!isCompliant && (
+                          <span className="text-[8px] font-semibold text-amber-600 dark:text-amber-400">
+                            Min ₹250
+                          </span>
+                        )}
+                        {!isFuture && (
+                          <button
+                            type="button"
+                            onClick={() => openPaymentModal(win)}
+                            className="text-[9px] text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-bold hover:underline"
+                          >
+                            Manage
+                          </button>
+                        )}
+                      </div>
+                    ) : isFuture ? (
+                      <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-600 italic">
+                        Scheduled
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => openPaymentModal(win)}
+                        className="text-[9px] font-extrabold bg-purple-600 hover:bg-purple-700 text-white px-2 py-0.5 rounded-md transition-all active:scale-95 shadow-xs"
+                      >
+                        + Pay
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
+
+          {/* ─── Year-by-Year Compounding Breakdown ─── */}
+          {yearlyBreakdown.length > 0 && (
+            <div>
+              <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-2">
+                Year-by-Year Growth (Annual Compounding)
+              </p>
+              <div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-700">
+                <table className="w-full text-[10px]">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400">
+                      <th className="px-3 py-2 text-left font-bold">Financial Year</th>
+                      <th className="px-3 py-2 text-right font-bold">Rate</th>
+                      <th className="px-3 py-2 text-right font-bold">Deposit</th>
+                      <th className="px-3 py-2 text-right font-bold">Interest</th>
+                      <th className="px-3 py-2 text-right font-bold">Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                    {yearlyBreakdown.map((row, idx) => {
+                      const isContributionYear = idx < SSY_CONTRIBUTION_YEARS;
+                      const isMaturityYear = idx === SSY_MATURITY_YEARS - 1;
+                      return (
+                        <tr
+                          key={row.fy}
+                          className={`transition-colors ${
+                            isMaturityYear
+                              ? 'bg-emerald-50/80 dark:bg-emerald-950/30 font-bold'
+                              : isContributionYear
+                              ? 'hover:bg-slate-50/50 dark:hover:bg-slate-800/30'
+                              : 'bg-slate-50/30 dark:bg-slate-800/10 text-slate-400 dark:text-slate-500 hover:bg-slate-50/60 dark:hover:bg-slate-800/30'
+                          }`}
+                        >
+                          <td className="px-3 py-1.5 text-left">
+                            <span className="font-semibold">{row.fy}</span>
+                            {isMaturityYear && (
+                              <span className="ml-1 text-[8px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-1 py-0.5 rounded-full font-bold">
+                                Maturity
+                              </span>
+                            )}
+                            {isContributionYear && !isMaturityYear && (
+                              <span className="ml-1 text-[8px] text-purple-500 dark:text-purple-400">
+                                Yr {idx + 1}/15
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-3 py-1.5 text-right font-bold text-purple-600 dark:text-purple-400">
+                            {row.interestRate}%
+                          </td>
+                          <td className="px-3 py-1.5 text-right">
+                            {row.deposit > 0 ? (
+                              <span className="text-blue-600 dark:text-blue-400 font-semibold">
+                                {formatINRCompact(row.deposit)}
+                              </span>
+                            ) : (
+                              <span className="text-slate-300 dark:text-slate-600">—</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-1.5 text-right text-emerald-600 dark:text-emerald-400 font-semibold">
+                            {formatINRCompact(row.interestEarned)}
+                          </td>
+                          <td className="px-3 py-1.5 text-right font-bold text-slate-800 dark:text-slate-100">
+                            {formatINRCompact(row.closingBalance)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1.5 italic">
+                * Historical rates used for past FYs. Future FYs use the latest notified rate. Interest credited annually on 31 March.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
+      {/* ─── Payment Modal ─── */}
       {payingSlot && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 shadow-xl" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setPayingSlot(null)} />
@@ -316,8 +386,11 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
             <h3 className="text-sm font-extrabold text-slate-850 dark:text-slate-100 mb-1">
               Record SSY Deposit ({formatFinancialYear(getFinancialYearStartUTC(payingSlot.start))})
             </h3>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-4">
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-1">
               Window: {formatISODateUTC(payingSlot.start)} to {formatISODateUTC(payingSlot.end)}
+            </p>
+            <p className="text-[11px] font-bold text-purple-600 dark:text-purple-400 mb-4">
+              Rate this FY: {getSSYRateForFY(getFYStartYear(payingSlot.start))}% p.a.
             </p>
 
             {(() => {
@@ -368,7 +441,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                  Amount (₹)
+                  Amount (₹) — must be multiple of ₹50
                 </label>
                 <input
                   type="number"

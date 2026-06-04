@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfolio';
-import { formatINR, getFDInvestedAmount, getFDEffectiveValue, getSSYMaturityValue, getCompoundedDepositValue } from '../utils/formatters';
+import { formatINR, getFDInvestedAmount, getFDEffectiveValue, getSSYMaturityValue, calculateSSYMaturityWithRates } from '../utils/formatters';
 import { Plus, TrendingUp, Landmark, Calendar, Clock, Heart } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import SIPFormFields from './fd/SIPFormFields';
@@ -178,18 +178,14 @@ function FixedDepositView({
       const years = timeDiff / (1000 * 3600 * 24 * 365.25);
       if (years > 0) {
         if (mode === 'ssy') {
-          const start = new Date(startDate);
-          const end = maturityDate ? new Date(maturityDate) : new Date(start.getFullYear() + 21, start.getMonth(), start.getDate());
-          if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-            let total = 0;
-            for (let i = 0; i < 15; i++) {
-              const depDate = new Date(start.getFullYear() + i, start.getMonth(), start.getDate());
-              if (depDate.getTime() <= end.getTime()) {
-                total += getCompoundedDepositValue(p, depDate, end, r);
-              }
-            }
-            setMaturityAmount(total.toFixed(2));
-          }
+          // Use the accurate SSY annual-compounding engine with the user-supplied rate
+          const { maturityAmount } = calculateSSYMaturityWithRates(
+            startDate,
+            p,
+            undefined,   // no actual contributions yet when creating
+            r            // override rate = what user typed in the form
+          );
+          setMaturityAmount(maturityAmount.toFixed(2));
         } else {
           const amt = p * Math.pow(1 + r / 400, 4 * years);
           setMaturityAmount(amt.toFixed(2));
