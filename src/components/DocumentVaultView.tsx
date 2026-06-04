@@ -27,7 +27,8 @@ interface DocumentVaultViewProps {
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
   portfolios: Portfolio[];
-  onAdd: (assetType: string, portfolioName: string, payload: unknown) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }

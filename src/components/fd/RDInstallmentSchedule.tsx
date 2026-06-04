@@ -3,7 +3,8 @@ import { FixedDeposit } from '../../types/portfolio';
 
 interface RDInstallmentScheduleProps {
   fd: FixedDeposit;
-  onUpdate: (assetType: string, id: string, payload: unknown) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
 }
 
 export function RDInstallmentSchedule({ fd, onUpdate }: RDInstallmentScheduleProps) {

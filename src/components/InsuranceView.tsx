@@ -15,8 +15,10 @@ interface InsuranceViewProps {
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
-  onAdd: (assetType: string, portfolioName: string, payload: unknown) => Promise<void>;
-  onUpdate: (assetType: string, id: string, payload: unknown) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }

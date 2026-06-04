@@ -10,7 +10,7 @@ interface ModeConfig {
   principalLabel: string;
   themeColor: string;
   iconBg: string;
-  iconClass: React.ComponentType;
+  iconClass: React.ElementType;
 }
 
 interface DepositDetailsCardProps {
@@ -20,7 +20,8 @@ interface DepositDetailsCardProps {
   documents: DocumentMetadata[];
   onOpenEdit: (fd: FixedDeposit) => void;
   onConfirmDelete: (fd: FixedDeposit) => void;
-  onUpdate: (assetType: string, id: string, payload: unknown) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
 }
 
 function calculateCurrentAge(dobString: string): number {
