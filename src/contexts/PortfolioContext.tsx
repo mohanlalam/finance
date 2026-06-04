@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useCallback, useRef, useMemo, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Portfolio, PortfolioName, AssetPayload } from '../types/portfolio';
@@ -200,7 +201,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
   }), [
     portfolios, netWorthHistory, loadStatus, loadError, priceStatus,
     lastUpdated, failedSymbols, isUsingCachedData, cacheUpdatedAt,
-    isAuthRequired, activeTab, activePortfolio, load, refreshPrices,
+    isAuthRequired, activeTab, setActiveTab, activePortfolio, load, refreshPrices,
     addPortfolio, renamePortfolio, deletePortfolio, addAsset, updateAsset,
     deleteAsset, portfolioOptionsForModal,
   ]);

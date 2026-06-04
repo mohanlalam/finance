@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import { Portfolio, Holding, FixedDeposit, Insurance } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
+import { getRDEffectiveValue } from '../utils/rdUtils';
+import { getSIPEffectiveValue } from '../utils/sipUtils';
+import { getSSYEffectiveValue } from '../utils/ssyUtils';
 
 /* ── Allocation Targets ── */
 
@@ -207,10 +210,17 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
 
     // ── Asset allocation ──
     const stocksVal = portfolios.reduce((s, p) => s + p.holdings.reduce((a, h) => a + h.currentValue, 0), 0);
+    const sipVal = portfolios.reduce((s, p) => s + (p.sipAccounts || []).reduce((a, acc) => a + getSIPEffectiveValue(acc), 0), 0);
+    const totalStocksVal = stocksVal + sipVal;
+
     const fdVal = portfolios.reduce(
       (s, p) => s + p.fixedDeposits.reduce((a, f) => a + (f.status === 'matured' ? Number(f.maturity_amount) : getFDEffectiveValue(f)), 0),
       0
     );
+    const rdVal = portfolios.reduce((s, p) => s + (p.rdAccounts || []).reduce((a, acc) => a + getRDEffectiveValue(acc), 0), 0);
+    const ssyVal = portfolios.reduce((s, p) => s + (p.ssyAccounts || []).reduce((a, acc) => a + getSSYEffectiveValue(acc), 0), 0);
+    const totalFdVal = fdVal + rdVal + ssyVal;
+
     const goldVal = portfolios.reduce(
       (s, p) => s + p.goldHoldings.reduce((a, g) => a + Number(g.current_valuation), 0),
       0
@@ -219,13 +229,13 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
       (s, p) => s + p.realEstate.reduce((a, r) => a + Number(r.current_valuation), 0),
       0
     );
-    const totalVal = stocksVal + fdVal + goldVal + realEstateVal;
+    const totalVal = totalStocksVal + totalFdVal + goldVal + realEstateVal;
 
     const pct = (v: number) => (totalVal > 0 ? (v / totalVal) * 100 : 0);
 
     const allocationSlices: AllocationSlice[] = [
-      { label: 'Stocks', actual: pct(stocksVal), target: TARGET_ALLOCATION.stocks, drift: pct(stocksVal) - TARGET_ALLOCATION.stocks, value: stocksVal },
-      { label: 'Fixed Deposits', actual: pct(fdVal), target: TARGET_ALLOCATION.fd, drift: pct(fdVal) - TARGET_ALLOCATION.fd, value: fdVal },
+      { label: 'Stocks', actual: pct(totalStocksVal), target: TARGET_ALLOCATION.stocks, drift: pct(totalStocksVal) - TARGET_ALLOCATION.stocks, value: totalStocksVal },
+      { label: 'Fixed Deposits', actual: pct(totalFdVal), target: TARGET_ALLOCATION.fd, drift: pct(totalFdVal) - TARGET_ALLOCATION.fd, value: totalFdVal },
       { label: 'Gold', actual: pct(goldVal), target: TARGET_ALLOCATION.gold, drift: pct(goldVal) - TARGET_ALLOCATION.gold, value: goldVal },
       { label: 'Real Estate', actual: pct(realEstateVal), target: TARGET_ALLOCATION.realEstate, drift: pct(realEstateVal) - TARGET_ALLOCATION.realEstate, value: realEstateVal },
     ];

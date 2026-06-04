@@ -101,35 +101,43 @@ export function calculateSSYMaturityWithRates(
     let rawDeposit = 0;
     let deposit = 0;
     let depositCapped = false;
+    let fyContributions: { date: string; amount: number }[] = [];
 
     if (depositYear < 15) {
       if (contributions && contributions.length > 0) {
-        rawDeposit = contributions
-          .filter((c) => {
-            const d = parseISODateUTC(c.date);
-            if (!d) return false;
-            return d.getTime() >= fyStartDate.getTime() && d.getTime() <= fyEndDate.getTime();
-          })
-          .reduce((s, c) => s + c.amount, 0);
+        fyContributions = contributions.filter((c) => {
+          const d = parseISODateUTC(c.date);
+          if (!d) return false;
+          return d.getTime() >= fyStartDate.getTime() && d.getTime() <= fyEndDate.getTime();
+        });
+        rawDeposit = fyContributions.reduce((s, c) => s + c.amount, 0);
 
         if (rawDeposit === 0 && isFutureFY) {
           rawDeposit = annualDeposit;
-        }
-
-        if (rawDeposit > SSY_MAX_FY_DEPOSIT) {
-          deposit = SSY_MAX_FY_DEPOSIT;
-          depositCapped = true;
-        } else {
-          deposit = rawDeposit;
+          fyContributions = [{ date: `${fyStart}-04-01`, amount: annualDeposit }];
         }
       } else {
         rawDeposit = annualDeposit;
-        deposit = Math.min(annualDeposit, SSY_MAX_FY_DEPOSIT);
-        depositCapped = annualDeposit > SSY_MAX_FY_DEPOSIT;
+        fyContributions = [{ date: `${fyStart}-04-01`, amount: annualDeposit }];
       }
-    }
 
-    balance += deposit;
+      // Sort and cap contributions chronologically
+      const sortedFyContribs = [...fyContributions].sort(
+        (a, b) => (parseISODateUTC(a.date)?.getTime() ?? 0) - (parseISODateUTC(b.date)?.getTime() ?? 0)
+      );
+
+      let runningTotal = 0;
+      const cappedFyContribs = sortedFyContribs.map((c) => {
+        const remaining = SSY_MAX_FY_DEPOSIT - runningTotal;
+        const allowed = Math.max(0, Math.min(c.amount, remaining));
+        runningTotal += allowed;
+        return { date: c.date, amount: allowed };
+      });
+
+      deposit = runningTotal;
+      depositCapped = rawDeposit > SSY_MAX_FY_DEPOSIT;
+      fyContributions = cappedFyContribs;
+    }
 
     let rate: number;
     if (rateSchedule && rateSchedule.length > 0) {
@@ -147,8 +155,32 @@ export function calculateSSYMaturityWithRates(
         : (futureRate ?? 8.2);
     }
 
-    const interest = parseFloat((balance * rate / 100).toFixed(2));
-    balance = parseFloat((balance + interest).toFixed(2));
+    // Month-by-month interest calculation
+    // Monthly interest is based on the lowest balance between the 5th day and the end of the month
+    // Meaning deposits made on or before 5th of month 'm' earn interest for month 'm'
+    let yearInterestSum = 0;
+    for (let m = 0; m < 12; m++) {
+      const calYear = m < 9 ? fyStart : fyStart + 1;
+      const calMonth = m < 9 ? m + 3 : m - 9;
+      // Cutoff date is the 5th of that month
+      const cutoff = new Date(Date.UTC(calYear, calMonth, 5, 23, 59, 59));
+
+      // Sum deposits made in this FY on or before this cutoff
+      const depositsBeforeCutoff = fyContributions
+        .filter((c) => {
+          const d = parseISODateUTC(c.date);
+          if (!d) return false;
+          return d.getTime() <= cutoff.getTime();
+        })
+        .reduce((sum, c) => sum + c.amount, 0);
+
+      const balanceForMonth = balance + depositsBeforeCutoff;
+      const monthlyInterest = balanceForMonth * (rate / 12 / 100);
+      yearInterestSum += monthlyInterest;
+    }
+
+    const interest = parseFloat(yearInterestSum.toFixed(2));
+    balance = parseFloat((balance + deposit + interest).toFixed(2));
 
     breakdown.push({
       fy: `FY ${fyStart}-${String(fyStart + 1).slice(-2)}`,
@@ -233,52 +265,88 @@ export function getSSYContributions(account: SSYAccount, end: Date): { date: str
  * Returns the total amount actually invested in an SSY account.
  */
 export function getSSYInvestedAmount(account: SSYAccount): number {
-  if (account.contributions && account.contributions.length > 0) {
-    const fyTotals: Record<number, number> = {};
-    for (const c of account.contributions) {
-      const d = parseISODateUTC(c.date);
-      if (!d || isNaN(d.getTime())) continue;
-      const m = d.getUTCMonth();
-      const fyStartYear = m >= 3 ? d.getUTCFullYear() : d.getUTCFullYear() - 1;
-      fyTotals[fyStartYear] = (fyTotals[fyStartYear] ?? 0) + c.amount;
-    }
-    return Object.values(fyTotals)
-      .reduce((sum, amt) => sum + Math.min(amt, SSY_MAX_FY_DEPOSIT), 0);
+  const contributions = getSSYContributions(account, new Date());
+  const fyTotals: Record<number, number> = {};
+  for (const c of contributions) {
+    const d = parseISODateUTC(c.date);
+    if (!d || isNaN(d.getTime())) continue;
+    const m = d.getUTCMonth();
+    const fyStartYear = m >= 3 ? d.getUTCFullYear() : d.getUTCFullYear() - 1;
+    fyTotals[fyStartYear] = (fyTotals[fyStartYear] ?? 0) + c.amount;
   }
-  return 0;
+  return Object.values(fyTotals)
+    .reduce((sum, amt) => sum + Math.min(amt, SSY_MAX_FY_DEPOSIT), 0);
 }
 
 /**
  * Returns current accrued valuation of an SSY account.
  */
 export function getSSYEffectiveValue(account: SSYAccount, upToDate: Date = new Date()): number {
-  const p = Number(account.annual_deposit);
-  const r = Number(account.interest_rate);
-  const s = parseISODateUTC(account.start_date);
-  if (!s) return p;
-  
+  const start = parseISODateUTC(account.start_date);
+  if (!start) return Number(account.annual_deposit);
+
   if (account.status === 'matured') {
     return Number(account.maturity_amount);
   }
-  
-  const maturityDate = parseISODateUTC(account.maturity_date);
-  const end = maturityDate && maturityDate.getTime() < upToDate.getTime()
-    ? maturityDate
-    : upToDate;
-     
-  const timeDiff = end.getTime() - s.getTime();
-  const years = timeDiff / (1000 * 3600 * 24 * 365.25);
-  
-  if (years > 0 && !isNaN(r) && !isNaN(s.getTime())) {
-    const contributions = getSSYContributions(account, end);
-    const totalValue = contributions.reduce((sum, c) => {
-      const depDate = parseISODateUTC(c.date);
-      if (!depDate) return sum;
-      return sum + getCompoundedDepositValue(c.amount, depDate, end, r);
-    }, 0);
-    return totalValue;
+
+  // Run the full financial year growth simulation
+  const { yearlyBreakdown } = calculateSSYMaturityWithRates(
+    account.start_date,
+    Number(account.annual_deposit),
+    account.contributions,
+    account.rate_schedule,
+    Number(account.interest_rate) > 0 ? Number(account.interest_rate) : 8.2
+  );
+
+  if (yearlyBreakdown.length === 0) {
+    return Number(account.annual_deposit);
   }
-  return p;
+
+  const evalFYStartYear = getFYStartYear(upToDate);
+  const acctFYStart = getFYStartYear(start);
+  const maturityYear = start.getUTCFullYear() + 21;
+
+  if (evalFYStartYear < acctFYStart) {
+    return 0;
+  }
+
+  if (evalFYStartYear >= maturityYear) {
+    return yearlyBreakdown[yearlyBreakdown.length - 1].closingBalance;
+  }
+
+  const idx = evalFYStartYear - acctFYStart;
+  if (idx < 0 || idx >= yearlyBreakdown.length) {
+    return Number(account.annual_deposit);
+  }
+
+  const row = yearlyBreakdown[idx];
+  const lastClosingBalance = idx > 0 ? yearlyBreakdown[idx - 1].closingBalance : 0;
+
+  const fyStartDate = new Date(Date.UTC(row.fyStartYear, 3, 1));
+  const isFutureRelToEval = fyStartDate.getTime() > upToDate.getTime();
+
+  let deposits = 0;
+  if (isFutureRelToEval || !account.contributions || account.contributions.length === 0) {
+    deposits = row.deposit;
+  } else {
+    deposits = (account.contributions || [])
+      .filter((c) => {
+        const d = parseISODateUTC(c.date);
+        if (!d) return false;
+        return d.getTime() >= fyStartDate.getTime() && d.getTime() <= upToDate.getTime();
+      })
+      .reduce((sum, c) => sum + c.amount, 0);
+    deposits = Math.min(deposits, SSY_MAX_FY_DEPOSIT);
+  }
+
+  const elapsedMs = Math.max(0, upToDate.getTime() - fyStartDate.getTime());
+  const isFullFY = (upToDate.getUTCMonth() === 2 && upToDate.getUTCDate() === 31) ||
+                   (upToDate.getMonth() === 2 && upToDate.getDate() === 31);
+  const fraction = isFullFY ? 1.0 : elapsedMs / (365.25 * 24 * 3600 * 1000);
+  const rate = row.interestRate;
+
+  const interest = (lastClosingBalance + deposits) * (rate / 100) * Math.min(1.0, fraction);
+  return parseFloat((lastClosingBalance + deposits + interest).toFixed(2));
 }
 
 export function getSSYMaturityValue(account: SSYAccount): number {

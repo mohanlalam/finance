@@ -118,7 +118,7 @@ body {
   header,
   nav,
   footer,
-  .print\\:hidden,
+  .print\:hidden,
   [role="navigation"],
   [aria-label="Asset navigation"],
   button,

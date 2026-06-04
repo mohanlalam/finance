@@ -547,7 +547,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
       throw err;
     }
-  }, [load, handleAuthExpired, portfolios]);
+  }, [load, handleAuthExpired]);
 
   const deleteAsset = useCallback(async (assetType: string, id: string) => {
     try {
