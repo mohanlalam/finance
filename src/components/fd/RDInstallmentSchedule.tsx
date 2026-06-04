@@ -3,7 +3,7 @@ import { FixedDeposit } from '../../types/portfolio';
 
 interface RDInstallmentScheduleProps {
   fd: FixedDeposit;
-  onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
+  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
 }
 
 export function RDInstallmentSchedule({ fd, onUpdate }: RDInstallmentScheduleProps) {

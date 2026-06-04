@@ -19,7 +19,7 @@ interface DepositDetailsCardProps {
   documents: DocumentMetadata[];
   onOpenEdit: (fd: FixedDeposit) => void;
   onConfirmDelete: (fd: FixedDeposit) => void;
-  onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
+  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
 }
 
 export function DepositDetailsCard({

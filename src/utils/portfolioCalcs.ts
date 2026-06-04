@@ -42,7 +42,7 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
     .reduce((a, f) => a + getFDEffectiveValue(f), 0), 0);
     
   const rd = target.reduce((s, p) => s + p.fixedDeposits
-    .filter(f => f.fd_type === 'recurring' || f.fd_type === 'rd')
+    .filter(f => f.fd_type === 'recurring')
     .reduce((a, f) => a + getFDEffectiveValue(f), 0), 0);
     
   const ssy = target.reduce((s, p) => s + p.fixedDeposits
@@ -64,7 +64,12 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
 /** Estimate today's P&L from intraday movement */
 export function estimateTodayPnL(portfolio: Portfolio | null, all: Portfolio[]): number {
   const holdings = portfolio ? portfolio.holdings : all.flatMap((p) => p.holdings);
-  return holdings.reduce((sum, h) => sum + (h.todayPnLPercent / 100) * h.currentValue, 0);
+  return holdings.reduce((sum, h) => {
+    // Derive yesterday's closing value, then compute today's absolute change
+    const factor = 1 + h.todayPnLPercent / 100;
+    const yesterdayValue = factor !== 0 ? h.currentValue / factor : h.currentValue;
+    return sum + (h.currentValue - yesterdayValue);
+  }, 0);
 }
 
 /** Get a specific portfolio by name */

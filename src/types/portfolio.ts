@@ -1,7 +1,7 @@
 export type PortfolioName = string;
 
 export interface Holding {
-  id?: string;
+  id: string;
   sno: number;
   stockName: string;
   ticker: string;
@@ -106,3 +106,73 @@ export interface Portfolio {
   totalPnL: number;
   totalPnLPercent: number;
 }
+
+export interface StockPayload {
+  stockName: string;
+  ticker: string;
+  yahooSymbol: string;
+  qty: number;
+  avgPrice: number;
+  amountInvested: number;
+  weekLow52: number;
+  weekHigh52: number;
+}
+
+export interface FDPayload {
+  bank_name: string;
+  principal_amount: number;
+  interest_rate: number;
+  start_date: string;
+  maturity_date: string | null;
+  maturity_amount: number;
+  status: 'active' | 'matured';
+  fd_type?: string;
+  contributions?: { date: string; amount: number }[];
+  notes?: string;
+  mf_scheme_code?: string;
+  units?: number;
+}
+
+export interface GoldPayload {
+  item_name: string;
+  purity: string;
+  weight_grams: number;
+  purchase_price: number;
+  current_valuation: number;
+  purchase_date?: string;
+  notes?: string;
+}
+
+export interface RealEstatePayload {
+  property_name: string;
+  property_type: 'apartment' | 'plot' | 'house' | 'commercial';
+  location?: string;
+  purchase_price: number;
+  current_valuation: number;
+  purchase_date?: string;
+  monthly_rent: number;
+  notes?: string;
+}
+
+export interface InsurancePayload {
+  insurance_type: 'health' | 'term' | 'life' | 'motor' | 'other';
+  provider: string;
+  policy_name: string;
+  policy_number?: string;
+  sum_assured: number;
+  premium_amount: number;
+  renewal_date?: string;
+  notes?: string;
+}
+
+export interface DocumentPayload {
+  name: string;
+  filePath: string;
+  fileType: string;
+  linkedAssetType: string;
+  linkedAssetId: string | null;
+  expiryDate: string | null;
+}
+
+export type AssetPayload = StockPayload | FDPayload | GoldPayload | RealEstatePayload | InsurancePayload | DocumentPayload;
+

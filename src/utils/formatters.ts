@@ -97,7 +97,23 @@ export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()
         
         return currentPrincipal + finalInterest;
       }
-      // FDs and RDs compound quarterly
+
+      if (f.fd_type === 'recurring') {
+        // RDs: each monthly installment compounds quarterly from its own deposit date
+        const totalMonths = Math.max(1, Math.round(years * 12));
+        // Use contributions array if available, otherwise divide principal evenly
+        const monthlyAmount = (f.contributions && f.contributions.length > 0)
+          ? f.contributions.reduce((sum, c) => sum + c.amount, 0) / f.contributions.length
+          : p / totalMonths;
+        let total = 0;
+        for (let m = 0; m < totalMonths; m++) {
+          const remainingYears = (totalMonths - m) / 12;
+          total += monthlyAmount * Math.pow(1 + r / 400, 4 * remainingYears);
+        }
+        return total > 0 ? total : p;
+      }
+
+      // FDs compound quarterly
       return p * Math.pow(1 + r / 400, 4 * years);
     }
   }

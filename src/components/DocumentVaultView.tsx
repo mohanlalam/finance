@@ -13,6 +13,7 @@ import { supabase } from '../utils/supabaseClient';
 import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X } from 'lucide-react';
 import { getDocumentUrl } from '../utils/formatters';
 import Modal from './Modal';
+import ConfirmModal from './ConfirmModal';
 
 type AssetType = 'general' | 'stock' | 'fd' | 'gold' | 'real_estate' | 'insurance';
 
@@ -26,7 +27,7 @@ interface DocumentVaultViewProps {
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
   portfolios: Portfolio[];
-  onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }
@@ -58,6 +59,8 @@ export default React.memo(function DocumentVaultView({
   const [linkedAssetId, setLinkedAssetId] = useState<string>('');
   const [documentName, setDocumentName] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<DocumentMetadata | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -180,19 +183,27 @@ export default React.memo(function DocumentVaultView({
   }
 
   async function handleDelete(doc: DocumentMetadata) {
-    if (!confirm(`Delete "${doc.name}"? This removes the storage file and the record.`)) return;
+    setDeleteTarget(doc);
+  }
+
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
-      if (!doc.file_path.startsWith('http')) {
+      if (!deleteTarget.file_path.startsWith('http')) {
         const { error: deleteErr } = await supabase.storage
           .from('investment-documents')
-          .remove([doc.file_path]);
+          .remove([deleteTarget.file_path]);
         if (deleteErr) {
           console.error('Failed to delete storage object:', deleteErr);
         }
       }
-      await onDelete('document', doc.id);
+      await onDelete('document', deleteTarget.id);
+      setDeleteTarget(null);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Delete failed');
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -465,6 +476,18 @@ export default React.memo(function DocumentVaultView({
           </>
         )}
       </Modal>
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Document"
+        message={`Delete "${deleteTarget?.name}"? This removes the storage file and the record.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 });

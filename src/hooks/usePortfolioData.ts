@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Holding, Portfolio, FixedDeposit, GoldHolding, RealEstate, Insurance, DocumentMetadata } from '../types/portfolio';
+import { Holding, Portfolio, FixedDeposit, GoldHolding, RealEstate, Insurance, DocumentMetadata, AssetPayload } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
 import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiClient';
 
@@ -87,15 +87,12 @@ function dbToHolding(h: DBHolding): Holding {
   };
 }
 
-function buildPortfolio(
-  dbP: DBPortfolio,
+function recalcPortfolioTotals(
   holdings: Holding[],
   fds: FixedDeposit[],
   gold: GoldHolding[],
-  realEstate: RealEstate[],
-  insurances: Insurance[],
-  docs: DocumentMetadata[]
-): Portfolio {
+  realEstate: RealEstate[]
+) {
   const stockInvested = holdings.reduce((sum, h) => sum + h.amountInvested, 0);
   const stockCurrent = holdings.reduce((sum, h) => sum + h.currentValue, 0);
 
@@ -113,6 +110,20 @@ function buildPortfolio(
   const totalPnL = totalCurrentValue - totalInvested;
   const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
 
+  return { totalInvested, totalCurrentValue, totalPnL, totalPnLPercent };
+}
+
+function buildPortfolio(
+  dbP: DBPortfolio,
+  holdings: Holding[],
+  fds: FixedDeposit[],
+  gold: GoldHolding[],
+  realEstate: RealEstate[],
+  insurances: Insurance[],
+  docs: DocumentMetadata[]
+): Portfolio {
+  const totals = recalcPortfolioTotals(holdings, fds, gold, realEstate);
+
   return {
     id: dbP.id,
     name: dbP.name,
@@ -123,10 +134,7 @@ function buildPortfolio(
     realEstate,
     insurances,
     documents: docs,
-    totalInvested,
-    totalCurrentValue,
-    totalPnL,
-    totalPnLPercent,
+    ...totals,
   };
 }
 
@@ -141,30 +149,17 @@ function applyLivePrices(portfolios: Portfolio[], priceMap: Record<string, { ltp
       return { ...h, ltp: live.ltp, currentValue, unrealizedPnL, pnlPercent, todayPnLPercent: live.todayPct };
     });
 
-    const stockInvested = updatedHoldings.reduce((sum, h) => sum + h.amountInvested, 0);
-    const stockCurrent = updatedHoldings.reduce((sum, h) => sum + h.currentValue, 0);
-
-    const fdInvested = portfolio.fixedDeposits.reduce((sum, f) => sum + Number(f.principal_amount), 0);
-    const fdCurrent = portfolio.fixedDeposits.reduce((sum, f) => sum + getFDEffectiveValue(f), 0);
-
-    const goldInvested = portfolio.goldHoldings.reduce((sum, g) => sum + Number(g.purchase_price), 0);
-    const goldCurrent = portfolio.goldHoldings.reduce((sum, g) => sum + Number(g.current_valuation), 0);
-
-    const reInvested = portfolio.realEstate.reduce((sum, r) => sum + Number(r.purchase_price), 0);
-    const reCurrent = portfolio.realEstate.reduce((sum, r) => sum + Number(r.current_valuation), 0);
-
-    const totalInvested = stockInvested + fdInvested + goldInvested + reInvested;
-    const totalCurrentValue = stockCurrent + fdCurrent + goldCurrent + reCurrent;
-    const totalPnL = totalCurrentValue - totalInvested;
-    const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
+    const totals = recalcPortfolioTotals(
+      updatedHoldings,
+      portfolio.fixedDeposits,
+      portfolio.goldHoldings,
+      portfolio.realEstate
+    );
 
     return {
       ...portfolio,
       holdings: updatedHoldings,
-      totalInvested,
-      totalCurrentValue,
-      totalPnL,
-      totalPnLPercent,
+      ...totals,
     };
   });
 }
@@ -181,30 +176,17 @@ function applyLiveMFNavs(portfolios: Portfolio[], navMap: Record<string, number>
       return f;
     });
 
-    const stockInvested = portfolio.holdings.reduce((sum, h) => sum + h.amountInvested, 0);
-    const stockCurrent = portfolio.holdings.reduce((sum, h) => sum + h.currentValue, 0);
-
-    const fdInvested = updatedFDs.reduce((sum, f) => sum + Number(f.principal_amount), 0);
-    const fdCurrent = updatedFDs.reduce((sum, f) => sum + getFDEffectiveValue(f), 0);
-
-    const goldInvested = portfolio.goldHoldings.reduce((sum, g) => sum + Number(g.purchase_price), 0);
-    const goldCurrent = portfolio.goldHoldings.reduce((sum, g) => sum + Number(g.current_valuation), 0);
-
-    const reInvested = portfolio.realEstate.reduce((sum, r) => sum + Number(r.purchase_price), 0);
-    const reCurrent = portfolio.realEstate.reduce((sum, r) => sum + Number(r.current_valuation), 0);
-
-    const totalInvested = stockInvested + fdInvested + goldInvested + reInvested;
-    const totalCurrentValue = stockCurrent + fdCurrent + goldCurrent + reCurrent;
-    const totalPnL = totalCurrentValue - totalInvested;
-    const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
+    const totals = recalcPortfolioTotals(
+      portfolio.holdings,
+      updatedFDs,
+      portfolio.goldHoldings,
+      portfolio.realEstate
+    );
 
     return {
       ...portfolio,
       fixedDeposits: updatedFDs,
-      totalInvested,
-      totalCurrentValue,
-      totalPnL,
-      totalPnLPercent,
+      ...totals,
     };
   });
 }
@@ -299,34 +281,38 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     const uniqueSchemeCodes = Array.from(new Set(sipFds.map((f) => f.mf_scheme_code!)));
     const navMap: Record<string, number> = {};
 
-    await Promise.all(
-      uniqueSchemeCodes.map(async (code) => {
-        try {
-          const cacheKey = `mf_nav_${code}`;
-          const cached = sessionStorage.getItem(cacheKey);
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (Date.now() - parsed.timestamp < 4 * 60 * 60 * 1000) {
-              navMap[code] = parsed.nav;
-              return;
+    const BATCH_SIZE = 4;
+    for (let i = 0; i < uniqueSchemeCodes.length; i += BATCH_SIZE) {
+      const batch = uniqueSchemeCodes.slice(i, i + BATCH_SIZE);
+      await Promise.allSettled(
+        batch.map(async (code) => {
+          try {
+            const cacheKey = `mf_nav_${code}`;
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+              const parsed = JSON.parse(cached);
+              if (Date.now() - parsed.timestamp < 4 * 60 * 60 * 1000) {
+                navMap[code] = parsed.nav;
+                return;
+              }
             }
-          }
 
-          const res = await fetch(`https://api.mfapi.in/mf/${code}`);
-          if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-          const json = await res.json();
-          if (json.data && json.data.length > 0) {
-            const nav = parseFloat(json.data[0].nav);
-            if (!isNaN(nav)) {
-              navMap[code] = nav;
-              sessionStorage.setItem(cacheKey, JSON.stringify({ nav, timestamp: Date.now() }));
+            const res = await fetch(`https://api.mfapi.in/mf/${code}`);
+            if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+            const json = await res.json();
+            if (json.data && json.data.length > 0) {
+              const nav = parseFloat(json.data[0].nav);
+              if (!isNaN(nav)) {
+                navMap[code] = nav;
+                sessionStorage.setItem(cacheKey, JSON.stringify({ nav, timestamp: Date.now() }));
+              }
             }
+          } catch (err) {
+            console.warn(`[portfolio] Failed to fetch NAV for mutual fund scheme ${code}:`, err);
           }
-        } catch (err) {
-          console.warn(`[portfolio] Failed to fetch NAV for mutual fund scheme ${code}:`, err);
-        }
-      })
-    );
+        })
+      );
+    }
 
     return navMap;
   }, []);
@@ -346,6 +332,10 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       const dbPortfolios: DBPortfolio[] = data.portfolios || [];
       const dbHoldings: DBHolding[] = data.holdings || [];
       const dbFixedDeposits: FixedDeposit[] = data.fixed_deposits || [];
+      // Normalize fd_type: 'rd' → 'recurring' for consistency
+      dbFixedDeposits.forEach(f => {
+        if (f.fd_type === 'rd') f.fd_type = 'recurring';
+      });
       const dbGoldHoldings: GoldHolding[] = data.gold_holdings || [];
       const dbRealEstate: RealEstate[] = data.real_estate || [];
       const dbInsurances: Insurance[] = data.insurances || [];
@@ -491,7 +481,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   const addAsset = useCallback(async (
     assetType: string,
     portfolioName: string,
-    payload: Record<string, unknown>,
+    payload: AssetPayload,
     options: AssetMutationOptions = {}
   ) => {
     try {
@@ -512,7 +502,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     }
   }, [load, handleAuthExpired]);
 
-  const updateAsset = useCallback(async (assetType: string, id: string, payload: Record<string, unknown>) => {
+  const updateAsset = useCallback(async (assetType: string, id: string, payload: Partial<AssetPayload>) => {
     try {
       await invokeFunction<unknown>('holdings-crud?action=update', {
         method: 'PATCH',

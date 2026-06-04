@@ -1,6 +1,6 @@
 import React from 'react';
 import { Wifi, WifiOff, Plus } from 'lucide-react';
-import { Portfolio } from '../types/portfolio';
+import { Portfolio, AssetPayload } from '../types/portfolio';
 import { FetchStatus } from '../hooks/useMarketData';
 import PortfolioTable from './PortfolioTable';
 import FixedDepositView from './FixedDepositView';
@@ -25,8 +25,8 @@ interface AssetTabContentProps {
   onAddHoldingClick: () => void;
   onDeleteStock: (holdingId: string) => Promise<void>;
   onUpdateStock: (holdingId: string, qty: number, avgPrice: number) => Promise<void>;
-  onAddAsset: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<void>;
-  onUpdateAsset: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
+  onAddAsset: (assetType: string, portfolioName: string, payload: AssetPayload) => Promise<void>;
+  onUpdateAsset: (assetType: string, id: string, payload: Partial<AssetPayload>) => Promise<void>;
   onDeleteAsset: (assetType: string, id: string) => Promise<void>;
   quickAddTarget?: 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null;
   onQuickAddComplete?: () => void;
@@ -121,7 +121,7 @@ export default React.memo(function AssetTabContent({
 
         {activeAsset === 'rd' && (
           <FixedDepositView
-            fixedDeposits={visiblePortfolio.fixedDeposits.filter(f => f.fd_type === 'recurring' || f.fd_type === 'rd')}
+            fixedDeposits={visiblePortfolio.fixedDeposits.filter(f => f.fd_type === 'recurring')}
             documents={visiblePortfolio.documents}
             portfolioName={visiblePortfolio.name}
             portfolioOptions={portfolioOptions}
@@ -302,7 +302,7 @@ export default React.memo(function AssetTabContent({
                 <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
               </div>
               <FixedDepositView
-                fixedDeposits={p.fixedDeposits.filter(f => f.fd_type === 'recurring' || f.fd_type === 'rd')}
+                fixedDeposits={p.fixedDeposits.filter(f => f.fd_type === 'recurring')}
                 documents={p.documents}
                 portfolioName={p.name}
                 portfolioOptions={portfolioOptions}

@@ -53,7 +53,7 @@ export default function MobileHomeSummary({
   const currentPortfolios = activePortfolio ? [activePortfolio] : portfolios;
   const stockCount = currentPortfolios.reduce((s, p) => s + p.holdings.length, 0);
   const fdCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'regular' || !f.fd_type).length, 0);
-  const rdCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'recurring' || f.fd_type === 'rd').length, 0);
+  const rdCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'recurring').length, 0);
   const ssyCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'ssy').length, 0);
   const sipCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'sip').length, 0);
   const goldCount = currentPortfolios.reduce((s, p) => s + p.goldHoldings.length, 0);

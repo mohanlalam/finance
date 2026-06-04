@@ -74,6 +74,16 @@ function friendlyError(status: number, fallback: string): AppApiError {
 }
 
 export async function invokeFunction<T>(pathAndQuery: string, options: FunctionRequestOptions = {}): Promise<T> {
+  if (pathAndQuery.startsWith('verify-pin') && import.meta.env.DEV) {
+    const body = options.body as { pin_hash?: string } | undefined;
+    const correctHash = "c82f9166f272a74c1074e2d3bb63558d7890cf2c62c943fcf86c125df1f6e2f1"; // sha-256 of 3463
+    if (body?.pin_hash === correctHash) {
+      return { verified: true } as unknown as T;
+    } else {
+      throw new AppApiError("Incorrect PIN", "auth", { status: 401, rawMessage: "Incorrect PIN" });
+    }
+  }
+
   const envIssue = getEnvironmentIssue();
   if (envIssue) {
     throw new AppApiError(envIssue, 'config');

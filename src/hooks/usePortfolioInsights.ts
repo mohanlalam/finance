@@ -114,7 +114,6 @@ function allHoldingsWithMeta(portfolios: Portfolio[]): HoldingInsight[] {
   );
 }
 
-const TARGET_ALLOCATION = getAllocationTargets();
 
 /* ── Score calculators ── */
 
@@ -181,6 +180,7 @@ function calcInsuranceCoverage(portfolios: Portfolio[]): number {
 
 export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights {
   return useMemo(() => {
+    const TARGET_ALLOCATION = getAllocationTargets();
     const all = allHoldingsWithMeta(portfolios);
     const allHoldings = portfolios.flatMap((p) => p.holdings);
 
