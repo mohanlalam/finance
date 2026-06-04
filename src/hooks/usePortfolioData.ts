@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Holding, Portfolio, FixedDeposit, GoldHolding, RealEstate, Insurance, DocumentMetadata, AssetPayload } from '../types/portfolio';
-import { getFDEffectiveValue } from '../utils/formatters';
+import { getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
 import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiClient';
 
 const PORTFOLIO_CACHE_KEY = 'finance_portfolio_cache_v1';
@@ -96,7 +96,7 @@ function recalcPortfolioTotals(
   const stockInvested = holdings.reduce((sum, h) => sum + h.amountInvested, 0);
   const stockCurrent = holdings.reduce((sum, h) => sum + h.currentValue, 0);
 
-  const fdInvested = fds.reduce((sum, f) => sum + Number(f.principal_amount), 0);
+  const fdInvested = fds.reduce((sum, f) => sum + getFDInvestedAmount(f), 0);
   const fdCurrent = fds.reduce((sum, f) => sum + getFDEffectiveValue(f), 0);
 
   const goldInvested = gold.reduce((sum, g) => sum + Number(g.purchase_price), 0);

@@ -97,6 +97,26 @@ export function getSSYContributions(f: FixedDeposit, end: Date): { date: string;
   return list;
 }
 
+export function getFDInvestedAmount(f: FixedDeposit): number {
+  if (f.fd_type === 'ssy' && f.contributions && f.contributions.length > 0) {
+    return f.contributions.reduce((sum, c) => sum + Number(c.amount), 0);
+  }
+  return Number(f.principal_amount);
+}
+
+export function getSSYMaturityValue(f: FixedDeposit): number {
+  if (f.fd_type !== 'ssy') {
+    return getFDEffectiveValue(f);
+  }
+  if (Number(f.maturity_amount) > 0) {
+    return Number(f.maturity_amount);
+  }
+  if (f.maturity_date) {
+    return getFDEffectiveValue(f, new Date(f.maturity_date));
+  }
+  return getFDEffectiveValue(f);
+}
+
 export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()): number {
   const p = Number(f.principal_amount);
   const r = Number(f.interest_rate);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FixedDeposit, DocumentMetadata } from '../../types/portfolio';
-import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../../utils/formatters';
+import { formatINR, getDocumentUrl, getFDEffectiveValue, getSSYMaturityValue } from '../../utils/formatters';
 import { CheckCircle, FileText, Edit2, Trash2, Clock, AlertCircle, StickyNote } from 'lucide-react';
 import RDInstallmentSchedule from './RDInstallmentSchedule';
 import SSYInstallmentSchedule from './SSYInstallmentSchedule';
@@ -95,7 +95,7 @@ export function DepositDetailsCard({
           </div>
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500">{mode === 'sip' ? 'Current Valuation' : (fd.maturity_date ? 'Maturity Value' : 'Current Value')}</p>
-            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatINR(getFDEffectiveValue(fd))}</p>
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatINR(mode === 'ssy' ? getSSYMaturityValue(fd) : getFDEffectiveValue(fd))}</p>
           </div>
           <div className="col-span-2 sm:col-span-1 flex items-center justify-start md:justify-end gap-2">
             {fdDocs.map((doc) => (

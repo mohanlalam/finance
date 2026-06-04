@@ -191,9 +191,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     try {
       await onUpdate('fd', fd.id, { 
         contributions: updated,
-        principal_amount: metrics.totalInvested, 
-        maturity_amount: metrics.maturityAmount,
-        estMaturityAmount: metrics.maturityAmount 
+        maturityAmount: metrics.maturityAmount,
       });
       setPayingSlot(null);
     } catch (err) {
@@ -217,9 +215,7 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
     try {
       await onUpdate('fd', fd.id, { 
         contributions: updated,
-        principal_amount: metrics.totalInvested,
-        maturity_amount: metrics.maturityAmount,
-        estMaturityAmount: metrics.maturityAmount
+        maturityAmount: metrics.maturityAmount,
       });
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete contribution');

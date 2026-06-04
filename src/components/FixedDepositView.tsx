@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfolio';
-import { formatINR, getFDEffectiveValue, getCompoundedDepositValue } from '../utils/formatters';
+import { formatINR, getFDInvestedAmount, getFDEffectiveValue, getSSYMaturityValue, getCompoundedDepositValue } from '../utils/formatters';
 import { Plus, TrendingUp, Landmark, Calendar, Clock, Heart } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import SIPFormFields from './fd/SIPFormFields';
@@ -205,10 +205,10 @@ function FixedDepositView({
   }, [startDate, calculateMaturity]);
 
   // Math
-  const totalPrincipal = fixedDeposits.reduce((s, f) => s + Number(f.principal_amount), 0);
-  const totalMaturity = fixedDeposits.reduce((s, f) => s + getFDEffectiveValue(f), 0);
-  const avgRate = fixedDeposits.length
-    ? fixedDeposits.reduce((s, f) => s + Number(f.interest_rate) * Number(f.principal_amount), 0) / totalPrincipal
+  const totalPrincipal = fixedDeposits.reduce((s, f) => s + getFDInvestedAmount(f), 0);
+  const totalMaturity = fixedDeposits.reduce((s, f) => s + (mode === 'ssy' ? getSSYMaturityValue(f) : getFDEffectiveValue(f)), 0);
+  const avgRate = fixedDeposits.length && totalPrincipal > 0
+    ? fixedDeposits.reduce((s, f) => s + Number(f.interest_rate) * getFDInvestedAmount(f), 0) / totalPrincipal
     : 0;
 
   const handleOpenAdd = useCallback(() => {
