@@ -1,17 +1,16 @@
 import React, { useState, useCallback } from 'react';
-import { FixedDeposit } from '../../types/portfolio';
+import { RDAccount } from '../../types/portfolio';
 
 interface RDInstallmentScheduleProps {
-  fd: FixedDeposit;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  account: RDAccount;
+  onUpdate: (id: string, payload: { contributions: { date: string; amount: number }[] }) => Promise<void>;
 }
 
-export function RDInstallmentSchedule({ fd, onUpdate }: RDInstallmentScheduleProps) {
+export function RDInstallmentSchedule({ account, onUpdate }: RDInstallmentScheduleProps) {
   const [expanded, setExpanded] = useState(false);
 
   // Helper for RD installment calculation
-  const getRDInstallmentMonths = useCallback((startDateStr: string, maturityDateStr: string | null): Date[] => {
+  const getRDInstallmentMonths = useCallback((startDateStr: string, maturityDateStr: string): Date[] => {
     const start = new Date(startDateStr);
     if (isNaN(start.getTime())) return [];
     
@@ -42,7 +41,7 @@ export function RDInstallmentSchedule({ fd, onUpdate }: RDInstallmentSchedulePro
     });
   }, []);
 
-  const handleRecordInstallment = async (fd: FixedDeposit, targetMonth: Date) => {
+  const handleRecordInstallment = async (account: RDAccount, targetMonth: Date) => {
     const year = targetMonth.getFullYear();
     const month = String(targetMonth.getMonth() + 1).padStart(2, '0');
     const today = new Date();
@@ -51,13 +50,13 @@ export function RDInstallmentSchedule({ fd, onUpdate }: RDInstallmentSchedulePro
       dateStr = today.toISOString().split('T')[0];
     }
     
-    const existing = fd.contributions || [];
-    const updated = [...existing, { date: dateStr, amount: fd.principal_amount }].sort(
+    const existing = account.contributions || [];
+    const updated = [...existing, { date: dateStr, amount: Number(account.monthly_deposit) }].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
     
     try {
-      await onUpdate('fd', fd.id, { contributions: updated });
+      await onUpdate(account.id, { contributions: updated });
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to record installment');
     }
@@ -68,7 +67,7 @@ export function RDInstallmentSchedule({ fd, onUpdate }: RDInstallmentSchedulePro
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+        className="flex items-center gap-1 text-[11px] font-bold text-pink-600 dark:text-pink-400 hover:underline"
       >
         {expanded ? 'Hide Installment Schedule' : 'Show Installment Schedule'}
       </button>
@@ -79,8 +78,8 @@ export function RDInstallmentSchedule({ fd, onUpdate }: RDInstallmentSchedulePro
             Monthly Installments
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
-            {getRDInstallmentMonths(fd.start_date, fd.maturity_date).map((monthDate, idx) => {
-              const isPaid = isRDMonthPaid(monthDate, fd.contributions);
+            {getRDInstallmentMonths(account.start_date, account.maturity_date).map((monthDate, idx) => {
+              const isPaid = isRDMonthPaid(monthDate, account.contributions);
               const label = monthDate.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
               return (
                 <div
@@ -99,8 +98,8 @@ export function RDInstallmentSchedule({ fd, onUpdate }: RDInstallmentSchedulePro
                   ) : (
                     <button
                       type="button"
-                      onClick={() => void handleRecordInstallment(fd, monthDate)}
-                      className="text-[9px] font-extrabold bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-0.5 rounded-md transition-all active:scale-95 shadow-xs"
+                      onClick={() => void handleRecordInstallment(account, monthDate)}
+                      className="text-[9px] font-extrabold bg-pink-600 hover:bg-pink-700 text-white px-2 py-0.5 rounded-md transition-all active:scale-95 shadow-xs"
                     >
                       + Pay
                     </button>

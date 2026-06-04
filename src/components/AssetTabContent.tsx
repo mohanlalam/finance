@@ -4,6 +4,8 @@ import { Portfolio, AssetPayload } from '../types/portfolio';
 import { FetchStatus } from '../hooks/useMarketData';
 import PortfolioTable from './PortfolioTable';
 import FixedDepositView from './FixedDepositView';
+import RDView from './rd/RDView';
+import SIPView from './sip/SIPView';
 import SSYView from './ssy/SSYView';
 import GoldHoldingView from './GoldHoldingView';
 import RealEstateView from './RealEstateView';
@@ -116,21 +118,15 @@ export default React.memo(function AssetTabContent({
             onUpdate={onUpdateAsset}
             onDelete={onDeleteAsset}
             autoOpenAddModal={quickAddTarget === 'fd'}
-            mode="fd"
           />
         )}
 
         {activeAsset === 'rd' && (
-          <FixedDepositView
-            fixedDeposits={visiblePortfolio.fixedDeposits.filter(f => f.fd_type === 'recurring')}
+          <RDView
             documents={visiblePortfolio.documents}
             portfolioName={visiblePortfolio.name}
             portfolioOptions={portfolioOptions}
-            onAdd={onAddAsset}
-            onUpdate={onUpdateAsset}
-            onDelete={onDeleteAsset}
             autoOpenAddModal={quickAddTarget === 'rd'}
-            mode="rd"
           />
         )}
 
@@ -144,16 +140,11 @@ export default React.memo(function AssetTabContent({
         )}
 
         {activeAsset === 'sip' && (
-          <FixedDepositView
-            fixedDeposits={visiblePortfolio.fixedDeposits.filter(f => f.fd_type === 'sip')}
+          <SIPView
             documents={visiblePortfolio.documents}
             portfolioName={visiblePortfolio.name}
             portfolioOptions={portfolioOptions}
-            onAdd={onAddAsset}
-            onUpdate={onUpdateAsset}
-            onDelete={onDeleteAsset}
             autoOpenAddModal={quickAddTarget === 'sip'}
-            mode="sip"
           />
         )}
 
@@ -282,7 +273,6 @@ export default React.memo(function AssetTabContent({
                 onUpdate={onUpdateAsset}
                 onDelete={onDeleteAsset}
                 autoOpenAddModal={index === 0 && quickAddTarget === 'fd'}
-                mode="fd"
               />
             </div>
           ))}
@@ -297,16 +287,11 @@ export default React.memo(function AssetTabContent({
                 <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
                 <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
               </div>
-              <FixedDepositView
-                fixedDeposits={p.fixedDeposits.filter(f => f.fd_type === 'recurring')}
+              <RDView
                 documents={p.documents}
                 portfolioName={p.name}
                 portfolioOptions={portfolioOptions}
-                onAdd={onAddAsset}
-                onUpdate={onUpdateAsset}
-                onDelete={onDeleteAsset}
                 autoOpenAddModal={index === 0 && quickAddTarget === 'rd'}
-                mode="rd"
               />
             </div>
           ))}
@@ -340,16 +325,11 @@ export default React.memo(function AssetTabContent({
                 <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
                 <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
               </div>
-              <FixedDepositView
-                fixedDeposits={p.fixedDeposits.filter(f => f.fd_type === 'sip')}
+              <SIPView
                 documents={p.documents}
                 portfolioName={p.name}
                 portfolioOptions={portfolioOptions}
-                onAdd={onAddAsset}
-                onUpdate={onUpdateAsset}
-                onDelete={onDeleteAsset}
                 autoOpenAddModal={index === 0 && quickAddTarget === 'sip'}
-                mode="sip"
               />
             </div>
           ))}

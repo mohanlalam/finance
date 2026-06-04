@@ -71,6 +71,8 @@ Deno.serve(async (req: Request) => {
         { data: portfolios, error: pErr },
         { data: holdings, error: hErr },
         { data: fixed_deposits, error: fdErr },
+        { data: rd_accounts, error: rdErr },
+        { data: sip_accounts, error: sipErr },
         { data: ssy_accounts, error: ssyErr },
         { data: gold_holdings, error: goldErr },
         { data: real_estate, error: reErr },
@@ -82,6 +84,8 @@ Deno.serve(async (req: Request) => {
         supabase.from("portfolios").select("*").order("name"),
         supabase.from("holdings").select("*").order("sno"),
         supabase.from("fixed_deposits").select("*").order("created_at"),
+        supabase.from("rd_accounts").select("*").order("created_at"),
+        supabase.from("sip_accounts").select("*").order("created_at"),
         supabase.from("ssy_accounts").select("*").order("created_at"),
         supabase.from("gold_holdings").select("*").order("created_at"),
         supabase.from("real_estate").select("*").order("created_at"),
@@ -94,6 +98,8 @@ Deno.serve(async (req: Request) => {
       if (pErr) throw pErr;
       if (hErr) throw hErr;
       if (fdErr) throw fdErr;
+      if (rdErr) throw rdErr;
+      if (sipErr) throw sipErr;
       if (ssyErr) throw ssyErr;
       if (goldErr) throw goldErr;
       if (reErr) throw reErr;
@@ -111,7 +117,7 @@ Deno.serve(async (req: Request) => {
         };
       });
 
-      return new Response(JSON.stringify({ portfolios, holdings: holdingsWithCache, fixed_deposits, ssy_accounts, gold_holdings, real_estate, insurances, documents, net_worth_history }), {
+      return new Response(JSON.stringify({ portfolios, holdings: holdingsWithCache, fixed_deposits, rd_accounts, sip_accounts, ssy_accounts, gold_holdings, real_estate, insurances, documents, net_worth_history }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -226,6 +232,44 @@ Deno.serve(async (req: Request) => {
             status: payload.status || "active",
             contributions: payload.contributions || [],
             rate_schedule: payload.rate_schedule || [],
+            notes: payload.notes || null,
+          })
+          .select()
+          .single();
+        insertData = res.data;
+        insertError = res.error;
+      } else if (asset_type === "rd_account") {
+        const res = await supabase
+          .from("rd_accounts")
+          .insert({
+            portfolio_id: portfolio.id,
+            bank_name: payload.bank_name,
+            monthly_deposit: Number(payload.monthly_deposit),
+            interest_rate: Number(payload.interest_rate),
+            start_date: payload.start_date,
+            maturity_date: payload.maturity_date,
+            maturity_amount: Number(payload.maturity_amount),
+            status: payload.status || "active",
+            contributions: payload.contributions || [],
+            notes: payload.notes || null,
+          })
+          .select()
+          .single();
+        insertData = res.data;
+        insertError = res.error;
+      } else if (asset_type === "sip_account") {
+        const res = await supabase
+          .from("sip_accounts")
+          .insert({
+            portfolio_id: portfolio.id,
+            fund_name: payload.fund_name,
+            monthly_sip: Number(payload.monthly_sip),
+            expected_cagr: Number(payload.expected_cagr),
+            units: Number(payload.units ?? 0),
+            start_date: payload.start_date,
+            next_sip_date: payload.next_sip_date || null,
+            fallback_valuation: Number(payload.fallback_valuation ?? 0),
+            mf_scheme_code: payload.mf_scheme_code || null,
             notes: payload.notes || null,
           })
           .select()
@@ -356,6 +400,28 @@ Deno.serve(async (req: Request) => {
         if (payload.contributions !== undefined) updates.contributions = payload.contributions;
         if (payload.rate_schedule !== undefined) updates.rate_schedule = payload.rate_schedule;
         if (payload.notes !== undefined) updates.notes = payload.notes;
+      } else if (asset_type === "rd_account") {
+        table = "rd_accounts";
+        if (payload.bank_name !== undefined) updates.bank_name = payload.bank_name;
+        if (payload.monthly_deposit !== undefined) updates.monthly_deposit = Number(payload.monthly_deposit);
+        if (payload.interest_rate !== undefined) updates.interest_rate = Number(payload.interest_rate);
+        if (payload.start_date !== undefined) updates.start_date = payload.start_date;
+        if (payload.maturity_date !== undefined) updates.maturity_date = payload.maturity_date;
+        if (payload.maturity_amount !== undefined) updates.maturity_amount = Number(payload.maturity_amount);
+        if (payload.status !== undefined) updates.status = payload.status;
+        if (payload.contributions !== undefined) updates.contributions = payload.contributions;
+        if (payload.notes !== undefined) updates.notes = payload.notes;
+      } else if (asset_type === "sip_account") {
+        table = "sip_accounts";
+        if (payload.fund_name !== undefined) updates.fund_name = payload.fund_name;
+        if (payload.monthly_sip !== undefined) updates.monthly_sip = Number(payload.monthly_sip);
+        if (payload.expected_cagr !== undefined) updates.expected_cagr = Number(payload.expected_cagr);
+        if (payload.units !== undefined) updates.units = Number(payload.units);
+        if (payload.start_date !== undefined) updates.start_date = payload.start_date;
+        if (payload.next_sip_date !== undefined) updates.next_sip_date = payload.next_sip_date;
+        if (payload.fallback_valuation !== undefined) updates.fallback_valuation = Number(payload.fallback_valuation);
+        if (payload.mf_scheme_code !== undefined) updates.mf_scheme_code = payload.mf_scheme_code;
+        if (payload.notes !== undefined) updates.notes = payload.notes;
       } else if (asset_type === "gold") {
         table = "gold_holdings";
         if (payload.itemName !== undefined) updates.item_name = payload.itemName;
@@ -427,6 +493,10 @@ Deno.serve(async (req: Request) => {
         table = "fixed_deposits";
       } else if (asset_type === "ssy_account") {
         table = "ssy_accounts";
+      } else if (asset_type === "rd_account") {
+        table = "rd_accounts";
+      } else if (asset_type === "sip_account") {
+        table = "sip_accounts";
       } else if (asset_type === "gold") {
         table = "gold_holdings";
       } else if (asset_type === "real_estate") {

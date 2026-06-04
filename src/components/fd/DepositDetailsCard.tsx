@@ -2,7 +2,6 @@ import React from 'react';
 import { FixedDeposit, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../../utils/formatters';
 import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote } from 'lucide-react';
-import RDInstallmentSchedule from './RDInstallmentSchedule';
 
 interface ModeConfig {
   title: string;
@@ -14,7 +13,6 @@ interface ModeConfig {
 
 interface DepositDetailsCardProps {
   fd: FixedDeposit;
-  mode: 'fd' | 'rd' | 'sip';
   cfg: ModeConfig;
   documents: DocumentMetadata[];
   onOpenEdit: (fd: FixedDeposit) => void;
@@ -23,16 +21,12 @@ interface DepositDetailsCardProps {
   onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
 }
 
-
-
 export function DepositDetailsCard({
   fd,
-  mode,
   cfg,
   documents,
   onOpenEdit,
   onConfirmDelete,
-  onUpdate,
 }: DepositDetailsCardProps) {
   const IconComponent = cfg.iconClass;
 
@@ -50,7 +44,7 @@ export function DepositDetailsCard({
 
   const progress = getProgressPercent(fd);
   const fdDocs = documents.filter((d) => d.asset_type === 'fd' && d.asset_id === fd.id);
-  const isMatured = fd.status === 'matured' || (mode !== 'sip' && progress >= 100);
+  const isMatured = fd.status === 'matured' || progress >= 100;
 
   return (
     <div className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors" role="listitem">
@@ -63,11 +57,11 @@ export function DepositDetailsCard({
             <div className="flex items-center gap-2 flex-wrap">
               <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">{fd.bank_name}</h4>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isMatured ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'}`}>
-                {isMatured ? 'Matured' : `${fd.interest_rate}% ${mode === 'sip' ? 'Expected CAGR' : 'p.a.'}`}
+                {isMatured ? 'Matured' : `${fd.interest_rate}% p.a.`}
               </span>
             </div>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-              {fd.start_date} &rarr; {fd.maturity_date || (mode === 'sip' ? 'Ongoing SIP' : 'Ongoing')}
+              {fd.start_date} &rarr; {fd.maturity_date || 'Ongoing'}
             </p>
           </div>
         </div>
@@ -78,7 +72,7 @@ export function DepositDetailsCard({
             <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatINR(Number(fd.principal_amount))}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-400 dark:text-slate-500">{mode === 'sip' ? 'Current Valuation' : (fd.maturity_date ? 'Maturity Value' : 'Current Value')}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">{fd.maturity_date ? 'Maturity Value' : 'Current Value'}</p>
             <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatINR(getFDEffectiveValue(fd))}</p>
           </div>
           <div className="col-span-2 sm:col-span-1 flex items-center justify-start md:justify-end gap-2">
@@ -97,7 +91,7 @@ export function DepositDetailsCard({
             ))}
             <button
               onClick={() => onOpenEdit(fd)}
-              className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
+              className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-505 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
               title={`Edit ${cfg.title}`}
               aria-label={`Edit ${cfg.title} at ${fd.bank_name}`}
             >
@@ -105,7 +99,7 @@ export function DepositDetailsCard({
             </button>
             <button
               onClick={() => onConfirmDelete(fd)}
-              className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
+              className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-505 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
               title={`Delete ${cfg.title}`}
               aria-label={`Delete ${cfg.title} at ${fd.bank_name}`}
             >
@@ -115,48 +109,32 @@ export function DepositDetailsCard({
         </div>
       </div>
 
-      {/* Progress Bar / Next SIP Due Date details */}
-      {mode !== 'sip' ? (
-        <div className="mt-4 space-y-4">
-          <div>
-            <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 mb-1">
-              <span className="flex items-center gap-1">
-                <Clock size={10} aria-hidden="true" />
-                Maturity Timeline
-              </span>
-              <span>{fd.maturity_date ? `${progress.toFixed(0)}% elapsed` : 'Ongoing accumulation'}</span>
-            </div>
-            {fd.maturity_date && (
-              <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Maturity timeline progress">
-                <div
-                  className={`h-full rounded-full transition-all duration-300 ${isMatured ? 'bg-emerald-500' : 'bg-blue-500'}`}
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            )}
+      <div className="mt-4 space-y-4">
+        <div>
+          <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-505 mb-1">
+            <span className="flex items-center gap-1">
+              <Clock size={10} aria-hidden="true" />
+              Maturity Timeline
+            </span>
+            <span>{fd.maturity_date ? `${progress.toFixed(0)}% elapsed` : 'Ongoing accumulation'}</span>
           </div>
-          
-          {mode === 'rd' && (
-            <RDInstallmentSchedule fd={fd} onUpdate={onUpdate} />
+          {fd.maturity_date && (
+            <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Maturity timeline progress">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${isMatured ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           )}
+        </div>
 
-          {fd.notes && (
-            <p className="text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5">
-              <StickyNote size={11} className="shrink-0 mt-0.5" />
-              <span className="italic">{fd.notes}</span>
-            </p>
-          )}
-        </div>
-      ) : (
-        <div className="mt-2 space-y-2">
-          {fd.notes && (
-            <p className="text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5">
-              <StickyNote size={11} className="shrink-0 mt-0.5" />
-              <span className="italic">{fd.notes}</span>
-            </p>
-          )}
-        </div>
-      )}
+        {fd.notes && (
+          <p className="text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5">
+            <StickyNote size={11} className="shrink-0 mt-0.5" />
+            <span className="italic">{fd.notes}</span>
+          </p>
+        )}
+      </div>
     </div>
   );
 }

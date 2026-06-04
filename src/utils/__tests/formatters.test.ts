@@ -27,22 +27,6 @@ describe('formatPercent', () => {
 });
 
 describe('getFDEffectiveValue', () => {
-  it('returns maturity amount for sip', () => {
-    const sip: FixedDeposit = {
-      id: 'sip-1',
-      portfolio_id: 'p1',
-      bank_name: 'Mutual Fund',
-      principal_amount: 5000,
-      interest_rate: 12,
-      start_date: '2026-01-01',
-      maturity_date: null,
-      maturity_amount: 15000,
-      status: 'active',
-      fd_type: 'sip',
-    };
-    expect(getFDEffectiveValue(sip)).toBe(15000);
-  });
-
   it('returns maturity amount for matured fds', () => {
     const fd: FixedDeposit = {
       id: 'fd-1',
@@ -77,38 +61,5 @@ describe('getFDEffectiveValue', () => {
     const val = getFDEffectiveValue(fd, new Date('2027-01-01'));
     expect(Math.round(val)).toBe(108237);
   });
-
-  it('calculates recurring deposit (RD) compounding correctly', () => {
-    const rd: FixedDeposit = {
-      id: 'rd-1',
-      portfolio_id: 'p1',
-      bank_name: 'Post Office',
-      principal_amount: 120000,
-      interest_rate: 6.8,
-      start_date: '2026-01-01',
-      maturity_date: '2027-01-01',
-      maturity_amount: 124500,
-      status: 'active',
-      fd_type: 'recurring',
-      contributions: [
-        { date: '2026-01-01', amount: 10000 },
-        { date: '2026-02-01', amount: 10000 },
-        { date: '2026-03-01', amount: 10000 },
-        { date: '2026-04-01', amount: 10000 },
-        { date: '2026-05-01', amount: 10000 },
-        { date: '2026-06-01', amount: 10000 },
-        { date: '2026-07-01', amount: 10000 },
-        { date: '2026-08-01', amount: 10000 },
-        { date: '2026-09-01', amount: 10000 },
-        { date: '2026-10-01', amount: 10000 },
-        { date: '2026-11-01', amount: 10000 },
-        { date: '2026-12-01', amount: 10000 },
-      ]
-    };
-    const val = getFDEffectiveValue(rd, new Date('2027-01-01'));
-    expect(val).toBeGreaterThan(120000);
-    expect(val).toBeLessThan(129000);
-  });
-
 });
 

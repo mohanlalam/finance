@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
-import { Holding, Portfolio, FixedDeposit, SSYAccount, GoldHolding, RealEstate, Insurance, DocumentMetadata, AssetPayload } from '../types/portfolio';
+import { Holding, Portfolio, FixedDeposit, RDAccount, SIPAccount, SSYAccount, GoldHolding, RealEstate, Insurance, DocumentMetadata, AssetPayload } from '../types/portfolio';
 import { getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
+import { getRDInvestedAmount, getRDEffectiveValue } from '../utils/rdUtils';
+import { getSIPInvestedAmount, getSIPEffectiveValue } from '../utils/sipUtils';
 import { getSSYInvestedAmount, getSSYEffectiveValue } from '../utils/ssyUtils';
 import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiClient';
 
@@ -48,6 +50,8 @@ interface DBData {
   portfolios?: DBPortfolio[];
   holdings?: DBHolding[];
   fixed_deposits?: FixedDeposit[];
+  rd_accounts?: RDAccount[];
+  sip_accounts?: SIPAccount[];
   ssy_accounts?: SSYAccount[];
   gold_holdings?: GoldHolding[];
   real_estate?: RealEstate[];
@@ -92,6 +96,8 @@ function dbToHolding(h: DBHolding): Holding {
 function recalcPortfolioTotals(
   holdings: Holding[],
   fds: FixedDeposit[],
+  rdAccounts: RDAccount[],
+  sipAccounts: SIPAccount[],
   ssyAccounts: SSYAccount[],
   gold: GoldHolding[],
   realEstate: RealEstate[]
@@ -102,6 +108,12 @@ function recalcPortfolioTotals(
   const fdInvested = fds.reduce((sum, f) => sum + getFDInvestedAmount(f), 0);
   const fdCurrent = fds.reduce((sum, f) => sum + getFDEffectiveValue(f), 0);
 
+  const rdInvested = rdAccounts.reduce((sum, r) => sum + getRDInvestedAmount(r), 0);
+  const rdCurrent = rdAccounts.reduce((sum, r) => sum + getRDEffectiveValue(r), 0);
+
+  const sipInvested = sipAccounts.reduce((sum, s) => sum + getSIPInvestedAmount(s), 0);
+  const sipCurrent = sipAccounts.reduce((sum, s) => sum + getSIPEffectiveValue(s), 0);
+
   const ssyInvested = ssyAccounts.reduce((sum, s) => sum + getSSYInvestedAmount(s), 0);
   const ssyCurrent = ssyAccounts.reduce((sum, s) => sum + getSSYEffectiveValue(s), 0);
 
@@ -111,8 +123,8 @@ function recalcPortfolioTotals(
   const reInvested = realEstate.reduce((sum, r) => sum + Number(r.purchase_price), 0);
   const reCurrent = realEstate.reduce((sum, r) => sum + Number(r.current_valuation), 0);
 
-  const totalInvested = stockInvested + fdInvested + ssyInvested + goldInvested + reInvested;
-  const totalCurrentValue = stockCurrent + fdCurrent + ssyCurrent + goldCurrent + reCurrent;
+  const totalInvested = stockInvested + fdInvested + rdInvested + sipInvested + ssyInvested + goldInvested + reInvested;
+  const totalCurrentValue = stockCurrent + fdCurrent + rdCurrent + sipCurrent + ssyCurrent + goldCurrent + reCurrent;
   const totalPnL = totalCurrentValue - totalInvested;
   const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
 
@@ -123,13 +135,15 @@ function buildPortfolio(
   dbP: DBPortfolio,
   holdings: Holding[],
   fds: FixedDeposit[],
+  rdAccounts: RDAccount[],
+  sipAccounts: SIPAccount[],
   ssyAccounts: SSYAccount[],
   gold: GoldHolding[],
   realEstate: RealEstate[],
   insurances: Insurance[],
   docs: DocumentMetadata[]
 ): Portfolio {
-  const totals = recalcPortfolioTotals(holdings, fds, ssyAccounts, gold, realEstate);
+  const totals = recalcPortfolioTotals(holdings, fds, rdAccounts, sipAccounts, ssyAccounts, gold, realEstate);
 
   return {
     id: dbP.id,
@@ -137,6 +151,8 @@ function buildPortfolio(
     label: dbP.label,
     holdings,
     fixedDeposits: fds,
+    rdAccounts,
+    sipAccounts,
     ssyAccounts,
     goldHoldings: gold,
     realEstate,
@@ -160,6 +176,8 @@ function applyLivePrices(portfolios: Portfolio[], priceMap: Record<string, { ltp
     const totals = recalcPortfolioTotals(
       updatedHoldings,
       portfolio.fixedDeposits,
+      portfolio.rdAccounts || [],
+      portfolio.sipAccounts || [],
       portfolio.ssyAccounts || [],
       portfolio.goldHoldings,
       portfolio.realEstate
@@ -175,19 +193,21 @@ function applyLivePrices(portfolios: Portfolio[], priceMap: Record<string, { ltp
 
 function applyLiveMFNavs(portfolios: Portfolio[], navMap: Record<string, number>): Portfolio[] {
   return portfolios.map((portfolio) => {
-    const updatedFDs = portfolio.fixedDeposits.map((f) => {
-      if (f.fd_type === 'sip' && f.mf_scheme_code && navMap[f.mf_scheme_code] !== undefined) {
-        const nav = navMap[f.mf_scheme_code];
-        const units = Number(f.units || 0);
+    const updatedSips = (portfolio.sipAccounts || []).map((s) => {
+      if (s.mf_scheme_code && navMap[s.mf_scheme_code] !== undefined) {
+        const nav = navMap[s.mf_scheme_code];
+        const units = Number(s.units || 0);
         const currentValue = units * nav;
-        return { ...f, maturity_amount: currentValue };
+        return { ...s, fallback_valuation: currentValue };
       }
-      return f;
+      return s;
     });
 
     const totals = recalcPortfolioTotals(
       portfolio.holdings,
-      updatedFDs,
+      portfolio.fixedDeposits,
+      portfolio.rdAccounts || [],
+      updatedSips,
       portfolio.ssyAccounts || [],
       portfolio.goldHoldings,
       portfolio.realEstate
@@ -195,7 +215,7 @@ function applyLiveMFNavs(portfolios: Portfolio[], navMap: Record<string, number>
 
     return {
       ...portfolio,
-      fixedDeposits: updatedFDs,
+      sipAccounts: updatedSips,
       ...totals,
     };
   });
@@ -284,11 +304,11 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     return map;
   }, []);
 
-  const fetchLiveMFNavs = useCallback(async (fds: FixedDeposit[]): Promise<Record<string, number>> => {
-    const sipFds = fds.filter((f) => f.fd_type === 'sip' && f.mf_scheme_code);
-    if (sipFds.length === 0) return {};
+  const fetchLiveMFNavs = useCallback(async (sips: SIPAccount[]): Promise<Record<string, number>> => {
+    const sipAccounts = sips.filter((s) => s.mf_scheme_code);
+    if (sipAccounts.length === 0) return {};
 
-    const uniqueSchemeCodes = Array.from(new Set(sipFds.map((f) => f.mf_scheme_code!)));
+    const uniqueSchemeCodes = Array.from(new Set(sipAccounts.map((s) => s.mf_scheme_code!)));
     const navMap: Record<string, number> = {};
 
     const BATCH_SIZE = 4;
@@ -341,11 +361,9 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
       const dbPortfolios: DBPortfolio[] = data.portfolios || [];
       const dbHoldings: DBHolding[] = data.holdings || [];
-      const dbFixedDeposits: FixedDeposit[] = (data.fixed_deposits || []).filter((f: FixedDeposit) => f.fd_type !== 'ssy');
-      // Normalize fd_type: 'rd' → 'recurring' for consistency
-      dbFixedDeposits.forEach(f => {
-        if (f.fd_type === 'rd') f.fd_type = 'recurring';
-      });
+      const dbFixedDeposits: FixedDeposit[] = (data.fixed_deposits || []).filter((f: FixedDeposit) => !f.fd_type || f.fd_type === 'regular');
+      const dbRDAccounts: RDAccount[] = data.rd_accounts || [];
+      const dbSIPAccounts: SIPAccount[] = data.sip_accounts || [];
       const dbSSYAccounts: SSYAccount[] = data.ssy_accounts || [];
       const dbGoldHoldings: GoldHolding[] = data.gold_holdings || [];
       const dbRealEstate: RealEstate[] = data.real_estate || [];
@@ -368,13 +386,15 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           .map(dbToHolding);
 
         const fds = dbFixedDeposits.filter((f) => f.portfolio_id === dbP.id);
+        const rds = dbRDAccounts.filter((r) => r.portfolio_id === dbP.id);
+        const sips = dbSIPAccounts.filter((s) => s.portfolio_id === dbP.id);
         const ssy = dbSSYAccounts.filter((s) => s.portfolio_id === dbP.id);
         const gold = dbGoldHoldings.filter((g) => g.portfolio_id === dbP.id);
         const realEstate = dbRealEstate.filter((r) => r.portfolio_id === dbP.id);
         const insurances = dbInsurances.filter((i) => i.portfolio_id === dbP.id);
         const docs = dbDocuments.filter((d) => d.portfolio_id === dbP.id);
 
-        return buildPortfolio(dbP, holdings, fds, ssy, gold, realEstate, insurances, docs);
+        return buildPortfolio(dbP, holdings, fds, rds, sips, ssy, gold, realEstate, insurances, docs);
       });
 
       setPortfolios(built);
@@ -386,11 +406,11 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       setPriceStatus('loading');
       try {
         const allHoldings = built.flatMap((p) => p.holdings);
-        const allFDs = built.flatMap((p) => p.fixedDeposits);
+        const allSips = built.flatMap((p) => p.sipAccounts || []);
 
         const [priceMap, navMap] = await Promise.all([
           allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
-          fetchLiveMFNavs(allFDs),
+          fetchLiveMFNavs(allSips),
         ]);
 
         setPortfolios((prev) => {
@@ -436,11 +456,11 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     setPriceStatus('loading');
     try {
       const allHoldings = portfolios.flatMap((p) => p.holdings);
-      const allFDs = portfolios.flatMap((p) => p.fixedDeposits);
+      const allSips = portfolios.flatMap((p) => p.sipAccounts || []);
 
       const [priceMap, navMap] = await Promise.all([
         allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
-        fetchLiveMFNavs(allFDs),
+        fetchLiveMFNavs(allSips),
       ]);
 
       setPortfolios((prev) => {

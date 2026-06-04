@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
-import { Plus, TrendingUp, Landmark, Calendar, Clock } from 'lucide-react';
+import { Plus, TrendingUp, Landmark, Calendar } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
-import SIPFormFields from './fd/SIPFormFields';
 import StandardFormFields from './fd/StandardFormFields';
 import DepositDetailsCard from './fd/DepositDetailsCard';
 
@@ -23,79 +22,30 @@ interface FixedDepositViewProps {
   onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
-  mode?: 'fd' | 'rd' | 'sip';
 }
 
-const MODE_CONFIG = {
-  fd: {
-    title: 'Fixed Deposit',
-    titlePlural: 'Fixed Deposits',
-    registryTitle: 'FD Registry',
-    createBtn: 'Create Fixed Deposit',
-    firstBtn: 'Create Your First FD',
-    issuerLabel: 'Bank / Issuer Name',
-    principalLabel: 'Principal Amount (₹)',
-    maturityLabel: 'Maturity Amount (₹)',
-    editTitle: 'Edit Fixed Deposit',
-    createTitle: 'Create Fixed Deposit',
-    rateLabel: 'Interest Rate (% p.a.)',
-    rateSub: 'Across all FDs',
-    startLabel: 'Start Date',
-    maturityDateLabel: 'Maturity Date',
-    noActiveText: 'No Fixed Deposits Yet',
-    subText: 'Start tracking your FDs to monitor maturity timelines, interest accrual, and upcoming deadlines.',
-    totalLabel: 'Total FD Balance',
-    estMaturityLabel: 'Est. Maturity Value',
-    iconClass: Landmark,
-    themeColor: 'from-blue-600 to-indigo-600',
-    iconBg: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-  },
-  rd: {
-    title: 'Recurring Deposit',
-    titlePlural: 'Recurring Deposits',
-    registryTitle: 'RD Registry',
-    createBtn: 'Create Recurring Deposit',
-    firstBtn: 'Create Your First RD',
-    issuerLabel: 'Bank / Post Office Name',
-    principalLabel: 'Monthly Deposit Amount (₹)',
-    maturityLabel: 'Maturity Amount (₹)',
-    editTitle: 'Edit Recurring Deposit',
-    createTitle: 'Create Recurring Deposit',
-    rateLabel: 'Interest Rate (% p.a.)',
-    rateSub: 'Across all RDs',
-    startLabel: 'Start Date',
-    maturityDateLabel: 'Maturity Date',
-    noActiveText: 'No Recurring Deposits Yet',
-    subText: 'Start tracking your RDs to monitor recurring timelines, interest accrual, and upcoming deadlines.',
-    totalLabel: 'Total RD Invested',
-    estMaturityLabel: 'Est. Maturity Value',
-    iconClass: Clock,
-    themeColor: 'from-pink-600 to-rose-600',
-    iconBg: 'bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400',
-  },
-  sip: {
-    title: 'SIP Mutual Fund',
-    titlePlural: 'SIP Mutual Funds',
-    registryTitle: 'SIP Registry',
-    createBtn: 'Create SIP',
-    firstBtn: 'Create Your First SIP',
-    issuerLabel: 'Mutual Fund / Stock Name',
-    principalLabel: 'Monthly SIP Amount (₹)',
-    maturityLabel: 'Current Valuation (₹)',
-    editTitle: 'Edit SIP',
-    createTitle: 'Create SIP',
-    rateLabel: 'Expected Return (% CAGR)',
-    rateSub: 'Expected returns',
-    startLabel: 'Start Date',
-    maturityDateLabel: 'Next SIP Date',
-    noActiveText: 'No SIPs Yet',
-    subText: 'Start tracking your SIPs to monitor fund growth, total investment, and current valuation.',
-    totalLabel: 'Total SIP Invested',
-    estMaturityLabel: 'Current Portfolio Value',
-    iconClass: TrendingUp,
-    themeColor: 'from-sky-600 to-cyan-600',
-    iconBg: 'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400',
-  },
+const CFG = {
+  title: 'Fixed Deposit',
+  titlePlural: 'Fixed Deposits',
+  registryTitle: 'FD Registry',
+  createBtn: 'Create Fixed Deposit',
+  firstBtn: 'Create Your First FD',
+  issuerLabel: 'Bank / Issuer Name',
+  principalLabel: 'Principal Amount (₹)',
+  maturityLabel: 'Maturity Amount (₹)',
+  editTitle: 'Edit Fixed Deposit',
+  createTitle: 'Create Fixed Deposit',
+  rateLabel: 'Interest Rate (% p.a.)',
+  rateSub: 'Across all FDs',
+  startLabel: 'Start Date',
+  maturityDateLabel: 'Maturity Date',
+  noActiveText: 'No Fixed Deposits Yet',
+  subText: 'Start tracking your FDs to monitor maturity timelines, interest accrual, and upcoming deadlines.',
+  totalLabel: 'Total FD Balance',
+  estMaturityLabel: 'Est. Maturity Value',
+  themeColor: 'from-blue-600 to-indigo-600',
+  iconBg: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+  iconClass: Landmark,
 };
 
 function FixedDepositView({
@@ -107,11 +57,7 @@ function FixedDepositView({
   onUpdate,
   onDelete,
   autoOpenAddModal,
-  mode = 'fd',
 }: FixedDepositViewProps) {
-  const cfg = MODE_CONFIG[mode];
-  const IconComponent = cfg.iconClass;
-
   const [showModal, setShowModal] = useState(false);
   const [editingFd, setEditingFd] = useState<FixedDeposit | null>(null);
   const [loading, setLoading] = useState(false);
@@ -128,13 +74,8 @@ function FixedDepositView({
   const [maturityAmount, setMaturityAmount] = useState('');
   const [status, setStatus] = useState<'active' | 'matured'>('active');
   const [notes, setNotes] = useState('');
-  const [mfSchemeCode, setMfSchemeCode] = useState('');
-  const [units, setUnits] = useState('');
-  const [isValidatingScheme, setIsValidatingScheme] = useState(false);
 
   const calculateMaturity = useCallback(() => {
-    if (mode === 'sip') return;
-
     const p = parseFloat(principalAmount);
     const r = parseFloat(interestRate);
     const s = new Date(startDate);
@@ -149,7 +90,7 @@ function FixedDepositView({
         setMaturityAmount(p.toFixed(2));
       }
     }
-  }, [principalAmount, interestRate, startDate, maturityDate, mode, editingFd]);
+  }, [principalAmount, interestRate, startDate, maturityDate]);
 
   useEffect(() => {
     calculateMaturity();
@@ -167,52 +108,21 @@ function FixedDepositView({
     setFormPortfolio(portfolioName);
     setBankName('');
     setPrincipalAmount('');
-    setInterestRate(mode === 'sip' ? '0' : '');
+    setInterestRate('');
     setStartDate('');
     setMaturityDate('');
     setMaturityAmount('');
     setStatus('active');
     setNotes('');
-    setMfSchemeCode('');
-    setUnits('');
     setError('');
     setShowModal(true);
-  }, [portfolioName, mode]);
+  }, [portfolioName]);
 
   useEffect(() => {
     if (autoOpenAddModal) {
       handleOpenAdd();
     }
   }, [autoOpenAddModal, handleOpenAdd]);
-
-  const handleValidateScheme = async () => {
-    if (!mfSchemeCode) {
-      setError('Please enter a Scheme Code first.');
-      return;
-    }
-    setIsValidatingScheme(true);
-    setError('');
-    try {
-      const res = await fetch(`https://api.mfapi.in/mf/${mfSchemeCode}`);
-      if (!res.ok) throw new Error(`Scheme not found (HTTP ${res.status})`);
-      const json = await res.json();
-      if (json.meta && json.meta.scheme_name) {
-        setBankName(json.meta.scheme_name);
-        if (json.data && json.data.length > 0) {
-          const latestNav = parseFloat(json.data[0].nav);
-          if (!isNaN(latestNav) && units) {
-            setMaturityAmount((parseFloat(units) * latestNav).toFixed(2));
-          }
-        }
-      } else {
-        throw new Error('Invalid scheme code or details not found');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to validate scheme code');
-    } finally {
-      setIsValidatingScheme(false);
-    }
-  };
 
   function handleOpenEdit(fd: FixedDeposit) {
     setEditingFd(fd);
@@ -225,24 +135,15 @@ function FixedDepositView({
     setMaturityAmount(fd.maturity_amount.toString());
     setStatus(fd.status);
     setNotes(fd.notes ?? '');
-    setMfSchemeCode(fd.mf_scheme_code ?? '');
-    setUnits(fd.units?.toString() ?? '');
     setError('');
     setShowModal(true);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (mode === 'sip') {
-      if (!bankName || !principalAmount || !startDate) {
-        setError('Scheme Name, Monthly SIP Amount, and Start Date are required.');
-        return;
-      }
-    } else {
-      if (!bankName || !principalAmount || !interestRate || !startDate || !maturityAmount) {
-        setError('All fields except Maturity Date are required.');
-        return;
-      }
+    if (!bankName || !principalAmount || !interestRate || !startDate || !maturityAmount) {
+      setError('All fields except Maturity Date are required.');
+      return;
     }
 
     setLoading(true);
@@ -251,15 +152,13 @@ function FixedDepositView({
     const payload = {
       bankName,
       principalAmount: parseFloat(principalAmount),
-      interestRate: parseFloat(interestRate || '0'),
+      interestRate: parseFloat(interestRate),
       startDate,
       maturityDate: maturityDate || null,
-      maturityAmount: parseFloat(maturityAmount || '0'),
+      maturityAmount: parseFloat(maturityAmount),
       status,
-      fdType: mode === 'rd' ? 'recurring' : mode === 'sip' ? 'sip' : 'regular',
+      fdType: 'regular',
       notes: notes || null,
-      mfSchemeCode: mode === 'sip' ? (mfSchemeCode || null) : null,
-      units: mode === 'sip' ? (parseFloat(units) || null) : null,
     };
 
     try {
@@ -289,25 +188,22 @@ function FixedDepositView({
   return (
     <div className="space-y-6">
       {/* Metrics Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="region" aria-label={`${cfg.title} summary metrics`}>
-        <div className={`bg-gradient-to-tr ${cfg.themeColor} rounded-2xl p-5 text-white shadow-md flex items-center justify-between`}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="region" aria-label={`${CFG.title} summary metrics`}>
+        <div className={`bg-gradient-to-tr ${CFG.themeColor} rounded-2xl p-5 text-white shadow-md flex items-center justify-between`}>
           <div>
-            <p className="text-xs text-white/80 font-semibold uppercase tracking-wider">{cfg.totalLabel}</p>
+            <p className="text-xs text-white/80 font-semibold uppercase tracking-wider">{CFG.totalLabel}</p>
             <p className="text-2xl font-bold mt-1">{formatINR(totalPrincipal)}</p>
             <p className="text-xs text-white/70 mt-2">Active Capital Locked</p>
           </div>
-          <IconComponent size={40} className="opacity-20 shrink-0" aria-hidden="true" />
+          <Landmark size={40} className="opacity-20 shrink-0" aria-hidden="true" />
         </div>
 
         <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">{cfg.estMaturityLabel}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">{CFG.estMaturityLabel}</p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(totalMaturity)}</p>
             <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-2">
-              {mode === 'sip' 
-                ? `${totalMaturity >= totalPrincipal ? '+' : ''}${formatINR(totalMaturity - totalPrincipal)} Net Returns` 
-                : `+${formatINR(totalMaturity - totalPrincipal)} Total Earnings`
-              }
+              +{formatINR(totalMaturity - totalPrincipal)} Total Earnings
             </p>
           </div>
           <TrendingUp size={40} className="text-emerald-500/20 shrink-0" aria-hidden="true" />
@@ -316,10 +212,10 @@ function FixedDepositView({
         <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">
-              {mode === 'sip' ? 'Average Return rate' : 'Weighted Interest Rate'}
+              Weighted Interest Rate
             </p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{avgRate.toFixed(2)}%</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">{cfg.rateSub}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">{CFG.rateSub}</p>
           </div>
           <Calendar size={40} className="text-blue-500/20 shrink-0" aria-hidden="true" />
         </div>
@@ -328,42 +224,41 @@ function FixedDepositView({
       {/* Grid/List */}
       <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">{cfg.registryTitle}</h3>
+          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">{CFG.registryTitle}</h3>
           <button
             onClick={handleOpenAdd}
-            aria-label={cfg.createBtn}
+            aria-label={CFG.createBtn}
             className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
           >
             <Plus size={13} aria-hidden="true" />
-            {cfg.createBtn}
+            {CFG.createBtn}
           </button>
         </div>
 
         {fixedDeposits.length === 0 ? (
           <div className="p-16 text-center">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
-              <IconComponent size={36} className="text-indigo-400 dark:text-indigo-500" aria-hidden="true" />
+              <Landmark size={36} className="text-indigo-400 dark:text-indigo-500" aria-hidden="true" />
             </div>
-            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">{cfg.noActiveText}</h4>
+            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">{CFG.noActiveText}</h4>
             <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
-              {cfg.subText}
+              {CFG.subText}
             </p>
             <button
               onClick={handleOpenAdd}
               className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-indigo-500/20"
             >
               <Plus size={15} aria-hidden="true" />
-              {cfg.firstBtn}
+              {CFG.firstBtn}
             </button>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label={`${cfg.titlePlural} list`}>
+          <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label={`${CFG.titlePlural} list`}>
             {fixedDeposits.map((fd) => (
               <DepositDetailsCard
                 key={fd.id}
                 fd={fd}
-                mode={mode}
-                cfg={cfg}
+                cfg={CFG}
                 documents={documents}
                 onOpenEdit={handleOpenEdit}
                 onConfirmDelete={setConfirmDelete}
@@ -382,7 +277,7 @@ function FixedDepositView({
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
               <div>
                 <h3 id="fd-modal-title" className="text-base font-bold text-slate-800 dark:text-slate-100">
-                  {editingFd ? cfg.editTitle : cfg.createTitle}
+                  {editingFd ? CFG.editTitle : CFG.createTitle}
                 </h3>
                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Enter details to track valuation and timeline</p>
               </div>
@@ -410,47 +305,23 @@ function FixedDepositView({
                 </select>
               </div>
 
-              {mode === 'sip' ? (
-                <SIPFormFields
-                  mfSchemeCode={mfSchemeCode}
-                  setMfSchemeCode={setMfSchemeCode}
-                  bankName={bankName}
-                  setBankName={setBankName}
-                  principalAmount={principalAmount}
-                  setPrincipalAmount={setPrincipalAmount}
-                  interestRate={interestRate}
-                  setInterestRate={setInterestRate}
-                  units={units}
-                  setUnits={setUnits}
-                  startDate={startDate}
-                  setStartDate={setStartDate}
-                  maturityDate={maturityDate}
-                  setMaturityDate={setMaturityDate}
-                  maturityAmount={maturityAmount}
-                  setMaturityAmount={setMaturityAmount}
-                  isValidatingScheme={isValidatingScheme}
-                  onValidateScheme={handleValidateScheme}
-                />
-              ) : (
-                <StandardFormFields
-                  cfg={cfg}
-                  bankName={bankName}
-                  setBankName={setBankName}
-                  principalAmount={principalAmount}
-                  setPrincipalAmount={setPrincipalAmount}
-                  interestRate={interestRate}
-                  setInterestRate={setInterestRate}
-                  startDate={startDate}
-                  setStartDate={setStartDate}
-                  maturityDate={maturityDate}
-                  setMaturityDate={setMaturityDate}
-                  maturityAmount={maturityAmount}
-                  setMaturityAmount={setMaturityAmount}
-                  status={status}
-                  setStatus={setStatus}
-                  calculateMaturity={calculateMaturity}
-                />
-              )}
+              <StandardFormFields
+                bankName={bankName}
+                setBankName={setBankName}
+                principalAmount={principalAmount}
+                setPrincipalAmount={setPrincipalAmount}
+                interestRate={interestRate}
+                setInterestRate={setInterestRate}
+                startDate={startDate}
+                setStartDate={setStartDate}
+                maturityDate={maturityDate}
+                setMaturityDate={setMaturityDate}
+                maturityAmount={maturityAmount}
+                setMaturityAmount={setMaturityAmount}
+                status={status}
+                setStatus={setStatus}
+                calculateMaturity={calculateMaturity}
+              />
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Notes <span className="font-normal text-slate-400">(optional)</span></label>
@@ -480,7 +351,7 @@ function FixedDepositView({
                   disabled={loading}
                   className="flex-1 bg-indigo-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-indigo-700 transition-colors disabled:opacity-50"
                 >
-                  {loading ? 'Saving...' : editingFd ? 'Save Changes' : `Create ${cfg.title}`}
+                  {loading ? 'Saving...' : editingFd ? 'Save Changes' : `Create ${CFG.title}`}
                 </button>
               </div>
             </form>
@@ -493,8 +364,8 @@ function FixedDepositView({
         isOpen={!!confirmDelete}
         onClose={() => setConfirmDelete(null)}
         onConfirm={() => { if (confirmDelete) void handleDelete(confirmDelete.id); }}
-        title={`Delete ${cfg.title}`}
-        message={confirmDelete ? `Are you sure you want to delete the ${cfg.title.toLowerCase()} at "${confirmDelete.bank_name}"? This cannot be undone.` : ''}
+        title={`Delete ${CFG.title}`}
+        message={confirmDelete ? `Are you sure you want to delete the ${CFG.title.toLowerCase()} at "${confirmDelete.bank_name}"? This cannot be undone.` : ''}
         confirmLabel="Delete"
       />
     </div>

@@ -1,5 +1,7 @@
 import { Holding, Portfolio } from '../types/portfolio';
 import { getFDEffectiveValue } from './formatters';
+import { getRDEffectiveValue } from './rdUtils';
+import { getSIPEffectiveValue } from './sipUtils';
 import { getSSYEffectiveValue } from './ssyUtils';
 
 /** Sum invested amounts across holdings */
@@ -39,19 +41,16 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
   const stocks = target.reduce((s, p) => s + p.holdings.reduce((a, h) => a + h.currentValue, 0), 0);
   
   const fd = target.reduce((s, p) => s + p.fixedDeposits
-    .filter(f => f.fd_type === 'regular' || !f.fd_type)
     .reduce((a, f) => a + getFDEffectiveValue(f), 0), 0);
     
-  const rd = target.reduce((s, p) => s + p.fixedDeposits
-    .filter(f => f.fd_type === 'recurring')
-    .reduce((a, f) => a + getFDEffectiveValue(f), 0), 0);
+  const rd = target.reduce((s, p) => s + (p.rdAccounts || [])
+    .reduce((a, r) => a + getRDEffectiveValue(r), 0), 0);
     
   const ssy = target.reduce((s, p) => s + (p.ssyAccounts || [])
     .reduce((a, acc) => a + getSSYEffectiveValue(acc), 0), 0);
     
-  const sip = target.reduce((s, p) => s + p.fixedDeposits
-    .filter(f => f.fd_type === 'sip')
-    .reduce((a, f) => a + getFDEffectiveValue(f), 0), 0);
+  const sip = target.reduce((s, p) => s + (p.sipAccounts || [])
+    .reduce((a, sAcc) => a + getSIPEffectiveValue(sAcc), 0), 0);
 
   const gold = target.reduce((s, p) => s + p.goldHoldings.reduce((a, g) => a + Number(g.current_valuation), 0), 0);
   const realEstate = target.reduce((s, p) => s + p.realEstate.reduce((a, r) => a + Number(r.current_valuation), 0), 0);

@@ -58,6 +58,36 @@ export interface SSYAccount {
   created_at?: string;
 }
 
+export interface RDAccount {
+  id: string;
+  portfolio_id: string;
+  bank_name: string;
+  monthly_deposit: number;
+  interest_rate: number;
+  start_date: string;
+  maturity_date: string;
+  maturity_amount: number;
+  status: 'active' | 'matured';
+  contributions: { date: string; amount: number }[];
+  notes?: string;
+  created_at?: string;
+}
+
+export interface SIPAccount {
+  id: string;
+  portfolio_id: string;
+  fund_name: string;
+  monthly_sip: number;
+  expected_cagr: number;
+  units: number;
+  start_date: string;
+  next_sip_date?: string | null;
+  fallback_valuation: number;
+  mf_scheme_code?: string;
+  notes?: string;
+  created_at?: string;
+}
+
 export interface GoldHolding {
   id: string;
   portfolio_id: string;
@@ -105,7 +135,7 @@ export interface DocumentMetadata {
   name: string;
   file_path: string;
   file_type?: string;
-  asset_type: 'stock' | 'fd' | 'ssy' | 'gold' | 'real_estate' | 'insurance' | 'general';
+  asset_type: 'stock' | 'fd' | 'ssy' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'general';
   asset_id?: string;
   expiry_date?: string;
   created_at?: string;
@@ -117,6 +147,8 @@ export interface Portfolio {
   label: string;
   holdings: Holding[];
   fixedDeposits: FixedDeposit[];
+  rdAccounts?: RDAccount[];
+  sipAccounts?: SIPAccount[];
   ssyAccounts?: SSYAccount[];
   goldHoldings: GoldHolding[];
   realEstate: RealEstate[];
@@ -170,6 +202,30 @@ export interface SSYPayload {
   notes?: string;
 }
 
+export interface RDPayload {
+  bank_name: string;
+  monthly_deposit: number;
+  interest_rate: number;
+  start_date: string;
+  maturity_date: string;
+  maturity_amount: number;
+  status: 'active' | 'matured';
+  contributions?: { date: string; amount: number }[];
+  notes?: string;
+}
+
+export interface SIPPayload {
+  fund_name: string;
+  monthly_sip: number;
+  expected_cagr: number;
+  units: number;
+  start_date: string;
+  next_sip_date?: string | null;
+  fallback_valuation: number;
+  mf_scheme_code?: string;
+  notes?: string;
+}
+
 export interface GoldPayload {
   item_name: string;
   purity: string;
@@ -211,5 +267,5 @@ export interface DocumentPayload {
   expiryDate: string | null;
 }
 
-export type AssetPayload = StockPayload | FDPayload | SSYPayload | GoldPayload | RealEstatePayload | InsurancePayload | DocumentPayload;
+export type AssetPayload = StockPayload | FDPayload | SSYPayload | RDPayload | SIPPayload | GoldPayload | RealEstatePayload | InsurancePayload | DocumentPayload;
 

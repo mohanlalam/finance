@@ -1,16 +1,6 @@
 import React from 'react';
 
-interface ModeConfig {
-  issuerLabel: string;
-  principalLabel: string;
-  rateLabel: string;
-  startLabel: string;
-  maturityDateLabel: string;
-  maturityLabel: string;
-}
-
 interface StandardFormFieldsProps {
-  cfg: ModeConfig;
   bankName: string;
   setBankName: (val: string) => void;
   principalAmount: string;
@@ -29,7 +19,6 @@ interface StandardFormFieldsProps {
 }
 
 export function StandardFormFields({
-  cfg,
   bankName,
   setBankName,
   principalAmount,
@@ -49,7 +38,7 @@ export function StandardFormFields({
   return (
     <>
       <div>
-        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.issuerLabel}</label>
+        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Bank / Issuer Name</label>
         <input
           type="text"
           placeholder="e.g. SBI Bank, Post Office"
@@ -59,11 +48,9 @@ export function StandardFormFields({
         />
       </div>
 
-
-
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.principalLabel}</label>
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Principal Amount (₹)</label>
           <input
             type="number"
             placeholder="0"
@@ -74,7 +61,7 @@ export function StandardFormFields({
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.rateLabel}</label>
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Interest Rate (% p.a.)</label>
           <input
             type="number"
             step="0.01"
@@ -89,7 +76,7 @@ export function StandardFormFields({
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.startLabel}</label>
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Start Date</label>
           <input
             type="date"
             value={startDate}
@@ -99,7 +86,7 @@ export function StandardFormFields({
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.maturityDateLabel}</label>
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Maturity Date</label>
           <input
             type="date"
             value={maturityDate}
@@ -112,7 +99,7 @@ export function StandardFormFields({
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{cfg.maturityLabel}</label>
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Maturity Amount (₹)</label>
           <input
             type="number"
             placeholder="Auto-computed"
