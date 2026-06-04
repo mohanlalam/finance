@@ -259,3 +259,160 @@ export function SSYInstallmentSchedule({ fd, onUpdate }: SSYInstallmentScheduleP
               const paidContribs = getPaidContributionsForWindow(win.start, win.end, fd.contributions);
               const totalPaid = paidContribs.reduce((sum, c) => sum + c.amount, 0);
               const label = formatFinancialYear(getFinancialYearStartUTC(win.start));
+              const yearRange = `${formatISODateUTC(win.start)} to ${formatISODateUTC(win.end)}`;
+              const isFuture = win.start.getTime() > now.getTime();
+              const isCompliant = totalPaid >= SSY_MIN_FINANCIAL_YEAR_DEPOSIT;
+              const isFullyPaid = totalPaid >= SSY_MAX_FINANCIAL_YEAR_DEPOSIT;
+
+              return (
+                <div
+                  key={win.index}
+                  className={`rounded-xl border p-2 flex flex-col items-center justify-between text-center gap-1.5 transition-all ${getContainerClassName(totalPaid, isFuture)}`}
+                >
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold tracking-wide">{label}</span>
+                    <span className="text-[8px] text-slate-400 dark:text-slate-500 font-semibold">{yearRange}</span>
+                  </div>
+                  {totalPaid > 0 ? (
+                    <div className="flex flex-col items-center gap-1">
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isFullyPaid ? 'bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-450' : 'bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-450'}`}>
+                        ₹{totalPaid.toLocaleString('en-IN')}
+                      </span>
+                      {!isCompliant && (
+                        <span className="text-[8px] font-semibold text-amber-600 dark:text-amber-400">
+                          Min ₹250
+                        </span>
+                      )}
+                      {!isFuture && (
+                        <button
+                          type="button"
+                          onClick={() => openPaymentModal(win)}
+                          className="text-[9px] text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-bold hover:underline"
+                        >
+                          Manage
+                        </button>
+                      )}
+                    </div>
+                  ) : isFuture ? (
+                    <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-600 italic">
+                      Scheduled
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => openPaymentModal(win)}
+                      className="text-[9px] font-extrabold bg-purple-600 hover:bg-purple-700 text-white px-2 py-0.5 rounded-md transition-all active:scale-95 shadow-xs"
+                    >
+                      + Pay
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {payingSlot && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 shadow-xl" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setPayingSlot(null)} />
+          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6 border border-slate-100 dark:border-slate-700/50">
+            <h3 className="text-sm font-extrabold text-slate-850 dark:text-slate-100 mb-1">
+              Record SSY Deposit ({formatFinancialYear(getFinancialYearStartUTC(payingSlot.start))})
+            </h3>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-4">
+              Window: {formatISODateUTC(payingSlot.start)} to {formatISODateUTC(payingSlot.end)}
+            </p>
+
+            {(() => {
+              const paidContribs = getPaidContributionsForWindow(payingSlot.start, payingSlot.end, fd.contributions);
+              if (paidContribs.length === 0) return null;
+
+              return (
+                <div className="mb-4 space-y-1.5 max-h-32 overflow-y-auto border-b border-slate-100 dark:border-slate-700/50 pb-3">
+                  <p className="text-[9px] font-bold text-slate-400 dark:text-slate-550 uppercase tracking-wide">
+                    Contributions for this Year:
+                  </p>
+                  {paidContribs.map((contrib, idx) => (
+                    <div key={`${contrib.date}-${contrib.amount}-${idx}`} className="flex justify-between items-center text-xs bg-slate-50 dark:bg-slate-900/40 px-2.5 py-1 rounded-lg">
+                      <span className="font-semibold text-slate-600 dark:text-slate-400">{contrib.date}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-800 dark:text-slate-200">
+                          ₹{contrib.amount.toLocaleString('en-IN')}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => void handleDeleteContribution(contrib)}
+                          className="text-red-500 hover:text-red-700 text-sm font-bold w-4 h-4 flex items-center justify-center rounded hover:bg-red-50 dark:hover:bg-red-950/20"
+                          title="Delete this deposit"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                  Deposit Date
+                </label>
+                <input
+                  type="date"
+                  value={depositDate}
+                  min={formatISODateUTC(payingSlot.start)}
+                  max={formatISODateUTC(payingSlot.end)}
+                  onChange={(e) => setDepositDate(e.target.value)}
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                  Amount (₹)
+                </label>
+                <input
+                  type="number"
+                  min="50"
+                  step="50"
+                  value={depositAmount}
+                  placeholder="e.g. 10000"
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors"
+                />
+              </div>
+
+              {modalError && (
+                <p className="text-[10px] text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 rounded-xl px-2.5 py-1.5">
+                  {modalError}
+                </p>
+              )}
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setPayingSlot(null)}
+                  className="flex-1 border border-slate-200 dark:border-slate-750 text-slate-650 dark:text-slate-350 text-xs font-semibold rounded-xl py-2 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleRecordInstallment()}
+                  className="flex-1 bg-purple-600 text-white text-xs font-semibold rounded-xl py-2 hover:bg-purple-700 transition-all"
+                >
+                  Save Deposit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default React.memo(SSYInstallmentSchedule);
