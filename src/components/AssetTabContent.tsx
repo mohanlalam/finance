@@ -13,7 +13,7 @@ import InsuranceView from './InsuranceView';
 import DocumentVaultView from './DocumentVaultView';
 import { pnlColor, formatPercent, formatINR } from '../utils/formatters';
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
 
 interface PortfolioOption {
   name: string;

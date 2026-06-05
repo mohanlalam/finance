@@ -21,6 +21,12 @@ import MobileAlertsView from '../components/MobileAlertsView';
 import { ImportRow } from '../components/ExportPanel';
 import { AddHoldingPayload } from '../components/AddHoldingModal';
 
+import NetWorthTimelineChart from '../components/NetWorthTimelineChart';
+import TreemapChart from '../components/TreemapChart';
+import SankeyChart from '../components/SankeyChart';
+import PortfolioAssistant from '../components/PortfolioAssistant';
+import DashboardWidgets from '../components/DashboardWidgets';
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { formatINR, formatPercent, pnlColor } from '../utils/formatters';
 import { usePortfolio } from '../contexts/PortfolioContext';
@@ -32,7 +38,7 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { getBreakdownSlices } from '../utils/chartHelpers';
 import { classBreakdown, estimateTodayPnL } from '../utils/portfolioCalcs';
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
 
 export default function AppShell() {
   const {
@@ -43,6 +49,7 @@ export default function AppShell() {
     addPortfolio, renamePortfolio, deletePortfolio,
     addAsset, updateAsset, deleteAsset,
     portfolioOptionsForModal,
+    netWorthHistory,
   } = usePortfolio();
   const { darkMode, toggleDarkMode } = useTheme();
 
@@ -196,6 +203,10 @@ export default function AppShell() {
 
   const visiblePortfolio = portfolio;
 
+  if (activeAsset === 'widgets') {
+    return <DashboardWidgets portfolios={portfolios} activePortfolio={portfolio} />;
+  }
+
   return (
     <div
       onTouchStart={handleTouchStart}
@@ -319,11 +330,31 @@ export default function AppShell() {
 
                 {activeTab === 'all' && (
                   <SectionErrorBoundary sectionName="Portfolio Insights">
-                    <InsightsPanel insights={insights} />
+                    <InsightsPanel
+                      insights={insights}
+                      portfolios={portfolios}
+                      activePortfolio={portfolio}
+                    />
                   </SectionErrorBoundary>
                 )}
 
                 <div className="space-y-4">
+                  <SectionErrorBoundary sectionName="Net Worth Timeline">
+                    <NetWorthTimelineChart history={netWorthHistory} currentNetWorth={summaryData.totalCurrentValue} />
+                  </SectionErrorBoundary>
+
+                  <SectionErrorBoundary sectionName="Sankey Flow Diagram">
+                    <SankeyChart portfolios={portfolios} activePortfolio={portfolio} />
+                  </SectionErrorBoundary>
+
+                  <SectionErrorBoundary sectionName="Equity Concentration Treemap">
+                    <TreemapChart holdings={portfolio ? portfolio.holdings : portfolios.flatMap(p => p.holdings)} />
+                  </SectionErrorBoundary>
+
+                  <SectionErrorBoundary sectionName="AI Portfolio Assistant">
+                    <PortfolioAssistant portfolios={portfolios} />
+                  </SectionErrorBoundary>
+
                   <SectionErrorBoundary sectionName="Asset Class Pie Chart">
                     <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
                   </SectionErrorBoundary>
@@ -471,7 +502,11 @@ export default function AppShell() {
             {/* Insights Panel — only on family overview */}
             {activeTab === 'all' && (
               <SectionErrorBoundary sectionName="Portfolio Insights">
-                <InsightsPanel insights={insights} />
+                <InsightsPanel
+                  insights={insights}
+                  portfolios={portfolios}
+                  activePortfolio={portfolio}
+                />
               </SectionErrorBoundary>
             )}
 
@@ -484,6 +519,24 @@ export default function AppShell() {
               label={summaryData.label}
               isLoading={isLoading}
             />
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              <SectionErrorBoundary sectionName="Net Worth Timeline">
+                <NetWorthTimelineChart history={netWorthHistory} currentNetWorth={summaryData.totalCurrentValue} />
+              </SectionErrorBoundary>
+              <SectionErrorBoundary sectionName="AI Portfolio Assistant">
+                <PortfolioAssistant portfolios={portfolios} />
+              </SectionErrorBoundary>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              <SectionErrorBoundary sectionName="Sankey Flow Diagram">
+                <SankeyChart portfolios={portfolios} activePortfolio={portfolio} />
+              </SectionErrorBoundary>
+              <SectionErrorBoundary sectionName="Equity Concentration Treemap">
+                <TreemapChart holdings={portfolio ? portfolio.holdings : portfolios.flatMap(p => p.holdings)} />
+              </SectionErrorBoundary>
+            </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <SectionErrorBoundary sectionName="Asset Class Pie Chart">

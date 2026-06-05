@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react';
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
 
 interface UseSwipeNavigationProps {
   activeAsset: AssetTab;

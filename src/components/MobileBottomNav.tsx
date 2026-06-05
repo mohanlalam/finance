@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Home as HomeIcon, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, Heart, ChevronUp } from 'lucide-react';
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
 
 interface MobileBottomNavProps {
   activeAsset: AssetTab;

@@ -44,6 +44,12 @@ Component folders are isolated by asset domain to ensure clean separation of con
 * **[src/components/rd/](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/rd/)**: Recurring Deposit lists (`RDView.tsx`, `RDAccountCard.tsx`), modals (`RDFormModal.tsx`), and monthly contributions trackers (`RDInstallmentSchedule.tsx`).
 * **[src/components/sip/](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/sip/)**: Mutual Fund SIP views (`SIPView.tsx`, `SIPAccountCard.tsx`), modals (`SIPFormModal.tsx`), and live schema lookup fields (`SIPFormFields.tsx`).
 * **[src/components/ssy/](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/ssy/)**: SSY girls' ledger views (`SSYView.tsx`, `SSYAccountCard.tsx`), form modals (`SSYFormModal.tsx`), and custom compounding ledger schedules (`SSYSchedule.tsx`).
+* **Visual Dashboard & Widget Components**:
+  * **[NetWorthTimelineChart.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/NetWorthTimelineChart.tsx)**: Responsive SVG line & area chart showing compound net worth valuation timeline.
+  * **[TreemapChart.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/TreemapChart.tsx)**: SVG tree-map highlighting relative equity allocation sizes.
+  * **[SankeyChart.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/SankeyChart.tsx)**: SVG flow diagram mapping net worth down to category classes and sub-assets.
+  * **[PortfolioAssistant.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/PortfolioAssistant.tsx)**: Interactive NLP chat assistant interface.
+  * **[DashboardWidgets.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/DashboardWidgets.tsx)**: Capacitor WebView widget page with Net Worth, Today's Gain, and upcoming FD indicators.
 
 ---
 
@@ -62,6 +68,10 @@ Every deposit registry maps to its own separate database table. This guarantees 
 
 ## 🧮 Calculations & Formatters
 * **[portfolioCalcs.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/portfolioCalcs.ts)**: Handles asset allocation aggregations, performance monitoring, drift offsets, and exports the shared `compoundValue` engine.
+* **[performance.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/performance.ts)**: Implements Newton-Raphson + Bisection solvers for XIRR, CAGR calculations, and weighted holding age.
+* **[healthScore.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/healthScore.ts)**: Evaluates a 0-100 health score based on diversification, active SIPs, emergency buffers, equity concentration, and insurance status.
+* **[rebalancing.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/rebalancing.ts)**: Asset rebalancing engine calculating specific buy/sell recommendations from target drift.
+* **[assistant.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/assistant.ts)**: Client-side regex parser for NLP query matching (invested mutual funds, best returns, upcoming maturities).
 * **[formatters.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/formatters.ts)**: Implements Indian currency formats (`₹` INR) and standard FD compounding (compounded semi-annually).
 * **[rdUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/rdUtils.ts)**: Computes elapsed month contributions and quarterly compounding leveraging the shared engine.
 * **[sipUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/sipUtils.ts)**: Calculates monthly contributions elapsed and retrieves live NAV evaluation limits.

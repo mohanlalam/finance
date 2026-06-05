@@ -12,9 +12,14 @@ import {
 } from '../hooks/usePortfolioInsights';
 import AllocationTargetsSettings from './AllocationTargetsSettings';
 
+import { Portfolio } from '../types/portfolio';
+import { calculateHealthScore } from '../utils/healthScore';
+import { calculateRebalancing } from '../utils/rebalancing';
+
 interface InsightsPanelProps {
   insights: PortfolioInsights;
-  /** Called when allocation targets change so the parent re-fetches insights */
+  portfolios: Portfolio[];
+  activePortfolio: Portfolio | null;
   onTargetsChanged?: () => void;
 }
 
@@ -118,7 +123,23 @@ const BiggestMover = React.memo(function BiggestMover({ mover }: { mover: Holdin
   );
 });
 
-const AllocationDrift = React.memo(function AllocationDrift({ slices }: { slices: AllocationSlice[] }) {
+const AllocationDrift = React.memo(function AllocationDrift({
+  slices,
+  portfolios,
+  activePortfolio,
+}: {
+  slices: AllocationSlice[];
+  portfolios: Portfolio[];
+  activePortfolio: Portfolio | null;
+}) {
+  const targetPcts = {
+    equity: slices.find((s) => s.label === 'Stocks')?.target ?? 60,
+    debt: slices.find((s) => s.label === 'Fixed Deposits')?.target ?? 20,
+    gold: slices.find((s) => s.label === 'Gold')?.target ?? 10,
+    realEstate: slices.find((s) => s.label === 'Real Estate')?.target ?? 10,
+  };
+  const rebalancingAdvice = calculateRebalancing(portfolios, activePortfolio, targetPcts);
+
   if (slices.every((s) => s.value === 0)) return <p className="text-xs text-slate-400 dark:text-slate-500">No assets yet</p>;
   return (
     <div className="space-y-2.5">
@@ -154,6 +175,26 @@ const AllocationDrift = React.memo(function AllocationDrift({ slices }: { slices
           </div>
         );
       })}
+
+      {/* Actionable Rebalancing Recommendations */}
+      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/50 space-y-2">
+        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+          Rebalancing Recommendations
+        </p>
+        <div className="grid grid-cols-2 gap-2 text-[10.5px]">
+          {rebalancingAdvice.map((advice) => {
+            const isAligned = advice.recommendation === 'Aligned';
+            return (
+              <div key={advice.assetClass} className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/35 px-2.5 py-1.5 rounded-xl">
+                <span className="font-semibold text-slate-500">{advice.assetClass}</span>
+                <span className={`font-bold ${isAligned ? 'text-slate-400' : advice.diffAmount > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                  {advice.recommendation}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 });
@@ -268,8 +309,15 @@ const FILTERS: { id: InsightFilter; label: string }[] = [
   { id: 'due_soon', label: 'Due Soon' },
 ];
 
-export default React.memo(function InsightsPanel({ insights, onTargetsChanged }: InsightsPanelProps) {
+export default React.memo(function InsightsPanel({
+  insights,
+  portfolios,
+  activePortfolio,
+  onTargetsChanged,
+}: InsightsPanelProps) {
   const [activeFilter, setActiveFilter] = useState<InsightFilter>('all');
+
+  const healthReport = calculateHealthScore(portfolios, activePortfolio);
 
   const f = activeFilter;
   const showStocks = f === 'all' || f === 'stocks' || f === 'high_risk';
@@ -312,9 +360,54 @@ export default React.memo(function InsightsPanel({ insights, onTargetsChanged }:
         })}
       </div>
 
-      {/* Row 1 — Biggest Mover + Top Holdings */}
+      {/* Row 1 — Biggest Mover + Top Holdings + Health Score */}
       {showStocks && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card
+            title="Portfolio Health Score"
+            icon={<Activity size={14} className="text-emerald-500" />}
+            accent="emerald"
+          >
+            <div className="flex items-center gap-4">
+              <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15.915"
+                    className="text-slate-100 dark:text-slate-700/60"
+                    strokeWidth="3.5"
+                    stroke="currentColor"
+                    fill="none"
+                  />
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15.915"
+                    className="text-emerald-500 transition-all duration-500"
+                    strokeDasharray={`${healthReport.score} 100`}
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="none"
+                  />
+                </svg>
+                <div className="absolute text-center">
+                  <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100">{healthReport.score}</span>
+                  <span className="text-[6.5px] text-slate-400 block -mt-1.5">/100</span>
+                </div>
+              </div>
+              <div className="flex-1 space-y-1 overflow-y-auto max-h-[85px] pr-1 scrollbar-none">
+                {healthReport.strengths.slice(0, 2).map((s, idx) => (
+                  <p key={`str-${idx}`} className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 truncate">{s}</p>
+                ))}
+                {healthReport.risks.slice(0, 2).map((r, idx) => (
+                  <p key={`risk-${idx}`} className="text-[9px] font-semibold text-amber-600 dark:text-amber-405 truncate">{r}</p>
+                ))}
+              </div>
+            </div>
+          </Card>
+
           <Card
             title="Today's Biggest Mover"
             icon={<Activity size={14} className="text-amber-500 dark:text-amber-405" />}
@@ -371,7 +464,11 @@ export default React.memo(function InsightsPanel({ insights, onTargetsChanged }:
               accent="slate"
               action={<AllocationTargetsSettings onSaved={onTargetsChanged} />}
             >
-              <AllocationDrift slices={insights.allocationSlices} />
+              <AllocationDrift
+                slices={insights.allocationSlices}
+                portfolios={portfolios}
+                activePortfolio={activePortfolio}
+              />
             </Card>
           )}
         </div>
