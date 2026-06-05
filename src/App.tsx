@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { isPinConfigured, isSessionVerified } from './utils/auth';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { PortfolioProvider, usePortfolio } from './contexts/PortfolioContext';
+import { PortfolioProvider, usePortfolioState, usePortfolioActions } from './contexts/PortfolioContext';
 import PinLockScreen from './components/PinLockScreen';
 import DashboardLoading from './components/DashboardLoading';
 import DashboardError from './components/DashboardError';
@@ -62,7 +62,8 @@ export default function App() {
 
 /** Gate that shows loading/error states before rendering the dashboard */
 function LoadGate({ onUnlock }: { onUnlock: () => void }) {
-  const { loadStatus, loadError, isAuthRequired, load } = usePortfolio();
+  const { loadStatus, loadError, isAuthRequired } = usePortfolioState();
+  const { load } = usePortfolioActions();
 
   if (loadStatus === 'idle' || loadStatus === 'loading') {
     return <DashboardLoading />;

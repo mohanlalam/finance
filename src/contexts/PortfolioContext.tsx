@@ -158,7 +158,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
 
     function startPolling() {
       if (interval) return;
-      interval = setInterval(() => refreshPricesRef.current(), 30000);
+      interval = setInterval(() => refreshPricesRef.current(), 15 * 60 * 1000);
     }
 
     function stopPolling() {
@@ -208,55 +208,73 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
   }, [loadStatus, load]);
 
   const addRDAccount = useCallback(async (portfolioName: string, payload: RDPayload) => {
-    if (isMutatingRef.current) return;
+    if (isMutatingRef.current) {
+      throw new Error('An update is already in progress. Please try again in a moment.');
+    }
     await addAsset('rd_account', portfolioName, payload);
     await refreshSnapshot();
   }, [addAsset, isMutatingRef, refreshSnapshot]);
 
   const updateRDAccount = useCallback(async (id: string, payload: Partial<RDPayload>) => {
-    if (isMutatingRef.current) return;
+    if (isMutatingRef.current) {
+      throw new Error('An update is already in progress. Please try again in a moment.');
+    }
     await updateAsset('rd_account', id, payload);
     await refreshSnapshot();
   }, [updateAsset, isMutatingRef, refreshSnapshot]);
 
   const deleteRDAccount = useCallback(async (id: string) => {
-    if (isMutatingRef.current) return;
+    if (isMutatingRef.current) {
+      throw new Error('An update is already in progress. Please try again in a moment.');
+    }
     await deleteAsset('rd_account', id);
     await refreshSnapshot();
   }, [deleteAsset, isMutatingRef, refreshSnapshot]);
 
   const addSIPAccount = useCallback(async (portfolioName: string, payload: SIPPayload) => {
-    if (isMutatingRef.current) return;
+    if (isMutatingRef.current) {
+      throw new Error('An update is already in progress. Please try again in a moment.');
+    }
     await addAsset('sip_account', portfolioName, payload);
     await refreshSnapshot();
   }, [addAsset, isMutatingRef, refreshSnapshot]);
 
   const updateSIPAccount = useCallback(async (id: string, payload: Partial<SIPPayload>) => {
-    if (isMutatingRef.current) return;
+    if (isMutatingRef.current) {
+      throw new Error('An update is already in progress. Please try again in a moment.');
+    }
     await updateAsset('sip_account', id, payload);
     await refreshSnapshot();
   }, [updateAsset, isMutatingRef, refreshSnapshot]);
 
   const deleteSIPAccount = useCallback(async (id: string) => {
-    if (isMutatingRef.current) return;
+    if (isMutatingRef.current) {
+      throw new Error('An update is already in progress. Please try again in a moment.');
+    }
     await deleteAsset('sip_account', id);
     await refreshSnapshot();
   }, [deleteAsset, isMutatingRef, refreshSnapshot]);
 
   const addSSYAccount = useCallback(async (portfolioName: string, payload: SSYPayload) => {
-    if (isMutatingRef.current) return;
+    if (isMutatingRef.current) {
+      throw new Error('An update is already in progress. Please try again in a moment.');
+    }
     await addAsset('ssy_account', portfolioName, payload);
     await refreshSnapshot();
   }, [addAsset, isMutatingRef, refreshSnapshot]);
 
   const updateSSYAccount = useCallback(async (id: string, payload: Partial<SSYPayload>) => {
-    if (isMutatingRef.current) return;
+    if (isMutatingRef.current) {
+      throw new Error('An update is already in progress. Please try again in a moment.');
+    }
     await updateAsset('ssy_account', id, payload);
     await refreshSnapshot();
   }, [updateAsset, isMutatingRef, refreshSnapshot]);
 
   const deleteSSYAccount = useCallback(async (id: string) => {
-    if (isMutatingRef.current) return;
+    if (isMutatingRef.current) {
+      throw new Error('An update is already in progress. Please try again in a moment.');
+    }
     await deleteAsset('ssy_account', id);
     await refreshSnapshot();
   }, [deleteAsset, isMutatingRef, refreshSnapshot]);

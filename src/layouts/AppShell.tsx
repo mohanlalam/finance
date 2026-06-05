@@ -30,7 +30,7 @@ const PortfolioAssistant = React.lazy(() => import('../components/PortfolioAssis
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { formatINR, formatPercent, pnlColor } from '../utils/formatters';
-import { usePortfolio } from '../contexts/PortfolioContext';
+import { usePortfolioState, usePortfolioActions } from '../contexts/PortfolioContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePortfolioInsights } from '../hooks/usePortfolioInsights';
 import { useDismissibleAlerts } from '../hooks/useAlerts';
@@ -77,13 +77,15 @@ export default function AppShell() {
   const {
     portfolios, priceStatus, lastUpdated, failedSymbols,
     isUsingCachedData, cacheUpdatedAt, isPriceStale,
-    activeTab, setActiveTab, activePortfolio,
-    load, refreshPrices,
+    activeTab, activePortfolio, portfolioOptionsForModal,
+    netWorthHistory,
+  } = usePortfolioState();
+
+  const {
+    setActiveTab, load, refreshPrices,
     addPortfolio, renamePortfolio, deletePortfolio,
     addAsset, updateAsset, deleteAsset,
-    portfolioOptionsForModal,
-    netWorthHistory,
-  } = usePortfolio();
+  } = usePortfolioActions();
   const { darkMode, toggleDarkMode } = useTheme();
 
   const { family, asset } = useParams<{ family: string; asset: string }>();

@@ -7,7 +7,7 @@ import ConfirmModal from '../ConfirmModal';
 import SIPAccountCard from './SIPAccountCard';
 import { SIPFormModal } from './SIPFormModal';
 import { useSIPData } from '../../hooks/useSIPData';
-import { usePortfolio } from '../../contexts/PortfolioContext';
+import { usePortfolioState } from '../../contexts/PortfolioContext';
 import AssetCardSkeleton from '../AssetCardSkeleton';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
@@ -29,7 +29,7 @@ export function SIPView({
   portfolioOptions,
   autoOpenAddModal,
 }: SIPViewProps) {
-  const { portfolios, isMutating } = usePortfolio();
+  const { portfolios, isMutating } = usePortfolioState();
   const {
     sipAccounts,
     loading,

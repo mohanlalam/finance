@@ -1,17 +1,9 @@
 import { useMemo } from 'react';
-import { usePortfolio } from '../contexts/PortfolioContext';
+import { usePortfolioState, usePortfolioActions } from '../contexts/PortfolioContext';
 
 export function useSSYData() {
-  const {
-    portfolios,
-    load,
-    loadStatus,
-    loadError,
-    isMutating,
-    addSSYAccount,
-    updateSSYAccount,
-    deleteSSYAccount,
-  } = usePortfolio();
+  const { portfolios, loadStatus, loadError, isMutating } = usePortfolioState();
+  const { load, addSSYAccount, updateSSYAccount, deleteSSYAccount } = usePortfolioActions();
 
   const ssyAccounts = useMemo(() => {
     return portfolios.flatMap((p) => p.ssyAccounts || []);

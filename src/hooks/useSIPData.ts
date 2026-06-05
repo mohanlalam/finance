@@ -1,17 +1,9 @@
 import { useMemo } from 'react';
-import { usePortfolio } from '../contexts/PortfolioContext';
+import { usePortfolioState, usePortfolioActions } from '../contexts/PortfolioContext';
 
 export function useSIPData() {
-  const {
-    portfolios,
-    load,
-    loadStatus,
-    loadError,
-    isMutating,
-    addSIPAccount,
-    updateSIPAccount,
-    deleteSIPAccount,
-  } = usePortfolio();
+  const { portfolios, loadStatus, loadError, isMutating } = usePortfolioState();
+  const { load, addSIPAccount, updateSIPAccount, deleteSIPAccount } = usePortfolioActions();
 
   const sipAccounts = useMemo(() => {
     return portfolios.flatMap((p) => p.sipAccounts || []);

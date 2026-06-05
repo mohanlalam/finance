@@ -1,17 +1,9 @@
 import { useMemo } from 'react';
-import { usePortfolio } from '../contexts/PortfolioContext';
+import { usePortfolioState, usePortfolioActions } from '../contexts/PortfolioContext';
 
 export function useRDData() {
-  const {
-    portfolios,
-    load,
-    loadStatus,
-    loadError,
-    isMutating,
-    addRDAccount,
-    updateRDAccount,
-    deleteRDAccount,
-  } = usePortfolio();
+  const { portfolios, loadStatus, loadError, isMutating } = usePortfolioState();
+  const { load, addRDAccount, updateRDAccount, deleteRDAccount } = usePortfolioActions();
 
   const rdAccounts = useMemo(() => {
     return portfolios.flatMap((p) => p.rdAccounts || []);

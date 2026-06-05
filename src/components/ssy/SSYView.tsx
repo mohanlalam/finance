@@ -7,7 +7,7 @@ import ConfirmModal from '../ConfirmModal';
 import SSYAccountCard from './SSYAccountCard';
 import { SSYFormModal } from './SSYFormModal';
 import { useSSYData } from '../../hooks/useSSYData';
-import { usePortfolio } from '../../contexts/PortfolioContext';
+import { usePortfolioState } from '../../contexts/PortfolioContext';
 import AssetCardSkeleton from '../AssetCardSkeleton';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
@@ -29,7 +29,7 @@ export function SSYView({
   portfolioOptions,
   autoOpenAddModal,
 }: SSYViewProps) {
-  const { portfolios, isMutating } = usePortfolio();
+  const { portfolios, isMutating } = usePortfolioState();
   const {
     ssyAccounts,
     loading,

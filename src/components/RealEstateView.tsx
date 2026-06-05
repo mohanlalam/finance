@@ -4,7 +4,7 @@ import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/for
 import { Plus, Trash2, Edit2, Home, MapPin, TrendingUp, Building2, FileText, X, StickyNote } from 'lucide-react';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
-import { usePortfolio } from '../contexts/PortfolioContext';
+import { usePortfolioState } from '../contexts/PortfolioContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
 
 interface PortfolioOption {
@@ -37,7 +37,7 @@ export default React.memo(function RealEstateView({
   onDelete,
   autoOpenAddModal,
 }: RealEstateViewProps) {
-  const { isMutating } = usePortfolio();
+  const { isMutating } = usePortfolioState();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<RealEstate | null>(null);
   const [loading, setLoading] = useState(false);

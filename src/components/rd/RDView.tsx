@@ -7,7 +7,7 @@ import ConfirmModal from '../ConfirmModal';
 import RDAccountCard from './RDAccountCard';
 import { RDFormModal } from './RDFormModal';
 import { useRDData } from '../../hooks/useRDData';
-import { usePortfolio } from '../../contexts/PortfolioContext';
+import { usePortfolioState } from '../../contexts/PortfolioContext';
 import AssetCardSkeleton from '../AssetCardSkeleton';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
@@ -29,7 +29,7 @@ export function RDView({
   portfolioOptions,
   autoOpenAddModal,
 }: RDViewProps) {
-  const { portfolios, isMutating } = usePortfolio();
+  const { portfolios, isMutating } = usePortfolioState();
   const {
     rdAccounts,
     loading,

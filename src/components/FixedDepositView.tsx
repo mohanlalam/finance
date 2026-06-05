@@ -5,7 +5,7 @@ import { Plus, TrendingUp, Landmark, Calendar } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import StandardFormFields from './fd/StandardFormFields';
 import DepositDetailsCard from './fd/DepositDetailsCard';
-import { usePortfolio } from '../contexts/PortfolioContext';
+import { usePortfolioState } from '../contexts/PortfolioContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
@@ -61,7 +61,7 @@ function FixedDepositView({
   onDelete,
   autoOpenAddModal,
 }: FixedDepositViewProps) {
-  const { isMutating } = usePortfolio();
+  const { isMutating } = usePortfolioState();
   const [showModal, setShowModal] = useState(false);
   const [editingFd, setEditingFd] = useState<FixedDeposit | null>(null);
   const [loading, setLoading] = useState(false);
