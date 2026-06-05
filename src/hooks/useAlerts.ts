@@ -54,8 +54,17 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
       for (const h of p.holdings) {
         if (h.ltp <= 0 || h.weekHigh52 <= 0 || h.weekLow52 <= 0) continue;
 
-        // Within 2% of 52-week high
-        if (h.ltp >= h.weekHigh52 * 0.98) {
+        // Above or near 52-week high
+        if (h.ltp > h.weekHigh52) {
+          alerts.push({
+            id: `52w-high-above-${p.name}-${h.id ?? h.ticker}`,
+            type: '52w_high',
+            severity: 'info',
+            title: `${h.ticker} above 52-week high`,
+            message: `LTP ₹${h.ltp.toLocaleString('en-IN')} vs High ₹${h.weekHigh52.toLocaleString('en-IN')}`,
+            portfolioLabel: p.label,
+          });
+        } else if (h.ltp >= h.weekHigh52 * 0.98) {
           alerts.push({
             id: `52w-high-${p.name}-${h.id ?? h.ticker}`,
             type: '52w_high',
@@ -66,8 +75,17 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
           });
         }
 
-        // Within 2% of 52-week low
-        if (h.ltp <= h.weekLow52 * 1.02 && h.weekLow52 > 0) {
+        // Below or near 52-week low
+        if (h.ltp < h.weekLow52) {
+          alerts.push({
+            id: `52w-low-below-${p.name}-${h.id ?? h.ticker}`,
+            type: '52w_low',
+            severity: 'warning',
+            title: `${h.ticker} below 52-week low`,
+            message: `LTP ₹${h.ltp.toLocaleString('en-IN')} vs Low ₹${h.weekLow52.toLocaleString('en-IN')}`,
+            portfolioLabel: p.label,
+          });
+        } else if (h.ltp <= h.weekLow52 * 1.02 && h.weekLow52 > 0) {
           alerts.push({
             id: `52w-low-${p.name}-${h.id ?? h.ticker}`,
             type: '52w_low',
@@ -79,11 +97,20 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
         }
       }
 
-      // ── FD maturity within 15 days ──
+      // ── FD maturity alerts ──
       for (const fd of p.fixedDeposits) {
         if (fd.status === 'matured' || !fd.maturity_date) continue;
         const days = Math.ceil((new Date(fd.maturity_date).getTime() - Date.now()) / (1000 * 3600 * 24));
-        if (days >= 0 && days <= 15) {
+        if (days < 0) {
+          alerts.push({
+            id: `fd-overdue-${p.name}-${fd.id}`,
+            type: 'fd_maturity',
+            severity: 'critical',
+            title: `FD overdue for maturity`,
+            message: `${fd.bank_name} — ₹${Number(fd.principal_amount).toLocaleString('en-IN')} (Matured ${Math.abs(days)} days ago)`,
+            portfolioLabel: p.label,
+          });
+        } else if (days <= 15) {
           alerts.push({
             id: `fd-maturity-${p.name}-${fd.id}`,
             type: 'fd_maturity',
@@ -95,11 +122,20 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
         }
       }
 
-      // ── Insurance renewal within 30 days ──
+      // ── Insurance renewal alerts ──
       for (const ins of p.insurances) {
         if (!ins.renewal_date) continue;
         const days = Math.ceil((new Date(ins.renewal_date).getTime() - Date.now()) / (1000 * 3600 * 24));
-        if (days >= 0 && days <= 30) {
+        if (days < 0) {
+          alerts.push({
+            id: `insurance-overdue-${p.name}-${ins.id}`,
+            type: 'insurance_renewal',
+            severity: 'critical',
+            title: `Insurance premium overdue`,
+            message: `${ins.policy_name} — ${ins.provider} (Due ${Math.abs(days)} days ago)`,
+            portfolioLabel: p.label,
+          });
+        } else if (days <= 30) {
           alerts.push({
             id: `insurance-renewal-${p.name}-${ins.id}`,
             type: 'insurance_renewal',
@@ -111,11 +147,20 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
         }
       }
 
-      // ── Document expiry within 30 days ──
+      // ── Document expiry alerts ──
       for (const doc of p.documents) {
         if (!doc.expiry_date) continue;
         const days = Math.ceil((new Date(doc.expiry_date).getTime() - Date.now()) / (1000 * 3600 * 24));
-        if (days >= 0 && days <= 30) {
+        if (days < 0) {
+          alerts.push({
+            id: `document-expired-${p.name}-${doc.id}`,
+            type: 'document_expiry',
+            severity: 'critical',
+            title: `Document expired`,
+            message: `${doc.name} (Expired ${Math.abs(days)} days ago)`,
+            portfolioLabel: p.label,
+          });
+        } else if (days <= 30) {
           alerts.push({
             id: `document-expiry-${p.name}-${doc.id}`,
             type: 'document_expiry',
