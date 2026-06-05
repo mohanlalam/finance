@@ -106,6 +106,7 @@ project antigravity/
 │   │   │   ├── SSYFormModal.tsx      # Create/Edit SSY account form dialog
 │   │   │   ├── SSYSchedule.tsx       # Compounding yearly ledger breakdown
 │   │   │   └── SSYView.tsx           # Main dashboard registry for SSY accounts
+│   │   ├── AssetCardSkeleton.tsx # Reusable pulsing shimmer card wireframe for all registry views
 │   │   ├── AddHoldingModal.tsx   # Modal form to add new stock holdings
 │   │   ├── AddFamilyModal.tsx    # Modal form to add new family members
 │   │   ├── RenamePortfolioModal.tsx # Modal form to rename family member portfolios
@@ -132,11 +133,13 @@ project antigravity/
 │   │   ├── SectionErrorBoundary.tsx # Nested React error boundary for asset-specific dashboard components
 │   │   ├── DashboardLoading.tsx  # Skeleton loader states for dashboard fetch
 │   │   └── DashboardError.tsx    # Full-page retry UI for API/Supabase connection failures
+│   ├── contexts/
+│   │   └── PortfolioContext.tsx  # Global state provider, pricing sync statuses, and consolidated CRUD functions
 │   ├── hooks/
 │   │   ├── usePortfolioData.ts   # Core data hook — Edge Function list, CRUD operations, local cache, live prices
-│   │   ├── useRDData.ts          # Standalone hook for Recurring Deposits CRUD
-│   │   ├── useSIPData.ts         # Standalone hook for Mutual Fund SIPs CRUD
-│   │   ├── useSSYData.ts         # Standalone hook for Sukanya Samriddhi Yojana CRUD
+│   │   ├── useRDData.ts          # Thin hook wrapper pulling Recurring Deposits CRUD from context
+│   │   ├── useSIPData.ts          # Thin hook wrapper pulling Mutual Fund SIPs CRUD from context
+│   │   ├── useSSYData.ts         # Thin hook wrapper pulling Sukanya Samriddhi Yojana CRUD from context
 │   │   ├── usePortfolioInsights.ts # Computes allocation, performer, and reminder insights
 │   │   ├── useMarketData.ts      # Standalone market price fetcher (CORS proxied)
 │   │   ├── useAlerts.ts          # Evaluates warnings, contains visible/dismissed states
@@ -149,10 +152,10 @@ project antigravity/
 │   │   ├── auth.ts               # Session PIN verification and security helpers
 │   │   ├── chartHelpers.ts       # Groups color configuration hex values and slices formatting
 │   │   ├── formatters.ts         # INR formatting, percent formatting, P&L colors, getDocumentUrl, and FD compounding
-│   │   ├── portfolioCalcs.ts     # Computes aggregate values and drift splits across all assets
-│   │   ├── rdUtils.ts            # Recurring Deposit installment & compounding calculators
+│   │   ├── portfolioCalcs.ts     # Computes aggregate values and drift splits; contains the shared compoundValue engine
+│   │   ├── rdUtils.ts            # Recurring Deposit installment & compounding calculations leveraging the shared engine
 │   │   ├── sipUtils.ts           # SIP contribution & manual valuation helpers
-│   │   ├── ssyUtils.ts           # SSY Financial Year and annual compounding calculators
+│   │   ├── ssyUtils.ts           # SSY Financial Year & annual compounding calculations leveraging the shared engine
 │   │   └── supabaseClient.ts     # Supabase SDK initialization
 │   └── data/
 │       ├── portfolioData.ts      # Static/seed portfolio data

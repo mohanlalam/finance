@@ -7,16 +7,19 @@ This document provides a high-level overview of the folder structure, data flow,
 ## 📁 Key File Structures & Domains
 
 ### 1. State Management & API Hooks
+* **[PortfolioContext.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/contexts/PortfolioContext.tsx)**
+  * Unified context provider hosting global state, pricing sync statuses, portfolios data, and the consolidated CRUD action triggers (`addAsset`, `updateAsset`, `deleteAsset`).
 * **[usePortfolioData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/usePortfolioData.ts)**
-  * Source of truth for portfolio assets, net worth snapshots, and CRUD operations.
+  * Source of truth for portfolio assets, net worth snapshots, and database transactions.
+  * Guarantees race-free state transitions by processing queries/mutations through a serialized promise queue (`runMutation`).
   * Connects to Supabase Edge Functions via [apiClient.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/apiClient.ts).
-  * Manages stock price polling (Yahoo Finance cache proxy) and coordinates overall state updates across the application.
+  * Manages stock price caching (15-minute TTL) and live polling.
 * **[useRDData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useRDData.ts)**
-  * Dedicated hook wrapping CRUD actions for Recurring Deposits (`rd_account` asset type).
+  * Thin hook wrapper pulling Recurring Deposit state and operations directly from `PortfolioContext`.
 * **[useSIPData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useSIPData.ts)**
-  * Dedicated hook wrapping CRUD actions for Mutual Fund SIPs (`sip_account` asset type), fetching live NAV values from AMFI schemes.
+  * Thin hook wrapper pulling Mutual Fund SIP state and operations from `PortfolioContext`.
 * **[useSSYData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useSSYData.ts)**
-  * Dedicated hook wrapping CRUD actions for Sukanya Samriddhi Yojana accounts (`ssy_account` asset type).
+  * Thin hook wrapper pulling Sukanya Samriddhi Yojana state and operations from `PortfolioContext`.
 
 ### 2. App Shell & Navigation Router
 * **[App.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/App.tsx)**
@@ -56,8 +59,8 @@ Every deposit registry maps to its own separate database table. This guarantees 
 ---
 
 ## 🧮 Calculations & Formatters
-* **[portfolioCalcs.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/portfolioCalcs.ts)**: Handles asset allocation aggregations, performance monitoring (gainers/losers), and drift offsets.
-* **[formatters.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/formatters.ts)**: Implements Indian currency formats (`₹` INR) and standard FD compounding (`getFDEffectiveValue`).
-* **[rdUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/rdUtils.ts)**: Computes elapsed month contributions and quarterly compounding per contribution date.
+* **[portfolioCalcs.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/portfolioCalcs.ts)**: Handles asset allocation aggregations, performance monitoring, drift offsets, and exports the shared `compoundValue` engine.
+* **[formatters.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/formatters.ts)**: Implements Indian currency formats (`₹` INR) and standard FD compounding (compounded semi-annually).
+* **[rdUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/rdUtils.ts)**: Computes elapsed month contributions and quarterly compounding leveraging the shared engine.
 * **[sipUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/sipUtils.ts)**: Calculates monthly contributions elapsed and retrieves live NAV evaluation limits.
-* **[ssyUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/ssyUtils.ts)**: Contains Indian Financial Year calculations, annual SSY compounding rates, and legal deposit range validations.
+* **[ssyUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/ssyUtils.ts)**: Contains Indian Financial Year calculations, annual SSY compounding rates (compounded annually on April 1st), and legal deposit range validations.
