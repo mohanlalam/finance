@@ -4,6 +4,8 @@ import { formatINR, getDocumentUrl } from '../utils/formatters';
 import { Plus, Trash2, Edit2, Shield, ShieldAlert, FileText, Calendar, Clock, X, StickyNote } from 'lucide-react';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
+import { usePortfolio } from '../contexts/PortfolioContext';
+import AssetCardSkeleton from './AssetCardSkeleton';
 
 interface PortfolioOption {
   name: string;
@@ -50,6 +52,7 @@ export default React.memo(function InsuranceView({
   onDelete,
   autoOpenAddModal,
 }: InsuranceViewProps) {
+  const { isMutating } = usePortfolio();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Insurance | null>(null);
   const [loading, setLoading] = useState(false);
@@ -196,7 +199,11 @@ export default React.memo(function InsuranceView({
           </button>
         </div>
 
-        {insurances.length === 0 ? (
+        {isMutating ? (
+          <div className="p-6">
+            <AssetCardSkeleton count={Math.max(1, insurances.length || 3)} />
+          </div>
+        ) : insurances.length === 0 ? (
           <div className="p-16 text-center">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-950/30 dark:to-pink-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
               <Shield size={36} className="text-rose-400 dark:text-rose-500" />

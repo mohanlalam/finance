@@ -14,6 +14,8 @@ import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Pa
 import { getDocumentUrl } from '../utils/formatters';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
+import { usePortfolio } from '../contexts/PortfolioContext';
+import AssetCardSkeleton from './AssetCardSkeleton';
 
 type AssetType = 'general' | 'stock' | 'fd' | 'gold' | 'real_estate' | 'insurance';
 
@@ -51,6 +53,7 @@ export default React.memo(function DocumentVaultView({
   onDelete,
   autoOpenAddModal,
 }: DocumentVaultViewProps) {
+  const { isMutating } = usePortfolio();
   const [activeFolder, setActiveFolder] = useState<AssetType>('general');
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -311,7 +314,11 @@ export default React.memo(function DocumentVaultView({
           </div>
         </div>
 
-        {folderDocs.length === 0 ? (
+        {isMutating ? (
+          <div className="p-6">
+            <AssetCardSkeleton count={Math.max(1, folderDocs.length || 3)} />
+          </div>
+        ) : folderDocs.length === 0 ? (
           <div className="p-16 text-center">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center mx-auto mb-5 shadow-sm">
               <Folder size={36} className="text-slate-400 dark:text-slate-500" />

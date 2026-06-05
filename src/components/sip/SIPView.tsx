@@ -8,6 +8,7 @@ import SIPAccountCard from './SIPAccountCard';
 import { SIPFormModal } from './SIPFormModal';
 import { useSIPData } from '../../hooks/useSIPData';
 import { usePortfolio } from '../../contexts/PortfolioContext';
+import AssetCardSkeleton from '../AssetCardSkeleton';
 
 interface PortfolioOption {
   name: string;
@@ -27,9 +28,10 @@ export function SIPView({
   portfolioOptions,
   autoOpenAddModal,
 }: SIPViewProps) {
-  const { portfolios } = usePortfolio();
+  const { portfolios, isMutating } = usePortfolio();
   const {
     sipAccounts,
+    loading,
     addSIPAccount,
     updateSIPAccount,
     deleteSIPAccount,
@@ -122,7 +124,7 @@ export function SIPView({
               {totalValue >= totalPrincipal ? '+' : ''}{formatINR(totalValue - totalPrincipal)} Gains
             </p>
           </div>
-          <TrendingUp size={40} className="text-emerald-500/20 shrink-0" aria-hidden="true" />
+          <TrendingUp size={40} className="text-emerald-500/25 shrink-0" aria-hidden="true" />
         </div>
 
         <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
@@ -149,7 +151,11 @@ export function SIPView({
           </button>
         </div>
 
-        {filteredAccounts.length === 0 ? (
+        {loading || isMutating ? (
+          <div className="p-6">
+            <AssetCardSkeleton count={Math.max(1, filteredAccounts.length || 3)} />
+          </div>
+        ) : filteredAccounts.length === 0 ? (
           <div className="p-16 text-center">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-sky-50 to-cyan-100 dark:from-sky-950/30 dark:to-cyan-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
               <TrendingUp size={36} className="text-sky-400 dark:text-sky-500" aria-hidden="true" />

@@ -1,4 +1,5 @@
 import { RDAccount } from '../types/portfolio';
+import { compoundValue } from './portfolioCalcs';
 
 /**
  * Returns the total amount actually invested in a Recurring Deposit.
@@ -42,7 +43,7 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
         const diff = end.getTime() - cDate.getTime();
         const remYears = diff / (1000 * 3600 * 24 * 365.25);
         if (remYears >= 0) {
-          total += Number(c.amount) * Math.pow(1 + r / 400, 4 * remYears);
+          total += compoundValue(Number(c.amount), r, 4, remYears);
         } else {
           total += Number(c.amount);
         }
@@ -53,7 +54,7 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
       let total = 0;
       for (let m = 0; m < totalMonths; m++) {
         const remainingYears = (totalMonths - m) / 12;
-        total += p * Math.pow(1 + r / 400, 4 * remainingYears);
+        total += compoundValue(p, r, 4, remainingYears);
       }
       return total > 0 ? total : p;
     }

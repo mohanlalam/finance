@@ -4,6 +4,8 @@ import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/for
 import { Plus, Trash2, Edit2, Home, MapPin, TrendingUp, Building2, FileText, X, StickyNote } from 'lucide-react';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
+import { usePortfolio } from '../contexts/PortfolioContext';
+import AssetCardSkeleton from './AssetCardSkeleton';
 
 interface PortfolioOption {
   name: string;
@@ -35,6 +37,7 @@ export default React.memo(function RealEstateView({
   onDelete,
   autoOpenAddModal,
 }: RealEstateViewProps) {
+  const { isMutating } = usePortfolio();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<RealEstate | null>(null);
   const [loading, setLoading] = useState(false);
@@ -190,7 +193,11 @@ export default React.memo(function RealEstateView({
           </button>
         </div>
 
-        {realEstate.length === 0 ? (
+        {isMutating ? (
+          <div className="p-6">
+            <AssetCardSkeleton count={Math.max(1, realEstate.length || 3)} />
+          </div>
+        ) : realEstate.length === 0 ? (
           <div className="p-16 text-center">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950/30 dark:to-teal-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
               <Building2 size={36} className="text-emerald-400 dark:text-emerald-500" />

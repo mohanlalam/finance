@@ -37,7 +37,7 @@ type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real
 export default function AppShell() {
   const {
     portfolios, priceStatus, lastUpdated, failedSymbols,
-    isUsingCachedData, cacheUpdatedAt,
+    isUsingCachedData, cacheUpdatedAt, isPriceStale,
     activeTab, setActiveTab, activePortfolio,
     load, refreshPrices,
     addPortfolio, renamePortfolio, deletePortfolio,
@@ -264,6 +264,13 @@ export default function AppShell() {
           </div>
         )}
 
+        {isPriceStale && priceStatus !== 'error' && (
+          <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-400 rounded-lg px-4 py-3 text-sm">
+            <AlertCircle size={16} className="shrink-0 text-amber-600 dark:text-amber-400" />
+            <span>Stock prices may be outdated. Press Ctrl+Shift+R to refresh.</span>
+          </div>
+        )}
+
         {priceStatus === 'success' && failedSymbols.length > 0 && (
           <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-lg px-4 py-3 text-sm">
             <AlertCircle size={16} className="shrink-0 text-slate-400 dark:text-slate-500" />
@@ -299,6 +306,7 @@ export default function AppShell() {
                   todayPnLPercent={todayPnLPercent}
                   breakdown={breakdown}
                   alertCount={visibleAlerts.length}
+                  alerts={visibleAlerts}
                   lastUpdated={lastUpdated}
                   priceStatus={priceStatus}
                   onRefresh={refreshPrices}

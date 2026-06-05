@@ -30,6 +30,12 @@ export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavi
   }, []);
 
   const handleTouchEnd = useCallback(() => {
+    const globalWin = window as unknown as { __lastShortcutTime?: number };
+    const lastShortcut = globalWin.__lastShortcutTime || 0;
+    if (Date.now() - lastShortcut < 300) {
+      return;
+    }
+
     const diffX = touchStart.current.x - touchEnd.current.x;
     const diffY = touchStart.current.y - touchEnd.current.y;
 

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Holding, Portfolio, FixedDeposit, RDAccount, SIPAccount, SSYAccount, GoldHolding, RealEstate, Insurance, DocumentMetadata, AssetPayload } from '../types/portfolio';
 import { getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../utils/rdUtils';
@@ -192,14 +192,17 @@ function applyLivePrices(portfolios: Portfolio[], priceMap: Record<string, { ltp
   });
 }
 
-function applyLiveMFNavs(portfolios: Portfolio[], navMap: Record<string, number>): Portfolio[] {
+function applyLiveMFNavs(portfolios: Portfolio[], navMap: Record<string, number>, staleSchemes: Set<string>): Portfolio[] {
   return portfolios.map((portfolio) => {
     const updatedSips = (portfolio.sipAccounts || []).map((s) => {
       if (s.mf_scheme_code && navMap[s.mf_scheme_code] !== undefined) {
         const nav = navMap[s.mf_scheme_code];
         const units = Number(s.units || 0);
         const currentValue = units * nav;
-        return { ...s, fallback_valuation: currentValue };
+        const navIsStale = staleSchemes.has(s.mf_scheme_code);
+        return { ...s, fallback_valuation: currentValue, navIsStale };
+      } else if (s.mf_scheme_code) {
+        return { ...s, navIsStale: true };
       }
       return s;
     });
@@ -272,6 +275,63 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   const [cacheUpdatedAt, setCacheUpdatedAt] = useState<Date | null>(null);
   const [isAuthRequired, setIsAuthRequired] = useState(false);
 
+  const [lastPriceFetch, setLastPriceFetchState] = useState<Date | null>(() => {
+    try {
+      const saved = localStorage.getItem('finance_last_price_fetch');
+      return saved ? new Date(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const setLastPriceFetch = useCallback((date: Date) => {
+    setLastPriceFetchState(date);
+    try {
+      localStorage.setItem('finance_last_price_fetch', date.toISOString());
+    } catch { /* ignore */ }
+  }, []);
+
+  const PRICE_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+  const isPriceStale = lastPriceFetch
+    ? Date.now() - lastPriceFetch.getTime() > PRICE_CACHE_TTL_MS
+    : true;
+
+  const isMutatingRef = useRef(false);
+  const [isMutating, setIsMutating] = useState(false);
+  const mutationQueue = useRef<Promise<unknown>>(Promise.resolve());
+
+  const runMutation = useCallback(async <T>(fn: () => Promise<T>): Promise<T> => {
+    const nextPromise = new Promise<T>((resolve, reject) => {
+      mutationQueue.current.then(async () => {
+        isMutatingRef.current = true;
+        setIsMutating(true);
+        try {
+          const res = await fn();
+          resolve(res);
+        } catch (err) {
+          reject(err);
+        } finally {
+          isMutatingRef.current = false;
+          setIsMutating(false);
+        }
+      }).catch(async () => {
+        isMutatingRef.current = true;
+        setIsMutating(true);
+        try {
+          const res = await fn();
+          resolve(res);
+        } catch (err) {
+          reject(err);
+        } finally {
+          isMutatingRef.current = false;
+          setIsMutating(false);
+        }
+      });
+    });
+    mutationQueue.current = nextPromise.catch(() => {});
+    return nextPromise;
+  }, []);
+
   const handleAuthExpired = useCallback(() => {
     setIsAuthRequired(true);
     onAuthExpired?.();
@@ -305,20 +365,21 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     return map;
   }, []);
 
-  const fetchLiveMFNavs = useCallback(async (sips: SIPAccount[]): Promise<Record<string, number>> => {
+  const fetchLiveMFNavs = useCallback(async (sips: SIPAccount[]): Promise<{ navMap: Record<string, number>, staleSchemes: Set<string> }> => {
     const sipAccounts = sips.filter((s) => s.mf_scheme_code);
-    if (sipAccounts.length === 0) return {};
+    const staleSchemes = new Set<string>();
+    const navMap: Record<string, number> = {};
+    if (sipAccounts.length === 0) return { navMap, staleSchemes };
 
     const uniqueSchemeCodes = Array.from(new Set(sipAccounts.map((s) => s.mf_scheme_code!)));
-    const navMap: Record<string, number> = {};
 
     const BATCH_SIZE = 4;
     for (let i = 0; i < uniqueSchemeCodes.length; i += BATCH_SIZE) {
       const batch = uniqueSchemeCodes.slice(i, i + BATCH_SIZE);
       await Promise.allSettled(
         batch.map(async (code) => {
+          const cacheKey = `mf_nav_${code}`;
           try {
-            const cacheKey = `mf_nav_${code}`;
             const cached = sessionStorage.getItem(cacheKey);
             if (cached) {
               const parsed = JSON.parse(cached);
@@ -334,13 +395,25 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
               sessionStorage.setItem(cacheKey, JSON.stringify({ nav: details.latestNav, timestamp: Date.now() }));
             }
           } catch (err) {
-            console.warn(`[portfolio] Failed to fetch NAV for mutual fund scheme ${code}:`, err);
+            console.warn(`[portfolio] Failed to fetch NAV for mutual fund scheme ${code}, checking cache fallback:`, err);
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+              try {
+                const parsed = JSON.parse(cached);
+                navMap[code] = parsed.nav;
+                staleSchemes.add(code);
+              } catch {
+                staleSchemes.add(code);
+              }
+            } else {
+              staleSchemes.add(code);
+            }
           }
         })
       );
     }
 
-    return navMap;
+    return { navMap, staleSchemes };
   }, []);
 
   const load = useCallback(async () => {
@@ -404,17 +477,18 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         const allHoldings = built.flatMap((p) => p.holdings);
         const allSips = built.flatMap((p) => p.sipAccounts || []);
 
-        const [priceMap, navMap] = await Promise.all([
+        const [priceMap, navData] = await Promise.all([
           allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
           fetchLiveMFNavs(allSips),
         ]);
 
         setPortfolios((prev) => {
           const withPrices = applyLivePrices(prev, priceMap);
-          return applyLiveMFNavs(withPrices, navMap);
+          return applyLiveMFNavs(withPrices, navData.navMap, navData.staleSchemes);
         });
 
         setLastUpdated(new Date());
+        setLastPriceFetch(new Date());
         setPriceStatus('success');
       } catch (priceErr: unknown) {
         console.error('[portfolio] price fetch failed:', priceErr);
@@ -445,7 +519,11 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       setLoadError(msg);
       setLoadStatus('error');
     }
-  }, [loadFromDB, fetchLivePrices, fetchLiveMFNavs, handleAuthExpired]);
+  }, [loadFromDB, fetchLivePrices, fetchLiveMFNavs, handleAuthExpired, setLastPriceFetch]);
+
+  const refreshSnapshot = useCallback(async () => {
+    await load();
+  }, [load]);
 
   const refreshPrices = useCallback(async () => {
     if (portfolios.length === 0) return;
@@ -454,17 +532,18 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       const allHoldings = portfolios.flatMap((p) => p.holdings);
       const allSips = portfolios.flatMap((p) => p.sipAccounts || []);
 
-      const [priceMap, navMap] = await Promise.all([
+      const [priceMap, navData] = await Promise.all([
         allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
         fetchLiveMFNavs(allSips),
       ]);
 
       setPortfolios((prev) => {
         const withPrices = applyLivePrices(prev, priceMap);
-        return applyLiveMFNavs(withPrices, navMap);
+        return applyLiveMFNavs(withPrices, navData.navMap, navData.staleSchemes);
       });
 
       setLastUpdated(new Date());
+      setLastPriceFetch(new Date());
       setPriceStatus('success');
     } catch (err) {
       if (err instanceof AppApiError && err.code === 'auth') {
@@ -472,39 +551,43 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       }
       setPriceStatus('error');
     }
-  }, [portfolios, fetchLivePrices, fetchLiveMFNavs, handleAuthExpired]);
+  }, [portfolios, fetchLivePrices, fetchLiveMFNavs, handleAuthExpired, setLastPriceFetch]);
 
   const addPortfolio = useCallback(async (name: string, label: string) => {
-    try {
-      await invokeFunction<unknown>('holdings-crud?action=add_portfolio', {
-        method: 'POST',
-        body: { name, label },
-      });
-      await load();
-    } catch (err) {
-      if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
-      throw err;
-    }
-  }, [load, handleAuthExpired]);
+    return runMutation(async () => {
+      try {
+        await invokeFunction<unknown>('holdings-crud?action=add_portfolio', {
+          method: 'POST',
+          body: { name, label },
+        });
+        await load();
+      } catch (err) {
+        if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
+        throw err;
+      }
+    });
+  }, [runMutation, load, handleAuthExpired]);
 
   const renamePortfolio = useCallback(async (portfolioId: string, newLabel: string) => {
-    try {
-      await invokeFunction<unknown>('holdings-crud?action=update', {
-        method: 'PATCH',
-        body: {
-          asset_type: 'portfolio',
-          id: portfolioId,
-          label: newLabel,
-        },
-      });
-      setPortfolios((prev) =>
-        prev.map((p) => (p.id === portfolioId ? { ...p, label: newLabel } : p))
-      );
-    } catch (err) {
-      if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
-      throw err;
-    }
-  }, [handleAuthExpired]);
+    return runMutation(async () => {
+      try {
+        await invokeFunction<unknown>('holdings-crud?action=update', {
+          method: 'PATCH',
+          body: {
+            asset_type: 'portfolio',
+            id: portfolioId,
+            label: newLabel,
+          },
+        });
+        setPortfolios((prev) =>
+          prev.map((p) => (p.id === portfolioId ? { ...p, label: newLabel } : p))
+        );
+      } catch (err) {
+        if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
+        throw err;
+      }
+    });
+  }, [runMutation, handleAuthExpired]);
 
   const addAsset = useCallback(async (
     assetType: string,
@@ -512,74 +595,82 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     payload: AssetPayload,
     options: AssetMutationOptions = {}
   ) => {
-    try {
-      const finalPayload = { ...payload } as Record<string, unknown>;
-      await invokeFunction<unknown>('holdings-crud?action=add', {
-        method: 'POST',
-        body: {
-          asset_type: assetType,
-          portfolioName,
-          ...finalPayload,
-        },
-      });
-      if (options.reload !== false) {
-        await load();
+    return runMutation(async () => {
+      try {
+        const finalPayload = { ...payload } as Record<string, unknown>;
+        await invokeFunction<unknown>('holdings-crud?action=add', {
+          method: 'POST',
+          body: {
+            asset_type: assetType,
+            portfolioName,
+            ...finalPayload,
+          },
+        });
+        if (options.reload !== false) {
+          await load();
+        }
+      } catch (err) {
+        if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
+        throw err;
       }
-    } catch (err) {
-      if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
-      throw err;
-    }
-  }, [load, handleAuthExpired]);
+    });
+  }, [runMutation, load, handleAuthExpired]);
 
   const updateAsset = useCallback(async (assetType: string, id: string, payload: Partial<AssetPayload>) => {
-    try {
-      const finalPayload = { ...payload } as Record<string, unknown>;
-      await invokeFunction<unknown>('holdings-crud?action=update', {
-        method: 'PATCH',
-        body: {
-          asset_type: assetType,
-          id,
-          ...finalPayload,
-        },
-      });
-      await load();
-    } catch (err) {
-      if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
-      throw err;
-    }
-  }, [load, handleAuthExpired]);
+    return runMutation(async () => {
+      try {
+        const finalPayload = { ...payload } as Record<string, unknown>;
+        await invokeFunction<unknown>('holdings-crud?action=update', {
+          method: 'PATCH',
+          body: {
+            asset_type: assetType,
+            id,
+            ...finalPayload,
+          },
+        });
+        await load();
+      } catch (err) {
+        if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
+        throw err;
+      }
+    });
+  }, [runMutation, load, handleAuthExpired]);
 
   const deleteAsset = useCallback(async (assetType: string, id: string) => {
-    try {
-      await invokeFunction<unknown>('holdings-crud?action=delete', {
-        method: 'DELETE',
-        body: {
-          asset_type: assetType,
-          id,
-        },
-      });
-      await load();
-    } catch (err) {
-      if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
-      throw err;
-    }
-  }, [load, handleAuthExpired]);
+    return runMutation(async () => {
+      try {
+        await invokeFunction<unknown>('holdings-crud?action=delete', {
+          method: 'DELETE',
+          body: {
+            asset_type: assetType,
+            id,
+          },
+        });
+        await load();
+      } catch (err) {
+        if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
+        throw err;
+      }
+    });
+  }, [runMutation, load, handleAuthExpired]);
 
   const deletePortfolio = useCallback(async (portfolioId: string) => {
-    try {
-      await invokeFunction<unknown>('holdings-crud?action=delete', {
-        method: 'DELETE',
-        body: {
-          asset_type: 'portfolio',
-          id: portfolioId,
-        },
-      });
-      await load();
-    } catch (err) {
-      if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
-      throw err;
-    }
-  }, [load, handleAuthExpired]);
+    return runMutation(async () => {
+      try {
+        await invokeFunction<unknown>('holdings-crud?action=delete', {
+          method: 'DELETE',
+          body: {
+            asset_type: 'portfolio',
+            id: portfolioId,
+          },
+        });
+        await load();
+      } catch (err) {
+        if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
+        throw err;
+      }
+    });
+  }, [runMutation, load, handleAuthExpired]);
 
   return {
     portfolios,
@@ -592,7 +683,12 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     isUsingCachedData,
     cacheUpdatedAt,
     isAuthRequired,
+    isMutating,
+    isMutatingRef,
+    lastPriceFetch,
+    isPriceStale,
     load,
+    refreshSnapshot,
     refreshPrices,
     addPortfolio,
     renamePortfolio,

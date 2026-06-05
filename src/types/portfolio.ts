@@ -84,6 +84,7 @@ export interface SIPAccount {
   next_sip_date?: string | null;
   fallback_valuation: number;
   mf_scheme_code?: string;
+  navIsStale?: boolean;
   notes?: string;
   created_at?: string;
 }

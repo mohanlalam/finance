@@ -199,40 +199,100 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
 export function useDismissibleAlerts(portfolios: Portfolio[]) {
   const alerts = useAlerts(portfolios);
 
-  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(() => {
+  // We load/save as Record<string, number> (id -> dismissedAt timestamp)
+  const [dismissedAlertsMap, setDismissedAlertsMap] = useState<Record<string, number>>(() => {
     try {
-      const saved = sessionStorage.getItem('finance_dismissed_alerts');
-      return saved ? new Set(JSON.parse(saved)) : new Set();
+      const saved = localStorage.getItem('portfolio_dismissed_alerts');
+      if (!saved) return {};
+      const parsed = JSON.parse(saved) as Record<string, number>;
+      
+      // Auto-filter out anything older than 30 days on load
+      const now = Date.now();
+      const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+      const cleanMap: Record<string, number> = {};
+      let changed = false;
+      for (const [id, timestamp] of Object.entries(parsed)) {
+        if (now - timestamp < thirtyDaysMs) {
+          cleanMap[id] = timestamp;
+        } else {
+          changed = true;
+        }
+      }
+      if (changed) {
+        localStorage.setItem('portfolio_dismissed_alerts', JSON.stringify(cleanMap));
+      }
+      return cleanMap;
     } catch {
-      return new Set();
+      return {};
     }
   });
 
+  // Perform monthly cleanup of alerts that are no longer active
+  useEffect(() => {
+    try {
+      const now = Date.now();
+      const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+      const lastCleanupStr = localStorage.getItem('portfolio_dismissed_alerts_cleanup');
+      const lastCleanup = lastCleanupStr ? parseInt(lastCleanupStr, 10) : 0;
+
+      if (!lastCleanup) {
+        // First time initialization of cleanup timer
+        localStorage.setItem('portfolio_dismissed_alerts_cleanup', String(now));
+        return;
+      }
+
+      // If last cleanup was more than 30 days ago
+      if (now - lastCleanup > thirtyDaysMs) {
+        const activeIds = new Set(alerts.map((a) => a.id));
+        setDismissedAlertsMap((prev) => {
+          const cleanMap: Record<string, number> = {};
+          let changed = false;
+          for (const [id, timestamp] of Object.entries(prev)) {
+            // Keep only if it's currently active AND not older than 30 days
+            if (activeIds.has(id) && now - timestamp < thirtyDaysMs) {
+              cleanMap[id] = timestamp;
+            } else {
+              changed = true;
+            }
+          }
+          if (changed) {
+            localStorage.setItem('portfolio_dismissed_alerts', JSON.stringify(cleanMap));
+            return cleanMap;
+          }
+          return prev;
+        });
+        localStorage.setItem('portfolio_dismissed_alerts_cleanup', String(now));
+      }
+    } catch { /* ignore */ }
+  }, [alerts]);
+
   const handleDismissAlert = useCallback((id: string) => {
-    setDismissedAlerts((prev) => {
-      const next = new Set(prev);
-      next.add(id);
+    setDismissedAlertsMap((prev) => {
+      const next = { ...prev, [id]: Date.now() };
       try {
-        sessionStorage.setItem('finance_dismissed_alerts', JSON.stringify(Array.from(next)));
+        localStorage.setItem('portfolio_dismissed_alerts', JSON.stringify(next));
       } catch { /* ignore */ }
       return next;
     });
   }, []);
 
   const handleDismissAll = useCallback(() => {
-    setDismissedAlerts((prev) => {
-      const next = new Set(prev);
-      alerts.forEach((a) => next.add(a.id));
+    setDismissedAlertsMap((prev) => {
+      const next = { ...prev };
+      const now = Date.now();
+      alerts.forEach((a) => {
+        next[a.id] = now;
+      });
       try {
-        sessionStorage.setItem('finance_dismissed_alerts', JSON.stringify(Array.from(next)));
+        localStorage.setItem('portfolio_dismissed_alerts', JSON.stringify(next));
       } catch { /* ignore */ }
       return next;
     });
   }, [alerts]);
 
   const visibleAlerts = useMemo(() => {
-    return alerts.filter((a) => !dismissedAlerts.has(a.id));
-  }, [alerts, dismissedAlerts]);
+    return alerts.filter((a) => !Object.prototype.hasOwnProperty.call(dismissedAlertsMap, a.id));
+  }, [alerts, dismissedAlertsMap]);
 
   return {
     visibleAlerts,

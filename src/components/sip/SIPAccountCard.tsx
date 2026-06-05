@@ -36,9 +36,15 @@ export function SIPAccountCard({
             <span className="w-2.5 h-2.5 rounded-full bg-sky-500 animate-pulse" aria-hidden="true" />
             <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">{account.fund_name}</h4>
             {account.mf_scheme_code ? (
-              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-500 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                <Wifi size={10} /> Live
-              </span>
+              account.navIsStale ? (
+                <span className="text-[10px] font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-500 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                  <Wifi size={10} className="text-amber-500 animate-pulse" /> Stale (AMFI Offline)
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-500 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                  <Wifi size={10} /> Live
+                </span>
+              )
             ) : (
               <span className="text-[10px] font-bold bg-slate-100 text-slate-500 dark:bg-slate-900/30 dark:text-slate-400 px-2 py-0.5 rounded-full flex items-center gap-0.5">
                 Manual

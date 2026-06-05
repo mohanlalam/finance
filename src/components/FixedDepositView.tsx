@@ -5,6 +5,8 @@ import { Plus, TrendingUp, Landmark, Calendar } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import StandardFormFields from './fd/StandardFormFields';
 import DepositDetailsCard from './fd/DepositDetailsCard';
+import { usePortfolio } from '../contexts/PortfolioContext';
+import AssetCardSkeleton from './AssetCardSkeleton';
 
 interface PortfolioOption {
   name: string;
@@ -58,6 +60,7 @@ function FixedDepositView({
   onDelete,
   autoOpenAddModal,
 }: FixedDepositViewProps) {
+  const { isMutating } = usePortfolio();
   const [showModal, setShowModal] = useState(false);
   const [editingFd, setEditingFd] = useState<FixedDeposit | null>(null);
   const [loading, setLoading] = useState(false);
@@ -235,7 +238,11 @@ function FixedDepositView({
           </button>
         </div>
 
-        {fixedDeposits.length === 0 ? (
+        {isMutating ? (
+          <div className="p-6">
+            <AssetCardSkeleton count={Math.max(1, fixedDeposits.length || 3)} />
+          </div>
+        ) : fixedDeposits.length === 0 ? (
           <div className="p-16 text-center">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
               <Landmark size={36} className="text-indigo-400 dark:text-indigo-500" aria-hidden="true" />

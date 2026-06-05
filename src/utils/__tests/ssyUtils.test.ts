@@ -17,6 +17,14 @@ describe('SSY Utilities', () => {
       // March 31st, 2026 is in FY 2025-26
       expect(getFYStartYear(new Date(Date.UTC(2026, 2, 31)))).toBe(2025);
     });
+
+    it('handles local dates and midnights on April 1st without timezone shift', () => {
+      const localDate = new Date(2026, 3, 1); // April 1st in local time (month index 3)
+      expect(getFYStartYear(localDate)).toBe(2026);
+
+      const localMarch31 = new Date(2026, 2, 31); // March 31st in local time (month index 2)
+      expect(getFYStartYear(localMarch31)).toBe(2025);
+    });
   });
 
   describe('getSSYRateForFY', () => {

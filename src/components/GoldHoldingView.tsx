@@ -4,6 +4,8 @@ import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/for
 import { Plus, Trash2, Edit2, Coins, TrendingUp, Scale, FileText, X, StickyNote } from 'lucide-react';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
+import { usePortfolio } from '../contexts/PortfolioContext';
+import AssetCardSkeleton from './AssetCardSkeleton';
 
 interface PortfolioOption {
   name: string;
@@ -35,6 +37,7 @@ export default React.memo(function GoldHoldingView({
   onDelete,
   autoOpenAddModal,
 }: GoldHoldingViewProps) {
+  const { isMutating } = usePortfolio();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<GoldHolding | null>(null);
   const [loading, setLoading] = useState(false);
@@ -176,7 +179,11 @@ export default React.memo(function GoldHoldingView({
           </button>
         </div>
 
-        {goldHoldings.length === 0 ? (
+        {isMutating ? (
+          <div className="p-6">
+            <AssetCardSkeleton count={Math.max(1, goldHoldings.length || 3)} />
+          </div>
+        ) : goldHoldings.length === 0 ? (
           <div className="p-16 text-center">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-950/30 dark:to-yellow-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
               <Coins size={36} className="text-amber-400 dark:text-amber-500" />

@@ -1,4 +1,5 @@
 import { SSYAccount } from '../types/portfolio';
+import { compoundValue } from './portfolioCalcs';
 
 // ─── SSY Historical Interest Rates (Government-notified) ───
 // Maps FY start year → rate (%). FY 2024 means April 2024 – March 2025.
@@ -48,10 +49,24 @@ export function parseISODateUTC(value: string): Date | null {
   return isNaN(d.getTime()) ? null : d;
 }
 
+/** Normalizes a date to UTC start of day without timezone shifting. */
+export function normalizeDateToUTC(date: Date): Date {
+  if (
+    date.getUTCHours() === 0 &&
+    date.getUTCMinutes() === 0 &&
+    date.getUTCSeconds() === 0 &&
+    date.getUTCMilliseconds() === 0
+  ) {
+    return date;
+  }
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+}
+
 /** Returns the April-start year for the financial year containing `date`. */
 export function getFYStartYear(date: Date): number {
-  const m = date.getUTCMonth(); // 0=Jan … 3=Apr
-  return m >= 3 ? date.getUTCFullYear() : date.getUTCFullYear() - 1;
+  const normalized = normalizeDateToUTC(date);
+  const m = normalized.getUTCMonth(); // 0=Jan … 3=Apr
+  return m >= 3 ? normalized.getUTCFullYear() : normalized.getUTCFullYear() - 1;
 }
 
 /**
@@ -234,11 +249,15 @@ export function getCompoundedDepositValue(
                      (currentDate.getUTCMonth() === 2 && currentDate.getUTCDate() === 31 && periodEnd.getUTCMonth() === 2 && periodEnd.getUTCDate() === 31);
     const actualT = isFullFY ? 1.0 : t;
 
+    const nextBalance = actualT === 1.0
+      ? compoundValue(balance, ratePercent, 1, 1.0)
+      : balance + balance * r * actualT;
+
     if (periodEnd.getTime() >= endDate.getTime()) {
-      balance += balance * r * actualT;
+      balance = nextBalance;
       break;
     } else {
-      balance += balance * r * actualT;
+      balance = nextBalance;
       currentDate = periodEnd;
     }
   }
@@ -251,6 +270,7 @@ export function getSSYContributions(account: SSYAccount, end: Date): { date: str
     return account.contributions;
   }
   
+  const endNormalized = normalizeDateToUTC(end);
   const list: { date: string; amount: number }[] = [];
   const start = parseISODateUTC(account.start_date);
   if (!start) return [];
@@ -258,7 +278,7 @@ export function getSSYContributions(account: SSYAccount, end: Date): { date: str
   
   for (let i = 0; i < 15; i++) {
     const depDate = new Date(Date.UTC(start.getUTCFullYear() + i, start.getUTCMonth(), start.getUTCDate()));
-    if (depDate.getTime() <= end.getTime()) {
+    if (depDate.getTime() <= endNormalized.getTime()) {
       list.push({
         date: depDate.toISOString().split('T')[0],
         amount: p
@@ -296,6 +316,8 @@ export function getSSYEffectiveValue(account: SSYAccount, upToDate: Date = new D
     return Number(account.maturity_amount);
   }
 
+  const upToDateNormalized = normalizeDateToUTC(upToDate);
+
   // Run the full financial year growth simulation
   const { yearlyBreakdown } = calculateSSYMaturityWithRates(
     account.start_date,
@@ -309,7 +331,7 @@ export function getSSYEffectiveValue(account: SSYAccount, upToDate: Date = new D
     return Number(account.annual_deposit);
   }
 
-  const evalFYStartYear = getFYStartYear(upToDate);
+  const evalFYStartYear = getFYStartYear(upToDateNormalized);
   const acctFYStart = getFYStartYear(start);
   const maturityYear = start.getUTCFullYear() + 21;
 
@@ -330,7 +352,7 @@ export function getSSYEffectiveValue(account: SSYAccount, upToDate: Date = new D
   const lastClosingBalance = idx > 0 ? yearlyBreakdown[idx - 1].closingBalance : 0;
 
   const fyStartDate = new Date(Date.UTC(row.fyStartYear, 3, 1));
-  const isFutureRelToEval = fyStartDate.getTime() > upToDate.getTime();
+  const isFutureRelToEval = fyStartDate.getTime() > upToDateNormalized.getTime();
 
   let deposits = 0;
   if (isFutureRelToEval || !account.contributions || account.contributions.length === 0) {
@@ -340,15 +362,15 @@ export function getSSYEffectiveValue(account: SSYAccount, upToDate: Date = new D
       .filter((c) => {
         const d = parseISODateUTC(c.date);
         if (!d) return false;
-        return d.getTime() >= fyStartDate.getTime() && d.getTime() <= upToDate.getTime();
+        return d.getTime() >= fyStartDate.getTime() && d.getTime() <= upToDateNormalized.getTime();
       })
       .reduce((sum, c) => sum + c.amount, 0);
     deposits = Math.min(deposits, SSY_MAX_FY_DEPOSIT);
   }
 
-  const elapsedMs = Math.max(0, upToDate.getTime() - fyStartDate.getTime());
-  const isFullFY = (upToDate.getUTCMonth() === 2 && upToDate.getUTCDate() === 31) ||
-                   (upToDate.getMonth() === 2 && upToDate.getDate() === 31);
+  const elapsedMs = Math.max(0, upToDateNormalized.getTime() - fyStartDate.getTime());
+  const isFullFY = (upToDateNormalized.getUTCMonth() === 2 && upToDateNormalized.getUTCDate() === 31) ||
+                   (upToDateNormalized.getMonth() === 2 && upToDateNormalized.getDate() === 31);
   const fraction = isFullFY ? 1.0 : elapsedMs / (365.25 * 24 * 3600 * 1000);
   const rate = row.interestRate;
 

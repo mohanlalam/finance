@@ -8,6 +8,7 @@ import SSYAccountCard from './SSYAccountCard';
 import { SSYFormModal } from './SSYFormModal';
 import { useSSYData } from '../../hooks/useSSYData';
 import { usePortfolio } from '../../contexts/PortfolioContext';
+import AssetCardSkeleton from '../AssetCardSkeleton';
 
 interface PortfolioOption {
   name: string;
@@ -27,9 +28,10 @@ export function SSYView({
   portfolioOptions,
   autoOpenAddModal,
 }: SSYViewProps) {
-  const { portfolios } = usePortfolio();
+  const { portfolios, isMutating } = usePortfolio();
   const {
     ssyAccounts,
+    loading,
     addSSYAccount,
     updateSSYAccount,
     deleteSSYAccount,
@@ -158,7 +160,11 @@ export function SSYView({
         )}
       </div>
 
-      {filteredAccounts.length === 0 ? (
+      {loading || isMutating ? (
+        <div className="p-2">
+          <AssetCardSkeleton count={Math.max(1, filteredAccounts.length || 3)} />
+        </div>
+      ) : filteredAccounts.length === 0 ? (
         <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden p-16 text-center">
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-50 to-fuchsia-100 dark:from-purple-950/30 dark:to-fuchsia-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
             <Heart size={36} className="text-purple-400 dark:text-purple-500" aria-hidden="true" />

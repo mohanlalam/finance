@@ -1,7 +1,6 @@
-/* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useCallback, useRef, useMemo, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useCallback, useRef, useMemo, ReactNode, MutableRefObject } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Portfolio, PortfolioName, AssetPayload } from '../types/portfolio';
+import { Portfolio, PortfolioName, AssetPayload, RDPayload, SIPPayload, SSYPayload } from '../types/portfolio';
 import { NetWorthSnapshot, usePortfolioData, LoadStatus } from '../hooks/usePortfolioData';
 
 interface PortfolioContextValue {
@@ -16,6 +15,8 @@ interface PortfolioContextValue {
   isUsingCachedData: boolean;
   cacheUpdatedAt: Date | null;
   isAuthRequired: boolean;
+  lastPriceFetch: Date | null;
+  isPriceStale: boolean;
 
   /* Active view state */
   activeTab: PortfolioName;
@@ -24,6 +25,7 @@ interface PortfolioContextValue {
 
   /* Actions */
   load: () => Promise<void>;
+  refreshSnapshot: () => Promise<void>;
   refreshPrices: () => Promise<void>;
   addPortfolio: (name: string, label: string) => Promise<void>;
   renamePortfolio: (id: string, label: string) => Promise<void>;
@@ -31,6 +33,23 @@ interface PortfolioContextValue {
   addAsset: (assetType: string, portfolioName: string, payload: AssetPayload, options?: { reload?: boolean }) => Promise<void>;
   updateAsset: (assetType: string, id: string, payload: Partial<AssetPayload>) => Promise<void>;
   deleteAsset: (assetType: string, id: string) => Promise<void>;
+  isMutating: boolean;
+  isMutatingRef: MutableRefObject<boolean>;
+
+  /* RD Actions */
+  addRDAccount: (portfolioName: string, payload: RDPayload) => Promise<void>;
+  updateRDAccount: (id: string, payload: Partial<RDPayload>) => Promise<void>;
+  deleteRDAccount: (id: string) => Promise<void>;
+
+  /* SIP Actions */
+  addSIPAccount: (portfolioName: string, payload: SIPPayload) => Promise<void>;
+  updateSIPAccount: (id: string, payload: Partial<SIPPayload>) => Promise<void>;
+  deleteSIPAccount: (id: string) => Promise<void>;
+
+  /* SSY Actions */
+  addSSYAccount: (portfolioName: string, payload: SSYPayload) => Promise<void>;
+  updateSSYAccount: (id: string, payload: Partial<SSYPayload>) => Promise<void>;
+  deleteSSYAccount: (id: string) => Promise<void>;
 
   /* Derived */
   portfolioOptionsForModal: { name: string; label: string }[];
@@ -65,7 +84,12 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     isUsingCachedData,
     cacheUpdatedAt,
     isAuthRequired,
+    lastPriceFetch,
+    isPriceStale,
+    isMutating,
+    isMutatingRef,
     load,
+    refreshSnapshot,
     refreshPrices,
     addPortfolio,
     renamePortfolio,
@@ -175,6 +199,60 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadStatus, load]);
 
+  const addRDAccount = useCallback(async (portfolioName: string, payload: RDPayload) => {
+    if (isMutatingRef.current) return;
+    await addAsset('rd_account', portfolioName, payload);
+    await refreshSnapshot();
+  }, [addAsset, isMutatingRef, refreshSnapshot]);
+
+  const updateRDAccount = useCallback(async (id: string, payload: Partial<RDPayload>) => {
+    if (isMutatingRef.current) return;
+    await updateAsset('rd_account', id, payload);
+    await refreshSnapshot();
+  }, [updateAsset, isMutatingRef, refreshSnapshot]);
+
+  const deleteRDAccount = useCallback(async (id: string) => {
+    if (isMutatingRef.current) return;
+    await deleteAsset('rd_account', id);
+    await refreshSnapshot();
+  }, [deleteAsset, isMutatingRef, refreshSnapshot]);
+
+  const addSIPAccount = useCallback(async (portfolioName: string, payload: SIPPayload) => {
+    if (isMutatingRef.current) return;
+    await addAsset('sip_account', portfolioName, payload);
+    await refreshSnapshot();
+  }, [addAsset, isMutatingRef, refreshSnapshot]);
+
+  const updateSIPAccount = useCallback(async (id: string, payload: Partial<SIPPayload>) => {
+    if (isMutatingRef.current) return;
+    await updateAsset('sip_account', id, payload);
+    await refreshSnapshot();
+  }, [updateAsset, isMutatingRef, refreshSnapshot]);
+
+  const deleteSIPAccount = useCallback(async (id: string) => {
+    if (isMutatingRef.current) return;
+    await deleteAsset('sip_account', id);
+    await refreshSnapshot();
+  }, [deleteAsset, isMutatingRef, refreshSnapshot]);
+
+  const addSSYAccount = useCallback(async (portfolioName: string, payload: SSYPayload) => {
+    if (isMutatingRef.current) return;
+    await addAsset('ssy_account', portfolioName, payload);
+    await refreshSnapshot();
+  }, [addAsset, isMutatingRef, refreshSnapshot]);
+
+  const updateSSYAccount = useCallback(async (id: string, payload: Partial<SSYPayload>) => {
+    if (isMutatingRef.current) return;
+    await updateAsset('ssy_account', id, payload);
+    await refreshSnapshot();
+  }, [updateAsset, isMutatingRef, refreshSnapshot]);
+
+  const deleteSSYAccount = useCallback(async (id: string) => {
+    if (isMutatingRef.current) return;
+    await deleteAsset('ssy_account', id);
+    await refreshSnapshot();
+  }, [deleteAsset, isMutatingRef, refreshSnapshot]);
+
   const value = useMemo<PortfolioContextValue>(() => ({
     portfolios,
     netWorthHistory,
@@ -190,6 +268,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     setActiveTab,
     activePortfolio,
     load,
+    refreshSnapshot,
     refreshPrices,
     addPortfolio,
     renamePortfolio,
@@ -198,12 +277,29 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     updateAsset,
     deleteAsset,
     portfolioOptionsForModal,
+    isMutating,
+    isMutatingRef,
+    lastPriceFetch,
+    isPriceStale,
+    addRDAccount,
+    updateRDAccount,
+    deleteRDAccount,
+    addSIPAccount,
+    updateSIPAccount,
+    deleteSIPAccount,
+    addSSYAccount,
+    updateSSYAccount,
+    deleteSSYAccount,
   }), [
     portfolios, netWorthHistory, loadStatus, loadError, priceStatus,
     lastUpdated, failedSymbols, isUsingCachedData, cacheUpdatedAt,
     isAuthRequired, activeTab, setActiveTab, activePortfolio, load, refreshPrices,
     addPortfolio, renamePortfolio, deletePortfolio, addAsset, updateAsset,
-    deleteAsset, portfolioOptionsForModal,
+    deleteAsset, portfolioOptionsForModal, isMutating, isMutatingRef, refreshSnapshot,
+    lastPriceFetch, isPriceStale,
+    addRDAccount, updateRDAccount, deleteRDAccount,
+    addSIPAccount, updateSIPAccount, deleteSIPAccount,
+    addSSYAccount, updateSSYAccount, deleteSSYAccount,
   ]);
 
   return <PortfolioContext.Provider value={value}>{children}</PortfolioContext.Provider>;

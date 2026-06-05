@@ -1,6 +1,7 @@
 import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock, Heart } from 'lucide-react';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
+import { Alert } from '../hooks/useAlerts';
 
 interface MobileHomeSummaryProps {
   summaryData: {
@@ -24,6 +25,7 @@ interface MobileHomeSummaryProps {
     insurancePremium: number;
   };
   alertCount: number;
+  alerts: Alert[];
   lastUpdated: Date | null;
   priceStatus: string;
   onRefresh: () => void;
@@ -40,6 +42,7 @@ export default function MobileHomeSummary({
   todayPnLPercent,
   breakdown,
   alertCount,
+  alerts,
   lastUpdated,
   priceStatus,
   onRefresh,
@@ -60,6 +63,19 @@ export default function MobileHomeSummary({
   const propertyCount = currentPortfolios.reduce((s, p) => s + p.realEstate.length, 0);
   const insuranceCount = currentPortfolios.reduce((s, p) => s + p.insurances.length, 0);
   const docCount = currentPortfolios.reduce((s, p) => s + p.documents.length, 0);
+
+  const totalValue =
+    breakdown.stocks +
+    breakdown.fd +
+    breakdown.rd +
+    breakdown.ssy +
+    breakdown.sip +
+    breakdown.gold +
+    breakdown.realEstate;
+
+  const getPercent = (val: number) => {
+    return totalValue > 0 ? (val / totalValue) * 100 : 0;
+  };
 
   const assetCards = [
     {
@@ -217,6 +233,71 @@ export default function MobileHomeSummary({
         </button>
       </div>
 
+      {/* Asset Allocation Section */}
+      {totalValue > 0 && (
+        <div className="bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-800/80 rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Asset Allocation</span>
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{formatINR(totalValue)}</span>
+          </div>
+          
+          <div className="w-full h-3.5 bg-slate-100 dark:bg-slate-700 rounded-full flex overflow-hidden shadow-inner">
+            {breakdown.stocks > 0 && <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.stocks)}%` }} />}
+            {breakdown.fd > 0 && <div className="h-full bg-indigo-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.fd)}%` }} />}
+            {breakdown.rd > 0 && <div className="h-full bg-pink-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.rd)}%` }} />}
+            {breakdown.ssy > 0 && <div className="h-full bg-purple-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.ssy)}%` }} />}
+            {breakdown.sip > 0 && <div className="h-full bg-sky-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.sip)}%` }} />}
+            {breakdown.gold > 0 && <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.gold)}%` }} />}
+            {breakdown.realEstate > 0 && <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.realEstate)}%` }} />}
+          </div>
+
+          <div className="grid grid-cols-3 gap-y-2 gap-x-2 pt-1 text-[9.5px] font-bold text-slate-500 dark:text-slate-400">
+            {breakdown.stocks > 0 && (
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="w-2.5 h-2.5 rounded bg-blue-500 shrink-0" />
+                <span className="truncate">Stocks ({getPercent(breakdown.stocks).toFixed(0)}%)</span>
+              </div>
+            )}
+            {breakdown.fd > 0 && (
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="w-2.5 h-2.5 rounded bg-indigo-500 shrink-0" />
+                <span className="truncate">FD ({getPercent(breakdown.fd).toFixed(0)}%)</span>
+              </div>
+            )}
+            {breakdown.rd > 0 && (
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="w-2.5 h-2.5 rounded bg-pink-500 shrink-0" />
+                <span className="truncate">RD ({getPercent(breakdown.rd).toFixed(0)}%)</span>
+              </div>
+            )}
+            {breakdown.ssy > 0 && (
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="w-2.5 h-2.5 rounded bg-purple-500 shrink-0" />
+                <span className="truncate">SSY ({getPercent(breakdown.ssy).toFixed(0)}%)</span>
+              </div>
+            )}
+            {breakdown.sip > 0 && (
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="w-2.5 h-2.5 rounded bg-sky-500 shrink-0" />
+                <span className="truncate">SIP ({getPercent(breakdown.sip).toFixed(0)}%)</span>
+              </div>
+            )}
+            {breakdown.gold > 0 && (
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="w-2.5 h-2.5 rounded bg-amber-500 shrink-0" />
+                <span className="truncate">Gold ({getPercent(breakdown.gold).toFixed(0)}%)</span>
+              </div>
+            )}
+            {breakdown.realEstate > 0 && (
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="w-2.5 h-2.5 rounded bg-emerald-500 shrink-0" />
+                <span className="truncate">RE ({getPercent(breakdown.realEstate).toFixed(0)}%)</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Alerts Indicator Widget */}
       <button
         onClick={onOpenAlerts}
@@ -242,6 +323,66 @@ export default function MobileHomeSummary({
           <ChevronRight size={14} />
         </div>
       </button>
+
+      {/* Quick Alert Strips */}
+      {alerts.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between pl-1">
+            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              Critical Alerts
+            </span>
+            <button onClick={onOpenAlerts} className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+              View All ({alerts.length})
+            </button>
+          </div>
+          <div className="space-y-2">
+            {alerts.slice(0, 2).map((alert) => (
+              <div
+                key={alert.id}
+                onClick={onOpenAlerts}
+                className={`p-3 border rounded-2xl shadow-sm hover:shadow flex items-start gap-3 active:scale-98 transition-all cursor-pointer ${
+                  alert.severity === 'critical'
+                    ? 'bg-red-50/70 border-red-100 dark:bg-red-950/20 dark:border-red-900/30'
+                    : alert.severity === 'warning'
+                    ? 'bg-amber-50/70 border-amber-100 dark:bg-amber-950/20 dark:border-amber-900/30'
+                    : 'bg-blue-50/70 border-blue-100 dark:bg-blue-950/20 dark:border-blue-900/30'
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                  alert.severity === 'critical'
+                    ? 'bg-red-500/10 text-red-500'
+                    : alert.severity === 'warning'
+                    ? 'bg-amber-500/10 text-amber-500'
+                    : 'bg-blue-500/10 text-blue-500'
+                }`}>
+                  <AlertCircle size={16} className={alert.severity === 'critical' ? 'animate-pulse' : ''} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 justify-between">
+                    <h5 className={`text-xs font-bold truncate ${
+                      alert.severity === 'critical'
+                        ? 'text-red-800 dark:text-red-300'
+                        : alert.severity === 'warning'
+                        ? 'text-amber-800 dark:text-amber-300'
+                        : 'text-blue-800 dark:text-blue-300'
+                    }`}>
+                      {alert.title}
+                    </h5>
+                    {alert.portfolioLabel && (
+                      <span className="text-[8.5px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-md uppercase tracking-wider shrink-0">
+                        {alert.portfolioLabel}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5 leading-tight">
+                    {alert.message}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Quick Asset Grid */}
       <div className="space-y-2.5">

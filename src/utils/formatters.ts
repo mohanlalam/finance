@@ -1,4 +1,5 @@
 import { FixedDeposit } from '../types/portfolio';
+import { compoundValue } from './portfolioCalcs';
 
 
 
@@ -68,7 +69,7 @@ export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()
   if (years > 0 && !isNaN(r) && !isNaN(s.getTime())) {
     if (!isNaN(p)) {
       // FDs compound half-yearly
-      return p * Math.pow(1 + r / 200, 2 * years);
+      return compoundValue(p, r, 2, years);
     }
   }
   return p;
