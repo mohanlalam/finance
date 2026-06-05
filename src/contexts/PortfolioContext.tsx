@@ -3,8 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Portfolio, PortfolioName, AssetPayload, RDPayload, SIPPayload, SSYPayload } from '../types/portfolio';
 import { NetWorthSnapshot, usePortfolioData, LoadStatus } from '../hooks/usePortfolioData';
 
-interface PortfolioContextValue {
-  /* State */
+export interface PortfolioDataContextValue {
   portfolios: Portfolio[];
   netWorthHistory: NetWorthSnapshot[];
   loadStatus: LoadStatus;
@@ -15,15 +14,16 @@ interface PortfolioContextValue {
   isUsingCachedData: boolean;
   cacheUpdatedAt: Date | null;
   isAuthRequired: boolean;
+  activeTab: PortfolioName;
+  activePortfolio: Portfolio | null;
+  portfolioOptionsForModal: { name: string; label: string }[];
+  isMutating: boolean;
   lastPriceFetch: Date | null;
   isPriceStale: boolean;
+}
 
-  /* Active view state */
-  activeTab: PortfolioName;
+export interface PortfolioActionContextValue {
   setActiveTab: (tab: PortfolioName) => void;
-  activePortfolio: Portfolio | null;
-
-  /* Actions */
   load: () => Promise<void>;
   refreshSnapshot: () => Promise<void>;
   refreshPrices: () => Promise<void>;
@@ -33,34 +33,42 @@ interface PortfolioContextValue {
   addAsset: (assetType: string, portfolioName: string, payload: AssetPayload, options?: { reload?: boolean }) => Promise<void>;
   updateAsset: (assetType: string, id: string, payload: Partial<AssetPayload>) => Promise<void>;
   deleteAsset: (assetType: string, id: string) => Promise<void>;
-  isMutating: boolean;
   isMutatingRef: MutableRefObject<boolean>;
-
-  /* RD Actions */
   addRDAccount: (portfolioName: string, payload: RDPayload) => Promise<void>;
   updateRDAccount: (id: string, payload: Partial<RDPayload>) => Promise<void>;
   deleteRDAccount: (id: string) => Promise<void>;
-
-  /* SIP Actions */
   addSIPAccount: (portfolioName: string, payload: SIPPayload) => Promise<void>;
   updateSIPAccount: (id: string, payload: Partial<SIPPayload>) => Promise<void>;
   deleteSIPAccount: (id: string) => Promise<void>;
-
-  /* SSY Actions */
   addSSYAccount: (portfolioName: string, payload: SSYPayload) => Promise<void>;
   updateSSYAccount: (id: string, payload: Partial<SSYPayload>) => Promise<void>;
   deleteSSYAccount: (id: string) => Promise<void>;
-
-  /* Derived */
-  portfolioOptionsForModal: { name: string; label: string }[];
 }
 
-const PortfolioContext = createContext<PortfolioContextValue | null>(null);
+export interface PortfolioContextValue extends PortfolioDataContextValue, PortfolioActionContextValue {}
+
+const PortfolioDataContext = createContext<PortfolioDataContextValue | null>(null);
+const PortfolioActionContext = createContext<PortfolioActionContextValue | null>(null);
+
+export function usePortfolioState(): PortfolioDataContextValue {
+  const ctx = useContext(PortfolioDataContext);
+  if (!ctx) throw new Error('usePortfolioState must be used within PortfolioProvider');
+  return ctx;
+}
+
+export function usePortfolioActions(): PortfolioActionContextValue {
+  const ctx = useContext(PortfolioActionContext);
+  if (!ctx) throw new Error('usePortfolioActions must be used within PortfolioProvider');
+  return ctx;
+}
 
 export function usePortfolio(): PortfolioContextValue {
-  const ctx = useContext(PortfolioContext);
-  if (!ctx) throw new Error('usePortfolio must be used within PortfolioProvider');
-  return ctx;
+  const data = useContext(PortfolioDataContext);
+  const actions = useContext(PortfolioActionContext);
+  if (!data || !actions) {
+    throw new Error('usePortfolio must be used within PortfolioProvider');
+  }
+  return useMemo(() => ({ ...data, ...actions }), [data, actions]);
 }
 
 interface PortfolioProviderProps {
@@ -253,7 +261,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     await refreshSnapshot();
   }, [deleteAsset, isMutatingRef, refreshSnapshot]);
 
-  const value = useMemo<PortfolioContextValue>(() => ({
+  const dataValue = useMemo<PortfolioDataContextValue>(() => ({
     portfolios,
     netWorthHistory,
     loadStatus,
@@ -265,8 +273,32 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     cacheUpdatedAt,
     isAuthRequired,
     activeTab,
-    setActiveTab,
     activePortfolio,
+    portfolioOptionsForModal,
+    isMutating,
+    lastPriceFetch,
+    isPriceStale,
+  }), [
+    portfolios,
+    netWorthHistory,
+    loadStatus,
+    loadError,
+    priceStatus,
+    lastUpdated,
+    failedSymbols,
+    isUsingCachedData,
+    cacheUpdatedAt,
+    isAuthRequired,
+    activeTab,
+    activePortfolio,
+    portfolioOptionsForModal,
+    isMutating,
+    lastPriceFetch,
+    isPriceStale,
+  ]);
+
+  const actionValue = useMemo<PortfolioActionContextValue>(() => ({
+    setActiveTab,
     load,
     refreshSnapshot,
     refreshPrices,
@@ -276,11 +308,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     addAsset,
     updateAsset,
     deleteAsset,
-    portfolioOptionsForModal,
-    isMutating,
     isMutatingRef,
-    lastPriceFetch,
-    isPriceStale,
     addRDAccount,
     updateRDAccount,
     deleteRDAccount,
@@ -291,16 +319,33 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     updateSSYAccount,
     deleteSSYAccount,
   }), [
-    portfolios, netWorthHistory, loadStatus, loadError, priceStatus,
-    lastUpdated, failedSymbols, isUsingCachedData, cacheUpdatedAt,
-    isAuthRequired, activeTab, setActiveTab, activePortfolio, load, refreshPrices,
-    addPortfolio, renamePortfolio, deletePortfolio, addAsset, updateAsset,
-    deleteAsset, portfolioOptionsForModal, isMutating, isMutatingRef, refreshSnapshot,
-    lastPriceFetch, isPriceStale,
-    addRDAccount, updateRDAccount, deleteRDAccount,
-    addSIPAccount, updateSIPAccount, deleteSIPAccount,
-    addSSYAccount, updateSSYAccount, deleteSSYAccount,
+    setActiveTab,
+    load,
+    refreshSnapshot,
+    refreshPrices,
+    addPortfolio,
+    renamePortfolio,
+    deletePortfolio,
+    addAsset,
+    updateAsset,
+    deleteAsset,
+    isMutatingRef,
+    addRDAccount,
+    updateRDAccount,
+    deleteRDAccount,
+    addSIPAccount,
+    updateSIPAccount,
+    deleteSIPAccount,
+    addSSYAccount,
+    updateSSYAccount,
+    deleteSSYAccount,
   ]);
 
-  return <PortfolioContext.Provider value={value}>{children}</PortfolioContext.Provider>;
+  return (
+    <PortfolioDataContext.Provider value={dataValue}>
+      <PortfolioActionContext.Provider value={actionValue}>
+        {children}
+      </PortfolioActionContext.Provider>
+    </PortfolioDataContext.Provider>
+  );
 }

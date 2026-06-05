@@ -127,4 +127,16 @@ export function RDAccountCard({
   );
 }
 
-export default React.memo(RDAccountCard);
+export default React.memo(
+  RDAccountCard,
+  (prev, next) =>
+    prev.account.id === next.account.id &&
+    prev.account.status === next.account.status &&
+    prev.account.monthly_deposit === next.account.monthly_deposit &&
+    prev.account.interest_rate === next.account.interest_rate &&
+    prev.account.start_date === next.account.start_date &&
+    prev.account.maturity_date === next.account.maturity_date &&
+    prev.account.notes === next.account.notes &&
+    (prev.account.contributions?.length ?? 0) === (next.account.contributions?.length ?? 0) &&
+    prev.documents.length === next.documents.length
+);

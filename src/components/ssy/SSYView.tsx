@@ -9,6 +9,7 @@ import { SSYFormModal } from './SSYFormModal';
 import { useSSYData } from '../../hooks/useSSYData';
 import { usePortfolio } from '../../contexts/PortfolioContext';
 import AssetCardSkeleton from '../AssetCardSkeleton';
+import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
 interface PortfolioOption {
   name: string;
@@ -183,16 +184,40 @@ export function SSYView({
         </div>
       ) : (
         <div className="space-y-4" role="list" aria-label="Sukanya Samriddhi Accounts list">
-          {filteredAccounts.map((account) => (
-            <SSYAccountCard
-              key={account.id}
-              account={account}
-              documents={documents}
-              onOpenEdit={handleOpenEdit}
-              onConfirmDelete={setConfirmDelete}
-              onUpdate={updateSSYAccount}
-            />
-          ))}
+          {filteredAccounts.length > 8 ? (
+            <List
+              height={600}
+              itemCount={filteredAccounts.length}
+              itemSize={320}
+              width="100%"
+            >
+              {({ index, style }: ListChildComponentProps) => {
+                const account = filteredAccounts[index];
+                return (
+                  <div style={style} className="pb-4 last:pb-0">
+                    <SSYAccountCard
+                      account={account}
+                      documents={documents}
+                      onOpenEdit={handleOpenEdit}
+                      onConfirmDelete={setConfirmDelete}
+                      onUpdate={updateSSYAccount}
+                    />
+                  </div>
+                );
+              }}
+            </List>
+          ) : (
+            filteredAccounts.map((account) => (
+              <SSYAccountCard
+                key={account.id}
+                account={account}
+                documents={documents}
+                onOpenEdit={handleOpenEdit}
+                onConfirmDelete={setConfirmDelete}
+                onUpdate={updateSSYAccount}
+              />
+            ))
+          )}
         </div>
       )}
 

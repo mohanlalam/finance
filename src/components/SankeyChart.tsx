@@ -65,57 +65,104 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
   const x2 = 260;
   const x3 = 480;
   const nodeW = 20;
-
-  // Let's compute node heights proportional to value
-  const totalH = 160; // total height budget for stacks
-  const scale = totalH / data.total;
-
-  const nodeHeights = {
-    equity: data.equity * scale,
-    debt: data.debt * scale,
-    gold: data.gold * scale,
-    re: data.re * scale,
-    stocks: data.stocks * scale,
-    sip: data.sip * scale,
-    fd: data.fd * scale,
-    rd: data.rd * scale,
-    ssy: data.ssy * scale,
-  };
-
-  // Node Y offsets
   const y1_total = 40;
-  const totalNodeH = data.total * scale;
 
-  // Col 2 stack offsets
-  const y2_equity = 40;
-  const y2_debt = y2_equity + nodeHeights.equity + 15;
-  const y2_gold = y2_debt + nodeHeights.debt + 15;
-  const y2_re = y2_gold + nodeHeights.gold + 15;
+  // Let's compute node heights and layouts proportional to value and memoize them
+  const layout = useMemo(() => {
+    const totalH = 160; // total height budget for stacks
+    const scale = totalH / data.total;
 
-  // Col 3 stack offsets
-  const y3_stocks = 40;
-  const y3_sip = y3_stocks + nodeHeights.stocks + 10;
-  const y3_fd = y3_sip + nodeHeights.sip + 15;
-  const y3_rd = y3_fd + nodeHeights.fd + 10;
-  const y3_ssy = y3_rd + nodeHeights.rd + 10;
-  const y3_gold = y3_ssy + nodeHeights.ssy + 15;
-  const y3_re = y3_gold + nodeHeights.gold + 15;
+    const nodeHeights = {
+      equity: data.equity * scale,
+      debt: data.debt * scale,
+      gold: data.gold * scale,
+      re: data.re * scale,
+      stocks: data.stocks * scale,
+      sip: data.sip * scale,
+      fd: data.fd * scale,
+      rd: data.rd * scale,
+      ssy: data.ssy * scale,
+    };
 
-  // Helper to draw smooth bezier link path between nodes
-  const getLinkPath = (sx: number, sy: number, sw: number, tx: number, ty: number, tw: number) => {
-    const cx1 = sx + (tx - sx) / 2;
-    const cy1 = sy;
-    const cx2 = sx + (tx - sx) / 2;
-    const cy2 = ty;
+    const totalNodeH = data.total * scale;
 
-    return `
-      M ${sx} ${sy}
-      C ${cx1} ${cy1}, ${cx2} ${cy2}, ${tx} ${ty}
-      L ${tx} ${ty + tw}
-      C ${cx2} ${cy2 + tw}, ${cx1} ${sy + sw}, ${sx} ${sy + sw}
-      Z
-    `;
-  };
+    // Col 2 stack offsets
+    const y2_equity = 40;
+    const y2_debt = y2_equity + nodeHeights.equity + 15;
+    const y2_gold = y2_debt + nodeHeights.debt + 15;
+    const y2_re = y2_gold + nodeHeights.gold + 15;
+
+    // Col 3 stack offsets
+    const y3_stocks = 40;
+    const y3_sip = y3_stocks + nodeHeights.stocks + 10;
+    const y3_fd = y3_sip + nodeHeights.sip + 15;
+    const y3_rd = y3_fd + nodeHeights.fd + 10;
+    const y3_ssy = y3_rd + nodeHeights.rd + 10;
+    const y3_gold = y3_ssy + nodeHeights.ssy + 15;
+    const y3_re = y3_gold + nodeHeights.gold + 15;
+
+    // Helper to draw smooth bezier link path between nodes
+    const getLinkPath = (sx: number, sy: number, sw: number, tx: number, ty: number, tw: number) => {
+      const cx1 = sx + (tx - sx) / 2;
+      const cy1 = sy;
+      const cx2 = sx + (tx - sx) / 2;
+      const cy2 = ty;
+
+      return `
+        M ${sx} ${sy}
+        C ${cx1} ${cy1}, ${cx2} ${cy2}, ${tx} ${ty}
+        L ${tx} ${ty + tw}
+        C ${cx2} ${cy2 + tw}, ${cx1} ${sy + sw}, ${sx} ${sy + sw}
+        Z
+      `;
+    };
+
+    return {
+      nodeHeights,
+      totalNodeH,
+      y2_equity,
+      y2_debt,
+      y2_gold,
+      y2_re,
+      y3_stocks,
+      y3_sip,
+      y3_fd,
+      y3_rd,
+      y3_ssy,
+      y3_gold,
+      y3_re,
+      links: {
+        eqToCat: getLinkPath(x1 + nodeW, y1_total, nodeHeights.equity, x2, y2_equity, nodeHeights.equity),
+        debtToCat: getLinkPath(x1 + nodeW, y1_total + nodeHeights.equity, nodeHeights.debt, x2, y2_debt, nodeHeights.debt),
+        goldToCat: getLinkPath(x1 + nodeW, y1_total + nodeHeights.equity + nodeHeights.debt, nodeHeights.gold, x2, y2_gold, nodeHeights.gold),
+        reToCat: getLinkPath(x1 + nodeW, y1_total + nodeHeights.equity + nodeHeights.debt + nodeHeights.gold, nodeHeights.re, x2, y2_re, nodeHeights.re),
+        stocksToSub: getLinkPath(x2 + nodeW, y2_equity, nodeHeights.stocks, x3, y3_stocks, nodeHeights.stocks),
+        sipToSub: getLinkPath(x2 + nodeW, y2_equity + nodeHeights.stocks, nodeHeights.sip, x3, y3_sip, nodeHeights.sip),
+        fdToSub: getLinkPath(x2 + nodeW, y2_debt, nodeHeights.fd, x3, y3_fd, nodeHeights.fd),
+        rdToSub: getLinkPath(x2 + nodeW, y2_debt + nodeHeights.fd, nodeHeights.rd, x3, y3_rd, nodeHeights.rd),
+        ssyToSub: getLinkPath(x2 + nodeW, y2_debt + nodeHeights.fd + nodeHeights.rd, nodeHeights.ssy, x3, y3_ssy, nodeHeights.ssy),
+        goldToSub: getLinkPath(x2 + nodeW, y2_gold, nodeHeights.gold, x3, y3_gold, nodeHeights.gold),
+        reToSub: getLinkPath(x2 + nodeW, y2_re, nodeHeights.re, x3, y3_re, nodeHeights.re),
+      }
+    };
+  }, [data]);
+
+  const {
+    nodeHeights,
+    totalNodeH,
+    y2_equity,
+    y2_debt,
+    y2_gold,
+    y2_re,
+    y3_stocks,
+    y3_sip,
+    y3_fd,
+    y3_rd,
+    y3_ssy,
+    y3_gold,
+    y3_re,
+    links
+  } = layout;
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 relative">
@@ -158,23 +205,23 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
           </defs>
 
           {/* Links: Col 1 -> Col 2 */}
-          <path d={getLinkPath(x1 + nodeW, y1_total, nodeHeights.equity, x2, y2_equity, nodeHeights.equity)} fill="url(#eqGrad)" />
-          <path d={getLinkPath(x1 + nodeW, y1_total + nodeHeights.equity, nodeHeights.debt, x2, y2_debt, nodeHeights.debt)} fill="url(#debtGrad)" />
-          <path d={getLinkPath(x1 + nodeW, y1_total + nodeHeights.equity + nodeHeights.debt, nodeHeights.gold, x2, y2_gold, nodeHeights.gold)} fill="url(#goldGrad)" />
-          <path d={getLinkPath(x1 + nodeW, y1_total + nodeHeights.equity + nodeHeights.debt + nodeHeights.gold, nodeHeights.re, x2, y2_re, nodeHeights.re)} fill="url(#reGrad)" />
+          <path d={links.eqToCat} fill="url(#eqGrad)" />
+          <path d={links.debtToCat} fill="url(#debtGrad)" />
+          <path d={links.goldToCat} fill="url(#goldGrad)" />
+          <path d={links.reToCat} fill="url(#reGrad)" />
 
           {/* Links: Col 2 -> Col 3 */}
           {/* Equity -> Stocks & SIPs */}
-          <path d={getLinkPath(x2 + nodeW, y2_equity, nodeHeights.stocks, x3, y3_stocks, nodeHeights.stocks)} fill="url(#eqGrad)" />
-          <path d={getLinkPath(x2 + nodeW, y2_equity + nodeHeights.stocks, nodeHeights.sip, x3, y3_sip, nodeHeights.sip)} fill="url(#eqGrad)" />
+          <path d={links.stocksToSub} fill="url(#eqGrad)" />
+          <path d={links.sipToSub} fill="url(#eqGrad)" />
           {/* Debt -> FDs, RDs, SSYs */}
-          <path d={getLinkPath(x2 + nodeW, y2_debt, nodeHeights.fd, x3, y3_fd, nodeHeights.fd)} fill="url(#debtGrad)" />
-          <path d={getLinkPath(x2 + nodeW, y2_debt + nodeHeights.fd, nodeHeights.rd, x3, y3_rd, nodeHeights.rd)} fill="url(#debtGrad)" />
-          <path d={getLinkPath(x2 + nodeW, y2_debt + nodeHeights.fd + nodeHeights.rd, nodeHeights.ssy, x3, y3_ssy, nodeHeights.ssy)} fill="url(#debtGrad)" />
+          <path d={links.fdToSub} fill="url(#debtGrad)" />
+          <path d={links.rdToSub} fill="url(#debtGrad)" />
+          <path d={links.ssyToSub} fill="url(#debtGrad)" />
           {/* Gold -> Gold node */}
-          <path d={getLinkPath(x2 + nodeW, y2_gold, nodeHeights.gold, x3, y3_gold, nodeHeights.gold)} fill="url(#goldGrad)" />
+          <path d={links.goldToSub} fill="url(#goldGrad)" />
           {/* Real Estate -> Real Estate node */}
-          <path d={getLinkPath(x2 + nodeW, y2_re, nodeHeights.re, x3, y3_re, nodeHeights.re)} fill="url(#reGrad)" />
+          <path d={links.reToSub} fill="url(#reGrad)" />
 
           {/* Nodes (Col 1: Net Worth) */}
           <rect x={x1} y={y1_total} width={nodeW} height={totalNodeH} fill="#3b82f6" rx={3} />

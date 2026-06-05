@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { TrendingUp, TrendingDown, AlertTriangle, Landmark, Shield, Activity, Crown, Target, BarChart3, Filter } from 'lucide-react';
 import { formatINR, formatPercent } from '../utils/formatters';
 import {
@@ -13,8 +13,8 @@ import {
 import AllocationTargetsSettings from './AllocationTargetsSettings';
 
 import { Portfolio } from '../types/portfolio';
-import { calculateHealthScore } from '../utils/healthScore';
-import { calculateRebalancing } from '../utils/rebalancing';
+import { calculateHealthScore, calculateHealthScoreAsync, HealthReport } from '../utils/healthScore';
+import { calculateRebalancing, calculateRebalancingAsync, RebalancingAdvice } from '../utils/rebalancing';
 
 interface InsightsPanelProps {
   insights: PortfolioInsights;
@@ -132,13 +132,26 @@ const AllocationDrift = React.memo(function AllocationDrift({
   portfolios: Portfolio[];
   activePortfolio: Portfolio | null;
 }) {
-  const targetPcts = {
+  const targetPcts = useMemo(() => ({
     equity: slices.find((s) => s.label === 'Stocks')?.target ?? 60,
     debt: slices.find((s) => s.label === 'Fixed Deposits')?.target ?? 20,
     gold: slices.find((s) => s.label === 'Gold')?.target ?? 10,
     realEstate: slices.find((s) => s.label === 'Real Estate')?.target ?? 10,
-  };
-  const rebalancingAdvice = calculateRebalancing(portfolios, activePortfolio, targetPcts);
+  }), [slices]);
+
+  const [rebalancingAdvice, setRebalancingAdvice] = useState<RebalancingAdvice[]>(() =>
+    calculateRebalancing(portfolios, activePortfolio, targetPcts)
+  );
+
+  useEffect(() => {
+    let active = true;
+    calculateRebalancingAsync(portfolios, activePortfolio, targetPcts).then((advice) => {
+      if (active) setRebalancingAdvice(advice);
+    });
+    return () => {
+      active = false;
+    };
+  }, [portfolios, activePortfolio, targetPcts]);
 
   if (slices.every((s) => s.value === 0)) return <p className="text-xs text-slate-400 dark:text-slate-500">No assets yet</p>;
   return (
@@ -317,7 +330,19 @@ export default React.memo(function InsightsPanel({
 }: InsightsPanelProps) {
   const [activeFilter, setActiveFilter] = useState<InsightFilter>('all');
 
-  const healthReport = calculateHealthScore(portfolios, activePortfolio);
+  const [healthReport, setHealthReport] = useState<HealthReport>(() =>
+    calculateHealthScore(portfolios, activePortfolio)
+  );
+
+  useEffect(() => {
+    let active = true;
+    calculateHealthScoreAsync(portfolios, activePortfolio).then((report) => {
+      if (active) setHealthReport(report);
+    });
+    return () => {
+      active = false;
+    };
+  }, [portfolios, activePortfolio]);
 
   const f = activeFilter;
   const showStocks = f === 'all' || f === 'stocks' || f === 'high_risk';

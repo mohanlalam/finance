@@ -13,7 +13,109 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Inline CSS skeleton for hydration boot speedup -->
+    <style>
+      .boot-loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background-color: #0f172a;
+        margin: 0;
+      }
+      .boot-card {
+        width: 100%;
+        max-width: 24rem;
+        padding: 2rem;
+        background: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(51, 65, 85, 0.5);
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(12px);
+        text-align: center;
+      }
+      .boot-circle {
+        width: 3rem;
+        height: 3rem;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        border-radius: 1rem;
+        margin: 0 auto 1.5rem;
+        animation: pulse 2s infinite ease-in-out;
+      }
+      .boot-title {
+        height: 1.75rem;
+        width: 10rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
+        margin: 0 auto 0.75rem;
+      }
+      .boot-text {
+        height: 0.75rem;
+        width: 15rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 0.25rem;
+        margin: 0 auto 2.5rem;
+      }
+      .boot-dots {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+      }
+      .boot-dot {
+        width: 0.85rem;
+        height: 0.85rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+      }
+      .boot-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        max-width: 16rem;
+        margin: 0 auto;
+      }
+      .boot-key {
+        aspect-ratio: 1;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+      }
+    </style>
+    <div class="boot-loader">
+      <div class="boot-card">
+        <div class="boot-circle"></div>
+        <div class="boot-title"></div>
+        <div class="boot-text"></div>
+        <div class="boot-dots">
+          <div class="boot-dot"></div>
+          <div class="boot-dot"></div>
+          <div class="boot-dot"></div>
+          <div class="boot-dot"></div>
+        </div>
+        <div class="boot-grid">
+          <div class="boot-key"></div>
+          <div class="boot-key"></div>
+          <div class="boot-key"></div>
+          <div class="boot-key"></div>
+          <div class="boot-key"></div>
+          <div class="boot-key"></div>
+          <div class="boot-key"></div>
+          <div class="boot-key"></div>
+          <div class="boot-key"></div>
+          <div></div>
+          <div class="boot-key"></div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

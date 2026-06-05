@@ -9,6 +9,7 @@ import { RDFormModal } from './RDFormModal';
 import { useRDData } from '../../hooks/useRDData';
 import { usePortfolio } from '../../contexts/PortfolioContext';
 import AssetCardSkeleton from '../AssetCardSkeleton';
+import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
 interface PortfolioOption {
   name: string;
@@ -174,16 +175,40 @@ export function RDView({
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label="Recurring Deposits list">
-            {filteredAccounts.map((account) => (
-              <RDAccountCard
-                key={account.id}
-                account={account}
-                documents={documents}
-                onOpenEdit={handleOpenEdit}
-                onConfirmDelete={setConfirmDelete}
-                onUpdate={updateRDAccount}
-              />
-            ))}
+            {filteredAccounts.length > 8 ? (
+              <List
+                height={500}
+                itemCount={filteredAccounts.length}
+                itemSize={240}
+                width="100%"
+              >
+                {({ index, style }: ListChildComponentProps) => {
+                  const account = filteredAccounts[index];
+                  return (
+                    <div style={style} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                      <RDAccountCard
+                        account={account}
+                        documents={documents}
+                        onOpenEdit={handleOpenEdit}
+                        onConfirmDelete={setConfirmDelete}
+                        onUpdate={updateRDAccount}
+                      />
+                    </div>
+                  );
+                }}
+              </List>
+            ) : (
+              filteredAccounts.map((account) => (
+                <RDAccountCard
+                  key={account.id}
+                  account={account}
+                  documents={documents}
+                  onOpenEdit={handleOpenEdit}
+                  onConfirmDelete={setConfirmDelete}
+                  onUpdate={updateRDAccount}
+                />
+              ))
+            )}
           </div>
         )}
       </div>

@@ -160,3 +160,33 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
 
   return { score, strengths, risks };
 }
+
+/**
+ * Calculates a Portfolio Health Score asynchronously using a Web Worker
+ */
+export function calculateHealthScoreAsync(portfolios: Portfolio[], activePortfolio: Portfolio | null): Promise<HealthReport> {
+  return new Promise((resolve) => {
+    if (typeof window !== 'undefined' && window.Worker) {
+      try {
+        const worker = new Worker(new URL('../workers/healthScore.worker.ts', import.meta.url), { type: 'module' });
+        worker.onmessage = (e) => {
+          if (e.data.error) {
+            resolve(calculateHealthScore(portfolios, activePortfolio));
+          } else {
+            resolve(e.data.result);
+          }
+          worker.terminate();
+        };
+        worker.onerror = () => {
+          resolve(calculateHealthScore(portfolios, activePortfolio));
+          worker.terminate();
+        };
+        worker.postMessage({ portfolios, activePortfolio });
+        return;
+      } catch (err) {
+        console.warn('[healthScore worker] failed, falling back:', err);
+      }
+    }
+    resolve(calculateHealthScore(portfolios, activePortfolio));
+  });
+}

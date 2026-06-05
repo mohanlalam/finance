@@ -180,7 +180,7 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
       const diff = currentPct - lastPct;
       if (Math.abs(diff) >= 5) {
         alerts.push({
-          id: `portfolio-swing-${lastPct.toFixed(2)}-${currentPct.toFixed(2)}`,
+          id: 'portfolio-swing-alert',
           type: 'portfolio_swing',
           severity: diff < 0 ? 'critical' : 'info',
           title: `Portfolio ${diff > 0 ? 'up' : 'down'} ${Math.abs(diff).toFixed(1)}% since last session`,

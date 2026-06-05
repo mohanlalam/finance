@@ -1,11 +1,12 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Holding, Portfolio, FixedDeposit, RDAccount, SIPAccount, SSYAccount, GoldHolding, RealEstate, Insurance, DocumentMetadata, AssetPayload } from '../types/portfolio';
 import { getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../utils/rdUtils';
-import { getSIPInvestedAmount, getSIPEffectiveValue } from '../utils/sipUtils';
+import { getSIPInvestedAmount, getSIPEffectiveValue, fetchNAV } from '../utils/sipUtils';
 import { getSSYInvestedAmount, getSSYEffectiveValue } from '../utils/ssyUtils';
 import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiClient';
-import { fetchAMFIScheme } from '../utils/amfiClient';
+import useSWR from 'swr';
+import * as idb from 'idb-keyval';
 
 const PORTFOLIO_CACHE_KEY = 'finance_portfolio_cache_v1';
 
@@ -378,36 +379,17 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       const batch = uniqueSchemeCodes.slice(i, i + BATCH_SIZE);
       await Promise.allSettled(
         batch.map(async (code) => {
-          const cacheKey = `mf_nav_${code}`;
           try {
-            const cached = sessionStorage.getItem(cacheKey);
-            if (cached) {
-              const parsed = JSON.parse(cached);
-              if (Date.now() - parsed.timestamp < 4 * 60 * 60 * 1000) {
-                navMap[code] = parsed.nav;
-                return;
-              }
-            }
-
-            const details = await fetchAMFIScheme(code);
-            if (details.latestNav !== null) {
-              navMap[code] = details.latestNav;
-              sessionStorage.setItem(cacheKey, JSON.stringify({ nav: details.latestNav, timestamp: Date.now() }));
-            }
-          } catch (err) {
-            console.warn(`[portfolio] Failed to fetch NAV for mutual fund scheme ${code}, checking cache fallback:`, err);
-            const cached = sessionStorage.getItem(cacheKey);
-            if (cached) {
-              try {
-                const parsed = JSON.parse(cached);
-                navMap[code] = parsed.nav;
-                staleSchemes.add(code);
-              } catch {
-                staleSchemes.add(code);
-              }
-            } else {
+            const details = await fetchNAV(code);
+            if (details.isStale) {
               staleSchemes.add(code);
             }
+            if (details.value > 0) {
+              navMap[code] = details.value;
+            }
+          } catch (err) {
+            console.warn(`[portfolio] Failed to fetch NAV for mutual fund scheme ${code}:`, err);
+            staleSchemes.add(code);
           }
         })
       );
@@ -416,31 +398,54 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     return { navMap, staleSchemes };
   }, []);
 
-  const load = useCallback(async () => {
-    setLoadStatus('loading');
-    setLoadError('');
-    setIsUsingCachedData(false);
-    setIsAuthRequired(false);
-    try {
+  // 1. IndexedDB cache read (Phase 5)
+  useEffect(() => {
+    idb.get('portfolio_data_cache').then((cached) => {
+      if (cached && portfolios.length === 0) {
+        const parsed = cached as { portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[]; cachedAt: string };
+        setPortfolios(parsed.portfolios);
+        setNetWorthHistory(parsed.netWorthHistory || []);
+        setCacheUpdatedAt(new Date(parsed.cachedAt));
+        setIsUsingCachedData(true);
+        setLoadStatus('success');
+      }
+    }).catch((err) => {
+      console.warn('[portfolio] IndexedDB read error:', err);
+    });
+  }, []);
+
+  // 2. SWR fetch for Database assets (Phase 2)
+  const { data: dbData, error: swrError, mutate: mutateAssets } = useSWR(
+    'portfolio-assets',
+    async () => {
       const envIssue = getEnvironmentIssue();
       if (envIssue) throw new AppApiError(envIssue, 'config');
-
       const data = await loadFromDB();
       if (!data || typeof data !== 'object') throw new Error('No data returned from database');
+      return data;
+    },
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000,
+    }
+  );
 
-      const dbPortfolios: DBPortfolio[] = data.portfolios || [];
-      const dbHoldings: DBHolding[] = data.holdings || [];
-      const dbFixedDeposits: FixedDeposit[] = (data.fixed_deposits || []).filter((f: FixedDeposit) => !f.fd_type || f.fd_type === 'regular');
-      const dbRDAccounts: RDAccount[] = data.rd_accounts || [];
-      const dbSIPAccounts: SIPAccount[] = data.sip_accounts || [];
-      const dbSSYAccounts: SSYAccount[] = data.ssy_accounts || [];
-      const dbGoldHoldings: GoldHolding[] = data.gold_holdings || [];
-      const dbRealEstate: RealEstate[] = data.real_estate || [];
-      const dbInsurances: Insurance[] = data.insurances || [];
-      const dbDocuments: DocumentMetadata[] = data.documents || [];
-      const dbNetWorthHistory: NetWorthSnapshot[] = data.net_worth_history || [];
+  // 3. Process dbData when it updates
+  useEffect(() => {
+    if (!dbData) return;
+    try {
+      const dbPortfolios: DBPortfolio[] = dbData.portfolios || [];
+      const dbHoldings: DBHolding[] = dbData.holdings || [];
+      const dbFixedDeposits: FixedDeposit[] = (dbData.fixed_deposits || []).filter((f: FixedDeposit) => !f.fd_type || f.fd_type === 'regular');
+      const dbRDAccounts: RDAccount[] = dbData.rd_accounts || [];
+      const dbSIPAccounts: SIPAccount[] = dbData.sip_accounts || [];
+      const dbSSYAccounts: SSYAccount[] = dbData.ssy_accounts || [];
+      const dbGoldHoldings: GoldHolding[] = dbData.gold_holdings || [];
+      const dbRealEstate: RealEstate[] = dbData.real_estate || [];
+      const dbInsurances: Insurance[] = dbData.insurances || [];
+      const dbDocuments: DocumentMetadata[] = dbData.documents || [];
+      const dbNetWorthHistory: NetWorthSnapshot[] = dbData.net_worth_history || [];
 
-      // Sort portfolios: put personal/mother/wife in front, others later
       const order: Record<string, number> = { personal: 0, mother: 1, wife: 2 };
       const sortedPortfolios = [...dbPortfolios].sort((a, b) => {
         const oa = order[a.name] !== undefined ? order[a.name] : 99;
@@ -468,82 +473,131 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
       setPortfolios(built);
       setNetWorthHistory(dbNetWorthHistory);
-      writeCachedPortfolios(built, dbNetWorthHistory);
+      setIsUsingCachedData(false);
       setCacheUpdatedAt(new Date());
       setLoadStatus('success');
 
+      // Write cache to local storage and IndexedDB
+      writeCachedPortfolios(built, dbNetWorthHistory);
+      idb.set('portfolio_data_cache', {
+        portfolios: built,
+        netWorthHistory: dbNetWorthHistory,
+        cachedAt: new Date().toISOString(),
+      }).catch((err) => {
+        console.warn('[portfolio] IndexedDB write error:', err);
+      });
+
+      // Price and NAV fetching
       setPriceStatus('loading');
-      try {
-        const allHoldings = built.flatMap((p) => p.holdings);
-        const allSips = built.flatMap((p) => p.sipAccounts || []);
-
-        const [priceMap, navData] = await Promise.all([
-          allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
-          fetchLiveMFNavs(allSips),
-        ]);
-
+      const allHoldings = built.flatMap((p) => p.holdings);
+      const allSips = built.flatMap((p) => p.sipAccounts || []);
+      Promise.all([
+        allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
+        fetchLiveMFNavs(allSips),
+      ]).then(([priceMap, navData]) => {
         setPortfolios((prev) => {
           const withPrices = applyLivePrices(prev, priceMap);
           return applyLiveMFNavs(withPrices, navData.navMap, navData.staleSchemes);
         });
-
         setLastUpdated(new Date());
         setLastPriceFetch(new Date());
         setPriceStatus('success');
-      } catch (priceErr: unknown) {
+      }).catch((priceErr) => {
         console.error('[portfolio] price fetch failed:', priceErr);
         if (priceErr instanceof AppApiError && priceErr.code === 'auth') {
           handleAuthExpired();
-          return;
         }
         setPriceStatus('error');
+      });
+
+    } catch (err) {
+      console.error('[portfolio] Database parsing error:', err);
+      setLoadStatus('error');
+      setLoadError(getFriendlyMessage(err));
+    }
+  }, [dbData, fetchLivePrices, fetchLiveMFNavs, handleAuthExpired]);
+
+  // 4. Handle SWR Errors
+  useEffect(() => {
+    if (swrError) {
+      console.error('[portfolio] SWR fetch error:', swrError);
+      if (swrError instanceof AppApiError && swrError.code === 'auth') {
+        handleAuthExpired();
+        return;
       }
-    } catch (err: unknown) {
-      const cached = err instanceof AppApiError && err.code !== 'auth' ? readCachedPortfolios() : null;
-      if (cached) {
+      // Try local cache fallback if not already loaded
+      const cached = readCachedPortfolios();
+      if (cached && portfolios.length === 0) {
         setPortfolios(cached.portfolios);
         setNetWorthHistory(cached.netWorthHistory || []);
         setCacheUpdatedAt(new Date(cached.cachedAt));
         setIsUsingCachedData(true);
-        setLoadError(getFriendlyMessage(err));
+        setLoadError(getFriendlyMessage(swrError));
         setLoadStatus('success');
         setPriceStatus('error');
-        return;
+      } else if (portfolios.length === 0) {
+        setLoadError(getFriendlyMessage(swrError));
+        setLoadStatus('error');
       }
-
-      const msg = getFriendlyMessage(err);
-      console.error('[portfolio] load failed:', err);
-      if (err instanceof AppApiError && err.code === 'auth') {
-        handleAuthExpired();
-      }
-      setLoadError(msg);
-      setLoadStatus('error');
     }
-  }, [loadFromDB, fetchLivePrices, fetchLiveMFNavs, handleAuthExpired, setLastPriceFetch]);
+  }, [swrError, handleAuthExpired, portfolios.length]);
 
-  const refreshSnapshot = useCallback(async () => {
-    await load();
+  const load = useCallback(async () => {
+    setLoadStatus('loading');
+    setLoadError('');
+    await mutateAssets();
+  }, [mutateAssets]);
+
+  // 5. Debounced refreshSnapshot (Phase 2.3)
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const refreshSnapshot = useCallback(() => {
+    return new Promise<void>((resolve) => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+      refreshTimeoutRef.current = setTimeout(async () => {
+        await load();
+        resolve();
+      }, 500);
+    });
   }, [load]);
+
+  // 6. Polling prices via SWR (Phase 2.1)
+  const { data: livePrices, mutate: refreshPricesSWR } = useSWR(
+    portfolios.length > 0 ? 'live-prices' : null,
+    async () => {
+      const allHoldings = portfolios.flatMap((p) => p.holdings);
+      const allSips = portfolios.flatMap((p) => p.sipAccounts || []);
+      if (allHoldings.length === 0 && allSips.length === 0) return null;
+      const [priceMap, navData] = await Promise.all([
+        allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
+        fetchLiveMFNavs(allSips),
+      ]);
+      return { priceMap, navData };
+    },
+    {
+      refreshInterval: 15 * 60 * 1000, // auto-refresh every 15 min
+      revalidateOnFocus: false,
+    }
+  );
+
+  useEffect(() => {
+    if (!livePrices) return;
+    setPortfolios((prev) => {
+      const withPrices = applyLivePrices(prev, livePrices.priceMap);
+      return applyLiveMFNavs(withPrices, livePrices.navData.navMap, livePrices.navData.staleSchemes);
+    });
+    setLastUpdated(new Date());
+    setLastPriceFetch(new Date());
+    setPriceStatus('success');
+  }, [livePrices, setLastPriceFetch]);
 
   const refreshPrices = useCallback(async () => {
     if (portfolios.length === 0) return;
     setPriceStatus('loading');
     try {
-      const allHoldings = portfolios.flatMap((p) => p.holdings);
-      const allSips = portfolios.flatMap((p) => p.sipAccounts || []);
-
-      const [priceMap, navData] = await Promise.all([
-        allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
-        fetchLiveMFNavs(allSips),
-      ]);
-
-      setPortfolios((prev) => {
-        const withPrices = applyLivePrices(prev, priceMap);
-        return applyLiveMFNavs(withPrices, navData.navMap, navData.staleSchemes);
-      });
-
-      setLastUpdated(new Date());
-      setLastPriceFetch(new Date());
+      await refreshPricesSWR();
       setPriceStatus('success');
     } catch (err) {
       if (err instanceof AppApiError && err.code === 'auth') {
@@ -551,7 +605,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       }
       setPriceStatus('error');
     }
-  }, [portfolios, fetchLivePrices, fetchLiveMFNavs, handleAuthExpired, setLastPriceFetch]);
+  }, [portfolios.length, refreshPricesSWR, handleAuthExpired]);
 
   const addPortfolio = useCallback(async (name: string, label: string) => {
     return runMutation(async () => {

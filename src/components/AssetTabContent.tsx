@@ -3,14 +3,16 @@ import { Wifi, WifiOff, Plus } from 'lucide-react';
 import { Portfolio, AssetPayload } from '../types/portfolio';
 import { FetchStatus } from '../hooks/useMarketData';
 import PortfolioTable from './PortfolioTable';
-import FixedDepositView from './FixedDepositView';
-import RDView from './rd/RDView';
-import SIPView from './sip/SIPView';
-import SSYView from './ssy/SSYView';
 import GoldHoldingView from './GoldHoldingView';
 import RealEstateView from './RealEstateView';
 import InsuranceView from './InsuranceView';
 import DocumentVaultView from './DocumentVaultView';
+import AssetCardSkeleton from './AssetCardSkeleton';
+
+const FixedDepositView = React.lazy(() => import('./FixedDepositView'));
+const RDView = React.lazy(() => import('./rd/RDView'));
+const SIPView = React.lazy(() => import('./sip/SIPView'));
+const SSYView = React.lazy(() => import('./ssy/SSYView'));
 import { pnlColor, formatPercent, formatINR } from '../utils/formatters';
 
 type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
@@ -62,7 +64,8 @@ export default React.memo(function AssetTabContent({
     // ─── Single Portfolio View ───
     return (
       <div id="portfolio-content" role="tabpanel" aria-labelledby={`tab-${visiblePortfolio.name}`} className="space-y-4">
-        {activeAsset === 'stocks' && (
+        <React.Suspense fallback={<AssetCardSkeleton />}>
+          {activeAsset === 'stocks' && (
           <div>
             <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <h2 className="text-base font-bold text-slate-700 dark:text-slate-200">{visiblePortfolio.label} — Stocks & ETFs</h2>
@@ -198,6 +201,7 @@ export default React.memo(function AssetTabContent({
             autoOpenAddModal={quickAddTarget === 'documents'}
           />
         )}
+        </React.Suspense>
       </div>
     );
   }
@@ -205,7 +209,8 @@ export default React.memo(function AssetTabContent({
   // ─── Family Overview View (Aggregated across all members) ───
   return (
     <div id="portfolio-content" role="tabpanel" aria-labelledby="tab-all" className="space-y-4">
-      {activeAsset === 'stocks' && (
+      <React.Suspense fallback={<AssetCardSkeleton />}>
+        {activeAsset === 'stocks' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-bold text-slate-700 dark:text-slate-200">All Stock Holdings</h2>
@@ -426,6 +431,7 @@ export default React.memo(function AssetTabContent({
           ))}
         </div>
       )}
+      </React.Suspense>
     </div>
   );
 });

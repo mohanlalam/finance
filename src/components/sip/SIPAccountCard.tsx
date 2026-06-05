@@ -134,4 +134,17 @@ export function SIPAccountCard({
   );
 }
 
-export default React.memo(SIPAccountCard);
+export default React.memo(
+  SIPAccountCard,
+  (prev, next) =>
+    prev.account.id === next.account.id &&
+    prev.account.monthly_sip === next.account.monthly_sip &&
+    prev.account.expected_cagr === next.account.expected_cagr &&
+    prev.account.units === next.account.units &&
+    prev.account.start_date === next.account.start_date &&
+    prev.account.next_sip_date === next.account.next_sip_date &&
+    prev.account.fallback_valuation === next.account.fallback_valuation &&
+    prev.account.navIsStale === next.account.navIsStale &&
+    prev.account.notes === next.account.notes &&
+    prev.documents.length === next.documents.length
+);

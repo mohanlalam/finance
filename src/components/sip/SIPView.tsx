@@ -9,6 +9,7 @@ import { SIPFormModal } from './SIPFormModal';
 import { useSIPData } from '../../hooks/useSIPData';
 import { usePortfolio } from '../../contexts/PortfolioContext';
 import AssetCardSkeleton from '../AssetCardSkeleton';
+import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
 interface PortfolioOption {
   name: string;
@@ -174,15 +175,38 @@ export function SIPView({
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label="SIP Mutual Funds list">
-            {filteredAccounts.map((account) => (
-              <SIPAccountCard
-                key={account.id}
-                account={account}
-                documents={documents}
-                onOpenEdit={handleOpenEdit}
-                onConfirmDelete={setConfirmDelete}
-              />
-            ))}
+            {filteredAccounts.length > 8 ? (
+              <List
+                height={500}
+                itemCount={filteredAccounts.length}
+                itemSize={130}
+                width="100%"
+              >
+                {({ index, style }: ListChildComponentProps) => {
+                  const account = filteredAccounts[index];
+                  return (
+                    <div style={style} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                      <SIPAccountCard
+                        account={account}
+                        documents={documents}
+                        onOpenEdit={handleOpenEdit}
+                        onConfirmDelete={setConfirmDelete}
+                      />
+                    </div>
+                  );
+                }}
+              </List>
+            ) : (
+              filteredAccounts.map((account) => (
+                <SIPAccountCard
+                  key={account.id}
+                  account={account}
+                  documents={documents}
+                  onOpenEdit={handleOpenEdit}
+                  onConfirmDelete={setConfirmDelete}
+                />
+              ))
+            )}
           </div>
         )}
       </div>

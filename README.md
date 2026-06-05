@@ -36,6 +36,12 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **Holdings Table Sorting Presets** — Quick presets to sort holdings by current value, total P&L, today's percent movement, or overall allocation percent.
 - **Mobile Bottom Navigation** — Fixed bottom bar for quick tabs swapping on narrow mobile viewports, featuring an **Alert Count Badge** on the Home tab.
 
+### ⚡ High Performance & Responsiveness
+- **Asynchronous Web Workers** — Offloads heavy computations (Newton-Raphson XIRR solvers, multi-factor Health Score scoring, and rebalancing recommendations) to background threads (`src/workers/`) with fail-safe synchronous fallbacks.
+- **List Virtualization** — Uses `react-window` to virtualize large registry listings (>8 accounts) to keep scrolling fluid and render times minimal.
+- **Intersection Lazy Loading** — Leverages an `IntersectionObserver` viewport wrapper to lazy-load charts and assistant modules, avoiding off-screen SVG coordinate calculations.
+- **Advanced Caching** — Employs `SWR` for remote state cache validation, IndexedDB local caches (`idb-keyval`) for instant stale-while-revalidate loads, and 15-minute TTL caching for live Mutual Fund NAV fetches.
+
 ### 📂 Multi-Asset Registry & Reminders
 - **Fixed Deposits (FD)** — Real-time compounded interest tracking (compounded half-yearly), maturity date tracking, timeline progress bars, and document attachments.
 - **Recurring Deposits (RD)** — Multi-month installment tracking with an interactive month-by-month grid list, paid vs. overdue status tracking, and a one-click **+ Pay** action button to record monthly contributions.
@@ -69,6 +75,9 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **Vite 5** — Lightning-fast dev server and optimized builds
 - **Tailwind CSS 3** — Utility-first styling
 - **Lucide React ^0.511.0** — Modern, consistent iconography
+- **SWR ^2.4.1** — Stale-while-revalidate data fetching and caching
+- **react-window ^2.2.7** — Grid and list virtualization
+- **idb-keyval ^6.2.5** — Minimalistic IndexedDB wrapper for local cache storage
 
 ### Backend (Supabase)
 - **PostgreSQL** — Relational database tables for portfolios, holdings, FDs (`fixed_deposits`), RDs (`rd_accounts`), Mutual Funds (`sip_accounts`), SSY (`ssy_accounts`), gold, real estate, insurances, documents, and net worth history.

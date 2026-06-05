@@ -77,3 +77,37 @@ function formatINRCompact(value: number): string {
   if (value >= 100000) return `₹${(value / 100000).toFixed(2)}L`;
   return `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 }
+
+/**
+ * Calculates asset allocation rebalancing orders asynchronously using a Web Worker
+ */
+export function calculateRebalancingAsync(
+  portfolios: Portfolio[],
+  activePortfolio: Portfolio | null,
+  targetPcts: { equity: number; debt: number; gold: number; realEstate: number }
+): Promise<RebalancingAdvice[]> {
+  return new Promise((resolve) => {
+    if (typeof window !== 'undefined' && window.Worker) {
+      try {
+        const worker = new Worker(new URL('../workers/rebalancing.worker.ts', import.meta.url), { type: 'module' });
+        worker.onmessage = (e) => {
+          if (e.data.error) {
+            resolve(calculateRebalancing(portfolios, activePortfolio, targetPcts));
+          } else {
+            resolve(e.data.result);
+          }
+          worker.terminate();
+        };
+        worker.onerror = () => {
+          resolve(calculateRebalancing(portfolios, activePortfolio, targetPcts));
+          worker.terminate();
+        };
+        worker.postMessage({ portfolios, activePortfolio, targetPcts });
+        return;
+      } catch (err) {
+        console.warn('[rebalancing worker] failed, falling back:', err);
+      }
+    }
+    resolve(calculateRebalancing(portfolios, activePortfolio, targetPcts));
+  });
+}

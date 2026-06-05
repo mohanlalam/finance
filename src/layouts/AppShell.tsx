@@ -1,9 +1,7 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react';
 import { WifiOff, AlertCircle, RefreshCw, TrendingUp, Landmark, Coins, Home, Shield, FolderOpen, Clock, Heart } from 'lucide-react';
 import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
-import PieChart from '../components/PieChart';
-import BarChart from '../components/BarChart';
 import AddHoldingModal from '../components/AddHoldingModal';
 import MobileBottomNav from '../components/MobileBottomNav';
 import SearchBar from '../components/SearchBar';
@@ -21,11 +19,14 @@ import MobileAlertsView from '../components/MobileAlertsView';
 import { ImportRow } from '../components/ExportPanel';
 import { AddHoldingPayload } from '../components/AddHoldingModal';
 
-import NetWorthTimelineChart from '../components/NetWorthTimelineChart';
-import TreemapChart from '../components/TreemapChart';
-import SankeyChart from '../components/SankeyChart';
-import PortfolioAssistant from '../components/PortfolioAssistant';
 import DashboardWidgets from '../components/DashboardWidgets';
+
+const PieChart = React.lazy(() => import('../components/PieChart'));
+const BarChart = React.lazy(() => import('../components/BarChart'));
+const NetWorthTimelineChart = React.lazy(() => import('../components/NetWorthTimelineChart'));
+const TreemapChart = React.lazy(() => import('../components/TreemapChart'));
+const SankeyChart = React.lazy(() => import('../components/SankeyChart'));
+const PortfolioAssistant = React.lazy(() => import('../components/PortfolioAssistant'));
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { formatINR, formatPercent, pnlColor } from '../utils/formatters';
@@ -37,6 +38,38 @@ import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { getBreakdownSlices } from '../utils/chartHelpers';
 import { classBreakdown, estimateTodayPnL } from '../utils/portfolioCalcs';
+
+// Lazy viewport container that loads child components only when they are visible
+function LazyViewport({ children, placeholderHeight = 240 }: { children: React.ReactNode; placeholderHeight?: number }) {
+  const [isIntersected, setIsIntersected] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsIntersected(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '100px' }
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} style={{ minHeight: isIntersected ? undefined : placeholderHeight }}>
+      {isIntersected ? children : (
+        <div 
+          className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 animate-pulse" 
+          style={{ height: placeholderHeight }} 
+        />
+      )}
+    </div>
+  );
+}
 
 type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
 
@@ -340,26 +373,51 @@ export default function AppShell() {
 
                 <div className="space-y-4">
                   <SectionErrorBoundary sectionName="Net Worth Timeline">
-                    <NetWorthTimelineChart history={netWorthHistory} currentNetWorth={summaryData.totalCurrentValue} />
+                    <LazyViewport placeholderHeight={240}>
+                      <Suspense fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                        <NetWorthTimelineChart history={netWorthHistory} currentNetWorth={summaryData.totalCurrentValue} />
+                      </Suspense>
+                    </LazyViewport>
                   </SectionErrorBoundary>
 
                   <SectionErrorBoundary sectionName="Sankey Flow Diagram">
-                    <SankeyChart portfolios={portfolios} activePortfolio={portfolio} />
+                    <LazyViewport placeholderHeight={240}>
+                      <Suspense fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                        <SankeyChart portfolios={portfolios} activePortfolio={portfolio} />
+                      </Suspense>
+                    </LazyViewport>
                   </SectionErrorBoundary>
 
                   <SectionErrorBoundary sectionName="Equity Concentration Treemap">
-                    <TreemapChart holdings={portfolio ? portfolio.holdings : portfolios.flatMap(p => p.holdings)} />
+                    <LazyViewport placeholderHeight={200}>
+                      <Suspense fallback={<div className="h-[200px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                        <TreemapChart holdings={portfolio ? portfolio.holdings : portfolios.flatMap(p => p.holdings)} />
+                      </Suspense>
+                    </LazyViewport>
                   </SectionErrorBoundary>
 
                   <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-                    <PortfolioAssistant portfolios={portfolios} />
+                    <LazyViewport placeholderHeight={200}>
+                      <Suspense fallback={<div className="h-[200px] bg-slate-900 border border-slate-700/60 rounded-2xl animate-pulse" />}>
+                        <PortfolioAssistant portfolios={portfolios} />
+                      </Suspense>
+                    </LazyViewport>
                   </SectionErrorBoundary>
 
                   <SectionErrorBoundary sectionName="Asset Class Pie Chart">
-                    <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
+                    <LazyViewport placeholderHeight={280}>
+                      <Suspense fallback={<div className="h-[280px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                        <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
+                      </Suspense>
+                    </LazyViewport>
                   </SectionErrorBoundary>
+
                   <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
-                    <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
+                    <LazyViewport placeholderHeight={280}>
+                      <Suspense fallback={<div className="h-[280px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                        <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
+                      </Suspense>
+                    </LazyViewport>
                   </SectionErrorBoundary>
                 </div>
               </div>
@@ -522,28 +580,52 @@ export default function AppShell() {
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <SectionErrorBoundary sectionName="Net Worth Timeline">
-                <NetWorthTimelineChart history={netWorthHistory} currentNetWorth={summaryData.totalCurrentValue} />
+                <LazyViewport placeholderHeight={240}>
+                  <Suspense fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                    <NetWorthTimelineChart history={netWorthHistory} currentNetWorth={summaryData.totalCurrentValue} />
+                  </Suspense>
+                </LazyViewport>
               </SectionErrorBoundary>
               <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-                <PortfolioAssistant portfolios={portfolios} />
+                <LazyViewport placeholderHeight={200}>
+                  <Suspense fallback={<div className="h-[200px] bg-slate-900 border border-slate-700/60 rounded-2xl animate-pulse" />}>
+                    <PortfolioAssistant portfolios={portfolios} />
+                  </Suspense>
+                </LazyViewport>
               </SectionErrorBoundary>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <SectionErrorBoundary sectionName="Sankey Flow Diagram">
-                <SankeyChart portfolios={portfolios} activePortfolio={portfolio} />
+                <LazyViewport placeholderHeight={240}>
+                  <Suspense fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                    <SankeyChart portfolios={portfolios} activePortfolio={portfolio} />
+                  </Suspense>
+                </LazyViewport>
               </SectionErrorBoundary>
               <SectionErrorBoundary sectionName="Equity Concentration Treemap">
-                <TreemapChart holdings={portfolio ? portfolio.holdings : portfolios.flatMap(p => p.holdings)} />
+                <LazyViewport placeholderHeight={200}>
+                  <Suspense fallback={<div className="h-[200px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                    <TreemapChart holdings={portfolio ? portfolio.holdings : portfolios.flatMap(p => p.holdings)} />
+                  </Suspense>
+                </LazyViewport>
               </SectionErrorBoundary>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <SectionErrorBoundary sectionName="Asset Class Pie Chart">
-                <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
+                <LazyViewport placeholderHeight={280}>
+                  <Suspense fallback={<div className="h-[280px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                    <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
+                  </Suspense>
+                </LazyViewport>
               </SectionErrorBoundary>
               <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
-                <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
+                <LazyViewport placeholderHeight={280}>
+                  <Suspense fallback={<div className="h-[280px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                    <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
+                  </Suspense>
+                </LazyViewport>
               </SectionErrorBoundary>
             </div>
 

@@ -139,4 +139,15 @@ export function DepositDetailsCard({
   );
 }
 
-export default React.memo(DepositDetailsCard);
+export default React.memo(
+  DepositDetailsCard,
+  (prev, next) =>
+    prev.fd.id === next.fd.id &&
+    prev.fd.status === next.fd.status &&
+    prev.fd.principal_amount === next.fd.principal_amount &&
+    prev.fd.interest_rate === next.fd.interest_rate &&
+    prev.fd.start_date === next.fd.start_date &&
+    prev.fd.maturity_date === next.fd.maturity_date &&
+    prev.fd.notes === next.fd.notes &&
+    prev.documents.length === next.documents.length
+);

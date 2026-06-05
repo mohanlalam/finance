@@ -7,6 +7,7 @@ import StandardFormFields from './fd/StandardFormFields';
 import DepositDetailsCard from './fd/DepositDetailsCard';
 import { usePortfolio } from '../contexts/PortfolioContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
+import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
 interface PortfolioOption {
   name: string;
@@ -261,17 +262,42 @@ function FixedDepositView({
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label={`${CFG.titlePlural} list`}>
-            {fixedDeposits.map((fd) => (
-              <DepositDetailsCard
-                key={fd.id}
-                fd={fd}
-                cfg={CFG}
-                documents={documents}
-                onOpenEdit={handleOpenEdit}
-                onConfirmDelete={setConfirmDelete}
-                onUpdate={onUpdate}
-              />
-            ))}
+            {fixedDeposits.length > 8 ? (
+              <List
+                height={500}
+                itemCount={fixedDeposits.length}
+                itemSize={180}
+                width="100%"
+              >
+                {({ index, style }: ListChildComponentProps) => {
+                  const fd = fixedDeposits[index];
+                  return (
+                    <div style={style} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                      <DepositDetailsCard
+                        fd={fd}
+                        cfg={CFG}
+                        documents={documents}
+                        onOpenEdit={handleOpenEdit}
+                        onConfirmDelete={setConfirmDelete}
+                        onUpdate={onUpdate}
+                      />
+                    </div>
+                  );
+                }}
+              </List>
+            ) : (
+              fixedDeposits.map((fd) => (
+                <DepositDetailsCard
+                  key={fd.id}
+                  fd={fd}
+                  cfg={CFG}
+                  documents={documents}
+                  onOpenEdit={handleOpenEdit}
+                  onConfirmDelete={setConfirmDelete}
+                  onUpdate={onUpdate}
+                />
+              ))
+            )}
           </div>
         )}
       </div>

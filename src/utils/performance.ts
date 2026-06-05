@@ -180,3 +180,33 @@ export function getBenchmarkReturns(years: number = 1): {
     return { nifty50: 14.2, nifty500: 14.9, sp500: 11.8 };
   }
 }
+
+/**
+ * Asynchronously calculates XIRR using a Web Worker with synchronous fallback
+ */
+export function runXIRRAsync(cashflows: CashFlow[]): Promise<number> {
+  return new Promise((resolve) => {
+    if (typeof window !== 'undefined' && window.Worker) {
+      try {
+        const worker = new Worker(new URL('../workers/xirr.worker.ts', import.meta.url), { type: 'module' });
+        worker.onmessage = (e) => {
+          if (e.data.error) {
+            resolve(calculateXIRR(cashflows));
+          } else {
+            resolve(e.data.result);
+          }
+          worker.terminate();
+        };
+        worker.onerror = () => {
+          resolve(calculateXIRR(cashflows));
+          worker.terminate();
+        };
+        worker.postMessage({ cashflows });
+        return;
+      } catch (err) {
+        console.warn('[xirr worker] initialization failed, falling back:', err);
+      }
+    }
+    resolve(calculateXIRR(cashflows));
+  });
+}
