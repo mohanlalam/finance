@@ -154,7 +154,7 @@ export default function MobileHomeSummary({
           </span>
         </div>
 
-        <h2 className="text-4xl font-extrabold tracking-tight mt-3 bg-gradient-to-r from-white via-slate-100 to-slate-350 bg-clip-text text-transparent relative z-10">
+        <h2 className="text-4xl font-extrabold tracking-tight mt-3 bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent relative z-10">
           {formatINR(summaryData.totalCurrentValue)}
         </h2>
 
@@ -200,11 +200,11 @@ export default function MobileHomeSummary({
       </div>
 
       {/* Sticky Mini Refresh Status Bar */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/70 dark:bg-slate-800/70 border border-slate-200/50 dark:border-slate-750/30 rounded-2xl text-[11px] text-slate-500 dark:text-slate-450 backdrop-blur shadow-sm">
+      <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/70 dark:bg-slate-800/70 border border-slate-200/50 dark:border-slate-700/30 rounded-2xl text-[11px] text-slate-500 dark:text-slate-400 backdrop-blur shadow-sm">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className={`w-2 h-2 rounded-full shrink-0 ${priceStatus === 'success' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
           <span className="font-semibold shrink-0">{priceStatus === 'success' ? 'Live Prices' : 'Snapshot'}</span>
-          <span className="text-slate-350 dark:text-slate-700 shrink-0">•</span>
+          <span className="text-slate-300 dark:text-slate-700 shrink-0">•</span>
           <span className="truncate">Updated {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Never'}</span>
         </div>
         <button
@@ -220,7 +220,7 @@ export default function MobileHomeSummary({
       {/* Alerts Indicator Widget */}
       <button
         onClick={onOpenAlerts}
-        className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow active:scale-98 transition-all text-left"
+        className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow active:scale-98 transition-all text-left"
       >
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${alertCount > 0 ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-500' : 'bg-slate-50 dark:bg-slate-900 text-slate-400'}`}>
@@ -228,7 +228,7 @@ export default function MobileHomeSummary({
           </div>
           <div>
             <h4 className="text-xs font-bold text-slate-700 dark:text-slate-200">Portfolio Alerts</h4>
-            <p className="text-[10.5px] text-slate-450 dark:text-slate-500 mt-0.5">
+            <p className="text-[10.5px] text-slate-400 dark:text-slate-500 mt-0.5">
               {alertCount > 0 ? `You have ${alertCount} active alerts requiring review` : 'All assets are healthy'}
             </p>
           </div>
@@ -253,19 +253,19 @@ export default function MobileHomeSummary({
             <button
               key={card.id}
               onClick={() => onNavigateAsset(card.id)}
-              className="relative overflow-hidden bg-white dark:bg-slate-850 border border-slate-150 dark:border-slate-800/80 rounded-2xl p-4 text-left shadow-sm hover:shadow active:scale-98 transition-all flex flex-col justify-between h-28"
+              className="relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 text-left shadow-sm hover:shadow active:scale-98 transition-all flex flex-col justify-between h-28"
             >
               <div className="flex items-center justify-between w-full">
-                <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-750 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center">
                   {card.icon}
                 </div>
-                <ChevronRight size={13} className="text-slate-350 dark:text-slate-650" />
+                <ChevronRight size={13} className="text-slate-300 dark:text-slate-600" />
               </div>
               <div className="mt-2">
                 <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 truncate uppercase tracking-wide">
                   {card.label}
                 </p>
-                <p className="text-[14px] font-extrabold text-slate-850 dark:text-slate-100 mt-0.5">
+                <p className="text-[14px] font-extrabold text-slate-800 dark:text-slate-100 mt-0.5">
                   {card.value !== null ? formatINR(card.value) : 'Vault'}
                 </p>
                 <p className="text-[9.5px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5 leading-none">

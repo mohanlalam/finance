@@ -44,7 +44,7 @@ const TYPE_CONFIG: Record<AlertType, { icon: React.ReactNode; color: string; bg:
   },
   document_expiry: {
     icon: <FileText size={16} />,
-    color: 'text-slate-755 dark:text-slate-350',
+    color: 'text-slate-700 dark:text-slate-300',
     bg: 'bg-slate-50 dark:bg-slate-800/40',
     border: 'border-slate-200 dark:border-slate-700',
   },
@@ -93,13 +93,13 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
               <Bell size={18} />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-150">Active Alerts</h2>
+              <h2 className="text-base font-bold text-slate-800 dark:text-slate-200">Active Alerts</h2>
               <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{alerts.length} action items require attention</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-750 flex items-center justify-center text-slate-400 dark:text-slate-300 transition-colors"
+            className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300 transition-colors"
             aria-label="Close Alerts"
           >
             <X size={18} />
@@ -131,7 +131,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
                 <span>{tab.label}</span>
                 {count > 0 && (
                   <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600 dark:bg-slate-750 dark:text-slate-300'
+                    isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                   }`}>
                     {count}
                   </span>
@@ -208,7 +208,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
           <div className="p-4 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30 flex gap-3">
             <button
               onClick={onDismissAll}
-              className="flex-1 py-3 text-xs font-bold text-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 rounded-xl transition-all"
+              className="flex-1 py-3 text-xs font-bold text-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-all"
             >
               Clear All ({alerts.length})
             </button>

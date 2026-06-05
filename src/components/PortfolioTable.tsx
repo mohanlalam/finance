@@ -167,7 +167,7 @@ export default React.memo(function PortfolioTable({
     >
       <span className="flex items-center gap-1">
         {label}
-        <ArrowUpDown size={11} className={sortKey === k ? 'text-blue-500' : 'text-slate-350 dark:text-slate-600'} />
+        <ArrowUpDown size={11} className={sortKey === k ? 'text-blue-500' : 'text-slate-300 dark:text-slate-600'} />
       </span>
     </th>
   );
@@ -196,7 +196,7 @@ export default React.memo(function PortfolioTable({
       {/* Mobile Card View */}
       <div className="md:hidden">
         {sorted.length > 0 && (
-          <div className="px-4 py-3 bg-slate-50/50 dark:bg-slate-900/30 border-b border-slate-100 dark:border-slate-750/50 grid grid-cols-2 gap-4">
+          <div className="px-4 py-3 bg-slate-50/50 dark:bg-slate-900/30 border-b border-slate-100 dark:border-slate-700/50 grid grid-cols-2 gap-4">
             <div>
               <p className="text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase tracking-wider">Total Value</p>
               <p className="text-base font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 whitespace-nowrap">{formatINR(totalCurrentValue)}</p>
@@ -315,7 +315,7 @@ export default React.memo(function PortfolioTable({
 
                 <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-500 pt-1 border-t border-slate-50 dark:border-slate-700/30">
                   <div className="flex gap-2">
-                    <span>Alloc: <span className="font-semibold text-slate-600 dark:text-slate-450">{h._allocation.toFixed(1)}%</span></span>
+                    <span>Alloc: <span className="font-semibold text-slate-600 dark:text-slate-400">{h._allocation.toFixed(1)}%</span></span>
                     <span>Today: <span className={`font-semibold ${pnlColor(h.todayPnLPercent)}`}>{formatPercent(h.todayPnLPercent)}</span></span>
                   </div>
 
@@ -380,7 +380,7 @@ export default React.memo(function PortfolioTable({
                 <tr
                   role="row"
                   key={`${h.ticker}-${h.sno}`}
-                  className={`hover:bg-slate-50/80 dark:hover:bg-slate-750/30 transition-colors ${isDeleting ? 'opacity-40' : ''}`}
+                  className={`hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors ${isDeleting ? 'opacity-40' : ''}`}
                 >
                   <td role="cell" className="px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 max-w-[180px]">
                     <span className="truncate block" title={h.stockName}>{h.stockName}</span>
@@ -388,7 +388,7 @@ export default React.memo(function PortfolioTable({
                   <td role="cell" className="px-4 py-3">
                     <span className="inline-block bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-xs font-bold px-2 py-0.5 rounded-md">{h.ticker}</span>
                   </td>
-                  <td role="cell" className="px-4 py-3 text-sm text-slate-600 dark:text-slate-350 text-right">
+                  <td role="cell" className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 text-right">
                     {editingId === h.id ? (
                       <div className="flex items-center gap-1 justify-end">
                         <input
@@ -434,7 +434,7 @@ export default React.memo(function PortfolioTable({
                       <p className="text-[10px] text-red-500 mt-0.5">{editError}</p>
                     )}
                   </td>
-                  <td role="cell" className="px-4 py-3 text-sm text-slate-600 dark:text-slate-350 text-right">
+                  <td role="cell" className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 text-right">
                     {editingId === h.id ? (
                       <div className="flex items-center justify-end">
                         <input
@@ -482,7 +482,7 @@ export default React.memo(function PortfolioTable({
                     </span>
                   </td>
                   <td role="cell" className="px-4 py-3 text-right">
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-450">
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       {((h as Record<string, unknown>)._allocation as number).toFixed(1)}%
                     </span>
                   </td>
@@ -495,7 +495,7 @@ export default React.memo(function PortfolioTable({
                         className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
                           isConfirming
                             ? 'bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400 hover:bg-red-200'
-                            : 'text-slate-350 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20'
+                            : 'text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20'
                         }`}
                         onBlur={() => setConfirmId(null)}
                       >
@@ -511,11 +511,11 @@ export default React.memo(function PortfolioTable({
             <tr role="row">
               <td role="cell" colSpan={5} className="px-4 py-3 text-sm font-bold">Portfolio Total</td>
               <td role="cell" className="px-4 py-3 text-sm font-bold text-right">{formatINR(totalCurrentValue)}</td>
-              <td role="cell" className="px-4 py-3 text-sm font-bold text-right text-slate-350 dark:text-slate-400">{formatINR(totalInvested)}</td>
-              <td role="cell" className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-450' : 'text-red-405'}`}>
+              <td role="cell" className="px-4 py-3 text-sm font-bold text-right text-slate-300 dark:text-slate-400">{formatINR(totalInvested)}</td>
+              <td role="cell" className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-405'}`}>
                 {totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}
               </td>
-              <td role="cell" colSpan={onDelete ? 4 : 3} className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-450' : 'text-red-405'}`}>
+              <td role="cell" colSpan={onDelete ? 4 : 3} className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-405'}`}>
                 {formatPercent(totalPnLPercent)}
               </td>
             </tr>

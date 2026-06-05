@@ -48,7 +48,7 @@ Every deposit registry maps to its own separate database table. This guarantees 
 
 | Asset Tab / UI Mode | Supabase PostgreSQL Table | Core Compounding / Valuation Rule |
 | :--- | :--- | :--- |
-| **Fixed Deposit (FD)** | `fixed_deposits` | Quarterly compounding (FD interest rates) |
+| **Fixed Deposit (FD)** | `fixed_deposits` | Half-yearly compounding (FD interest rates) |
 | **Recurring Deposit (RD)** | `rd_accounts` | Quarterly compounding + Contribution dates array |
 | **Sukanya Samriddhi (SSY)** | `ssy_accounts` | Annual compounding on April 1st (Indian financial boundary) |
 | **SIP Mutual Fund (SIP)** | `sip_accounts` | Live AMFI NAV scheme price multiplication, no compounding |

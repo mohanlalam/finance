@@ -215,10 +215,10 @@ export default React.memo(function RealEstateView({
               const propertyYield = Number(r.current_valuation) > 0 ? ((Number(r.monthly_rent) * 12) / Number(r.current_valuation)) * 100 : 0;
               const docs = documents.filter((d) => d.asset_type === 'real_estate' && d.asset_id === r.id);
               return (
-                <div key={r.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-750/30 transition-colors">
+                <div key={r.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-450 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-500 flex items-center justify-center shrink-0">
                         <Home size={20} />
                       </div>
                       <div>
@@ -266,7 +266,7 @@ export default React.memo(function RealEstateView({
                         ))}
                         <button
                           onClick={() => handleOpenEdit(r)}
-                          className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-650 dark:hover:text-blue-450 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
+                          className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-650 dark:hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
                           title="Edit"
                         >
                           <Edit2 size={14} />
@@ -323,7 +323,7 @@ export default React.memo(function RealEstateView({
               value={formPortfolio}
               onChange={(e) => setFormPortfolio(e.target.value)}
               disabled={!!editing}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors disabled:opacity-50"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors disabled:opacity-50"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
@@ -338,7 +338,7 @@ export default React.memo(function RealEstateView({
               placeholder="e.g. 2BHK Apartment (Whitefield)"
               value={propertyName}
               onChange={(e) => setPropertyName(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
             />
           </div>
 
@@ -348,7 +348,7 @@ export default React.memo(function RealEstateView({
               <select
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value as RealEstate['property_type'])}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors capitalize"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors capitalize"
               >
                 {TYPE_OPTIONS.map((t) => (
                   <option key={t} value={t}>{t}</option>
@@ -362,7 +362,7 @@ export default React.memo(function RealEstateView({
                 placeholder="City, State"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-755 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
               />
             </div>
           </div>
@@ -375,7 +375,7 @@ export default React.memo(function RealEstateView({
                 placeholder="0"
                 value={purchasePrice}
                 onChange={(e) => setPurchasePrice(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
               />
             </div>
             <div>
@@ -385,7 +385,7 @@ export default React.memo(function RealEstateView({
                 placeholder="0"
                 value={currentValuation}
                 onChange={(e) => setCurrentValuation(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
               />
             </div>
           </div>
@@ -397,7 +397,7 @@ export default React.memo(function RealEstateView({
                 type="date"
                 value={purchaseDate}
                 onChange={(e) => setPurchaseDate(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
               />
             </div>
             <div>
@@ -407,7 +407,7 @@ export default React.memo(function RealEstateView({
                 placeholder="0"
                 value={monthlyRent}
                 onChange={(e) => setMonthlyRent(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
               />
             </div>
           </div>
@@ -419,7 +419,7 @@ export default React.memo(function RealEstateView({
               placeholder="e.g. Disputed title, under renovation, used as collateral"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-450 transition-colors resize-none"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors resize-none"
             />
           </div>
 

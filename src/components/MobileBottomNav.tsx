@@ -114,7 +114,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                 className={`relative flex-1 flex flex-col items-center justify-center gap-1 h-full transition-all duration-150 active:scale-95 outline-none ${
                   isActive
                     ? 'text-blue-600 dark:text-blue-400 font-bold'
-                    : 'text-slate-400 dark:text-slate-500 active:text-slate-600 dark:active:text-slate-350'
+                    : 'text-slate-400 dark:text-slate-500 active:text-slate-600 dark:active:text-slate-300'
                 }`}
               >
                 <div className={`transition-transform duration-200 ${isActive ? 'scale-110 -translate-y-0.5' : ''} relative`}>
@@ -146,7 +146,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
             className={`relative flex-1 flex flex-col items-center justify-center gap-1 h-full transition-all duration-150 active:scale-95 outline-none ${
               isMoreActive || isDrawerOpen
                 ? 'text-blue-600 dark:text-blue-400 font-bold'
-                : 'text-slate-400 dark:text-slate-500 active:text-slate-600 dark:active:text-slate-350'
+                : 'text-slate-400 dark:text-slate-500 active:text-slate-600 dark:active:text-slate-300'
             }`}
           >
             <div className={`transition-transform duration-200 ${isMoreActive || isDrawerOpen ? 'scale-110 -translate-y-0.5 rotate-180' : ''} relative`}>

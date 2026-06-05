@@ -69,7 +69,7 @@ export default React.memo(function AddFamilyModal({
             placeholder="e.g. Father's Portfolio"
             value={newFamilyLabel}
             onChange={(e) => setNewFamilyLabel(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
           />
         </div>
         <div>
@@ -81,7 +81,7 @@ export default React.memo(function AddFamilyModal({
             placeholder="e.g. father (auto-derived from label if empty)"
             value={newFamilyName}
             onChange={(e) => setNewFamilyName(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-455 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
           />
         </div>
 
@@ -96,7 +96,7 @@ export default React.memo(function AddFamilyModal({
             type="button"
             disabled={submitting}
             onClick={onClose}
-            className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-350 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors disabled:opacity-50"
+            className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>

@@ -105,7 +105,7 @@ export function RDView({
     <div className="space-y-6">
       {/* Metrics Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="region" aria-label="RD summary metrics">
-        <div className="bg-gradient-to-tr from-pink-650 to-rose-600 rounded-2xl p-5 text-white shadow-md flex items-center justify-between">
+        <div className="bg-gradient-to-tr from-pink-600 to-rose-600 rounded-2xl p-5 text-white shadow-md flex items-center justify-between">
           <div>
             <p className="text-xs text-white/80 font-semibold uppercase tracking-wider">Total RD Invested</p>
             <p className="text-2xl font-bold mt-1">{formatINR(totalPrincipal)}</p>

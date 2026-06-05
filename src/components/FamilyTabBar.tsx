@@ -97,7 +97,7 @@ export default React.memo(function FamilyTabBar({
                 e.stopPropagation();
                 onRenameClick({ id: p.id, name: p.name, label: p.label });
               }}
-              className="ml-1 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-150 text-slate-400 hover:text-slate-650 hover:bg-slate-100 dark:text-slate-500 dark:hover:text-slate-300 dark:hover:bg-slate-800 opacity-0 group-hover:opacity-100 focus:opacity-100"
+              className="ml-1 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-150 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:text-slate-500 dark:hover:text-slate-300 dark:hover:bg-slate-800 opacity-0 group-hover:opacity-100 focus:opacity-100"
               title={`Rename ${p.label}`}
               aria-label={`Rename portfolio ${p.label}`}
             >

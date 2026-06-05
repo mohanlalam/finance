@@ -177,7 +177,7 @@ export default React.memo(function InsuranceView({
         <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Renewals in 60d</p>
-            <p className={`text-2xl font-bold mt-1 ${upcomingRenewals > 0 ? 'text-amber-600 dark:text-amber-450' : 'text-slate-800 dark:text-slate-100'}`}>{upcomingRenewals}</p>
+            <p className={`text-2xl font-bold mt-1 ${upcomingRenewals > 0 ? 'text-amber-600 dark:text-amber-500' : 'text-slate-800 dark:text-slate-100'}`}>{upcomingRenewals}</p>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Action needed soon</p>
           </div>
           <ShieldAlert size={40} className="text-amber-500/20 shrink-0" />
@@ -224,7 +224,7 @@ export default React.memo(function InsuranceView({
               const docs = documents.filter((d) => d.asset_type === 'insurance' && d.asset_id === i.id);
 
               return (
-                <div key={i.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-750/30 transition-colors">
+                <div key={i.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
                       <div className={`w-10 h-10 rounded-xl ${style.bg} ${style.text} flex items-center justify-center shrink-0`}>
@@ -247,7 +247,7 @@ export default React.memo(function InsuranceView({
                             </span>
                           )}
                           {isExpired && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/40 text-red-750 dark:text-red-400">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400">
                               Expired
                             </span>
                           )}
@@ -266,7 +266,7 @@ export default React.memo(function InsuranceView({
                       <div>
                         <p className="text-xs text-slate-400 dark:text-slate-500">Premium / year</p>
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{formatINR(Number(i.premium_amount))}</p>
-                        {i.renewal_date && <p className="text-[10px] text-slate-450 dark:text-slate-500">Renew: {i.renewal_date}</p>}
+                        {i.renewal_date && <p className="text-[10px] text-slate-400 dark:text-slate-500">Renew: {i.renewal_date}</p>}
                       </div>
                       <div className="col-span-2 sm:col-span-1 flex items-center justify-start md:justify-end gap-2">
                         {docs.map((doc) => (
@@ -283,7 +283,7 @@ export default React.memo(function InsuranceView({
                         ))}
                         <button
                           onClick={() => handleOpenEdit(i)}
-                          className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-650 dark:hover:text-blue-450 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
+                          className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-650 dark:hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
                           title="Edit"
                         >
                           <Edit2 size={14} />
@@ -340,7 +340,7 @@ export default React.memo(function InsuranceView({
               value={formPortfolio}
               onChange={(e) => setFormPortfolio(e.target.value)}
               disabled={!!editing}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-450 transition-colors disabled:opacity-50"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-colors disabled:opacity-50"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
@@ -354,7 +354,7 @@ export default React.memo(function InsuranceView({
               <select
                 value={insuranceType}
                 onChange={(e) => setInsuranceType(e.target.value as Insurance['insurance_type'])}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-355 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-450 transition-colors capitalize"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-colors capitalize"
               >
                 {TYPE_OPTIONS.map((t) => (
                   <option key={t} value={t}>{t}</option>
@@ -368,7 +368,7 @@ export default React.memo(function InsuranceView({
                 placeholder="e.g. HDFC Ergo"
                 value={provider}
                 onChange={(e) => setProvider(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-colors"
               />
             </div>
           </div>
@@ -380,7 +380,7 @@ export default React.memo(function InsuranceView({
               placeholder="e.g. Optima Secure Family"
               value={policyName}
               onChange={(e) => setPolicyName(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-455 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-colors"
             />
           </div>
 
@@ -391,7 +391,7 @@ export default React.memo(function InsuranceView({
               placeholder="e.g. POL-10928374"
               value={policyNumber}
               onChange={(e) => setPolicyNumber(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-455 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-colors"
             />
           </div>
 
@@ -403,7 +403,7 @@ export default React.memo(function InsuranceView({
                 placeholder="0"
                 value={sumAssured}
                 onChange={(e) => setSumAssured(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-755 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-colors"
               />
             </div>
             <div>
@@ -413,7 +413,7 @@ export default React.memo(function InsuranceView({
                 placeholder="0"
                 value={premiumAmount}
                 onChange={(e) => setPremiumAmount(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-755 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-colors"
               />
             </div>
           </div>
@@ -424,7 +424,7 @@ export default React.memo(function InsuranceView({
               type="date"
               value={renewalDate}
               onChange={(e) => setRenewalDate(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-455 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-colors"
             />
           </div>
 
@@ -435,7 +435,7 @@ export default React.memo(function InsuranceView({
               placeholder="e.g. Family floater plan, covers 4 members"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-455 transition-colors resize-none"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-colors resize-none"
             />
           </div>
 
@@ -447,7 +447,7 @@ export default React.memo(function InsuranceView({
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-350 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors"
+              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               Cancel
             </button>

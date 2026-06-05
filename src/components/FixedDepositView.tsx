@@ -84,7 +84,7 @@ function FixedDepositView({
       const timeDiff = m.getTime() - s.getTime();
       const years = timeDiff / (1000 * 3600 * 24 * 365.25);
       if (years > 0) {
-        const amt = p * Math.pow(1 + r / 400, 4 * years);
+        const amt = p * Math.pow(1 + r / 200, 2 * years);
         setMaturityAmount(amt.toFixed(2));
       } else {
         setMaturityAmount(p.toFixed(2));
@@ -297,7 +297,7 @@ function FixedDepositView({
                   value={formPortfolio}
                   onChange={(e) => setFormPortfolio(e.target.value)}
                   disabled={!!editingFd}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors disabled:opacity-50"
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors disabled:opacity-50"
                 >
                   {portfolioOptions.map((o) => (
                     <option key={o.name} value={o.name}>{o.label}</option>

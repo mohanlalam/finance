@@ -172,7 +172,7 @@ export function SSYFormModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="ssy-modal-title">
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 dark:border-slate-700/50">
+      <div className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200/50 dark:border-slate-800/50">
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
           <div>
             <h3 id="ssy-modal-title" className="text-base font-bold text-slate-800 dark:text-slate-100">
@@ -197,7 +197,7 @@ export function SSYFormModal({
               value={formPortfolio}
               onChange={(e) => setFormPortfolio(e.target.value)}
               disabled={!!editingAccount}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors disabled:opacity-50"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors disabled:opacity-50"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
@@ -361,7 +361,7 @@ export function SSYFormModal({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-purple-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-purple-755 transition-colors disabled:opacity-50"
+              className="flex-1 bg-purple-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-purple-700 transition-colors disabled:opacity-50"
             >
               {loading ? 'Saving...' : editingAccount ? 'Save Changes' : 'Create SSY Account'}
             </button>

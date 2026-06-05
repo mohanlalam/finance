@@ -86,7 +86,7 @@ const GainersList = React.memo(function GainersList({ items, type }: { items: Ho
             {type === 'gain' ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
           </span>
           <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate flex-1">{item.holding.ticker}</span>
-          <span className={`text-xs font-bold shrink-0 ${type === 'gain' ? 'text-emerald-600 dark:text-emerald-450' : 'text-red-500 dark:text-red-450'}`}>
+          <span className={`text-xs font-bold shrink-0 ${type === 'gain' ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-500 dark:text-red-450'}`}>
             {formatPercent(item.holding.pnlPercent, 1)}
           </span>
         </div>
@@ -109,7 +109,7 @@ const BiggestMover = React.memo(function BiggestMover({ mover }: { mover: Holdin
         <p className="text-[10px] text-slate-400 dark:text-slate-500">{h.stockName}</p>
       </div>
       <div className="ml-auto text-right">
-        <p className={`text-sm font-bold ${isUp ? 'text-emerald-600 dark:text-emerald-450' : 'text-red-500 dark:text-red-450'}`}>
+        <p className={`text-sm font-bold ${isUp ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-500 dark:text-red-450'}`}>
           {formatPercent(h.todayPnLPercent, 2)}
         </p>
         <p className="text-[10px] text-slate-400 dark:text-slate-500">{mover.portfolioLabel}</p>
@@ -171,7 +171,7 @@ const ConcentrationRisk = React.memo(function ConcentrationRisk({ warnings }: { 
     <div className="space-y-2">
       {warnings.slice(0, 5).map((w, i) => (
         <div key={`${w.ticker}-${i}`} className="flex items-center gap-2">
-          <AlertTriangle size={12} className="text-amber-500 dark:text-amber-450 shrink-0" />
+          <AlertTriangle size={12} className="text-amber-500 dark:text-amber-500 shrink-0" />
           <span className="text-xs text-slate-600 dark:text-slate-300 flex-1 truncate">
             <span className="font-bold">{w.ticker}</span> is {w.pct.toFixed(1)}% of {w.portfolioLabel}
           </span>
@@ -194,7 +194,7 @@ const FDReminders = React.memo(function FDReminders({ alerts }: { alerts: FDMatu
             <p className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">{a.fd.bank_name}</p>
             <p className="text-[10px] text-slate-400 dark:text-slate-500">{a.portfolioLabel} · {formatINR(Number(a.fd.principal_amount))}</p>
           </div>
-          <span className={`text-xs font-bold shrink-0 ${a.daysLeft <= 7 ? 'text-red-500 dark:text-red-400' : 'text-amber-600 dark:text-amber-450'}`}>
+          <span className={`text-xs font-bold shrink-0 ${a.daysLeft <= 7 ? 'text-red-500 dark:text-red-400' : 'text-amber-600 dark:text-amber-500'}`}>
             {a.daysLeft === 0 ? 'Today' : `${a.daysLeft}d`}
           </span>
         </div>
@@ -209,7 +209,7 @@ const InsuranceReminders = React.memo(function InsuranceReminders({ alerts }: { 
     <div className="space-y-2">
       {alerts.map((a, i) => (
         <div key={`ins-${i}`} className="flex items-center gap-2">
-          <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${a.daysLeft <= 15 ? 'bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400' : 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-450'}`}>
+          <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${a.daysLeft <= 15 ? 'bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400' : 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-500'}`}>
             <Shield size={12} />
           </div>
           <div className="flex-1 min-w-0">

@@ -1,12 +1,11 @@
 import React, { useState, useCallback } from 'react';
-import { SSYAccount } from '../../types/portfolio';
+import { SSYAccount, SSYPayload } from '../../types/portfolio';
 import { calculateSSYMaturityWithRates, SSY_HISTORICAL_RATES } from '../../utils/ssyUtils';
 import { Edit2, Check, X, AlertTriangle } from 'lucide-react';
 
 interface SSYScheduleProps {
   account: SSYAccount;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (id: string, payload: any) => Promise<void>;
+  onUpdate: (id: string, payload: Partial<SSYPayload>) => Promise<void>;
 }
 
 const SSY_MIN_FINANCIAL_YEAR_DEPOSIT = 250;
@@ -262,12 +261,12 @@ export function SSYSchedule({ account, onUpdate }: SSYScheduleProps) {
 
   const getContainerClassName = (totalPaid: number, isFuture: boolean): string => {
     if (totalPaid >= SSY_MIN_FINANCIAL_YEAR_DEPOSIT) {
-      return 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50';
+      return 'bg-emerald-500/[0.04] dark:bg-emerald-500/[0.03] border-emerald-500/20 dark:border-emerald-500/10 hover:border-emerald-500/35 transition-all';
     }
     if (isFuture) {
-      return 'bg-slate-50/50 dark:bg-slate-800/20 border-slate-100 dark:border-slate-800';
+      return 'bg-slate-500/[0.03] dark:bg-slate-500/[0.02] border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all';
     }
-    return 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/50';
+    return 'bg-amber-500/[0.04] dark:bg-amber-500/[0.03] border-amber-500/20 dark:border-amber-500/10 hover:border-amber-500/35 transition-all';
   };
 
   const windows = getSSYWindows(account.start_date);
@@ -329,15 +328,15 @@ export function SSYSchedule({ account, onUpdate }: SSYScheduleProps) {
                       </span>
                     )}
                     {!exceedsMax && totalPaid > 0 ? (
-                      <div className="flex flex-col items-center gap-1">
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isFullyPaid ? 'bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400' : 'bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400'}`}>
+                      <div className="flex flex-col items-center gap-1.5">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${isFullyPaid ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/10' : 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/10'}`}>
                           ₹{totalPaid.toLocaleString('en-IN')}
                         </span>
                         {!isCompliant && (
                           <span className="text-[8px] font-semibold text-amber-600 dark:text-amber-400">Min ₹250</span>
                         )}
                         {!isFuture && (
-                          <button type="button" onClick={() => openPaymentModal(win)} className="text-[9px] text-purple-600 dark:text-purple-400 hover:text-purple-800 font-bold hover:underline">
+                          <button type="button" onClick={() => openPaymentModal(win)} className="text-[9px] text-purple-600 dark:text-purple-400 hover:text-purple-700 font-bold transition-all">
                             Manage
                           </button>
                         )}
@@ -346,7 +345,7 @@ export function SSYSchedule({ account, onUpdate }: SSYScheduleProps) {
                       <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-600 italic">Scheduled</span>
                     ) : (
                       !exceedsMax && (
-                        <button type="button" onClick={() => openPaymentModal(win)} className="text-[9px] font-extrabold bg-purple-600 hover:bg-purple-700 text-white px-2 py-0.5 rounded-md transition-all active:scale-95">
+                        <button type="button" onClick={() => openPaymentModal(win)} className="text-[9px] font-bold bg-purple-600 hover:bg-purple-700 text-white px-2.5 py-1 rounded-lg transition-all active:scale-95 shadow-sm shadow-purple-500/15">
                           + Pay
                         </button>
                       )
@@ -509,8 +508,8 @@ export function SSYSchedule({ account, onUpdate }: SSYScheduleProps) {
       {payingSlot && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 shadow-xl" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setPayingSlot(null)} />
-          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6 border border-slate-100 dark:border-slate-700/50">
-            <h3 className="text-sm font-extrabold text-slate-850 dark:text-slate-100 mb-1">
+          <div className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6 border border-slate-200/50 dark:border-slate-800/50">
+            <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 mb-1">
               Record SSY Deposit ({formatFinancialYear(getFinancialYearStartUTC(payingSlot.start))})
             </h3>
             <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-1">
@@ -612,7 +611,7 @@ export function SSYSchedule({ account, onUpdate }: SSYScheduleProps) {
               )}
 
               <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setPayingSlot(null)} className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-xl py-2 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all">
+                <button type="button" onClick={() => setPayingSlot(null)} className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-xl py-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
                   Close
                 </button>
                 {(getPaidContributionsForWindow(payingSlot.start, payingSlot.end, account.contributions)

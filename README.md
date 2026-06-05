@@ -26,7 +26,7 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **Mobile Bottom Navigation** — Fixed bottom bar for quick tabs swapping on narrow mobile viewports, featuring an **Alert Count Badge** on the Home tab.
 
 ### 📂 Multi-Asset Registry & Reminders
-- **Fixed Deposits (FD)** — Real-time compounded interest tracking (compounded quarterly), maturity date tracking, timeline progress bars, and document attachments.
+- **Fixed Deposits (FD)** — Real-time compounded interest tracking (compounded half-yearly), maturity date tracking, timeline progress bars, and document attachments.
 - **Recurring Deposits (RD)** — Multi-month installment tracking with an interactive month-by-month grid list, paid vs. overdue status tracking, and a one-click **+ Pay** action button to record monthly contributions.
 - **Sukanya Samriddhi Yojana (SSY)** — Multi-year financial tracking with compounding strictly on every April 1st (Indian Financial Year end). Auto-calculates default 21-year maturity dates and flags deposits that violate the legal ₹250 – ₹1,50,000 annual range.
 - **SIP Mutual Funds** — Real-time mutual fund tracking via scheme automation. Integrate Scheme Codes with `api.mfapi.in` (including a 4-hour `sessionStorage` cache) to dynamically fetch live NAVs and calculate current portfolio valuations based on units owned.

@@ -36,7 +36,7 @@ export function SIPAccountCard({
             <span className="w-2.5 h-2.5 rounded-full bg-sky-500 animate-pulse" aria-hidden="true" />
             <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">{account.fund_name}</h4>
             {account.mf_scheme_code ? (
-              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-450 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-500 px-2 py-0.5 rounded-full flex items-center gap-0.5">
                 <Wifi size={10} /> Live
               </span>
             ) : (
@@ -82,7 +82,7 @@ export function SIPAccountCard({
           </div>
           <div>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Est. Invested</p>
-            <p className="text-xs font-bold text-slate-700 dark:text-slate-350">{formatINR(invested)}</p>
+            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{formatINR(invested)}</p>
           </div>
           <div>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Current Value</p>

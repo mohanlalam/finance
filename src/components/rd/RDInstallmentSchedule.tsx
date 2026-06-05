@@ -86,8 +86,8 @@ export function RDInstallmentSchedule({ account, onUpdate }: RDInstallmentSchedu
                   key={idx}
                   className={`rounded-xl border p-2 flex flex-col items-center justify-between text-center gap-1.5 transition-all ${
                     isPaid
-                      ? 'bg-emerald-50/30 border-emerald-250 dark:bg-emerald-950/10 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-400'
-                      : 'bg-slate-50/50 border-slate-200 dark:bg-slate-900/20 dark:border-slate-750 text-slate-500 dark:text-slate-450'
+                      ? 'bg-emerald-50/30 border-emerald-200 dark:bg-emerald-950/10 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-400'
+                      : 'bg-slate-50/50 border-slate-200 dark:bg-slate-900/20 dark:border-slate-700 text-slate-500 dark:text-slate-400'
                   }`}
                 >
                   <span className="text-[10px] font-bold tracking-wide">{label}</span>

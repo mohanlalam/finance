@@ -118,7 +118,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
           <select
             value={form.portfolioName}
             onChange={(e) => set('portfolioName', e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
           >
             {portfolioOptions.map((o) => (
               <option key={o.name} value={o.name}>{o.label}</option>
@@ -133,7 +133,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             placeholder="e.g. Reliance Industries Limited"
             value={form.stockName}
             onChange={(e) => set('stockName', e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
           />
         </div>
 
@@ -145,7 +145,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               placeholder="e.g. RELIANCE"
               value={form.ticker}
               onChange={(e) => set('ticker', e.target.value.toUpperCase())}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors uppercase"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors uppercase"
             />
           </div>
           <div>
@@ -153,7 +153,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             <select
               value={form.exchange}
               onChange={(e) => set('exchange', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
             >
               {EXCHANGE_OPTIONS.map((o) => (
                 <option key={o} value={o.split(' ')[0]}>{o}</option>
@@ -172,7 +172,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             placeholder="e.g. RELIANCE.NS"
             value={form.yahooSymbol}
             onChange={(e) => setForm((p) => ({ ...p, yahooSymbol: e.target.value }))}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
           />
         </div>
 
@@ -186,7 +186,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               step="any"
               value={form.qty}
               onChange={(e) => set('qty', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
             />
           </div>
           <div>
@@ -198,7 +198,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               step="any"
               value={form.avgPrice}
               onChange={(e) => set('avgPrice', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
             />
           </div>
         </div>
@@ -215,7 +215,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             step="any"
             value={form.amountInvested}
             onChange={(e) => setForm((p) => ({ ...p, amountInvested: e.target.value }))}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
           />
         </div>
 
@@ -229,7 +229,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               step="any"
               value={form.weekLow52}
               onChange={(e) => set('weekLow52', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
             />
           </div>
           <div>
@@ -241,7 +241,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               step="any"
               value={form.weekHigh52}
               onChange={(e) => set('weekHigh52', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-650 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
             />
           </div>
         </div>

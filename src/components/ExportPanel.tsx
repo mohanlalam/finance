@@ -276,7 +276,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
       <div className="relative" ref={containerRef}>
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 text-xs text-slate-400 dark:text-slate-350 hover:text-blue-450 border border-slate-700 dark:border-slate-600 rounded-lg hover:border-slate-500 transition-colors"
+          className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 text-xs text-slate-400 dark:text-slate-300 hover:text-blue-500 border border-slate-700 dark:border-slate-600 rounded-lg hover:border-slate-500 transition-colors"
           title="Import/Export Options"
           aria-expanded={open}
           aria-haspopup="true"
@@ -375,7 +375,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             <select
               value={importTarget}
               onChange={(e) => setImportTarget(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-750 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-450 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
@@ -401,7 +401,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
           )}
 
           {importRows.length > 0 && (
-            <div className="bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-750 rounded-xl overflow-hidden">
+            <div className="bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
               <div className="px-3 py-2 bg-slate-100 dark:bg-slate-800/80 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Preview — {importRows.length} holdings
               </div>
@@ -440,7 +440,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
               type="button"
               disabled={importing}
               onClick={() => setShowImport(false)}
-              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-350 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
             >
               Cancel
             </button>

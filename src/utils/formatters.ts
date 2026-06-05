@@ -67,8 +67,8 @@ export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()
   
   if (years > 0 && !isNaN(r) && !isNaN(s.getTime())) {
     if (!isNaN(p)) {
-      // FDs compound quarterly
-      return p * Math.pow(1 + r / 400, 4 * years);
+      // FDs compound half-yearly
+      return p * Math.pow(1 + r / 200, 2 * years);
     }
   }
   return p;

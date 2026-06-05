@@ -40,9 +40,11 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
   }, [portfolios]);
 
   useEffect(() => {
-    baselinePnlPctRef.current = currentPct;
-    setLastPnlPct(currentPct);
-  }, [currentPct]);
+    if (baselinePnlPctRef.current === null && portfolios.length > 0) {
+      baselinePnlPctRef.current = currentPct;
+      setLastPnlPct(currentPct);
+    }
+  }, [currentPct, portfolios]);
 
   return useMemo(() => {
     const alerts: Alert[] = [];

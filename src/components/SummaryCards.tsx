@@ -31,7 +31,7 @@ function SummaryCards({
       className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
     >
       {/* 1. Net Worth Card (Premium Dark Gradient) */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl border border-slate-800 dark:border-slate-800/80 shadow-md p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2">
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl border border-slate-800 dark:border-slate-800/80 shadow-md p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2 premium-card glow-indigo">
         <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
         
@@ -50,22 +50,22 @@ function SummaryCards({
       </div>
 
       {/* 2. Invested Card (Clean Slate Glass) */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2">
+      <div className="glass-panel premium-card rounded-2xl shadow-sm p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2">
         <div className="flex items-center justify-between">
           <span className="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Invested</span>
-          <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+          <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-750 flex items-center justify-center">
             <BarChart2 size={14} className="text-slate-500 dark:text-slate-400 sm:hidden" />
             <BarChart2 size={16} className="text-slate-500 dark:text-slate-400 hidden sm:block" />
           </span>
         </div>
-        <p className="text-lg sm:text-2xl font-extrabold text-slate-850 dark:text-slate-100">{formatINR(totalInvested)}</p>
+        <p className="text-lg sm:text-2xl font-extrabold text-slate-800 dark:text-slate-100">{formatINR(totalInvested)}</p>
         <p className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 hidden sm:block">Cost basis across all holdings</p>
       </div>
 
       {/* 3. Total P&L Card (Color-coded Border & Soft BG) */}
-      <div className={`rounded-2xl border shadow-sm p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2 ${
+      <div className={`rounded-2xl border shadow-sm p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2 premium-card ${
         isGain
-          ? 'bg-emerald-500/[0.04] dark:bg-emerald-500/[0.03] border-emerald-500/25 dark:border-emerald-500/15'
+          ? 'bg-emerald-500/[0.04] dark:bg-emerald-500/[0.03] border-emerald-500/25 dark:border-emerald-500/15 glow-emerald'
           : 'bg-red-500/[0.04] dark:bg-red-500/[0.03] border-red-500/25 dark:border-red-500/15'
       }`}>
         <div className="flex items-center justify-between">
@@ -78,7 +78,7 @@ function SummaryCards({
             {isGain ? <TrendingUp size={14} className="text-emerald-600 dark:text-emerald-400" /> : <TrendingDown size={14} className="text-red-500 dark:text-red-400" />}
           </span>
         </div>
-        <p className={`text-lg sm:text-2xl font-extrabold ${isGain ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-650 dark:text-red-400'}`}>
+        <p className={`text-lg sm:text-2xl font-extrabold ${isGain ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
           {isGain ? '+' : ''}{formatINR(totalPnL)}
         </p>
         <p className={`text-[10px] sm:text-xs font-bold ${pnlColor(totalPnL)}`}>
@@ -88,9 +88,9 @@ function SummaryCards({
 
       {/* 4. Today's P&L Card (Color-coded daily returns) */}
       {todayPnL !== undefined ? (
-        <div className={`rounded-2xl border shadow-sm p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2 ${
+        <div className={`rounded-2xl border shadow-sm p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2 premium-card ${
           isTodayGain
-            ? 'bg-emerald-500/[0.04] dark:bg-emerald-500/[0.03] border-emerald-500/25 dark:border-emerald-500/15'
+            ? 'bg-emerald-500/[0.04] dark:bg-emerald-500/[0.03] border-emerald-500/25 dark:border-emerald-500/15 glow-emerald'
             : 'bg-red-500/[0.04] dark:bg-red-500/[0.03] border-red-500/25 dark:border-red-500/15'
         }`}>
           <div className="flex items-center justify-between">
@@ -111,15 +111,15 @@ function SummaryCards({
           </p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2">
+        <div className="glass-panel premium-card rounded-2xl shadow-sm p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Today</span>
             <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
               <Activity size={14} className="text-slate-400" />
             </span>
           </div>
-          <p className="text-base font-semibold text-slate-400 dark:text-slate-500 mt-1.5">No live data</p>
-          <p className="text-[10px] text-slate-450 dark:text-slate-500">Intraday quotes unavailable</p>
+          <p className="text-base font-semibold text-slate-450 dark:text-slate-500 mt-1.5">No live data</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500">Intraday quotes unavailable</p>
         </div>
       )}
     </div>

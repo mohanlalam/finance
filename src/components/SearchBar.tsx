@@ -195,7 +195,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
             <button
               onClick={handleMobileClose}
               aria-label="Back to dashboard"
-              className="p-1 rounded-lg text-slate-400 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="p-1 rounded-lg text-slate-400 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               <ArrowLeft size={20} />
             </button>
@@ -232,7 +232,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                   className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
                     isActive
                       ? 'bg-blue-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-500 dark:bg-slate-850 dark:text-slate-400'
+                      : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                   }`}
                 >
                   {tab.label}
@@ -252,7 +252,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                     <button
                       key={type}
                       onClick={() => setActiveFilter(type as SearchFilter)}
-                      className="flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-750/30 rounded-2xl text-left transition-all active:scale-95"
+                      className="flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-700/30 rounded-2xl text-left transition-all active:scale-95"
                     >
                       <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900 shadow-3xs flex items-center justify-center shrink-0">
                         {TYPE_ICONS[type]}
@@ -282,13 +282,13 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                         <button
                           key={`${type}-${idx}`}
                           onClick={() => handleSelect(item)}
-                          className="w-full text-left p-3.5 bg-white dark:bg-slate-850 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 border border-slate-150/40 dark:border-slate-800/80 rounded-2xl flex items-center justify-between gap-3 transition-colors active:scale-[0.99]"
+                          className="w-full text-left p-3.5 bg-white dark:bg-slate-800 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 border border-slate-200/40 dark:border-slate-800/80 rounded-2xl flex items-center justify-between gap-3 transition-colors active:scale-[0.99]"
                         >
                           <div className="min-w-0">
                             <p className="text-xs font-extrabold text-slate-800 dark:text-slate-250 truncate">{item.label}</p>
-                            <p className="text-[10px] font-medium text-slate-450 dark:text-slate-400 truncate mt-0.5">{item.sublabel}</p>
+                            <p className="text-[10px] font-medium text-slate-400 dark:text-slate-400 truncate mt-0.5">{item.sublabel}</p>
                           </div>
-                          <span className="text-[9px] font-bold uppercase bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-350 px-2 py-0.5 rounded-md shrink-0">
+                          <span className="text-[9px] font-bold uppercase bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-2 py-0.5 rounded-md shrink-0">
                             {item.portfolioLabel}
                           </span>
                         </button>
@@ -349,7 +349,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
           <button
             onClick={() => { setQuery(''); setOpen(false); }}
             aria-label="Clear search"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-350 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
           >
             <X size={14} />
           </button>

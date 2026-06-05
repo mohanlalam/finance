@@ -1,5 +1,5 @@
 import React from 'react';
-import { SSYAccount, DocumentMetadata } from '../../types/portfolio';
+import { SSYAccount, DocumentMetadata, SSYPayload } from '../../types/portfolio';
 import { formatINR, getDocumentUrl } from '../../utils/formatters';
 import { getSSYEffectiveValue } from '../../utils/ssyUtils';
 import { CheckCircle, FileText, Edit2, Trash2, Clock, AlertCircle, StickyNote, Heart } from 'lucide-react';
@@ -10,8 +10,7 @@ interface SSYAccountCardProps {
   documents: DocumentMetadata[];
   onOpenEdit: (account: SSYAccount) => void;
   onConfirmDelete: (account: SSYAccount) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (id: string, payload: any) => Promise<void>;
+  onUpdate: (id: string, payload: Partial<SSYPayload>) => Promise<void>;
 }
 
 function calculateCurrentAge(dobString: string): number {
@@ -53,7 +52,7 @@ export function SSYAccountCard({
   const isMatured = account.status === 'matured' || progress >= 100;
 
   return (
-    <div className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors" role="listitem">
+    <div className="glass-panel border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300" role="listitem">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
           <div

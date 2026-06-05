@@ -38,7 +38,7 @@ export function RDAccountCard({
             <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse" aria-hidden="true" />
             <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">{account.bank_name}</h4>
             {isMatured ? (
-              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-450 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-500 px-2 py-0.5 rounded-full flex items-center gap-0.5">
                 <CheckCircle size={10} /> Matured
               </span>
             ) : (
@@ -74,7 +74,7 @@ export function RDAccountCard({
           </div>
           <div>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Total Invested</p>
-            <p className="text-xs font-bold text-slate-700 dark:text-slate-350">{formatINR(invested)}</p>
+            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{formatINR(invested)}</p>
           </div>
           <div>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Current Value</p>
