@@ -63,6 +63,7 @@ export function calculateXIRR(cashflows: CashFlow[]): number {
       if (rNext > -0.999 && rNext < 10.0) {
         return rNext;
       }
+      break; // Exit loop on out-of-bounds convergence to allow bisection solver to run
     }
     r = rNext;
   }
@@ -140,8 +141,12 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
 
   // Process Stocks
   for (const stock of portfolio.holdings) {
-    // Treat stocks as purchased 1 year ago on average if start date is missing
-    const age = 1.0;
+    // Treat stocks as purchased using creation date fallback if start/purchase date is missing, otherwise default to 1.0
+    const age = processDate((stock as { created_at?: string }).created_at) ||
+                processDate((stock as { createdAt?: string }).createdAt) ||
+                processDate((portfolio as { created_at?: string }).created_at) ||
+                processDate((portfolio as { createdAt?: string }).createdAt) ||
+                1.0;
     weightedTimeSum += stock.amountInvested * age;
     totalInvested += stock.amountInvested;
   }
@@ -165,7 +170,9 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
 }
 
 /**
- * Returns static benchmark annualized returns (CAGR %) for comparison
+ * Returns static benchmark annualized returns (CAGR %) for comparison.
+ * NOTE: These are estimated approximate figures for v1. In a production environment,
+ * these should be dynamically fetched annually from a configuration endpoint or Supabase Edge function.
  */
 export function getBenchmarkReturns(years: number = 1): {
   nifty50: number;
