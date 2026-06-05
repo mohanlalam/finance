@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Transaction History &amp; Budgeting | Azure Ledger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #0b1326;
+            color: #dae2fd;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+        .budget-progress {
+            transition: width 1s ease-out;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#131b2e",
+                    "surface-container-high": "#222a3d",
+                    "secondary": "#b9c8de",
+                    "warning": "#F59E0B",
+                    "outline-variant": "#424754",
+                    "on-tertiary-container": "#1f2a3c",
+                    "on-error-container": "#ffdad6",
+                    "background": "#0b1326",
+                    "surface": "#0b1326",
+                    "on-background": "#dae2fd",
+                    "on-secondary-fixed": "#0d1c2d",
+                    "success": "#10B981",
+                    "secondary-fixed-dim": "#b9c8de",
+                    "outline": "#8c909f",
+                    "on-primary": "#002e6a",
+                    "surface-container-lowest": "#060e20",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-tertiary": "#263143",
+                    "surface-container-highest": "#2d3449",
+                    "on-error": "#690005",
+                    "inverse-on-surface": "#283044",
+                    "on-surface-variant": "#c2c6d6",
+                    "error": "#EF4444",
+                    "surface-variant": "#2d3449",
+                    "primary": "#adc6ff",
+                    "tertiary-container": "#8691a7",
+                    "inverse-primary": "#005ac2",
+                    "on-tertiary-fixed-variant": "#3c475a",
+                    "inverse-surface": "#dae2fd",
+                    "tertiary-fixed-dim": "#bcc7de",
+                    "on-secondary-fixed-variant": "#39485a",
+                    "on-primary-container": "#00285d",
+                    "tertiary": "#bcc7de",
+                    "tertiary-fixed": "#d8e3fb",
+                    "error-container": "#93000a",
+                    "surface-glass": "rgba(30, 41, 59, 0.7)",
+                    "surface-bright": "#31394d",
+                    "secondary-container": "#39485a",
+                    "primary-container": "#4d8eff",
+                    "surface-container": "#171f33",
+                    "on-primary-fixed": "#001a42",
+                    "on-secondary-container": "#a7b6cc",
+                    "surface-tint": "#adc6ff",
+                    "primary-fixed": "#d8e2ff",
+                    "on-tertiary-fixed": "#111c2d",
+                    "on-primary-fixed-variant": "#004395",
+                    "on-secondary": "#233143",
+                    "border-glass": "rgba(255, 255, 255, 0.1)",
+                    "on-surface": "#dae2fd",
+                    "secondary-fixed": "#d4e4fa",
+                    "surface-dim": "#0b1326"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "gutter": "24px",
+                    "container-max-width": "1280px",
+                    "margin-desktop": "40px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "label-md": ["Inter"],
+                    "display-lg": ["Outfit"],
+                    "title-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "display-lg-mobile": ["Outfit"],
+                    "body-md": ["Inter"],
+                    "mono-data": ["Inter"],
+                    "headline-md": ["Outfit"]
+            },
+            "fontSize": {
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "mono-data": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-surface">
+<!-- SideNavBar (The Anchor) -->
+<aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant shadow-sm z-50 p-gutter">
+<div class="mb-10">
+<h1 class="font-display-lg text-display-lg-mobile font-bold text-primary">Azure Ledger</h1>
+<p class="font-label-md text-label-md text-secondary opacity-70">Family Wealth Office</p>
+</div>
+<nav class="flex-grow space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+                Portfolio
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-primary font-bold bg-secondary-container rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+                Transactions
+            </a>
+</nav>
+<button class="mt-4 bg-primary text-on-primary font-label-md text-label-md py-3 rounded-lg flex items-center justify-center gap-2 Active: scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+            Add Asset
+        </button>
+<div class="mt-auto pt-6 border-t border-outline-variant space-y-2">
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-primary transition-all font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-primary transition-all font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+                Support
+            </a>
+</div>
+</aside>
+<div class="md:ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-40 flex justify-between items-center px-margin-desktop w-full py-4 bg-surface-glass backdrop-blur-md border-b border-border-glass">
+<div class="flex items-center">
+<h2 class="font-title-lg text-title-lg text-primary">Transaction History</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative hidden lg:block">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant material-symbols-outlined" data-icon="search">search</span>
+<input class="bg-surface-container-lowest border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-md focus:outline-none focus:border-primary w-64" placeholder="Search ledger..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary">
+<img alt="Family administrator profile" data-alt="A close-up professional headshot of a mature, confident family office administrator in a high-end corporate setting. The lighting is sophisticated and moody, consistent with a dark-mode UI aesthetic, featuring soft blue and amber rim lights. He is wearing a tailored charcoal suit against a blurred background of a modern glass-walled office at night." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXy2GO8ajtIgVMLYV-ObbD4u3OYq3NgorwzFUtPNr3wau_n3nVNJLwCGzIjO3ZHc4WfDTs2nyltuxGYRgyctl4aD-o5kQD7S4m-qSu8seSOA9VnTMfy_PPt-q7UxYs5uvE7lHsJS4D8CIrf5jwnUJaa6AOlZjVVcc6ey0amEUxRufPUgWgOekGRHhkNuq341glk815DmcNSsYzxhx8ODniPpfoyGd22n-jKGmsKoy-qVEALb34wIxHbph2rHiy3344TJIqHjQKxKbY"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="p-gutter lg:p-margin-desktop flex-grow max-w-[1400px] mx-auto w-full">
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Left: Transactions List (8 Cols) -->
+<section class="col-span-12 lg:col-span-8 flex flex-col gap-gutter">
+<!-- Filters & Search -->
+<div class="glass-panel p-6 rounded-xl flex flex-col md:flex-row gap-4 justify-between items-center">
+<div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 no-scrollbar">
+<button class="bg-secondary-container text-primary font-label-md text-label-md px-4 py-2 rounded-full whitespace-nowrap">All Time</button>
+<button class="hover:bg-surface-container-high text-on-surface-variant font-label-md text-label-md px-4 py-2 rounded-full transition-all whitespace-nowrap">Last 30 Days</button>
+<button class="hover:bg-surface-container-high text-on-surface-variant font-label-md text-label-md px-4 py-2 rounded-full transition-all whitespace-nowrap">Income</button>
+<button class="hover:bg-surface-container-high text-on-surface-variant font-label-md text-label-md px-4 py-2 rounded-full transition-all whitespace-nowrap">Expenses</button>
+</div>
+<div class="flex items-center gap-2 w-full md:w-auto">
+<button class="flex items-center gap-2 border border-outline-variant px-4 py-2 rounded-lg text-label-md text-on-surface-variant hover:border-primary transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="filter_list">filter_list</span>
+                                Advanced Filters
+                            </button>
+</div>
+</div>
+<!-- Transaction Cards Container -->
+<div class="space-y-3">
+<!-- Transaction Row 1 -->
+<div class="glass-panel p-4 rounded-xl flex items-center justify-between hover:bg-surface-container-high transition-all group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+</div>
+<div>
+<h4 class="font-title-lg text-body-lg text-on-surface">Mortgage Repayment</h4>
+<p class="text-body-md text-on-surface-variant">CitiBank • Oct 24, 2024</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-body-lg text-error">-$4,250.00</span>
+<p class="text-label-md text-on-surface-variant uppercase tracking-wider">Housing</p>
+</div>
+</div>
+<!-- Transaction Row 2 -->
+<div class="glass-panel p-4 rounded-xl flex items-center justify-between hover:bg-surface-container-high transition-all group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-success/10 flex items-center justify-center text-success">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+</div>
+<div>
+<h4 class="font-title-lg text-body-lg text-on-surface">Quarterly Dividends</h4>
+<p class="text-body-md text-on-surface-variant">Vanguard Index Fund • Oct 22, 2024</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-body-lg text-success">+$12,480.20</span>
+<p class="text-label-md text-on-surface-variant uppercase tracking-wider">Investment</p>
+</div>
+</div>
+<!-- Transaction Row 3 -->
+<div class="glass-panel p-4 rounded-xl flex items-center justify-between hover:bg-surface-container-high transition-all group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+<span class="material-symbols-outlined" data-icon="flight">flight</span>
+</div>
+<div>
+<h4 class="font-title-lg text-body-lg text-on-surface">Emirates Airlines</h4>
+<p class="text-body-md text-on-surface-variant">Family Vacation • Oct 20, 2024</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-body-lg text-error">-$8,120.00</span>
+<p class="text-label-md text-on-surface-variant uppercase tracking-wider">Travel</p>
+</div>
+</div>
+<!-- Transaction Row 4 -->
+<div class="glass-panel p-4 rounded-xl flex items-center justify-between hover:bg-surface-container-high transition-all group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+</div>
+<div>
+<h4 class="font-title-lg text-body-lg text-on-surface">Cedar Sinai Premium</h4>
+<p class="text-body-md text-on-surface-variant">Health Insurance • Oct 18, 2024</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-body-lg text-error">-$1,150.00</span>
+<p class="text-label-md text-on-surface-variant uppercase tracking-wider">Healthcare</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Right: Budgeting & Forecast (4 Cols) -->
+<aside class="col-span-12 lg:col-span-4 flex flex-col gap-gutter">
+<!-- Monthly Budget Tracker -->
+<div class="glass-panel rounded-xl overflow-hidden">
+<div class="bg-surface-container-high/50 px-6 py-4 border-b border-border-glass">
+<h3 class="font-headline-md text-headline-md text-on-surface">Monthly Budget</h3>
+</div>
+<div class="p-6 space-y-6">
+<!-- Category 1 -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="text-body-md text-on-surface font-medium">Housing</span>
+<span class="text-label-md text-on-surface-variant">$4,250 / $5,000</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="budget-progress bg-primary h-full rounded-full" style="width: 85%"></div>
+</div>
+</div>
+<!-- Category 2 -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="text-body-md text-on-surface font-medium">Travel</span>
+<span class="text-label-md text-error">$8,120 / $6,000</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="budget-progress bg-error h-full rounded-full" style="width: 100%"></div>
+</div>
+</div>
+<!-- Category 3 -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="text-body-md text-on-surface font-medium">Investments</span>
+<span class="text-label-md text-on-surface-variant">$15,000 / $25,000</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="budget-progress bg-success h-full rounded-full" style="width: 60%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Projected Spending Forecast -->
+<div class="relative rounded-xl overflow-hidden min-h-[300px] flex flex-col justify-end p-6 group">
+<img alt="Digital data projection" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700" data-alt="A futuristic digital data visualization with flowing blue lines of code and holographic spending forecasts projected against a dark, tech-oriented background. The mood is analytical and secure, with a deep blue and slate palette. Subtle glowing particles suggest live data processing in a high-stakes financial environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbRuZlkXO5_hvv31wfowbuDGcKtA7yF0Fna0EwkGjHeV1j4FRBRhbI1LZ-Noq-gi9P9Jt3AogU7XJ1J4R2Gg_bfilPnlNrXCKtG16e-q13VUyn7YrCJELniTISW2LOQKV40XvxpkctKLVlqRICIzEtbmIJxCJMKfhbAJs_hso1yXKPq_46RLJCRYoTtrDZnEUw182l5_tv8I5ut2f5ZoVuxXG4yfI8A2uhSkjLxydydued2RRj8wdGawa59Vz2BWbB_xEZdbFybiuV"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-2 text-primary mb-2">
+<span class="material-symbols-outlined" data-icon="auto_graph">auto_graph</span>
+<span class="font-label-md text-label-md uppercase tracking-widest">AI Forecast</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Projected Spending</h3>
+<p class="text-body-md text-on-surface-variant mb-4">Based on historical patterns, your family is on track to spend $18,400 this month, which is 12% above average.</p>
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest/50 backdrop-blur-sm rounded-lg border border-border-glass">
+<div>
+<p class="text-label-md text-on-surface-variant">Est. End of Month</p>
+<p class="font-mono-data text-headline-md text-primary">$18,432.50</p>
+</div>
+<button class="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Financial Security Message -->
+<div class="p-6 rounded-xl border border-dashed border-outline-variant flex items-center gap-4">
+<span class="material-symbols-outlined text-success" data-icon="verified_user">verified_user</span>
+<p class="text-label-md text-on-surface-variant">Your transaction data is encrypted with military-grade AES-256 and protected by biometric authentication.</p>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-8 mt-auto border-t border-outline-variant bg-surface-container-lowest flex flex-col md:flex-row justify-between items-center px-margin-desktop gap-4">
+<p class="font-body-md text-body-md text-secondary opacity-60">© 2024 Azure Ledger Financial. Secure Tier 4 Data Encryption Active.</p>
+<div class="flex gap-6">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-all duration-300 underline" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-all duration-300 underline" href="#">Security Standards</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-all duration-300 underline" href="#">Terms of Service</a>
+</div>
+</footer>
+</div>
+<!-- Mobile Navigation (Bottom Bar) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface-container-low border-t border-outline-variant flex justify-around items-center z-50">
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px]">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px]">Ledger</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="text-[10px]">Assets</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px]">Settings</span>
+</button>
+</nav>
+<script>
+        // Micro-interactions for budget progress bars
+        document.addEventListener('DOMContentLoaded', () => {
+            const bars = document.querySelectorAll('.budget-progress');
+            bars.forEach(bar => {
+                const targetWidth = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = targetWidth;
+                }, 300);
+            });
+
+            // Subtle hover effect for transaction cards
+            const cards = document.querySelectorAll('.glass-panel');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-2px)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body></html>

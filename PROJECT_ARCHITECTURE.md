@@ -31,6 +31,8 @@ This document provides a high-level overview of the folder structure, data flow,
   * Custom hook that isolates window keyboard keydown event listeners (e.g. `Ctrl+Shift+R` to sync stock prices).
 * **[useAlerts.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useAlerts.ts)**
   * Evaluates warnings (expiring documents, upcoming due dates, portfolio concentration limits) and handles dismissals.
+* **[PinLockScreen.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/PinLockScreen.tsx)**
+  * Restricts app access via a secure numerical pin-pad gate with keyboard support and session-based verification.
 
 ### 3. Registry Component Routing
 * **[AssetTabContent.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/AssetTabContent.tsx)**

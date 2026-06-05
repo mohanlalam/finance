@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Investment Portfolio | Azure Ledger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+        .chart-glow {
+            filter: drop-shadow(0 0 8px rgba(173, 198, 255, 0.3));
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #424754;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#131b2e",
+                        "surface-container-high": "#222a3d",
+                        "secondary": "#b9c8de",
+                        "warning": "#F59E0B",
+                        "outline-variant": "#424754",
+                        "on-tertiary-container": "#1f2a3c",
+                        "on-error-container": "#ffdad6",
+                        "background": "#0b1326",
+                        "surface": "#0b1326",
+                        "on-background": "#dae2fd",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "success": "#10B981",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "outline": "#8c909f",
+                        "on-primary": "#002e6a",
+                        "surface-container-lowest": "#060e20",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-tertiary": "#263143",
+                        "surface-container-highest": "#2d3449",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#283044",
+                        "on-surface-variant": "#c2c6d6",
+                        "error": "#EF4444",
+                        "surface-variant": "#2d3449",
+                        "primary": "#adc6ff",
+                        "tertiary-container": "#8691a7",
+                        "inverse-primary": "#005ac2",
+                        "on-tertiary-fixed-variant": "#3c475a",
+                        "inverse-surface": "#dae2fd",
+                        "tertiary-fixed-dim": "#bcc7de",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "on-primary-container": "#00285d",
+                        "tertiary": "#bcc7de",
+                        "tertiary-fixed": "#d8e3fb",
+                        "error-container": "#93000a",
+                        "surface-glass": "rgba(30, 41, 59, 0.7)",
+                        "surface-bright": "#31394d",
+                        "secondary-container": "#39485a",
+                        "primary-container": "#4d8eff",
+                        "surface-container": "#171f33",
+                        "on-primary-fixed": "#001a42",
+                        "on-secondary-container": "#a7b6cc",
+                        "surface-tint": "#adc6ff",
+                        "primary-fixed": "#d8e2ff",
+                        "on-tertiary-fixed": "#111c2d",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-secondary": "#233143",
+                        "border-glass": "rgba(255, 255, 255, 0.1)",
+                        "on-surface": "#dae2fd",
+                        "secondary-fixed": "#d4e4fa",
+                        "surface-dim": "#0b1326"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "container-max-width": "1280px",
+                        "margin-desktop": "40px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "display-lg": ["Outfit"],
+                        "title-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg-mobile": ["Outfit"],
+                        "body-md": ["Inter"],
+                        "mono-data": ["Inter"],
+                        "headline-md": ["Outfit"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "mono-data": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md custom-scrollbar">
+<!-- SideNavBar Shell -->
+<aside class="hidden md:flex h-screen w-64 fixed left-0 top-0 flex-col bg-surface-container-low border-r border-outline-variant shadow-sm z-50 p-gutter">
+<div class="mb-10">
+<h1 class="font-display-lg text-headline-md font-bold text-primary">Azure Ledger</h1>
+<p class="font-label-md text-label-md text-on-surface-variant opacity-70">Family Wealth Office</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-primary font-bold bg-secondary-container rounded-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+<span class="font-label-md text-label-md">Portfolio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-md text-label-md">Transactions</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-outline-variant space-y-4">
+<button class="w-full py-3 bg-primary text-on-primary font-bold rounded-lg flex items-center justify-center gap-2 active:scale-95 duration-150">
+<span class="material-symbols-outlined">add</span>
+<span class="font-label-md text-label-md">Add Asset</span>
+</button>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar Shell -->
+<header class="sticky top-0 z-40 flex justify-between items-center px-margin-desktop w-full py-4 bg-surface-glass backdrop-blur-md border-b border-border-glass">
+<h2 class="font-title-lg text-title-lg text-primary">Portfolio Overview</h2>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center bg-surface-container-lowest px-4 py-2 rounded-full border border-outline-variant w-64 focus-within:border-primary transition-all">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-md w-full ml-2 text-on-surface" placeholder="Search assets..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">lock</span>
+</button>
+<div class="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a mature male financial administrator with salt and pepper hair, wearing a navy blue tailored suit. He is smiling subtly in a high-end corporate office setting with soft, warm bokeh lighting. The overall aesthetic is professional, secure, and authoritative, matching a premium wealth management platform's persona." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDso5oDxhoekb2zLGUDbaA-ssX0OChBDlyjmDuDvKrCWbtaMmtTAZ4-PpK8YvaqUNOpFC_NXghOL3jJRocxzKfvb8zDAmhCCh89iWQuUKhpxCJS0K9Dr_GyQDDt1nHOFLr7hLY7KW08trgJ1tnKebUHHsORY3h4yDstnP08nlW7I6xsWRvJ8JBwZIdgGHkJOgU6vg8E6DTI9DiJf-CEZBjpdjrgMcBG7zKP_Ojv-4hsTQSFf2SNeYj8KzxPuhppcauc-IsUIrqaz-gv"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="p-margin-desktop space-y-gutter flex-1">
+<!-- Bento Grid Header: Top Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter">
+<div class="glass-card p-6 rounded-xl">
+<p class="text-label-md font-label-md text-on-surface-variant mb-1">Total Net Worth</p>
+<h3 class="text-headline-md font-headline-md text-primary">$4,822,190.42</h3>
+<div class="flex items-center gap-1 mt-2 text-success font-mono-data text-sm">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+1.24% today</span>
+</div>
+</div>
+<div class="glass-card p-6 rounded-xl">
+<p class="text-label-md font-label-md text-on-surface-variant mb-1">Cash Balance</p>
+<h3 class="text-headline-md font-headline-md text-on-surface">$142,504.18</h3>
+<div class="flex items-center gap-1 mt-2 text-on-surface-variant font-mono-data text-sm">
+<span>APY 4.25%</span>
+</div>
+</div>
+<div class="glass-card p-6 rounded-xl">
+<p class="text-label-md font-label-md text-on-surface-variant mb-1">Unrealized Gain</p>
+<h3 class="text-headline-md font-headline-md text-success">+$612,488.10</h3>
+<p class="text-label-md font-label-md text-on-surface-variant mt-2">All time</p>
+</div>
+<div class="glass-card p-6 rounded-xl flex flex-col justify-between">
+<div>
+<p class="text-label-md font-label-md text-on-surface-variant mb-1">Portfolio Risk Profile</p>
+<div class="flex items-center justify-between">
+<span class="text-headline-md font-headline-md text-warning">Moderate</span>
+<span class="text-body-md text-on-surface-variant">64/100</span>
+</div>
+</div>
+<div class="w-full h-2 bg-surface-container-highest rounded-full mt-4 overflow-hidden">
+<div class="h-full bg-gradient-to-r from-success via-warning to-error" style="width: 64%"></div>
+</div>
+</div>
+</div>
+<!-- Main Portfolio View & Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Performance Charts Column -->
+<div class="lg:col-span-1 space-y-gutter">
+<div class="glass-card p-6 rounded-xl h-full">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-title-lg text-body-lg text-primary">Performance by Category</h4>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">more_vert</span>
+</div>
+<div class="space-y-6">
+<!-- Custom Bar Chart Simulation -->
+<div class="space-y-4">
+<div class="space-y-1">
+<div class="flex justify-between text-body-md text-on-surface mb-1">
+<span>Technology</span>
+<span class="font-mono-data">42%</span>
+</div>
+<div class="w-full h-3 bg-surface-container-highest rounded-full">
+<div class="h-full bg-primary rounded-full chart-glow" style="width: 42%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-body-md text-on-surface mb-1">
+<span>Real Estate</span>
+<span class="font-mono-data">28%</span>
+</div>
+<div class="w-full h-3 bg-surface-container-highest rounded-full">
+<div class="h-full bg-tertiary rounded-full" style="width: 28%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-body-md text-on-surface mb-1">
+<span>Fixed Income</span>
+<span class="font-mono-data">15%</span>
+</div>
+<div class="w-full h-3 bg-surface-container-highest rounded-full">
+<div class="h-full bg-secondary rounded-full" style="width: 15%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-body-md text-on-surface mb-1">
+<span>Commodities</span>
+<span class="font-mono-data">10%</span>
+</div>
+<div class="w-full h-3 bg-surface-container-highest rounded-full">
+<div class="h-full bg-outline rounded-full" style="width: 10%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-body-md text-on-surface mb-1">
+<span>Cryptocurrency</span>
+<span class="font-mono-data">5%</span>
+</div>
+<div class="w-full h-3 bg-surface-container-highest rounded-full">
+<div class="h-full bg-primary-container rounded-full" style="width: 5%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed Assets Table Column -->
+<div class="lg:col-span-2">
+<div class="glass-card rounded-xl overflow-hidden border border-border-glass">
+<div class="px-6 py-4 border-b border-border-glass flex justify-between items-center bg-surface-glass">
+<h4 class="font-title-lg text-body-lg text-primary">Holdings</h4>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-surface-container-high rounded text-label-md font-label-md text-on-surface hover:text-primary transition-colors">Equity</button>
+<button class="px-3 py-1 text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors">Funds</button>
+<button class="px-3 py-1 text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors">Alts</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-lowest/50 text-label-md font-label-md text-on-surface-variant border-b border-outline-variant">
+<tr>
+<th class="px-6 py-3 font-semibold">Asset Name</th>
+<th class="px-6 py-3 font-semibold text-right">Current Value</th>
+<th class="px-6 py-3 font-semibold text-right">Daily Δ</th>
+<th class="px-6 py-3 font-semibold text-right">Total Gain/Loss</th>
+<th class="px-6 py-3 font-semibold text-center">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-high/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">AAPL</div>
+<div>
+<div class="font-bold text-on-surface">Apple Inc.</div>
+<div class="text-xs text-on-surface-variant">Technology • 140 Shares</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right font-mono-data">$26,446.00</td>
+<td class="px-6 py-4 text-right">
+<span class="text-success font-mono-data">+$412.30</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="text-success font-mono-data">+$8,210.45</div>
+<div class="text-[10px] text-on-surface-variant">+45.12%</div>
+</td>
+<td class="px-6 py-4 text-center">
+<button class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">query_stats</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-tertiary/10 flex items-center justify-center text-tertiary font-bold text-xs">VOO</div>
+<div>
+<div class="font-bold text-on-surface">Vanguard S&amp;P 500</div>
+<div class="text-xs text-on-surface-variant">Index Fund • 850 Units</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right font-mono-data">$412,240.50</td>
+<td class="px-6 py-4 text-right">
+<span class="text-success font-mono-data">+$2,850.12</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="text-success font-mono-data">+$94,102.30</div>
+<div class="text-[10px] text-on-surface-variant">+29.58%</div>
+</td>
+<td class="px-6 py-4 text-center">
+<button class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">query_stats</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-error/10 flex items-center justify-center text-error font-bold text-xs">TSLA</div>
+<div>
+<div class="font-bold text-on-surface">Tesla, Inc.</div>
+<div class="text-xs text-on-surface-variant">Consumer Cyclical • 45 Shares</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right font-mono-data">$7,820.10</td>
+<td class="px-6 py-4 text-right">
+<span class="text-error font-mono-data">-$120.45</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="text-error font-mono-data">-$1,240.00</div>
+<div class="text-[10px] text-on-surface-variant">-13.68%</div>
+</td>
+<td class="px-6 py-4 text-center">
+<button class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">query_stats</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container/10 flex items-center justify-center text-primary-container font-bold text-xs">BRK.B</div>
+<div>
+<div class="font-bold text-on-surface">Berkshire Hathaway</div>
+<div class="text-xs text-on-surface-variant">Financial • 120 Shares</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right font-mono-data">$48,240.00</td>
+<td class="px-6 py-4 text-right">
+<span class="text-success font-mono-data">+$310.80</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="text-success font-mono-data">+$4,210.15</div>
+<div class="text-[10px] text-on-surface-variant">+9.56%</div>
+</td>
+<td class="px-6 py-4 text-center">
+<button class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">query_stats</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-3 border-t border-border-glass flex justify-end">
+<button class="text-label-md font-label-md text-primary flex items-center gap-1 hover:underline">
+                                View all holdings <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Row: Recent Reports & Insights -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter pb-12">
+<div class="glass-card p-6 rounded-xl flex gap-6">
+<div class="w-24 h-24 rounded-lg bg-surface-container-highest overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A highly detailed close-up of high-end financial data visualizations on a dark glass monitor. The screen displays vibrant neon blue and emerald green candlestick charts and volumetric trading data glowing against a deep slate background. Soft reflections of architectural office lighting create a depth and realism indicative of a secure, elite financial trading floor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtOQ4Znj_-gcTBnwuLVNjCm1P191PaA4jgQCbZipeB5HkAGoyHPG9NUyIIthX11RWVd_inEvBqUGCsSTDotcSbWI9LkVXh1J-HPqALu5-fb9_QT8gG1xP1P3ODFzZJ6iFrxbG3P8Ug3ihpLqCH__UWmVSADPUucfGUIQAOjda-S9dJ53OFX90lfBBZp3OQJrwTo77AwSKRvHjmAVaqMZD6k-heTf6HiWAOMiiZrEs27JfoNytNrCy7fotI0-2O72ZUcMUFvnI3O9Nw"/>
+</div>
+<div class="flex-1">
+<h5 class="text-body-lg font-title-lg text-on-surface mb-2">Quarterly Portfolio Review</h5>
+<p class="text-body-md text-on-surface-variant mb-4">Your personalized analysis for Q3 2024 is ready. Explore how your diversified strategy performed against benchmarks.</p>
+<button class="px-4 py-2 bg-secondary-container text-primary text-label-md font-label-md rounded-lg hover:bg-surface-container-highest transition-colors">Download PDF</button>
+</div>
+</div>
+<div class="glass-card p-6 rounded-xl flex gap-6">
+<div class="w-24 h-24 rounded-lg bg-surface-container-highest overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A sophisticated abstract 3D render of interconnected glowing nodes and data streams in a dark digital void. The primary colors are cyan and deep indigo, with metallic textures reflecting soft light. This represents secure, encrypted cloud data flows and advanced financial infrastructure in a futuristic, modern corporate style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHStJHKSmLwLDmu4ItV7w5C1w9WCcbVsFCGMks83cofSBt1pUrqMqUeMfmHdOX36e8_a1EvRq0_W4jYoTMB5g1d0iNq-BdE3O3m1-65OeKxmHrdOkBY4bzOyybyGbUdUTfL-mXDFm9j8-R-sIGCaNeIP7FlPOHX2uGXTj4YFsi3M3GmBKhPsEoDIkKgN34xRGxTpsOSUO-FLFRpfP6ffU90c6FH78h4wjDlfYbhWOP-afY1lWb9BnhLu8Xe4w4q2mau77gMiHYGvne"/>
+</div>
+<div class="flex-1">
+<h5 class="text-body-lg font-title-lg text-on-surface mb-2">Smart Rebalancing Alert</h5>
+<p class="text-body-md text-on-surface-variant mb-4">Technology exposure has exceeded your target drift by 4.2%. View suggested trades to realign with your risk profile.</p>
+<button class="px-4 py-2 bg-primary text-on-primary text-label-md font-label-md rounded-lg hover:opacity-90 transition-opacity">Review Trades</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Shell -->
+<footer class="w-full py-8 mt-auto flex flex-col md:flex-row justify-between items-center px-margin-desktop gap-4 bg-surface-container-lowest border-t border-outline-variant">
+<p class="font-body-md text-body-md text-secondary opacity-80">© 2024 Azure Ledger Financial. Secure Tier 4 Data Encryption Active.</p>
+<div class="flex gap-8">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-all duration-300 underline" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-all duration-300 underline" href="#">Security Standards</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-all duration-300 underline" href="#">Terms of Service</a>
+</div>
+</footer>
+</main>
+<!-- Mobile Nav Anchor -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface-glass backdrop-blur-lg border-t border-border-glass flex items-center justify-around px-4 z-50">
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-label-md">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+<span class="text-[10px] font-label-md">Portfolio</span>
+</button>
+<div class="-mt-8 w-14 h-14 bg-primary rounded-full flex items-center justify-center text-on-primary shadow-lg">
+<span class="material-symbols-outlined">add</span>
+</div>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-[10px] font-label-md">History</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-label-md">Profile</span>
+</button>
+</div>
+<script>
+        // Simple micro-interaction for active states
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('mousedown', () => {
+                el.style.transform = 'scale(0.97)';
+                el.style.opacity = '0.8';
+            });
+            el.addEventListener('mouseup', () => {
+                el.style.transform = 'scale(1)';
+                el.style.opacity = '1';
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = 'scale(1)';
+                el.style.opacity = '1';
+            });
+        });
+    </script>
+</body></html>

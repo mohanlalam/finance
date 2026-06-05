@@ -132,7 +132,8 @@ project antigravity/
 │   │   ├── AppErrorBoundary.tsx  # Global React error boundary component
 │   │   ├── SectionErrorBoundary.tsx # Nested React error boundary for asset-specific dashboard components
 │   │   ├── DashboardLoading.tsx  # Skeleton loader states for dashboard fetch
-│   │   └── DashboardError.tsx    # Full-page retry UI for API/Supabase connection failures
+│   │   ├── DashboardError.tsx    # Full-page retry UI for API/Supabase connection failures
+│   │   └── PinLockScreen.tsx     # Secure session-based PIN lock keypad gate screen
 │   ├── contexts/
 │   │   └── PortfolioContext.tsx  # Global state provider, pricing sync statuses, and consolidated CRUD functions
 │   ├── hooks/
