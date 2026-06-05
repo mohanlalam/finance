@@ -146,6 +146,7 @@ export interface Portfolio {
   id: string;
   name: PortfolioName;
   label: string;
+  created_at?: string;
   holdings: Holding[];
   fixedDeposits: FixedDeposit[];
   rdAccounts?: RDAccount[];

@@ -74,9 +74,9 @@ CPU-heavy financial and scoring calculations are offloaded to asynchronous backg
 * **Lazy Rendering Viewports**: Charts and components inside `AppShell.tsx` are lazy-rendered via `IntersectionObserver` wrappers, postponing loading and calculation until the elements are scrolled into the viewport.
 
 ### 3. Caching & Network Coalescing
-* **SWR Hook**: Wraps remote assets data with cache revalidation.
+* **SWR Hook & Mutation Coalescing**: Wraps remote assets data with cache revalidation. Coordinates remote calls to prevent double fetching, ensuring initial load live prices and NAV updates are handled smoothly by SWR keys.
 * **In-Memory TTL Caching**: Live NAV scheme requests inside `sipUtils.ts` are cached in memory with a 15-minute Time-To-Live.
-* **IndexedDB Snapshot Caching**: Net Worth and asset snapshots are cached using `idb-keyval` for instant rendering on boot before API synchronization completes.
+* **IndexedDB Cache Storage**: Local caching of full portfolio datasets is strictly offloaded to IndexedDB (`idb-keyval`) to avoid browser `localStorage` size limits (keeping `localStorage` only for lightweight metadata like execution timestamps). It includes active `isMounted` guard patterns to prevent memory leak state updates.
 
 ---
 

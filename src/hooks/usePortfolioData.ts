@@ -8,8 +8,6 @@ import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiCl
 import useSWR from 'swr';
 import * as idb from 'idb-keyval';
 
-const PORTFOLIO_CACHE_KEY = 'finance_portfolio_cache_v1';
-
 interface DBHolding {
   id: string;
   portfolio_id: string;
@@ -30,6 +28,7 @@ interface DBPortfolio {
   id: string;
   name: string;
   label: string;
+  created_at?: string;
 }
 
 interface QuoteResult {
@@ -63,12 +62,6 @@ interface DBData {
 }
 
 export type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
-
-interface PortfolioCache {
-  portfolios: Portfolio[];
-  netWorthHistory: NetWorthSnapshot[];
-  cachedAt: string;
-}
 
 function dbToHolding(h: DBHolding): Holding {
   const ltp = h.cached_ltp !== undefined && h.cached_ltp !== null ? Number(h.cached_ltp) : h.avg_price;
@@ -151,6 +144,7 @@ function buildPortfolio(
     id: dbP.id,
     name: dbP.name,
     label: dbP.label,
+    created_at: dbP.created_at,
     holdings,
     fixedDeposits: fds,
     rdAccounts,
@@ -230,30 +224,6 @@ function getFriendlyMessage(err: unknown): string {
   if (err instanceof AppApiError) return err.message;
   if (err instanceof Error) return err.message;
   return 'Something went wrong. Please try again.';
-}
-
-function readCachedPortfolios(): PortfolioCache | null {
-  try {
-    const raw = localStorage.getItem(PORTFOLIO_CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as PortfolioCache;
-    if (!Array.isArray(parsed.portfolios) || !parsed.cachedAt) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function writeCachedPortfolios(portfolios: Portfolio[], netWorthHistory: NetWorthSnapshot[]): void {
-  try {
-    localStorage.setItem(PORTFOLIO_CACHE_KEY, JSON.stringify({
-      portfolios,
-      netWorthHistory,
-      cachedAt: new Date().toISOString(),
-    }));
-  } catch (err) {
-    console.warn('[portfolio] failed to write local cache:', err);
-  }
 }
 
 interface UsePortfolioDataOptions {
@@ -400,7 +370,9 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
   // 1. IndexedDB cache read (Phase 5)
   useEffect(() => {
+    let isMounted = true;
     idb.get('portfolio_data_cache').then((cached) => {
+      if (!isMounted) return;
       if (cached && portfolios.length === 0) {
         const parsed = cached as { portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[]; cachedAt: string };
         setPortfolios(parsed.portfolios);
@@ -412,6 +384,10 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     }).catch((err) => {
       console.warn('[portfolio] IndexedDB read error:', err);
     });
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 2. SWR fetch for Database assets (Phase 2)
@@ -430,141 +406,8 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     }
   );
 
-  // 3. Process dbData when it updates
-  useEffect(() => {
-    if (!dbData) return;
-    try {
-      const dbPortfolios: DBPortfolio[] = dbData.portfolios || [];
-      const dbHoldings: DBHolding[] = dbData.holdings || [];
-      const dbFixedDeposits: FixedDeposit[] = (dbData.fixed_deposits || []).filter((f: FixedDeposit) => !f.fd_type || f.fd_type === 'regular');
-      const dbRDAccounts: RDAccount[] = dbData.rd_accounts || [];
-      const dbSIPAccounts: SIPAccount[] = dbData.sip_accounts || [];
-      const dbSSYAccounts: SSYAccount[] = dbData.ssy_accounts || [];
-      const dbGoldHoldings: GoldHolding[] = dbData.gold_holdings || [];
-      const dbRealEstate: RealEstate[] = dbData.real_estate || [];
-      const dbInsurances: Insurance[] = dbData.insurances || [];
-      const dbDocuments: DocumentMetadata[] = dbData.documents || [];
-      const dbNetWorthHistory: NetWorthSnapshot[] = dbData.net_worth_history || [];
-
-      const order: Record<string, number> = { personal: 0, mother: 1, wife: 2 };
-      const sortedPortfolios = [...dbPortfolios].sort((a, b) => {
-        const oa = order[a.name] !== undefined ? order[a.name] : 99;
-        const ob = order[b.name] !== undefined ? order[b.name] : 99;
-        return oa - ob;
-      });
-
-      const built = sortedPortfolios.map((dbP) => {
-        const holdings = dbHoldings
-          .filter((h) => h.portfolio_id === dbP.id)
-          .sort((a, b) => a.sno - b.sno)
-          .map(dbToHolding);
-
-        const fds = dbFixedDeposits.filter((f) => f.portfolio_id === dbP.id);
-        const rds = dbRDAccounts.filter((r) => r.portfolio_id === dbP.id);
-        const sips = dbSIPAccounts.filter((s) => s.portfolio_id === dbP.id);
-        const ssy = dbSSYAccounts.filter((s) => s.portfolio_id === dbP.id);
-        const gold = dbGoldHoldings.filter((g) => g.portfolio_id === dbP.id);
-        const realEstate = dbRealEstate.filter((r) => r.portfolio_id === dbP.id);
-        const insurances = dbInsurances.filter((i) => i.portfolio_id === dbP.id);
-        const docs = dbDocuments.filter((d) => d.portfolio_id === dbP.id);
-
-        return buildPortfolio(dbP, holdings, fds, rds, sips, ssy, gold, realEstate, insurances, docs);
-      });
-
-      setPortfolios(built);
-      setNetWorthHistory(dbNetWorthHistory);
-      setIsUsingCachedData(false);
-      setCacheUpdatedAt(new Date());
-      setLoadStatus('success');
-
-      // Write cache to local storage and IndexedDB
-      writeCachedPortfolios(built, dbNetWorthHistory);
-      idb.set('portfolio_data_cache', {
-        portfolios: built,
-        netWorthHistory: dbNetWorthHistory,
-        cachedAt: new Date().toISOString(),
-      }).catch((err) => {
-        console.warn('[portfolio] IndexedDB write error:', err);
-      });
-
-      // Price and NAV fetching
-      setPriceStatus('loading');
-      const allHoldings = built.flatMap((p) => p.holdings);
-      const allSips = built.flatMap((p) => p.sipAccounts || []);
-      Promise.all([
-        allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
-        fetchLiveMFNavs(allSips),
-      ]).then(([priceMap, navData]) => {
-        setPortfolios((prev) => {
-          const withPrices = applyLivePrices(prev, priceMap);
-          return applyLiveMFNavs(withPrices, navData.navMap, navData.staleSchemes);
-        });
-        setLastUpdated(new Date());
-        setLastPriceFetch(new Date());
-        setPriceStatus('success');
-      }).catch((priceErr) => {
-        console.error('[portfolio] price fetch failed:', priceErr);
-        if (priceErr instanceof AppApiError && priceErr.code === 'auth') {
-          handleAuthExpired();
-        }
-        setPriceStatus('error');
-      });
-
-    } catch (err) {
-      console.error('[portfolio] Database parsing error:', err);
-      setLoadStatus('error');
-      setLoadError(getFriendlyMessage(err));
-    }
-  }, [dbData, fetchLivePrices, fetchLiveMFNavs, handleAuthExpired]);
-
-  // 4. Handle SWR Errors
-  useEffect(() => {
-    if (swrError) {
-      console.error('[portfolio] SWR fetch error:', swrError);
-      if (swrError instanceof AppApiError && swrError.code === 'auth') {
-        handleAuthExpired();
-        return;
-      }
-      // Try local cache fallback if not already loaded
-      const cached = readCachedPortfolios();
-      if (cached && portfolios.length === 0) {
-        setPortfolios(cached.portfolios);
-        setNetWorthHistory(cached.netWorthHistory || []);
-        setCacheUpdatedAt(new Date(cached.cachedAt));
-        setIsUsingCachedData(true);
-        setLoadError(getFriendlyMessage(swrError));
-        setLoadStatus('success');
-        setPriceStatus('error');
-      } else if (portfolios.length === 0) {
-        setLoadError(getFriendlyMessage(swrError));
-        setLoadStatus('error');
-      }
-    }
-  }, [swrError, handleAuthExpired, portfolios.length]);
-
-  const load = useCallback(async () => {
-    setLoadStatus('loading');
-    setLoadError('');
-    await mutateAssets();
-  }, [mutateAssets]);
-
-  // 5. Debounced refreshSnapshot (Phase 2.3)
-  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const refreshSnapshot = useCallback(() => {
-    return new Promise<void>((resolve) => {
-      if (refreshTimeoutRef.current) {
-        clearTimeout(refreshTimeoutRef.current);
-      }
-      refreshTimeoutRef.current = setTimeout(async () => {
-        await load();
-        resolve();
-      }, 500);
-    });
-  }, [load]);
-
   // 6. Polling prices via SWR (Phase 2.1)
-  const { data: livePrices, mutate: refreshPricesSWR } = useSWR(
+  const { data: livePrices, error: livePricesError, mutate: refreshPricesSWR } = useSWR(
     portfolios.length > 0 ? 'live-prices' : null,
     async () => {
       const allHoldings = portfolios.flatMap((p) => p.holdings);
@@ -593,6 +436,16 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     setPriceStatus('success');
   }, [livePrices, setLastPriceFetch]);
 
+  useEffect(() => {
+    if (livePricesError) {
+      console.error('[portfolio] SWR live prices fetch error:', livePricesError);
+      if (livePricesError instanceof AppApiError && livePricesError.code === 'auth') {
+        handleAuthExpired();
+      }
+      setPriceStatus('error');
+    }
+  }, [livePricesError, handleAuthExpired]);
+
   const refreshPrices = useCallback(async () => {
     if (portfolios.length === 0) return;
     setPriceStatus('loading');
@@ -606,6 +459,141 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       setPriceStatus('error');
     }
   }, [portfolios.length, refreshPricesSWR, handleAuthExpired]);
+
+  // 3. Process dbData when it updates
+  useEffect(() => {
+    if (!dbData) return;
+    try {
+      const dbPortfolios: DBPortfolio[] = dbData.portfolios || [];
+      const dbHoldings: DBHolding[] = dbData.holdings || [];
+      const dbFixedDeposits: FixedDeposit[] = (dbData.fixed_deposits || []).filter((f: FixedDeposit) => !f.fd_type || f.fd_type === 'regular');
+      const dbRDAccounts: RDAccount[] = dbData.rd_accounts || [];
+      const dbSIPAccounts: SIPAccount[] = dbData.sip_accounts || [];
+      const dbSSYAccounts: SSYAccount[] = dbData.ssy_accounts || [];
+      const dbGoldHoldings: GoldHolding[] = dbData.gold_holdings || [];
+      const dbRealEstate: RealEstate[] = dbData.real_estate || [];
+      const dbInsurances: Insurance[] = dbData.insurances || [];
+      const dbDocuments: DocumentMetadata[] = dbData.documents || [];
+      const dbNetWorthHistory: NetWorthSnapshot[] = dbData.net_worth_history || [];
+
+      const order: Record<string, number> = { personal: 0, mother: 1, wife: 2 };
+      const sortedPortfolios = [...dbPortfolios].sort((a, b) => {
+        const oa = order[a.name] !== undefined ? order[a.name] : 99;
+        const ob = order[b.name] !== undefined ? order[b.name] : 99;
+        if (oa !== ob) return oa - ob;
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return dateA - dateB;
+      });
+
+      const built = sortedPortfolios.map((dbP) => {
+        const holdings = dbHoldings
+          .filter((h) => h.portfolio_id === dbP.id)
+          .sort((a, b) => a.sno - b.sno)
+          .map(dbToHolding);
+
+        const fds = dbFixedDeposits.filter((f) => f.portfolio_id === dbP.id);
+        const rds = dbRDAccounts.filter((r) => r.portfolio_id === dbP.id);
+        const sips = dbSIPAccounts.filter((s) => s.portfolio_id === dbP.id);
+        const ssy = dbSSYAccounts.filter((s) => s.portfolio_id === dbP.id);
+        const gold = dbGoldHoldings.filter((g) => g.portfolio_id === dbP.id);
+        const realEstate = dbRealEstate.filter((r) => r.portfolio_id === dbP.id);
+        const insurances = dbInsurances.filter((i) => i.portfolio_id === dbP.id);
+        const docs = dbDocuments.filter((d) => d.portfolio_id === dbP.id);
+
+        return buildPortfolio(dbP, holdings, fds, rds, sips, ssy, gold, realEstate, insurances, docs);
+      });
+
+      setPortfolios(built);
+      setNetWorthHistory(dbNetWorthHistory);
+      setIsUsingCachedData(false);
+      setCacheUpdatedAt(new Date());
+      setLoadStatus('success');
+
+      // Write cache to IndexedDB
+      idb.set('portfolio_data_cache', {
+        portfolios: built,
+        netWorthHistory: dbNetWorthHistory,
+        cachedAt: new Date().toISOString(),
+      }).catch((err) => {
+        console.warn('[portfolio] IndexedDB write error:', err);
+      });
+
+      // Let SWR key handle live price / NAV fetching.
+      // Trigger a prompt SWR update:
+      setPriceStatus('loading');
+      setTimeout(() => {
+        refreshPricesSWR().catch((priceErr) => {
+          console.error('[portfolio] initial SWR price fetch failed:', priceErr);
+          if (priceErr instanceof AppApiError && priceErr.code === 'auth') {
+            handleAuthExpired();
+          }
+          setPriceStatus('error');
+        });
+      }, 0);
+
+    } catch (err) {
+      console.error('[portfolio] Database parsing error:', err);
+      setLoadStatus('error');
+      setLoadError(getFriendlyMessage(err));
+    }
+  }, [dbData, handleAuthExpired, refreshPricesSWR]);
+
+  // 4. Handle SWR Errors
+  useEffect(() => {
+    if (swrError) {
+      console.error('[portfolio] SWR fetch error:', swrError);
+      if (swrError instanceof AppApiError && swrError.code === 'auth') {
+        handleAuthExpired();
+        return;
+      }
+      // Try local cache fallback if not already loaded
+      if (portfolios.length === 0) {
+        let isMounted = true;
+        idb.get('portfolio_data_cache').then((cached) => {
+          if (!isMounted) return;
+          if (cached) {
+            const parsed = cached as { portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[]; cachedAt: string };
+            setPortfolios(parsed.portfolios);
+            setNetWorthHistory(parsed.netWorthHistory || []);
+            setCacheUpdatedAt(new Date(parsed.cachedAt));
+            setIsUsingCachedData(true);
+            setLoadError(getFriendlyMessage(swrError));
+            setLoadStatus('success');
+            setPriceStatus('error');
+          } else {
+            setLoadError(getFriendlyMessage(swrError));
+            setLoadStatus('error');
+          }
+        }).catch((err) => {
+          console.warn('[portfolio] IndexedDB read error during error fallback:', err);
+          setLoadError(getFriendlyMessage(swrError));
+          setLoadStatus('error');
+        });
+        return () => {
+          isMounted = false;
+        };
+      }
+    }
+  }, [swrError, handleAuthExpired, portfolios.length]);
+
+  const load = useCallback(async () => {
+    setLoadStatus('loading');
+    setLoadError('');
+    await mutateAssets();
+  }, [mutateAssets]);
+
+  // 5. Debounced refreshSnapshot (Phase 2.3)
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const refreshSnapshot = useCallback(async () => {
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+    }
+    refreshTimeoutRef.current = setTimeout(() => {
+      void load();
+    }, 500);
+  }, [load]);
 
   const addPortfolio = useCallback(async (name: string, label: string) => {
     return runMutation(async () => {

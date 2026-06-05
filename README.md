@@ -40,7 +40,7 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **Asynchronous Web Workers** — Offloads heavy computations (Newton-Raphson XIRR solvers, multi-factor Health Score scoring, and rebalancing recommendations) to background threads (`src/workers/`) with fail-safe synchronous fallbacks.
 - **List Virtualization** — Uses `react-window` to virtualize large registry listings (>8 accounts) to keep scrolling fluid and render times minimal.
 - **Intersection Lazy Loading** — Leverages an `IntersectionObserver` viewport wrapper to lazy-load charts and assistant modules, avoiding off-screen SVG coordinate calculations.
-- **Advanced Caching** — Employs `SWR` for remote state cache validation, IndexedDB local caches (`idb-keyval`) for instant stale-while-revalidate loads, and 15-minute TTL caching for live Mutual Fund NAV fetches.
+- **Advanced Caching** — Employs `SWR` for remote state cache validation and coordinated fetch management (eliminating double price fetches), IndexedDB local caches (`idb-keyval`) for instant stale-while-revalidate loads (eliminating `localStorage` size limit vulnerabilities), and 15-minute TTL caching for live Mutual Fund NAV fetches.
 
 ### 📂 Multi-Asset Registry & Reminders
 - **Fixed Deposits (FD)** — Real-time compounded interest tracking (compounded half-yearly), maturity date tracking, timeline progress bars, and document attachments.
