@@ -12,16 +12,135 @@ export interface AssistantResponse {
 /**
  * Parses queries and executes rules client-side over portfolio data
  */
-export function askAssistant(query: string, portfolios: Portfolio[]): AssistantResponse {
+export enum Intent {
+  MUTUAL_FUND_YEAR_INVESTMENTS = 'MUTUAL_FUND_YEAR_INVESTMENTS',
+  PERFORMERS = 'PERFORMERS',
+  MATURITY_TIMELINE = 'MATURITY_TIMELINE',
+  ALLOCATION_SPLIT = 'ALLOCATION_SPLIT',
+  SPECIFIC_GOLD = 'SPECIFIC_GOLD',
+  SPECIFIC_MUTUAL_FUNDS = 'SPECIFIC_MUTUAL_FUNDS',
+  SPECIFIC_STOCKS = 'SPECIFIC_STOCKS',
+  SPECIFIC_FDS = 'SPECIFIC_FDS',
+  INSURANCE_REMINDERS = 'INSURANCE_REMINDERS',
+  NET_WORTH = 'NET_WORTH',
+  UNKNOWN = 'UNKNOWN'
+}
+
+export function detectIntent(query: string): Intent {
   const q = query.toLowerCase().trim();
-  const matchedAssets: AssistantResponse['matchedAssets'] = [];
 
   // Query 1: Mutual Fund current year investments
   if (
-    (q.includes('mutual fund') || q.includes('sip') || q.includes('funds')) &&
-    (q.includes('invested') || q.includes('contribution')) &&
+    (q.includes('mutual fund') || q.includes('sip') || q.includes('funds') || q.includes('mf')) &&
+    (q.includes('invested') || q.includes('contribution') || q.includes('deposit')) &&
     (q.includes('this year') || q.includes('2026') || q.includes('current year'))
   ) {
+    return Intent.MUTUAL_FUND_YEAR_INVESTMENTS;
+  }
+
+  // Query 2: Performers
+  if (
+    q.includes('highest return') ||
+    q.includes('best return') ||
+    q.includes('top return') ||
+    q.includes('maximum return') ||
+    q.includes('best performing') ||
+    q.includes('highest gain') ||
+    q.includes('top performer') ||
+    q.includes('best asset') ||
+    q.includes('best investment')
+  ) {
+    return Intent.PERFORMERS;
+  }
+
+  // Query 3: Maturity
+  if (
+    q.includes('maturing') ||
+    q.includes('maturity') ||
+    q.includes('maturities') ||
+    q.includes('matures') ||
+    q.includes('expire') ||
+    q.includes('expiry') ||
+    q.includes('due date')
+  ) {
+    return Intent.MATURITY_TIMELINE;
+  }
+
+  // Query 4: Consolidated Allocation Split
+  if (
+    q.includes('allocation') ||
+    q.includes('split') ||
+    q.includes('diversification') ||
+    q.includes('percentage') ||
+    q.includes('portfolio weight')
+  ) {
+    return Intent.ALLOCATION_SPLIT;
+  }
+
+  // Query 5: Insurance reminders
+  if (
+    q.includes('insurance') ||
+    q.includes('policy') ||
+    q.includes('premium') ||
+    q.includes('renewal')
+  ) {
+    return Intent.INSURANCE_REMINDERS;
+  }
+
+  // Query 6: Specific Gold
+  if (
+    /\bgold\b/.test(q) &&
+    (q.includes('holding') || q.includes('show') || q.includes('my') || q.includes('asset') || q.includes('registry') || q.includes('value') || q.includes('valuation') || q.includes('have') || q.includes('invest') || q.trim() === 'gold')
+  ) {
+    return Intent.SPECIFIC_GOLD;
+  }
+
+  // Specific Mutual Funds
+  if (
+    (q.includes('mutual fund') || q.includes('sip') || q.includes('funds') || q.includes('mf')) &&
+    (q.includes('show') || q.includes('my') || q.includes('list') || q.includes('holding') || q.includes('value') || q.includes('valuation') || q.includes('investment') || q.includes('have') || q.includes('invest') || q.trim() === 'sip' || q.trim() === 'mutual fund')
+  ) {
+    return Intent.SPECIFIC_MUTUAL_FUNDS;
+  }
+
+  // Specific Stocks
+  if (
+    (q.includes('stock') || q.includes('holding') || q.includes('equity') || q.includes('share')) &&
+    (q.includes('show') || q.includes('my') || q.includes('list') || q.includes('value') || q.includes('valuation') || q.includes('direct') || q.includes('have') || q.includes('invest') || q.trim() === 'stocks')
+  ) {
+    return Intent.SPECIFIC_STOCKS;
+  }
+
+  // Specific FDs
+  if (
+    (q.includes('fixed deposit') || q.includes('fd') || q.includes('fds')) &&
+    (q.includes('show') || q.includes('my') || q.includes('list') || q.includes('value') || q.includes('valuation') || q.includes('have') || q.includes('invest') || q.trim() === 'fd' || q.trim() === 'fds' || q.trim() === 'fixed deposit')
+  ) {
+    return Intent.SPECIFIC_FDS;
+  }
+
+  // Query 7: Net Worth
+  if (
+    q.includes('net worth') ||
+    q.includes('wealth') ||
+    (q.includes('total') && (q.includes('value') || q.includes('valuation') || q.includes('portfolio')))
+  ) {
+    return Intent.NET_WORTH;
+  }
+
+  return Intent.UNKNOWN;
+}
+
+/**
+ * Parses queries and executes rules client-side over portfolio data
+ */
+export function askAssistant(query: string, portfolios: Portfolio[]): AssistantResponse {
+  const q = query.toLowerCase().trim();
+  const matchedAssets: AssistantResponse['matchedAssets'] = [];
+  const intent = detectIntent(q);
+
+  // Query 1: Mutual Fund current year investments
+  if (intent === Intent.MUTUAL_FUND_YEAR_INVESTMENTS) {
     let totalInvested = 0;
     const currentYear = new Date().getFullYear();
 
@@ -186,17 +305,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
   }
 
   // Query 2: Performer Queries (Absolute and Percentage returns)
-  if (
-    q.includes('highest return') ||
-    q.includes('best return') ||
-    q.includes('top return') ||
-    q.includes('maximum return') ||
-    q.includes('best performing') ||
-    q.includes('highest gain') ||
-    q.includes('top performer') ||
-    q.includes('best asset') ||
-    q.includes('best investment')
-  ) {
+  if (intent === Intent.PERFORMERS) {
     const validAssets = allAssets.filter(a => a.invested > 0);
     if (validAssets.length === 0) {
       return {
@@ -229,15 +338,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
   }
 
   // Query 3: Maturity / upcoming maturity timeline queries
-  if (
-    q.includes('maturing') ||
-    q.includes('maturity') ||
-    q.includes('maturities') ||
-    q.includes('matures') ||
-    q.includes('expire') ||
-    q.includes('expiry') ||
-    q.includes('due date')
-  ) {
+  if (intent === Intent.MATURITY_TIMELINE) {
     interface MaturityItem {
       name: string;
       type: string;
@@ -446,14 +547,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
   const totalVal = equityTotal + debtTotal + goldTotal + realEstateTotal;
 
   // Query 4: Allocation Split Queries
-  if (
-    q.includes('allocation') ||
-    q.includes('split') ||
-    q.includes('diversification') ||
-    q.includes('share') ||
-    q.includes('percentage') ||
-    q.includes('portfolio weight')
-  ) {
+  if (intent === Intent.ALLOCATION_SPLIT) {
     if (totalVal === 0) {
       return {
         answer: 'Your total portfolio valuation is currently zero. Add assets to see your allocation distribution.',
@@ -496,7 +590,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
   }
 
   // Specific Allocation Classes
-  if (q.includes('gold')) {
+  if (intent === Intent.SPECIFIC_GOLD) {
     const gdPct = totalVal > 0 ? (goldTotal / totalVal) * 100 : 0;
     let answer = `You have **${formatINR(goldTotal)}** in Gold Registry holdings, representing **${gdPct.toFixed(1)}%** of your total portfolio.\n\n`;
     answer += `### Gold Inventory:\n`;
@@ -510,7 +604,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     return { answer, matchedAssets: goldList };
   }
 
-  if (q.includes('mutual fund') || q.includes('sip') || q.includes('funds')) {
+  if (intent === Intent.SPECIFIC_MUTUAL_FUNDS) {
     const mfPct = totalVal > 0 ? (sipTotal / totalVal) * 100 : 0;
     let answer = `You have **${formatINR(sipTotal)}** in Mutual Fund SIPs, representing **${mfPct.toFixed(1)}%** of your total portfolio.\n\n`;
     answer += `### Mutual Fund Holdings:\n`;
@@ -527,7 +621,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     return { answer, matchedAssets: sipList };
   }
 
-  if (q.includes('stock') || q.includes('holding') || q.includes('equity')) {
+  if (intent === Intent.SPECIFIC_STOCKS) {
     const stPct = totalVal > 0 ? (stocksTotal / totalVal) * 100 : 0;
     let answer = `You have **${formatINR(stocksTotal)}** in direct Stocks, representing **${stPct.toFixed(1)}%** of your total portfolio.\n\n`;
     answer += `### Stock Portfolio List:\n`;
@@ -541,7 +635,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     return { answer, matchedAssets: stockList };
   }
 
-  if (q.includes('fixed deposit') || q.includes('fd') || q.includes('fixed deposits')) {
+  if (intent === Intent.SPECIFIC_FDS) {
     const fdPct = totalVal > 0 ? (fdTotal / totalVal) * 100 : 0;
     let answer = `You have **${formatINR(fdTotal)}** in Fixed Deposits, representing **${fdPct.toFixed(1)}%** of your total portfolio.\n\n`;
     answer += `### Fixed Deposits:\n`;
@@ -557,7 +651,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
   }
 
   // Query 5: Insurance / policy due premium reminders
-  if (q.includes('insurance') || q.includes('policy') || q.includes('premium') || q.includes('renewal')) {
+  if (intent === Intent.INSURANCE_REMINDERS) {
     let count = 0;
     let sumCover = 0;
     let annualPremium = 0;
@@ -651,7 +745,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
   }
 
   // Fallback net worth FAQ
-  if (q.includes('net worth') || q.includes('wealth') || q.includes('total value')) {
+  if (intent === Intent.NET_WORTH) {
     const totalCurrentVal = portfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
     const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
     return {

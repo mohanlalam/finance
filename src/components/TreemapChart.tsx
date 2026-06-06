@@ -61,26 +61,29 @@ export default function TreemapChart({ holdings }: TreemapChartProps) {
       const x = remainingX;
       const y = remainingY;
 
+      const widthDenom = total * (remainingW / width);
+      const heightDenom = total * (remainingH / height);
+
       if (remainingW >= remainingH) {
         // Split vertically (columns)
-        w = (item.currentValue / (total * (remainingW / width))) * width;
-        w = Math.min(w, remainingW);
-        h = remainingH;
+        w = widthDenom > 0 ? (item.currentValue / widthDenom) * width : 0;
+        w = Math.max(0, Math.min(w, remainingW));
+        h = Math.max(0, remainingH);
         remainingX += w;
-        remainingW -= w;
+        remainingW = Math.max(0, remainingW - w);
       } else {
         // Split horizontally (rows)
-        h = (item.currentValue / (total * (remainingH / height))) * height;
-        h = Math.min(h, remainingH);
-        w = remainingW;
+        h = heightDenom > 0 ? (item.currentValue / heightDenom) * height : 0;
+        h = Math.max(0, Math.min(h, remainingH));
+        w = Math.max(0, remainingW);
         remainingY += h;
-        remainingH -= h;
+        remainingH = Math.max(0, remainingH - h);
       }
 
       items.push({
         label: item.ticker,
         value: item.currentValue,
-        pct,
+        pct: pct,
         x,
         y,
         w,
@@ -100,8 +103,8 @@ export default function TreemapChart({ holdings }: TreemapChartProps) {
           pct,
           x: remainingX,
           y: remainingY,
-          w: remainingW,
-          h: remainingH,
+          w: Math.max(0, remainingW),
+          h: Math.max(0, remainingH),
           color: '#64748b',
         });
       }
@@ -128,7 +131,7 @@ export default function TreemapChart({ holdings }: TreemapChartProps) {
       ) : (
         <div className="w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-750">
           <svg viewBox="0 0 600 200" className="w-full h-auto">
-            {treemapItems.map((item, idx) => (
+            {treemapItems.filter(item => item.w >= 1 && item.h >= 1).map((item, idx) => (
               <g key={idx}>
                 <rect
                   x={item.x}

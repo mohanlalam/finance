@@ -19,6 +19,17 @@ export function calculateCAGR(invested: number, current: number, years: number):
 export function calculateXIRR(cashflows: CashFlow[]): number {
   if (cashflows.length < 2) return 0;
 
+  // Guard against same-sign cashflows
+  let hasPositive = false;
+  let hasNegative = false;
+  for (const flow of cashflows) {
+    if (flow.amount > 0) hasPositive = true;
+    if (flow.amount < 0) hasNegative = true;
+  }
+  if (!hasPositive || !hasNegative) {
+    return 0;
+  }
+
   // Sort cashflows chronologically
   const flows = [...cashflows].sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -71,20 +82,26 @@ export function calculateXIRR(cashflows: CashFlow[]): number {
   // Fallback to Bisection method if Newton-Raphson didn't converge
   let low = -0.99;
   let high = 10.0;
+  let yLow = f(low);
+  let yHigh = f(high);
   
-  for (let i = 0; i < 100; i++) {
-    const mid = (low + high) / 2;
-    const yMid = f(mid);
-    
-    if (Math.abs(yMid) < epsilon) {
-      return mid;
-    }
-    
-    // Check signs to narrow interval
-    if (yMid * f(low) < 0) {
-      high = mid;
-    } else {
-      low = mid;
+  if (yLow * yHigh < 0) {
+    for (let i = 0; i < 100; i++) {
+      const mid = (low + high) / 2;
+      const yMid = f(mid);
+      
+      if (Math.abs(yMid) < epsilon) {
+        return mid;
+      }
+      
+      // Check signs to narrow interval
+      if (yMid * yLow < 0) {
+        high = mid;
+        yHigh = yMid;
+      } else {
+        low = mid;
+        yLow = yMid;
+      }
     }
   }
 

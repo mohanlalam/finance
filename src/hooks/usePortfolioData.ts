@@ -577,11 +577,35 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     }
   }, [swrError, handleAuthExpired, portfolios.length]);
 
+  const invalidateIDBCache = useCallback(async () => {
+    try {
+      await idb.del('portfolio_data_cache');
+      setIsUsingCachedData(false);
+      setCacheUpdatedAt(null);
+    } catch (err) {
+      console.warn('[portfolio] IndexedDB delete error:', err);
+    }
+  }, []);
+
   const load = useCallback(async () => {
     setLoadStatus('loading');
     setLoadError('');
     await mutateAssets();
   }, [mutateAssets]);
+
+  // document visibilitychange listener to refresh SWR hook data on focus/resume
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void load();
+        void refreshPrices();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [load, refreshPrices]);
 
   // 5. Debounced refreshSnapshot (Phase 2.3)
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -602,13 +626,14 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           method: 'POST',
           body: { name, label },
         });
+        await invalidateIDBCache();
         await load();
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
         throw err;
       }
     });
-  }, [runMutation, load, handleAuthExpired]);
+  }, [runMutation, load, handleAuthExpired, invalidateIDBCache]);
 
   const renamePortfolio = useCallback(async (portfolioId: string, newLabel: string) => {
     return runMutation(async () => {
@@ -621,6 +646,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
             label: newLabel,
           },
         });
+        await invalidateIDBCache();
         setPortfolios((prev) =>
           prev.map((p) => (p.id === portfolioId ? { ...p, label: newLabel } : p))
         );
@@ -629,7 +655,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         throw err;
       }
     });
-  }, [runMutation, handleAuthExpired]);
+  }, [runMutation, handleAuthExpired, invalidateIDBCache]);
 
   const addAsset = useCallback(async (
     assetType: string,
@@ -648,6 +674,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
             ...finalPayload,
           },
         });
+        await invalidateIDBCache();
         if (options.reload !== false) {
           await load();
         }
@@ -656,7 +683,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         throw err;
       }
     });
-  }, [runMutation, load, handleAuthExpired]);
+  }, [runMutation, load, handleAuthExpired, invalidateIDBCache]);
 
   const updateAsset = useCallback(async (assetType: string, id: string, payload: Partial<AssetPayload>) => {
     return runMutation(async () => {
@@ -670,13 +697,14 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
             ...finalPayload,
           },
         });
+        await invalidateIDBCache();
         await load();
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
         throw err;
       }
     });
-  }, [runMutation, load, handleAuthExpired]);
+  }, [runMutation, load, handleAuthExpired, invalidateIDBCache]);
 
   const deleteAsset = useCallback(async (assetType: string, id: string) => {
     return runMutation(async () => {
@@ -688,13 +716,14 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
             id,
           },
         });
+        await invalidateIDBCache();
         await load();
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
         throw err;
       }
     });
-  }, [runMutation, load, handleAuthExpired]);
+  }, [runMutation, load, handleAuthExpired, invalidateIDBCache]);
 
   const deletePortfolio = useCallback(async (portfolioId: string) => {
     return runMutation(async () => {
@@ -706,13 +735,14 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
             id: portfolioId,
           },
         });
+        await invalidateIDBCache();
         await load();
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
         throw err;
       }
     });
-  }, [runMutation, load, handleAuthExpired]);
+  }, [runMutation, load, handleAuthExpired, invalidateIDBCache]);
 
   return {
     portfolios,

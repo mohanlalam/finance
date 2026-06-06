@@ -172,4 +172,14 @@ describe('askAssistant query parser', () => {
     expect(res.answer).toContain('due on');
     expect(res.answer).toContain('15,000');
   });
+
+  it('prevents false positive matches on unrelated phrases containing gold or return', () => {
+    const resGold = askAssistant('is this gold standard?', mockPortfolios);
+    expect(resGold.answer).toContain("I couldn't match your exact query");
+    expect(resGold.matchedAssets.length).toBe(0);
+
+    const resReturn = askAssistant('what is the return address?', mockPortfolios);
+    expect(resReturn.answer).toContain("I couldn't match your exact query");
+    expect(resReturn.matchedAssets.length).toBe(0);
+  });
 });

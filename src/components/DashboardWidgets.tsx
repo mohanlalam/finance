@@ -113,7 +113,7 @@ export default function DashboardWidgets({ portfolios, activePortfolio }: Dashbo
               </div>
             ) : (
               <div className="mt-3 text-center py-2 bg-slate-900/30 rounded-xl">
-                <p className="text-[10px] text-slate-500 italic">No FDs maturing</p>
+                <p className="text-[10px] text-slate-500 italic">No upcoming maturities</p>
                 <p className="text-[9px] text-slate-600 mt-0.5">within 30 days</p>
               </div>
             )}

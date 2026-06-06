@@ -205,86 +205,134 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
           </defs>
 
           {/* Links: Col 1 -> Col 2 */}
-          <path d={links.eqToCat} fill="url(#eqGrad)" />
-          <path d={links.debtToCat} fill="url(#debtGrad)" />
-          <path d={links.goldToCat} fill="url(#goldGrad)" />
-          <path d={links.reToCat} fill="url(#reGrad)" />
+          {nodeHeights.equity > 0 && <path d={links.eqToCat} fill="url(#eqGrad)" />}
+          {nodeHeights.debt > 0 && <path d={links.debtToCat} fill="url(#debtGrad)" />}
+          {nodeHeights.gold > 0 && <path d={links.goldToCat} fill="url(#goldGrad)" />}
+          {nodeHeights.re > 0 && <path d={links.reToCat} fill="url(#reGrad)" />}
 
           {/* Links: Col 2 -> Col 3 */}
           {/* Equity -> Stocks & SIPs */}
-          <path d={links.stocksToSub} fill="url(#eqGrad)" />
-          <path d={links.sipToSub} fill="url(#eqGrad)" />
+          {nodeHeights.stocks > 0 && <path d={links.stocksToSub} fill="url(#eqGrad)" />}
+          {nodeHeights.sip > 0 && <path d={links.sipToSub} fill="url(#eqGrad)" />}
           {/* Debt -> FDs, RDs, SSYs */}
-          <path d={links.fdToSub} fill="url(#debtGrad)" />
-          <path d={links.rdToSub} fill="url(#debtGrad)" />
-          <path d={links.ssyToSub} fill="url(#debtGrad)" />
+          {nodeHeights.fd > 0 && <path d={links.fdToSub} fill="url(#debtGrad)" />}
+          {nodeHeights.rd > 0 && <path d={links.rdToSub} fill="url(#debtGrad)" />}
+          {nodeHeights.ssy > 0 && <path d={links.ssyToSub} fill="url(#debtGrad)" />}
           {/* Gold -> Gold node */}
-          <path d={links.goldToSub} fill="url(#goldGrad)" />
+          {nodeHeights.gold > 0 && <path d={links.goldToSub} fill="url(#goldGrad)" />}
           {/* Real Estate -> Real Estate node */}
-          <path d={links.reToSub} fill="url(#reGrad)" />
+          {nodeHeights.re > 0 && <path d={links.reToSub} fill="url(#reGrad)" />}
 
           {/* Nodes (Col 1: Net Worth) */}
-          <rect x={x1} y={y1_total} width={nodeW} height={totalNodeH} fill="#3b82f6" rx={3} />
-          <text x={x1 - 6} y={y1_total + totalNodeH / 2 + 4} textAnchor="end" className="fill-slate-700 dark:fill-slate-200 font-extrabold text-[9.5px]">
-            NET WORTH ({formatCompactINR(data.total)})
-          </text>
+          {totalNodeH > 0 && (
+            <>
+              <rect x={x1} y={y1_total} width={nodeW} height={totalNodeH} fill="#3b82f6" rx={3} />
+              <text x={x1 - 6} y={y1_total + totalNodeH / 2 + 4} textAnchor="end" className="fill-slate-700 dark:fill-slate-200 font-extrabold text-[9.5px]">
+                NET WORTH ({formatCompactINR(data.total)})
+              </text>
+            </>
+          )}
 
           {/* Nodes (Col 2: Categories) */}
-          <rect x={x2} y={y2_equity} width={nodeW} height={nodeHeights.equity} fill="#3b82f6" rx={3} />
-          <text x={x2 - 6} y={y2_equity + nodeHeights.equity / 2 + 3} textAnchor="end" className="fill-slate-600 dark:fill-slate-300 font-bold text-[8.5px]">
-            Equity ({formatCompactINR(data.equity)})
-          </text>
+          {nodeHeights.equity > 0 && (
+            <>
+              <rect x={x2} y={y2_equity} width={nodeW} height={nodeHeights.equity} fill="#3b82f6" rx={3} />
+              <text x={x2 - 6} y={y2_equity + nodeHeights.equity / 2 + 3} textAnchor="end" className="fill-slate-600 dark:fill-slate-300 font-bold text-[8.5px]">
+                Equity ({formatCompactINR(data.equity)})
+              </text>
+            </>
+          )}
 
-          <rect x={x2} y={y2_debt} width={nodeW} height={nodeHeights.debt} fill="#8b5cf6" rx={3} />
-          <text x={x2 - 6} y={y2_debt + nodeHeights.debt / 2 + 3} textAnchor="end" className="fill-slate-600 dark:fill-slate-300 font-bold text-[8.5px]">
-            Debt ({formatCompactINR(data.debt)})
-          </text>
+          {nodeHeights.debt > 0 && (
+            <>
+              <rect x={x2} y={y2_debt} width={nodeW} height={nodeHeights.debt} fill="#8b5cf6" rx={3} />
+              <text x={x2 - 6} y={y2_debt + nodeHeights.debt / 2 + 3} textAnchor="end" className="fill-slate-600 dark:fill-slate-300 font-bold text-[8.5px]">
+                Debt ({formatCompactINR(data.debt)})
+              </text>
+            </>
+          )}
 
-          <rect x={x2} y={y2_gold} width={nodeW} height={nodeHeights.gold} fill="#eab308" rx={3} />
-          <text x={x2 - 6} y={y2_gold + nodeHeights.gold / 2 + 3} textAnchor="end" className="fill-slate-600 dark:fill-slate-300 font-bold text-[8.5px]">
-            Gold ({formatCompactINR(data.gold)})
-          </text>
+          {nodeHeights.gold > 0 && (
+            <>
+              <rect x={x2} y={y2_gold} width={nodeW} height={nodeHeights.gold} fill="#eab308" rx={3} />
+              <text x={x2 - 6} y={y2_gold + nodeHeights.gold / 2 + 3} textAnchor="end" className="fill-slate-600 dark:fill-slate-300 font-bold text-[8.5px]">
+                Gold ({formatCompactINR(data.gold)})
+              </text>
+            </>
+          )}
 
-          <rect x={x2} y={y2_re} width={nodeW} height={nodeHeights.re} fill="#f97316" rx={3} />
-          <text x={x2 - 6} y={y2_re + nodeHeights.re / 2 + 3} textAnchor="end" className="fill-slate-600 dark:fill-slate-300 font-bold text-[8.5px]">
-            Realty ({formatCompactINR(data.re)})
-          </text>
+          {nodeHeights.re > 0 && (
+            <>
+              <rect x={x2} y={y2_re} width={nodeW} height={nodeHeights.re} fill="#f97316" rx={3} />
+              <text x={x2 - 6} y={y2_re + nodeHeights.re / 2 + 3} textAnchor="end" className="fill-slate-600 dark:fill-slate-300 font-bold text-[8.5px]">
+                Realty ({formatCompactINR(data.re)})
+              </text>
+            </>
+          )}
 
           {/* Nodes (Col 3: Sub-assets) */}
-          <rect x={x3} y={y3_stocks} width={nodeW} height={nodeHeights.stocks} fill="#3b82f6" rx={3} />
-          <text x={x3 + nodeW + 6} y={y3_stocks + nodeHeights.stocks / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
-            Stocks ({formatCompactINR(data.stocks)})
-          </text>
+          {nodeHeights.stocks > 0 && (
+            <>
+              <rect x={x3} y={y3_stocks} width={nodeW} height={nodeHeights.stocks} fill="#3b82f6" rx={3} />
+              <text x={x3 + nodeW + 6} y={y3_stocks + nodeHeights.stocks / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
+                Stocks ({formatCompactINR(data.stocks)})
+              </text>
+            </>
+          )}
 
-          <rect x={x3} y={y3_sip} width={nodeW} height={nodeHeights.sip} fill="#60a5fa" rx={3} />
-          <text x={x3 + nodeW + 6} y={y3_sip + nodeHeights.sip / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
-            Mutual Funds ({formatCompactINR(data.sip)})
-          </text>
+          {nodeHeights.sip > 0 && (
+            <>
+              <rect x={x3} y={y3_sip} width={nodeW} height={nodeHeights.sip} fill="#60a5fa" rx={3} />
+              <text x={x3 + nodeW + 6} y={y3_sip + nodeHeights.sip / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
+                Mutual Funds ({formatCompactINR(data.sip)})
+              </text>
+            </>
+          )}
 
-          <rect x={x3} y={y3_fd} width={nodeW} height={nodeHeights.fd} fill="#8b5cf6" rx={3} />
-          <text x={x3 + nodeW + 6} y={y3_fd + nodeHeights.fd / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
-            FDs ({formatCompactINR(data.fd)})
-          </text>
+          {nodeHeights.fd > 0 && (
+            <>
+              <rect x={x3} y={y3_fd} width={nodeW} height={nodeHeights.fd} fill="#8b5cf6" rx={3} />
+              <text x={x3 + nodeW + 6} y={y3_fd + nodeHeights.fd / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
+                FDs ({formatCompactINR(data.fd)})
+              </text>
+            </>
+          )}
 
-          <rect x={x3} y={y3_rd} width={nodeW} height={nodeHeights.rd} fill="#a78bfa" rx={3} />
-          <text x={x3 + nodeW + 6} y={y3_rd + nodeHeights.rd / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
-            RDs ({formatCompactINR(data.rd)})
-          </text>
+          {nodeHeights.rd > 0 && (
+            <>
+              <rect x={x3} y={y3_rd} width={nodeW} height={nodeHeights.rd} fill="#a78bfa" rx={3} />
+              <text x={x3 + nodeW + 6} y={y3_rd + nodeHeights.rd / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
+                RDs ({formatCompactINR(data.rd)})
+              </text>
+            </>
+          )}
 
-          <rect x={x3} y={y3_ssy} width={nodeW} height={nodeHeights.ssy} fill="#c084fc" rx={3} />
-          <text x={x3 + nodeW + 6} y={y3_ssy + nodeHeights.ssy / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
-            SSY ({formatCompactINR(data.ssy)})
-          </text>
+          {nodeHeights.ssy > 0 && (
+            <>
+              <rect x={x3} y={y3_ssy} width={nodeW} height={nodeHeights.ssy} fill="#c084fc" rx={3} />
+              <text x={x3 + nodeW + 6} y={y3_ssy + nodeHeights.ssy / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
+                SSY ({formatCompactINR(data.ssy)})
+              </text>
+            </>
+          )}
 
-          <rect x={x3} y={y3_gold} width={nodeW} height={nodeHeights.gold} fill="#eab308" rx={3} />
-          <text x={x3 + nodeW + 6} y={y3_gold + nodeHeights.gold / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
-            Gold ({formatCompactINR(data.gold)})
-          </text>
+          {nodeHeights.gold > 0 && (
+            <>
+              <rect x={x3} y={y3_gold} width={nodeW} height={nodeHeights.gold} fill="#eab308" rx={3} />
+              <text x={x3 + nodeW + 6} y={y3_gold + nodeHeights.gold / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
+                Gold ({formatCompactINR(data.gold)})
+              </text>
+            </>
+          )}
 
-          <rect x={x3} y={y3_re} width={nodeW} height={nodeHeights.re} fill="#f97316" rx={3} />
-          <text x={x3 + nodeW + 6} y={y3_re + nodeHeights.re / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
-            Property ({formatCompactINR(data.re)})
-          </text>
+          {nodeHeights.re > 0 && (
+            <>
+              <rect x={x3} y={y3_re} width={nodeW} height={nodeHeights.re} fill="#f97316" rx={3} />
+              <text x={x3 + nodeW + 6} y={y3_re + nodeHeights.re / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
+                Property ({formatCompactINR(data.re)})
+              </text>
+            </>
+          )}
         </svg>
       </div>
     </div>

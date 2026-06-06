@@ -31,6 +31,28 @@ describe('calculateXIRR', () => {
     expect(calculateXIRR([])).toBe(0);
     expect(calculateXIRR([{ date: '2025-01-01', amount: -10000 }])).toBe(0);
   });
+
+  it('returns 0 for negative-only or positive-only cashflows', () => {
+    const negativeOnly = [
+      { date: '2025-01-01', amount: -10000 },
+      { date: '2025-06-01', amount: -5000 },
+    ];
+    const positiveOnly = [
+      { date: '2025-01-01', amount: 10000 },
+      { date: '2025-06-01', amount: 5000 },
+    ];
+    expect(calculateXIRR(negativeOnly)).toBe(0);
+    expect(calculateXIRR(positiveOnly)).toBe(0);
+  });
+
+  it('correctly calculates XIRR for a 20-year cashflow', () => {
+    const cashflows: CashFlow[] = [
+      { date: '2005-01-01', amount: -10000 },
+      { date: '2025-01-01', amount: 67275 }, // ~10% CAGR over 20 years (1.1^20 * 10000 = 67275)
+    ];
+    const xirr = calculateXIRR(cashflows);
+    expect(xirr).toBeCloseTo(0.10, 2);
+  });
 });
 
 describe('calculateWeightedAge', () => {

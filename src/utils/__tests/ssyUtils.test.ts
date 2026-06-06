@@ -116,5 +116,53 @@ describe('SSY Utilities', () => {
       const val = getSSYEffectiveValue(account, new Date('2028-03-31'));
       expect(Math.round(val)).toBeCloseTo(117072, 0);
     });
+
+    it('correctly stops accepting deposits after 15 years but continues compounding interest until 21 years maturity', () => {
+      const start = '2026-04-01';
+      const annualDeposit = 100000;
+      const result = calculateSSYMaturityWithRates(start, annualDeposit);
+
+      // Verify that after year 15, deposit is 0
+      for (let i = 15; i < 21; i++) {
+        expect(result.yearlyBreakdown[i].deposit).toBe(0);
+        expect(result.yearlyBreakdown[i].interestEarned).toBeGreaterThan(0); // still earns interest
+      }
+      expect(result.yearlyBreakdown.length).toBe(21);
+    });
+
+    it('handles a missed financial year correctly (0 deposit)', () => {
+      const start = '2020-04-01';
+      // Explicit contributions missing for FY 2021
+      const contributions = [
+        { date: '2020-05-01', amount: 50000 },
+        // FY 2021 missed (April 2021 - March 2022)
+        { date: '2022-05-01', amount: 50000 },
+      ];
+
+      const result = calculateSSYMaturityWithRates(start, 50000, contributions);
+
+      // FY 2020 (depositYear 0) has 50000
+      expect(result.yearlyBreakdown[0].deposit).toBe(50000);
+      // FY 2021 (depositYear 1) has 0 deposit
+      expect(result.yearlyBreakdown[1].deposit).toBe(0);
+      // FY 2021 still earns interest on the previous balance
+      expect(result.yearlyBreakdown[1].interestEarned).toBeGreaterThan(0);
+      // FY 2022 (depositYear 2) has 50000
+      expect(result.yearlyBreakdown[2].deposit).toBe(50000);
+    });
+
+    it('correctly maps March 31st and April 1st contributions to separate financial years', () => {
+      const start = '2026-04-01';
+      const contributions = [
+        { date: '2027-03-31', amount: 40000 }, // FY 2026 (depositYear 0)
+        { date: '2027-04-01', amount: 60000 }, // FY 2027 (depositYear 1)
+      ];
+      const result = calculateSSYMaturityWithRates(start, 0, contributions);
+      
+      // FY 2026 (depositYear 0) should have deposit 40000
+      expect(result.yearlyBreakdown[0].deposit).toBe(40000);
+      // FY 2027 (depositYear 1) should have deposit 60000
+      expect(result.yearlyBreakdown[1].deposit).toBe(60000);
+    });
   });
 });

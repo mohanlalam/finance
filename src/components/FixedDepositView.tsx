@@ -268,6 +268,7 @@ function FixedDepositView({
                 itemCount={fixedDeposits.length}
                 itemSize={180}
                 width="100%"
+                itemKey={(index) => fixedDeposits[index].id}
               >
                 {({ index, style }: ListChildComponentProps) => {
                   const fd = fixedDeposits[index];

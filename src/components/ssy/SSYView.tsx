@@ -190,6 +190,7 @@ export function SSYView({
               itemCount={filteredAccounts.length}
               itemSize={320}
               width="100%"
+              itemKey={(index) => filteredAccounts[index].id}
             >
               {({ index, style }: ListChildComponentProps) => {
                 const account = filteredAccounts[index];

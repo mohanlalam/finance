@@ -181,6 +181,7 @@ export function RDView({
                 itemCount={filteredAccounts.length}
                 itemSize={240}
                 width="100%"
+                itemKey={(index) => filteredAccounts[index].id}
               >
                 {({ index, style }: ListChildComponentProps) => {
                   const account = filteredAccounts[index];

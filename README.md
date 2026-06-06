@@ -9,21 +9,21 @@ A premium, interactive web application designed to track and manage multi-asset 
 ### 📊 Financial Dashboard & Analytics
 - **Asset Allocation Chart** — Interactive donut chart showcasing distribution across Stocks, FDs, Gold, and Real Estate.
 - **Net Worth Growth Timeline** — Responsive SVG line/area chart with interactive tooltip nodes plotting historical compound wealth appreciation.
-- **Sankey Flow Diagram** — Native SVG flow diagram charting wealth streams from net worth categories to individual sub-assets.
-- **Equity Concentration Treemap** — SVG treemap visualization showing relative sizes of top stock holdings.
+- **Sankey Flow Diagram** — Native SVG flow diagram charting wealth streams from net worth categories to individual sub-assets. Safeguarded against zero-thickness path and degenerate node renders.
+- **Equity Concentration Treemap** — SVG treemap visualization showing relative sizes of top stock holdings. Includes division-by-zero guards and filters out sub-1px elements to ensure overlapping coordinate safety.
 - **P&L Visuals** — Direct indications of profits and losses with custom positive/negative indicators and INR formatting.
 - **Comparison Engine** — Multi-dimensional bar chart comparing total invested vs. current value per family member.
 - **Live Prices** — Live feeds for stock and ETF holdings (every 30 seconds) showing intraday changes and overall returns.
 
 ### 💡 Portfolio Insights & Rebalancing
 - **Performance Highlights** — Instantly view top stock holdings, top gainers, top losers, and today's biggest absolute price movement.
-- **Portfolio Health Score** — Automated multi-factor evaluation engine (0-100) scoring diversification, active SIPs, emergency fund coverage, stock concentration, and active insurances.
-- **Rebalancing recommendations** — Smart allocation rebalancing engine displaying exact cash buy/sell suggestions from target drifts (e.g. "Sell Equity, Buy Debt").
+- **Portfolio Health Score** — Automated multi-factor evaluation engine (0-100) scoring diversification, active SIPs, emergency fund coverage (capped at 20 points), stock concentration, and active insurances (raised to 15 points).
+- **Rebalancing recommendations** — Smart allocation rebalancing engine displaying exact cash buy/sell suggestions from target drifts, ignoring tiny drifts under an explicit threshold `MIN_ACTION = 5000`.
 - **Asset Allocation Drift & Targets** — Tracks deviations between actual asset splits and targets. Features **User-Configurable Allocation Targets** via a settings modal.
 - **Portfolio Concentration Alerts** — Warnings if any single equity exceeds 15% of the total portfolio value.
 
 ### 🤖 AI Portfolio Assistant
-- **NLP Query Console** — Client-side regular expression assistant parser processing questions about portfolios, highest return assets, and maturing dates (e.g., "Show all investments maturing in 2027").
+- **Intent-Based NLP Classifier** — Pre-filters queries into structured intents (e.g. performers, maturities, allocations) to eliminate false positive keywords before parameter extraction.
 
 ### 📱 Android Home Screen Widgets
 - **Capacitor WebView Widgets** — Isolated WebView route displaying custom-styled, real-time widgets for Net Worth, Today's Gain, and upcoming FD maturities, optimized for Capacitor home widget slots.
@@ -38,9 +38,9 @@ A premium, interactive web application designed to track and manage multi-asset 
 
 ### ⚡ High Performance & Responsiveness
 - **Asynchronous Web Workers** — Offloads heavy computations (Newton-Raphson XIRR solvers, multi-factor Health Score scoring, and rebalancing recommendations) to background threads (`src/workers/`) with fail-safe synchronous fallbacks.
-- **List Virtualization** — Uses `react-window` to virtualize large registry listings (>8 accounts) to keep scrolling fluid and render times minimal.
+- **List Virtualization & Row Keys** — Uses `react-window` to virtualize large registry listings (>8 accounts) to keep scrolling fluid and render times minimal. Row key elements are explicitly bound to asset IDs (`itemKey`) to optimize DOM recycling and prevent rendering glitches.
 - **Intersection Lazy Loading** — Leverages an `IntersectionObserver` viewport wrapper to lazy-load charts and assistant modules, avoiding off-screen SVG coordinate calculations.
-- **Advanced Caching** — Employs `SWR` for remote state cache validation and coordinated fetch management (eliminating double price fetches), IndexedDB local caches (`idb-keyval`) for instant stale-while-revalidate loads (eliminating `localStorage` size limit vulnerabilities), and 15-minute TTL caching for live Mutual Fund NAV fetches.
+- **Advanced Caching & Focus Resume** — Employs `SWR` for remote state cache validation and coordinated fetch management (eliminating double price fetches), IndexedDB local caches (`idb-keyval`) for instant stale-while-revalidate loads (invalidated on write/mutations to prevent stale state), document `visibilitychange` listeners to refresh data on window focus/resume, and 15-minute TTL caching for live Mutual Fund NAV fetches.
 
 ### 📂 Multi-Asset Registry & Reminders
 - **Fixed Deposits (FD)** — Real-time compounded interest tracking (compounded half-yearly), maturity date tracking, timeline progress bars, and document attachments.

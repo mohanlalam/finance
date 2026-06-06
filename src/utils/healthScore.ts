@@ -81,21 +81,21 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
     risks.push('⚠ No active Mutual Fund SIPs running');
   }
 
-  // 3. EMERGENCY FUND BUFFER (Max 25 pts)
+  // 3. EMERGENCY FUND BUFFER (Max 20 pts)
   // Emergency funds = FDs + RDs. Monthly baseline expense = ₹50,000
   const emergencyFund = breakdown.fd + breakdown.rd;
   const MONTHLY_EXPENSE = 50000;
   const monthsCovered = MONTHLY_EXPENSE > 0 ? emergencyFund / MONTHLY_EXPENSE : 0;
 
   if (monthsCovered >= 6) {
-    score += 25;
+    score += 20;
     strengths.push('✓ Solid emergency fund buffer (>6 months expenses)');
   } else if (monthsCovered >= 3) {
-    score += 15;
+    score += 12;
     strengths.push('✓ Moderate emergency fund buffer (3-6 months expenses)');
     risks.push('⚠ Emergency fund could be boosted to cover 6 months');
   } else {
-    score += 5;
+    score += 4;
     risks.push('⚠ High risk: emergency fund covers less than 3 months of expenses');
   }
 
@@ -131,7 +131,7 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
     risks.push(`⚠ Concentration risk: ${highestStockTicker} exceeds ${highestStockPct.toFixed(0)}% of stock holdings`);
   }
 
-  // 5. INSURANCE COVER (Max 10 pts)
+  // 5. INSURANCE COVER (Max 15 pts)
   let healthIns = false;
   let termIns = false;
 
@@ -144,10 +144,10 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
 
   let insScore = 0;
   if (healthIns && termIns) {
-    insScore = 10;
+    insScore = 15;
     strengths.push('✓ Fully insured: health and term/life cover active');
   } else if (healthIns || termIns) {
-    insScore = 5;
+    insScore = 7;
     strengths.push(`✓ Partial insurance: ${healthIns ? 'Health' : 'Term/Life'} cover active`);
     risks.push(`⚠ Missing ${healthIns ? 'Term/Life' : 'Health'} insurance policy`);
   } else {
