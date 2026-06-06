@@ -20,6 +20,8 @@ This document provides a high-level overview of the folder structure, data flow,
   * Sorts family portfolios dynamically in a data-driven way, pinning the primary `'personal'` portfolio to the top and sorting custom/other portfolios chronologically via database creation dates (`created_at`).
   * Connects to Supabase Edge Functions via [apiClient.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/apiClient.ts).
   * Manages stock price caching (15-minute TTL) and live polling.
+* **[supabaseClient.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/supabaseClient.ts)**
+  * Dynmically initializes the Supabase JS SDK. Refactored to dynamically import `@supabase/supabase-js` only when `getSupabase()` is executed, preventing the large client library (~117 kB) from loading inside the initial auth bundle.
 * **[useRDData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useRDData.ts)**
   * Thin hook wrapper pulling Recurring Deposit state and operations directly from `PortfolioContext`.
 * **[useSIPData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useSIPData.ts)**
@@ -29,9 +31,9 @@ This document provides a high-level overview of the folder structure, data flow,
 
 ### 2. App Shell & Navigation Router
 * **[App.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/App.tsx)**
-  * Roots the layout, global Dark/Light mode theme state, keyboard shortcuts, swipe tab routing, and responsive layouts.
-  * Coordinates layout differences: renders [MobileHomeSummary.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/MobileHomeSummary.tsx) on narrow views, and a multi-panel grid dashboard on desktops.
-  * Implements dynamic **code splitting** (`React.lazy` and `React.Suspense`) to load the heavy `AppShell` dashboard component asynchronously, reducing the initial JS entry bundle size by 63% (~380 kB saved) to make the PIN Lock screen load instantly on mobile.
+  * Serves as a lightweight, zero-dependency entry gate component. If the access PIN is not verified, it immediately renders `PinLockScreen` from a clean, provider-free chunk. Once unlocked, it dynamically imports and mounts `MainApp` using `React.lazy`.
+* **[MainApp.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/MainApp.tsx)**
+  * Hosts all context providers (`ThemeProvider`, `PortfolioProvider`), the Router routes structure, and the dashboard hydration load gates, isolating them from the initial lock screen bundle to optimize initial paint speeds.
 * **[useSwipeNavigation.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useSwipeNavigation.ts)**
   * Touch swipe gesture listeners and navigation routing between active asset tabs.
 * **[useKeyboardShortcuts.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useKeyboardShortcuts.ts)**
@@ -66,21 +68,22 @@ Component folders are isolated by asset domain to ensure clean separation of con
 The application implements a series of high-performance strategies to guarantee fluid 60FPS animations, instant transitions, and negligible main-thread blocking:
 
 ### 1. Web Worker Offloading
-CPU-heavy financial and scoring calculations are offloaded to asynchronous background Web Workers in the `src/workers/` folder. Each worker includes a **fail-safe synchronous fallback** for environments that do not support Web Workers (such as unit test execution):
-* **[xirr.worker.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/workers/xirr.worker.ts)**: Handles Newton-Raphson cash flow solvers.
-* **[healthScore.worker.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/workers/healthScore.worker.ts)**: Performs portfolio health evaluations.
-* **[rebalancing.worker.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/workers/rebalancing.worker.ts)**: Generates buy/sell allocation drift advice.
+* CPU-heavy financial and scoring calculations are offloaded to asynchronous background Web Workers in the `src/workers/` folder. If a worker fails to instantiate (common on iOS WebViews or Capacitor environments) or triggers an execution error, the task falls back to the synchronous main-thread solver while throwing detailed warnings (`console.warn`) for debugging diagnostics:
+  * **[xirr.worker.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/workers/xirr.worker.ts)**: Handles Newton-Raphson cash flow solvers.
+  * **[healthScore.worker.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/workers/healthScore.worker.ts)**: Performs portfolio health evaluations.
+  * **[rebalancing.worker.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/workers/rebalancing.worker.ts)**: Generates buy/sell allocation drift advice.
 
 ### 2. Render Memoization & Virtualization
 * **List Virtualization**: Accounts views utilize `react-window` to virtualize accounts when lists exceed 8 items, binding rows to unique asset IDs (`itemKey`) to optimize DOM recycling and prevent rendering glitches during list mutations.
 * **Card Memoization**: Asset card components use `React.memo` with strict equality functions comparing primary metrics to prevent redundant child re-renders.
 * **SVG Coordinate Memoization**: Grid and path builders in `NetWorthTimelineChart.tsx` and `SankeyChart.tsx` wrap layout and coordinate calculations in `useMemo` blocks, avoiding recalculation unless data or sizes change.
-* **Lazy Rendering Viewports**: Charts and components inside `AppShell.tsx` are lazy-rendered via `IntersectionObserver` wrappers, postponing loading and calculation until the elements are scrolled into the viewport.
+* **Lazy Rendering Viewports**: Heavy SVG/D3 charts (`NetWorthTimelineChart.tsx`, `TreemapChart.tsx`, `SankeyChart.tsx`) inside `AppShell.tsx` are wrapped in a type-safe `LazyChartWrapper` utilizing `IntersectionObserver`. This completely defers dynamic import bundle fetching and `React.lazy` evaluation until the chart placeholder scrolls into view, avoiding startup main-thread bloat.
 
 ### 3. Caching & Network Coalescing
 * **SWR Hook & Mutation Coalescing**: Wraps remote assets data with cache revalidation. Coordinates remote calls to prevent double fetching, ensuring initial load live prices and NAV updates are handled smoothly by SWR keys.
-* **Persistent LocalStorage NAV Caching**: Live AMFI Mutual Fund NAV scheme requests inside `sipUtils.ts` are cached in `localStorage` with a 12-hour Time-To-Live (TTL) to persist data across mobile app launches/sessions and prevent redundant sequential client-side network queries.
+* **Persistent IndexedDB NAV Caching**: Live AMFI Mutual Fund NAV scheme requests inside `sipUtils.ts` are cached and written asynchronously to IndexedDB (`idb-keyval`) to prevent synchronous main-thread jank. The NAV cache is loaded asynchronously into an in-memory map on app start using `initNAVCache()` during the hook mount sequence.
 * **IndexedDB Cache Storage**: Local caching of full portfolio datasets is strictly offloaded to IndexedDB (`idb-keyval`) to avoid browser `localStorage` size limits (keeping `localStorage` only for lightweight metadata like execution timestamps). It includes active `isMounted` guard patterns to prevent memory leak state updates.
+* **Reload Gating on Resume**: Implements a 5-minute (300,000 ms) elapsed time gate inside the `visibilitychange` listener of `usePortfolioData.ts` to prevent redundant, concurrent network sync operations on mobile app focus resumes.
 
 ---
 

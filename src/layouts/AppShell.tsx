@@ -23,9 +23,6 @@ import DashboardWidgets from '../components/DashboardWidgets';
 
 const PieChart = React.lazy(() => import('../components/PieChart'));
 const BarChart = React.lazy(() => import('../components/BarChart'));
-const NetWorthTimelineChart = React.lazy(() => import('../components/NetWorthTimelineChart'));
-const TreemapChart = React.lazy(() => import('../components/TreemapChart'));
-const SankeyChart = React.lazy(() => import('../components/SankeyChart'));
 const PortfolioAssistant = React.lazy(() => import('../components/PortfolioAssistant'));
 
 import { useParams, useNavigate } from 'react-router-dom';
@@ -63,6 +60,57 @@ function LazyViewport({ children, placeholderHeight = 240 }: { children: React.R
   return (
     <div ref={ref} style={{ minHeight: isIntersected ? undefined : placeholderHeight }}>
       {isIntersected ? children : (
+        <div 
+          className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 animate-pulse" 
+          style={{ height: placeholderHeight }} 
+        />
+      )}
+    </div>
+  );
+}
+
+// Lazy chart wrapper that ensures the dynamic import is only evaluated on intersection
+function LazyChartWrapper<TProps extends object>({
+  importFunc,
+  fallback,
+  props,
+  placeholderHeight = 240
+}: {
+  importFunc: () => Promise<{ default: React.ComponentType<TProps> }>;
+  fallback: React.ReactNode;
+  props: TProps;
+  placeholderHeight?: number;
+}) {
+  const [isIntersected, setIsIntersected] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsIntersected(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '100px' }
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const LazyComponent = useMemo(() => {
+    if (!isIntersected) return null;
+    return React.lazy(importFunc) as unknown as React.ComponentType<TProps>;
+  }, [isIntersected, importFunc]);
+
+  return (
+    <div ref={ref} style={{ minHeight: isIntersected ? undefined : placeholderHeight }}>
+      {isIntersected && LazyComponent ? (
+        <Suspense fallback={fallback}>
+          <LazyComponent {...props} />
+        </Suspense>
+      ) : (
         <div 
           className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 animate-pulse" 
           style={{ height: placeholderHeight }} 
@@ -394,27 +442,30 @@ export default function AppShell() {
 
                 <div className="space-y-4">
                   <SectionErrorBoundary sectionName="Net Worth Timeline">
-                    <LazyViewport placeholderHeight={240}>
-                      <Suspense fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                        <NetWorthTimelineChart history={netWorthHistory} currentNetWorth={summaryData.totalCurrentValue} />
-                      </Suspense>
-                    </LazyViewport>
+                    <LazyChartWrapper
+                      importFunc={() => import('../components/NetWorthTimelineChart')}
+                      placeholderHeight={240}
+                      fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
+                      props={{ history: netWorthHistory, currentNetWorth: summaryData.totalCurrentValue }}
+                    />
                   </SectionErrorBoundary>
-
+ 
                   <SectionErrorBoundary sectionName="Sankey Flow Diagram">
-                    <LazyViewport placeholderHeight={240}>
-                      <Suspense fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                        <SankeyChart portfolios={portfolios} activePortfolio={portfolio} />
-                      </Suspense>
-                    </LazyViewport>
+                    <LazyChartWrapper
+                      importFunc={() => import('../components/SankeyChart')}
+                      placeholderHeight={240}
+                      fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
+                      props={{ portfolios, activePortfolio: portfolio }}
+                    />
                   </SectionErrorBoundary>
-
+ 
                   <SectionErrorBoundary sectionName="Equity Concentration Treemap">
-                    <LazyViewport placeholderHeight={200}>
-                      <Suspense fallback={<div className="h-[200px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                        <TreemapChart holdings={portfolio ? portfolio.holdings : portfolios.flatMap(p => p.holdings)} />
-                      </Suspense>
-                    </LazyViewport>
+                    <LazyChartWrapper
+                      importFunc={() => import('../components/TreemapChart')}
+                      placeholderHeight={200}
+                      fallback={<div className="h-[200px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
+                      props={{ holdings: portfolio ? portfolio.holdings : portfolios.flatMap(p => p.holdings) }}
+                    />
                   </SectionErrorBoundary>
 
                   <SectionErrorBoundary sectionName="AI Portfolio Assistant">
@@ -601,11 +652,12 @@ export default function AppShell() {
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <SectionErrorBoundary sectionName="Net Worth Timeline">
-                <LazyViewport placeholderHeight={240}>
-                  <Suspense fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                    <NetWorthTimelineChart history={netWorthHistory} currentNetWorth={summaryData.totalCurrentValue} />
-                  </Suspense>
-                </LazyViewport>
+                <LazyChartWrapper
+                  importFunc={() => import('../components/NetWorthTimelineChart')}
+                  placeholderHeight={240}
+                  fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
+                  props={{ history: netWorthHistory, currentNetWorth: summaryData.totalCurrentValue }}
+                />
               </SectionErrorBoundary>
               <SectionErrorBoundary sectionName="AI Portfolio Assistant">
                 <LazyViewport placeholderHeight={200}>
@@ -615,21 +667,23 @@ export default function AppShell() {
                 </LazyViewport>
               </SectionErrorBoundary>
             </div>
-
+ 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <SectionErrorBoundary sectionName="Sankey Flow Diagram">
-                <LazyViewport placeholderHeight={240}>
-                  <Suspense fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                    <SankeyChart portfolios={portfolios} activePortfolio={portfolio} />
-                  </Suspense>
-                </LazyViewport>
+                <LazyChartWrapper
+                  importFunc={() => import('../components/SankeyChart')}
+                  placeholderHeight={240}
+                  fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
+                  props={{ portfolios, activePortfolio: portfolio }}
+                />
               </SectionErrorBoundary>
               <SectionErrorBoundary sectionName="Equity Concentration Treemap">
-                <LazyViewport placeholderHeight={200}>
-                  <Suspense fallback={<div className="h-[200px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                    <TreemapChart holdings={portfolio ? portfolio.holdings : portfolios.flatMap(p => p.holdings)} />
-                  </Suspense>
-                </LazyViewport>
+                <LazyChartWrapper
+                  importFunc={() => import('../components/TreemapChart')}
+                  placeholderHeight={200}
+                  fallback={<div className="h-[200px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
+                  props={{ holdings: portfolio ? portfolio.holdings : portfolios.flatMap(p => p.holdings) }}
+                />
               </SectionErrorBoundary>
             </div>
 

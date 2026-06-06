@@ -9,7 +9,7 @@ import {
   Insurance,
   Holding,
 } from '../types/portfolio';
-import { supabase } from '../utils/supabaseClient';
+import { getSupabase } from '../utils/supabaseClient';
 import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X } from 'lucide-react';
 import { getDocumentUrl } from '../utils/formatters';
 import Modal from './Modal';
@@ -157,6 +157,7 @@ export default React.memo(function DocumentVaultView({
       const safeName = pendingFile.name.replace(/[^\w.-]/g, '_');
       const storagePath = `${formPortfolio}/${activeFolder}/${ts}_${safeName}`;
 
+      const supabase = await getSupabase();
       const { error: uploadErr } = await supabase.storage
         .from('investment-documents')
         .upload(storagePath, pendingFile);
@@ -195,6 +196,7 @@ export default React.memo(function DocumentVaultView({
     setIsDeleting(true);
     try {
       if (!deleteTarget.file_path.startsWith('http')) {
+        const supabase = await getSupabase();
         const { error: deleteErr } = await supabase.storage
           .from('investment-documents')
           .remove([deleteTarget.file_path]);

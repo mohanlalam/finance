@@ -1,5 +1,6 @@
 import { SIPAccount } from '../types/portfolio';
 import { fetchAMFIScheme } from './amfiClient';
+import * as idb from 'idb-keyval';
 
 /**
  * Returns the estimated total amount invested in the SIP.
@@ -19,16 +20,19 @@ export function getSIPInvestedAmount(account: SIPAccount): number {
 
 const navCache = new Map<string, { value: number; name: string; fetchedAt: number }>();
 
-// Load from localStorage on initialization
-try {
-  const saved = localStorage.getItem('nav_cache');
-  if (saved) {
-    const entries: [string, { value: number; name: string; fetchedAt: number }][] = JSON.parse(saved);
-    for (const [k, v] of entries) {
-      navCache.set(k, v);
+export async function initNAVCache(): Promise<void> {
+  try {
+    const saved = await idb.get('nav_cache');
+    if (saved) {
+      const entries: [string, { value: number; name: string; fetchedAt: number }][] = JSON.parse(saved);
+      for (const [k, v] of entries) {
+        navCache.set(k, v);
+      }
     }
+  } catch (err) {
+    console.warn('[sipUtils] Failed to load NAV cache:', err);
   }
-} catch { /* ignore */ }
+}
 
 /**
  * Returns the current valuation of a SIP Mutual Fund.
@@ -77,7 +81,7 @@ export async function fetchNAV(schemeCode: string): Promise<NAVResult> {
     const entry = { value: details.latestNav, name: details.schemeName, fetchedAt: Date.now() };
     navCache.set(schemeCode, entry);
     try {
-      localStorage.setItem('nav_cache', JSON.stringify([...navCache.entries()]));
+      await idb.set('nav_cache', JSON.stringify([...navCache.entries()]));
     } catch { /* ignore */ }
     return { value: details.latestNav, schemeName: details.schemeName, isStale: false };
   } catch (err) {

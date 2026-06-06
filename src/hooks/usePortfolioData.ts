@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Holding, Portfolio, FixedDeposit, RDAccount, SIPAccount, SSYAccount, GoldHolding, RealEstate, Insurance, DocumentMetadata, AssetPayload } from '../types/portfolio';
 import { getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../utils/rdUtils';
-import { getSIPInvestedAmount, getSIPEffectiveValue, fetchNAV } from '../utils/sipUtils';
+import { getSIPInvestedAmount, getSIPEffectiveValue, fetchNAV, initNAVCache } from '../utils/sipUtils';
 import { getSSYInvestedAmount, getSSYEffectiveValue } from '../utils/ssyUtils';
 import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiClient';
 import useSWR from 'swr';
@@ -272,6 +272,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   const isMutatingRef = useRef(false);
   const [isMutating, setIsMutating] = useState(false);
   const mutationQueue = useRef<Promise<unknown>>(Promise.resolve());
+  const lastRefreshRef = useRef<number>(0);
 
   const runMutation = useCallback(async <T>(fn: () => Promise<T>): Promise<T> => {
     const nextPromise = new Promise<T>((resolve, reject) => {
@@ -373,19 +374,25 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   // 1. IndexedDB cache read (Phase 5)
   useEffect(() => {
     let isMounted = true;
-    idb.get('portfolio_data_cache').then((cached) => {
+    async function init() {
+      await initNAVCache();
       if (!isMounted) return;
-      if (cached && portfolios.length === 0) {
-        const parsed = cached as { portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[]; cachedAt: string };
-        setPortfolios(parsed.portfolios);
-        setNetWorthHistory(parsed.netWorthHistory || []);
-        setCacheUpdatedAt(new Date(parsed.cachedAt));
-        setIsUsingCachedData(true);
-        setLoadStatus('success');
+      try {
+        const cached = await idb.get('portfolio_data_cache');
+        if (!isMounted) return;
+        if (cached && portfolios.length === 0) {
+          const parsed = cached as { portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[]; cachedAt: string };
+          setPortfolios(parsed.portfolios);
+          setNetWorthHistory(parsed.netWorthHistory || []);
+          setCacheUpdatedAt(new Date(parsed.cachedAt));
+          setIsUsingCachedData(true);
+          setLoadStatus('success');
+        }
+      } catch (err) {
+        console.warn('[portfolio] IndexedDB read error:', err);
       }
-    }).catch((err) => {
-      console.warn('[portfolio] IndexedDB read error:', err);
-    });
+    }
+    init();
     return () => {
       isMounted = false;
     };
@@ -602,6 +609,9 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
+        const now = Date.now();
+        if (now - lastRefreshRef.current < 300_000) return;
+        lastRefreshRef.current = now;
         void load();
         void refreshPrices();
       }

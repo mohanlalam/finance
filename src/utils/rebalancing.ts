@@ -94,13 +94,15 @@ export function calculateRebalancingAsync(
         const worker = new Worker(new URL('../workers/rebalancing.worker.ts', import.meta.url), { type: 'module' });
         worker.onmessage = (e) => {
           if (e.data.error) {
+            console.warn('[rebalancing worker] returned computation error, falling back:', e.data.error);
             resolve(calculateRebalancing(portfolios, activePortfolio, targetPcts));
           } else {
             resolve(e.data.result);
           }
           worker.terminate();
         };
-        worker.onerror = () => {
+        worker.onerror = (err) => {
+          console.warn('[rebalancing worker] error in worker thread, falling back:', err);
           resolve(calculateRebalancing(portfolios, activePortfolio, targetPcts));
           worker.terminate();
         };
@@ -109,6 +111,8 @@ export function calculateRebalancingAsync(
       } catch (err) {
         console.warn('[rebalancing worker] failed, falling back:', err);
       }
+    } else {
+      console.warn('[rebalancing worker] Web Workers are not supported in this environment, falling back.');
     }
     resolve(calculateRebalancing(portfolios, activePortfolio, targetPcts));
   });

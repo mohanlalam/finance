@@ -221,13 +221,15 @@ export function runXIRRAsync(cashflows: CashFlow[]): Promise<number> {
         const worker = new Worker(new URL('../workers/xirr.worker.ts', import.meta.url), { type: 'module' });
         worker.onmessage = (e) => {
           if (e.data.error) {
+            console.warn('[xirr worker] returned computation error, falling back:', e.data.error);
             resolve(calculateXIRR(cashflows));
           } else {
             resolve(e.data.result);
           }
           worker.terminate();
         };
-        worker.onerror = () => {
+        worker.onerror = (err) => {
+          console.warn('[xirr worker] error in worker thread, falling back:', err);
           resolve(calculateXIRR(cashflows));
           worker.terminate();
         };
@@ -236,6 +238,8 @@ export function runXIRRAsync(cashflows: CashFlow[]): Promise<number> {
       } catch (err) {
         console.warn('[xirr worker] initialization failed, falling back:', err);
       }
+    } else {
+      console.warn('[xirr worker] Web Workers are not supported in this environment, falling back.');
     }
     resolve(calculateXIRR(cashflows));
   });

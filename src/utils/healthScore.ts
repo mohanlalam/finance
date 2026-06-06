@@ -171,13 +171,15 @@ export function calculateHealthScoreAsync(portfolios: Portfolio[], activePortfol
         const worker = new Worker(new URL('../workers/healthScore.worker.ts', import.meta.url), { type: 'module' });
         worker.onmessage = (e) => {
           if (e.data.error) {
+            console.warn('[healthScore worker] returned computation error, falling back:', e.data.error);
             resolve(calculateHealthScore(portfolios, activePortfolio));
           } else {
             resolve(e.data.result);
           }
           worker.terminate();
         };
-        worker.onerror = () => {
+        worker.onerror = (err) => {
+          console.warn('[healthScore worker] error in worker thread, falling back:', err);
           resolve(calculateHealthScore(portfolios, activePortfolio));
           worker.terminate();
         };
@@ -186,6 +188,8 @@ export function calculateHealthScoreAsync(portfolios: Portfolio[], activePortfol
       } catch (err) {
         console.warn('[healthScore worker] failed, falling back:', err);
       }
+    } else {
+      console.warn('[healthScore worker] Web Workers are not supported in this environment, falling back.');
     }
     resolve(calculateHealthScore(portfolios, activePortfolio));
   });

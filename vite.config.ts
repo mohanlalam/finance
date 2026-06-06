@@ -9,7 +9,38 @@ export default defineConfig(({ command }) => ({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
+        globPatterns: [
+          'index.html',
+          'manifest.webmanifest',
+          'assets/index-*.js',
+          'assets/index-*.css',
+        ],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.includes('/functions/v1/'),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-api-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 24 * 60 * 60 * 7, // 7 days
+              },
+              networkTimeoutSeconds: 5,
+            },
+          },
+          {
+            urlPattern: ({ url }) => url.host === 'api.mfapi.in',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'amfi-api-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 24 * 60 * 60, // 1 day
+              },
+              networkTimeoutSeconds: 5,
+            },
+          },
+        ],
       },
       manifest: {
         name: 'Family Wealth Tracker',

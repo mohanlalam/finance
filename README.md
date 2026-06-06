@@ -37,11 +37,11 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **Mobile Bottom Navigation** — Fixed bottom bar for quick tabs swapping on narrow mobile viewports, featuring an **Alert Count Badge** on the Home tab.
 
 ### ⚡ High Performance & Responsiveness
-- **Asynchronous Web Workers** — Offloads heavy computations (Newton-Raphson XIRR solvers, multi-factor Health Score scoring, and rebalancing recommendations) to background threads (`src/workers/`) with fail-safe synchronous fallbacks.
+- **Asynchronous Web Workers** — Offloads heavy computations (Newton-Raphson XIRR solvers, multi-factor Health Score scoring, and rebalancing recommendations) to background threads (`src/workers/`) with synchronous fallbacks and detailed diagnostics warnings in case of worker thread initialization failures.
 - **List Virtualization & Row Keys** — Uses `react-window` to virtualize large registry listings (>8 accounts) to keep scrolling fluid and render times minimal. Row key elements are explicitly bound to asset IDs (`itemKey`) to optimize DOM recycling and prevent rendering glitches.
-- **Intersection Lazy Loading** — Leverages an `IntersectionObserver` viewport wrapper to lazy-load charts and assistant modules, avoiding off-screen SVG coordinate calculations.
-- **Lock Screen Code-Splitting** — Dynamically code-splits the main dashboard layout (`AppShell`), reducing the initial entry bundle size by 63% (saving ~380 kB on initial download) to make the interactive PIN Lock screen load instantly on mobile networks.
-- **Advanced Caching & Focus Resume** — Employs `SWR` for remote state cache validation and coordinated fetch management (eliminating double price fetches), IndexedDB local caches (`idb-keyval`) for instant stale-while-revalidate loads (invalidated on write/mutations to prevent stale state), document `visibilitychange` listeners to refresh data on window focus/resume, persistent 12-hour `localStorage` cache for live Mutual Fund NAV fetches (to prevent slow client-side queries on app relaunch), and a ref-based resolver registry queue in `refreshSnapshot` to prevent hanging promises under debouncing/cancellation.
+- **Intersection Lazy Loading** — Leverages a custom type-safe `LazyChartWrapper` component with `IntersectionObserver` to lazy-load charts (`NetWorthTimelineChart`, `TreemapChart`, `SankeyChart`) only when they scroll into the viewport, completely deferring their bundle load and dynamic import evaluation.
+- **Lock Screen Code-Splitting** — Dynamically code-splits the context providers and routing (`MainApp`) as well as the main dashboard layout (`AppShell`), keeping the entry bundle size tiny (188 kB) so the zero-dependency PIN Lock screen loads instantly on mobile networks.
+- **Advanced Caching & Focus Resume** — Employs `SWR` for remote state cache validation, IndexedDB local caches (`idb-keyval`) for instant stale-while-revalidate loads (invalidated on write/mutations), a 5-minute time gate on document `visibilitychange` refresh listeners to stop redundant reloads, async IndexedDB caching for live Mutual Fund NAV fetches (with an in-memory map to prevent synchronous startup thread blocks), and a ref-based resolver registry queue in `refreshSnapshot` to prevent hanging promises.
 
 ### 📂 Multi-Asset Registry & Reminders
 - **Fixed Deposits (FD)** — Real-time compounded interest tracking (compounded half-yearly), maturity date tracking, timeline progress bars, and document attachments.
@@ -99,7 +99,8 @@ A premium, interactive web application designed to track and manage multi-asset 
 project antigravity/
 ├── index.html                    # HTML entry point
 ├── src/
-│   ├── App.tsx                   # Root component — layout, custom hooks coordination, desktop/mobile routing
+│   ├── App.tsx                   # Root component — lightweight, zero-dependency PIN screen gate
+│   ├── MainApp.tsx               # Lazy-loaded main app shell container (contexts, routes, load gates)
 │   ├── main.tsx                  # React DOM mount
 │   ├── index.css                 # Global styles / Tailwind imports
 │   ├── vite-env.d.ts             # Vite type declarations
