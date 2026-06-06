@@ -28,6 +28,7 @@ export enum Intent {
 
 export function detectIntent(query: string): Intent {
   const q = query.toLowerCase().trim();
+  const currentYear = new Date().getFullYear();
 
   // Query 2: Performers (High priority to avoid false positive intent match on other categories)
   if (
@@ -58,7 +59,7 @@ export function detectIntent(query: string): Intent {
   if (
     (q.includes('mutual fund') || q.includes('sip') || q.includes('funds') || q.includes('mf')) &&
     (q.includes('invested') || q.includes('contribution') || q.includes('deposit')) &&
-    (q.includes('this year') || q.includes('2026') || q.includes('current year'))
+    (q.includes('this year') || q.includes(String(currentYear)) || q.includes('current year'))
   ) {
     return Intent.MUTUAL_FUND_YEAR_INVESTMENTS;
   }
@@ -115,6 +116,9 @@ export function detectIntent(query: string): Intent {
 
   // Specific Stocks
   if (
+    !q.includes('mutual fund') &&
+    !q.includes('sip') &&
+    !q.includes('mf') &&
     (q.includes('stock') || q.includes('holding') || q.includes('equity') || q.includes('share')) &&
     (q.includes('show') || q.includes('my') || q.includes('list') || q.includes('value') || q.includes('valuation') || q.includes('direct') || q.includes('have') || q.includes('invest') || q.trim() === 'stocks')
   ) {
@@ -173,7 +177,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
             matchedAssets.push({
               name: sip.fund_name,
               type: 'Mutual Fund SIP',
-              details: `Monthly SIP: ${formatINR(sip.monthly_sip)} (Invested ${monthsThisYear} months in 2026: ${formatINR(investedVal)})`,
+              details: `Monthly SIP: ${formatINR(sip.monthly_sip)} (Invested ${monthsThisYear} months in ${currentYear}: ${formatINR(investedVal)})`,
             });
           }
         }
@@ -181,7 +185,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     }
 
     return {
-      answer: `You have invested a total of **${formatINR(totalInvested)}** in Mutual Fund SIPs during the current calendar year (2026).`,
+      answer: `You have invested a total of **${formatINR(totalInvested)}** in Mutual Fund SIPs during the current calendar year (${currentYear}).`,
       matchedAssets,
     };
   }

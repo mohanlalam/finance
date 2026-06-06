@@ -227,23 +227,39 @@ export function useDismissibleAlerts(portfolios: Portfolio[]) {
     }
   });
 
+  const alertsRef = useRef(alerts);
+  useEffect(() => {
+    alertsRef.current = alerts;
+  }, [alerts]);
+
+  const lastCleanupRef = useRef<number>(
+    (() => {
+      try {
+        const saved = localStorage.getItem('portfolio_dismissed_alerts_cleanup');
+        return saved ? parseInt(saved, 10) : 0;
+      } catch {
+        return 0;
+      }
+    })()
+  );
+
   // Perform monthly cleanup of alerts that are no longer active
   useEffect(() => {
     try {
       const now = Date.now();
       const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-      const lastCleanupStr = localStorage.getItem('portfolio_dismissed_alerts_cleanup');
-      const lastCleanup = lastCleanupStr ? parseInt(lastCleanupStr, 10) : 0;
+      const lastCleanup = lastCleanupRef.current;
 
       if (!lastCleanup) {
         // First time initialization of cleanup timer
+        lastCleanupRef.current = now;
         localStorage.setItem('portfolio_dismissed_alerts_cleanup', String(now));
         return;
       }
 
       // If last cleanup was more than 30 days ago
       if (now - lastCleanup > thirtyDaysMs) {
-        const activeIds = new Set(alerts.map((a) => a.id));
+        const activeIds = new Set(alertsRef.current.map((a) => a.id));
         setDismissedAlertsMap((prev) => {
           const cleanMap: Record<string, number> = {};
           let changed = false;
@@ -261,10 +277,11 @@ export function useDismissibleAlerts(portfolios: Portfolio[]) {
           }
           return prev;
         });
+        lastCleanupRef.current = now;
         localStorage.setItem('portfolio_dismissed_alerts_cleanup', String(now));
       }
     } catch { /* ignore */ }
-  }, [alerts]);
+  }, []);
 
   const handleDismissAlert = useCallback((id: string) => {
     setDismissedAlertsMap((prev) => {
