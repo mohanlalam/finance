@@ -30,7 +30,38 @@ export default class SectionErrorBoundary extends Component<SectionErrorBoundary
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error(`[${this.props.sectionName ?? 'section'}] render error:`, error, info);
+    
+    const isChunkError = 
+      error.message.includes('dynamically imported module') ||
+      error.message.includes('chunk load') ||
+      error.message.includes('Loading chunk') ||
+      error.message.includes('loading chunk');
+      
+    if (isChunkError) {
+      const chunkErrorKey = 'finance_chunk_error_reload';
+      const lastReload = sessionStorage.getItem(chunkErrorKey);
+      const now = Date.now();
+      
+      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+        sessionStorage.setItem(chunkErrorKey, now.toString());
+        window.location.reload();
+      }
+    }
   }
+
+  handleRetry = () => {
+    const isChunkError = 
+      this.state.message.includes('dynamically imported module') ||
+      this.state.message.includes('chunk load') ||
+      this.state.message.includes('Loading chunk') ||
+      this.state.message.includes('loading chunk');
+      
+    if (isChunkError) {
+      window.location.reload();
+    } else {
+      this.setState({ hasError: false, message: '' });
+    }
+  };
 
   render() {
     if (this.state.hasError) {
@@ -45,7 +76,7 @@ export default class SectionErrorBoundary extends Component<SectionErrorBoundary
           </p>
           <p className="text-xs text-red-500 dark:text-red-400/70 mb-4">{this.state.message}</p>
           <button
-            onClick={() => this.setState({ hasError: false, message: '' })}
+            onClick={this.handleRetry}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 dark:text-red-400 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-700 rounded-lg px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
           >
             <RefreshCw size={12} />

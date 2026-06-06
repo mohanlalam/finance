@@ -25,6 +25,23 @@ export default class AppErrorBoundary extends Component<AppErrorBoundaryProps, A
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('[app] render failed:', error, info);
+    
+    const isChunkError = 
+      error.message.includes('dynamically imported module') ||
+      error.message.includes('chunk load') ||
+      error.message.includes('Loading chunk') ||
+      error.message.includes('loading chunk');
+      
+    if (isChunkError) {
+      const chunkErrorKey = 'finance_chunk_error_reload';
+      const lastReload = sessionStorage.getItem(chunkErrorKey);
+      const now = Date.now();
+      
+      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+        sessionStorage.setItem(chunkErrorKey, now.toString());
+        window.location.reload();
+      }
+    }
   }
 
   render() {
