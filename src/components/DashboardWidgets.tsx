@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Portfolio } from '../types/portfolio';
 import { formatINR, formatPercent, getFDEffectiveValue } from '../utils/formatters';
 import { Landmark, TrendingUp, ShieldAlert, Award } from 'lucide-react';
+import { calculateWeightedAge, calculateCAGR } from '../utils/performance';
 
 interface DashboardWidgetsProps {
   portfolios: Portfolio[];
@@ -19,7 +20,23 @@ export default function DashboardWidgets({ portfolios, activePortfolio }: Dashbo
     : portfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
 
   const totalPnL = totalCurrentValue - totalInvested;
-  const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
+
+  const totalPnLPercent = useMemo(() => {
+    if (activePortfolio) {
+      const age = calculateWeightedAge(activePortfolio);
+      return calculateCAGR(totalInvested, totalCurrentValue, age) * 100;
+    } else {
+      let weightedTimeSum = 0;
+      let totalInvestedForAge = 0;
+      for (const p of portfolios) {
+        const age = calculateWeightedAge(p);
+        weightedTimeSum += p.totalInvested * age;
+        totalInvestedForAge += p.totalInvested;
+      }
+      const combinedAge = totalInvestedForAge > 0 ? weightedTimeSum / totalInvestedForAge : 1.0;
+      return calculateCAGR(totalInvested, totalCurrentValue, combinedAge) * 100;
+    }
+  }, [portfolios, activePortfolio, totalInvested, totalCurrentValue]);
 
   // Calculate today's gain
   const holdings = activePortfolio ? activePortfolio.holdings : portfolios.flatMap((p) => p.holdings);
@@ -74,7 +91,7 @@ export default function DashboardWidgets({ portfolios, activePortfolio }: Dashbo
           <div>
             <p className="text-[10px] text-slate-400">Total Invested: {formatINR(totalInvested)}</p>
             <p className={`text-[11px] font-bold mt-1 ${totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              {totalPnL >= 0 ? '+' : ''}{formatPercent(totalPnLPercent, 2)} Returns
+              {formatPercent(totalPnLPercent, 2)} return (annualized)
             </p>
           </div>
         </div>

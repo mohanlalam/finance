@@ -82,7 +82,7 @@ function SummaryCards({
           {isGain ? '+' : ''}{formatINR(totalPnL)}
         </p>
         <p className={`text-[10px] sm:text-xs font-bold ${pnlColor(totalPnL)}`}>
-          {isGain ? '+' : ''}{formatPercent(totalPnLPercent)} return
+          {formatPercent(totalPnLPercent)} return (annualized)
         </p>
       </div>
 
