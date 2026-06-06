@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateCAGR, calculateXIRR, calculateWeightedAge, getBenchmarkReturns, CashFlow } from '../performance';
+import { calculateCAGR, calculateXIRR, calculateWeightedAge, getBenchmarkReturns, CashFlow, getPortfolioAnnualizedReturn } from '../performance';
 import { Portfolio } from '../../types/portfolio';
 
 describe('calculateCAGR', () => {
@@ -149,6 +149,47 @@ describe('calculateWeightedAge', () => {
     // The weighted age should be exactly 2.0.
     const weightedAge = calculateWeightedAge(portfolio);
     expect(weightedAge).toBeCloseTo(2.0, 1);
+  });
+});
+
+describe('getPortfolioAnnualizedReturn (XIRR)', () => {
+  it('correctly calculates XIRR for a portfolio with standard SIP cashflows', () => {
+    const now = new Date();
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()).toISOString().split('T')[0];
+
+    const portfolio: Portfolio = {
+      id: 'p-xirr-test',
+      name: 'personal',
+      label: 'Personal',
+      holdings: [],
+      fixedDeposits: [],
+      goldHoldings: [],
+      realEstate: [],
+      insurances: [],
+      documents: [],
+      sipAccounts: [
+        {
+          id: 'sip-xirr',
+          portfolio_id: 'p-xirr-test',
+          fund_name: 'Nifty 50 Index Fund',
+          monthly_sip: 10000,
+          expected_cagr: 12,
+          units: 100,
+          start_date: oneYearAgo,
+          fallback_valuation: 140000, // total invested is 130000 (13 months), valued at 140000
+        }
+      ],
+      totalInvested: 130000,
+      totalCurrentValue: 140000,
+      totalPnL: 5000,
+      totalPnLPercent: 4.17,
+    };
+
+    const rate = getPortfolioAnnualizedReturn(portfolio);
+    // 12 monthly deposits of 10000, final value 125000 in 1 year.
+    // XIRR should solve to positive double-digit return rate (around 7-8% depending on exact days).
+    expect(rate).toBeGreaterThan(0.05);
+    expect(rate).toBeLessThan(0.20);
   });
 });
 

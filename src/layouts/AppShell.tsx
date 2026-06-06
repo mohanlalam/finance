@@ -38,7 +38,7 @@ import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { getBreakdownSlices } from '../utils/chartHelpers';
 import { classBreakdown, estimateTodayPnL } from '../utils/portfolioCalcs';
-import { calculateWeightedAge, calculateCAGR } from '../utils/performance';
+import { getPortfolioAnnualizedReturn, getMultiplePortfoliosAnnualizedReturn } from '../utils/performance';
 
 // Lazy viewport container that loads child components only when they are visible
 function LazyViewport({ children, placeholderHeight = 240 }: { children: React.ReactNode; placeholderHeight?: number }) {
@@ -150,30 +150,20 @@ export default function AppShell() {
     const totalCurrentValue = portfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
     const totalPnL = totalCurrentValue - totalInvested;
     
-    // Calculate combined weighted age
-    let weightedTimeSum = 0;
-    let totalInvestedForAge = 0;
-    for (const p of portfolios) {
-      const age = calculateWeightedAge(p);
-      weightedTimeSum += p.totalInvested * age;
-      totalInvestedForAge += p.totalInvested;
-    }
-    const combinedAge = totalInvestedForAge > 0 ? weightedTimeSum / totalInvestedForAge : 1.0;
-    const cagr = calculateCAGR(totalInvested, totalCurrentValue, combinedAge);
-    const totalPnLPercent = cagr * 100;
+    const rate = getMultiplePortfoliosAnnualizedReturn(portfolios);
+    const totalPnLPercent = rate * 100;
     
     return { totalInvested, totalCurrentValue, totalPnL, totalPnLPercent };
   }, [portfolios]);
 
   const summaryData = useMemo(() => {
     if (portfolio) {
-      const age = calculateWeightedAge(portfolio);
-      const cagr = calculateCAGR(portfolio.totalInvested, portfolio.totalCurrentValue, age);
+      const rate = getPortfolioAnnualizedReturn(portfolio);
       return {
         totalInvested: portfolio.totalInvested,
         totalCurrentValue: portfolio.totalCurrentValue,
         totalPnL: portfolio.totalPnL,
-        totalPnLPercent: cagr * 100,
+        totalPnLPercent: rate * 100,
         label: portfolio.label
       };
     } else {

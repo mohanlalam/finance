@@ -240,3 +240,191 @@ export function runXIRRAsync(cashflows: CashFlow[]): Promise<number> {
     resolve(calculateXIRR(cashflows));
   });
 }
+
+/**
+ * Generates the cash outflows (as negative amounts) for a portfolio
+ */
+export function getPortfolioCashFlows(portfolio: Portfolio): CashFlow[] {
+  const cashflows: CashFlow[] = [];
+  const nowStr = new Date().toISOString().split('T')[0];
+
+  const addFlow = (dateStr: string | undefined, amount: number) => {
+    if (amount <= 0) return;
+    const date = dateStr || nowStr;
+    cashflows.push({ date, amount: -amount });
+  };
+
+  // 1. Process FDs
+  for (const fd of portfolio.fixedDeposits) {
+    addFlow(fd.start_date, fd.principal_amount);
+  }
+
+  // 2. Process RDs
+  if (portfolio.rdAccounts) {
+    for (const rd of portfolio.rdAccounts) {
+      if (rd.contributions && rd.contributions.length > 0) {
+        for (const c of rd.contributions) {
+          addFlow(c.date, Number(c.amount));
+        }
+      } else {
+        const start = new Date(rd.start_date);
+        if (isNaN(start.getTime())) {
+          addFlow(rd.start_date, getRDInvestedAmount(rd));
+          continue;
+        }
+        const end = new Date();
+        const rawMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+        const dayOfMonth = start.getDate();
+        const currentDayOfMonth = end.getDate();
+        const elapsed = rawMonths + (currentDayOfMonth >= dayOfMonth ? 1 : 0);
+        const monthlyAmount = Number(rd.monthly_deposit);
+        for (let m = 0; m < elapsed; m++) {
+          const flowDate = new Date(start.getFullYear(), start.getMonth() + m, start.getDate());
+          if (flowDate.getTime() <= end.getTime()) {
+            addFlow(flowDate.toISOString().split('T')[0], monthlyAmount);
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Process SSYs
+  if (portfolio.ssyAccounts) {
+    for (const ssy of portfolio.ssyAccounts) {
+      if (ssy.contributions && ssy.contributions.length > 0) {
+        for (const c of ssy.contributions) {
+          addFlow(c.date, Number(c.amount));
+        }
+      } else {
+        const start = new Date(ssy.start_date);
+        if (isNaN(start.getTime())) {
+          addFlow(ssy.start_date, getSSYInvestedAmount(ssy));
+          continue;
+        }
+        const end = new Date();
+        const yearsElapsed = end.getFullYear() - start.getFullYear() + 1;
+        const annualAmount = Number(ssy.annual_deposit);
+        for (let y = 0; y < yearsElapsed; y++) {
+          const flowDate = new Date(start.getFullYear() + y, start.getMonth(), start.getDate());
+          if (flowDate.getTime() <= end.getTime()) {
+            addFlow(flowDate.toISOString().split('T')[0], annualAmount);
+          }
+        }
+      }
+    }
+  }
+
+  // 4. Process SIPs
+  if (portfolio.sipAccounts) {
+    for (const sip of portfolio.sipAccounts) {
+      const start = new Date(sip.start_date);
+      if (isNaN(start.getTime())) {
+        addFlow(sip.start_date, getSIPInvestedAmount(sip));
+        continue;
+      }
+      const end = new Date();
+      const rawMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+      const dayOfMonth = start.getDate();
+      const currentDayOfMonth = end.getDate();
+      const elapsed = rawMonths + (currentDayOfMonth >= dayOfMonth ? 1 : 0);
+      const monthlyAmount = Number(sip.monthly_sip);
+
+      for (let m = 0; m < elapsed; m++) {
+        const flowDate = new Date(start.getFullYear(), start.getMonth() + m, start.getDate());
+        if (flowDate.getTime() <= end.getTime()) {
+          addFlow(flowDate.toISOString().split('T')[0], monthlyAmount);
+        }
+      }
+    }
+  }
+
+  // 5. Process Stocks
+  for (const stock of portfolio.holdings) {
+    const date = (stock as { created_at?: string }).created_at ||
+                 (stock as { createdAt?: string }).createdAt ||
+                 (portfolio as { created_at?: string }).created_at ||
+                 (portfolio as { createdAt?: string }).createdAt ||
+                 nowStr;
+    addFlow(date, stock.amountInvested);
+  }
+
+  // 6. Process Gold
+  for (const gold of portfolio.goldHoldings) {
+    addFlow(gold.purchase_date, gold.purchase_price);
+  }
+
+  // 7. Process Real Estate
+  for (const re of portfolio.realEstate) {
+    addFlow(re.purchase_date, re.purchase_price);
+  }
+
+  return cashflows;
+}
+
+/**
+ * Calculates portfolio XIRR
+ */
+export function calculatePortfolioXIRR(portfolio: Portfolio): number {
+  const cashflows = getPortfolioCashFlows(portfolio);
+  if (cashflows.length === 0) return 0;
+
+  const nowStr = new Date().toISOString().split('T')[0];
+  cashflows.push({ date: nowStr, amount: portfolio.totalCurrentValue });
+
+  return calculateXIRR(cashflows);
+}
+
+/**
+ * Calculates XIRR across multiple portfolios combined
+ */
+export function calculateMultiplePortfoliosXIRR(portfolios: Portfolio[]): number {
+  const cashflows: CashFlow[] = [];
+  let totalCurrentValue = 0;
+
+  for (const p of portfolios) {
+    cashflows.push(...getPortfolioCashFlows(p));
+    totalCurrentValue += p.totalCurrentValue;
+  }
+
+  if (cashflows.length === 0) return 0;
+
+  const nowStr = new Date().toISOString().split('T')[0];
+  cashflows.push({ date: nowStr, amount: totalCurrentValue });
+
+  return calculateXIRR(cashflows);
+}
+
+/**
+ * Returns the portfolio annualized return using XIRR, falling back to CAGR if XIRR cannot be solved
+ */
+export function getPortfolioAnnualizedReturn(portfolio: Portfolio): number {
+  const xirr = calculatePortfolioXIRR(portfolio);
+  if (xirr !== 0) return xirr;
+
+  const age = calculateWeightedAge(portfolio);
+  return calculateCAGR(portfolio.totalInvested, portfolio.totalCurrentValue, age);
+}
+
+/**
+ * Returns the annualized return across multiple portfolios using XIRR, falling back to CAGR if XIRR cannot be solved
+ */
+export function getMultiplePortfoliosAnnualizedReturn(portfolios: Portfolio[]): number {
+  const xirr = calculateMultiplePortfoliosXIRR(portfolios);
+  if (xirr !== 0) return xirr;
+
+  let weightedTimeSum = 0;
+  let totalInvestedForAge = 0;
+  let totalInvested = 0;
+  let totalCurrentValue = 0;
+
+  for (const p of portfolios) {
+    const age = calculateWeightedAge(p);
+    weightedTimeSum += p.totalInvested * age;
+    totalInvestedForAge += p.totalInvested;
+    totalInvested += p.totalInvested;
+    totalCurrentValue += p.totalCurrentValue;
+  }
+
+  const combinedAge = totalInvestedForAge > 0 ? weightedTimeSum / totalInvestedForAge : 1.0;
+  return calculateCAGR(totalInvested, totalCurrentValue, combinedAge);
+}

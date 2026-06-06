@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Portfolio } from '../types/portfolio';
 import { formatINR, formatPercent, getFDEffectiveValue } from '../utils/formatters';
 import { Landmark, TrendingUp, ShieldAlert, Award } from 'lucide-react';
-import { calculateWeightedAge, calculateCAGR } from '../utils/performance';
+import { getPortfolioAnnualizedReturn, getMultiplePortfoliosAnnualizedReturn } from '../utils/performance';
 
 interface DashboardWidgetsProps {
   portfolios: Portfolio[];
@@ -23,20 +23,11 @@ export default function DashboardWidgets({ portfolios, activePortfolio }: Dashbo
 
   const totalPnLPercent = useMemo(() => {
     if (activePortfolio) {
-      const age = calculateWeightedAge(activePortfolio);
-      return calculateCAGR(totalInvested, totalCurrentValue, age) * 100;
+      return getPortfolioAnnualizedReturn(activePortfolio) * 100;
     } else {
-      let weightedTimeSum = 0;
-      let totalInvestedForAge = 0;
-      for (const p of portfolios) {
-        const age = calculateWeightedAge(p);
-        weightedTimeSum += p.totalInvested * age;
-        totalInvestedForAge += p.totalInvested;
-      }
-      const combinedAge = totalInvestedForAge > 0 ? weightedTimeSum / totalInvestedForAge : 1.0;
-      return calculateCAGR(totalInvested, totalCurrentValue, combinedAge) * 100;
+      return getMultiplePortfoliosAnnualizedReturn(portfolios) * 100;
     }
-  }, [portfolios, activePortfolio, totalInvested, totalCurrentValue]);
+  }, [portfolios, activePortfolio]);
 
   // Calculate today's gain
   const holdings = activePortfolio ? activePortfolio.holdings : portfolios.flatMap((p) => p.holdings);
