@@ -22,6 +22,7 @@ interface DBHolding {
   amount_invested: number;
   cached_ltp?: number | null;
   cached_today_pct?: number | null;
+  created_at?: string;
 }
 
 interface DBPortfolio {
@@ -85,6 +86,7 @@ function dbToHolding(h: DBHolding): Holding {
     pnlPercent,
     todayPnLPercent,
     currentValue,
+    created_at: h.created_at,
   };
 }
 
@@ -195,7 +197,7 @@ function applyLiveMFNavs(portfolios: Portfolio[], navMap: Record<string, number>
         const units = Number(s.units || 0);
         const currentValue = units * nav;
         const navIsStale = staleSchemes.has(s.mf_scheme_code);
-        return { ...s, fallback_valuation: currentValue, navIsStale };
+        return { ...s, fallback_valuation: currentValue, navIsStale, liveNav: nav };
       } else if (s.mf_scheme_code) {
         return { ...s, navIsStale: true };
       }
@@ -476,14 +478,15 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       const dbDocuments: DocumentMetadata[] = dbData.documents || [];
       const dbNetWorthHistory: NetWorthSnapshot[] = dbData.net_worth_history || [];
 
-      const order: Record<string, number> = { personal: 0, mother: 1, wife: 2 };
       const sortedPortfolios = [...dbPortfolios].sort((a, b) => {
-        const oa = order[a.name] !== undefined ? order[a.name] : 99;
-        const ob = order[b.name] !== undefined ? order[b.name] : 99;
-        if (oa !== ob) return oa - ob;
+        if (a.name === 'personal') return -1;
+        if (b.name === 'personal') return 1;
+
         const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
         const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-        return dateA - dateB;
+        if (dateA !== dateB) return dateA - dateB;
+
+        return a.label.localeCompare(b.label);
       });
 
       const built = sortedPortfolios.map((dbP) => {
@@ -609,14 +612,26 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
   // 5. Debounced refreshSnapshot (Phase 2.3)
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshResolversRef = useRef<(() => void)[]>([]);
 
-  const refreshSnapshot = useCallback(async () => {
-    if (refreshTimeoutRef.current) {
-      clearTimeout(refreshTimeoutRef.current);
-    }
-    refreshTimeoutRef.current = setTimeout(() => {
-      void load();
-    }, 500);
+  const refreshSnapshot = useCallback(() => {
+    return new Promise<void>((resolve) => {
+      refreshResolversRef.current.push(resolve);
+
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+
+      refreshTimeoutRef.current = setTimeout(async () => {
+        try {
+          await load();
+        } finally {
+          const resolvers = refreshResolversRef.current;
+          refreshResolversRef.current = [];
+          resolvers.forEach((res) => res());
+        }
+      }, 500);
+    });
   }, [load]);
 
   const addPortfolio = useCallback(async (name: string, label: string) => {

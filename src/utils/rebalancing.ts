@@ -54,8 +54,8 @@ export function calculateRebalancing(
     
     const MIN_ACTION = 5000;
     
-    // Threshold drift check (e.g. only suggest rebalancing if diff represents > 1% of portfolio value or absolute difference > MIN_ACTION)
-    if (Math.abs(diffAmount) > MIN_ACTION && Math.abs(actualPct - asset.targetPct) >= 0.5) {
+    // Suggest rebalancing purely based on absolute difference exceeding the MIN_ACTION threshold
+    if (Math.abs(diffAmount) >= MIN_ACTION) {
       if (diffAmount > 0) {
         recommendation = `Sell ${formatINRCompact(diffAmount)}`;
       } else {

@@ -16,6 +16,7 @@ export interface Holding {
   pnlPercent: number;
   todayPnLPercent: number;
   currentValue: number;
+  created_at?: string;
 }
 
 export interface FixedDeposit {
@@ -84,6 +85,7 @@ export interface SIPAccount {
   next_sip_date?: string | null;
   fallback_valuation: number;
   mf_scheme_code?: string;
+  liveNav?: number;
   navIsStale?: boolean;
   notes?: string;
   created_at?: string;

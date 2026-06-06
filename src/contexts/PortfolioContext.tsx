@@ -45,8 +45,6 @@ export interface PortfolioActionContextValue {
   deleteSSYAccount: (id: string) => Promise<void>;
 }
 
-export interface PortfolioContextValue extends PortfolioDataContextValue, PortfolioActionContextValue {}
-
 const PortfolioDataContext = createContext<PortfolioDataContextValue | null>(null);
 const PortfolioActionContext = createContext<PortfolioActionContextValue | null>(null);
 
@@ -60,15 +58,6 @@ export function usePortfolioActions(): PortfolioActionContextValue {
   const ctx = useContext(PortfolioActionContext);
   if (!ctx) throw new Error('usePortfolioActions must be used within PortfolioProvider');
   return ctx;
-}
-
-export function usePortfolio(): PortfolioContextValue {
-  const data = useContext(PortfolioDataContext);
-  const actions = useContext(PortfolioActionContext);
-  if (!data || !actions) {
-    throw new Error('usePortfolio must be used within PortfolioProvider');
-  }
-  return useMemo(() => ({ ...data, ...actions }), [data, actions]);
 }
 
 interface PortfolioProviderProps {

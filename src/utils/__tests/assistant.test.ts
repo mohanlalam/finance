@@ -182,4 +182,9 @@ describe('askAssistant query parser', () => {
     expect(resReturn.answer).toContain("I couldn't match your exact query");
     expect(resReturn.matchedAssets.length).toBe(0);
   });
+
+  it('correctly routes ambiguous queries like show me my best SIP returns this year to Intent.PERFORMERS', () => {
+    const res = askAssistant('show me my best SIP returns this year', mockPortfolios);
+    expect(res.answer).toContain('Sector 45 Apartment'); // matches the top overall performer in mockPortfolios
+  });
 });

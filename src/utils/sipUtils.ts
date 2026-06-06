@@ -37,8 +37,9 @@ try {
 export function getSIPEffectiveValue(account: SIPAccount, liveNav?: number): number {
   const units = Number(account.units || (account as { units_held?: number }).units_held || 0);
   
-  if (liveNav && liveNav > 0) {
-    return liveNav * units;
+  const nav = liveNav !== undefined ? liveNav : account.liveNav;
+  if (nav && nav > 0) {
+    return nav * units;
   }
   
   if (account.mf_scheme_code) {

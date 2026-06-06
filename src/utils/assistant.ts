@@ -29,6 +29,31 @@ export enum Intent {
 export function detectIntent(query: string): Intent {
   const q = query.toLowerCase().trim();
 
+  // Query 2: Performers (High priority to avoid false positive intent match on other categories)
+  if (
+    q.includes('highest return') || q.includes('highest returns') ||
+    q.includes('best return') || q.includes('best returns') ||
+    q.includes('top return') || q.includes('top returns') ||
+    q.includes('maximum return') || q.includes('maximum returns') ||
+    q.includes('best performing') ||
+    q.includes('highest gain') || q.includes('highest gains') ||
+    q.includes('top performer') || q.includes('top performers') ||
+    q.includes('best asset') || q.includes('best assets') ||
+    q.includes('best investment') || q.includes('best investments') ||
+    (/best\s+(?:\w+\s+){0,3}returns?\b/.test(q)) ||
+    (/highest\s+(?:\w+\s+){0,3}returns?\b/.test(q)) ||
+    (/top\s+(?:\w+\s+){0,3}returns?\b/.test(q)) ||
+    (/maximum\s+(?:\w+\s+){0,3}returns?\b/.test(q)) ||
+    (/best\s+(?:\w+\s+){0,3}performing/.test(q)) ||
+    (/best\s+(?:\w+\s+){0,3}gains?\b/.test(q)) ||
+    (/highest\s+(?:\w+\s+){0,3}gains?\b/.test(q)) ||
+    (/top\s+(?:\w+\s+){0,3}performers?\b/.test(q)) ||
+    (/best\s+(?:\w+\s+){0,3}assets?\b/.test(q)) ||
+    (/best\s+(?:\w+\s+){0,3}investments?\b/.test(q))
+  ) {
+    return Intent.PERFORMERS;
+  }
+
   // Query 1: Mutual Fund current year investments
   if (
     (q.includes('mutual fund') || q.includes('sip') || q.includes('funds') || q.includes('mf')) &&
@@ -36,21 +61,6 @@ export function detectIntent(query: string): Intent {
     (q.includes('this year') || q.includes('2026') || q.includes('current year'))
   ) {
     return Intent.MUTUAL_FUND_YEAR_INVESTMENTS;
-  }
-
-  // Query 2: Performers
-  if (
-    q.includes('highest return') ||
-    q.includes('best return') ||
-    q.includes('top return') ||
-    q.includes('maximum return') ||
-    q.includes('best performing') ||
-    q.includes('highest gain') ||
-    q.includes('top performer') ||
-    q.includes('best asset') ||
-    q.includes('best investment')
-  ) {
-    return Intent.PERFORMERS;
   }
 
   // Query 3: Maturity
