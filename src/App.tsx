@@ -13,6 +13,13 @@ export default function App() {
   const [pinVerified, setPinVerified] = useState(() => !isPinConfigured() || isSessionVerified());
 
   useEffect(() => {
+    // Preload AppShell in the background after the lock screen renders
+    const preloadTimer = setTimeout(() => {
+      import('./layouts/AppShell').catch((err) => {
+        console.warn('[App] Failed to preload AppShell:', err);
+      });
+    }, 800);
+
     const globalWin = window as unknown as { __lastInputSource?: string; __lastShortcutTime?: number };
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
@@ -26,6 +33,7 @@ export default function App() {
     window.addEventListener('keydown', handleKeyDown, { capture: true });
     window.addEventListener('touchstart', handleTouchStart, { capture: true });
     return () => {
+      clearTimeout(preloadTimer);
       window.removeEventListener('keydown', handleKeyDown, { capture: true });
       window.removeEventListener('touchstart', handleTouchStart, { capture: true });
     };
