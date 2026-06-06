@@ -1,4 +1,7 @@
 import { Portfolio } from '../types/portfolio';
+import { getRDInvestedAmount } from './rdUtils';
+import { getSIPInvestedAmount } from './sipUtils';
+import { getSSYInvestedAmount } from './ssyUtils';
 
 export interface CashFlow {
   date: string; // ISO format: YYYY-MM-DD
@@ -133,8 +136,9 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
   if (portfolio.rdAccounts) {
     for (const rd of portfolio.rdAccounts) {
       const age = processDate(rd.start_date);
-      weightedTimeSum += rd.monthly_deposit * age; // proxy approximation
-      totalInvested += rd.monthly_deposit;
+      const invested = getRDInvestedAmount(rd);
+      weightedTimeSum += invested * age;
+      totalInvested += invested;
     }
   }
 
@@ -142,8 +146,9 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
   if (portfolio.ssyAccounts) {
     for (const ssy of portfolio.ssyAccounts) {
       const age = processDate(ssy.start_date);
-      weightedTimeSum += ssy.annual_deposit * age;
-      totalInvested += ssy.annual_deposit;
+      const invested = getSSYInvestedAmount(ssy);
+      weightedTimeSum += invested * age;
+      totalInvested += invested;
     }
   }
 
@@ -151,8 +156,9 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
   if (portfolio.sipAccounts) {
     for (const sip of portfolio.sipAccounts) {
       const age = processDate(sip.start_date);
-      weightedTimeSum += sip.monthly_sip * age;
-      totalInvested += sip.monthly_sip;
+      const invested = getSIPInvestedAmount(sip);
+      weightedTimeSum += invested * age;
+      totalInvested += invested;
     }
   }
 

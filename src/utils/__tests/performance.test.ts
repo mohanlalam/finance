@@ -111,6 +111,45 @@ describe('calculateWeightedAge', () => {
     const weightedAge = calculateWeightedAge(portfolio);
     expect(weightedAge).toBeCloseTo(1.5, 1);
   });
+
+  it('weights RDs, SSYs, and SIPs by their actual invested amounts', () => {
+    const now = new Date();
+    const twoYearsAgo = new Date(now.getFullYear() - 2, now.getMonth(), now.getDate()).toISOString().split('T')[0];
+
+    const portfolio: Portfolio = {
+      id: 'p-age-2',
+      name: 'personal',
+      label: 'Personal',
+      holdings: [],
+      fixedDeposits: [],
+      goldHoldings: [],
+      realEstate: [],
+      insurances: [],
+      documents: [],
+      sipAccounts: [
+        {
+          id: 'sip-1',
+          portfolio_id: 'p-age-2',
+          fund_name: 'Nippon Large Cap',
+          monthly_sip: 5000,
+          expected_cagr: 12,
+          units: 100,
+          start_date: twoYearsAgo,
+          fallback_valuation: 130000,
+        }
+      ],
+      totalInvested: 120000,
+      totalCurrentValue: 130000,
+      totalPnL: 10000,
+      totalPnLPercent: 8.33,
+    };
+
+    // The SIP is 2 years old.
+    // getSIPInvestedAmount(sip) will return 5000 * 24 = 120000.
+    // The weighted age should be exactly 2.0.
+    const weightedAge = calculateWeightedAge(portfolio);
+    expect(weightedAge).toBeCloseTo(2.0, 1);
+  });
 });
 
 describe('getBenchmarkReturns', () => {
