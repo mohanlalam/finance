@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { isPinConfigured, isSessionVerified } from './utils/auth';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -6,7 +6,8 @@ import { PortfolioProvider, usePortfolioState, usePortfolioActions } from './con
 import PinLockScreen from './components/PinLockScreen';
 import DashboardLoading from './components/DashboardLoading';
 import DashboardError from './components/DashboardError';
-import AppShell from './layouts/AppShell';
+
+const AppShell = lazy(() => import('./layouts/AppShell'));
 
 export default function App() {
   const [pinVerified, setPinVerified] = useState(() => !isPinConfigured() || isSessionVerified());
@@ -80,5 +81,9 @@ function LoadGate({ onUnlock }: { onUnlock: () => void }) {
     );
   }
 
-  return <AppShell />;
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <AppShell />
+    </Suspense>
+  );
 }

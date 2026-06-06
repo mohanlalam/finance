@@ -19,9 +19,9 @@ export function getSIPInvestedAmount(account: SIPAccount): number {
 
 const navCache = new Map<string, { value: number; name: string; fetchedAt: number }>();
 
-// Load from sessionStorage on initialization
+// Load from localStorage on initialization
 try {
-  const saved = sessionStorage.getItem('nav_cache');
+  const saved = localStorage.getItem('nav_cache');
   if (saved) {
     const entries: [string, { value: number; name: string; fetchedAt: number }][] = JSON.parse(saved);
     for (const [k, v] of entries) {
@@ -52,7 +52,7 @@ export function getSIPEffectiveValue(account: SIPAccount, liveNav?: number): num
   return Number(account.fallback_valuation);
 }
 
-const NAV_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const NAV_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
 
 export interface NAVResult {
   value: number;
@@ -77,7 +77,7 @@ export async function fetchNAV(schemeCode: string): Promise<NAVResult> {
     const entry = { value: details.latestNav, name: details.schemeName, fetchedAt: Date.now() };
     navCache.set(schemeCode, entry);
     try {
-      sessionStorage.setItem('nav_cache', JSON.stringify([...navCache.entries()]));
+      localStorage.setItem('nav_cache', JSON.stringify([...navCache.entries()]));
     } catch { /* ignore */ }
     return { value: details.latestNav, schemeName: details.schemeName, isStale: false };
   } catch (err) {

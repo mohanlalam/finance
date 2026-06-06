@@ -591,10 +591,12 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   }, []);
 
   const load = useCallback(async () => {
-    setLoadStatus('loading');
+    if (portfolios.length === 0) {
+      setLoadStatus('loading');
+    }
     setLoadError('');
     await mutateAssets();
-  }, [mutateAssets]);
+  }, [mutateAssets, portfolios.length]);
 
   // document visibilitychange listener to refresh SWR hook data on focus/resume
   useEffect(() => {
