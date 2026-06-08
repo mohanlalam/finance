@@ -86,6 +86,9 @@ The application implements a series of high-performance strategies to guarantee 
 * **IndexedDB Cache Storage**: Local caching of full portfolio datasets is strictly offloaded to IndexedDB (`idb-keyval`) to avoid browser `localStorage` size limits (keeping `localStorage` only for lightweight metadata like execution timestamps). It includes active `isMounted` guard patterns to prevent memory leak state updates.
 * **Reload Gating on Resume**: Implements a 5-minute (300,000 ms) elapsed time gate inside the `visibilitychange` listener of `usePortfolioData.ts` to prevent redundant, concurrent network sync operations on mobile app focus resumes.
 
+### 4. Bundler & Explicit Chunk Splitting
+* **Rollup manualChunks Splitting**: Configures a dynamic module path filter for Rolldown `manualChunks` in [vite.config.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/vite.config.ts) to explicitly split heavy modules (`@supabase/supabase-js`, `swr`, `idb-keyval`, and `react-window`) into separate vendor chunks. This prevents third-party packages from being bundled into the entry chunk, keeping the initial paint payload for the lock screen exceptionally light.
+
 ---
 
 ## 💾 Database Schema & Table Mappings
