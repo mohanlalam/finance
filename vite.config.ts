@@ -58,4 +58,26 @@ export default defineConfig(({ command }) => ({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@supabase')) {
+              return 'supabase';
+            }
+            if (id.includes('swr')) {
+              return 'swr';
+            }
+            if (id.includes('idb-keyval')) {
+              return 'idb';
+            }
+            if (id.includes('react-window')) {
+              return 'react-window';
+            }
+          }
+        }
+      }
+    }
+  },
 }));
