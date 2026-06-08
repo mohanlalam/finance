@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Pencil, Trash2, UserPlus, User, Heart, Users } from 'lucide-react';
+import { LayoutDashboard, Pencil, Trash2, UserPlus, User, Heart, Users } from './icons/AppIcons';
 import { Portfolio, PortfolioName } from '../types/portfolio';
 import { formatPercent } from '../utils/formatters';
 

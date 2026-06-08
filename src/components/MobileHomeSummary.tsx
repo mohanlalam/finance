@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock, Heart } from 'lucide-react';
+import { memo, useMemo } from 'react';
+import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock, Heart } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { Alert } from '../hooks/useAlerts';
@@ -52,17 +53,29 @@ export default function MobileHomeSummary({
   portfolios,
   activePortfolio,
 }: MobileHomeSummaryProps) {
-  // Count items
-  const currentPortfolios = activePortfolio ? [activePortfolio] : portfolios;
-  const stockCount = currentPortfolios.reduce((s, p) => s + p.holdings.length, 0);
-  const fdCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'regular' || !f.fd_type).length, 0);
-  const rdCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'recurring').length, 0);
-  const ssyCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'ssy').length, 0);
-  const sipCount = currentPortfolios.reduce((s, p) => s + p.fixedDeposits.filter(f => f.fd_type === 'sip').length, 0);
-  const goldCount = currentPortfolios.reduce((s, p) => s + p.goldHoldings.length, 0);
-  const propertyCount = currentPortfolios.reduce((s, p) => s + p.realEstate.length, 0);
-  const insuranceCount = currentPortfolios.reduce((s, p) => s + p.insurances.length, 0);
-  const docCount = currentPortfolios.reduce((s, p) => s + p.documents.length, 0);
+  // Single-pass count computation — avoids 9 separate reduce() calls on every render
+  const {
+    stockCount, fdCount, rdCount, ssyCount, sipCount,
+    goldCount, propertyCount, insuranceCount, docCount
+  } = useMemo(() => {
+    let stockCount = 0, fdCount = 0, rdCount = 0, ssyCount = 0, sipCount = 0,
+        goldCount = 0, propertyCount = 0, insuranceCount = 0, docCount = 0;
+    const ps = activePortfolio ? [activePortfolio] : portfolios;
+    for (const p of ps) {
+      stockCount += p.holdings.length;
+      for (const f of p.fixedDeposits) {
+        if (!f.fd_type || f.fd_type === 'regular') fdCount++;
+        else if (f.fd_type === 'recurring') rdCount++;
+        else if (f.fd_type === 'ssy') ssyCount++;
+        else if (f.fd_type === 'sip') sipCount++;
+      }
+      goldCount      += p.goldHoldings.length;
+      propertyCount  += p.realEstate.length;
+      insuranceCount += p.insurances.length;
+      docCount       += p.documents.length;
+    }
+    return { stockCount, fdCount, rdCount, ssyCount, sipCount, goldCount, propertyCount, insuranceCount, docCount };
+  }, [activePortfolio, portfolios]);
 
   const totalValue =
     breakdown.stocks +
@@ -420,3 +433,7 @@ export default function MobileHomeSummary({
     </div>
   );
 }
+
+// React.memo prevents re-renders when parent state (e.g. lastUpdated) changes
+// but none of MobileHomeSummary's own props have changed
+export default memo(MobileHomeSummary);

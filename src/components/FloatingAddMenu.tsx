@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, Heart } from 'lucide-react';
+import { Plus, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, Heart } from './icons/AppIcons';
 
 interface FloatingAddMenuProps {
   onAddStock: () => void;

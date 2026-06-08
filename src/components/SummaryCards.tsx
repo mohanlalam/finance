@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, IndianRupee, BarChart2, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, IndianRupee, BarChart2, Activity } from './icons/AppIcons';
 import { formatINR, formatPercent, pnlColor } from '../utils/formatters';
 
 interface SummaryCardsProps {

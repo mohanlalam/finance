@@ -56,6 +56,9 @@ export default defineConfig(({ command }) => ({
   ],
   base: command === 'serve' ? '/' : '/finance/',
   build: {
+    target: 'es2020',           // ~10-15% smaller output; modern mobile supports all ES2020 features
+    cssMinify: true,            // deduplicate CSS selectors across chunks
+    reportCompressedSize: false, // skip gzip sizing step to speed up builds
     rollupOptions: {
       output: {
         manualChunks(id) {

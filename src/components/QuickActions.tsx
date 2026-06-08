@@ -1,5 +1,5 @@
 import React from 'react';
-import { Landmark, Coins, RefreshCw, TrendingUp } from 'lucide-react';
+import { Landmark, Coins, RefreshCw, TrendingUp } from './icons/AppIcons';
 
 interface QuickActionsProps {
   onAddStock: () => void;

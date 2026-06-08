@@ -431,6 +431,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     {
       revalidateOnFocus: false,
       dedupingInterval: 300_000, // matches the 5-min gate in visibilitychange listener
+      errorRetryCount: 2,         // prevent retry storm on mobile bad-network
     }
   );
 

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Check, Sun, Moon } from 'lucide-react';
+import React, { useState, Suspense } from 'react';
+import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Check, Sun, Moon } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { FetchStatus } from '../hooks/useMarketData';
 import { Portfolio } from '../types/portfolio';
-import ExportPanel, { ImportRow } from './ExportPanel';
+import type { ImportRow } from './ExportPanel';
 import { Alert } from '../hooks/useAlerts';
+
+const ExportPanel = React.lazy(() => import('./ExportPanel'));
 
 interface HeaderProps {
   totalCurrentValue: number;
@@ -150,11 +152,13 @@ function Header({
                   Synced {formatRelativeTime(lastUpdated)}
                 </span>
               )}
-              <ExportPanel
-                portfolios={portfolios}
-                onImportCSV={onImportCSV}
-                portfolioOptions={portfolioOptions}
-              />
+              <Suspense fallback={<div className="w-8 h-8 rounded-lg bg-slate-800 animate-pulse" />}>
+                <ExportPanel
+                  portfolios={portfolios}
+                  onImportCSV={onImportCSV}
+                  portfolioOptions={portfolioOptions}
+                />
+              </Suspense>
 
               {/* Dark Mode Toggle */}
               <button

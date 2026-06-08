@@ -5,7 +5,8 @@ import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
 import AddHoldingModal from '../components/AddHoldingModal';
 import MobileBottomNav from '../components/MobileBottomNav';
-import SearchBar from '../components/SearchBar';
+// SearchBar lazy-loaded — saves 17 KB from the initial AppShell parse
+const SearchBar = React.lazy(() => import('../components/SearchBar'));
 import FamilyTabBar from '../components/FamilyTabBar';
 import AddFamilyModal from '../components/AddFamilyModal';
 import RenamePortfolioModal from '../components/RenamePortfolioModal';
@@ -406,7 +407,9 @@ export default function AppShell() {
           <div className="space-y-4">
             {/* Search Bar on Mobile */}
             <div data-search-bar className="px-0.5">
-              <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
+              <Suspense fallback={null}>
+                <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
+              </Suspense>
             </div>
 
             {/* Family Tabs Row on Mobile */}
@@ -547,7 +550,9 @@ export default function AppShell() {
           <>
             {/* Search Bar */}
             <div data-search-bar>
-              <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
+              <Suspense fallback={null}>
+                <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
+              </Suspense>
             </div>
 
             {/* Quick Actions */}

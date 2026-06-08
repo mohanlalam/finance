@@ -1,5 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw } from './icons/AppIcons';
 
 interface SectionErrorBoundaryProps {
   children: ReactNode;

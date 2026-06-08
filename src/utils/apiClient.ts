@@ -33,8 +33,15 @@ export function getEnvironmentIssue(): string {
   return '';
 }
 
+// Cache the hashed PIN for the lifetime of the session — avoids a
+// SubtleCrypto.digest() call on every API request (price ticks, etc.)
+let _cachedPinHash: string | null = null;
+
 async function buildHeaders(): Promise<Record<string, string>> {
-  const hashedPin = await ensureHashedPin();
+  if (!_cachedPinHash) {
+    _cachedPinHash = await ensureHashedPin();
+  }
+  const hashedPin = _cachedPinHash;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     apikey: SUPABASE_ANON_KEY,
@@ -54,6 +61,7 @@ async function buildHeaders(): Promise<Record<string, string>> {
 function friendlyError(status: number, fallback: string): AppApiError {
   if (status === 401) {
     clearSessionVerification();
+    _cachedPinHash = null; // force re-derivation on next request after re-login
     return new AppApiError('Session expired. Please enter your PIN again.', 'auth', {
       status,
       rawMessage: fallback,

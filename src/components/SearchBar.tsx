@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Search, X, TrendingUp, Landmark, Coins, Home as HomeIcon, Shield, FolderOpen, ArrowLeft } from 'lucide-react';
+import { Search, X, TrendingUp, Landmark, Coins, Home as HomeIcon, Shield, FolderOpen, ArrowLeft } from './icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
 
 interface SearchResult {

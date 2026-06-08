@@ -144,10 +144,15 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     load();
 
     let interval: ReturnType<typeof setInterval> | null = null;
+    // Track last refresh time so we don't hammer the API on every tab-switch
+    let lastRefreshTime = 0;
 
     function startPolling() {
       if (interval) return;
-      interval = setInterval(() => refreshPricesRef.current(), 15 * 60 * 1000);
+      interval = setInterval(() => {
+        lastRefreshTime = Date.now();
+        refreshPricesRef.current();
+      }, 15 * 60 * 1000);
     }
 
     function stopPolling() {
@@ -159,7 +164,12 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
 
     function handleVisibility() {
       if (document.visibilityState === 'visible') {
-        refreshPricesRef.current();
+        // Only refresh if at least 5 minutes have passed since the last fetch
+        // (matches the SWR dedupingInterval of 300 000 ms)
+        if (Date.now() - lastRefreshTime >= 300_000) {
+          lastRefreshTime = Date.now();
+          refreshPricesRef.current();
+        }
         startPolling();
       } else {
         stopPolling();
