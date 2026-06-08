@@ -183,6 +183,9 @@ function applyLivePrices(portfolios: Portfolio[], priceMap: Record<string, { ltp
       return { ...h, ltp: live.ltp, currentValue, unrealizedPnL, pnlPercent, todayPnLPercent: live.todayPct };
     });
 
+    // Skip expensive totals recalc if no holding's price actually changed
+    if (updatedHoldings.every((h, i) => h === portfolio.holdings[i])) return portfolio;
+
     const totals = recalcPortfolioTotals(
       updatedHoldings,
       portfolio.fixedDeposits,
@@ -203,7 +206,8 @@ function applyLivePrices(portfolios: Portfolio[], priceMap: Record<string, { ltp
 
 function applyLiveMFNavs(portfolios: Portfolio[], navMap: Record<string, number>, staleSchemes: Set<string>): Portfolio[] {
   return portfolios.map((portfolio) => {
-    const updatedSips = (portfolio.sipAccounts || []).map((s) => {
+    const origSips = portfolio.sipAccounts || [];
+    const updatedSips = origSips.map((s) => {
       if (s.mf_scheme_code && navMap[s.mf_scheme_code] !== undefined) {
         const nav = navMap[s.mf_scheme_code];
         const units = Number(s.units || 0);
@@ -215,6 +219,9 @@ function applyLiveMFNavs(portfolios: Portfolio[], navMap: Record<string, number>
       }
       return s;
     });
+
+    // Skip expensive totals recalc if no SIP's NAV actually changed
+    if (updatedSips.every((s, i) => s === origSips[i])) return portfolio;
 
     const totals = recalcPortfolioTotals(
       portfolio.holdings,
@@ -423,7 +430,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     },
     {
       revalidateOnFocus: false,
-      dedupingInterval: 60000,
+      dedupingInterval: 300_000, // matches the 5-min gate in visibilitychange listener
     }
   );
 

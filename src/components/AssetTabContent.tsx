@@ -1,19 +1,23 @@
 import React from 'react';
-import { Wifi, WifiOff, Plus } from 'lucide-react';
+// Inline SVG icons — keeps lucide-react out of the critical bundle
+import { Wifi, WifiOff, Plus } from './icons/AppIcons';
 import { Portfolio, AssetPayload } from '../types/portfolio';
 import { FetchStatus } from '../hooks/useMarketData';
-import PortfolioTable from './PortfolioTable';
-import GoldHoldingView from './GoldHoldingView';
-import RealEstateView from './RealEstateView';
-import InsuranceView from './InsuranceView';
-import DocumentVaultView from './DocumentVaultView';
 import AssetCardSkeleton from './AssetCardSkeleton';
-
-const FixedDepositView = React.lazy(() => import('./FixedDepositView'));
-const RDView = React.lazy(() => import('./rd/RDView'));
-const SIPView = React.lazy(() => import('./sip/SIPView'));
-const SSYView = React.lazy(() => import('./ssy/SSYView'));
+// Eagerly loaded (lightweight, always visible on stocks tab)
 import { pnlColor, formatPercent, formatINR } from '../utils/formatters';
+
+// Lazy-loaded: only fetched when the user navigates to that tab
+const PortfolioTable    = React.lazy(() => import('./PortfolioTable'));
+const GoldHoldingView   = React.lazy(() => import('./GoldHoldingView'));
+const RealEstateView    = React.lazy(() => import('./RealEstateView'));
+const InsuranceView     = React.lazy(() => import('./InsuranceView'));
+const DocumentVaultView = React.lazy(() => import('./DocumentVaultView'));
+const FixedDepositView  = React.lazy(() => import('./FixedDepositView'));
+const RDView            = React.lazy(() => import('./rd/RDView'));
+const SIPView           = React.lazy(() => import('./sip/SIPView'));
+const SSYView           = React.lazy(() => import('./ssy/SSYView'));
+
 
 type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
 
@@ -95,19 +99,23 @@ export default React.memo(function AssetTabContent({
               </div>
             </div>
 
-            <PortfolioTable
-              holdings={visiblePortfolio.holdings}
-              totalInvested={visiblePortfolio.holdings.reduce((s, h) => s + h.amountInvested, 0)}
-              totalCurrentValue={visiblePortfolio.holdings.reduce((s, h) => s + h.currentValue, 0)}
-              totalPnL={visiblePortfolio.holdings.reduce((s, h) => s + h.unrealizedPnL, 0)}
-              totalPnLPercent={(() => {
-                const inv = visiblePortfolio.holdings.reduce((s, h) => s + h.amountInvested, 0);
-                const pnl = visiblePortfolio.holdings.reduce((s, h) => s + h.unrealizedPnL, 0);
-                return inv > 0 ? (pnl / inv) * 100 : 0;
-              })()}
-              onDelete={onDeleteStock}
-              onUpdate={onUpdateStock}
-            />
+            {(() => {
+              // Compute stock totals in one pass to avoid 5 separate reduce calls
+              const inv = visiblePortfolio.holdings.reduce((s, h) => s + h.amountInvested, 0);
+              const cur = visiblePortfolio.holdings.reduce((s, h) => s + h.currentValue, 0);
+              const pnl = visiblePortfolio.holdings.reduce((s, h) => s + h.unrealizedPnL, 0);
+              return (
+                <PortfolioTable
+                  holdings={visiblePortfolio.holdings}
+                  totalInvested={inv}
+                  totalCurrentValue={cur}
+                  totalPnL={pnl}
+                  totalPnLPercent={inv > 0 ? (pnl / inv) * 100 : 0}
+                  onDelete={onDeleteStock}
+                  onUpdate={onUpdateStock}
+                />
+              );
+            })()
           </div>
         )}
 
@@ -241,19 +249,23 @@ export default React.memo(function AssetTabContent({
                     <p className="text-xs text-slate-400 dark:text-slate-505">Add stocks or ETFs to start tracking live prices and P&amp;L.</p>
                   </div>
                 ) : (
-                  <PortfolioTable
-                    holdings={p.holdings}
-                    totalInvested={p.holdings.reduce((s, h) => s + h.amountInvested, 0)}
-                    totalCurrentValue={p.holdings.reduce((s, h) => s + h.currentValue, 0)}
-                    totalPnL={p.holdings.reduce((s, h) => s + h.unrealizedPnL, 0)}
-                    totalPnLPercent={(() => {
-                      const inv = p.holdings.reduce((s, h) => s + h.amountInvested, 0);
-                      const pnl = p.holdings.reduce((s, h) => s + h.unrealizedPnL, 0);
-                      return inv > 0 ? (pnl / inv) * 100 : 0;
-                    })()}
-                    onDelete={onDeleteStock}
-                    onUpdate={onUpdateStock}
-                  />
+                  {(() => {
+                    // Single-pass computation — avoids 5 separate reduce calls
+                    const inv = p.holdings.reduce((s, h) => s + h.amountInvested, 0);
+                    const cur = p.holdings.reduce((s, h) => s + h.currentValue, 0);
+                    const pnl = p.holdings.reduce((s, h) => s + h.unrealizedPnL, 0);
+                    return (
+                      <PortfolioTable
+                        holdings={p.holdings}
+                        totalInvested={inv}
+                        totalCurrentValue={cur}
+                        totalPnL={pnl}
+                        totalPnLPercent={inv > 0 ? (pnl / inv) * 100 : 0}
+                        onDelete={onDeleteStock}
+                        onUpdate={onUpdateStock}
+                      />
+                    );
+                  })()
                 )}
               </div>
             ))}

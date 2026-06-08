@@ -12,8 +12,8 @@ export default defineConfig(({ command }) => ({
         globPatterns: [
           'index.html',
           'manifest.webmanifest',
-          'assets/index-*.js',
-          'assets/index-*.css',
+          'assets/*.js',   // pre-cache entry + all lazy vendor chunks (supabase, swr, idb, lucide…)
+          'assets/*.css',
         ],
         runtimeCaching: [
           {

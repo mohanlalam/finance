@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react';
-import { WifiOff, AlertCircle, RefreshCw, TrendingUp, Landmark, Coins, Home, Shield, FolderOpen, Clock, Heart } from 'lucide-react';
+// Inline SVG icons — keeps lucide-react out of the critical post-unlock bundle
+import { WifiOff, AlertCircle, RefreshCw, TrendingUp, Landmark, Coins, Home, Shield, FolderOpen, Clock, Heart } from '../components/icons/AppIcons';
 import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
 import AddHoldingModal from '../components/AddHoldingModal';
@@ -11,12 +12,11 @@ import RenamePortfolioModal from '../components/RenamePortfolioModal';
 import ConfirmModal from '../components/ConfirmModal';
 import AssetTabContent from '../components/AssetTabContent';
 import SectionErrorBoundary from '../components/SectionErrorBoundary';
-import InsightsPanel from '../components/InsightsPanel';
 import QuickActions from '../components/QuickActions';
 import FloatingAddMenu from '../components/FloatingAddMenu';
 import MobileHomeSummary from '../components/MobileHomeSummary';
 import MobileAlertsView from '../components/MobileAlertsView';
-import { ImportRow } from '../components/ExportPanel';
+import type { ImportRow } from '../components/ExportPanel'; // type-only: erased at build time
 import { AddHoldingPayload } from '../components/AddHoldingModal';
 
 import DashboardWidgets from '../components/DashboardWidgets';
@@ -24,6 +24,8 @@ import DashboardWidgets from '../components/DashboardWidgets';
 const PieChart = React.lazy(() => import('../components/PieChart'));
 const BarChart = React.lazy(() => import('../components/BarChart'));
 const PortfolioAssistant = React.lazy(() => import('../components/PortfolioAssistant'));
+// Lazy-loaded: only fetched when activeTab === 'all' renders it on screen
+const InsightsPanel = React.lazy(() => import('../components/InsightsPanel'));
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { formatINR, formatPercent, pnlColor } from '../utils/formatters';
@@ -83,6 +85,9 @@ function LazyChartWrapper<TProps extends object>({
 }) {
   const [isIntersected, setIsIntersected] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  // Pin the import function reference so React.lazy() is only called once per
+  // mount — prevents chart components from unmounting on every parent re-render
+  const importRef = useRef(importFunc);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -101,8 +106,8 @@ function LazyChartWrapper<TProps extends object>({
 
   const LazyComponent = useMemo(() => {
     if (!isIntersected) return null;
-    return React.lazy(importFunc) as unknown as React.ComponentType<TProps>;
-  }, [isIntersected, importFunc]);
+    return React.lazy(importRef.current) as unknown as React.ComponentType<TProps>;
+  }, [isIntersected]);
 
   return (
     <div ref={ref} style={{ minHeight: isIntersected ? undefined : placeholderHeight }}>
@@ -140,7 +145,17 @@ export default function AppShell() {
   const { family, asset } = useParams<{ family: string; asset: string }>();
   const navigate = useNavigate();
 
-  const activeAsset = (asset as AssetTab) || (window.innerWidth < 768 ? 'home' : 'stocks');
+  // Declared early so it can be used in activeAsset derivation below without
+  // reading window.innerWidth (which forces a layout reflow) on every render
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const activeAsset = (asset as AssetTab) || (isMobile ? 'home' : 'stocks');
 
   const setActiveAsset = useCallback((newAsset: AssetTab) => {
     navigate(`/${family || 'all'}/${newAsset}`);
@@ -152,14 +167,6 @@ export default function AppShell() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string; label: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showMobileAlerts, setShowMobileAlerts] = useState(false);
-
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Persist active asset tab
   useEffect(() => {
@@ -316,9 +323,10 @@ export default function AppShell() {
       onTouchEnd={handleTouchEnd}
       className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-safe-content md:pb-0 text-slate-800 dark:text-slate-100 transition-colors relative overflow-x-hidden"
     >
-      {/* Decorative background glow shapes */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 dark:bg-blue-500/3 rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="absolute top-[30vh] right-1/4 w-[600px] h-[600px] bg-indigo-500/5 dark:bg-indigo-500/3 rounded-full blur-[140px] pointer-events-none z-0" />
+      {/* Decorative background glow shapes — blur reduced from 120-140px to 60-70px
+           (perceptually same, ~4× cheaper GPU compositing on mobile) */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 dark:bg-blue-500/3 rounded-full blur-[60px] pointer-events-none z-0 will-change-transform" />
+      <div className="absolute top-[30vh] right-1/4 w-[600px] h-[600px] bg-indigo-500/5 dark:bg-indigo-500/3 rounded-full blur-[70px] pointer-events-none z-0 will-change-transform" />
 
       {/* Print-only report header */}
       <div className="print-report-header hidden items-center justify-between px-8 py-6 border-b-2 border-slate-200 mb-6">
@@ -432,11 +440,13 @@ export default function AppShell() {
 
                 {activeTab === 'all' && (
                   <SectionErrorBoundary sectionName="Portfolio Insights">
-                    <InsightsPanel
-                      insights={insights}
-                      portfolios={portfolios}
-                      activePortfolio={portfolio}
-                    />
+                    <Suspense fallback={<div className="h-40 bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                      <InsightsPanel
+                        insights={insights}
+                        portfolios={portfolios}
+                        activePortfolio={portfolio}
+                      />
+                    </Suspense>
                   </SectionErrorBoundary>
                 )}
 
@@ -632,11 +642,13 @@ export default function AppShell() {
             {/* Insights Panel — only on family overview */}
             {activeTab === 'all' && (
               <SectionErrorBoundary sectionName="Portfolio Insights">
-                <InsightsPanel
-                  insights={insights}
-                  portfolios={portfolios}
-                  activePortfolio={portfolio}
-                />
+                <Suspense fallback={<div className="h-40 bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                  <InsightsPanel
+                    insights={insights}
+                    portfolios={portfolios}
+                    activePortfolio={portfolio}
+                  />
+                </Suspense>
               </SectionErrorBoundary>
             )}
 
