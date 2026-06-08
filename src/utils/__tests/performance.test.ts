@@ -105,6 +105,13 @@ describe('calculateWeightedAge', () => {
       totalCurrentValue: 22000,
       totalPnL: 2000,
       totalPnLPercent: 10,
+      stocksValue: 12000,
+      fdValue: 10000,
+      rdValue: 0,
+      ssyValue: 0,
+      sipValue: 0,
+      goldValue: 0,
+      realEstateValue: 0,
     };
 
     // Expected weighted age = (10000 * 1.0 [stocks default] + 10000 * 2.0 [FD start_date]) / 20000 = 1.5 years
@@ -142,6 +149,13 @@ describe('calculateWeightedAge', () => {
       totalCurrentValue: 130000,
       totalPnL: 10000,
       totalPnLPercent: 8.33,
+      stocksValue: 0,
+      fdValue: 0,
+      rdValue: 0,
+      ssyValue: 0,
+      sipValue: 130000,
+      goldValue: 0,
+      realEstateValue: 0,
     };
 
     // The SIP is 2 years old.
@@ -183,6 +197,13 @@ describe('getPortfolioAnnualizedReturn (XIRR)', () => {
       totalCurrentValue: 140000,
       totalPnL: 5000,
       totalPnLPercent: 4.17,
+      stocksValue: 0,
+      fdValue: 0,
+      rdValue: 0,
+      ssyValue: 0,
+      sipValue: 140000,
+      goldValue: 0,
+      realEstateValue: 0,
     };
 
     const rate = getPortfolioAnnualizedReturn(portfolio);

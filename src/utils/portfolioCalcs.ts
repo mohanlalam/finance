@@ -1,8 +1,4 @@
 import { Holding, Portfolio } from '../types/portfolio';
-import { getFDEffectiveValue } from './formatters';
-import { getRDEffectiveValue } from './rdUtils';
-import { getSIPEffectiveValue } from './sipUtils';
-import { getSSYEffectiveValue } from './ssyUtils';
 
 /** Sum invested amounts across holdings */
 export function calcTotalInvested(holdings: Holding[]): number {
@@ -38,22 +34,13 @@ export function holdingsTotals(holdings: Holding[]) {
 /** Compute asset class breakdown across portfolios */
 export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null) {
   const target = scope ? [scope] : portfolios;
-  const stocks = target.reduce((s, p) => s + p.holdings.reduce((a, h) => a + h.currentValue, 0), 0);
-  
-  const fd = target.reduce((s, p) => s + p.fixedDeposits
-    .reduce((a, f) => a + getFDEffectiveValue(f), 0), 0);
-    
-  const rd = target.reduce((s, p) => s + (p.rdAccounts || [])
-    .reduce((a, r) => a + getRDEffectiveValue(r), 0), 0);
-    
-  const ssy = target.reduce((s, p) => s + (p.ssyAccounts || [])
-    .reduce((a, acc) => a + getSSYEffectiveValue(acc), 0), 0);
-    
-  const sip = target.reduce((s, p) => s + (p.sipAccounts || [])
-    .reduce((a, sAcc) => a + getSIPEffectiveValue(sAcc), 0), 0);
-
-  const gold = target.reduce((s, p) => s + p.goldHoldings.reduce((a, g) => a + Number(g.current_valuation), 0), 0);
-  const realEstate = target.reduce((s, p) => s + p.realEstate.reduce((a, r) => a + Number(r.current_valuation), 0), 0);
+  const stocks = target.reduce((s, p) => s + p.stocksValue, 0);
+  const fd = target.reduce((s, p) => s + p.fdValue, 0);
+  const rd = target.reduce((s, p) => s + p.rdValue, 0);
+  const ssy = target.reduce((s, p) => s + p.ssyValue, 0);
+  const sip = target.reduce((s, p) => s + p.sipValue, 0);
+  const gold = target.reduce((s, p) => s + p.goldValue, 0);
+  const realEstate = target.reduce((s, p) => s + p.realEstateValue, 0);
   const insuranceCover = target.reduce((s, p) => s + p.insurances.reduce((a, i) => a + Number(i.sum_assured), 0), 0);
   const insurancePremium = target.reduce((s, p) => s + p.insurances.reduce((a, i) => a + Number(i.premium_amount), 0), 0);
   
@@ -77,21 +64,4 @@ export function getPortfolioByName(portfolios: Portfolio[], name: string): Portf
   return portfolios.find((p) => p.name === name) ?? null;
 }
 
-/**
- * Calculate standard compound interest.
- * @param principal The starting amount (P)
- * @param ratePercent The annual interest rate in percent (r)
- * @param compoundingFrequency The number of times interest compounds per year (n)
- * @param years The time in years (t)
- */
-export function compoundValue(
-  principal: number,
-  ratePercent: number,
-  compoundingFrequency: number,
-  years: number
-): number {
-  if (years <= 0 || isNaN(ratePercent) || isNaN(years) || isNaN(principal) || principal <= 0) {
-    return principal;
-  }
-  return principal * Math.pow(1 + ratePercent / (compoundingFrequency * 100), compoundingFrequency * years);
-}
+

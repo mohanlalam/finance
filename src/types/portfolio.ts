@@ -162,6 +162,13 @@ export interface Portfolio {
   totalCurrentValue: number;
   totalPnL: number;
   totalPnLPercent: number;
+  stocksValue: number;
+  fdValue: number;
+  rdValue: number;
+  ssyValue: number;
+  sipValue: number;
+  goldValue: number;
+  realEstateValue: number;
 }
 
 export interface StockPayload {

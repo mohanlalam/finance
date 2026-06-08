@@ -1,5 +1,5 @@
 import { RDAccount } from '../types/portfolio';
-import { compoundValue } from './portfolioCalcs';
+import { compoundValue } from './mathUtils';
 
 /**
  * Returns the total amount actually invested in a Recurring Deposit.

@@ -125,7 +125,19 @@ function recalcPortfolioTotals(
   const totalPnL = totalCurrentValue - totalInvested;
   const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
 
-  return { totalInvested, totalCurrentValue, totalPnL, totalPnLPercent };
+  return {
+    totalInvested,
+    totalCurrentValue,
+    totalPnL,
+    totalPnLPercent,
+    stocksValue: stockCurrent,
+    fdValue: fdCurrent,
+    rdValue: rdCurrent,
+    ssyValue: ssyCurrent,
+    sipValue: sipCurrent,
+    goldValue: goldCurrent,
+    realEstateValue: reCurrent,
+  };
 }
 
 function buildPortfolio(
@@ -375,7 +387,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   useEffect(() => {
     let isMounted = true;
     async function init() {
-      await initNAVCache();
+      initNAVCache().catch(err => console.warn('[sipUtils] NAV cache init error:', err));
       if (!isMounted) return;
       try {
         const cached = await idb.get('portfolio_data_cache');

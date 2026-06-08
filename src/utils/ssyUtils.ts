@@ -1,5 +1,5 @@
 import { SSYAccount } from '../types/portfolio';
-import { compoundValue } from './portfolioCalcs';
+import { compoundValue } from './mathUtils';
 
 // ─── SSY Historical Interest Rates (Government-notified) ───
 // Maps FY start year → rate (%). FY 2024 means April 2024 – March 2025.

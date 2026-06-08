@@ -36,6 +36,13 @@ describe('estimateTodayPnL', () => {
       totalCurrentValue: 22000,
       totalPnL: 2000,
       totalPnLPercent: 10,
+      stocksValue: 22000,
+      fdValue: 0,
+      rdValue: 0,
+      ssyValue: 0,
+      sipValue: 0,
+      goldValue: 0,
+      realEstateValue: 0,
     };
 
     // yesterday closing value = currentValue / (1 + todayPnLPercent / 100) = 22000 / 1.10 = 20000

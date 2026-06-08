@@ -102,6 +102,13 @@ describe('calculateHealthScore', () => {
       totalCurrentValue: 437000,
       totalPnL: -3000,
       totalPnLPercent: -0.68,
+      stocksValue: 22000,
+      fdValue: 350000,
+      rdValue: 0,
+      ssyValue: 0,
+      sipValue: 150000,
+      goldValue: 65000,
+      realEstateValue: 0,
     };
 
     const report = calculateHealthScore([portfolio], null);
@@ -160,6 +167,13 @@ describe('calculateHealthScore', () => {
       totalCurrentValue: 200000,
       totalPnL: 0,
       totalPnLPercent: 0,
+      stocksValue: 0,
+      fdValue: 200000,
+      rdValue: 0,
+      ssyValue: 0,
+      sipValue: 0,
+      goldValue: 0,
+      realEstateValue: 0,
     };
 
     const report = calculateHealthScore([portfolio], null);
@@ -277,6 +291,13 @@ describe('calculateHealthScore', () => {
       totalCurrentValue: 600000,
       totalPnL: 0,
       totalPnLPercent: 0,
+      stocksValue: 200000,
+      fdValue: 300000,
+      rdValue: 0,
+      ssyValue: 0,
+      sipValue: 50000,
+      goldValue: 100000,
+      realEstateValue: 0,
     };
 
     const report = calculateHealthScore([portfolio], null);

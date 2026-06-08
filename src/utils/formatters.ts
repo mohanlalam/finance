@@ -1,5 +1,5 @@
 import { FixedDeposit } from '../types/portfolio';
-import { compoundValue } from './portfolioCalcs';
+import { compoundValue } from './mathUtils';
 
 
 

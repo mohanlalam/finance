@@ -44,6 +44,13 @@ describe('calculateRebalancing', () => {
         totalCurrentValue: 100000,
         totalPnL: 0,
         totalPnLPercent: 0,
+        stocksValue: 100000,
+        fdValue: 0,
+        rdValue: 0,
+        ssyValue: 0,
+        sipValue: 0,
+        goldValue: 0,
+        realEstateValue: 0,
       }
     ];
 
@@ -126,6 +133,13 @@ describe('calculateRebalancing', () => {
         totalCurrentValue: 1000000,
         totalPnL: 0,
         totalPnLPercent: 0,
+        stocksValue: 598000,
+        fdValue: 202000,
+        rdValue: 0,
+        ssyValue: 0,
+        sipValue: 0,
+        goldValue: 100000,
+        realEstateValue: 100000,
       }
     ];
 
@@ -205,6 +219,13 @@ describe('calculateRebalancing', () => {
         totalCurrentValue: 10000000,
         totalPnL: 0,
         totalPnLPercent: 0,
+        stocksValue: 5980000,
+        fdValue: 2020000,
+        rdValue: 0,
+        ssyValue: 0,
+        sipValue: 0,
+        goldValue: 1000000,
+        realEstateValue: 1000000,
       }
     ];
 

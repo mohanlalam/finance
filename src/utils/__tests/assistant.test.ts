@@ -128,6 +128,13 @@ describe('askAssistant query parser', () => {
       totalCurrentValue: 6418000,
       totalPnL: 1078000,
       totalPnLPercent: 20.18,
+      stocksValue: 25000,
+      fdValue: 150000,
+      rdValue: 10000,
+      ssyValue: 0,
+      sipValue: 65000,
+      goldValue: 75000,
+      realEstateValue: 6000000,
     },
   ];
 

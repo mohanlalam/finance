@@ -269,16 +269,24 @@ export function SSYSchedule({ account, onUpdate }: SSYScheduleProps) {
     return 'bg-amber-500/[0.04] dark:bg-amber-500/[0.03] border-amber-500/20 dark:border-amber-500/10 hover:border-amber-500/35 transition-all';
   };
 
-  const windows = getSSYWindows(account.start_date);
-  const now = new Date();
+  const windows = React.useMemo(() => {
+    if (!expanded) return [];
+    return getSSYWindows(account.start_date);
+  }, [expanded, getSSYWindows, account.start_date]);
 
-  const { yearlyBreakdown } = calculateSSYMaturityWithRates(
-    account.start_date,
-    Number(account.annual_deposit),
-    account.contributions,
-    account.rate_schedule,
-    Number(account.interest_rate) > 0 ? Number(account.interest_rate) : 8.2
-  );
+  const now = React.useMemo(() => new Date(), []);
+
+  const yearlyBreakdown = React.useMemo(() => {
+    if (!expanded) return [];
+    const { yearlyBreakdown: breakdown } = calculateSSYMaturityWithRates(
+      account.start_date,
+      Number(account.annual_deposit),
+      account.contributions,
+      account.rate_schedule,
+      Number(account.interest_rate) > 0 ? Number(account.interest_rate) : 8.2
+    );
+    return breakdown;
+  }, [expanded, account.start_date, account.annual_deposit, account.contributions, account.rate_schedule, account.interest_rate]);
 
   return (
     <div className="pt-2 border-t border-slate-100 dark:border-slate-700/50">
