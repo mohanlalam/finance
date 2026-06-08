@@ -37,11 +37,15 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **Mobile Bottom Navigation** — Fixed bottom bar for quick tabs swapping on narrow mobile viewports, featuring an **Alert Count Badge** on the Home tab.
 
 ### ⚡ High Performance & Responsiveness
+- **App Icons inline SVG System** — Replaced all external `lucide-react` icons inside critical path modules (such as Header, BottomNav, summary panels, and error boundaries) with a custom inline SVG library (`AppIcons.tsx`). This completely isolates `lucide-react` to lazy-loaded chunks and prevents large dependency footprints during initial mount.
+- **Dynamic Tab Preloading** — Lazily loads all primary asset views and tables (`FixedDepositView`, `RDView`, `SIPView`, `SSYView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, and `PortfolioTable`). Uses an IIFE single-pass preloader on mount to fetch all bundle chunks in parallel, eliminating UI lag on swipe navigation.
 - **Asynchronous Web Workers** — Offloads heavy computations (Newton-Raphson XIRR solvers, multi-factor Health Score scoring, and rebalancing recommendations) to background threads (`src/workers/`) with synchronous fallbacks and detailed diagnostics warnings in case of worker thread initialization failures.
 - **List Virtualization & Row Keys** — Uses `react-window` to virtualize large registry listings (>8 accounts) to keep scrolling fluid and render times minimal. Row key elements are explicitly bound to asset IDs (`itemKey`) to optimize DOM recycling and prevent rendering glitches.
 - **Intersection Lazy Loading** — Leverages a custom type-safe `LazyChartWrapper` component with `IntersectionObserver` to lazy-load charts (`NetWorthTimelineChart`, `TreemapChart`, `SankeyChart`) only when they scroll into the viewport, completely deferring their bundle load and dynamic import evaluation.
-- **Lock Screen Code-Splitting** — Dynamically code-splits the context providers and routing (`MainApp`) as well as the main dashboard layout (`AppShell`), keeping the entry bundle size tiny (188 kB) so the zero-dependency PIN Lock screen loads instantly on mobile networks.
-- **Advanced Caching & Focus Resume** — Employs `SWR` for remote state cache validation, IndexedDB local caches (`idb-keyval`) for instant stale-while-revalidate loads (invalidated on write/mutations), a 5-minute time gate on document `visibilitychange` refresh listeners to stop redundant reloads, async IndexedDB caching for live Mutual Fund NAV fetches (with an in-memory map to prevent synchronous startup thread blocks), and a ref-based resolver registry queue in `refreshSnapshot` to prevent hanging promises.
+- **Lock Screen Code-Splitting** — Dynamically code-splits the context providers and routing (`MainApp`) as well as the main dashboard layout (`AppShell`) and components (like search bars and insights), keeping the entry bundle size tiny so the zero-dependency PIN Lock screen loads instantly on mobile networks.
+- **Advanced Caching & Focus Resume** — Employs `SWR` for remote state cache validation (customized with a 5-minute `dedupingInterval` and `errorRetryCount: 2`), IndexedDB local caches (`idb-keyval`) for instant stale-while-revalidate loads (invalidated on write/mutations), a 5-minute time-gate cooldown on tab focus resume reloads, module-level in-memory caching of Supabase PIN hashes, async IndexedDB caching for live Mutual Fund NAV fetches, and a ref-based resolver registry queue in `refreshSnapshot` to prevent hanging promises.
+- **Mobile Summary Optimization** — Optimizes `MobileHomeSummary` using `React.memo` to skip re-renders from parent data/price updates and collapses 9 duplicate `reduce()` calls into a single-pass `useMemo` loop.
+- **Vite & Rollup Build Enhancements** — Targets modern engines (`es2020`) to save 10-15% of chunk weight, minifies CSS, uses Rollup `manualChunks` to split supplier vendors, and enforces complete pre-caching of all JS and CSS chunks using workbox configurations in the PWA plugin for true offline availability.
 
 ### 📂 Multi-Asset Registry & Reminders
 - **Fixed Deposits (FD)** — Real-time compounded interest tracking (compounded half-yearly), maturity date tracking, timeline progress bars, and document attachments.
@@ -75,7 +79,7 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **TypeScript** — End-to-end type safety
 - **Vite 5** — Lightning-fast dev server and optimized builds
 - **Tailwind CSS 3** — Utility-first styling
-- **Lucide React ^0.511.0** — Modern, consistent iconography
+- **Lucide React ^0.511.0** — Modern, consistent iconography (loaded dynamically; fully deferred to off-critical path chunks)
 - **SWR ^2.4.1** — Stale-while-revalidate data fetching and caching
 - **react-window ^2.2.7** — Grid and list virtualization
 - **idb-keyval ^6.2.5** — Minimalistic IndexedDB wrapper for local cache storage
@@ -105,6 +109,8 @@ project antigravity/
 │   ├── index.css                 # Global styles / Tailwind imports
 │   ├── vite-env.d.ts             # Vite type declarations
 │   ├── components/
+│   │   ├── icons/
+│   │   │   └── AppIcons.tsx      # Inline SVG icon library replacing lucide-react on critical rendering paths
 │   │   ├── Header.tsx            # Top bar — total value, P&L, refresh controls, Import/Export trigger
 │   │   ├── SummaryCards.tsx      # KPI cards — invested, current, P&L, today (compact on mobile)
 │   │   ├── PortfolioTable.tsx    # Sortable holdings table with preset selectors & allocation column
@@ -156,6 +162,8 @@ project antigravity/
 │   │   ├── DashboardLoading.tsx  # Skeleton loader states for dashboard fetch
 │   │   ├── DashboardError.tsx    # Full-page retry UI for API/Supabase connection failures
 │   │   └── PinLockScreen.tsx     # Secure session-based PIN lock keypad gate screen
+│   ├── layouts/
+│   │   └── AppShell.tsx          # Main dashboard layout (responsive switcher, lazy panel views)
 │   ├── contexts/
 │   │   └── PortfolioContext.tsx  # Global state provider, pricing sync statuses, and consolidated CRUD functions
 │   ├── hooks/

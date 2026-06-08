@@ -10,15 +10,18 @@ This document provides a high-level overview of the folder structure, data flow,
 * **[PortfolioContext.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/contexts/PortfolioContext.tsx)**
   * Split into `PortfolioDataContext` (containing global asset lists, pricing sync statuses, and last updated timestamps) and `PortfolioActionContext` (consolidated CRUD action triggers: `addAsset`, `updateAsset`, `deleteAsset`, and `refresh`).
   * Exposes optimized `usePortfolioState()` and `usePortfolioActions()` hooks separately. The unified `usePortfolio()` combined hook has been completely removed to prevent form modals and write-only components from re-rendering during data/price ticks.
+  * Implements a tab visibility refresh gate (cooldown of 5 minutes / 300,000 ms) that prevents redundant database and pricing network queries when the user returns to the app tab. The background polling interval also updates the `lastRefreshTime` timestamp to prevent duplicate refresh requests on tab return.
 * **[usePortfolioData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/usePortfolioData.ts)**
   * Source of truth for portfolio assets, net worth snapshots, and database transactions.
   * Integrated **SWR caching** and automatic IndexedDB caching (`idb-keyval`) to implement stale-while-revalidate instant loads.
+  * Configures SWR with `dedupingInterval: 300_000` (5 minutes) to avoid duplicate network fetches within a short timeframe, and `errorRetryCount: 2` to prevent rapid retry storms on unstable mobile networks.
   * Clears IndexedDB cache via `invalidateIDBCache()` on asset/portfolio mutations to prevent state synchronization issues.
   * Listens to document `visibilitychange` events to trigger background SWR reloads and price refreshes on window focus/resume.
+  * Implements a `recalcPortfolioTotals` performance guard that skips recalculation tasks if the underlying asset details haven't changed.
   * Guarantees race-free state transitions by processing queries/mutations through a serialized promise queue (`runMutation`) with debounced mutation coalescing.
   * Implements a resolver registry callback queue (`refreshResolversRef`) in `refreshSnapshot` to prevent hanging promises when debounce triggers are cancelled.
   * Sorts family portfolios dynamically in a data-driven way, pinning the primary `'personal'` portfolio to the top and sorting custom/other portfolios chronologically via database creation dates (`created_at`).
-  * Connects to Supabase Edge Functions via [apiClient.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/apiClient.ts).
+  * Connects to Supabase Edge Functions via [apiClient.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/apiClient.ts). Now implements session-level in-memory caching of the computed SHA-256 PIN hash (`_cachedPinHash`) to eliminate encryption overhead on every API call. This cache is automatically cleared if a 401 Unauthorized response is received.
   * Manages stock price caching (15-minute TTL) and live polling.
 * **[supabaseClient.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/supabaseClient.ts)**
   * Dynmically initializes the Supabase JS SDK. Refactored to dynamically import `@supabase/supabase-js` only when `getSupabase()` is executed, preventing the large client library (~117 kB) from loading inside the initial auth bundle.
@@ -33,7 +36,9 @@ This document provides a high-level overview of the folder structure, data flow,
 * **[App.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/App.tsx)**
   * Serves as a lightweight, zero-dependency entry gate component. If the access PIN is not verified, it immediately renders `PinLockScreen` from a clean, provider-free chunk. Once unlocked, it dynamically imports and mounts `MainApp` using `React.lazy`.
 * **[MainApp.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/MainApp.tsx)**
-  * Hosts all context providers (`ThemeProvider`, `PortfolioProvider`), the Router routes structure, and the dashboard hydration load gates, isolating them from the initial lock screen bundle to optimize initial paint speeds.
+  * Hosts all context providers (`ThemeProvider`, `PortfolioProvider`), the Router routes structure, and the dashboard hydration load gates, isolating them from the initial lock screen bundle. Utilizes a single media-query listener setup to handle viewport checks efficiently.
+* **[AppShell.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/layouts/AppShell.tsx)**
+  * Serves as the core layout manager. Optimizes first paint speed by using `React.lazy` to defer loading the `InsightsPanel` and `SearchBar` components (minimizing bundle weight by ~17 KB for search alone). Uses `window.matchMedia` query listeners rather than `window.innerWidth` resize event handlers to run responsive layout adaptations (`isMobile`) without causing scroll lag or layout thrashing.
 * **[useSwipeNavigation.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useSwipeNavigation.ts)**
   * Touch swipe gesture listeners and navigation routing between active asset tabs.
 * **[useKeyboardShortcuts.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useKeyboardShortcuts.ts)**
@@ -46,7 +51,8 @@ This document provides a high-level overview of the folder structure, data flow,
 ### 3. Registry Component Routing
 * **[AssetTabContent.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/AssetTabContent.tsx)**
   * Orchestrator component rendering the active asset registry view.
-  * Integrates **dynamic lazy loading** (`React.lazy` and `React.Suspense`) for heavy views (`FixedDepositView`, `RDView`, `SIPView`, and `SSYView`) using [AssetCardSkeleton.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/AssetCardSkeleton.tsx) as the loading fallback.
+  * Integrates **dynamic lazy loading** (`React.lazy` and `React.Suspense`) for ALL heavy registry views and tables: `FixedDepositView`, `RDView`, `SIPView`, `SSYView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, and `PortfolioTable` using [AssetCardSkeleton.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/AssetCardSkeleton.tsx) as the loading fallback.
+  * Uses an IIFE single-pass mounting effect to trigger dynamic import preload requests for all asset views concurrently. This ensures sub-views are ready by the time the user swipes or navigates to them, eliminating tab-switching latency.
 
 ### 4. Modular UI Components
 Component folders are isolated by asset domain to ensure clean separation of concerns:
@@ -60,6 +66,9 @@ Component folders are isolated by asset domain to ensure clean separation of con
   * **[SankeyChart.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/SankeyChart.tsx)**: SVG flow diagram mapping net worth down to category classes and sub-assets. Contains thickness checks preventing the rendering of zero-width paths and invalid nodes.
   * **[PortfolioAssistant.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/PortfolioAssistant.tsx)**: Interactive NLP chat assistant interface.
   * **[DashboardWidgets.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/DashboardWidgets.tsx)**: Capacitor WebView widget page with Net Worth, Today's Gain, and upcoming FD indicators. Uses a clean fallback string "No upcoming maturities" under all zero-matured situations.
+* **App Icon System & Mobile Summary Optimizations**:
+  * **[AppIcons.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/icons/AppIcons.tsx)**: Custom inline SVG icon library containing 34 optimized icon definitions. By replacing all external `lucide-react` icons in critical rendering paths, it prevents the main application bundle from loading the large `lucide-react` module, resulting in dramatic bundle-weight savings.
+  * **[MobileHomeSummary.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/MobileHomeSummary.tsx)**: Displays the mobile dashboard overview. Wrapped with `React.memo` to prevent re-renders on price/data ticks when parent states change, and optimized to run a single-pass `useMemo` for-loop instead of 9 separate `reduce()` calculations.
 
 ---
 
@@ -86,8 +95,10 @@ The application implements a series of high-performance strategies to guarantee 
 * **IndexedDB Cache Storage**: Local caching of full portfolio datasets is strictly offloaded to IndexedDB (`idb-keyval`) to avoid browser `localStorage` size limits (keeping `localStorage` only for lightweight metadata like execution timestamps). It includes active `isMounted` guard patterns to prevent memory leak state updates.
 * **Reload Gating on Resume**: Implements a 5-minute (300,000 ms) elapsed time gate inside the `visibilitychange` listener of `usePortfolioData.ts` to prevent redundant, concurrent network sync operations on mobile app focus resumes.
 
-### 4. Bundler & Explicit Chunk Splitting
-* **Rollup manualChunks Splitting**: Configures a dynamic module path filter for Rolldown `manualChunks` in [vite.config.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/vite.config.ts) to explicitly split heavy modules (`@supabase/supabase-js`, `swr`, `idb-keyval`, and `react-window`) into separate vendor chunks. This prevents third-party packages from being bundled into the entry chunk, keeping the initial paint payload for the lock screen exceptionally light.
+### 4. Bundler & Build Optimizations
+* **Rollup manualChunks Splitting**: Configures a dynamic module path filter for manual chunks in [vite.config.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/vite.config.ts) to explicitly split heavy modules (`@supabase/supabase-js`, `swr`, `idb-keyval`, and `react-window`) into separate vendor chunks. This keeps the initial paint payload for the PIN Lock screen exceptionally light.
+* **Target and Compression Settings**: Configures compiler target as `es2020` in [vite.config.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/vite.config.ts), enabling modern ES features and reducing output bundle size by ~10-15%. Minimizes CSS via `cssMinify: true`, and disables `reportCompressedSize` to accelerate build pipelines.
+* **PWA Chunks Offline Caching**: Updates workbox caching patterns within the Vite PWA plugin to cache all compiled assets (`assets/*.js` and `assets/*.css`). This guarantees that all lazily-loaded sub-route chunks and CSS files are pre-cached and fully available offline on first load.
 
 ---
 
