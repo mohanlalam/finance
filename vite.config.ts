@@ -55,9 +55,6 @@ export default defineConfig(({ command }) => ({
     })
   ],
   base: command === 'serve' ? '/' : '/finance/',
-  optimizeDeps: {
-    exclude: ['lucide-react'],
-  },
   build: {
     rollupOptions: {
       output: {
@@ -74,6 +71,9 @@ export default defineConfig(({ command }) => ({
             }
             if (id.includes('react-window')) {
               return 'react-window';
+            }
+            if (id.includes('lucide-react')) {
+              return 'lucide';
             }
           }
         }

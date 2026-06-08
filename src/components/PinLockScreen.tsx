@@ -1,6 +1,50 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Lock, ShieldCheck, AlertCircle, Delete, ShieldAlert } from 'lucide-react';
 import { markSessionVerified, hashPin } from '../utils/auth';
+
+// Inline SVGs — keeps lucide-react out of the critical entry bundle
+function IconLock() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+function IconShieldCheck({ size = 32 }: { size?: number }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+function IconShieldAlert({ size = 32 }: { size?: number }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="M12 8v4" />
+      <path d="M12 16h.01" />
+    </svg>
+  );
+}
+function IconAlertCircle({ size = 14 }: { size?: number }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 8v4" />
+      <path d="M12 16h.01" />
+    </svg>
+  );
+}
+function IconDelete({ size = 22 }: { size?: number }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+      <path d="m15 9-6 6" />
+      <path d="m9 9 6 6" />
+    </svg>
+  );
+}
 
 const APP_PIN = (import.meta.env.VITE_APP_PIN as string | undefined) ?? '';
 const PIN_LENGTH = APP_PIN.length || 4;
@@ -38,9 +82,10 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
       if (nextPin.length === PIN_LENGTH) {
         if (nextPin === APP_PIN) {
           setSuccess(true);
+          // Fire onUnlock immediately after hashing — no artificial delay
           hashPin(nextPin).then((hash) => {
             markSessionVerified(hash);
-            setTimeout(() => onUnlock(), 500);
+            onUnlock();
           });
         } else {
           setShake(true);
@@ -105,7 +150,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
                 }`}
                 aria-hidden="true"
               >
-                {success ? <ShieldCheck size={32} /> : error ? <ShieldAlert size={32} /> : <Lock size={32} />}
+                {success ? <IconShieldCheck size={32} /> : error ? <IconShieldAlert size={32} /> : <IconLock />}
               </div>
               <p className="text-xs text-slate-400 font-semibold tracking-wider uppercase mt-1.5">Family Wealth Office Secure Access</p>
             </div>
@@ -134,7 +179,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             {/* Error Message */}
             {error && (
               <div className="flex items-center gap-2 text-red-400 text-sm mb-6 font-semibold" role="alert">
-                <AlertCircle size={14} />
+                <IconAlertCircle size={14} />
                 <span>{error}</span>
               </div>
             )}
@@ -142,7 +187,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             {/* Success Message */}
             {success && (
               <div className="flex items-center gap-2 text-emerald-400 text-sm mb-6 font-semibold" role="status">
-                <ShieldCheck size={14} />
+                <IconShieldCheck size={14} />
                 <span>Access Granted. Loading Vault...</span>
               </div>
             )}
@@ -193,7 +238,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
                 Forgot Access PIN?
               </a>
               <div className="mt-4 flex items-center justify-center gap-1.5 text-slate-400">
-                <ShieldCheck size={16} className="text-emerald-500" />
+                <IconShieldCheck size={16} />
                 <span className="text-[11px] font-semibold tracking-wide uppercase">Secure Tier 4 Encryption Active</span>
               </div>
             </div>
@@ -206,6 +251,8 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
                 <img
                   alt="High-tech cybersecurity"
                   className="rounded-xl opacity-75 mix-blend-screen w-full object-cover h-[300px]"
+                  loading="lazy"
+                  decoding="async"
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjjJ-916kqd5ywgCeXcCu8VNNQL2ghXwPLTFXPWEMmwooK0dPVvxdHuSTCtWVJcXvQxSrQ22qBJ2F6NUKlOxwdDzg2CZ_Umw9FuKMxZYy68k9WQxzwPqmLiYARjVGel9oN4hZ9jP4o54o4uTgQU6Y9JbGREva00oFF_fsM88Q0mZ3YLA2KJ-BzikuJ0z1x0bjdST7zUSDvKQor6rslKgoGwE8z2NJ6vKTsvRlvFtbMW9uGKLTGrlyahJGXaukjvJ9C0Uq6VgXJv1_C"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent pointer-events-none rounded-xl" />
