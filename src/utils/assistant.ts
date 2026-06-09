@@ -2,7 +2,6 @@ import { Portfolio } from '../types/portfolio';
 import { formatINR, getFDInvestedAmount, getFDEffectiveValue } from './formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from './rdUtils';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from './sipUtils';
-import { getSSYInvestedAmount, getSSYEffectiveValue } from './ssyUtils';
 
 export interface AssistantResponse {
   answer: string;
@@ -281,23 +280,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
       }
     }
 
-    // Sukanya Samriddhi Yojana
-    if (p.ssyAccounts) {
-      for (const ssy of p.ssyAccounts) {
-        const inv = getSSYInvestedAmount(ssy);
-        const val = getSSYEffectiveValue(ssy);
-        const gain = val - inv;
-        const gainPct = inv > 0 ? (gain / inv) * 100 : 0;
-        allAssets.push({
-          name: `${ssy.bank_name} SSY`,
-          type: 'Sukanya Samriddhi Yojana',
-          invested: inv,
-          value: val,
-          gain,
-          gainPct,
-        });
-      }
-    }
+
 
     // Mutual Fund SIPs
     if (p.sipAccounts) {
@@ -409,27 +392,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
       }
     }
 
-    // SSYs
-    for (const p of portfolios) {
-      if (p.ssyAccounts) {
-        for (const ssy of p.ssyAccounts) {
-          if (ssy.maturity_date) {
-            const mDate = new Date(ssy.maturity_date);
-            if (!isNaN(mDate.getTime())) {
-              maturities.push({
-                name: `${ssy.bank_name} SSY`,
-                type: 'Sukanya Samriddhi Yojana',
-                dateStr: ssy.maturity_date,
-                dateObj: mDate,
-                amount: ssy.maturity_amount,
-                isExpired: mDate.getTime() < today.getTime() && ssy.status === 'active',
-                details: `Annual deposit: ${formatINR(ssy.annual_deposit)}, Maturity Val: ${formatINR(ssy.maturity_amount)}`,
-              });
-            }
-          }
-        }
-      }
-    }
+
 
     // Insurances
     for (const p of portfolios) {
@@ -488,7 +451,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
         };
       } else {
         return {
-          answer: `No Fixed Deposits, Recurring Deposits, Sukanya Samriddhi Yojana accounts, insurance policies, or documents are maturing/due in **${targetYear}**.`,
+          answer: `No Fixed Deposits, Recurring Deposits, insurance policies, or documents are maturing/due in **${targetYear}**.`,
           matchedAssets: [],
         };
       }
@@ -537,7 +500,6 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
   let realEstateTotal = 0;
   let fdTotal = 0;
   let rdTotal = 0;
-  let ssyTotal = 0;
   let sipTotal = 0;
 
   for (const p of portfolios) {
@@ -548,16 +510,13 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     if (p.rdAccounts) {
       rdTotal += p.rdAccounts.reduce((sum, rd) => sum + getRDEffectiveValue(rd), 0);
     }
-    if (p.ssyAccounts) {
-      ssyTotal += p.ssyAccounts.reduce((sum, ssy) => sum + getSSYEffectiveValue(ssy), 0);
-    }
     if (p.sipAccounts) {
       sipTotal += p.sipAccounts.reduce((sum, sip) => sum + getSIPEffectiveValue(sip), 0);
     }
   }
 
   const equityTotal = stocksTotal + sipTotal;
-  const debtTotal = fdTotal + rdTotal + ssyTotal;
+  const debtTotal = fdTotal + rdTotal;
   const totalVal = equityTotal + debtTotal + goldTotal + realEstateTotal;
 
   // Query 4: Allocation Split Queries
@@ -585,10 +544,9 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     answer += `- **Equity (Stocks + Mutual Funds)**: **${formatINR(equityTotal)}** (${eqPct.toFixed(1)}%) ${getProgressBar(eqPct)}\n`;
     answer += `  * Direct Stocks: ${formatINR(stocksTotal)}\n`;
     answer += `  * Mutual Fund SIPs: ${formatINR(sipTotal)}\n`;
-    answer += `- **Debt (FD + RD + SSY)**: **${formatINR(debtTotal)}** (${dbPct.toFixed(1)}%) ${getProgressBar(dbPct)}\n`;
+    answer += `- **Debt (FD + RD)**: **${formatINR(debtTotal)}** (${dbPct.toFixed(1)}%) ${getProgressBar(dbPct)}\n`;
     answer += `  * Fixed Deposits: ${formatINR(fdTotal)}\n`;
     answer += `  * Recurring Deposits: ${formatINR(rdTotal)}\n`;
-    answer += `  * Sukanya Samriddhi Yojana (SSY): ${formatINR(ssyTotal)}\n`;
     answer += `- **Gold**: **${formatINR(goldTotal)}** (${gdPct.toFixed(1)}%) ${getProgressBar(gdPct)}\n`;
     answer += `- **Real Estate**: **${formatINR(realEstateTotal)}** (${rePct.toFixed(1)}%) ${getProgressBar(rePct)}\n`;
 

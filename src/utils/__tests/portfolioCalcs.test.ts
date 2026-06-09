@@ -39,7 +39,6 @@ describe('estimateTodayPnL', () => {
       stocksValue: 22000,
       fdValue: 0,
       rdValue: 0,
-      ssyValue: 0,
       sipValue: 0,
       goldValue: 0,
       realEstateValue: 0,

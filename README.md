@@ -38,7 +38,7 @@ A premium, interactive web application designed to track and manage multi-asset 
 
 ### ⚡ High Performance & Responsiveness
 - **App Icons inline SVG System** — Replaced all external `lucide-react` icons inside critical path modules (such as Header, BottomNav, summary panels, and error boundaries) with a custom inline SVG library (`AppIcons.tsx`). This completely isolates `lucide-react` to lazy-loaded chunks and prevents large dependency footprints during initial mount.
-- **Dynamic Tab Preloading** — Lazily loads all primary asset views and tables (`FixedDepositView`, `RDView`, `SIPView`, `SSYView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, and `PortfolioTable`). Uses an IIFE single-pass preloader on mount to fetch all bundle chunks in parallel, eliminating UI lag on swipe navigation.
+- **Dynamic Tab Preloading** — Lazily loads all primary asset views and tables (`FixedDepositView`, `RDView`, `SIPView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, and `PortfolioTable`). Uses an IIFE single-pass preloader on mount to fetch all bundle chunks in parallel, eliminating UI lag on swipe navigation.
 - **Asynchronous Web Workers** — Offloads heavy computations (Newton-Raphson XIRR solvers, multi-factor Health Score scoring, and rebalancing recommendations) to background threads (`src/workers/`) with synchronous fallbacks and detailed diagnostics warnings in case of worker thread initialization failures.
 - **List Virtualization & Row Keys** — Uses `react-window` to virtualize large registry listings (>8 accounts) to keep scrolling fluid and render times minimal. Row key elements are explicitly bound to asset IDs (`itemKey`) to optimize DOM recycling and prevent rendering glitches.
 - **Intersection Lazy Loading** — Leverages a custom type-safe `LazyChartWrapper` component with `IntersectionObserver` to lazy-load charts (`NetWorthTimelineChart`, `TreemapChart`, `SankeyChart`) only when they scroll into the viewport, completely deferring their bundle load and dynamic import evaluation.
@@ -50,7 +50,7 @@ A premium, interactive web application designed to track and manage multi-asset 
 ### 📂 Multi-Asset Registry & Reminders
 - **Fixed Deposits (FD)** — Real-time compounded interest tracking (compounded half-yearly), maturity date tracking, timeline progress bars, and document attachments.
 - **Recurring Deposits (RD)** — Multi-month installment tracking with an interactive month-by-month grid list, paid vs. overdue status tracking, and a one-click **+ Pay** action button to record monthly contributions.
-- **Sukanya Samriddhi Yojana (SSY)** — Multi-year financial tracking with compounding strictly on every April 1st (Indian Financial Year end). Auto-calculates default 21-year maturity dates and flags deposits that violate the legal ₹250 – ₹1,50,000 annual range.
+
 - **SIP Mutual Funds** — Real-time mutual fund tracking via scheme automation. Integrate Scheme Codes with `api.mfapi.in` (including a 4-hour `sessionStorage` cache) to dynamically fetch live NAVs and calculate current portfolio valuations based on units owned.
 - **Gold Holdings** — Weight tracking, purity selection (24K, 22K, etc.), cost basis vs. current valuation appreciation.
 - **Real Estate** — Property value trackers, locations, acquisition dates, monthly rental yield calculations, and empty-state CTA redirection.
@@ -85,7 +85,7 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **idb-keyval ^6.2.5** — Minimalistic IndexedDB wrapper for local cache storage
 
 ### Backend (Supabase)
-- **PostgreSQL** — Relational database tables for portfolios, holdings, FDs (`fixed_deposits`), RDs (`rd_accounts`), Mutual Funds (`sip_accounts`), SSY (`ssy_accounts`), gold, real estate, insurances, documents, and net worth history.
+- **PostgreSQL** — Relational database tables for portfolios, holdings, FDs (`fixed_deposits`), RDs (`rd_accounts`), Mutual Funds (`sip_accounts`), gold, real estate, insurances, documents, and net worth history.
 - **Supabase Storage** — Secure file storage for financial and insurance document attachments.
 - **Edge Functions (Deno)** — Serverless functions for:
   - `holdings-crud` — Secure DB access and operations (PIN-locked).
@@ -129,11 +129,7 @@ project antigravity/
 │   │   │   ├── SIPFormFields.tsx     # Inputs for scheme code lookup and unit holdings
 │   │   │   ├── SIPFormModal.tsx      # Create/Edit SIP form dialog
 │   │   │   └── SIPView.tsx           # Main dashboard registry for Mutual Funds (SIP)
-│   │   ├── ssy/                  # Sukanya Samriddhi Yojana (SSY)
-│   │   │   ├── SSYAccountCard.tsx    # Card layout for SSY registry
-│   │   │   ├── SSYFormModal.tsx      # Create/Edit SSY account form dialog
-│   │   │   ├── SSYSchedule.tsx       # Compounding yearly ledger breakdown
-│   │   │   └── SSYView.tsx           # Main dashboard registry for SSY accounts
+
 │   │   ├── AssetCardSkeleton.tsx # Reusable pulsing shimmer card wireframe for all registry views
 │   │   ├── AddHoldingModal.tsx   # Modal form to add new stock holdings
 │   │   ├── AddFamilyModal.tsx    # Modal form to add new family members
@@ -170,7 +166,7 @@ project antigravity/
 │   │   ├── usePortfolioData.ts   # Core data hook — Edge Function list, CRUD operations, local cache, live prices
 │   │   ├── useRDData.ts          # Thin hook wrapper pulling Recurring Deposits CRUD from context
 │   │   ├── useSIPData.ts          # Thin hook wrapper pulling Mutual Fund SIPs CRUD from context
-│   │   ├── useSSYData.ts         # Thin hook wrapper pulling Sukanya Samriddhi Yojana CRUD from context
+
 │   │   ├── usePortfolioInsights.ts # Computes allocation, performer, and reminder insights
 │   │   ├── useMarketData.ts      # Standalone market price fetcher (CORS proxied)
 │   │   ├── useAlerts.ts          # Evaluates warnings, contains visible/dismissed states
@@ -186,7 +182,7 @@ project antigravity/
 │   │   ├── portfolioCalcs.ts     # Computes aggregate values and drift splits; contains the shared compoundValue engine
 │   │   ├── rdUtils.ts            # Recurring Deposit installment & compounding calculations leveraging the shared engine
 │   │   ├── sipUtils.ts           # SIP contribution & manual valuation helpers
-│   │   ├── ssyUtils.ts           # SSY Financial Year & annual compounding calculations leveraging the shared engine
+
 │   │   └── supabaseClient.ts     # Supabase SDK initialization
 │   └── data/
 │       ├── portfolioData.ts      # Static/seed portfolio data

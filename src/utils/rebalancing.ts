@@ -22,7 +22,7 @@ export function calculateRebalancing(
   
   // Aggregate actuals
   const equityValue = breakdown.stocks + breakdown.sip;
-  const debtValue = breakdown.fd + breakdown.rd + breakdown.ssy;
+  const debtValue = breakdown.fd + breakdown.rd;
   const goldValue = breakdown.gold;
   const realEstateValue = breakdown.realEstate;
 

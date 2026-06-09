@@ -15,7 +15,7 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
 
   const flows = useMemo(() => {
     const equity = breakdown.stocks + breakdown.sip;
-    const debt = breakdown.fd + breakdown.rd + breakdown.ssy;
+    const debt = breakdown.fd + breakdown.rd;
     const gold = breakdown.gold;
     const re = breakdown.realEstate;
     const total = equity + debt + gold + re;
@@ -29,7 +29,6 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
       sip: breakdown.sip,
       fd: breakdown.fd,
       rd: breakdown.rd,
-      ssy: breakdown.ssy,
       total: total > 0 ? total : 1000000, // fallback
       isMock: total === 0,
     };
@@ -40,15 +39,14 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
     if (!flows.isMock) return flows;
     return {
       equity: 500000,
-      debt: 300000,
+      debt: 225000,
       gold: 100000,
       re: 100000,
       stocks: 350000,
       sip: 150000,
       fd: 150000,
       rd: 75000,
-      ssy: 75000,
-      total: 1000000,
+      total: 925000,
       isMock: true,
     };
   }, [flows]);
@@ -81,7 +79,6 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
       sip: data.sip * scale,
       fd: data.fd * scale,
       rd: data.rd * scale,
-      ssy: data.ssy * scale,
     };
 
     const totalNodeH = data.total * scale;
@@ -97,8 +94,7 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
     const y3_sip = y3_stocks + nodeHeights.stocks + 10;
     const y3_fd = y3_sip + nodeHeights.sip + 15;
     const y3_rd = y3_fd + nodeHeights.fd + 10;
-    const y3_ssy = y3_rd + nodeHeights.rd + 10;
-    const y3_gold = y3_ssy + nodeHeights.ssy + 15;
+    const y3_gold = y3_rd + nodeHeights.rd + 15;
     const y3_re = y3_gold + nodeHeights.gold + 15;
 
     // Helper to draw smooth bezier link path between nodes
@@ -128,7 +124,6 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
       y3_sip,
       y3_fd,
       y3_rd,
-      y3_ssy,
       y3_gold,
       y3_re,
       links: {
@@ -140,7 +135,6 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
         sipToSub: getLinkPath(x2 + nodeW, y2_equity + nodeHeights.stocks, nodeHeights.sip, x3, y3_sip, nodeHeights.sip),
         fdToSub: getLinkPath(x2 + nodeW, y2_debt, nodeHeights.fd, x3, y3_fd, nodeHeights.fd),
         rdToSub: getLinkPath(x2 + nodeW, y2_debt + nodeHeights.fd, nodeHeights.rd, x3, y3_rd, nodeHeights.rd),
-        ssyToSub: getLinkPath(x2 + nodeW, y2_debt + nodeHeights.fd + nodeHeights.rd, nodeHeights.ssy, x3, y3_ssy, nodeHeights.ssy),
         goldToSub: getLinkPath(x2 + nodeW, y2_gold, nodeHeights.gold, x3, y3_gold, nodeHeights.gold),
         reToSub: getLinkPath(x2 + nodeW, y2_re, nodeHeights.re, x3, y3_re, nodeHeights.re),
       }
@@ -158,7 +152,6 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
     y3_sip,
     y3_fd,
     y3_rd,
-    y3_ssy,
     y3_gold,
     y3_re,
     links
@@ -214,10 +207,9 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
           {/* Equity -> Stocks & SIPs */}
           {nodeHeights.stocks > 0 && <path d={links.stocksToSub} fill="url(#eqGrad)" />}
           {nodeHeights.sip > 0 && <path d={links.sipToSub} fill="url(#eqGrad)" />}
-          {/* Debt -> FDs, RDs, SSYs */}
+          {/* Debt -> FDs, RDs */}
           {nodeHeights.fd > 0 && <path d={links.fdToSub} fill="url(#debtGrad)" />}
           {nodeHeights.rd > 0 && <path d={links.rdToSub} fill="url(#debtGrad)" />}
-          {nodeHeights.ssy > 0 && <path d={links.ssyToSub} fill="url(#debtGrad)" />}
           {/* Gold -> Gold node */}
           {nodeHeights.gold > 0 && <path d={links.goldToSub} fill="url(#goldGrad)" />}
           {/* Real Estate -> Real Estate node */}
@@ -307,14 +299,7 @@ export default function SankeyChart({ portfolios, activePortfolio }: SankeyChart
             </>
           )}
 
-          {nodeHeights.ssy > 0 && (
-            <>
-              <rect x={x3} y={y3_ssy} width={nodeW} height={nodeHeights.ssy} fill="#c084fc" rx={3} />
-              <text x={x3 + nodeW + 6} y={y3_ssy + nodeHeights.ssy / 2 + 3} className="fill-slate-500 dark:fill-slate-400 font-semibold text-[8px]">
-                SSY ({formatCompactINR(data.ssy)})
-              </text>
-            </>
-          )}
+
 
           {nodeHeights.gold > 0 && (
             <>

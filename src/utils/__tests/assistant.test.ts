@@ -131,7 +131,6 @@ describe('askAssistant query parser', () => {
       stocksValue: 25000,
       fdValue: 150000,
       rdValue: 10000,
-      ssyValue: 0,
       sipValue: 65000,
       goldValue: 75000,
       realEstateValue: 6000000,

@@ -29,8 +29,7 @@ This document provides a high-level overview of the folder structure, data flow,
   * Thin hook wrapper pulling Recurring Deposit state and operations directly from `PortfolioContext`.
 * **[useSIPData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useSIPData.ts)**
   * Thin hook wrapper pulling Mutual Fund SIP state and operations from `PortfolioContext`.
-* **[useSSYData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useSSYData.ts)**
-  * Thin hook wrapper pulling Sukanya Samriddhi Yojana state and operations from `PortfolioContext`.
+
 
 ### 2. App Shell & Navigation Router
 * **[App.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/App.tsx)**
@@ -51,7 +50,7 @@ This document provides a high-level overview of the folder structure, data flow,
 ### 3. Registry Component Routing
 * **[AssetTabContent.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/AssetTabContent.tsx)**
   * Orchestrator component rendering the active asset registry view.
-  * Integrates **dynamic lazy loading** (`React.lazy` and `React.Suspense`) for ALL heavy registry views and tables: `FixedDepositView`, `RDView`, `SIPView`, `SSYView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, and `PortfolioTable` using [AssetCardSkeleton.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/AssetCardSkeleton.tsx) as the loading fallback.
+  * Integrates **dynamic lazy loading** (`React.lazy` and `React.Suspense`) for ALL heavy registry views and tables: `FixedDepositView`, `RDView`, `SIPView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, and `PortfolioTable` using [AssetCardSkeleton.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/AssetCardSkeleton.tsx) as the loading fallback.
   * Uses an IIFE single-pass mounting effect to trigger dynamic import preload requests for all asset views concurrently. This ensures sub-views are ready by the time the user swipes or navigates to them, eliminating tab-switching latency.
 
 ### 4. Modular UI Components
@@ -59,7 +58,7 @@ Component folders are isolated by asset domain to ensure clean separation of con
 * **[src/components/fd/](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/fd/)**: Standard Fixed Deposit cards (`DepositDetailsCard.tsx`) and form controls (`StandardFormFields.tsx`).
 * **[src/components/rd/](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/rd/)**: Recurring Deposit lists (`RDView.tsx`, `RDAccountCard.tsx`), modals (`RDFormModal.tsx`), and monthly contributions trackers (`RDInstallmentSchedule.tsx`).
 * **[src/components/sip/](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/sip/)**: Mutual Fund SIP views (`SIPView.tsx`, `SIPAccountCard.tsx`), modals (`SIPFormModal.tsx`), and live schema lookup fields (`SIPFormFields.tsx`).
-* **[src/components/ssy/](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/ssy/)**: SSY girls' ledger views (`SSYView.tsx`, `SSYAccountCard.tsx`), form modals (`SSYFormModal.tsx`), and custom compounding ledger schedules (`SSYSchedule.tsx`).
+
 * **Visual Dashboard & Widget Components**:
   * **[NetWorthTimelineChart.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/NetWorthTimelineChart.tsx)**: Responsive SVG line & area chart showing compound net worth valuation timeline. Custom date-range filtering is supported (1M, 3M, 6M, 1Y, ALL).
   * **[TreemapChart.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/TreemapChart.tsx)**: SVG tree-map highlighting relative equity allocation sizes. Safeguarded with division-by-zero guards and box clamping, filtering out sub-1px elements to prevent overlapping coordinate errors.
@@ -87,7 +86,7 @@ The application implements a series of high-performance strategies to guarantee 
 * **Card Memoization**: Asset card components use `React.memo` with strict equality functions comparing primary metrics to prevent redundant child re-renders.
 * **SVG Coordinate Memoization**: Grid and path builders in `NetWorthTimelineChart.tsx` and `SankeyChart.tsx` wrap layout and coordinate calculations in `useMemo` blocks, avoiding recalculation unless data or sizes change.
 * **Lazy Rendering Viewports**: Heavy SVG/D3 charts (`NetWorthTimelineChart.tsx`, `TreemapChart.tsx`, `SankeyChart.tsx`) inside `AppShell.tsx` are wrapped in a type-safe `LazyChartWrapper` utilizing `IntersectionObserver`. This completely defers dynamic import bundle fetching and `React.lazy` evaluation until the chart placeholder scrolls into view, avoiding startup main-thread bloat.
-* **Gated Schedule Calculations**: Heavy compounding ledger schedule calculations in `SSYSchedule.tsx` are gated and memoized using `React.useMemo` and the component's `expanded` state, reducing mount-time calculation overhead to exactly 0ms.
+
 
 ### 3. Caching & Network Coalescing
 * **SWR Hook & Mutation Coalescing**: Wraps remote assets data with cache revalidation. Coordinates remote calls to prevent double fetching, ensuring initial load live prices and NAV updates are handled smoothly by SWR keys.
@@ -110,13 +109,13 @@ Every deposit registry maps to its own separate database table. This guarantees 
 | :--- | :--- | :--- |
 | **Fixed Deposit (FD)** | `fixed_deposits` | Half-yearly compounding (FD interest rates) |
 | **Recurring Deposit (RD)** | `rd_accounts` | Quarterly compounding + Contribution dates array |
-| **Sukanya Samriddhi (SSY)** | `ssy_accounts` | Annual compounding on April 1st (Indian financial boundary) |
+
 | **SIP Mutual Fund (SIP)** | `sip_accounts` | Live AMFI NAV scheme price multiplication, no compounding |
 
 ---
 
 ## 🧮 Calculations & Formatters
-* **[portfolioCalcs.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/portfolioCalcs.ts)**: Handles asset allocation aggregations, performance monitoring, and drift offsets. Completely decoupled from specific asset utilities (`formatters.ts`, `rdUtils.ts`, `ssyUtils.ts`, `sipUtils.ts`) by relying on pre-calculated asset totals on the `Portfolio` object.
+* **[portfolioCalcs.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/portfolioCalcs.ts)**: Handles asset allocation aggregations, performance monitoring, and drift offsets. Completely decoupled from specific asset utilities (`formatters.ts`, `rdUtils.ts`, `sipUtils.ts`) by relying on pre-calculated asset totals on the `Portfolio` object.
 * **[mathUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/mathUtils.ts)**: Implements standard math helper utilities, exporting the shared `compoundValue` engine to break circular dependencies.
 * **[performance.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/performance.ts)**: Implements solvers for XIRR, CAGR calculations, and weighted holding age. Guarded against same-sign cashflows and Newton-Raphson divergence via a robust bisection fallback. Evaluates stock holdings' weighted age using the database `created_at` timestamp rather than a hardcoded 1.0 year fallback.
 * **[healthScore.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/healthScore.ts)**: Evaluates a 0-100 health score based on diversification, active SIPs, emergency buffers, equity concentration, and insurance status. Caps Emergency Fund Buffer at 20 points and Insurance Cover at 15 points.
@@ -125,4 +124,4 @@ Every deposit registry maps to its own separate database table. This guarantees 
 * **[formatters.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/formatters.ts)**: Implements Indian currency formats (`₹` INR) and standard FD compounding (compounded semi-annually).
 * **[rdUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/rdUtils.ts)**: Computes elapsed month contributions and quarterly compounding leveraging the shared engine.
 * **[sipUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/sipUtils.ts)**: Calculates monthly contributions elapsed and retrieves live NAV evaluations, automatically respecting `account.liveNav` parameters.
-* **[ssyUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/ssyUtils.ts)**: Contains Indian Financial Year calculations, annual SSY compounding rates, and legal deposit range validations.
+

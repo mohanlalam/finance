@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock, Heart } from './icons/AppIcons';
+import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { Alert } from '../hooks/useAlerts';
@@ -18,7 +18,6 @@ interface MobileHomeSummaryProps {
     stocks: number;
     fd: number;
     rd: number;
-    ssy: number;
     sip: number;
     gold: number;
     realEstate: number;
@@ -31,13 +30,13 @@ interface MobileHomeSummaryProps {
   priceStatus: string;
   onRefresh: () => void;
   isLoadingPrices: boolean;
-  onNavigateAsset: (asset: 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
+  onNavigateAsset: (asset: 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
   onOpenAlerts: () => void;
   portfolios: Portfolio[];
   activePortfolio: Portfolio | null;
 }
 
-export default function MobileHomeSummary({
+export function MobileHomeSummary({
   summaryData,
   todayPnL,
   todayPnLPercent,
@@ -55,10 +54,10 @@ export default function MobileHomeSummary({
 }: MobileHomeSummaryProps) {
   // Single-pass count computation — avoids 9 separate reduce() calls on every render
   const {
-    stockCount, fdCount, rdCount, ssyCount, sipCount,
+    stockCount, fdCount, rdCount, sipCount,
     goldCount, propertyCount, insuranceCount, docCount
   } = useMemo(() => {
-    let stockCount = 0, fdCount = 0, rdCount = 0, ssyCount = 0, sipCount = 0,
+    let stockCount = 0, fdCount = 0, rdCount = 0, sipCount = 0,
         goldCount = 0, propertyCount = 0, insuranceCount = 0, docCount = 0;
     const ps = activePortfolio ? [activePortfolio] : portfolios;
     for (const p of ps) {
@@ -66,7 +65,6 @@ export default function MobileHomeSummary({
       for (const f of p.fixedDeposits) {
         if (!f.fd_type || f.fd_type === 'regular') fdCount++;
         else if (f.fd_type === 'recurring') rdCount++;
-        else if (f.fd_type === 'ssy') ssyCount++;
         else if (f.fd_type === 'sip') sipCount++;
       }
       goldCount      += p.goldHoldings.length;
@@ -74,14 +72,13 @@ export default function MobileHomeSummary({
       insuranceCount += p.insurances.length;
       docCount       += p.documents.length;
     }
-    return { stockCount, fdCount, rdCount, ssyCount, sipCount, goldCount, propertyCount, insuranceCount, docCount };
+    return { stockCount, fdCount, rdCount, sipCount, goldCount, propertyCount, insuranceCount, docCount };
   }, [activePortfolio, portfolios]);
 
   const totalValue =
     breakdown.stocks +
     breakdown.fd +
     breakdown.rd +
-    breakdown.ssy +
     breakdown.sip +
     breakdown.gold +
     breakdown.realEstate;
@@ -114,14 +111,6 @@ export default function MobileHomeSummary({
       subtext: `${rdCount} Active RDs`,
       icon: <Clock size={20} className="text-pink-500" />,
       bg: 'from-pink-50/50 to-rose-50/20 dark:from-pink-950/20 dark:to-rose-950/5 border-pink-100/50 dark:border-pink-900/30',
-    },
-    {
-      id: 'ssy' as const,
-      label: 'Sukanya Samriddhi',
-      value: breakdown.ssy,
-      subtext: `${ssyCount} Accounts`,
-      icon: <Heart size={20} className="text-purple-500" />,
-      bg: 'from-purple-50/50 to-fuchsia-50/20 dark:from-purple-950/20 dark:to-fuchsia-950/5 border-purple-100/50 dark:border-purple-900/30',
     },
     {
       id: 'sip' as const,
@@ -258,7 +247,6 @@ export default function MobileHomeSummary({
             {breakdown.stocks > 0 && <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.stocks)}%` }} />}
             {breakdown.fd > 0 && <div className="h-full bg-indigo-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.fd)}%` }} />}
             {breakdown.rd > 0 && <div className="h-full bg-pink-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.rd)}%` }} />}
-            {breakdown.ssy > 0 && <div className="h-full bg-purple-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.ssy)}%` }} />}
             {breakdown.sip > 0 && <div className="h-full bg-sky-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.sip)}%` }} />}
             {breakdown.gold > 0 && <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.gold)}%` }} />}
             {breakdown.realEstate > 0 && <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.realEstate)}%` }} />}
@@ -281,12 +269,6 @@ export default function MobileHomeSummary({
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="w-2.5 h-2.5 rounded bg-pink-500 shrink-0" />
                 <span className="truncate">RD ({getPercent(breakdown.rd).toFixed(0)}%)</span>
-              </div>
-            )}
-            {breakdown.ssy > 0 && (
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="w-2.5 h-2.5 rounded bg-purple-500 shrink-0" />
-                <span className="truncate">SSY ({getPercent(breakdown.ssy).toFixed(0)}%)</span>
               </div>
             )}
             {breakdown.sip > 0 && (

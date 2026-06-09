@@ -3,7 +3,6 @@ import { Portfolio, Holding, FixedDeposit, Insurance } from '../types/portfolio'
 import { getFDEffectiveValue } from '../utils/formatters';
 import { getRDEffectiveValue } from '../utils/rdUtils';
 import { getSIPEffectiveValue } from '../utils/sipUtils';
-import { getSSYEffectiveValue } from '../utils/ssyUtils';
 
 /* ── Allocation Targets ── */
 
@@ -218,8 +217,7 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
       0
     );
     const rdVal = portfolios.reduce((s, p) => s + (p.rdAccounts || []).reduce((a, acc) => a + getRDEffectiveValue(acc), 0), 0);
-    const ssyVal = portfolios.reduce((s, p) => s + (p.ssyAccounts || []).reduce((a, acc) => a + getSSYEffectiveValue(acc), 0), 0);
-    const totalFdVal = fdVal + rdVal + ssyVal;
+    const totalFdVal = fdVal + rdVal;
 
     const goldVal = portfolios.reduce(
       (s, p) => s + p.goldHoldings.reduce((a, g) => a + Number(g.current_valuation), 0),

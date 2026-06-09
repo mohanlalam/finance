@@ -108,7 +108,6 @@ describe('calculateWeightedAge', () => {
       stocksValue: 12000,
       fdValue: 10000,
       rdValue: 0,
-      ssyValue: 0,
       sipValue: 0,
       goldValue: 0,
       realEstateValue: 0,
@@ -119,7 +118,7 @@ describe('calculateWeightedAge', () => {
     expect(weightedAge).toBeCloseTo(1.5, 1);
   });
 
-  it('weights RDs, SSYs, and SIPs by their actual invested amounts', () => {
+  it('weights RDs and SIPs by their actual invested amounts', () => {
     const now = new Date();
     const twoYearsAgo = new Date(now.getFullYear() - 2, now.getMonth(), now.getDate()).toISOString().split('T')[0];
 
@@ -152,7 +151,6 @@ describe('calculateWeightedAge', () => {
       stocksValue: 0,
       fdValue: 0,
       rdValue: 0,
-      ssyValue: 0,
       sipValue: 130000,
       goldValue: 0,
       realEstateValue: 0,
@@ -200,7 +198,6 @@ describe('getPortfolioAnnualizedReturn (XIRR)', () => {
       stocksValue: 0,
       fdValue: 0,
       rdValue: 0,
-      ssyValue: 0,
       sipValue: 140000,
       goldValue: 0,
       realEstateValue: 0,

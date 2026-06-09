@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react';
 // Inline SVG icons — keeps lucide-react out of the critical post-unlock bundle
-import { WifiOff, AlertCircle, RefreshCw, TrendingUp, Landmark, Coins, Home, Shield, FolderOpen, Clock, Heart } from '../components/icons/AppIcons';
+import { WifiOff, AlertCircle, RefreshCw, TrendingUp, Landmark, Coins, Home, Shield, FolderOpen, Clock } from '../components/icons/AppIcons';
 import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
 import AddHoldingModal from '../components/AddHoldingModal';
@@ -126,7 +126,7 @@ function LazyChartWrapper<TProps extends object>({
   );
 }
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
 
 export default function AppShell() {
   const {
@@ -161,7 +161,7 @@ export default function AppShell() {
   const setActiveAsset = useCallback((newAsset: AssetTab) => {
     navigate(`/${family || 'all'}/${newAsset}`);
   }, [navigate, family]);
-  const [quickAddTarget, setQuickAddTarget] = useState<'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null>(null);
+  const [quickAddTarget, setQuickAddTarget] = useState<'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddFamily, setShowAddFamily] = useState(false);
   const [renameTarget, setRenameTarget] = useState<{ id: string; name: string; label: string } | null>(null);
@@ -617,12 +617,11 @@ export default function AppShell() {
 
             {/* Wealth Mosaic for All view */}
             {activeTab === 'all' && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
                 {[
                   { label: 'Stocks', value: breakdown.stocks },
                   { label: 'FDs', value: breakdown.fd },
                   { label: 'RDs', value: breakdown.rd },
-                  { label: 'SSY', value: breakdown.ssy },
                   { label: 'SIPs', value: breakdown.sip },
                   { label: 'Gold', value: breakdown.gold },
                   { label: 'Real Estate', value: breakdown.realEstate },
@@ -727,7 +726,6 @@ export default function AppShell() {
                 { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={16} /> },
                 { id: 'fd', label: 'Fixed Deposits', icon: <Landmark size={16} /> },
                 { id: 'rd', label: 'Recurring Deposits', icon: <Clock size={16} /> },
-                { id: 'ssy', label: 'Sukanya Samriddhi', icon: <Heart size={16} /> },
                 { id: 'sip', label: 'SIP Mutual Funds', icon: <TrendingUp size={16} /> },
                 { id: 'gold', label: 'Gold Holdings', icon: <Coins size={16} /> },
                 { id: 'real_estate', label: 'Real Estate', icon: <Home size={16} /> },

@@ -29,33 +29,13 @@ export interface FixedDeposit {
   maturity_date: string | null;
   maturity_amount: number;
   status: 'active' | 'matured';
-  /** FD sub-type: 'regular' | 'recurring' | 'ssy' | 'nsc' | 'ppf' | 'sip' (default: 'regular') */
+  /** FD sub-type: 'regular' | 'recurring' | 'nsc' | 'ppf' | 'sip' (default: 'regular') */
   fd_type?: string;
   /** JSONB array of contribution records for recurring deposits */
   contributions?: { date: string; amount: number }[];
   notes?: string;
   mf_scheme_code?: string;
   units?: number;
-  girl_dob?: string;
-  /** Per-FY rate overrides for SSY: [{ fyStartYear: 2026, rate: 8.5 }, ...] */
-  rate_schedule?: { fyStartYear: number; rate: number }[];
-  created_at?: string;
-}
-
-export interface SSYAccount {
-  id: string;
-  portfolio_id: string;
-  bank_name: string;
-  girl_dob: string;
-  annual_deposit: number;
-  interest_rate: number;
-  start_date: string;
-  maturity_date: string;
-  maturity_amount: number;
-  status: 'active' | 'matured';
-  contributions: { date: string; amount: number }[];
-  rate_schedule: { fyStartYear: number; rate: number }[];
-  notes?: string;
   created_at?: string;
 }
 
@@ -138,7 +118,7 @@ export interface DocumentMetadata {
   name: string;
   file_path: string;
   file_type?: string;
-  asset_type: 'stock' | 'fd' | 'ssy' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'general';
+  asset_type: 'stock' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'general';
   asset_id?: string;
   expiry_date?: string;
   created_at?: string;
@@ -153,7 +133,6 @@ export interface Portfolio {
   fixedDeposits: FixedDeposit[];
   rdAccounts?: RDAccount[];
   sipAccounts?: SIPAccount[];
-  ssyAccounts?: SSYAccount[];
   goldHoldings: GoldHolding[];
   realEstate: RealEstate[];
   insurances: Insurance[];
@@ -165,7 +144,6 @@ export interface Portfolio {
   stocksValue: number;
   fdValue: number;
   rdValue: number;
-  ssyValue: number;
   sipValue: number;
   goldValue: number;
   realEstateValue: number;
@@ -195,22 +173,6 @@ export interface FDPayload {
   notes?: string;
   mf_scheme_code?: string;
   units?: number;
-  girl_dob?: string;
-  rate_schedule?: { fyStartYear: number; rate: number }[];
-}
-
-export interface SSYPayload {
-  bank_name: string;
-  girl_dob: string;
-  annual_deposit: number;
-  interest_rate: number;
-  start_date: string;
-  maturity_date: string;
-  maturity_amount: number;
-  status: 'active' | 'matured';
-  contributions?: { date: string; amount: number }[];
-  rate_schedule?: { fyStartYear: number; rate: number }[];
-  notes?: string;
 }
 
 export interface RDPayload {
@@ -278,5 +240,5 @@ export interface DocumentPayload {
   expiryDate: string | null;
 }
 
-export type AssetPayload = StockPayload | FDPayload | SSYPayload | RDPayload | SIPPayload | GoldPayload | RealEstatePayload | InsurancePayload | DocumentPayload;
+export type AssetPayload = StockPayload | FDPayload | RDPayload | SIPPayload | GoldPayload | RealEstatePayload | InsurancePayload | DocumentPayload;
 

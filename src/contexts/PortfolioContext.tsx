@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useCallback, useRef, useMemo, ReactNode, MutableRefObject } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Portfolio, PortfolioName, AssetPayload, RDPayload, SIPPayload, SSYPayload } from '../types/portfolio';
+import { Portfolio, PortfolioName, AssetPayload, RDPayload, SIPPayload } from '../types/portfolio';
 import { NetWorthSnapshot, usePortfolioData, LoadStatus } from '../hooks/usePortfolioData';
 
 export interface PortfolioDataContextValue {
@@ -40,9 +40,6 @@ export interface PortfolioActionContextValue {
   addSIPAccount: (portfolioName: string, payload: SIPPayload) => Promise<void>;
   updateSIPAccount: (id: string, payload: Partial<SIPPayload>) => Promise<void>;
   deleteSIPAccount: (id: string) => Promise<void>;
-  addSSYAccount: (portfolioName: string, payload: SSYPayload) => Promise<void>;
-  updateSSYAccount: (id: string, payload: Partial<SSYPayload>) => Promise<void>;
-  deleteSSYAccount: (id: string) => Promise<void>;
 }
 
 const PortfolioDataContext = createContext<PortfolioDataContextValue | null>(null);
@@ -254,29 +251,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     await refreshSnapshot();
   }, [deleteAsset, isMutatingRef, refreshSnapshot]);
 
-  const addSSYAccount = useCallback(async (portfolioName: string, payload: SSYPayload) => {
-    if (isMutatingRef.current) {
-      throw new Error('An update is already in progress. Please try again in a moment.');
-    }
-    await addAsset('ssy_account', portfolioName, payload);
-    await refreshSnapshot();
-  }, [addAsset, isMutatingRef, refreshSnapshot]);
 
-  const updateSSYAccount = useCallback(async (id: string, payload: Partial<SSYPayload>) => {
-    if (isMutatingRef.current) {
-      throw new Error('An update is already in progress. Please try again in a moment.');
-    }
-    await updateAsset('ssy_account', id, payload);
-    await refreshSnapshot();
-  }, [updateAsset, isMutatingRef, refreshSnapshot]);
-
-  const deleteSSYAccount = useCallback(async (id: string) => {
-    if (isMutatingRef.current) {
-      throw new Error('An update is already in progress. Please try again in a moment.');
-    }
-    await deleteAsset('ssy_account', id);
-    await refreshSnapshot();
-  }, [deleteAsset, isMutatingRef, refreshSnapshot]);
 
   const dataValue = useMemo<PortfolioDataContextValue>(() => ({
     portfolios,
@@ -332,9 +307,6 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     addSIPAccount,
     updateSIPAccount,
     deleteSIPAccount,
-    addSSYAccount,
-    updateSSYAccount,
-    deleteSSYAccount,
   }), [
     setActiveTab,
     load,
@@ -353,9 +325,6 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     addSIPAccount,
     updateSIPAccount,
     deleteSIPAccount,
-    addSSYAccount,
-    updateSSYAccount,
-    deleteSSYAccount,
   ]);
 
   return (

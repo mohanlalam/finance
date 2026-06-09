@@ -1,9 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Holding, Portfolio, FixedDeposit, RDAccount, SIPAccount, SSYAccount, GoldHolding, RealEstate, Insurance, DocumentMetadata, AssetPayload } from '../types/portfolio';
+import { Holding, Portfolio, FixedDeposit, RDAccount, SIPAccount, GoldHolding, RealEstate, Insurance, DocumentMetadata, AssetPayload } from '../types/portfolio';
 import { getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../utils/rdUtils';
 import { getSIPInvestedAmount, getSIPEffectiveValue, fetchNAV, initNAVCache } from '../utils/sipUtils';
-import { getSSYInvestedAmount, getSSYEffectiveValue } from '../utils/ssyUtils';
 import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiClient';
 import useSWR from 'swr';
 import * as idb from 'idb-keyval';
@@ -54,7 +53,6 @@ interface DBData {
   fixed_deposits?: FixedDeposit[];
   rd_accounts?: RDAccount[];
   sip_accounts?: SIPAccount[];
-  ssy_accounts?: SSYAccount[];
   gold_holdings?: GoldHolding[];
   real_estate?: RealEstate[];
   insurances?: Insurance[];
@@ -95,7 +93,6 @@ function recalcPortfolioTotals(
   fds: FixedDeposit[],
   rdAccounts: RDAccount[],
   sipAccounts: SIPAccount[],
-  ssyAccounts: SSYAccount[],
   gold: GoldHolding[],
   realEstate: RealEstate[]
 ) {
@@ -111,17 +108,14 @@ function recalcPortfolioTotals(
   const sipInvested = sipAccounts.reduce((sum, s) => sum + getSIPInvestedAmount(s), 0);
   const sipCurrent = sipAccounts.reduce((sum, s) => sum + getSIPEffectiveValue(s), 0);
 
-  const ssyInvested = ssyAccounts.reduce((sum, s) => sum + getSSYInvestedAmount(s), 0);
-  const ssyCurrent = ssyAccounts.reduce((sum, s) => sum + getSSYEffectiveValue(s), 0);
-
   const goldInvested = gold.reduce((sum, g) => sum + Number(g.purchase_price), 0);
   const goldCurrent = gold.reduce((sum, g) => sum + Number(g.current_valuation), 0);
 
   const reInvested = realEstate.reduce((sum, r) => sum + Number(r.purchase_price), 0);
   const reCurrent = realEstate.reduce((sum, r) => sum + Number(r.current_valuation), 0);
 
-  const totalInvested = stockInvested + fdInvested + rdInvested + sipInvested + ssyInvested + goldInvested + reInvested;
-  const totalCurrentValue = stockCurrent + fdCurrent + rdCurrent + sipCurrent + ssyCurrent + goldCurrent + reCurrent;
+  const totalInvested = stockInvested + fdInvested + rdInvested + sipInvested + goldInvested + reInvested;
+  const totalCurrentValue = stockCurrent + fdCurrent + rdCurrent + sipCurrent + goldCurrent + reCurrent;
   const totalPnL = totalCurrentValue - totalInvested;
   const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
 
@@ -133,7 +127,6 @@ function recalcPortfolioTotals(
     stocksValue: stockCurrent,
     fdValue: fdCurrent,
     rdValue: rdCurrent,
-    ssyValue: ssyCurrent,
     sipValue: sipCurrent,
     goldValue: goldCurrent,
     realEstateValue: reCurrent,
@@ -146,13 +139,12 @@ function buildPortfolio(
   fds: FixedDeposit[],
   rdAccounts: RDAccount[],
   sipAccounts: SIPAccount[],
-  ssyAccounts: SSYAccount[],
   gold: GoldHolding[],
   realEstate: RealEstate[],
   insurances: Insurance[],
   docs: DocumentMetadata[]
 ): Portfolio {
-  const totals = recalcPortfolioTotals(holdings, fds, rdAccounts, sipAccounts, ssyAccounts, gold, realEstate);
+  const totals = recalcPortfolioTotals(holdings, fds, rdAccounts, sipAccounts, gold, realEstate);
 
   return {
     id: dbP.id,
@@ -163,7 +155,6 @@ function buildPortfolio(
     fixedDeposits: fds,
     rdAccounts,
     sipAccounts,
-    ssyAccounts,
     goldHoldings: gold,
     realEstate,
     insurances,
@@ -191,7 +182,6 @@ function applyLivePrices(portfolios: Portfolio[], priceMap: Record<string, { ltp
       portfolio.fixedDeposits,
       portfolio.rdAccounts || [],
       portfolio.sipAccounts || [],
-      portfolio.ssyAccounts || [],
       portfolio.goldHoldings,
       portfolio.realEstate
     );
@@ -228,7 +218,6 @@ function applyLiveMFNavs(portfolios: Portfolio[], navMap: Record<string, number>
       portfolio.fixedDeposits,
       portfolio.rdAccounts || [],
       updatedSips,
-      portfolio.ssyAccounts || [],
       portfolio.goldHoldings,
       portfolio.realEstate
     );
@@ -498,7 +487,6 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       const dbFixedDeposits: FixedDeposit[] = (dbData.fixed_deposits || []).filter((f: FixedDeposit) => !f.fd_type || f.fd_type === 'regular');
       const dbRDAccounts: RDAccount[] = dbData.rd_accounts || [];
       const dbSIPAccounts: SIPAccount[] = dbData.sip_accounts || [];
-      const dbSSYAccounts: SSYAccount[] = dbData.ssy_accounts || [];
       const dbGoldHoldings: GoldHolding[] = dbData.gold_holdings || [];
       const dbRealEstate: RealEstate[] = dbData.real_estate || [];
       const dbInsurances: Insurance[] = dbData.insurances || [];
@@ -525,13 +513,12 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         const fds = dbFixedDeposits.filter((f) => f.portfolio_id === dbP.id);
         const rds = dbRDAccounts.filter((r) => r.portfolio_id === dbP.id);
         const sips = dbSIPAccounts.filter((s) => s.portfolio_id === dbP.id);
-        const ssy = dbSSYAccounts.filter((s) => s.portfolio_id === dbP.id);
         const gold = dbGoldHoldings.filter((g) => g.portfolio_id === dbP.id);
         const realEstate = dbRealEstate.filter((r) => r.portfolio_id === dbP.id);
         const insurances = dbInsurances.filter((i) => i.portfolio_id === dbP.id);
         const docs = dbDocuments.filter((d) => d.portfolio_id === dbP.id);
 
-        return buildPortfolio(dbP, holdings, fds, rds, sips, ssy, gold, realEstate, insurances, docs);
+        return buildPortfolio(dbP, holdings, fds, rds, sips, gold, realEstate, insurances, docs);
       });
 
       setPortfolios(built);

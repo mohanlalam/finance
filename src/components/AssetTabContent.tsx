@@ -16,10 +16,9 @@ const DocumentVaultView = React.lazy(() => import('./DocumentVaultView'));
 const FixedDepositView  = React.lazy(() => import('./FixedDepositView'));
 const RDView            = React.lazy(() => import('./rd/RDView'));
 const SIPView           = React.lazy(() => import('./sip/SIPView'));
-const SSYView           = React.lazy(() => import('./ssy/SSYView'));
 
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
 
 interface PortfolioOption {
   name: string;
@@ -37,7 +36,7 @@ interface AssetTabContentProps {
   onAddAsset: (assetType: string, portfolioName: string, payload: AssetPayload) => Promise<void>;
   onUpdateAsset: (assetType: string, id: string, payload: Partial<AssetPayload>) => Promise<void>;
   onDeleteAsset: (assetType: string, id: string) => Promise<void>;
-  quickAddTarget?: 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null;
+  quickAddTarget?: 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null;
   onQuickAddComplete?: () => void;
   portfolioOptions: PortfolioOption[];
 }
@@ -115,7 +114,7 @@ export default React.memo(function AssetTabContent({
                   onUpdate={onUpdateStock}
                 />
               );
-            })()
+            })()}
           </div>
         )}
 
@@ -141,14 +140,7 @@ export default React.memo(function AssetTabContent({
           />
         )}
 
-        {activeAsset === 'ssy' && (
-          <SSYView
-            documents={visiblePortfolio.documents}
-            portfolioName={visiblePortfolio.name}
-            portfolioOptions={portfolioOptions}
-            autoOpenAddModal={quickAddTarget === 'ssy'}
-          />
-        )}
+
 
         {activeAsset === 'sip' && (
           <SIPView
@@ -249,7 +241,7 @@ export default React.memo(function AssetTabContent({
                     <p className="text-xs text-slate-400 dark:text-slate-505">Add stocks or ETFs to start tracking live prices and P&amp;L.</p>
                   </div>
                 ) : (
-                  {(() => {
+                  (() => {
                     // Single-pass computation — avoids 5 separate reduce calls
                     const inv = p.holdings.reduce((s, h) => s + h.amountInvested, 0);
                     const cur = p.holdings.reduce((s, h) => s + h.currentValue, 0);
@@ -315,24 +307,7 @@ export default React.memo(function AssetTabContent({
         </div>
       )}
 
-      {activeAsset === 'ssy' && (
-        <div className="space-y-8">
-          {portfolios.map((p, index) => (
-            <div key={p.name}>
-              <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
-              </div>
-              <SSYView
-                documents={p.documents}
-                portfolioName={p.name}
-                portfolioOptions={portfolioOptions}
-                autoOpenAddModal={index === 0 && quickAddTarget === 'ssy'}
-              />
-            </div>
-          ))}
-        </div>
-      )}
+
 
       {activeAsset === 'sip' && (
         <div className="space-y-8">

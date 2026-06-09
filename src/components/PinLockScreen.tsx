@@ -228,7 +228,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
                 disabled={success}
                 aria-label="backspace"
               >
-                <Delete size={22} />
+                <IconDelete size={22} />
               </button>
             </div>
 

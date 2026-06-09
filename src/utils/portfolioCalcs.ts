@@ -37,14 +37,13 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
   const stocks = target.reduce((s, p) => s + p.stocksValue, 0);
   const fd = target.reduce((s, p) => s + p.fdValue, 0);
   const rd = target.reduce((s, p) => s + p.rdValue, 0);
-  const ssy = target.reduce((s, p) => s + p.ssyValue, 0);
   const sip = target.reduce((s, p) => s + p.sipValue, 0);
   const gold = target.reduce((s, p) => s + p.goldValue, 0);
   const realEstate = target.reduce((s, p) => s + p.realEstateValue, 0);
   const insuranceCover = target.reduce((s, p) => s + p.insurances.reduce((a, i) => a + Number(i.sum_assured), 0), 0);
   const insurancePremium = target.reduce((s, p) => s + p.insurances.reduce((a, i) => a + Number(i.premium_amount), 0), 0);
   
-  return { stocks, fd, rd, ssy, sip, gold, realEstate, insuranceCover, insurancePremium };
+  return { stocks, fd, rd, sip, gold, realEstate, insuranceCover, insurancePremium };
 }
 
 /** Estimate today's P&L from intraday movement */

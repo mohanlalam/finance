@@ -47,7 +47,7 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
   // Check if any single asset class exceeds 60% of total wealth (only if totalValue > 0)
   if (totalValue > 0) {
     const stockPct = (breakdown.stocks / totalValue) * 100;
-    const debtPct = ((breakdown.fd + breakdown.rd + breakdown.ssy) / totalValue) * 100;
+    const debtPct = ((breakdown.fd + breakdown.rd) / totalValue) * 100;
     const rePct = (breakdown.realEstate / totalValue) * 100;
 
     if (stockPct > 60) {

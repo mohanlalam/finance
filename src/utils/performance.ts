@@ -1,7 +1,6 @@
 import { Portfolio } from '../types/portfolio';
 import { getRDInvestedAmount } from './rdUtils';
 import { getSIPInvestedAmount } from './sipUtils';
-import { getSSYInvestedAmount } from './ssyUtils';
 
 export interface CashFlow {
   date: string; // ISO format: YYYY-MM-DD
@@ -142,15 +141,7 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
     }
   }
 
-  // Process SSYs
-  if (portfolio.ssyAccounts) {
-    for (const ssy of portfolio.ssyAccounts) {
-      const age = processDate(ssy.start_date);
-      const invested = getSSYInvestedAmount(ssy);
-      weightedTimeSum += invested * age;
-      totalInvested += invested;
-    }
-  }
+
 
   // Process SIPs
   if (portfolio.sipAccounts) {
@@ -292,31 +283,7 @@ export function getPortfolioCashFlows(portfolio: Portfolio): CashFlow[] {
     }
   }
 
-  // 3. Process SSYs
-  if (portfolio.ssyAccounts) {
-    for (const ssy of portfolio.ssyAccounts) {
-      if (ssy.contributions && ssy.contributions.length > 0) {
-        for (const c of ssy.contributions) {
-          addFlow(c.date, Number(c.amount));
-        }
-      } else {
-        const start = new Date(ssy.start_date);
-        if (isNaN(start.getTime())) {
-          addFlow(ssy.start_date, getSSYInvestedAmount(ssy));
-          continue;
-        }
-        const end = new Date();
-        const yearsElapsed = end.getFullYear() - start.getFullYear() + 1;
-        const annualAmount = Number(ssy.annual_deposit);
-        for (let y = 0; y < yearsElapsed; y++) {
-          const flowDate = new Date(start.getFullYear() + y, start.getMonth(), start.getDate());
-          if (flowDate.getTime() <= end.getTime()) {
-            addFlow(flowDate.toISOString().split('T')[0], annualAmount);
-          }
-        }
-      }
-    }
-  }
+
 
   // 4. Process SIPs
   if (portfolio.sipAccounts) {

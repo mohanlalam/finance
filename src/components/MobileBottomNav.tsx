@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Home as HomeIcon, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, Heart, ChevronUp } from './icons/AppIcons';
+import { Home as HomeIcon, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, ChevronUp } from './icons/AppIcons';
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'ssy' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
 
 interface MobileBottomNavProps {
   activeAsset: AssetTab;
@@ -18,7 +18,6 @@ const mainTabs: { id: AssetTab; label: string; icon: React.ReactNode }[] = [
 
 const moreTabs: { id: AssetTab; label: string; icon: React.ReactNode }[] = [
   { id: 'rd', label: 'RDs', icon: <Clock size={18} /> },
-  { id: 'ssy', label: 'SSY', icon: <Heart size={18} /> },
   { id: 'sip', label: 'SIPs', icon: <TrendingUp size={18} /> },
   { id: 'gold', label: 'Gold', icon: <Coins size={18} /> },
   { id: 'real_estate', label: 'Realty', icon: <Building2 size={18} /> },
