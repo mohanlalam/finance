@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { Portfolio } from '../types/portfolio';
 import { formatINR, formatPercent, getFDEffectiveValue } from '../utils/formatters';
 import { Landmark, TrendingUp, ShieldAlert, Award } from 'lucide-react';
-import { getPortfolioAnnualizedReturn, getMultiplePortfoliosAnnualizedReturn } from '../utils/performance';
 
 interface DashboardWidgetsProps {
   portfolios: Portfolio[];
@@ -22,12 +21,8 @@ export default function DashboardWidgets({ portfolios, activePortfolio }: Dashbo
   const totalPnL = totalCurrentValue - totalInvested;
 
   const totalPnLPercent = useMemo(() => {
-    if (activePortfolio) {
-      return getPortfolioAnnualizedReturn(activePortfolio) * 100;
-    } else {
-      return getMultiplePortfoliosAnnualizedReturn(portfolios) * 100;
-    }
-  }, [portfolios, activePortfolio]);
+    return totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
+  }, [totalInvested, totalPnL]);
 
   // Calculate today's gain
   const holdings = activePortfolio ? activePortfolio.holdings : portfolios.flatMap((p) => p.holdings);
@@ -82,7 +77,7 @@ export default function DashboardWidgets({ portfolios, activePortfolio }: Dashbo
           <div>
             <p className="text-[10px] text-slate-400">Total Invested: {formatINR(totalInvested)}</p>
             <p className={`text-[11px] font-bold mt-1 ${totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              {formatPercent(totalPnLPercent, 2)} return (annualized)
+              {formatPercent(totalPnLPercent, 2)} total return
             </p>
           </div>
         </div>

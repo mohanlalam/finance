@@ -29,6 +29,9 @@ This document provides a high-level overview of the folder structure, data flow,
   * Thin hook wrapper pulling Recurring Deposit state and operations directly from `PortfolioContext`.
 * **[useSIPData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useSIPData.ts)**
   * Thin hook wrapper pulling Mutual Fund SIP state and operations from `PortfolioContext`.
+* **[usePortfolioInsights.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/usePortfolioInsights.ts)**
+  * Evaluates aggregate portfolio insights, top holdings by value, top daily gainers and losers, and the **top 3 biggest movers** by absolute daily return.
+  * Calculates asset allocation drift, concentration alerts, fixed deposit upcoming maturities (30 days), and insurance renewal warnings (60 days) to construct the complete portfolio health analytics view.
 
 
 ### 2. App Shell & Navigation Router
@@ -65,6 +68,7 @@ Component folders are isolated by asset domain to ensure clean separation of con
   * **[SankeyChart.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/SankeyChart.tsx)**: SVG flow diagram mapping net worth down to category classes and sub-assets. Contains thickness checks preventing the rendering of zero-width paths and invalid nodes.
   * **[PortfolioAssistant.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/PortfolioAssistant.tsx)**: Interactive NLP chat assistant interface.
   * **[DashboardWidgets.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/DashboardWidgets.tsx)**: Capacitor WebView widget page with Net Worth, Today's Gain, and upcoming FD indicators. Uses a clean fallback string "No upcoming maturities" under all zero-matured situations.
+  * **[InsightsPanel.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/InsightsPanel.tsx)**: Displays the main portfolio health breakdown, today's top 3 biggest movers, top holdings list, best/worst performance indicators per member, top gainers/losers list, asset allocation drift, and alert notifications. Supports filtering insights by asset domain (All, Stocks, FDs, Insurance, High Risk, Due Soon).
 * **App Icon System & Mobile Summary Optimizations**:
   * **[AppIcons.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/icons/AppIcons.tsx)**: Custom inline SVG icon library containing 34 optimized icon definitions. By replacing all external `lucide-react` icons in critical rendering paths, it prevents the main application bundle from loading the large `lucide-react` module, resulting in dramatic bundle-weight savings.
   * **[MobileHomeSummary.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/MobileHomeSummary.tsx)**: Displays the mobile dashboard overview. Wrapped with `React.memo` to prevent re-renders on price/data ticks when parent states change, and optimized to run a single-pass `useMemo` for-loop instead of 9 separate `reduce()` calculations.

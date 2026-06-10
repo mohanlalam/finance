@@ -93,6 +93,7 @@ export interface PortfolioInsights {
   topGainers: HoldingInsight[];
   topLosers: HoldingInsight[];
   biggestMover: HoldingInsight | null;
+  biggestMovers: HoldingInsight[];
   allocationSlices: AllocationSlice[];
   concentrationWarnings: ConcentrationWarning[];
   fdMaturityAlerts: FDMaturityAlert[];
@@ -203,9 +204,10 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
       .slice(0, 5);
 
     // ── Today's biggest mover ──
-    const biggestMover = all.length > 0
-      ? [...all].sort((a, b) => Math.abs(b.holding.todayPnLPercent) - Math.abs(a.holding.todayPnLPercent))[0]
-      : null;
+    const biggestMovers = all.length > 0
+      ? [...all].sort((a, b) => Math.abs(b.holding.todayPnLPercent) - Math.abs(a.holding.todayPnLPercent)).slice(0, 3)
+      : [];
+    const biggestMover = biggestMovers[0] || null;
 
     // ── Asset allocation ──
     const stocksVal = portfolios.reduce((s, p) => s + p.holdings.reduce((a, h) => a + h.currentValue, 0), 0);
@@ -313,6 +315,7 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
       topGainers,
       topLosers,
       biggestMover,
+      biggestMovers,
       allocationSlices,
       concentrationWarnings,
       fdMaturityAlerts,

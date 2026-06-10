@@ -38,7 +38,6 @@ import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { getBreakdownSlices } from '../utils/chartHelpers';
 import { classBreakdown, estimateTodayPnL } from '../utils/portfolioCalcs';
-import { getPortfolioAnnualizedReturn, getMultiplePortfoliosAnnualizedReturn } from '../utils/performance';
 
 // Lazy viewport container that loads child components only when they are visible
 function LazyViewport({ children, placeholderHeight = 240 }: { children: React.ReactNode; placeholderHeight?: number }) {
@@ -205,21 +204,18 @@ export default function AppShell() {
     const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
     const totalCurrentValue = portfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
     const totalPnL = totalCurrentValue - totalInvested;
-    
-    const rate = getMultiplePortfoliosAnnualizedReturn(portfolios);
-    const totalPnLPercent = rate * 100;
+    const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
     
     return { totalInvested, totalCurrentValue, totalPnL, totalPnLPercent };
   }, [portfolios]);
 
   const summaryData = useMemo(() => {
     if (portfolio) {
-      const rate = getPortfolioAnnualizedReturn(portfolio);
       return {
         totalInvested: portfolio.totalInvested,
         totalCurrentValue: portfolio.totalCurrentValue,
         totalPnL: portfolio.totalPnL,
-        totalPnLPercent: rate * 100,
+        totalPnLPercent: portfolio.totalInvested > 0 ? (portfolio.totalPnL / portfolio.totalInvested) * 100 : 0,
         label: portfolio.label
       };
     } else {

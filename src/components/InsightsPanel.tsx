@@ -100,25 +100,33 @@ const GainersList = React.memo(function GainersList({ items, type }: { items: Ho
   );
 });
 
-const BiggestMover = React.memo(function BiggestMover({ mover }: { mover: HoldingInsight | null }) {
-  if (!mover) return <p className="text-xs text-slate-400 dark:text-slate-500">No data</p>;
-  const h = mover.holding;
-  const isUp = h.todayPnLPercent >= 0;
+const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: HoldingInsight[] }) {
+  if (movers.length === 0) return <p className="text-xs text-slate-400 dark:text-slate-500">No data</p>;
   return (
-    <div className="flex items-center gap-3">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isUp ? 'bg-emerald-50 dark:bg-emerald-950/30' : 'bg-red-50 dark:bg-red-950/30'}`}>
-        {isUp ? <TrendingUp size={20} className="text-emerald-600 dark:text-emerald-400" /> : <TrendingDown size={20} className="text-red-500 dark:text-red-400" />}
-      </div>
-      <div>
-        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{h.ticker}</p>
-        <p className="text-[10px] text-slate-400 dark:text-slate-500">{h.stockName}</p>
-      </div>
-      <div className="ml-auto text-right">
-        <p className={`text-sm font-bold ${isUp ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-500 dark:text-red-450'}`}>
-          {formatPercent(h.todayPnLPercent, 2)}
-        </p>
-        <p className="text-[10px] text-slate-400 dark:text-slate-500">{mover.portfolioLabel}</p>
-      </div>
+    <div className="space-y-3">
+      {movers.map((mover, idx) => {
+        const h = mover.holding;
+        const isUp = h.todayPnLPercent >= 0;
+        return (
+          <div key={`${h.ticker}-${idx}`} className="flex items-center gap-2.5">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isUp ? 'bg-emerald-50 dark:bg-emerald-950/30' : 'bg-red-50 dark:bg-red-950/30'}`}>
+              {isUp ? <TrendingUp size={16} className="text-emerald-600 dark:text-emerald-400" /> : <TrendingDown size={16} className="text-red-500 dark:text-red-400" />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{h.ticker}</span>
+                <span className="text-[9px] text-slate-400 dark:text-slate-500 truncate">{mover.portfolioLabel}</span>
+              </div>
+              <p className="text-[9px] text-slate-450 dark:text-slate-500 truncate leading-none mt-0.5">{h.stockName}</p>
+            </div>
+            <div className="text-right shrink-0">
+              <p className={`text-xs font-bold ${isUp ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-500 dark:text-red-450'}`}>
+                {formatPercent(h.todayPnLPercent, 2)}
+              </p>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 });
@@ -434,11 +442,11 @@ export default React.memo(function InsightsPanel({
           </Card>
 
           <Card
-            title="Today's Biggest Mover"
+            title="Today's Top 3 Movers"
             icon={<Activity size={14} className="text-amber-500 dark:text-amber-405" />}
             accent="amber"
           >
-            <BiggestMover mover={insights.biggestMover} />
+            <BiggestMovers movers={insights.biggestMovers} />
           </Card>
 
           <Card
