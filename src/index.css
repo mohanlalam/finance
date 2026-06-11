@@ -330,3 +330,98 @@ h1, h2, h3, h4, h5, h6, .font-bold, .font-extrabold {
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
+/* ── Unified Design System & Animation Upgrades ── */
+
+:root {
+  /* Z-index hierarchy variables */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-overlay: 400;
+  --z-toast: 500;
+
+  /* Card styling variables */
+  --radius-card: 14px;
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 8px -1px rgba(0, 0, 0, 0.03);
+  --shadow-card-hover: 0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Keyframes for Toast entry */
+@keyframes slideInFromTop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+.animate-slide-in {
+  animation: slideInFromTop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Unified asset card layout styling */
+.asset-card {
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  background-color: white;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+.dark .asset-card {
+  background-color: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3), 0 2px 8px -1px rgba(0, 0, 0, 0.2);
+}
+.asset-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Tab transition keyframes & classes */
+@keyframes tabFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.99) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.tab-transition {
+  animation: tabFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Accessible focus ring indicators */
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+.dark :focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+/* ── Tablet Responsive Breakpoint (768px - 1024px) ── */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .tablet-grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .tablet-p-4 {
+    padding: 1rem !important;
+  }
+  .tablet-gap-4 {
+    gap: 1rem !important;
+  }
+  .tablet-w-full {
+    width: 100% !important;
+  }
+  .tablet-text-sm {
+    font-size: 0.875rem !important;
+  }
+}
+
+

@@ -91,7 +91,7 @@ export function DepositDetailsCard({
             ))}
             <button
               onClick={() => onOpenEdit(fd)}
-              className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-505 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
+              className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
               title={`Edit ${cfg.title}`}
               aria-label={`Edit ${cfg.title} at ${fd.bank_name}`}
             >
@@ -99,7 +99,7 @@ export function DepositDetailsCard({
             </button>
             <button
               onClick={() => onConfirmDelete(fd)}
-              className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-505 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
+              className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
               title={`Delete ${cfg.title}`}
               aria-label={`Delete ${cfg.title} at ${fd.bank_name}`}
             >
@@ -111,7 +111,7 @@ export function DepositDetailsCard({
 
       <div className="mt-4 space-y-4">
         <div>
-          <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-505 mb-1">
+          <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-400 mb-1">
             <span className="flex items-center gap-1">
               <Clock size={10} aria-hidden="true" />
               Maturity Timeline

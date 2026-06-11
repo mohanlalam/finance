@@ -4,10 +4,12 @@ import { formatINR } from '../../utils/formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../utils/rdUtils';
 import { Plus, TrendingUp, Calendar, Clock } from 'lucide-react';
 import ConfirmModal from '../ConfirmModal';
+import EmptyState from '../EmptyState';
 import RDAccountCard from './RDAccountCard';
 import { RDFormModal } from './RDFormModal';
 import { useRDData } from '../../hooks/useRDData';
 import { usePortfolioState } from '../../contexts/PortfolioContext';
+import { useToast } from '../../contexts/ToastContext';
 import AssetCardSkeleton from '../AssetCardSkeleton';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
@@ -30,6 +32,7 @@ export function RDView({
   autoOpenAddModal,
 }: RDViewProps) {
   const { portfolios, isMutating } = usePortfolioState();
+  const { addToast } = useToast();
   const {
     rdAccounts,
     loading,
@@ -95,13 +98,14 @@ export function RDView({
     async (id: string) => {
       try {
         await deleteRDAccount(id);
+        addToast('Recurring deposit account deleted successfully', 'success');
       } catch (err) {
-        alert(err instanceof Error ? err.message : 'Deletion failed');
+        addToast(err instanceof Error ? err.message : 'Deletion failed', 'error');
       } finally {
         setConfirmDelete(null);
       }
     },
-    [deleteRDAccount]
+    [deleteRDAccount, addToast]
   );
 
   return (
@@ -157,21 +161,21 @@ export function RDView({
             <AssetCardSkeleton count={Math.max(1, filteredAccounts.length || 3)} />
           </div>
         ) : filteredAccounts.length === 0 ? (
-          <div className="p-16 text-center">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-950/30 dark:to-rose-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
-              <Clock size={36} className="text-pink-400 dark:text-pink-500" aria-hidden="true" />
-            </div>
-            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">No Recurring Deposits Yet</h4>
-            <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
-              Start tracking your RDs to monitor recurring timelines and interest accrual.
-            </p>
-            <button
-              onClick={handleOpenAdd}
-              className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-pink-500/20"
-            >
-              <Plus size={15} aria-hidden="true" />
-              Create Your First RD
-            </button>
+          <div className="p-8">
+            <EmptyState
+              type="rd"
+              title="No Recurring Deposits Yet"
+              description="Start tracking your RDs to monitor recurring timelines and interest accrual."
+              actionButton={
+                <button
+                  onClick={handleOpenAdd}
+                  className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-pink-500/20"
+                >
+                  <Plus size={15} aria-hidden="true" />
+                  Create Your First RD
+                </button>
+              }
+            />
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label="Recurring Deposits list">

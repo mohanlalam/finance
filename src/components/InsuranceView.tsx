@@ -5,7 +5,9 @@ import { Plus, Trash2, Edit2, Shield, ShieldAlert, FileText, Calendar, Clock, X,
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
 import { usePortfolioState } from '../contexts/PortfolioContext';
+import { useToast } from '../contexts/ToastContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
+import EmptyState from './EmptyState';
 
 interface PortfolioOption {
   name: string;
@@ -53,6 +55,7 @@ export default React.memo(function InsuranceView({
   autoOpenAddModal,
 }: InsuranceViewProps) {
   const { isMutating } = usePortfolioState();
+  const { addToast } = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Insurance | null>(null);
   const [loading, setLoading] = useState(false);
@@ -135,12 +138,15 @@ export default React.memo(function InsuranceView({
     try {
       if (editing) {
         await onUpdate('insurance', editing.id, payload);
+        addToast('Insurance policy updated successfully', 'success');
       } else {
         await onAdd('insurance', formPortfolio, payload);
+        addToast('Insurance policy created successfully', 'success');
       }
       setShowModal(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Operation failed');
+      addToast(err instanceof Error ? err.message : 'Operation failed', 'error');
     } finally {
       setLoading(false);
     }
@@ -149,8 +155,9 @@ export default React.memo(function InsuranceView({
   async function handleDelete(id: string) {
     try {
       await onDelete('insurance', id);
+      addToast('Insurance policy deleted successfully', 'success');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Delete failed');
+      addToast(err instanceof Error ? err.message : 'Delete failed', 'error');
     } finally {
       setConfirmDelete(null);
     }
@@ -204,22 +211,20 @@ export default React.memo(function InsuranceView({
             <AssetCardSkeleton count={Math.max(1, insurances.length || 3)} />
           </div>
         ) : insurances.length === 0 ? (
-          <div className="p-16 text-center">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-950/30 dark:to-pink-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
-              <Shield size={36} className="text-rose-400 dark:text-rose-500" />
-            </div>
-            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">No Insurance Policies Yet</h4>
-            <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
-              Register health, term, life, or motor policies to track coverage, premiums, and renewal deadlines.
-            </p>
-            <button
-              onClick={handleOpenAdd}
-              className="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-rose-500/20"
-            >
-              <Plus size={15} />
-              Add Your First Policy
-            </button>
-          </div>
+          <EmptyState
+            type="insurance"
+            title="No Insurance Policies Yet"
+            description="Register health, term, life, or motor policies to track coverage, premiums, and renewal deadlines."
+            actionButton={
+              <button
+                onClick={handleOpenAdd}
+                className="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-rose-500/20"
+              >
+                <Plus size={15} />
+                Add Your First Policy
+              </button>
+            }
+          />
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
             {insurances.map((i) => {

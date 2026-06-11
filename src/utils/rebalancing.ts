@@ -1,5 +1,7 @@
 import { Portfolio } from '../types/portfolio';
 import { classBreakdown } from './portfolioCalcs';
+import { formatINRCompact } from './formatters';
+import { REBALANCING_MIN_ACTION } from './constants';
 
 export interface RebalancingAdvice {
   assetClass: 'Equity' | 'Debt' | 'Gold' | 'Real Estate';
@@ -52,10 +54,8 @@ export function calculateRebalancing(
 
     let recommendation = 'Aligned';
     
-    const MIN_ACTION = 5000;
-    
-    // Suggest rebalancing purely based on absolute difference exceeding the MIN_ACTION threshold
-    if (Math.abs(diffAmount) >= MIN_ACTION) {
+    // Suggest rebalancing purely based on absolute difference exceeding the REBALANCING_MIN_ACTION threshold
+    if (Math.abs(diffAmount) >= REBALANCING_MIN_ACTION) {
       if (diffAmount > 0) {
         recommendation = `Sell ${formatINRCompact(diffAmount)}`;
       } else {
@@ -72,12 +72,6 @@ export function calculateRebalancing(
       recommendation,
     };
   });
-}
-
-function formatINRCompact(value: number): string {
-  if (value >= 10000000) return `₹${(value / 10000000).toFixed(2)}Cr`;
-  if (value >= 100000) return `₹${(value / 100000).toFixed(2)}L`;
-  return `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 }
 
 /**

@@ -91,7 +91,7 @@ const GainersList = React.memo(function GainersList({ items, type }: { items: Ho
             {type === 'gain' ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
           </span>
           <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate flex-1">{item.holding.ticker}</span>
-          <span className={`text-xs font-bold shrink-0 ${type === 'gain' ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-500 dark:text-red-450'}`}>
+          <span className={`text-xs font-bold shrink-0 ${type === 'gain' ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-500 dark:text-red-400'}`}>
             {formatPercent(item.holding.pnlPercent, 1)}
           </span>
         </div>
@@ -117,10 +117,10 @@ const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: Ho
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{h.ticker}</span>
                 <span className="text-[9px] text-slate-400 dark:text-slate-500 truncate">{mover.portfolioLabel}</span>
               </div>
-              <p className="text-[9px] text-slate-450 dark:text-slate-500 truncate leading-none mt-0.5">{h.stockName}</p>
+              <p className="text-[9px] text-slate-400 dark:text-slate-500 truncate leading-none mt-0.5">{h.stockName}</p>
             </div>
             <div className="text-right shrink-0">
-              <p className={`text-xs font-bold ${isUp ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-500 dark:text-red-450'}`}>
+              <p className={`text-xs font-bold ${isUp ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-500 dark:text-red-400'}`}>
                 {formatPercent(h.todayPnLPercent, 2)}
               </p>
             </div>
@@ -278,7 +278,7 @@ const InsuranceReminders = React.memo(function InsuranceReminders({ alerts }: { 
             <p className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">{a.insurance.policy_name}</p>
             <p className="text-[10px] text-slate-400 dark:text-slate-500">{a.portfolioLabel} · {formatINR(Number(a.insurance.premium_amount))}/yr</p>
           </div>
-          <span className={`text-xs font-bold shrink-0 ${a.daysLeft <= 15 ? 'text-red-500 dark:text-red-450' : 'text-rose-600 dark:text-rose-400'}`}>
+          <span className={`text-xs font-bold shrink-0 ${a.daysLeft <= 15 ? 'text-red-500 dark:text-red-400' : 'text-rose-600 dark:text-rose-400'}`}>
             {a.daysLeft}d
           </span>
         </div>
@@ -435,7 +435,7 @@ export default React.memo(function InsightsPanel({
                   <p key={`str-${idx}`} className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 truncate">{s}</p>
                 ))}
                 {healthReport.risks.slice(0, 2).map((r, idx) => (
-                  <p key={`risk-${idx}`} className="text-[9px] font-semibold text-amber-600 dark:text-amber-405 truncate">{r}</p>
+                  <p key={`risk-${idx}`} className="text-[9px] font-semibold text-amber-600 dark:text-amber-400 truncate">{r}</p>
                 ))}
               </div>
             </div>
@@ -443,7 +443,7 @@ export default React.memo(function InsightsPanel({
 
           <Card
             title="Today's Top 3 Movers"
-            icon={<Activity size={14} className="text-amber-500 dark:text-amber-405" />}
+            icon={<Activity size={14} className="text-amber-500 dark:text-amber-400" />}
             accent="amber"
           >
             <BiggestMovers movers={insights.biggestMovers} />

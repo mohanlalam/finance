@@ -4,6 +4,7 @@ import { Wifi, WifiOff, Plus } from './icons/AppIcons';
 import { Portfolio, AssetPayload } from '../types/portfolio';
 import { FetchStatus } from '../hooks/useMarketData';
 import AssetCardSkeleton from './AssetCardSkeleton';
+import EmptyState from './EmptyState';
 // Eagerly loaded (lightweight, always visible on stocks tab)
 import { pnlColor, formatPercent, formatINR } from '../utils/formatters';
 
@@ -16,9 +17,10 @@ const DocumentVaultView = React.lazy(() => import('./DocumentVaultView'));
 const FixedDepositView  = React.lazy(() => import('./FixedDepositView'));
 const RDView            = React.lazy(() => import('./rd/RDView'));
 const SIPView           = React.lazy(() => import('./sip/SIPView'));
+const WhatIfCalculator  = React.lazy(() => import('./WhatIfCalculator'));
 
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'what_if';
 
 interface PortfolioOption {
   name: string;
@@ -62,11 +64,27 @@ export default React.memo(function AssetTabContent({
       onQuickAddComplete?.();
     }
   }, [quickAddTarget, activeAsset, onQuickAddComplete]);
+
+  if (activeAsset === 'what_if') {
+    return (
+      <div className="tab-transition">
+        <React.Suspense fallback={<AssetCardSkeleton />}>
+          <WhatIfCalculator />
+        </React.Suspense>
+      </div>
+    );
+  }
   
   if (visiblePortfolio) {
     // ─── Single Portfolio View ───
     return (
-      <div id="portfolio-content" role="tabpanel" aria-labelledby={`tab-${visiblePortfolio.name}`} className="space-y-4">
+      <div
+        key={`${visiblePortfolio.name}-${activeAsset}`}
+        id="portfolio-content"
+        role="tabpanel"
+        aria-labelledby={`tab-${visiblePortfolio.name}`}
+        className="space-y-4 tab-transition"
+      >
         <React.Suspense fallback={<AssetCardSkeleton />}>
           {activeAsset === 'stocks' && (
           <div>
@@ -208,7 +226,13 @@ export default React.memo(function AssetTabContent({
 
   // ─── Family Overview View (Aggregated across all members) ───
   return (
-    <div id="portfolio-content" role="tabpanel" aria-labelledby="tab-all" className="space-y-4">
+    <div
+      key={`all-${activeAsset}`}
+      id="portfolio-content"
+      role="tabpanel"
+      aria-labelledby="tab-all"
+      className="space-y-4 tab-transition"
+    >
       <React.Suspense fallback={<AssetCardSkeleton />}>
         {activeAsset === 'stocks' && (
         <div className="space-y-6">
@@ -233,13 +257,20 @@ export default React.memo(function AssetTabContent({
                   </span>
                 </div>
                 {p.holdings.length === 0 ? (
-                  <div className="bg-white dark:bg-slate-800 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl py-10 text-center">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 flex items-center justify-center mx-auto mb-4 shadow-sm">
-                      <Wifi size={24} className="text-blue-400 dark:text-blue-500" />
-                    </div>
-                    <p className="text-sm font-bold text-slate-600 dark:text-slate-300 mb-1">No stock holdings yet</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-505">Add stocks or ETFs to start tracking live prices and P&amp;L.</p>
-                  </div>
+                  <EmptyState
+                    type="stocks"
+                    title="No stock holdings yet"
+                    description="Add stocks or ETFs to start tracking live prices and P&L."
+                    actionButton={
+                      <button
+                        onClick={onAddHoldingClick}
+                        className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                      >
+                        <Plus size={13} />
+                        Add Holding
+                      </button>
+                    }
+                  />
                 ) : (
                   (() => {
                     // Single-pass computation — avoids 5 separate reduce calls

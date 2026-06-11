@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useCallback, useRef, useMemo, Rea
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Portfolio, PortfolioName, AssetPayload, RDPayload, SIPPayload } from '../types/portfolio';
 import { NetWorthSnapshot, usePortfolioData, LoadStatus } from '../hooks/usePortfolioData';
+import { VISIBILITY_REFRESH_COOLDOWN } from '../utils/constants';
 
 export interface PortfolioDataContextValue {
   portfolios: Portfolio[];
@@ -163,7 +164,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
       if (document.visibilityState === 'visible') {
         // Only refresh if at least 5 minutes have passed since the last fetch
         // (matches the SWR dedupingInterval of 300 000 ms)
-        if (Date.now() - lastRefreshTime >= 300_000) {
+        if (Date.now() - lastRefreshTime >= VISIBILITY_REFRESH_COOLDOWN) {
           lastRefreshTime = Date.now();
           refreshPricesRef.current();
         }

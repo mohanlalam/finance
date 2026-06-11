@@ -74,3 +74,12 @@ export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()
   }
   return p;
 }
+
+export function formatINRCompact(value: number): string {
+  const absVal = Math.abs(value);
+  const sign = value < 0 ? '-' : '';
+  if (absVal >= 10000000) return `${sign}₹${(absVal / 10000000).toFixed(2)}Cr`;
+  if (absVal >= 100000) return `${sign}₹${(absVal / 100000).toFixed(2)}L`;
+  return `${sign}₹${Math.round(absVal).toLocaleString('en-IN')}`;
+}
+

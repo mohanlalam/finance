@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react';
 // Inline SVG icons — keeps lucide-react out of the critical post-unlock bundle
-import { WifiOff, AlertCircle, RefreshCw, TrendingUp, Landmark, Coins, Home, Shield, FolderOpen, Clock } from '../components/icons/AppIcons';
+import { WifiOff, AlertCircle, RefreshCw, TrendingUp, Landmark, Coins, Home, Shield, FolderOpen, Clock, Calculator } from '../components/icons/AppIcons';
 import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
 import AddHoldingModal from '../components/AddHoldingModal';
@@ -31,6 +31,7 @@ const InsightsPanel = React.lazy(() => import('../components/InsightsPanel'));
 import { useParams, useNavigate } from 'react-router-dom';
 import { formatINR, formatPercent, pnlColor } from '../utils/formatters';
 import { usePortfolioState, usePortfolioActions } from '../contexts/PortfolioContext';
+import { useToast } from '../contexts/ToastContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePortfolioInsights } from '../hooks/usePortfolioInsights';
 import { useDismissibleAlerts } from '../hooks/useAlerts';
@@ -125,7 +126,7 @@ function LazyChartWrapper<TProps extends object>({
   );
 }
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'what_if';
 
 export default function AppShell() {
   const {
@@ -141,6 +142,7 @@ export default function AppShell() {
     addAsset, updateAsset, deleteAsset,
   } = usePortfolioActions();
   const { darkMode, toggleDarkMode } = useTheme();
+  const { addToast } = useToast();
 
   const { family, asset } = useParams<{ family: string; asset: string }>();
   const navigate = useNavigate();
@@ -294,13 +296,14 @@ export default function AppShell() {
       if (activeTab === deleteTarget.name) {
         setActiveTab('all');
       }
+      addToast('Family member deleted successfully', 'success');
       setDeleteTarget(null);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete family member');
+      addToast(err instanceof Error ? err.message : 'Failed to delete family member', 'error');
     } finally {
       setIsDeleting(false);
     }
-  }, [deletePortfolio, deleteTarget, activeTab, setActiveTab]);
+  }, [deletePortfolio, deleteTarget, activeTab, setActiveTab, addToast]);
 
   const handleAddHolding = useCallback(async (data: AddHoldingPayload) => {
     const { portfolioName, ...payload } = data;
@@ -692,6 +695,7 @@ export default function AppShell() {
                 { id: 'real_estate', label: 'Real Estate', icon: <Home size={16} /> },
                 { id: 'insurance', label: 'Insurance Cover', icon: <Shield size={16} /> },
                 { id: 'documents', label: 'Document Vault', icon: <FolderOpen size={16} /> },
+                { id: 'what_if', label: 'What-If Calc', icon: <Calculator size={16} /> },
               ] as const).map((tab) => {
                 const isActive = effectiveAsset === tab.id;
                 return (

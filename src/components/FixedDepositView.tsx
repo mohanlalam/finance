@@ -3,9 +3,11 @@ import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfoli
 import { formatINR, getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
 import { Plus, TrendingUp, Landmark, Calendar } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
+import EmptyState from './EmptyState';
 import StandardFormFields from './fd/StandardFormFields';
 import DepositDetailsCard from './fd/DepositDetailsCard';
 import { usePortfolioState } from '../contexts/PortfolioContext';
+import { useToast } from '../contexts/ToastContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
@@ -62,6 +64,7 @@ function FixedDepositView({
   autoOpenAddModal,
 }: FixedDepositViewProps) {
   const { isMutating } = usePortfolioState();
+  const { addToast } = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editingFd, setEditingFd] = useState<FixedDeposit | null>(null);
   const [loading, setLoading] = useState(false);
@@ -168,12 +171,15 @@ function FixedDepositView({
     try {
       if (editingFd) {
         await onUpdate('fd', editingFd.id, payload);
+        addToast('Fixed deposit updated successfully', 'success');
       } else {
         await onAdd('fd', formPortfolio, payload);
+        addToast('Fixed deposit created successfully', 'success');
       }
       setShowModal(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Operation failed');
+      addToast(err instanceof Error ? err.message : 'Operation failed', 'error');
     } finally {
       setLoading(false);
     }
@@ -182,8 +188,9 @@ function FixedDepositView({
   async function handleDelete(id: string) {
     try {
       await onDelete('fd', id);
+      addToast('Fixed deposit deleted successfully', 'success');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Deletion failed');
+      addToast(err instanceof Error ? err.message : 'Deletion failed', 'error');
     } finally {
       setConfirmDelete(null);
     }
@@ -243,22 +250,22 @@ function FixedDepositView({
           <div className="p-6">
             <AssetCardSkeleton count={Math.max(1, fixedDeposits.length || 3)} />
           </div>
-        ) : fixedDeposits.length === 0 ? (
-          <div className="p-16 text-center">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
-              <Landmark size={36} className="text-indigo-400 dark:text-indigo-500" aria-hidden="true" />
-            </div>
-            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">{CFG.noActiveText}</h4>
-            <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
-              {CFG.subText}
-            </p>
-            <button
-              onClick={handleOpenAdd}
-              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-indigo-500/20"
-            >
-              <Plus size={15} aria-hidden="true" />
-              {CFG.firstBtn}
-            </button>
+                ) : fixedDeposits.length === 0 ? (
+          <div className="p-8">
+            <EmptyState
+              type="fd"
+              title={CFG.noActiveText}
+              description={CFG.subText}
+              actionButton={
+                <button
+                  onClick={handleOpenAdd}
+                  className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-indigo-500/20"
+                >
+                  <Plus size={15} aria-hidden="true" />
+                  {CFG.firstBtn}
+                </button>
+              }
+            />
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label={`${CFG.titlePlural} list`}>

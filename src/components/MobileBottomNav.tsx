@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Home as HomeIcon, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, ChevronUp } from './icons/AppIcons';
+import { Home as HomeIcon, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, ChevronUp, Calculator as CalculatorIcon } from './icons/AppIcons';
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'what_if';
 
 interface MobileBottomNavProps {
   activeAsset: AssetTab;
@@ -23,6 +23,7 @@ const moreTabs: { id: AssetTab; label: string; icon: React.ReactNode }[] = [
   { id: 'real_estate', label: 'Realty', icon: <Building2 size={18} /> },
   { id: 'insurance', label: 'Cover', icon: <Shield size={18} /> },
   { id: 'documents', label: 'Docs', icon: <FolderOpen size={18} /> },
+  { id: 'what_if', label: 'What-If', icon: <CalculatorIcon size={18} /> },
 ];
 
 function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileBottomNavProps) {

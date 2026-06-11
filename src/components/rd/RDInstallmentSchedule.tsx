@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { RDAccount } from '../../types/portfolio';
+import { useToast } from '../../contexts/ToastContext';
 
 interface RDInstallmentScheduleProps {
   account: RDAccount;
@@ -7,6 +8,7 @@ interface RDInstallmentScheduleProps {
 }
 
 export function RDInstallmentSchedule({ account, onUpdate }: RDInstallmentScheduleProps) {
+  const { addToast } = useToast();
   const [expanded, setExpanded] = useState(false);
 
   // Helper for RD installment calculation
@@ -57,8 +59,9 @@ export function RDInstallmentSchedule({ account, onUpdate }: RDInstallmentSchedu
     
     try {
       await onUpdate(account.id, { contributions: updated });
+      addToast('Installment recorded successfully', 'success');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to record installment');
+      addToast(err instanceof Error ? err.message : 'Failed to record installment', 'error');
     }
   };
 
@@ -93,9 +96,9 @@ export function RDInstallmentSchedule({ account, onUpdate }: RDInstallmentSchedu
               if (isPaid) {
                 cardClasses = 'bg-emerald-50/30 border-emerald-200 dark:bg-emerald-950/10 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-400';
               } else if (isPastMonth) {
-                cardClasses = 'bg-rose-50/30 border-rose-200 dark:bg-rose-950/10 dark:border-rose-900/40 text-rose-800 dark:text-rose-450';
+                cardClasses = 'bg-rose-50/30 border-rose-200 dark:bg-rose-950/10 dark:border-rose-900/40 text-rose-800 dark:text-rose-400';
               } else {
-                cardClasses = 'bg-amber-50/30 border-amber-200 dark:bg-amber-950/10 dark:border-amber-900/40 text-amber-800 dark:text-amber-450';
+                cardClasses = 'bg-amber-50/30 border-amber-200 dark:bg-amber-950/10 dark:border-amber-900/40 text-amber-800 dark:text-amber-400';
               }
 
               return (

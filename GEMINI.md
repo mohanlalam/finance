@@ -32,6 +32,8 @@ This document provides a high-level overview of the folder structure, data flow,
 * **[usePortfolioInsights.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/usePortfolioInsights.ts)**
   * Evaluates aggregate portfolio insights, top holdings by value, top daily gainers and losers, and the **top 3 biggest movers** by absolute daily return.
   * Calculates asset allocation drift, concentration alerts, fixed deposit upcoming maturities (30 days), and insurance renewal warnings (60 days) to construct the complete portfolio health analytics view.
+* **[ToastContext.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/contexts/ToastContext.tsx)**
+  * Exposes global toast/snackbar notifications state (`useToast`) and auto-dismissals, entirely replacing raw browser `alert()` popups across the app.
 
 
 ### 2. App Shell & Navigation Router
@@ -49,6 +51,8 @@ This document provides a high-level overview of the folder structure, data flow,
   * Evaluates warnings (expiring documents, upcoming due dates, portfolio concentration limits) and handles dismissals.
 * **[PinLockScreen.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/PinLockScreen.tsx)**
   * Restricts app access via a secure numerical pin-pad gate with keyboard support and session-based verification.
+* **[ErrorBoundary.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/ErrorBoundary.tsx)**
+  * Catches rendering errors defensively across major views (like lazy components and AppShell) to display user-friendly fallbacks rather than crashing the interface.
 
 ### 3. Registry Component Routing
 * **[AssetTabContent.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/AssetTabContent.tsx)**
@@ -64,6 +68,7 @@ Component folders are isolated by asset domain to ensure clean separation of con
 
 * **Visual Dashboard & Widget Components**:
   * **[NetWorthTimelineChart.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/NetWorthTimelineChart.tsx)**: Responsive SVG line & area chart showing compound net worth valuation timeline. Custom date-range filtering is supported (1M, 3M, 6M, 1Y, ALL).
+  * **[WhatIfCalculator.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/WhatIfCalculator.tsx)**: Premium glassmorphic calculator projecting compound returns and investment totals. Houses HSL-themed range inputs, metrics panels, and a dual-curve SVG area growth chart with interactive hover tooltips.
   * **[PortfolioAssistant.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/PortfolioAssistant.tsx)**: Conversational multi-turn NLP chat assistant. Features inline markdown formatting, automated auto-scroll logs, typing indicators, dynamic suggestion buttons, and keyboard shortcuts.
   * **[DashboardWidgets.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/DashboardWidgets.tsx)**: Capacitor WebView widget page with Net Worth, Today's Gain, and upcoming FD indicators. Uses a clean fallback string "No upcoming maturities" under all zero-matured situations.
   * **[InsightsPanel.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/InsightsPanel.tsx)**: Displays the main portfolio health breakdown, today's top 3 biggest movers, top holdings list, best/worst performance indicators per member, top gainers/losers list, asset allocation drift, and alert notifications. Supports filtering insights by asset domain (All, Stocks, FDs, Insurance, High Risk, Due Soon).

@@ -3,6 +3,7 @@ import { Portfolio, Holding, FixedDeposit, Insurance } from '../types/portfolio'
 import { getFDEffectiveValue } from '../utils/formatters';
 import { getRDEffectiveValue } from '../utils/rdUtils';
 import { getSIPEffectiveValue } from '../utils/sipUtils';
+import { FD_MATURITY_WARNING_DAYS, INSURANCE_RENEWAL_WARNING_DAYS } from '../utils/constants';
 
 /* ── Allocation Targets ── */
 
@@ -265,7 +266,7 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
       for (const fd of p.fixedDeposits) {
         if (fd.status === 'matured') continue;
         const days = daysUntil(fd.maturity_date);
-        if (days !== null && days >= 0 && days <= 30) {
+        if (days !== null && days >= 0 && days <= FD_MATURITY_WARNING_DAYS) {
           fdMaturityAlerts.push({ fd, daysLeft: days, portfolioLabel: p.label });
         }
       }
@@ -277,7 +278,7 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
     for (const p of portfolios) {
       for (const ins of p.insurances) {
         const days = daysUntil(ins.renewal_date);
-        if (days !== null && days >= 0 && days <= 60) {
+        if (days !== null && days >= 0 && days <= INSURANCE_RENEWAL_WARNING_DAYS) {
           insuranceRenewalAlerts.push({ insurance: ins, daysLeft: days, portfolioLabel: p.label });
         }
       }

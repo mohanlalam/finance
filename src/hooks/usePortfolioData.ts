@@ -6,6 +6,7 @@ import { getSIPInvestedAmount, getSIPEffectiveValue, fetchNAV, initNAVCache } fr
 import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiClient';
 import useSWR from 'swr';
 import * as idb from 'idb-keyval';
+import { SWR_DEDUPING_INTERVAL, SWR_ERROR_RETRY_COUNT, STOCK_PRICE_CACHE_TTL } from '../utils/constants';
 
 interface DBHolding {
   id: string;
@@ -272,7 +273,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     } catch { /* ignore */ }
   }, []);
 
-  const PRICE_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+  const PRICE_CACHE_TTL_MS = STOCK_PRICE_CACHE_TTL;
   const isPriceStale = lastPriceFetch
     ? Date.now() - lastPriceFetch.getTime() > PRICE_CACHE_TTL_MS
     : true;
@@ -419,8 +420,8 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     },
     {
       revalidateOnFocus: false,
-      dedupingInterval: 300_000, // matches the 5-min gate in visibilitychange listener
-      errorRetryCount: 2,         // prevent retry storm on mobile bad-network
+      dedupingInterval: SWR_DEDUPING_INTERVAL,
+      errorRetryCount: SWR_ERROR_RETRY_COUNT,
     }
   );
 
@@ -438,7 +439,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       return { priceMap, navData };
     },
     {
-      refreshInterval: 15 * 60 * 1000, // auto-refresh every 15 min
+      refreshInterval: STOCK_PRICE_CACHE_TTL,
       revalidateOnFocus: false,
     }
   );
@@ -617,7 +618,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         const now = Date.now();
-        if (now - lastRefreshRef.current < 300_000) return;
+        if (now - lastRefreshRef.current < SWR_DEDUPING_INTERVAL) return;
         lastRefreshRef.current = now;
         void load();
         void refreshPrices();

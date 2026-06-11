@@ -4,10 +4,12 @@ import { formatINR } from '../../utils/formatters';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../utils/sipUtils';
 import { Plus, TrendingUp, Calendar, ArrowUpRight } from 'lucide-react';
 import ConfirmModal from '../ConfirmModal';
+import EmptyState from '../EmptyState';
 import SIPAccountCard from './SIPAccountCard';
 import { SIPFormModal } from './SIPFormModal';
 import { useSIPData } from '../../hooks/useSIPData';
 import { usePortfolioState } from '../../contexts/PortfolioContext';
+import { useToast } from '../../contexts/ToastContext';
 import AssetCardSkeleton from '../AssetCardSkeleton';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
@@ -30,6 +32,7 @@ export function SIPView({
   autoOpenAddModal,
 }: SIPViewProps) {
   const { portfolios, isMutating } = usePortfolioState();
+  const { addToast } = useToast();
   const {
     sipAccounts,
     loading,
@@ -95,13 +98,14 @@ export function SIPView({
     async (id: string) => {
       try {
         await deleteSIPAccount(id);
+        addToast('Mutual Fund / SIP account deleted successfully', 'success');
       } catch (err) {
-        alert(err instanceof Error ? err.message : 'Deletion failed');
+        addToast(err instanceof Error ? err.message : 'Deletion failed', 'error');
       } finally {
         setConfirmDelete(null);
       }
     },
-    [deleteSIPAccount]
+    [deleteSIPAccount, addToast]
   );
 
   return (
@@ -157,21 +161,21 @@ export function SIPView({
             <AssetCardSkeleton count={Math.max(1, filteredAccounts.length || 3)} />
           </div>
         ) : filteredAccounts.length === 0 ? (
-          <div className="p-16 text-center">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-sky-50 to-cyan-100 dark:from-sky-950/30 dark:to-cyan-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
-              <TrendingUp size={36} className="text-sky-400 dark:text-sky-500" aria-hidden="true" />
-            </div>
-            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">No Mutual Funds / SIPs Yet</h4>
-            <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
-              Start tracking your SIPs to monitor fund growth, total investment, and live valuation.
-            </p>
-            <button
-              onClick={handleOpenAdd}
-              className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-sky-500/20"
-            >
-              <Plus size={15} aria-hidden="true" />
-              Create Your First SIP
-            </button>
+          <div className="p-8">
+            <EmptyState
+              type="sip"
+              title="No Mutual Funds / SIPs Yet"
+              description="Start tracking your SIPs to monitor fund growth, total investment, and live valuation."
+              actionButton={
+                <button
+                  onClick={handleOpenAdd}
+                  className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-sky-500/20"
+                >
+                  <Plus size={15} aria-hidden="true" />
+                  Create Your First SIP
+                </button>
+              }
+            />
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label="SIP Mutual Funds list">

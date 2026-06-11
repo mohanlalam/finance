@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react';
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'what_if';
 
 interface UseSwipeNavigationProps {
   activeAsset: AssetTab;
@@ -40,7 +40,7 @@ export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavi
     const diffY = touchStart.current.y - touchEnd.current.y;
 
     if (Math.abs(diffX) > 70 && Math.abs(diffY) < 40) {
-      const tabOrder: AssetTab[] = ['home', 'stocks', 'fd', 'rd', 'sip', 'gold', 'real_estate', 'insurance', 'documents'];
+      const tabOrder: AssetTab[] = ['home', 'stocks', 'fd', 'rd', 'sip', 'gold', 'real_estate', 'insurance', 'documents', 'what_if'];
       const currentIndex = tabOrder.indexOf(activeAsset);
 
       if (diffX > 0) {

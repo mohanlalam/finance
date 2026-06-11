@@ -55,6 +55,10 @@ export default defineConfig(({ command }) => ({
     })
   ],
   base: command === 'serve' ? '/' : '/finance/',
+  esbuild: command === 'serve' ? {} : {
+    pure: ['console.log', 'console.info', 'console.debug', 'console.trace'],
+    drop: ['debugger'],
+  },
   build: {
     target: 'es2020',           // ~10-15% smaller output; modern mobile supports all ES2020 features
     cssMinify: true,            // deduplicate CSS selectors across chunks

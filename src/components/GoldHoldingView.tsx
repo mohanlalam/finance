@@ -5,7 +5,9 @@ import { Plus, Trash2, Edit2, Coins, TrendingUp, Scale, FileText, X, StickyNote 
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
 import { usePortfolioState } from '../contexts/PortfolioContext';
+import { useToast } from '../contexts/ToastContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
+import EmptyState from './EmptyState';
 
 interface PortfolioOption {
   name: string;
@@ -38,6 +40,7 @@ export default React.memo(function GoldHoldingView({
   autoOpenAddModal,
 }: GoldHoldingViewProps) {
   const { isMutating } = usePortfolioState();
+  const { addToast } = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<GoldHolding | null>(null);
   const [loading, setLoading] = useState(false);
@@ -115,12 +118,15 @@ export default React.memo(function GoldHoldingView({
     try {
       if (editing) {
         await onUpdate('gold', editing.id, payload);
+        addToast('Gold holding updated successfully', 'success');
       } else {
         await onAdd('gold', formPortfolio, payload);
+        addToast('Gold holding created successfully', 'success');
       }
       setShowModal(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Operation failed');
+      addToast(err instanceof Error ? err.message : 'Operation failed', 'error');
     } finally {
       setLoading(false);
     }
@@ -129,8 +135,9 @@ export default React.memo(function GoldHoldingView({
   async function handleDelete(id: string) {
     try {
       await onDelete('gold', id);
+      addToast('Gold holding deleted successfully', 'success');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Delete failed');
+      addToast(err instanceof Error ? err.message : 'Delete failed', 'error');
     } finally {
       setConfirmDelete(null);
     }
@@ -184,22 +191,20 @@ export default React.memo(function GoldHoldingView({
             <AssetCardSkeleton count={Math.max(1, goldHoldings.length || 3)} />
           </div>
         ) : goldHoldings.length === 0 ? (
-          <div className="p-16 text-center">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-950/30 dark:to-yellow-950/30 flex items-center justify-center mx-auto mb-5 shadow-sm">
-              <Coins size={36} className="text-amber-400 dark:text-amber-500" />
-            </div>
-            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">No Gold Holdings Yet</h4>
-            <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
-              Track coins, jewelry, or bars by weight and purity to monitor appreciation over time.
-            </p>
-            <button
-              onClick={handleOpenAdd}
-              className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-amber-500/20"
-            >
-              <Plus size={15} />
-              Add Your First Gold Item
-            </button>
-          </div>
+          <EmptyState
+            type="gold"
+            title="No Gold Holdings Yet"
+            description="Track coins, jewelry, or bars by weight and purity to monitor appreciation over time."
+            actionButton={
+              <button
+                onClick={handleOpenAdd}
+                className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-amber-500/20"
+              >
+                <Plus size={15} />
+                Add Your First Gold Item
+              </button>
+            }
+          />
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
             {goldHoldings.map((g) => {

@@ -118,7 +118,7 @@ function SummaryCards({
               <Activity size={14} className="text-slate-400" />
             </span>
           </div>
-          <p className="text-base font-semibold text-slate-450 dark:text-slate-500 mt-1.5">No live data</p>
+          <p className="text-base font-semibold text-slate-400 dark:text-slate-500 mt-1.5">No live data</p>
           <p className="text-[10px] text-slate-400 dark:text-slate-500">Intraday quotes unavailable</p>
         </div>
       )}

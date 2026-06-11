@@ -117,7 +117,7 @@ function BarChart({ portfolios }: BarChartProps) {
                     y={paddingTop + chartHeight - currentH - 6}
                     textAnchor="middle"
                     fill=""
-                    className={isGain ? 'fill-emerald-700 dark:fill-emerald-450' : 'fill-rose-700 dark:fill-rose-450'}
+                    className={isGain ? 'fill-emerald-700 dark:fill-emerald-400' : 'fill-rose-700 dark:fill-rose-400'}
                     fontSize={9}
                     fontWeight={600}
                   >

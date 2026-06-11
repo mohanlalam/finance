@@ -15,7 +15,9 @@ import { getDocumentUrl } from '../utils/formatters';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
 import { usePortfolioState } from '../contexts/PortfolioContext';
+import { useToast } from '../contexts/ToastContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
+import EmptyState from './EmptyState';
 
 type AssetType = 'general' | 'stock' | 'fd' | 'gold' | 'real_estate' | 'insurance';
 
@@ -54,6 +56,7 @@ export default React.memo(function DocumentVaultView({
   autoOpenAddModal,
 }: DocumentVaultViewProps) {
   const { isMutating } = usePortfolioState();
+  const { addToast } = useToast();
   const [activeFolder, setActiveFolder] = useState<AssetType>('general');
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -175,6 +178,7 @@ export default React.memo(function DocumentVaultView({
         expiryDate: expiryDate || null,
       });
 
+      addToast('Document uploaded successfully', 'success');
       setShowLinkModal(false);
       setPendingFile(null);
       setDocumentName('');
@@ -182,6 +186,7 @@ export default React.memo(function DocumentVaultView({
       setExpiryDate('');
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed');
+      addToast(err instanceof Error ? err.message : 'Upload failed', 'error');
     } finally {
       setUploading(false);
     }
@@ -205,9 +210,10 @@ export default React.memo(function DocumentVaultView({
         }
       }
       await onDelete('document', deleteTarget.id);
+      addToast('Document deleted successfully', 'success');
       setDeleteTarget(null);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Delete failed');
+      addToast(err instanceof Error ? err.message : 'Delete failed', 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -321,22 +327,20 @@ export default React.memo(function DocumentVaultView({
             <AssetCardSkeleton count={Math.max(1, folderDocs.length || 3)} />
           </div>
         ) : folderDocs.length === 0 ? (
-          <div className="p-16 text-center">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center mx-auto mb-5 shadow-sm">
-              <Folder size={36} className="text-slate-400 dark:text-slate-500" />
-            </div>
-            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1.5">No Documents in This Folder</h4>
-            <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-xs mx-auto">
-              Upload PDFs, receipts, or policy documents to keep a secure digital record of your assets.
-            </p>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-600 dark:hover:bg-slate-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
-            >
-              <Upload size={15} />
-              Upload Your First Document
-            </button>
-          </div>
+          <EmptyState
+            type="documents"
+            title="No Documents in This Folder"
+            description="Upload PDFs, receipts, or policy documents to keep a secure digital record of your assets."
+            actionButton={
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-600 dark:hover:bg-slate-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+              >
+                <Upload size={15} />
+                Upload Your First Document
+              </button>
+            }
+          />
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
             {folderDocs.map((doc) => {

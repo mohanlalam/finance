@@ -36,7 +36,7 @@ interface MobileHomeSummaryProps {
   activePortfolio: Portfolio | null;
 }
 
-export function MobileHomeSummary({
+function MobileHomeSummary({
   summaryData,
   todayPnL,
   todayPnLPercent,

@@ -2,6 +2,9 @@ import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { PortfolioProvider, usePortfolioState, usePortfolioActions } from './contexts/PortfolioContext';
+import { ToastProvider } from './contexts/ToastContext';
+import ToastContainer from './components/Toast';
+import ErrorBoundary from './components/ErrorBoundary';
 import DashboardLoading from './components/DashboardLoading';
 import DashboardError from './components/DashboardError';
 
@@ -25,17 +28,23 @@ export default function MainApp({ onAuthExpired }: MainAppProps) {
   }
 
   return (
-    <ThemeProvider>
-      <PortfolioProvider onAuthExpired={onAuthExpired}>
-        <Routes>
-          <Route path="/" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
-          <Route path="/:family/:asset" element={<LoadGate onUnlock={onAuthExpired} />} />
-          <Route path="*" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
-        </Routes>
-      </PortfolioProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ToastProvider>
+        <ThemeProvider>
+          <PortfolioProvider onAuthExpired={onAuthExpired}>
+            <Routes>
+              <Route path="/" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
+              <Route path="/:family/:asset" element={<LoadGate onUnlock={onAuthExpired} />} />
+              <Route path="*" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
+            </Routes>
+            <ToastContainer />
+          </PortfolioProvider>
+        </ThemeProvider>
+      </ToastProvider>
+    </ErrorBoundary>
   );
 }
+
 
 /** Gate that shows loading/error states before rendering the dashboard */
 function LoadGate({ onUnlock }: { onUnlock: () => void }) {
@@ -59,7 +68,10 @@ function LoadGate({ onUnlock }: { onUnlock: () => void }) {
 
   return (
     <Suspense fallback={<DashboardLoading />}>
-      <AppShell />
+      <ErrorBoundary>
+        <AppShell />
+      </ErrorBoundary>
     </Suspense>
   );
 }
+

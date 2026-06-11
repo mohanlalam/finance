@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Upload, FileSpreadsheet, FileText, Database, X, Loader2, CheckCircle, AlertCircle, TrendingUp, Landmark, FolderOpen } from 'lucide-react';
 import { Portfolio } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
+import { getRDEffectiveValue } from '../utils/rdUtils';
+import { getSIPEffectiveValue } from '../utils/sipUtils';
 import Modal from './Modal';
 
 interface ExportPanelProps {
@@ -66,6 +68,24 @@ function allAssetsToCSV(portfolios: Portfolio[]): string {
   for (const p of portfolios) {
     for (const f of p.fixedDeposits) {
       sections.push(csvRow([p.label, f.bank_name, f.principal_amount, f.interest_rate, f.start_date, f.maturity_date || 'N/A', getFDEffectiveValue(f).toFixed(2), f.status]));
+    }
+  }
+
+  // Recurring Deposits
+  sections.push('\n=== RECURRING DEPOSITS ===');
+  sections.push(csvRow(['Portfolio', 'Bank', 'Monthly Deposit', 'Rate %', 'Start Date', 'Maturity Date', 'Current Value', 'Status']));
+  for (const p of portfolios) {
+    for (const r of p.rdAccounts || []) {
+      sections.push(csvRow([p.label, r.bank_name, r.monthly_deposit, r.interest_rate, r.start_date, r.maturity_date || 'N/A', getRDEffectiveValue(r).toFixed(2), r.status]));
+    }
+  }
+
+  // Mutual Fund SIPs
+  sections.push('\n=== MUTUAL FUND SIPS ===');
+  sections.push(csvRow(['Portfolio', 'Scheme Name', 'Monthly Investment', 'Units', 'Live NAV', 'Current Value', 'Status']));
+  for (const p of portfolios) {
+    for (const s of p.sipAccounts || []) {
+      sections.push(csvRow([p.label, s.fund_name, s.monthly_sip, s.units || 0, s.liveNav || 'N/A', getSIPEffectiveValue(s).toFixed(2), 'Active']));
     }
   }
 

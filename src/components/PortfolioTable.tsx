@@ -218,7 +218,7 @@ export default React.memo(function PortfolioTable({
 
         <div className="divide-y divide-slate-100 dark:divide-slate-700/50 p-3 space-y-3">
           {sorted.length === 0 ? (
-            <p className="text-xs text-slate-400 dark:text-slate-505 text-center py-4">No stock holdings yet.</p>
+            <p className="text-xs text-slate-400 dark:text-slate-400 text-center py-4">No stock holdings yet.</p>
           ) : (
             sorted.map((h) => {
             const isDeleting = deletingId === h.id;
@@ -512,10 +512,10 @@ export default React.memo(function PortfolioTable({
               <td role="cell" colSpan={5} className="px-4 py-3 text-sm font-bold">Portfolio Total</td>
               <td role="cell" className="px-4 py-3 text-sm font-bold text-right">{formatINR(totalCurrentValue)}</td>
               <td role="cell" className="px-4 py-3 text-sm font-bold text-right text-slate-300 dark:text-slate-400">{formatINR(totalInvested)}</td>
-              <td role="cell" className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-405'}`}>
+              <td role="cell" className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
                 {totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}
               </td>
-              <td role="cell" colSpan={onDelete ? 4 : 3} className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-405'}`}>
+              <td role="cell" colSpan={onDelete ? 4 : 3} className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
                 {formatPercent(totalPnLPercent)}
               </td>
             </tr>

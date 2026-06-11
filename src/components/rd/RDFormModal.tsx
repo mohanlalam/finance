@@ -170,7 +170,7 @@ export function RDFormModal({
               value={formPortfolio}
               onChange={(e) => setFormPortfolio(e.target.value)}
               disabled={!!editingAccount}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-450 transition-colors disabled:opacity-50"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors disabled:opacity-50"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
@@ -186,7 +186,7 @@ export function RDFormModal({
               placeholder="e.g. SBI, Post Office"
               value={bankName}
               onChange={(e) => setBankName(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-450 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
             />
           </div>
 
@@ -200,7 +200,7 @@ export function RDFormModal({
                 value={monthlyDeposit}
                 onChange={(e) => setMonthlyDeposit(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
               />
             </div>
             <div>
@@ -212,7 +212,7 @@ export function RDFormModal({
                 value={interestRate}
                 onChange={(e) => setInterestRate(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
               />
             </div>
           </div>
@@ -226,7 +226,7 @@ export function RDFormModal({
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
               />
             </div>
             <div>
@@ -236,7 +236,7 @@ export function RDFormModal({
                 value={maturityDate}
                 onChange={(e) => setMaturityDate(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
               />
             </div>
           </div>
@@ -250,7 +250,7 @@ export function RDFormModal({
                 placeholder="Auto-computed"
                 value={maturityAmount}
                 onChange={(e) => setMaturityAmount(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
               />
             </div>
             <div>
@@ -258,7 +258,7 @@ export function RDFormModal({
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as 'active' | 'matured')}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-450 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
               >
                 <option value="active">Active</option>
                 <option value="matured">Matured</option>
@@ -274,7 +274,7 @@ export function RDFormModal({
               placeholder="e.g. Linked to child marriage, Post office scheme"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-450 transition-colors resize-none"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors resize-none"
             />
           </div>
 
