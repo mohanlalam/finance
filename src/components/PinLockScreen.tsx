@@ -244,27 +244,6 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             </div>
           </div>
 
-          {/* Desktop Right Side Security Illustration (Side Decor) */}
-          <div className="hidden lg:block max-w-[420px]">
-            <div className="relative">
-              <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/5 bg-slate-950/40 backdrop-blur-sm p-4 relative group">
-                <img
-                  alt="High-tech cybersecurity"
-                  className="rounded-xl opacity-75 mix-blend-screen w-full object-cover h-[300px]"
-                  loading="lazy"
-                  decoding="async"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjjJ-916kqd5ywgCeXcCu8VNNQL2ghXwPLTFXPWEMmwooK0dPVvxdHuSTCtWVJcXvQxSrQ22qBJ2F6NUKlOxwdDzg2CZ_Umw9FuKMxZYy68k9WQxzwPqmLiYARjVGel9oN4hZ9jP4o54o4uTgQU6Y9JbGREva00oFF_fsM88Q0mZ3YLA2KJ-BzikuJ0z1x0bjdST7zUSDvKQor6rslKgoGwE8z2NJ6vKTsvRlvFtbMW9uGKLTGrlyahJGXaukjvJ9C0Uq6VgXJv1_C"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent pointer-events-none rounded-xl" />
-              </div>
-              <div className="absolute -bottom-4 -right-4 p-4 glass-card rounded-xl border border-blue-500/20 shadow-xl">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                  <p className="text-[11px] font-bold text-slate-200 tracking-wider uppercase">Secure Node: US-EAST-1 ACTIVE</p>
-                </div>
-              </div>
-            </div>
-          </div>
 
         </div>
       </main>
