@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock } from './icons/AppIcons';
+import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock, Calculator } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { Alert } from '../hooks/useAlerts';
@@ -30,7 +30,7 @@ interface MobileHomeSummaryProps {
   priceStatus: string;
   onRefresh: () => void;
   isLoadingPrices: boolean;
-  onNavigateAsset: (asset: 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
+  onNavigateAsset: (asset: 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'what_if') => void;
   onOpenAlerts: () => void;
   portfolios: Portfolio[];
   activePortfolio: Portfolio | null;
@@ -410,6 +410,32 @@ function MobileHomeSummary({
               </div>
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Tools & Calculators Section */}
+      <div className="space-y-2.5 pt-2">
+        <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">
+          Tools &amp; Calculators
+        </h3>
+        <div className="grid grid-cols-1 gap-3">
+          <button
+            onClick={() => onNavigateAsset('what_if')}
+            className="relative overflow-hidden bg-gradient-to-br from-indigo-50/40 to-blue-50/20 dark:from-indigo-950/10 dark:to-blue-950/5 border border-indigo-100/40 dark:border-indigo-900/20 rounded-2xl p-4 text-left shadow-sm hover:shadow active:scale-98 transition-all flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center animate-pulse">
+                <Calculator size={20} />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-700 dark:text-slate-200">What-If Investment Calculator</h4>
+                <p className="text-[10.5px] text-slate-400 dark:text-slate-500 mt-0.5">
+                  Project future portfolio growth with compound interest and returns
+                </p>
+              </div>
+            </div>
+            <ChevronRight size={14} className="text-slate-400" />
+          </button>
         </div>
       </div>
     </div>

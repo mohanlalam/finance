@@ -1,5 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import crypto from "node:crypto";
+import { Buffer } from "node:buffer";
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin");
@@ -13,6 +15,59 @@ function getCorsHeaders(req: Request) {
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin",
   };
+}
+
+async function fetchHdfcNavs(): Promise<Record<string, number>> {
+  const url = "https://hdfc-international.api-hdfclife.com/api/v1/navfunds/current-approved-investment/";
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      },
+      signal: AbortSignal.timeout(5000), // 5s timeout
+    });
+    if (!res.ok) {
+      console.warn(`HDFC API returned status ${res.status}`);
+      return {};
+    }
+    const json = await res.json();
+    const encryptedData = json.data;
+    if (!encryptedData || typeof encryptedData !== "string") {
+      console.warn("HDFC API returned empty or non-string data");
+      return {};
+    }
+    
+    // Decrypt using AES-256-GCM
+    const staticStr = "+OaG4nIEBHklazPlZpe9p4PLFXwJoaT1ACOWQkaHefM=";
+    const key = crypto.createHash("sha256").update(staticStr).digest();
+    const [ivHex, ciphertextHex, tagHex] = encryptedData.split(":");
+    if (!ivHex || !ciphertextHex || !tagHex) {
+      console.warn("Invalid encrypted payload format");
+      return {};
+    }
+    
+    const iv = Buffer.from(ivHex, "hex");
+    const ciphertext = Buffer.from(ciphertextHex, "hex");
+    const tag = Buffer.from(tagHex, "hex");
+    
+    const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
+    decipher.setAuthTag(tag);
+    let decrypted = decipher.update(ciphertext, undefined, "utf8");
+    decrypted += decipher.final("utf8");
+    
+    const parsed = JSON.parse(decrypted);
+    const navFunds = parsed?.navFunds?.funds_details || [];
+    const map: Record<string, number> = {};
+    navFunds.forEach((f: any) => {
+      if (f.fund_name && f.fund_value) {
+        map[f.fund_name] = parseFloat(f.fund_value);
+      }
+    });
+    return map;
+  } catch (err) {
+    console.error("Failed to fetch HDFC NAVs:", err);
+    return {};
+  }
 }
 
 interface SymbolRequest {
@@ -116,6 +171,13 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Run external HDFC API & USDINR Yahoo Finance fetch in parallel
+    const [hdfcNavs, usdInrQuote] = await Promise.all([
+      fetchHdfcNavs().catch(() => ({})),
+      fetchQuote("USDINR", "USDINR=X").catch(() => ({ ltp: 83.5, todayPct: 0 }))
+    ]);
+    const usdInrRate = usdInrQuote.ltp || 83.5;
+
     const yahooSymbols = symbols.map(s => s.yahooSymbol);
 
     // Fetch cached prices from database cache table
@@ -162,13 +224,13 @@ Deno.serve(async (req: Request) => {
 
       // Write valid fetched results to database cache table
       const cacheUpserts = fetchedResults
-        .filter(r => r.ltp !== null && r.todayPct !== null)
-        .map(r => ({
-          yahoo_symbol: r.yahooSymbol,
-          ltp: r.ltp,
-          today_pct: r.todayPct,
-          updated_at: new Date().toISOString()
-        }));
+          .filter(r => r.ltp !== null && r.todayPct !== null)
+          .map(r => ({
+            yahoo_symbol: r.yahooSymbol,
+            ltp: r.ltp,
+            today_pct: r.todayPct,
+            updated_at: new Date().toISOString()
+          }));
 
       if (cacheUpserts.length > 0) {
         const { error: upsertErr } = await supabase
@@ -190,7 +252,11 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    return new Response(JSON.stringify({ data: results }), {
+    return new Response(JSON.stringify({ 
+      data: results,
+      hdfcNavs,
+      usdInr: usdInrRate
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: unknown) {
