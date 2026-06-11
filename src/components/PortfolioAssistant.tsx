@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Portfolio } from '../types/portfolio';
 import { askAssistant, AssistantResponse } from '../utils/assistant';
-import { MessageSquare, Send, Sparkles, Trash2 } from 'lucide-react';
+import { Send, Sparkles, Trash2, Copy, Check } from 'lucide-react';
 
 interface PortfolioAssistantProps {
   portfolios: Portfolio[];
@@ -14,18 +14,42 @@ interface ChatMessage {
   response?: AssistantResponse;
 }
 
+// Clipboard copy component for assistant messages
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="absolute top-2 right-2 p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-white/90 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-200 z-20"
+      title="Copy answer"
+    >
+      {copied ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
+    </button>
+  );
+}
+
 // Simple custom markdown parser to convert basic elements into JSX
 const parseBoldAndCode = (text: string) => {
   const parts = text.split('**');
   return parts.map((part, i) => {
     if (i % 2 === 1) {
-      return <strong key={i} className="font-bold text-slate-100">{part}</strong>;
+      return <strong key={i} className="font-bold text-slate-900 dark:text-white">{part}</strong>;
     }
     const codeParts = part.split('`');
     if (codeParts.length > 1) {
       return codeParts.map((cp, j) => {
         if (j % 2 === 1) {
-          return <code key={`${i}-${j}`} className="bg-slate-800/80 px-1.5 py-0.5 rounded text-blue-400 font-mono text-[9.5px]">{cp}</code>;
+          return <code key={`${i}-${j}`} className="bg-slate-200 dark:bg-slate-800/80 px-1.5 py-0.5 rounded text-blue-600 dark:text-blue-400 font-mono text-[9.5px]">{cp}</code>;
         }
         return cp;
       });
@@ -36,52 +60,110 @@ const parseBoldAndCode = (text: string) => {
 
 const renderMarkdown = (text: string) => {
   const lines = text.split('\n');
-  return lines.map((line, lineIdx) => {
+  const blocks: React.ReactNode[] = [];
+  let currentTableLines: string[] = [];
+
+  const flushTable = (key: string | number) => {
+    if (currentTableLines.length === 0) return;
+
+    const rows = currentTableLines.map(line => {
+      const cells = line.split('|').map(c => c.trim());
+      if (cells[0] === '') cells.shift();
+      if (cells[cells.length - 1] === '') cells.pop();
+      return cells;
+    });
+
+    const headers = rows[0] || [];
+    const bodyRows = rows.slice(2) || []; // skip divider
+
+    blocks.push(
+      <div key={`table-${key}`} className="overflow-x-auto my-2.5 rounded-xl border border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/40 shadow-sm max-w-full">
+        <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700/60 text-[10px] sm:text-[10.5px]">
+          <thead className="bg-slate-100/70 dark:bg-slate-800/50">
+            <tr>
+              {headers.map((h, i) => (
+                <th key={i} className="px-3 py-2 text-left font-bold text-slate-650 dark:text-slate-200 uppercase tracking-wider">
+                  {parseBoldAndCode(h)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40 text-slate-600 dark:text-slate-300">
+            {bodyRows.map((row, rowIndex) => (
+              <tr key={rowIndex} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                {row.map((cell, cellIndex) => (
+                  <td key={cellIndex} className="px-3 py-1.5 whitespace-nowrap font-medium">
+                    {parseBoldAndCode(cell)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+    currentTableLines = [];
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+      currentTableLines.push(line);
+      continue;
+    } else if (currentTableLines.length > 0) {
+      flushTable(i);
+    }
+
     if (line.startsWith('### ')) {
-      return (
-        <h4 key={lineIdx} className="text-[10px] font-bold text-slate-200 mt-2.5 mb-1 tracking-wider uppercase">
+      blocks.push(
+        <h4 key={i} className="text-[10px] font-bold text-slate-700 dark:text-slate-200 mt-2.5 mb-1 tracking-wider uppercase">
           {parseBoldAndCode(line.slice(4))}
         </h4>
       );
-    }
-    if (line.startsWith('## ')) {
-      return (
-        <h3 key={lineIdx} className="text-[11px] font-bold text-slate-100 mt-3 mb-1.5 tracking-wider uppercase">
+    } else if (line.startsWith('## ')) {
+      blocks.push(
+        <h3 key={i} className="text-[11px] font-bold text-slate-800 dark:text-slate-100 mt-3 mb-1.5 tracking-wider uppercase">
           {parseBoldAndCode(line.slice(3))}
         </h3>
       );
-    }
-    if (line.startsWith('# ')) {
-      return (
-        <h2 key={lineIdx} className="text-xs font-bold text-slate-100 mt-3.5 mb-2 tracking-widest uppercase">
+    } else if (line.startsWith('# ')) {
+      blocks.push(
+        <h2 key={i} className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-3.5 mb-2 tracking-widest uppercase">
           {parseBoldAndCode(line.slice(2))}
         </h2>
       );
-    }
-    if (line.startsWith('- ') || line.startsWith('* ')) {
-      return (
-        <ul key={lineIdx} className="list-disc pl-4 my-0.5 text-[10.5px] text-slate-300">
+    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+      blocks.push(
+        <ul key={i} className="list-disc pl-4 my-0.5 text-[10.5px] text-slate-650 dark:text-slate-350">
           <li className="py-0.5">{parseBoldAndCode(line.slice(2))}</li>
         </ul>
       );
+    } else {
+      const olMatch = line.match(/^(\d+)\.\s(.*)/);
+      if (olMatch) {
+        blocks.push(
+          <ol key={i} className="list-decimal pl-4 my-0.5 text-[10.5px] text-slate-650 dark:text-slate-350">
+            <li className="py-0.5" value={parseInt(olMatch[1])}>{parseBoldAndCode(olMatch[2])}</li>
+          </ol>
+        );
+      } else if (line.trim() === '') {
+        blocks.push(<div key={i} className="h-1.5" />);
+      } else {
+        blocks.push(
+          <p key={i} className="text-[10.5px] text-slate-650 dark:text-slate-350 leading-relaxed my-0.5">
+            {parseBoldAndCode(line)}
+          </p>
+        );
+      }
     }
-    const olMatch = line.match(/^(\d+)\.\s(.*)/);
-    if (olMatch) {
-      return (
-        <ol key={lineIdx} className="list-decimal pl-4 my-0.5 text-[10.5px] text-slate-300">
-          <li className="py-0.5" value={parseInt(olMatch[1])}>{parseBoldAndCode(olMatch[2])}</li>
-        </ol>
-      );
-    }
-    if (line.trim() === '') {
-      return <div key={lineIdx} className="h-1.5" />;
-    }
-    return (
-      <p key={lineIdx} className="text-[10.5px] text-slate-300 leading-relaxed my-0.5">
-        {parseBoldAndCode(line)}
-      </p>
-    );
-  });
+  }
+
+  if (currentTableLines.length > 0) {
+    flushTable('end');
+  }
+
+  return blocks;
 };
 
 function getDynamicSuggestions(portfolios: Portfolio[]): string[] {
@@ -115,18 +197,13 @@ function getDynamicSuggestions(portfolios: Portfolio[]): string[] {
   }
 
   // 3. Defaults
-  if (suggestions.length < 3) {
-    suggestions.push('Which asset gave the highest return?');
-  }
-  if (suggestions.length < 3) {
-    suggestions.push('What is my total asset allocation split?');
-  }
-  if (suggestions.length < 3) {
-    suggestions.push('When is my next SIP?');
-  }
-  if (suggestions.length < 3) {
-    suggestions.push('Show family member breakdown');
-  }
+  suggestions.push('Diagnose my portfolio health');
+  suggestions.push('Give me asset rebalancing advice');
+  suggestions.push('What is my total asset allocation split?');
+  suggestions.push('Which asset gave the highest return?');
+  suggestions.push('Search for HDFC');
+  suggestions.push('Check emergency fund status');
+  suggestions.push('Show family member breakdown');
 
   return suggestions.slice(0, 3);
 }
@@ -135,7 +212,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
   const welcomeMessage = useMemo<ChatMessage>(() => ({
     id: 'welcome',
     role: 'assistant',
-    text: "Hello! I am your **AI Portfolio Assistant**. You can ask me questions about your family portfolio's performance, upcoming maturities, insurance renewals, and asset allocation split.\n\nTry clicking one of the suggested queries below or type your question!"
+    text: "Hello! I am your **AI Portfolio Assistant**. You can ask me questions about your family portfolio's performance, health diagnostics, rebalancing trade triggers, upcoming maturities, insurance premium renewals, and asset allocation split.\n\nTry clicking one of the suggested queries below or type your question!"
   }), []);
 
   const [query, setQuery] = useState('');
@@ -183,7 +260,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
     setQuery('');
     setIsLoading(true);
 
-    // Artificial brief latency for standard typing bubble feedback
+    // Artificial latency for standard typing bubble feedback
     await new Promise(r => setTimeout(r, 450));
 
     try {
@@ -195,7 +272,8 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
         response: res
       };
       setMessages(prev => [...prev, assistantMsg]);
-    } catch {
+    } catch (e) {
+      console.error(e);
       const errorMsg: ChatMessage = {
         id: Math.random().toString(36).substring(7),
         role: 'assistant',
@@ -221,15 +299,15 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700/60 rounded-2xl p-4 sm:p-5 text-slate-100 shadow-xl relative overflow-hidden flex flex-col h-[400px]">
+    <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 sm:p-5 text-slate-800 dark:text-slate-100 shadow-xl relative overflow-hidden flex flex-col h-[480px]">
       {/* Decorative background accent */}
-      <div className="absolute top-[-50px] right-[-50px] w-[150px] h-[150px] bg-blue-500/10 rounded-full blur-[40px] pointer-events-none" />
+      <div className="absolute top-[-50px] right-[-50px] w-[150px] h-[150px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[40px] pointer-events-none" />
 
       {/* Header */}
       <div className="flex justify-between items-center mb-3.5 shrink-0 z-10">
         <div className="flex items-center gap-2">
-          <Sparkles size={16} className="text-blue-400" />
-          <h3 className="text-xs font-bold text-slate-200 uppercase tracking-widest">
+          <Sparkles size={16} className="text-blue-500 dark:text-blue-400" />
+          <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
             AI Portfolio Assistant
           </h3>
         </div>
@@ -237,7 +315,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
           <button
             type="button"
             onClick={handleClear}
-            className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 hover:text-red-400 transition-colors bg-slate-800/40 hover:bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-700/25 active:scale-95"
+            className="flex items-center gap-1.5 text-[9px] font-bold text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors bg-slate-200/50 dark:bg-slate-800/40 hover:bg-slate-200 dark:hover:bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-200/30 dark:border-slate-700/25 active:scale-95"
             title="Reset conversation"
           >
             <Trash2 size={11} />
@@ -247,35 +325,45 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
       </div>
 
       {/* Chat History View */}
-      <div className="flex-1 overflow-y-auto pr-1 space-y-4 mb-4 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent min-h-0">
+      <div className="flex-1 overflow-y-auto pr-1 space-y-4 mb-4 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 scrollbar-track-transparent min-h-0">
         {messages.map((msg) => (
           <div key={msg.id} className="w-full">
             {msg.role === 'user' ? (
-              <div className="flex justify-end w-full animate-stitch-fade">
-                <div className="bg-blue-600 border border-blue-500/30 text-white rounded-2xl rounded-tr-sm px-3.5 py-2 text-[10.5px] max-w-[85%] font-medium shadow-md shadow-blue-600/10">
+              <div className="flex justify-end items-end gap-2 w-full animate-stitch-fade">
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 border border-blue-500/30 text-white rounded-2xl rounded-tr-sm px-3.5 py-2 text-[10.5px] max-w-[80%] font-medium shadow-md shadow-blue-600/10">
                   {msg.text}
+                </div>
+                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center text-[9px] font-extrabold text-indigo-650 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900 shrink-0">
+                  U
                 </div>
               </div>
             ) : (
               <div className="flex flex-col gap-2 items-start w-full animate-stitch-fade">
-                <div className="flex gap-2 items-start w-full">
-                  <MessageSquare size={13} className="text-blue-400 shrink-0 mt-0.5" />
-                  <div className="flex-1 space-y-1">
+                <div className="flex gap-2.5 items-start w-full">
+                  <div className="w-5.5 h-5.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-blue-500 dark:text-blue-400 shrink-0 mt-0.5 shadow-sm">
+                    <Sparkles size={11} className="text-blue-500 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1 space-y-1 bg-slate-100 dark:bg-slate-850/60 border border-slate-200/50 dark:border-slate-700/40 text-slate-800 dark:text-slate-100 rounded-2xl rounded-tl-sm px-3.5 py-2.5 shadow-sm relative group">
                     {renderMarkdown(msg.text)}
+                    
+                    {/* Clipboard copy trigger */}
+                    {msg.id !== 'welcome' && (
+                      <CopyButton text={msg.text} />
+                    )}
                   </div>
                 </div>
                 
                 {msg.response && msg.response.matchedAssets && msg.response.matchedAssets.length > 0 && (
-                  <div className="pl-5 w-full space-y-1.5">
-                    <p className="text-[8.5px] font-bold text-slate-500 uppercase tracking-wider">Matching Asset Classes:</p>
+                  <div className="pl-8 w-full space-y-1.5">
+                    <p className="text-[8.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Matching Asset Classes:</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                       {msg.response.matchedAssets.map((asset, idx) => (
-                        <div key={idx} className="bg-slate-800/60 border border-slate-700/20 rounded-lg p-2 flex flex-col gap-0.5 text-left">
+                        <div key={idx} className="bg-slate-100/50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/20 rounded-lg p-2 flex flex-col gap-0.5 text-left">
                           <div className="flex justify-between items-center text-[9px] font-bold">
-                            <span className="text-slate-200 truncate pr-2">{asset.name}</span>
-                            <span className="text-slate-500 bg-slate-750 px-1 py-0.5 rounded text-[7.5px] uppercase shrink-0">{asset.type}</span>
+                            <span className="text-slate-750 dark:text-slate-200 truncate pr-2">{asset.name}</span>
+                            <span className="text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-750 px-1 py-0.5 rounded text-[7.5px] uppercase shrink-0">{asset.type}</span>
                           </div>
-                          <span className="text-[8.5px] text-slate-400 font-semibold truncate">{asset.details}</span>
+                          <span className="text-[8.5px] text-slate-500 dark:text-slate-400 font-semibold truncate">{asset.details}</span>
                         </div>
                       ))}
                     </div>
@@ -286,12 +374,14 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
           </div>
         ))}
         {isLoading && (
-          <div className="flex gap-2 items-start w-full animate-pulse">
-            <MessageSquare size={13} className="text-blue-400 shrink-0 mt-0.5" />
-            <div className="flex items-center gap-1.5 bg-slate-800/40 px-3.5 py-2 rounded-xl border border-slate-700/10">
-              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <div className="flex gap-2.5 items-start w-full animate-pulse">
+            <div className="w-5.5 h-5.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-blue-500 dark:text-blue-400 shrink-0 mt-0.5 shadow-sm">
+              <Sparkles size={11} className="text-blue-500 dark:text-blue-400" />
+            </div>
+            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/40 px-3.5 py-2 rounded-xl border border-slate-200/30 dark:border-slate-700/10">
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         )}
@@ -301,14 +391,14 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
       {/* Suggested Questions */}
       {suggestions.length > 0 && (
         <div className="flex flex-col gap-1.5 mb-3 shrink-0">
-          <p className="text-[8.5px] font-bold text-slate-500 uppercase tracking-wider">Suggested Queries:</p>
+          <p className="text-[8.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Suggested Queries:</p>
           <div className="flex flex-wrap gap-1.5 max-h-[56px] overflow-y-auto">
             {suggestions.map((s, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => handleSuggestion(s)}
-                className="text-left text-[9.5px] text-blue-400 hover:text-blue-300 font-semibold hover:underline bg-slate-800/40 border border-slate-700/35 px-2.5 py-1.5 rounded-xl transition-all active:scale-95"
+                className="text-left text-[9.5px] text-blue-600 dark:text-blue-450 hover:text-blue-800 dark:hover:text-blue-300 font-semibold bg-slate-100/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/35 px-2.5 py-1.5 rounded-xl transition-all active:scale-95"
               >
                 &ldquo;{s}&rdquo;
               </button>
@@ -325,7 +415,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Ask a question... (Press '/' to focus)"
-          className="flex-1 bg-slate-800 border border-slate-750 focus:border-blue-500 rounded-xl px-3.5 py-2 text-[11px] text-slate-200 focus:outline-none placeholder-slate-500 transition-colors"
+          className="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-750 focus:border-blue-500 rounded-xl px-3.5 py-2 text-[11px] text-slate-800 dark:text-slate-250 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 transition-colors shadow-sm"
         />
         <button
           type="submit"
@@ -339,4 +429,3 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
     </div>
   );
 }
-

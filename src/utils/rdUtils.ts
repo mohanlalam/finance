@@ -5,7 +5,7 @@ import { compoundValue } from './mathUtils';
  * Returns the total amount actually invested in a Recurring Deposit.
  */
 export function getRDInvestedAmount(account: RDAccount): number {
-  if (account.contributions && account.contributions.length > 0) {
+  if (account.contributions) {
     return account.contributions.reduce((sum, c) => sum + Number(c.amount), 0);
   }
   const startDate = new Date(account.start_date);

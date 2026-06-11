@@ -1,7 +1,10 @@
 import { Portfolio } from '../types/portfolio';
-import { formatINR, getFDInvestedAmount, getFDEffectiveValue } from './formatters';
+import { formatINR, formatINRCompact, getFDInvestedAmount, getFDEffectiveValue } from './formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from './rdUtils';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from './sipUtils';
+import { calculateHealthScore } from './healthScore';
+import { calculateRebalancing } from './rebalancing';
+import { getAllocationTargets } from '../hooks/usePortfolioInsights';
 
 export interface AssistantResponse {
   answer: string;
@@ -24,22 +27,74 @@ export enum Intent {
   NET_WORTH = 'NET_WORTH',
   FAMILY_BREAKDOWN = 'FAMILY_BREAKDOWN',
   NEXT_SIP_DATE = 'NEXT_SIP_DATE',
+  PORTFOLIO_HEALTH = 'PORTFOLIO_HEALTH',
+  REBALANCING_ADVICE = 'REBALANCING_ADVICE',
+  EMERGENCY_FUND = 'EMERGENCY_FUND',
+  RENTAL_YIELD = 'RENTAL_YIELD',
+  EXPIRED_DOCUMENTS = 'EXPIRED_DOCUMENTS',
+  COMPREHENSIVE_SEARCH = 'COMPREHENSIVE_SEARCH',
   UNKNOWN = 'UNKNOWN'
 }
 
 export function normalizeQuery(query: string): string {
   let q = query.toLowerCase().trim();
   // Strip common filler phrases
-  q = q.replace(/\b(what is|what's|whats|tell me|show me|list my|how much|how many|show all|give me|get me|display)\b/g, '');
+  q = q.replace(/\b(what is|what's|whats|tell me|show me|list my|how much|how many|show all|give me|get me|display|search for|find|lookup|where is)\b/g, '');
   // Normalize synonyms
   q = q.replace(/\b(worth|wealth|assets|networth)\b/g, 'net worth');
   q = q.replace(/\b(mutualfunds|mutualfund|mfs)\b/g, 'mutual fund');
   q = q.replace(/\b(fixed deposit|fixed deposits|fds|fd)\b/g, 'fixed deposit');
   q = q.replace(/\b(recurring deposit|recurring deposits|rds|rd)\b/g, 'recurring deposit');
+  q = q.replace(/\b(rebalance|rebalancing|drift|target percentage|target allocation|target split|drift split)\b/g, 'rebalance');
+  q = q.replace(/\b(health|diagnostic|healthy|score|health score|audit|health report)\b/g, 'health');
+  q = q.replace(/\b(emergency|expenses|liquidity|buffer|emergency pool|emergency fund|emergency buffer)\b/g, 'emergency');
+  q = q.replace(/\b(rental yield|rent yield|rent return|rental income|rent income)\b/g, 'rental yield');
+  q = q.replace(/\b(expired|expiration|expiry|expiring|expired document|expired documents|document expiry|expiring docs|expiring documents)\b/g, 'expiry');
   return q.trim();
 }
 
-export function detectIntent(query: string): Intent {
+/**
+ * Helper to check if a query word matches any asset details in portfolios
+ */
+function hasSearchMatches(query: string, portfolios: Portfolio[]): boolean {
+  const words = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  if (words.length === 0) return false;
+
+  for (const p of portfolios) {
+    if (words.some(w => p.label.toLowerCase().includes(w))) return true;
+    for (const h of p.holdings) {
+      if (words.some(w => h.ticker.toLowerCase().includes(w) || h.stockName.toLowerCase().includes(w))) return true;
+    }
+    for (const fd of p.fixedDeposits) {
+      if (words.some(w => fd.bank_name.toLowerCase().includes(w) || (fd.notes && fd.notes.toLowerCase().includes(w)))) return true;
+    }
+    if (p.rdAccounts) {
+      for (const rd of p.rdAccounts) {
+        if (words.some(w => rd.bank_name.toLowerCase().includes(w) || (rd.notes && rd.notes.toLowerCase().includes(w)))) return true;
+      }
+    }
+    if (p.sipAccounts) {
+      for (const sip of p.sipAccounts) {
+        if (words.some(w => sip.fund_name.toLowerCase().includes(w) || (sip.notes && sip.notes.toLowerCase().includes(w)))) return true;
+      }
+    }
+    for (const g of p.goldHoldings) {
+      if (words.some(w => g.item_name.toLowerCase().includes(w) || g.purity.toLowerCase().includes(w) || (g.notes && g.notes.toLowerCase().includes(w)))) return true;
+    }
+    for (const re of p.realEstate) {
+      if (words.some(w => re.property_name.toLowerCase().includes(w) || re.property_type.toLowerCase().includes(w) || (re.location && re.location.toLowerCase().includes(w)))) return true;
+    }
+    for (const ins of p.insurances) {
+      if (words.some(w => ins.provider.toLowerCase().includes(w) || ins.policy_name.toLowerCase().includes(w) || ins.insurance_type.toLowerCase().includes(w))) return true;
+    }
+    for (const doc of p.documents) {
+      if (words.some(w => doc.name.toLowerCase().includes(w) || doc.file_path.toLowerCase().includes(w) || doc.asset_type.toLowerCase().includes(w))) return true;
+    }
+  }
+  return false;
+}
+
+export function detectIntent(query: string, portfolios?: Portfolio[]): Intent {
   const q = normalizeQuery(query);
   const currentYear = new Date().getFullYear();
 
@@ -100,6 +155,31 @@ export function detectIntent(query: string): Intent {
     return Intent.MUTUAL_FUND_YEAR_INVESTMENTS;
   }
 
+  // Health Score Audit
+  if (q.includes('health')) {
+    return Intent.PORTFOLIO_HEALTH;
+  }
+
+  // Rebalancing advice
+  if (q.includes('rebalance')) {
+    return Intent.REBALANCING_ADVICE;
+  }
+
+  // Emergency Fund
+  if (q.includes('emergency')) {
+    return Intent.EMERGENCY_FUND;
+  }
+
+  // Rental yield
+  if (q.includes('rental yield')) {
+    return Intent.RENTAL_YIELD;
+  }
+
+  // Expiry dates
+  if (q.includes('expiry') || q.includes('expired')) {
+    return Intent.EXPIRED_DOCUMENTS;
+  }
+
   // Query 3: Maturity
   if (
     q.includes('maturing') ||
@@ -107,7 +187,6 @@ export function detectIntent(query: string): Intent {
     q.includes('maturities') ||
     q.includes('matures') ||
     q.includes('expire') ||
-    q.includes('expiry') ||
     q.includes('due date')
   ) {
     return Intent.MATURITY_TIMELINE;
@@ -178,7 +257,16 @@ export function detectIntent(query: string): Intent {
     return Intent.NET_WORTH;
   }
 
+  // Fallback check: scan portfolios for fuzzy search matches
+  if (portfolios && hasSearchMatches(query, portfolios)) {
+    return Intent.COMPREHENSIVE_SEARCH;
+  }
+
   return Intent.UNKNOWN;
+}
+
+function formatGainINR(value: number): string {
+  return value >= 0 ? `+${formatINR(value)}` : formatINR(value);
 }
 
 /**
@@ -187,7 +275,7 @@ export function detectIntent(query: string): Intent {
 export function askAssistant(query: string, portfolios: Portfolio[]): AssistantResponse {
   const q = query.toLowerCase().trim();
   const matchedAssets: AssistantResponse['matchedAssets'] = [];
-  const intent = detectIntent(q);
+  const intent = detectIntent(q, portfolios);
 
   // Query 1: Mutual Fund current year investments
   if (intent === Intent.MUTUAL_FUND_YEAR_INVESTMENTS) {
@@ -354,20 +442,20 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     const topAbs = sortedByGain[0];
     const topPct = sortedByPct[0];
 
-    let answer = `Your absolute highest-returning asset is **${topAbs.name}** (${topAbs.type}) with a total return of **+${formatINR(topAbs.gain)}** (+${topAbs.gainPct.toFixed(1)}%).\n\n`;
+    let answer = `Your absolute highest-returning asset is **${topAbs.name}** (${topAbs.type}) with a total return of **${formatGainINR(topAbs.gain)}** (+${topAbs.gainPct.toFixed(1)}%).\n\n`;
     if (topPct.name !== topAbs.name) {
-      answer += `By percentage rate of return, your best performing asset is **${topPct.name}** (${topPct.type}) with a return of **+${topPct.gainPct.toFixed(1)}%** (+${formatINR(topPct.gain)} absolute gain).\n\n`;
+      answer += `By percentage rate of return, your best performing asset is **${topPct.name}** (${topPct.type}) with a return of **+${topPct.gainPct.toFixed(1)}%** (${formatGainINR(topPct.gain)} absolute gain).\n\n`;
     }
 
     answer += `### Top 3 Assets by Absolute Return:\n`;
     const top3 = sortedByGain.slice(0, 3);
     top3.forEach((asset, idx) => {
-      answer += `${idx + 1}. **${asset.name}** (${asset.type}): **+${formatINR(asset.gain)}** (+${asset.gainPct.toFixed(1)}%)\n`;
+      answer += `${idx + 1}. **${asset.name}** (${asset.type}): **${formatGainINR(asset.gain)}** (+${asset.gainPct.toFixed(1)}%)\n`;
     });
 
     return {
       answer,
-      matchedAssets: top3.map(a => ({ name: a.name, type: a.type, details: `Gain: +${formatINR(a.gain)} (+${a.gainPct.toFixed(1)}%)` })),
+      matchedAssets: top3.map(a => ({ name: a.name, type: a.type, details: `Gain: ${formatGainINR(a.gain)} (+${a.gainPct.toFixed(1)}%)` })),
     };
   }
 
@@ -844,10 +932,362 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     const totalCurrentVal = portfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
     const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
     const pnl = totalCurrentVal - totalInvested;
-    const pnlStr = pnl >= 0 ? `+${formatINR(pnl)}` : formatINR(pnl);
+    const pnlStr = formatGainINR(pnl);
     return {
       answer: `Your total consolidated family net worth today is **${formatINR(totalCurrentVal)}** on an invested capital of **${formatINR(totalInvested)}** (P&L: **${pnlStr}**).`,
       matchedAssets: [],
+    };
+  }
+
+  // 1. Portfolio Health Audit
+  if (intent === Intent.PORTFOLIO_HEALTH) {
+    const report = calculateHealthScore(portfolios, null);
+    let answer = `### 🩺 Portfolio Health Audit\n`;
+    answer += `Your overall portfolio health score is **${report.score}/100**.\n\n`;
+    
+    answer += `| Category | Description | Status |\n`;
+    answer += `| :--- | :--- | :--- |\n`;
+    
+    // Strengths
+    report.strengths.forEach(str => {
+      answer += `| Strength | ${str.slice(2)} | ✅ Pass |\n`;
+    });
+    
+    // Risks
+    report.risks.forEach(risk => {
+      answer += `| Risk | ${risk.slice(2)} | ⚠️ Warning |\n`;
+    });
+
+    if (report.risks.length === 0) {
+      answer += `\n🌟 **Excellent job!** No major risks or allocation gaps detected. Keep maintaining your SIP discipline!`;
+    } else {
+      answer += `\n💡 **Action items**: Address the warnings above (like boosting emergency funds or adding insurance policies) to increase your health score.`;
+    }
+
+    return {
+      answer,
+      matchedAssets: [],
+    };
+  }
+
+  // 2. Rebalancing Advice
+  if (intent === Intent.REBALANCING_ADVICE) {
+    const targets = getAllocationTargets();
+    const targetPcts = {
+      equity: targets.stocks,
+      debt: targets.fd,
+      gold: targets.gold,
+      realEstate: targets.realEstate
+    };
+    const advice = calculateRebalancing(portfolios, null, targetPcts);
+    
+    let answer = `### ⚖️ Asset Rebalancing Advice\n`;
+    answer += `Based on your configured target allocation targets, here is the drift analysis and trade recommendations:\n\n`;
+    
+    answer += `| Asset Class | Target % | Actual % | Drift | Action Recommendation |\n`;
+    answer += `| :--- | :---: | :---: | :---: | :--- |\n`;
+    
+    const matched: AssistantResponse['matchedAssets'] = [];
+    
+    advice.forEach(ad => {
+      const drift = ad.actualPct - ad.targetPct;
+      const driftSign = drift >= 0 ? '+' : '';
+      
+      answer += `| **${ad.assetClass}** | ${ad.targetPct}% | ${ad.actualPct.toFixed(1)}% | ${driftSign}${drift.toFixed(1)}% | **${ad.recommendation}** |\n`;
+      
+      if (ad.recommendation !== 'Aligned') {
+        matched.push({
+          name: ad.assetClass,
+          type: 'Rebalancing Trade',
+          details: `Drift: ${driftSign}${drift.toFixed(1)}%, Recommendation: ${ad.recommendation}`
+        });
+      }
+    });
+
+    answer += `\n*(Note: Rebalancing orders are recommended only when the trade amount exceeds the minimum action threshold of ${formatINR(5000)})*`;
+    
+    return {
+      answer,
+      matchedAssets: matched,
+    };
+  }
+
+  // 3. Emergency Fund
+  if (intent === Intent.EMERGENCY_FUND) {
+    let totalFDVal = 0;
+    let totalRDVal = 0;
+    
+    for (const p of portfolios) {
+      totalFDVal += p.fixedDeposits.reduce((sum, fd) => sum + (fd.status === 'matured' ? Number(fd.maturity_amount) : getFDEffectiveValue(fd)), 0);
+      if (p.rdAccounts) {
+        totalRDVal += p.rdAccounts.reduce((sum, rd) => sum + getRDEffectiveValue(rd), 0);
+      }
+    }
+    
+    const emergencyPool = totalFDVal + totalRDVal;
+    const MONTHLY_EXPENSE = 50000;
+    const monthsCovered = MONTHLY_EXPENSE > 0 ? emergencyPool / MONTHLY_EXPENSE : 0;
+    
+    let answer = `### 🚨 Emergency Fund Analysis\n`;
+    answer += `Your emergency/liquid capital consists of Fixed Deposits and Recurring Deposits:\n\n`;
+    answer += `- **Total liquid capital**: **${formatINR(emergencyPool)}**\n`;
+    answer += `  * Fixed Deposits: ${formatINR(totalFDVal)}\n`;
+    answer += `  * Recurring Deposits: ${formatINR(totalRDVal)}\n`;
+    answer += `- **Assumed monthly expense baseline**: **${formatINR(MONTHLY_EXPENSE)}/month**\n\n`;
+    
+    answer += `| Metric | Value | Rating |\n`;
+    answer += `| :--- | :---: | :---: |\n`;
+    answer += `| Months Covered | ${monthsCovered.toFixed(1)} months | ${monthsCovered >= 6 ? '✅ Solid (Excellent)' : monthsCovered >= 3 ? '⚠️ Moderate (Warning)' : '🚨 High Risk (Critical)'} |\n\n`;
+    
+    if (monthsCovered >= 6) {
+      answer += `✓ Your emergency pool covers more than 6 months of baseline living expenses. You have a very healthy buffer.`;
+    } else if (monthsCovered >= 3) {
+      answer += `⚠ Your emergency fund covers ${monthsCovered.toFixed(1)} months of expenses. It is recommended to boost your deposits to reach at least 6 months of coverage (${formatINR(MONTHLY_EXPENSE * 6)}).`;
+    } else {
+      answer += `🚨 **Critical Alert**: Your emergency fund covers less than 3 months of expenses. You should prioritize creating additional liquid deposits to protect against sudden income loss or health crises.`;
+    }
+
+    return {
+      answer,
+      matchedAssets: [],
+    };
+  }
+
+  // 4. Rental Yield
+  if (intent === Intent.RENTAL_YIELD) {
+    interface PropertyYield {
+      name: string;
+      owner: string;
+      purchasePrice: number;
+      currentVal: number;
+      monthlyRent: number;
+      annualRent: number;
+      yieldPct: number;
+    }
+    
+    const props: PropertyYield[] = [];
+    for (const p of portfolios) {
+      for (const re of p.realEstate) {
+        const annualRent = Number(re.monthly_rent) * 12;
+        const purchase = Number(re.purchase_price) || 1; // avoid division by zero
+        const yieldPct = (annualRent / purchase) * 100;
+        props.push({
+          name: re.property_name,
+          owner: p.label,
+          purchasePrice: re.purchase_price,
+          currentVal: re.current_valuation,
+          monthlyRent: re.monthly_rent,
+          annualRent,
+          yieldPct
+        });
+      }
+    }
+    
+    if (props.length === 0) {
+      return {
+        answer: "You do not have any Real Estate properties registered in your portfolio database.",
+        matchedAssets: []
+      };
+    }
+    
+    // Sort: highest yield first
+    const sortedProps = [...props].sort((a, b) => b.yieldPct - a.yieldPct);
+    
+    let answer = `### 🏢 Real Estate Rental Yields\n`;
+    answer += `Rental yields are calculated as: \`(Monthly Rent × 12) ÷ Purchase Price × 100\`\n\n`;
+    
+    answer += `| Property Name | Owner | Purchase Price | Monthly Rent | Annual Rent | Yield % |\n`;
+    answer += `| :--- | :--- | :---: | :---: | :---: | :---: |\n`;
+    
+    const matched: AssistantResponse['matchedAssets'] = [];
+    
+    sortedProps.forEach(pr => {
+      answer += `| **${pr.name}** | ${pr.owner} | ${formatINRCompact(pr.purchasePrice)} | ${formatINRCompact(pr.monthlyRent)} | ${formatINRCompact(pr.annualRent)} | **${pr.yieldPct.toFixed(2)}%** |\n`;
+      matched.push({
+        name: pr.name,
+        type: 'Real Estate Property',
+        details: `Rent: ${formatINR(pr.monthlyRent)}/mo (Yield: ${pr.yieldPct.toFixed(2)}%)`
+      });
+    });
+
+    const highestYield = sortedProps[0];
+    answer += `\n💡 **Insights**: The highest yielding property is **${highestYield.name}** owned by **${highestYield.owner}** with a yield rate of **${highestYield.yieldPct.toFixed(2)}%**.`;
+    
+    return {
+      answer,
+      matchedAssets: matched
+    };
+  }
+
+  // 5. Expired/Expiring Documents
+  if (intent === Intent.EXPIRED_DOCUMENTS) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    interface DocItem {
+      name: string;
+      owner: string;
+      assetType: string;
+      expiryDate: string;
+      expiryObj: Date;
+      daysRemaining: number;
+    }
+    
+    const docs: DocItem[] = [];
+    for (const p of portfolios) {
+      for (const doc of p.documents) {
+        if (doc.expiry_date) {
+          const eDate = new Date(doc.expiry_date);
+          if (!isNaN(eDate.getTime())) {
+            const diffTime = eDate.getTime() - today.getTime();
+            const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            // filter for expired or expiring in next 90 days
+            if (daysRemaining <= 90) {
+              docs.push({
+                name: doc.name,
+                owner: p.label,
+                assetType: doc.asset_type,
+                expiryDate: doc.expiry_date,
+                expiryObj: eDate,
+                daysRemaining
+              });
+            }
+          }
+        }
+      }
+    }
+    
+    if (docs.length === 0) {
+      return {
+        answer: "✓ **Great!** All registered documents are active and no renewals are due in the next 90 days.",
+        matchedAssets: []
+      };
+    }
+    
+    // Sort: expired first, then soonest expiry
+    const sortedDocs = [...docs].sort((a, b) => a.daysRemaining - b.daysRemaining);
+    
+    let answer = `### 📄 Document Vault Expiries & Renewals\n`;
+    answer += `Below are documents that have already expired or are due for renewal in the next 90 days:\n\n`;
+    
+    answer += `| Document Name | Owner | Asset Class | Expiry Date | Status |\n`;
+    answer += `| :--- | :--- | :--- | :---: | :--- |\n`;
+    
+    const matched: AssistantResponse['matchedAssets'] = [];
+    
+    sortedDocs.forEach(d => {
+      const statusStr = d.daysRemaining < 0
+        ? `🔴 Expired (${Math.abs(d.daysRemaining)} days ago)`
+        : d.daysRemaining === 0
+        ? `🚨 Expires TODAY`
+        : `🔔 Expires in ${d.daysRemaining} days`;
+        
+      answer += `| **${d.name}** | ${d.owner} | ${d.assetType.toUpperCase()} | ${d.expiryDate} | ${statusStr} |\n`;
+      
+      matched.push({
+        name: d.name,
+        type: 'Vault Document',
+        details: `Expiry: ${d.expiryDate} (${statusStr})`
+      });
+    });
+    
+    return {
+      answer,
+      matchedAssets: matched
+    };
+  }
+
+  // 6. Comprehensive Search Fallback
+  if (intent === Intent.COMPREHENSIVE_SEARCH) {
+    const searchTerms = q.split(/\s+/).filter(w => w.length > 2);
+    let answer = `### 🔍 Consolidated Search Results\n`;
+    answer += `Scanned all family registries for terms matching: ${searchTerms.map(t => `*"${t}"*`).join(', ')}\n\n`;
+    
+    const matched: AssistantResponse['matchedAssets'] = [];
+    
+    const addMatch = (name: string, type: string, details: string) => {
+      matched.push({ name, type, details });
+    };
+    
+    for (const p of portfolios) {
+      // Match holdings
+      for (const h of p.holdings) {
+        if (searchTerms.some(t => h.ticker.toLowerCase().includes(t) || h.stockName.toLowerCase().includes(t))) {
+          addMatch(`${h.stockName} (${h.ticker})`, 'Stock Holding', `Owner: ${p.label}, Qty: ${h.qty}, Current Value: ${formatINR(h.currentValue)}`);
+        }
+      }
+      
+      // Match FDs
+      for (const fd of p.fixedDeposits) {
+        if (searchTerms.some(t => fd.bank_name.toLowerCase().includes(t) || (fd.notes && fd.notes.toLowerCase().includes(t)))) {
+          const val = getFDEffectiveValue(fd);
+          addMatch(`${fd.bank_name} FD`, 'Fixed Deposit', `Owner: ${p.label}, Principal: ${formatINR(fd.principal_amount)}, Current Value: ${formatINR(val)}`);
+        }
+      }
+      
+      // Match RDs
+      if (p.rdAccounts) {
+        for (const rd of p.rdAccounts) {
+          if (searchTerms.some(t => rd.bank_name.toLowerCase().includes(t) || (rd.notes && rd.notes.toLowerCase().includes(t)))) {
+            const val = getRDEffectiveValue(rd);
+            addMatch(`${rd.bank_name} RD`, 'Recurring Deposit', `Owner: ${p.label}, Monthly: ${formatINR(rd.monthly_deposit)}, Current Value: ${formatINR(val)}`);
+          }
+        }
+      }
+      
+      // Match SIPs
+      if (p.sipAccounts) {
+        for (const sip of p.sipAccounts) {
+          if (searchTerms.some(t => sip.fund_name.toLowerCase().includes(t) || (sip.notes && sip.notes.toLowerCase().includes(t)))) {
+            const val = getSIPEffectiveValue(sip);
+            addMatch(sip.fund_name, 'Mutual Fund SIP', `Owner: ${p.label}, Monthly: ${formatINR(sip.monthly_sip)}, Current Value: ${formatINR(val)}`);
+          }
+        }
+      }
+      
+      // Match Gold
+      for (const g of p.goldHoldings) {
+        if (searchTerms.some(t => g.item_name.toLowerCase().includes(t) || g.purity.toLowerCase().includes(t) || (g.notes && g.notes.toLowerCase().includes(t)))) {
+          addMatch(g.item_name, 'Gold Holding', `Owner: ${p.label}, Wt: ${g.weight_grams}g (${g.purity}), Current Value: ${formatINR(g.current_valuation)}`);
+        }
+      }
+      
+      // Match Real Estate
+      for (const re of p.realEstate) {
+        if (searchTerms.some(t => re.property_name.toLowerCase().includes(t) || re.property_type.toLowerCase().includes(t) || (re.location && re.location.toLowerCase().includes(t)))) {
+          addMatch(re.property_name, 'Real Estate', `Owner: ${p.label}, Type: ${re.property_type}, Valuation: ${formatINR(re.current_valuation)}`);
+        }
+      }
+      
+      // Match Insurance
+      for (const ins of p.insurances) {
+        if (searchTerms.some(t => ins.provider.toLowerCase().includes(t) || ins.policy_name.toLowerCase().includes(t) || ins.insurance_type.toLowerCase().includes(t))) {
+          addMatch(`${ins.provider} - ${ins.policy_name}`, 'Insurance Policy', `Owner: ${p.label}, Type: ${ins.insurance_type.toUpperCase()}, Sum Assured: ${formatINR(ins.sum_assured)}`);
+        }
+      }
+      
+      // Match Documents
+      for (const doc of p.documents) {
+        if (searchTerms.some(t => doc.name.toLowerCase().includes(t) || doc.file_path.toLowerCase().includes(t) || doc.asset_type.toLowerCase().includes(t))) {
+          addMatch(doc.name, 'Document', `Owner: ${p.label}, Class: ${doc.asset_type.toUpperCase()}, Expiry: ${doc.expiry_date || 'N/A'}`);
+        }
+      }
+    }
+    
+    if (matched.length === 0) {
+      answer += `No matching asset names, symbols, bank labels, or documents found for *"#{q}"*. Try a different query.`;
+    } else {
+      answer += `Found **${matched.length}** matches across your family wealth registry:\n\n`;
+      answer += `| Asset Class | Matched Name | Description |\n`;
+      answer += `| :--- | :--- | :--- |\n`;
+      matched.forEach(m => {
+        answer += `| **${m.type}** | ${m.name} | ${m.details} |\n`;
+      });
+    }
+    
+    return {
+      answer,
+      matchedAssets: matched.slice(0, 8)
     };
   }
 

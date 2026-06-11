@@ -219,5 +219,40 @@ describe('askAssistant query parser', () => {
     expect(res2.answer).toContain('Fixed Deposits:');
     expect(res2.answer).toContain('SBI FD');
   });
+
+  it('handles portfolio health queries correctly', () => {
+    const res = askAssistant('how healthy is my portfolio?', mockPortfolios);
+    expect(res.answer).toContain('Portfolio Health Audit');
+    expect(res.answer).toContain('health score is');
+  });
+
+  it('handles rebalancing advice queries', () => {
+    const res = askAssistant('give me asset rebalancing advice', mockPortfolios);
+    expect(res.answer).toContain('Asset Rebalancing Advice');
+    expect(res.answer).toContain('Drift');
+  });
+
+  it('handles emergency fund status queries', () => {
+    const res = askAssistant('check emergency fund status', mockPortfolios);
+    expect(res.answer).toContain('Emergency Fund Analysis');
+    expect(res.answer).toContain('liquid capital');
+  });
+
+  it('handles property rental yield queries', () => {
+    const res = askAssistant('rental yields for properties', mockPortfolios);
+    expect(res.answer).toContain('Real Estate Rental Yields');
+    expect(res.answer).toContain('Sector 45 Apartment');
+  });
+
+  it('handles expired document alerts', () => {
+    const res = askAssistant('are there expired documents?', mockPortfolios);
+    expect(res.answer).toContain('no renewals are due');
+  });
+
+  it('handles comprehensive search queries', () => {
+    const res = askAssistant('find HDFC', mockPortfolios);
+    expect(res.answer).toContain('Consolidated Search Results');
+    expect(res.answer).toContain('HDFC FD');
+  });
 });
 
