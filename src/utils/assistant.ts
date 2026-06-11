@@ -22,12 +22,49 @@ export enum Intent {
   SPECIFIC_FDS = 'SPECIFIC_FDS',
   INSURANCE_REMINDERS = 'INSURANCE_REMINDERS',
   NET_WORTH = 'NET_WORTH',
+  FAMILY_BREAKDOWN = 'FAMILY_BREAKDOWN',
+  NEXT_SIP_DATE = 'NEXT_SIP_DATE',
   UNKNOWN = 'UNKNOWN'
 }
 
+export function normalizeQuery(query: string): string {
+  let q = query.toLowerCase().trim();
+  // Strip common filler phrases
+  q = q.replace(/\b(what is|what's|whats|tell me|show me|list my|how much|how many|show all|give me|get me|display)\b/g, '');
+  // Normalize synonyms
+  q = q.replace(/\b(worth|wealth|assets|networth)\b/g, 'net worth');
+  q = q.replace(/\b(mutualfunds|mutualfund|mfs)\b/g, 'mutual fund');
+  q = q.replace(/\b(fixed deposit|fixed deposits|fds|fd)\b/g, 'fixed deposit');
+  q = q.replace(/\b(recurring deposit|recurring deposits|rds|rd)\b/g, 'recurring deposit');
+  return q.trim();
+}
+
 export function detectIntent(query: string): Intent {
-  const q = query.toLowerCase().trim();
+  const q = normalizeQuery(query);
   const currentYear = new Date().getFullYear();
+
+  // Query 8: Next SIP Date (High priority)
+  if (
+    q.includes('next sip') ||
+    q.includes('upcoming sip') ||
+    q.includes('sip date') ||
+    q.includes('sip due') ||
+    q.includes('sip payment') ||
+    (q.includes('sip') && q.includes('when'))
+  ) {
+    return Intent.NEXT_SIP_DATE;
+  }
+
+  // Query 9: Family member breakdown (High priority)
+  if (
+    (q.includes('family') && (q.includes('breakdown') || q.includes('member') || q.includes('split') || q.includes('total') || q.includes('value') || q.includes('pnl') || q.includes('p&l') || q.includes('invest'))) ||
+    q.includes('who owns') ||
+    q.includes('each person') ||
+    q.includes('individual portfolio') ||
+    q.includes('owned by')
+  ) {
+    return Intent.FAMILY_BREAKDOWN;
+  }
 
   // Query 2: Performers (High priority to avoid false positive intent match on other categories)
   if (
@@ -714,6 +751,92 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
         details: `Premium: ${formatINR(pol.premium)}, Cover: ${formatINR(pol.cover)}, Renewal: ${pol.renewal}`
       }))
     };
+  }
+
+  // Query 8: Next SIP Date
+  if (intent === Intent.NEXT_SIP_DATE) {
+    interface SIPItem {
+      fundName: string;
+      owner: string;
+      monthlySIP: number;
+      nextSIPDate: string | null;
+      nextSIPDateObj: Date | null;
+    }
+    
+    const sips: SIPItem[] = [];
+    for (const p of portfolios) {
+      if (p.sipAccounts) {
+        for (const sip of p.sipAccounts) {
+          let dateObj: Date | null = null;
+          if (sip.next_sip_date) {
+            const d = new Date(sip.next_sip_date);
+            if (!isNaN(d.getTime())) {
+              dateObj = d;
+            }
+          }
+          sips.push({
+            fundName: sip.fund_name,
+            owner: p.label,
+            monthlySIP: sip.monthly_sip,
+            nextSIPDate: sip.next_sip_date || null,
+            nextSIPDateObj: dateObj
+          });
+        }
+      }
+    }
+    
+    if (sips.length === 0) {
+      return {
+        answer: "You have no active Mutual Fund SIP accounts in your portfolio database.",
+        matchedAssets: []
+      };
+    }
+    
+    const sortedSips = [...sips].sort((a, b) => {
+      if (!a.nextSIPDateObj) return 1;
+      if (!b.nextSIPDateObj) return -1;
+      return a.nextSIPDateObj.getTime() - b.nextSIPDateObj.getTime();
+    });
+    
+    let answer = `### 📅 Upcoming Mutual Fund SIP Schedule\n\n`;
+    const matched: AssistantResponse['matchedAssets'] = [];
+    
+    sortedSips.forEach(sip => {
+      const dateStr = sip.nextSIPDate ? `on **${sip.nextSIPDate}**` : 'date not specified';
+      answer += `- **${sip.fundName}** (${sip.owner}): Monthly payment of **${formatINR(sip.monthlySIP)}** due ${dateStr}.\n`;
+      
+      matched.push({
+        name: sip.fundName,
+        type: 'SIP Due Date',
+        details: `Owner: ${sip.owner}, Monthly: ${formatINR(sip.monthlySIP)}, Next Date: ${sip.nextSIPDate || 'N/A'}`
+      });
+    });
+    
+    return { answer, matchedAssets: matched };
+  }
+
+  // Query 9: Family member breakdown
+  if (intent === Intent.FAMILY_BREAKDOWN) {
+    let answer = `### 👥 Family Member Portfolio Breakdown\n\n`;
+    const matched: AssistantResponse['matchedAssets'] = [];
+    
+    portfolios.forEach(p => {
+      const invested = p.totalInvested;
+      const current = p.totalCurrentValue;
+      const pnl = current - invested;
+      const pnlPct = invested > 0 ? (pnl / invested) * 100 : 0;
+      const sign = pnl >= 0 ? '+' : '';
+      
+      answer += `- **${p.label}**: Net Worth **${formatINR(current)}** on invested capital of **${formatINR(invested)}** (P&L: **${sign}${formatINR(pnl)}** or **${sign}${pnlPct.toFixed(1)}%**).\n`;
+      
+      matched.push({
+        name: p.label,
+        type: 'Family Portfolio',
+        details: `Invested: ${formatINR(invested)}, Current: ${formatINR(current)}, P&L: ${sign}${formatINR(pnl)} (${sign}${pnlPct.toFixed(1)}%)`
+      });
+    });
+    
+    return { answer, matchedAssets: matched };
   }
 
   // Fallback net worth FAQ

@@ -458,24 +458,7 @@ export default function AppShell() {
                       props={{ history: netWorthHistory, currentNetWorth: summaryData.totalCurrentValue }}
                     />
                   </SectionErrorBoundary>
- 
-                  <SectionErrorBoundary sectionName="Sankey Flow Diagram">
-                    <LazyChartWrapper
-                      importFunc={() => import('../components/SankeyChart')}
-                      placeholderHeight={240}
-                      fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
-                      props={{ portfolios, activePortfolio: portfolio }}
-                    />
-                  </SectionErrorBoundary>
- 
-                  <SectionErrorBoundary sectionName="Equity Concentration Treemap">
-                    <LazyChartWrapper
-                      importFunc={() => import('../components/TreemapChart')}
-                      placeholderHeight={200}
-                      fallback={<div className="h-[200px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
-                      props={{ holdings: portfolio ? portfolio.holdings : portfolios.flatMap(p => p.holdings) }}
-                    />
-                  </SectionErrorBoundary>
+
 
                   <SectionErrorBoundary sectionName="AI Portfolio Assistant">
                     <LazyViewport placeholderHeight={200}>
@@ -679,25 +662,7 @@ export default function AppShell() {
                 </LazyViewport>
               </SectionErrorBoundary>
             </div>
- 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-              <SectionErrorBoundary sectionName="Sankey Flow Diagram">
-                <LazyChartWrapper
-                  importFunc={() => import('../components/SankeyChart')}
-                  placeholderHeight={240}
-                  fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
-                  props={{ portfolios, activePortfolio: portfolio }}
-                />
-              </SectionErrorBoundary>
-              <SectionErrorBoundary sectionName="Equity Concentration Treemap">
-                <LazyChartWrapper
-                  importFunc={() => import('../components/TreemapChart')}
-                  placeholderHeight={200}
-                  fallback={<div className="h-[200px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
-                  props={{ holdings: portfolio ? portfolio.holdings : portfolios.flatMap(p => p.holdings) }}
-                />
-              </SectionErrorBoundary>
-            </div>
+
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <SectionErrorBoundary sectionName="Asset Class Pie Chart">

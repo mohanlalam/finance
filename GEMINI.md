@@ -1,4 +1,4 @@
-# 💼 Family Portfolio Tracker — Project Architecture
+# 💼 Family Portfolio Tracker — GEMINI.md (Project Architecture)
 
 This document provides a high-level overview of the folder structure, data flow, state management, database mappings, and performance optimizations of the Family Portfolio Tracker application. It is designed to help developers and AI agents navigate the codebase efficiently.
 
@@ -64,9 +64,7 @@ Component folders are isolated by asset domain to ensure clean separation of con
 
 * **Visual Dashboard & Widget Components**:
   * **[NetWorthTimelineChart.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/NetWorthTimelineChart.tsx)**: Responsive SVG line & area chart showing compound net worth valuation timeline. Custom date-range filtering is supported (1M, 3M, 6M, 1Y, ALL).
-  * **[TreemapChart.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/TreemapChart.tsx)**: SVG tree-map highlighting relative equity allocation sizes. Safeguarded with division-by-zero guards and box clamping, filtering out sub-1px elements to prevent overlapping coordinate errors.
-  * **[SankeyChart.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/SankeyChart.tsx)**: SVG flow diagram mapping net worth down to category classes and sub-assets. Contains thickness checks preventing the rendering of zero-width paths and invalid nodes.
-  * **[PortfolioAssistant.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/PortfolioAssistant.tsx)**: Interactive NLP chat assistant interface.
+  * **[PortfolioAssistant.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/PortfolioAssistant.tsx)**: Conversational multi-turn NLP chat assistant. Features inline markdown formatting, automated auto-scroll logs, typing indicators, dynamic suggestion buttons, and keyboard shortcuts.
   * **[DashboardWidgets.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/DashboardWidgets.tsx)**: Capacitor WebView widget page with Net Worth, Today's Gain, and upcoming FD indicators. Uses a clean fallback string "No upcoming maturities" under all zero-matured situations.
   * **[InsightsPanel.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/InsightsPanel.tsx)**: Displays the main portfolio health breakdown, today's top 3 biggest movers, top holdings list, best/worst performance indicators per member, top gainers/losers list, asset allocation drift, and alert notifications. Supports filtering insights by asset domain (All, Stocks, FDs, Insurance, High Risk, Due Soon).
 * **App Icon System & Mobile Summary Optimizations**:
@@ -88,8 +86,8 @@ The application implements a series of high-performance strategies to guarantee 
 ### 2. Render Memoization & Virtualization
 * **List Virtualization**: Accounts views utilize `react-window` to virtualize accounts when lists exceed 8 items, binding rows to unique asset IDs (`itemKey`) to optimize DOM recycling and prevent rendering glitches during list mutations.
 * **Card Memoization**: Asset card components use `React.memo` with strict equality functions comparing primary metrics to prevent redundant child re-renders.
-* **SVG Coordinate Memoization**: Grid and path builders in `NetWorthTimelineChart.tsx` and `SankeyChart.tsx` wrap layout and coordinate calculations in `useMemo` blocks, avoiding recalculation unless data or sizes change.
-* **Lazy Rendering Viewports**: Heavy SVG/D3 charts (`NetWorthTimelineChart.tsx`, `TreemapChart.tsx`, `SankeyChart.tsx`) inside `AppShell.tsx` are wrapped in a type-safe `LazyChartWrapper` utilizing `IntersectionObserver`. This completely defers dynamic import bundle fetching and `React.lazy` evaluation until the chart placeholder scrolls into view, avoiding startup main-thread bloat.
+* **SVG Coordinate Memoization**: Grid and path builders in `NetWorthTimelineChart.tsx` wrap layout and coordinate calculations in `useMemo` blocks, avoiding recalculation unless data or sizes change.
+* **Lazy Rendering Viewports**: Heavy SVG/D3 charts (`NetWorthTimelineChart.tsx`) inside `AppShell.tsx` are wrapped in a type-safe `LazyChartWrapper` utilizing `IntersectionObserver`. This completely defers dynamic import bundle fetching and `React.lazy` evaluation until the chart placeholder scrolls into view, avoiding startup main-thread bloat.
 
 
 ### 3. Caching & Network Coalescing
@@ -124,7 +122,7 @@ Every deposit registry maps to its own separate database table. This guarantees 
 * **[performance.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/performance.ts)**: Implements solvers for XIRR, CAGR calculations, and weighted holding age. Guarded against same-sign cashflows and Newton-Raphson divergence via a robust bisection fallback. Evaluates stock holdings' weighted age using the database `created_at` timestamp rather than a hardcoded 1.0 year fallback.
 * **[healthScore.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/healthScore.ts)**: Evaluates a 0-100 health score based on diversification, active SIPs, emergency buffers, equity concentration, and insurance status. Caps Emergency Fund Buffer at 20 points and Insurance Cover at 15 points.
 * **[rebalancing.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/rebalancing.ts)**: Asset rebalancing engine calculating specific buy/sell recommendations from target drift. Recommends rebalancing purely when the absolute difference exceeds an explicit threshold `MIN_ACTION = 5000`, removing drift percentage dependencies.
-* **[assistant.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/assistant.ts)**: Features an intent-based classification system (`detectIntent`) routing natural language queries before running parameter extraction, preventing false positive matches. Evaluates performers query routes first with plural keyword-spacing support to avoid intent matching overlaps.
+* **[assistant.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/assistant.ts)**: Features an intent-based classification system (`detectIntent`) routing natural language queries with synonym normalization. Supports new family member wealth breakdown and next SIP date queries with high-priority matching to prevent keyword overlaps.
 * **[formatters.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/formatters.ts)**: Implements Indian currency formats (`₹` INR) and standard FD compounding (compounded semi-annually).
 * **[rdUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/rdUtils.ts)**: Computes elapsed month contributions and quarterly compounding leveraging the shared engine.
 * **[sipUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/sipUtils.ts)**: Calculates monthly contributions elapsed and retrieves live NAV evaluations, automatically respecting `account.liveNav` parameters.

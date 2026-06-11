@@ -193,4 +193,31 @@ describe('askAssistant query parser', () => {
     const res = askAssistant('show me my best SIP returns this year', mockPortfolios);
     expect(res.answer).toContain('Sector 45 Apartment'); // matches the top overall performer in mockPortfolios
   });
+
+  it('handles family breakdown queries correctly', () => {
+    const res = askAssistant('show family member breakdown', mockPortfolios);
+    expect(res.answer).toContain('Family Member Portfolio Breakdown');
+    expect(res.answer).toContain('Personal Portfolio');
+    expect(res.answer).toContain('64.18L');
+    expect(res.matchedAssets.some(m => m.name === 'Personal Portfolio')).toBe(true);
+  });
+
+  it('handles upcoming SIP schedules', () => {
+    const res = askAssistant('when is my next SIP?', mockPortfolios);
+    expect(res.answer).toContain('Upcoming Mutual Fund SIP Schedule');
+    expect(res.answer).toContain('Nifty 50 Index Fund');
+    expect(res.answer).toContain('5,000');
+  });
+
+  it('correctly normalizes queries and maps synonyms', () => {
+    // wealth -> net worth -> Intent.NET_WORTH
+    const res1 = askAssistant('show my total wealth', mockPortfolios);
+    expect(res1.answer).toContain('total consolidated family net worth today is');
+
+    // fds -> fixed deposit -> SPECIFIC_FDS
+    const res2 = askAssistant('list my fds', mockPortfolios);
+    expect(res2.answer).toContain('Fixed Deposits:');
+    expect(res2.answer).toContain('SBI FD');
+  });
 });
+
