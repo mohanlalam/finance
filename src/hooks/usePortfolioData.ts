@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Holding, Portfolio, FixedDeposit, RDAccount, SIPAccount, GoldHolding, RealEstate, Insurance, DocumentMetadata, AssetPayload } from '../types/portfolio';
 import { getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../utils/rdUtils';
-import { getSIPInvestedAmount, getSIPEffectiveValue, fetchNAV, initNAVCache, setUsdInrRate, navCache } from '../utils/sipUtils';
+import { getSIPInvestedAmount, getSIPEffectiveValue, fetchNAV, initNAVCache } from '../utils/sipUtils';
 import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiClient';
 import useSWR from 'swr';
 import * as idb from 'idb-keyval';
@@ -324,22 +324,15 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     return invokeFunction<DBData>('holdings-crud?action=list');
   }, []);
 
-  const fetchLivePrices = useCallback(async (holdings: Holding[]) => {
+  const fetchLivePrices = useCallback(async (holdings: Holding[]): Promise<Record<string, { ltp: number; todayPct: number }>> => {
+    if (holdings.length === 0) return {};
     const uniqueSymbols = Array.from(
       new Map(holdings.map((h) => [h.yahooSymbol, { ticker: h.ticker, yahooSymbol: h.yahooSymbol }])).values()
     );
-    // Always fetch live USD-INR conversion rate
-    uniqueSymbols.push({ ticker: 'USDINR', yahooSymbol: 'USDINR=X' });
-
-    const json = await invokeFunction<{
-      data: QuoteResult[];
-      usdInr?: number;
-      hdfcNavs?: Record<string, number>;
-    }>('market-data', {
+    const json = await invokeFunction<{ data: QuoteResult[] }>('market-data', {
       method: 'POST',
       body: { symbols: uniqueSymbols },
     });
-
     const map: Record<string, { ltp: number; todayPct: number }> = {};
     const failed: string[] = [];
     json.data.forEach((r) => {
@@ -348,17 +341,11 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       if (r.ltp !== null && r.todayPct !== null) {
         map[sym.yahooSymbol] = { ltp: r.ltp, todayPct: r.todayPct };
       } else {
-        if (r.ticker !== 'USDINR') {
-          failed.push(r.ticker);
-        }
+        failed.push(r.ticker);
       }
     });
     setFailedSymbols(failed);
-    return {
-      priceMap: map,
-      usdInr: json.usdInr,
-      hdfcNavs: json.hdfcNavs,
-    };
+    return map;
   }, []);
 
   const fetchLiveMFNavs = useCallback(async (sips: SIPAccount[]): Promise<{ navMap: Record<string, number>, staleSchemes: Set<string> }> => {
@@ -445,17 +432,11 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       const allHoldings = portfolios.flatMap((p) => p.holdings);
       const allSips = portfolios.flatMap((p) => p.sipAccounts || []);
       if (allHoldings.length === 0 && allSips.length === 0) return null;
-      
-      const [priceData, navData] = await Promise.all([
-        fetchLivePrices(allHoldings),
+      const [priceMap, navData] = await Promise.all([
+        allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
         fetchLiveMFNavs(allSips),
       ]);
-      return { 
-        priceMap: priceData.priceMap, 
-        usdInr: priceData.usdInr,
-        hdfcNavs: priceData.hdfcNavs,
-        navData 
-      };
+      return { priceMap, navData };
     },
     {
       refreshInterval: STOCK_PRICE_CACHE_TTL,
@@ -465,20 +446,6 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
   useEffect(() => {
     if (!livePrices) return;
-
-    // Cache the live USD-INR conversion rate and HDFC NAVs
-    if (livePrices.usdInr) {
-      setUsdInrRate(livePrices.usdInr);
-    }
-    if (livePrices.hdfcNavs) {
-      for (const [name, nav] of Object.entries(livePrices.hdfcNavs)) {
-        navCache.set(name, { value: nav, name, fetchedAt: Date.now() });
-      }
-      try {
-        idb.set('nav_cache', JSON.stringify([...navCache.entries()]));
-      } catch {}
-    }
-
     setPortfolios((prev) => {
       const withPrices = applyLivePrices(prev, livePrices.priceMap);
       return applyLiveMFNavs(withPrices, livePrices.navData.navMap, livePrices.navData.staleSchemes);
