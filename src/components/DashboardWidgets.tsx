@@ -111,7 +111,7 @@ export default function DashboardWidgets({ portfolios, activePortfolio }: Dashbo
             {maturingFDs.length > 0 ? (
               <div className="mt-2 space-y-1">
                 <h4 className="text-xs font-bold text-slate-100 truncate">{maturingFDs[0].bank_name}</h4>
-                <p className="text-[10px] text-slate-400">Due {maturingFDs[0].maturity_date}</p>
+                <p className="text-[10px] text-slate-400">Due {new Date(maturingFDs[0].maturity_date!).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                 <p className="text-[11px] font-extrabold text-purple-400">{formatINR(getFDEffectiveValue(maturingFDs[0]))}</p>
               </div>
             ) : (

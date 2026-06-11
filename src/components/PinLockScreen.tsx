@@ -82,11 +82,6 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
       if (nextPin.length === PIN_LENGTH) {
         if (nextPin === APP_PIN) {
           setSuccess(true);
-          // Fire onUnlock immediately after hashing — no artificial delay
-          hashPin(nextPin).then((hash) => {
-            markSessionVerified(hash);
-            onUnlock();
-          });
         } else {
           setShake(true);
           setError('Incorrect PIN. Please try again.');
@@ -98,7 +93,17 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
       }
       return nextPin;
     });
-  }, [success, onUnlock]);
+  }, [success]);
+
+  // Hash and unlock after successful PIN entry — kept outside the state updater to stay pure
+  useEffect(() => {
+    if (success && pin.length === PIN_LENGTH) {
+      hashPin(pin).then((hash) => {
+        markSessionVerified(hash);
+        onUnlock();
+      });
+    }
+  }, [success, pin, onUnlock]);
 
   // Physical keyboard listeners
   useEffect(() => {

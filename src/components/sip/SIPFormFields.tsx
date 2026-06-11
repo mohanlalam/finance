@@ -57,7 +57,7 @@ export function SIPFormFields({
             type="button"
             onClick={onValidateScheme}
             disabled={isValidatingScheme}
-            className="bg-sky-650 hover:bg-sky-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all disabled:opacity-50 shrink-0"
+            className="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all disabled:opacity-50 shrink-0"
           >
             {isValidatingScheme ? 'Validating...' : 'Fetch Fund'}
           </button>

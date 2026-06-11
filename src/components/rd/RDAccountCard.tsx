@@ -70,7 +70,7 @@ export function RDAccountCard({
           </div>
           <div>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Interest Rate</p>
-            <p className="text-xs font-extrabold text-indigo-650 dark:text-indigo-400">+{account.interest_rate}% p.a.</p>
+            <p className="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">+{account.interest_rate}% p.a.</p>
           </div>
           <div>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Total Invested</p>

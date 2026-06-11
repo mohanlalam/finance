@@ -126,7 +126,7 @@ export function RDView({
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Current Valuation</p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(totalValue)}</p>
             <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-2">
-              +{formatINR(totalValue - totalPrincipal)} Interest Accrued
+              {totalValue - totalPrincipal >= 0 ? '+' : ''}{formatINR(totalValue - totalPrincipal)} Interest Accrued
             </p>
           </div>
           <TrendingUp size={40} className="text-emerald-500/25 shrink-0" aria-hidden="true" />

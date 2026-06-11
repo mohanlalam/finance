@@ -14,5 +14,6 @@ export function compoundValue(
   if (years <= 0 || isNaN(ratePercent) || isNaN(years) || isNaN(principal) || principal <= 0) {
     return principal;
   }
+  if (compoundingFrequency <= 0) return principal;
   return principal * Math.pow(1 + ratePercent / (compoundingFrequency * 100), compoundingFrequency * years);
 }

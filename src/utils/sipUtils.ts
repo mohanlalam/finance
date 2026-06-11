@@ -53,7 +53,7 @@ export function getSIPEffectiveValue(account: SIPAccount, liveNav?: number): num
     }
   }
   
-  return Number(account.fallback_valuation);
+  return Number(account.fallback_valuation) || 0;
 }
 
 const NAV_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours

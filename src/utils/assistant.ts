@@ -843,8 +843,10 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
   if (intent === Intent.NET_WORTH) {
     const totalCurrentVal = portfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
     const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
+    const pnl = totalCurrentVal - totalInvested;
+    const pnlStr = pnl >= 0 ? `+${formatINR(pnl)}` : formatINR(pnl);
     return {
-      answer: `Your total consolidated family net worth today is **${formatINR(totalCurrentVal)}** on an invested capital of **${formatINR(totalInvested)}** (P&L: **+${formatINR(totalCurrentVal - totalInvested)}**).`,
+      answer: `Your total consolidated family net worth today is **${formatINR(totalCurrentVal)}** on an invested capital of **${formatINR(totalInvested)}** (P&L: **${pnlStr}**).`,
       matchedAssets: [],
     };
   }

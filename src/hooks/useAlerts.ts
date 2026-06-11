@@ -186,6 +186,9 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
           title: `Portfolio ${diff > 0 ? 'up' : 'down'} ${Math.abs(diff).toFixed(1)}% since last session`,
           message: `${lastPct.toFixed(1)}% → ${currentPct.toFixed(1)}%`,
         });
+        // Advance baseline so the same swing alert isn't regenerated on next render
+        baselinePnlPctRef.current = currentPct;
+        setLastPnlPct(currentPct);
       }
     }
     // Sort: critical first, then warning, then info

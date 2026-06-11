@@ -107,7 +107,7 @@ export function calculateXIRR(cashflows: CashFlow[]): number {
     }
   }
 
-  return r; // returns the last calculated rate
+  return 0; // bisection could not bracket or converge, return 0
 }
 
 /**
@@ -118,15 +118,16 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
   let totalInvested = 0;
   const now = new Date().getTime();
 
-  const processDate = (startDateStr?: string) => {
-    if (!startDateStr) return 0;
+  const processDate = (startDateStr?: string): number | null => {
+    if (!startDateStr) return null;
     const start = new Date(startDateStr).getTime();
+    if (isNaN(start)) return null;
     return Math.max(0, (now - start) / (365 * 24 * 3600 * 1000));
   };
 
   // Process FDs
   for (const fd of portfolio.fixedDeposits) {
-    const age = processDate(fd.start_date);
+    const age = processDate(fd.start_date) ?? 0;
     weightedTimeSum += fd.principal_amount * age;
     totalInvested += fd.principal_amount;
   }
@@ -134,7 +135,7 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
   // Process RDs
   if (portfolio.rdAccounts) {
     for (const rd of portfolio.rdAccounts) {
-      const age = processDate(rd.start_date);
+      const age = processDate(rd.start_date) ?? 0;
       const invested = getRDInvestedAmount(rd);
       weightedTimeSum += invested * age;
       totalInvested += invested;
@@ -146,7 +147,7 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
   // Process SIPs
   if (portfolio.sipAccounts) {
     for (const sip of portfolio.sipAccounts) {
-      const age = processDate(sip.start_date);
+      const age = processDate(sip.start_date) ?? 0;
       const invested = getSIPInvestedAmount(sip);
       weightedTimeSum += invested * age;
       totalInvested += invested;
@@ -156,10 +157,10 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
   // Process Stocks
   for (const stock of portfolio.holdings) {
     // Treat stocks as purchased using creation date fallback if start/purchase date is missing, otherwise default to 1.0
-    const age = processDate((stock as { created_at?: string }).created_at) ||
-                processDate((stock as { createdAt?: string }).createdAt) ||
-                processDate((portfolio as { created_at?: string }).created_at) ||
-                processDate((portfolio as { createdAt?: string }).createdAt) ||
+    const age = processDate((stock as { created_at?: string }).created_at) ??
+                processDate((stock as { createdAt?: string }).createdAt) ??
+                processDate((portfolio as { created_at?: string }).created_at) ??
+                processDate((portfolio as { createdAt?: string }).createdAt) ??
                 1.0;
     weightedTimeSum += stock.amountInvested * age;
     totalInvested += stock.amountInvested;
@@ -167,14 +168,14 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
 
   // Process Gold
   for (const gold of portfolio.goldHoldings) {
-    const age = processDate(gold.purchase_date) || 1.0;
+    const age = processDate(gold.purchase_date) ?? 1.0;
     weightedTimeSum += gold.purchase_price * age;
     totalInvested += gold.purchase_price;
   }
 
   // Process Real Estate
   for (const re of portfolio.realEstate) {
-    const age = processDate(re.purchase_date) || 2.0;
+    const age = processDate(re.purchase_date) ?? 2.0;
     weightedTimeSum += re.purchase_price * age;
     totalInvested += re.purchase_price;
   }
@@ -335,20 +336,21 @@ export function getPortfolioCashFlows(portfolio: Portfolio): CashFlow[] {
 /**
  * Calculates portfolio XIRR
  */
-export function calculatePortfolioXIRR(portfolio: Portfolio): number {
+export function calculatePortfolioXIRR(portfolio: Portfolio): number | null {
   const cashflows = getPortfolioCashFlows(portfolio);
-  if (cashflows.length === 0) return 0;
+  if (cashflows.length === 0) return null;
 
   const nowStr = new Date().toISOString().split('T')[0];
   cashflows.push({ date: nowStr, amount: portfolio.totalCurrentValue });
 
-  return calculateXIRR(cashflows);
+  const result = calculateXIRR(cashflows);
+  return result === 0 ? null : result;
 }
 
 /**
  * Calculates XIRR across multiple portfolios combined
  */
-export function calculateMultiplePortfoliosXIRR(portfolios: Portfolio[]): number {
+export function calculateMultiplePortfoliosXIRR(portfolios: Portfolio[]): number | null {
   const cashflows: CashFlow[] = [];
   let totalCurrentValue = 0;
 
@@ -357,12 +359,13 @@ export function calculateMultiplePortfoliosXIRR(portfolios: Portfolio[]): number
     totalCurrentValue += p.totalCurrentValue;
   }
 
-  if (cashflows.length === 0) return 0;
+  if (cashflows.length === 0) return null;
 
   const nowStr = new Date().toISOString().split('T')[0];
   cashflows.push({ date: nowStr, amount: totalCurrentValue });
 
-  return calculateXIRR(cashflows);
+  const result = calculateXIRR(cashflows);
+  return result === 0 ? null : result;
 }
 
 /**
@@ -370,7 +373,7 @@ export function calculateMultiplePortfoliosXIRR(portfolios: Portfolio[]): number
  */
 export function getPortfolioAnnualizedReturn(portfolio: Portfolio): number {
   const xirr = calculatePortfolioXIRR(portfolio);
-  if (xirr !== 0) return xirr;
+  if (xirr !== null) return xirr;
 
   const age = calculateWeightedAge(portfolio);
   return calculateCAGR(portfolio.totalInvested, portfolio.totalCurrentValue, age);
@@ -381,7 +384,7 @@ export function getPortfolioAnnualizedReturn(portfolio: Portfolio): number {
  */
 export function getMultiplePortfoliosAnnualizedReturn(portfolios: Portfolio[]): number {
   const xirr = calculateMultiplePortfoliosXIRR(portfolios);
-  if (xirr !== 0) return xirr;
+  if (xirr !== null) return xirr;
 
   let weightedTimeSum = 0;
   let totalInvestedForAge = 0;

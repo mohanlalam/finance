@@ -8,7 +8,10 @@ export function getRDInvestedAmount(account: RDAccount): number {
   if (account.contributions && account.contributions.length > 0) {
     return account.contributions.reduce((sum, c) => sum + Number(c.amount), 0);
   }
-  return 0;
+  const startDate = new Date(account.start_date);
+  const now = new Date();
+  const elapsedMonths = Math.max(1, (now.getFullYear() - startDate.getFullYear()) * 12 + now.getMonth() - startDate.getMonth());
+  return elapsedMonths * Number(account.monthly_deposit);
 }
 
 /**
@@ -66,5 +69,6 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
  * Returns the maturity value of the Recurring Deposit.
  */
 export function getRDMaturityValue(account: RDAccount): number {
+  if (!account.maturity_date) return Number(account.maturity_amount) || 0;
   return Number(account.maturity_amount) || getRDEffectiveValue(account, new Date(account.maturity_date));
 }

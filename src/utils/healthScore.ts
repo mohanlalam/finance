@@ -23,7 +23,7 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
 
   // 1. DIVERSIFICATION (Max 30 pts)
   let activeAssetClasses = 0;
-  if (breakdown.stocks > 0) activeAssetClasses++;
+  if (breakdown.stocks > 0 || breakdown.sip > 0) activeAssetClasses++;
   if (breakdown.fd > 0 || breakdown.rd > 0) activeAssetClasses++;
   if (breakdown.gold > 0) activeAssetClasses++;
   if (breakdown.realEstate > 0) activeAssetClasses++;

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useCallback, useRef, useMemo, Rea
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Portfolio, PortfolioName, AssetPayload, RDPayload, SIPPayload } from '../types/portfolio';
 import { NetWorthSnapshot, usePortfolioData, LoadStatus } from '../hooks/usePortfolioData';
-import { VISIBILITY_REFRESH_COOLDOWN } from '../utils/constants';
+
 
 export interface PortfolioDataContextValue {
   portfolios: Portfolio[];
@@ -137,49 +137,16 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     refreshPricesRef.current = refreshPrices;
   }, [refreshPrices]);
 
-  // Auto-load + smart polling with Page Visibility API
+  // Auto-load + background polling (visibility refresh is handled by usePortfolioData)
   useEffect(() => {
     load();
 
-    let interval: ReturnType<typeof setInterval> | null = null;
-    // Track last refresh time so we don't hammer the API on every tab-switch
-    let lastRefreshTime = 0;
-
-    function startPolling() {
-      if (interval) return;
-      interval = setInterval(() => {
-        lastRefreshTime = Date.now();
-        refreshPricesRef.current();
-      }, 15 * 60 * 1000);
-    }
-
-    function stopPolling() {
-      if (interval) {
-        clearInterval(interval);
-        interval = null;
-      }
-    }
-
-    function handleVisibility() {
-      if (document.visibilityState === 'visible') {
-        // Only refresh if at least 5 minutes have passed since the last fetch
-        // (matches the SWR dedupingInterval of 300 000 ms)
-        if (Date.now() - lastRefreshTime >= VISIBILITY_REFRESH_COOLDOWN) {
-          lastRefreshTime = Date.now();
-          refreshPricesRef.current();
-        }
-        startPolling();
-      } else {
-        stopPolling();
-      }
-    }
-
-    startPolling();
-    document.addEventListener('visibilitychange', handleVisibility);
+    const interval = setInterval(() => {
+      refreshPricesRef.current();
+    }, 15 * 60 * 1000);
 
     return () => {
-      stopPolling();
-      document.removeEventListener('visibilitychange', handleVisibility);
+      clearInterval(interval);
     };
   }, [load]);
 

@@ -10,7 +10,7 @@ This document provides a high-level overview of the folder structure, data flow,
 * **[PortfolioContext.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/contexts/PortfolioContext.tsx)**
   * Split into `PortfolioDataContext` (containing global asset lists, pricing sync statuses, and last updated timestamps) and `PortfolioActionContext` (consolidated CRUD action triggers: `addAsset`, `updateAsset`, `deleteAsset`, and `refresh`).
   * Exposes optimized `usePortfolioState()` and `usePortfolioActions()` hooks separately. The unified `usePortfolio()` combined hook has been completely removed to prevent form modals and write-only components from re-rendering during data/price ticks.
-  * Implements a tab visibility refresh gate (cooldown of 5 minutes / 300,000 ms) that prevents redundant database and pricing network queries when the user returns to the app tab. The background polling interval also updates the `lastRefreshTime` timestamp to prevent duplicate refresh requests on tab return.
+  * Sets up a background price refresh polling interval (15 minutes). The tab visibility refresh gate and resume cooldown are offloaded to `usePortfolioData.ts` to prevent redundant fetches.
 * **[usePortfolioData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/usePortfolioData.ts)**
   * Source of truth for portfolio assets, net worth snapshots, and database transactions.
   * Integrated **SWR caching** and automatic IndexedDB caching (`idb-keyval`) to implement stale-while-revalidate instant loads.
@@ -48,7 +48,7 @@ This document provides a high-level overview of the folder structure, data flow,
 * **[useKeyboardShortcuts.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useKeyboardShortcuts.ts)**
   * Custom hook that isolates window keyboard keydown event listeners (e.g. `Ctrl+Shift+R` to sync stock prices).
 * **[useAlerts.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useAlerts.ts)**
-  * Evaluates warnings (expiring documents, upcoming due dates, portfolio concentration limits) and handles dismissals.
+  * Evaluates warnings (expiring documents, upcoming due dates, stock 52-week highs/lows, and portfolio swing alerts) and handles dismissals.
 * **[PinLockScreen.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/PinLockScreen.tsx)**
   * Restricts app access via a secure numerical pin-pad gate with keyboard support and session-based verification.
 * **[ErrorBoundary.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/ErrorBoundary.tsx)**
@@ -58,7 +58,7 @@ This document provides a high-level overview of the folder structure, data flow,
 * **[AssetTabContent.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/AssetTabContent.tsx)**
   * Orchestrator component rendering the active asset registry view.
   * Integrates **dynamic lazy loading** (`React.lazy` and `React.Suspense`) for ALL heavy registry views and tables: `FixedDepositView`, `RDView`, `SIPView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, and `PortfolioTable` using [AssetCardSkeleton.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/AssetCardSkeleton.tsx) as the loading fallback.
-  * Uses an IIFE single-pass mounting effect to trigger dynamic import preload requests for all asset views concurrently. This ensures sub-views are ready by the time the user swipes or navigates to them, eliminating tab-switching latency.
+
 
 ### 4. Modular UI Components
 Component folders are isolated by asset domain to ensure clean separation of concerns:
@@ -73,7 +73,7 @@ Component folders are isolated by asset domain to ensure clean separation of con
   * **[DashboardWidgets.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/DashboardWidgets.tsx)**: Capacitor WebView widget page with Net Worth, Today's Gain, and upcoming FD indicators. Uses a clean fallback string "No upcoming maturities" under all zero-matured situations.
   * **[InsightsPanel.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/InsightsPanel.tsx)**: Displays the main portfolio health breakdown, today's top 3 biggest movers, top holdings list, best/worst performance indicators per member, top gainers/losers list, asset allocation drift, and alert notifications. Supports filtering insights by asset domain (All, Stocks, FDs, Insurance, High Risk, Due Soon).
 * **App Icon System & Mobile Summary Optimizations**:
-  * **[AppIcons.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/icons/AppIcons.tsx)**: Custom inline SVG icon library containing 34 optimized icon definitions. By replacing all external `lucide-react` icons in critical rendering paths, it prevents the main application bundle from loading the large `lucide-react` module, resulting in dramatic bundle-weight savings.
+  * **[AppIcons.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/icons/AppIcons.tsx)**: Custom inline SVG icon library containing 35 optimized icon definitions. By replacing all external `lucide-react` icons in critical rendering paths, it prevents the main application bundle from loading the large `lucide-react` module, resulting in dramatic bundle-weight savings.
   * **[MobileHomeSummary.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/MobileHomeSummary.tsx)**: Displays the mobile dashboard overview. Wrapped with `React.memo` to prevent re-renders on price/data ticks when parent states change, and optimized to run a single-pass `useMemo` for-loop instead of 9 separate `reduce()` calculations.
 
 ---

@@ -62,11 +62,9 @@ function MobileHomeSummary({
     const ps = activePortfolio ? [activePortfolio] : portfolios;
     for (const p of ps) {
       stockCount += p.holdings.length;
-      for (const f of p.fixedDeposits) {
-        if (!f.fd_type || f.fd_type === 'regular') fdCount++;
-        else if (f.fd_type === 'recurring') rdCount++;
-        else if (f.fd_type === 'sip') sipCount++;
-      }
+      fdCount += p.fixedDeposits.length;
+      rdCount += p.rdAccounts?.length || 0;
+      sipCount += p.sipAccounts?.length || 0;
       goldCount      += p.goldHoldings.length;
       propertyCount  += p.realEstate.length;
       insuranceCount += p.insurances.length;

@@ -135,9 +135,7 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
       .map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`)
       .join(' ');
       
-    const areaPath = `M ${points[0].x} ${paddingTop + chartHeight} ${linePath} L ${
-      points[points.length - 1].x
-    } ${paddingTop + chartHeight} Z`;
+    const areaPath = `M ${points[0].x} ${paddingTop + chartHeight} L ${points.map(p => `${p.x} ${p.y}`).join(' L ')} L ${points[points.length - 1].x} ${paddingTop + chartHeight} Z`;
     
     return { linePath, areaPath };
   }, [points, chartHeight]);

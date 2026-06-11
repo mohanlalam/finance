@@ -141,9 +141,7 @@ export default function WhatIfCalculator() {
     const wealthArea = `M ${svgPoints[0].x} ${svgPoints[0].investedY} ${fvPart} ${investedPartReverse} Z`;
 
     // Invested Area: between investedLine and bottom axis
-    const investedArea = `M ${svgPoints[0].x} ${paddingTop + chartHeight} ${investedLine} L ${
-      svgPoints[svgPoints.length - 1].x
-    } ${paddingTop + chartHeight} L ${svgPoints[0].x} ${paddingTop + chartHeight} Z`;
+    const investedArea = `M ${svgPoints[0].x} ${paddingTop + chartHeight} L ${svgPoints.map(p => `${p.x} ${p.investedY}`).join(' L ')} L ${svgPoints[svgPoints.length - 1].x} ${paddingTop + chartHeight} Z`;
 
     return { investedLine, fvLine, wealthArea, investedArea };
   }, [svgPoints, chartHeight]);

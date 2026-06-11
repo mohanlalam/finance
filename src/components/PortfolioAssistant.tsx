@@ -25,7 +25,7 @@ const parseBoldAndCode = (text: string) => {
     if (codeParts.length > 1) {
       return codeParts.map((cp, j) => {
         if (j % 2 === 1) {
-          return <code key={j} className="bg-slate-800/80 px-1.5 py-0.5 rounded text-blue-400 font-mono text-[9.5px]">{cp}</code>;
+          return <code key={`${i}-${j}`} className="bg-slate-800/80 px-1.5 py-0.5 rounded text-blue-400 font-mono text-[9.5px]">{cp}</code>;
         }
         return cp;
       });

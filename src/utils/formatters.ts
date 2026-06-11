@@ -4,11 +4,13 @@ import { compoundValue } from './mathUtils';
 
 
 export function formatINR(value: number): string {
-  if (Math.abs(value) >= 10000000) {
-    return `₹${(value / 10000000).toFixed(2)}Cr`;
+  const sign = value < 0 ? '-' : '';
+  const absVal = Math.abs(value);
+  if (absVal >= 10000000) {
+    return `${sign}₹${(absVal / 10000000).toFixed(2)}Cr`;
   }
-  if (Math.abs(value) >= 100000) {
-    return `₹${(value / 100000).toFixed(2)}L`;
+  if (absVal >= 100000) {
+    return `${sign}₹${(absVal / 100000).toFixed(2)}L`;
   }
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
