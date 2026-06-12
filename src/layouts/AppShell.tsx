@@ -31,7 +31,7 @@ const InsightsPanel = React.lazy(() => import('../components/InsightsPanel'));
 import { useParams, useNavigate } from 'react-router-dom';
 import { formatINR, formatPercent, pnlColor } from '../utils/formatters';
 import { usePortfolioState, usePortfolioActions } from '../contexts/PortfolioContext';
-import { useToast } from '../contexts/ToastContext';
+import { useToastActions } from '../contexts/ToastContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePortfolioInsights } from '../hooks/usePortfolioInsights';
 import { useDismissibleAlerts } from '../hooks/useAlerts';
@@ -142,7 +142,7 @@ export default function AppShell() {
     addAsset, updateAsset, deleteAsset,
   } = usePortfolioActions();
   const { darkMode, toggleDarkMode } = useTheme();
-  const { addToast } = useToast();
+  const { addToast } = useToastActions();
 
   const { family, asset } = useParams<{ family: string; asset: string }>();
   const navigate = useNavigate();

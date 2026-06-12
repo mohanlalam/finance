@@ -37,6 +37,7 @@ export interface FixedDeposit {
   mf_scheme_code?: string;
   units?: number;
   created_at?: string;
+  maturityDateTs?: number;
 }
 
 export interface RDAccount {
@@ -110,6 +111,7 @@ export interface Insurance {
   renewal_date?: string;
   notes?: string;
   created_at?: string;
+  renewalDateTs?: number;
 }
 
 export interface DocumentMetadata {
@@ -122,6 +124,7 @@ export interface DocumentMetadata {
   asset_id?: string;
   expiry_date?: string;
   created_at?: string;
+  expiryDateTs?: number;
 }
 
 export interface Portfolio {

@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { RDAccount } from '../../types/portfolio';
-import { useToast } from '../../contexts/ToastContext';
+import { useToastActions } from '../../contexts/ToastContext';
 
 interface RDInstallmentScheduleProps {
   account: RDAccount;
@@ -8,7 +8,7 @@ interface RDInstallmentScheduleProps {
 }
 
 export function RDInstallmentSchedule({ account, onUpdate }: RDInstallmentScheduleProps) {
-  const { addToast } = useToast();
+  const { addToast } = useToastActions();
   const [expanded, setExpanded] = useState(false);
 
   // Helper for RD installment calculation
@@ -32,16 +32,24 @@ export function RDInstallmentSchedule({ account, onUpdate }: RDInstallmentSchedu
     return months;
   }, []);
 
-  const isRDMonthPaid = useCallback((monthDate: Date, contributions?: { date: string; amount: number }[]): boolean => {
-    if (!contributions) return false;
-    const targetYear = monthDate.getFullYear();
-    const targetMonth = monthDate.getMonth();
-    
-    return contributions.some((c) => {
-      const cDate = new Date(c.date);
-      return !isNaN(cDate.getTime()) && cDate.getFullYear() === targetYear && cDate.getMonth() === targetMonth;
-    });
-  }, []);
+  const installmentMonths = useMemo(() => {
+    return getRDInstallmentMonths(account.start_date, account.maturity_date);
+  }, [getRDInstallmentMonths, account.start_date, account.maturity_date]);
+
+  const paidMonthsSet = useMemo(() => {
+    const set = new Set<string>();
+    if (account.contributions) {
+      account.contributions.forEach((c) => {
+        const cDate = new Date(c.date);
+        if (!isNaN(cDate.getTime())) {
+          const year = cDate.getFullYear();
+          const month = String(cDate.getMonth() + 1).padStart(2, '0');
+          set.add(`${year}-${month}`);
+        }
+      });
+    }
+    return set;
+  }, [account.contributions]);
 
   const handleRecordInstallment = async (account: RDAccount, targetMonth: Date) => {
     const year = targetMonth.getFullYear();
@@ -81,8 +89,11 @@ export function RDInstallmentSchedule({ account, onUpdate }: RDInstallmentSchedu
             Monthly Installments
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
-            {getRDInstallmentMonths(account.start_date, account.maturity_date).map((monthDate, idx) => {
-              const isPaid = isRDMonthPaid(monthDate, account.contributions);
+            {installmentMonths.map((monthDate, idx) => {
+              const year = monthDate.getFullYear();
+              const month = String(monthDate.getMonth() + 1).padStart(2, '0');
+              const monthKey = `${year}-${month}`;
+              const isPaid = paidMonthsSet.has(monthKey);
               const label = monthDate.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
               
               const today = new Date();

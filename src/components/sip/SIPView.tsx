@@ -9,7 +9,7 @@ import SIPAccountCard from './SIPAccountCard';
 import { SIPFormModal } from './SIPFormModal';
 import { useSIPData } from '../../hooks/useSIPData';
 import { usePortfolioState } from '../../contexts/PortfolioContext';
-import { useToast } from '../../contexts/ToastContext';
+import { useToastActions } from '../../contexts/ToastContext';
 import AssetCardSkeleton from '../AssetCardSkeleton';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
@@ -32,7 +32,7 @@ export function SIPView({
   autoOpenAddModal,
 }: SIPViewProps) {
   const { portfolios, isMutating } = usePortfolioState();
-  const { addToast } = useToast();
+  const { addToast } = useToastActions();
   const {
     sipAccounts,
     loading,

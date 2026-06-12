@@ -1,8 +1,5 @@
 import { useMemo } from 'react';
 import { Portfolio, Holding, FixedDeposit, Insurance } from '../types/portfolio';
-import { getFDEffectiveValue } from '../utils/formatters';
-import { getRDEffectiveValue } from '../utils/rdUtils';
-import { getSIPEffectiveValue } from '../utils/sipUtils';
 import { FD_MATURITY_WARNING_DAYS, INSURANCE_RENEWAL_WARNING_DAYS } from '../utils/constants';
 
 /* ── Allocation Targets ── */
@@ -211,25 +208,10 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
     const biggestMover = biggestMovers[0] || null;
 
     // ── Asset allocation ──
-    const stocksVal = portfolios.reduce((s, p) => s + p.holdings.reduce((a, h) => a + h.currentValue, 0), 0);
-    const sipVal = portfolios.reduce((s, p) => s + (p.sipAccounts || []).reduce((a, acc) => a + getSIPEffectiveValue(acc), 0), 0);
-    const totalStocksVal = stocksVal + sipVal;
-
-    const fdVal = portfolios.reduce(
-      (s, p) => s + p.fixedDeposits.reduce((a, f) => a + (f.status === 'matured' ? Number(f.maturity_amount) : getFDEffectiveValue(f)), 0),
-      0
-    );
-    const rdVal = portfolios.reduce((s, p) => s + (p.rdAccounts || []).reduce((a, acc) => a + getRDEffectiveValue(acc), 0), 0);
-    const totalFdVal = fdVal + rdVal;
-
-    const goldVal = portfolios.reduce(
-      (s, p) => s + p.goldHoldings.reduce((a, g) => a + Number(g.current_valuation), 0),
-      0
-    );
-    const realEstateVal = portfolios.reduce(
-      (s, p) => s + p.realEstate.reduce((a, r) => a + Number(r.current_valuation), 0),
-      0
-    );
+    const totalStocksVal = portfolios.reduce((s, p) => s + (p.stocksValue || 0) + (p.sipValue || 0), 0);
+    const totalFdVal = portfolios.reduce((s, p) => s + (p.fdValue || 0) + (p.rdValue || 0), 0);
+    const goldVal = portfolios.reduce((s, p) => s + (p.goldValue || 0), 0);
+    const realEstateVal = portfolios.reduce((s, p) => s + (p.realEstateValue || 0), 0);
     const totalVal = totalStocksVal + totalFdVal + goldVal + realEstateVal;
 
     const pct = (v: number) => (totalVal > 0 ? (v / totalVal) * 100 : 0);

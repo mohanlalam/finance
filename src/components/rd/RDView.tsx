@@ -9,7 +9,7 @@ import RDAccountCard from './RDAccountCard';
 import { RDFormModal } from './RDFormModal';
 import { useRDData } from '../../hooks/useRDData';
 import { usePortfolioState } from '../../contexts/PortfolioContext';
-import { useToast } from '../../contexts/ToastContext';
+import { useToastActions } from '../../contexts/ToastContext';
 import AssetCardSkeleton from '../AssetCardSkeleton';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
@@ -32,7 +32,7 @@ export function RDView({
   autoOpenAddModal,
 }: RDViewProps) {
   const { portfolios, isMutating } = usePortfolioState();
-  const { addToast } = useToast();
+  const { addToast } = useToastActions();
   const {
     rdAccounts,
     loading,

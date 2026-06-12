@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
 import EmptyState from '../../components/EmptyState';
 import ErrorBoundary from '../../components/ErrorBoundary';
-import { ToastProvider, useToast } from '../../contexts/ToastContext';
+import { ToastProvider, useToastActions } from '../../contexts/ToastContext';
 import ToastContainer from '../../components/Toast';
 
 afterEach(() => {
@@ -12,7 +12,7 @@ afterEach(() => {
 
 // Test Component for Toast Actions
 function ToastTester() {
-  const { addToast } = useToast();
+  const { addToast } = useToastActions();
   return (
     <button onClick={() => addToast('Test Message', 'success')}>
       Trigger Toast

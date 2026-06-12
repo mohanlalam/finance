@@ -1,11 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { RealEstate, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/formatters';
 import { Plus, Trash2, Edit2, Home, MapPin, TrendingUp, Building2, FileText, X, StickyNote } from './icons/AppIcons';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
 import { usePortfolioState } from '../contexts/PortfolioContext';
-import { useToast } from '../contexts/ToastContext';
+import { useToastActions } from '../contexts/ToastContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
 import EmptyState from './EmptyState';
 
@@ -40,7 +40,7 @@ export default React.memo(function RealEstateView({
   autoOpenAddModal,
 }: RealEstateViewProps) {
   const { isMutating } = usePortfolioState();
-  const { addToast } = useToast();
+  const { addToast } = useToastActions();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<RealEstate | null>(null);
   const [loading, setLoading] = useState(false);
@@ -59,12 +59,21 @@ export default React.memo(function RealEstateView({
   // Confirm-delete state
   const [confirmDelete, setConfirmDelete] = useState<RealEstate | null>(null);
 
-  const totalPurchase = realEstate.reduce((s, r) => s + Number(r.purchase_price), 0);
-  const totalCurrent = realEstate.reduce((s, r) => s + Number(r.current_valuation), 0);
-  const totalMonthlyRent = realEstate.reduce((s, r) => s + Number(r.monthly_rent), 0);
-  const annualRent = totalMonthlyRent * 12;
-  const totalGain = totalCurrent - totalPurchase;
-  const yieldPct = totalCurrent > 0 ? (annualRent / totalCurrent) * 100 : 0;
+  const { totalCurrent, totalMonthlyRent, annualRent, totalGain, yieldPct } = useMemo(() => {
+    const purchase = realEstate.reduce((s, r) => s + Number(r.purchase_price), 0);
+    const current = realEstate.reduce((s, r) => s + Number(r.current_valuation), 0);
+    const monthlyRent = realEstate.reduce((s, r) => s + Number(r.monthly_rent), 0);
+    const annual = monthlyRent * 12;
+    const gain = current - purchase;
+    const yieldPercentage = current > 0 ? (annual / current) * 100 : 0;
+    return {
+      totalCurrent: current,
+      totalMonthlyRent: monthlyRent,
+      annualRent: annual,
+      totalGain: gain,
+      yieldPct: yieldPercentage
+    };
+  }, [realEstate]);
 
   const handleOpenAdd = useCallback(() => {
     setEditing(null);

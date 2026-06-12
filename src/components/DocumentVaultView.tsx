@@ -15,7 +15,7 @@ import { getDocumentUrl } from '../utils/formatters';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
 import { usePortfolioState } from '../contexts/PortfolioContext';
-import { useToast } from '../contexts/ToastContext';
+import { useToastActions } from '../contexts/ToastContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
 import EmptyState from './EmptyState';
 
@@ -56,7 +56,27 @@ export default React.memo(function DocumentVaultView({
   autoOpenAddModal,
 }: DocumentVaultViewProps) {
   const { isMutating } = usePortfolioState();
-  const { addToast } = useToast();
+  const { addToast } = useToastActions();
+
+  const assetLabelMap = useMemo(() => {
+    const map = new Map<string, string>();
+    portfolio.holdings.forEach((h) => {
+      if (h.id) map.set(h.id, `${h.ticker} · ${h.stockName}`);
+    });
+    portfolio.fixedDeposits.forEach((f) => {
+      if (f.id) map.set(f.id, f.bank_name);
+    });
+    portfolio.goldHoldings.forEach((g) => {
+      if (g.id) map.set(g.id, g.item_name);
+    });
+    portfolio.realEstate.forEach((r) => {
+      if (r.id) map.set(r.id, r.property_name);
+    });
+    portfolio.insurances.forEach((i) => {
+      if (i.id) map.set(i.id, `${i.provider} · ${i.policy_name}`);
+    });
+    return map;
+  }, [portfolio]);
   const [activeFolder, setActiveFolder] = useState<AssetType>('general');
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -219,30 +239,7 @@ export default React.memo(function DocumentVaultView({
     }
   }
 
-  function getAssetLabel(doc: DocumentMetadata): string | null {
-    if (!doc.asset_id) return null;
-    if (doc.asset_type === 'stock') {
-      const h = portfolio.holdings.find((x) => x.id === doc.asset_id);
-      return h ? `${h.ticker} · ${h.stockName}` : null;
-    }
-    if (doc.asset_type === 'fd') {
-      const f = portfolio.fixedDeposits.find((x) => x.id === doc.asset_id);
-      return f ? f.bank_name : null;
-    }
-    if (doc.asset_type === 'gold') {
-      const g = portfolio.goldHoldings.find((x) => x.id === doc.asset_id);
-      return g ? g.item_name : null;
-    }
-    if (doc.asset_type === 'real_estate') {
-      const r = portfolio.realEstate.find((x) => x.id === doc.asset_id);
-      return r ? r.property_name : null;
-    }
-    if (doc.asset_type === 'insurance') {
-      const i = portfolio.insurances.find((x) => x.id === doc.asset_id);
-      return i ? `${i.provider} · ${i.policy_name}` : null;
-    }
-    return null;
-  }
+
 
   return (
     <div className="space-y-6">
@@ -344,7 +341,7 @@ export default React.memo(function DocumentVaultView({
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
             {folderDocs.map((doc) => {
-              const linkedLabel = getAssetLabel(doc);
+              const linkedLabel = doc.asset_id ? assetLabelMap.get(doc.asset_id) || null : null;
               return (
                 <div key={doc.id} className="px-6 py-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">

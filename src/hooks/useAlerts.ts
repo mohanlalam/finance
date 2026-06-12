@@ -99,8 +99,8 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
 
       // ── FD maturity alerts ──
       for (const fd of p.fixedDeposits) {
-        if (fd.status === 'matured' || !fd.maturity_date) continue;
-        const days = Math.ceil((new Date(fd.maturity_date).getTime() - Date.now()) / (1000 * 3600 * 24));
+        if (fd.status === 'matured' || fd.maturityDateTs === undefined) continue;
+        const days = Math.ceil((fd.maturityDateTs - Date.now()) / (1000 * 3600 * 24));
         if (days < 0) {
           alerts.push({
             id: `fd-overdue-${p.name}-${fd.id}`,
@@ -124,8 +124,8 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
 
       // ── Insurance renewal alerts ──
       for (const ins of p.insurances) {
-        if (!ins.renewal_date) continue;
-        const days = Math.ceil((new Date(ins.renewal_date).getTime() - Date.now()) / (1000 * 3600 * 24));
+        if (ins.renewalDateTs === undefined) continue;
+        const days = Math.ceil((ins.renewalDateTs - Date.now()) / (1000 * 3600 * 24));
         if (days < 0) {
           alerts.push({
             id: `insurance-overdue-${p.name}-${ins.id}`,
@@ -149,8 +149,8 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
 
       // ── Document expiry alerts ──
       for (const doc of p.documents) {
-        if (!doc.expiry_date) continue;
-        const days = Math.ceil((new Date(doc.expiry_date).getTime() - Date.now()) / (1000 * 3600 * 24));
+        if (doc.expiryDateTs === undefined) continue;
+        const days = Math.ceil((doc.expiryDateTs - Date.now()) / (1000 * 3600 * 24));
         if (days < 0) {
           alerts.push({
             id: `document-expired-${p.name}-${doc.id}`,

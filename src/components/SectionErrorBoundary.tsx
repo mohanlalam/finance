@@ -35,7 +35,9 @@ export default class SectionErrorBoundary extends Component<SectionErrorBoundary
       error.message.includes('dynamically imported module') ||
       error.message.includes('chunk load') ||
       error.message.includes('Loading chunk') ||
-      error.message.includes('loading chunk');
+      error.message.includes('loading chunk') ||
+      error.message.includes('Importing a module script failed') ||
+      error.message.includes('module script failed');
       
     if (isChunkError) {
       const chunkErrorKey = 'finance_chunk_error_reload';
@@ -54,7 +56,9 @@ export default class SectionErrorBoundary extends Component<SectionErrorBoundary
       this.state.message.includes('dynamically imported module') ||
       this.state.message.includes('chunk load') ||
       this.state.message.includes('Loading chunk') ||
-      this.state.message.includes('loading chunk');
+      this.state.message.includes('loading chunk') ||
+      this.state.message.includes('Importing a module script failed') ||
+      this.state.message.includes('module script failed');
       
     if (isChunkError) {
       window.location.reload();

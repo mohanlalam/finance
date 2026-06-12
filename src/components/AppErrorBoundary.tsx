@@ -30,7 +30,9 @@ export default class AppErrorBoundary extends Component<AppErrorBoundaryProps, A
       error.message.includes('dynamically imported module') ||
       error.message.includes('chunk load') ||
       error.message.includes('Loading chunk') ||
-      error.message.includes('loading chunk');
+      error.message.includes('loading chunk') ||
+      error.message.includes('Importing a module script failed') ||
+      error.message.includes('module script failed');
       
     if (isChunkError) {
       const chunkErrorKey = 'finance_chunk_error_reload';

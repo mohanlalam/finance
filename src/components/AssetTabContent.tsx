@@ -58,6 +58,36 @@ export default React.memo(function AssetTabContent({
   onQuickAddComplete,
   portfolioOptions,
 }: AssetTabContentProps) {
+
+  const singleStockTotals = React.useMemo(() => {
+    if (!visiblePortfolio) return { inv: 0, cur: 0, pnl: 0 };
+    return visiblePortfolio.holdings.reduce(
+      (acc, h) => {
+        acc.inv += h.amountInvested;
+        acc.cur += h.currentValue;
+        acc.pnl += h.unrealizedPnL;
+        return acc;
+      },
+      { inv: 0, cur: 0, pnl: 0 }
+    );
+  }, [visiblePortfolio]);
+
+  const totalsMap = React.useMemo(() => {
+    const map = new Map<string, { inv: number; cur: number; pnl: number }>();
+    for (const p of portfolios) {
+      const totals = p.holdings.reduce(
+        (acc, h) => {
+          acc.inv += h.amountInvested;
+          acc.cur += h.currentValue;
+          acc.pnl += h.unrealizedPnL;
+          return acc;
+        },
+        { inv: 0, cur: 0, pnl: 0 }
+      );
+      map.set(p.name, totals);
+    }
+    return map;
+  }, [portfolios]);
   
   React.useEffect(() => {
     if (quickAddTarget && quickAddTarget === activeAsset) {
@@ -116,23 +146,15 @@ export default React.memo(function AssetTabContent({
               </div>
             </div>
 
-            {(() => {
-              // Compute stock totals in one pass to avoid 5 separate reduce calls
-              const inv = visiblePortfolio.holdings.reduce((s, h) => s + h.amountInvested, 0);
-              const cur = visiblePortfolio.holdings.reduce((s, h) => s + h.currentValue, 0);
-              const pnl = visiblePortfolio.holdings.reduce((s, h) => s + h.unrealizedPnL, 0);
-              return (
-                <PortfolioTable
-                  holdings={visiblePortfolio.holdings}
-                  totalInvested={inv}
-                  totalCurrentValue={cur}
-                  totalPnL={pnl}
-                  totalPnLPercent={inv > 0 ? (pnl / inv) * 100 : 0}
-                  onDelete={onDeleteStock}
-                  onUpdate={onUpdateStock}
-                />
-              );
-            })()}
+            <PortfolioTable
+              holdings={visiblePortfolio.holdings}
+              totalInvested={singleStockTotals.inv}
+              totalCurrentValue={singleStockTotals.cur}
+              totalPnL={singleStockTotals.pnl}
+              totalPnLPercent={singleStockTotals.inv > 0 ? (singleStockTotals.pnl / singleStockTotals.inv) * 100 : 0}
+              onDelete={onDeleteStock}
+              onUpdate={onUpdateStock}
+            />
           </div>
         )}
 
@@ -272,23 +294,19 @@ export default React.memo(function AssetTabContent({
                     }
                   />
                 ) : (
-                  (() => {
-                    // Single-pass computation — avoids 5 separate reduce calls
-                    const inv = p.holdings.reduce((s, h) => s + h.amountInvested, 0);
-                    const cur = p.holdings.reduce((s, h) => s + h.currentValue, 0);
-                    const pnl = p.holdings.reduce((s, h) => s + h.unrealizedPnL, 0);
-                    return (
-                      <PortfolioTable
-                        holdings={p.holdings}
-                        totalInvested={inv}
-                        totalCurrentValue={cur}
-                        totalPnL={pnl}
-                        totalPnLPercent={inv > 0 ? (pnl / inv) * 100 : 0}
-                        onDelete={onDeleteStock}
-                        onUpdate={onUpdateStock}
-                      />
-                    );
-                  })()
+                  <PortfolioTable
+                    holdings={p.holdings}
+                    totalInvested={totalsMap.get(p.name)?.inv ?? 0}
+                    totalCurrentValue={totalsMap.get(p.name)?.cur ?? 0}
+                    totalPnL={totalsMap.get(p.name)?.pnl ?? 0}
+                    totalPnLPercent={
+                      (totalsMap.get(p.name)?.inv ?? 0) > 0
+                        ? ((totalsMap.get(p.name)?.pnl ?? 0) / (totalsMap.get(p.name)?.inv ?? 1)) * 100
+                        : 0
+                    }
+                    onDelete={onDeleteStock}
+                    onUpdate={onUpdateStock}
+                  />
                 )}
               </div>
             ))}

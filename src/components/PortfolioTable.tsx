@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { ArrowUpDown, TrendingUp, TrendingDown, Trash2, Pencil, Loader2, Check, X, SlidersHorizontal } from './icons/AppIcons';
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent, pnlColor } from '../utils/formatters';
@@ -24,6 +24,39 @@ interface PortfolioTableProps {
 }
 
 type SortKey = keyof Holding | '_allocation';
+
+const Th = React.memo(({
+  label,
+  k,
+  sortKey,
+  sortAsc,
+  handleSort,
+}: {
+  label: string;
+  k: SortKey;
+  sortKey: SortKey;
+  sortAsc: boolean;
+  handleSort: (key: SortKey) => void;
+}) => {
+  const getSortAria = (k: SortKey) => {
+    if (sortKey !== k) return 'none';
+    return sortAsc ? 'ascending' : 'descending';
+  };
+
+  return (
+    <th
+      role="columnheader"
+      aria-sort={getSortAria(k)}
+      className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-200 transition-colors whitespace-nowrap"
+      onClick={() => handleSort(k)}
+    >
+      <span className="flex items-center gap-1">
+        {label}
+        <ArrowUpDown size={11} className={sortKey === k ? 'text-blue-500' : 'text-slate-300 dark:text-slate-600'} />
+      </span>
+    </th>
+  );
+});
 
 export default React.memo(function PortfolioTable({
   holdings,
@@ -72,11 +105,18 @@ export default React.memo(function PortfolioTable({
     });
   }, [holdingsWithAlloc, sortKey, sortAsc]);
 
-  function handleSort(key: SortKey) {
+  const handleSort = useCallback((key: SortKey) => {
     setActivePreset(null);
-    if (sortKey === key) setSortAsc(!sortAsc);
-    else { setSortKey(key); setSortAsc(false); }
-  }
+    setSortKey((prevSortKey) => {
+      if (prevSortKey === key) {
+        setSortAsc((prevAsc) => !prevAsc);
+        return prevSortKey;
+      } else {
+        setSortAsc(false);
+        return key;
+      }
+    });
+  }, []);
 
   function handlePreset(preset: SortPreset) {
     const p = SORT_PRESETS.find((s) => s.id === preset);
@@ -152,25 +192,6 @@ export default React.memo(function PortfolioTable({
       editInputRef.current.select();
     }
   }, [editingId]);
-
-  const getSortAria = (k: SortKey) => {
-    if (sortKey !== k) return 'none';
-    return sortAsc ? 'ascending' : 'descending';
-  };
-
-  const Th = ({ label, k }: { label: string; k: SortKey }) => (
-    <th
-      role="columnheader"
-      aria-sort={getSortAria(k)}
-      className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-200 transition-colors whitespace-nowrap"
-      onClick={() => handleSort(k)}
-    >
-      <span className="flex items-center gap-1">
-        {label}
-        <ArrowUpDown size={11} className={sortKey === k ? 'text-blue-500' : 'text-slate-300 dark:text-slate-600'} />
-      </span>
-    </th>
-  );
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
@@ -292,7 +313,7 @@ export default React.memo(function PortfolioTable({
                         </div>
                       </div>
                     ) : (
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+                      <p className="text-[10px] text-slate-400 dark:text-slate-550 mt-0.5">
                         {formatNumber(h.qty, 0)} shares @ ₹{formatNumber(h.avgPrice)} (LTP: ₹{formatNumber(h.ltp)})
                       </p>
                     )}
@@ -313,7 +334,7 @@ export default React.memo(function PortfolioTable({
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-500 pt-1 border-t border-slate-50 dark:border-slate-700/30">
+                <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-550 pt-1 border-t border-slate-50 dark:border-slate-700/30">
                   <div className="flex gap-2">
                     <span>Alloc: <span className="font-semibold text-slate-600 dark:text-slate-400">{h._allocation.toFixed(1)}%</span></span>
                     <span>Today: <span className={`font-semibold ${pnlColor(h.todayPnLPercent)}`}>{formatPercent(h.todayPnLPercent)}</span></span>
@@ -348,8 +369,8 @@ export default React.memo(function PortfolioTable({
                 </div>
               </div>
             );
-          })
-        )}
+            })
+          )}
         </div>
       </div>
 
@@ -358,17 +379,17 @@ export default React.memo(function PortfolioTable({
         <table role="table" className="min-w-full">
           <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700">
             <tr role="row">
-              <Th label="Stock" k="stockName" />
-              <Th label="Ticker" k="ticker" />
-              <Th label="Qty" k="qty" />
-              <Th label="Avg Price" k="avgPrice" />
-              <Th label="LTP" k="ltp" />
-              <Th label="Current Value" k="currentValue" />
-              <Th label="Invested" k="amountInvested" />
-              <Th label="P&L" k="unrealizedPnL" />
-              <Th label="% P&L" k="pnlPercent" />
-              <Th label="Today %" k="todayPnLPercent" />
-              <Th label="Alloc %" k={"_allocation" as SortKey} />
+              <Th label="Stock" k="stockName" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
+              <Th label="Ticker" k="ticker" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
+              <Th label="Qty" k="qty" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
+              <Th label="Avg Price" k="avgPrice" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
+              <Th label="LTP" k="ltp" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
+              <Th label="Current Value" k="currentValue" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
+              <Th label="Invested" k="amountInvested" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
+              <Th label="P&L" k="unrealizedPnL" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
+              <Th label="% P&L" k="pnlPercent" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
+              <Th label="Today %" k="todayPnLPercent" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
+              <Th label="Alloc %" k={"_allocation" as SortKey} sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
               {onDelete && <th role="columnheader" className="px-4 py-3 w-10" />}
             </tr>
           </thead>

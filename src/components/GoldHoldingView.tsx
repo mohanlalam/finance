@@ -5,7 +5,7 @@ import { Plus, Trash2, Edit2, Coins, TrendingUp, Scale, FileText, X, StickyNote 
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
 import { usePortfolioState } from '../contexts/PortfolioContext';
-import { useToast } from '../contexts/ToastContext';
+import { useToastActions } from '../contexts/ToastContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
 import EmptyState from './EmptyState';
 
@@ -40,7 +40,7 @@ export default React.memo(function GoldHoldingView({
   autoOpenAddModal,
 }: GoldHoldingViewProps) {
   const { isMutating } = usePortfolioState();
-  const { addToast } = useToast();
+  const { addToast } = useToastActions();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<GoldHolding | null>(null);
   const [loading, setLoading] = useState(false);

@@ -56,6 +56,14 @@ export function getSIPEffectiveValue(account: SIPAccount, liveNav?: number): num
   return Number(account.fallback_valuation) || 0;
 }
 
+export async function saveNAVCacheToIDB(): Promise<void> {
+  try {
+    await idb.set('nav_cache', JSON.stringify([...navCache.entries()]));
+  } catch (err) {
+    console.warn('[sipUtils] Failed to save NAV cache to IDB:', err);
+  }
+}
+
 const NAV_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
 
 export interface NAVResult {
@@ -80,9 +88,6 @@ export async function fetchNAV(schemeCode: string): Promise<NAVResult> {
     }
     const entry = { value: details.latestNav, name: details.schemeName, fetchedAt: Date.now() };
     navCache.set(schemeCode, entry);
-    try {
-      await idb.set('nav_cache', JSON.stringify([...navCache.entries()]));
-    } catch { /* ignore */ }
     return { value: details.latestNav, schemeName: details.schemeName, isStale: false };
   } catch (err) {
     return {

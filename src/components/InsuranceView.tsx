@@ -1,11 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Insurance, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, getDocumentUrl } from '../utils/formatters';
 import { Plus, Trash2, Edit2, Shield, ShieldAlert, FileText, Calendar, Clock, X, StickyNote } from './icons/AppIcons';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
 import { usePortfolioState } from '../contexts/PortfolioContext';
-import { useToast } from '../contexts/ToastContext';
+import { useToastActions } from '../contexts/ToastContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
 import EmptyState from './EmptyState';
 
@@ -55,7 +55,7 @@ export default React.memo(function InsuranceView({
   autoOpenAddModal,
 }: InsuranceViewProps) {
   const { isMutating } = usePortfolioState();
-  const { addToast } = useToast();
+  const { addToast } = useToastActions();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Insurance | null>(null);
   const [loading, setLoading] = useState(false);
@@ -74,12 +74,12 @@ export default React.memo(function InsuranceView({
   // Confirm-delete state
   const [confirmDelete, setConfirmDelete] = useState<Insurance | null>(null);
 
-  const totalCoverage = insurances.reduce((s, i) => s + Number(i.sum_assured), 0);
-  const totalPremium = insurances.reduce((s, i) => s + Number(i.premium_amount), 0);
-  const upcomingRenewals = insurances.filter((i) => {
+  const totalCoverage = useMemo(() => insurances.reduce((s, i) => s + Number(i.sum_assured), 0), [insurances]);
+  const totalPremium = useMemo(() => insurances.reduce((s, i) => s + Number(i.premium_amount), 0), [insurances]);
+  const upcomingRenewals = useMemo(() => insurances.filter((i) => {
     const d = daysUntil(i.renewal_date);
     return d !== null && d >= 0 && d <= 60;
-  }).length;
+  }).length, [insurances]);
 
   const handleOpenAdd = useCallback(() => {
     setEditing(null);

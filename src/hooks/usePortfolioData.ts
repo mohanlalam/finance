@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Holding, Portfolio, FixedDeposit, RDAccount, SIPAccount, GoldHolding, RealEstate, Insurance, DocumentMetadata, AssetPayload } from '../types/portfolio';
 import { getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../utils/rdUtils';
-import { getSIPInvestedAmount, getSIPEffectiveValue, fetchNAV, initNAVCache } from '../utils/sipUtils';
+import { getSIPInvestedAmount, getSIPEffectiveValue, fetchNAV, initNAVCache, saveNAVCacheToIDB } from '../utils/sipUtils';
 import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiClient';
 import useSWR from 'swr';
 import * as idb from 'idb-keyval';
@@ -145,7 +145,31 @@ function buildPortfolio(
   insurances: Insurance[],
   docs: DocumentMetadata[]
 ): Portfolio {
-  const totals = recalcPortfolioTotals(holdings, fds, rdAccounts, sipAccounts, gold, realEstate);
+  const fdsWithTs = fds.map((f) => {
+    const ts = f.maturity_date ? new Date(f.maturity_date).getTime() : NaN;
+    return {
+      ...f,
+      maturityDateTs: isNaN(ts) ? undefined : ts,
+    };
+  });
+
+  const insurancesWithTs = insurances.map((i) => {
+    const ts = i.renewal_date ? new Date(i.renewal_date).getTime() : NaN;
+    return {
+      ...i,
+      renewalDateTs: isNaN(ts) ? undefined : ts,
+    };
+  });
+
+  const docsWithTs = docs.map((d) => {
+    const ts = d.expiry_date ? new Date(d.expiry_date).getTime() : NaN;
+    return {
+      ...d,
+      expiryDateTs: isNaN(ts) ? undefined : ts,
+    };
+  });
+
+  const totals = recalcPortfolioTotals(holdings, fdsWithTs, rdAccounts, sipAccounts, gold, realEstate);
 
   return {
     id: dbP.id,
@@ -153,13 +177,13 @@ function buildPortfolio(
     label: dbP.label,
     created_at: dbP.created_at,
     holdings,
-    fixedDeposits: fds,
+    fixedDeposits: fdsWithTs,
     rdAccounts,
     sipAccounts,
     goldHoldings: gold,
     realEstate,
-    insurances,
-    documents: docs,
+    insurances: insurancesWithTs,
+    documents: docsWithTs,
     ...totals,
   };
 }
@@ -379,6 +403,8 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       );
     }
 
+    await saveNAVCacheToIDB();
+
     return { navMap, staleSchemes };
   }, []);
 
@@ -423,6 +449,8 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     },
     {
       revalidateOnFocus: false,
+      revalidateIfStale: false,
+      revalidateOnMount: false,
       dedupingInterval: SWR_DEDUPING_INTERVAL,
       errorRetryCount: SWR_ERROR_RETRY_COUNT,
     }

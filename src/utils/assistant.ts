@@ -628,16 +628,12 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
   let sipTotal = 0;
 
   for (const p of portfolios) {
-    stocksTotal += p.holdings.reduce((sum, h) => sum + h.currentValue, 0);
-    goldTotal += p.goldHoldings.reduce((sum, g) => sum + Number(g.current_valuation), 0);
-    realEstateTotal += p.realEstate.reduce((sum, re) => sum + Number(re.current_valuation), 0);
-    fdTotal += p.fixedDeposits.reduce((sum, fd) => sum + getFDEffectiveValue(fd), 0);
-    if (p.rdAccounts) {
-      rdTotal += p.rdAccounts.reduce((sum, rd) => sum + getRDEffectiveValue(rd), 0);
-    }
-    if (p.sipAccounts) {
-      sipTotal += p.sipAccounts.reduce((sum, sip) => sum + getSIPEffectiveValue(sip), 0);
-    }
+    stocksTotal += p.stocksValue || 0;
+    goldTotal += p.goldValue || 0;
+    realEstateTotal += p.realEstateValue || 0;
+    fdTotal += p.fdValue || 0;
+    rdTotal += p.rdValue || 0;
+    sipTotal += p.sipValue || 0;
   }
 
   const equityTotal = stocksTotal + sipTotal;
@@ -1018,10 +1014,8 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     let totalRDVal = 0;
     
     for (const p of portfolios) {
-      totalFDVal += p.fixedDeposits.reduce((sum, fd) => sum + (fd.status === 'matured' ? Number(fd.maturity_amount) : getFDEffectiveValue(fd)), 0);
-      if (p.rdAccounts) {
-        totalRDVal += p.rdAccounts.reduce((sum, rd) => sum + getRDEffectiveValue(rd), 0);
-      }
+      totalFDVal += p.fdValue || 0;
+      totalRDVal += p.rdValue || 0;
     }
     
     const emergencyPool = totalFDVal + totalRDVal;
