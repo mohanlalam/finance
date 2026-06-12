@@ -8,6 +8,20 @@ import useSWR from 'swr';
 import * as idb from 'idb-keyval';
 import { SWR_DEDUPING_INTERVAL, SWR_ERROR_RETRY_COUNT, STOCK_PRICE_CACHE_TTL } from '../utils/constants';
 
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallbackValue: T): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  const timeoutPromise = new Promise<T>((resolve) => {
+    timeoutId = setTimeout(() => {
+      console.warn(`[portfolio] Promise timed out after ${timeoutMs}ms. Using fallback.`);
+      resolve(fallbackValue);
+    }, timeoutMs);
+  });
+  return Promise.race([promise, timeoutPromise]).then((val) => {
+    clearTimeout(timeoutId);
+    return val;
+  });
+}
+
 interface DBHolding {
   id: string;
   portfolio_id: string;
@@ -415,7 +429,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       initNAVCache().catch(err => console.warn('[sipUtils] NAV cache init error:', err));
       if (!isMounted) return;
       try {
-        const cached = await idb.get('portfolio_data_cache');
+        const cached = await withTimeout(idb.get('portfolio_data_cache'), 1500, null);
         if (!isMounted) return;
         if (cached && !hasHydratedRef.current) {
           hasHydratedRef.current = true;

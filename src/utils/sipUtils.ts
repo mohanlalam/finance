@@ -22,7 +22,10 @@ const navCache = new Map<string, { value: number; name: string; fetchedAt: numbe
 
 export async function initNAVCache(): Promise<void> {
   try {
-    const saved = await idb.get('nav_cache');
+    const saved = await Promise.race([
+      idb.get('nav_cache'),
+      new Promise<string | null>((resolve) => setTimeout(() => resolve(null), 1000))
+    ]);
     if (saved) {
       const entries: [string, { value: number; name: string; fetchedAt: number }][] = JSON.parse(saved);
       for (const [k, v] of entries) {
