@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, HashRouter } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { PortfolioProvider, usePortfolioState, usePortfolioActions } from './contexts/PortfolioContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -28,20 +28,22 @@ export default function MainApp({ onAuthExpired }: MainAppProps) {
   }
 
   return (
-    <ErrorBoundary>
-      <ToastProvider>
-        <ThemeProvider>
-          <PortfolioProvider onAuthExpired={onAuthExpired}>
-            <Routes>
-              <Route path="/" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
-              <Route path="/:family/:asset" element={<LoadGate onUnlock={onAuthExpired} />} />
-              <Route path="*" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
-            </Routes>
-            <ToastContainer />
-          </PortfolioProvider>
-        </ThemeProvider>
-      </ToastProvider>
-    </ErrorBoundary>
+    <HashRouter>
+      <ErrorBoundary>
+        <ToastProvider>
+          <ThemeProvider>
+            <PortfolioProvider onAuthExpired={onAuthExpired}>
+              <Routes>
+                <Route path="/" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
+                <Route path="/:family/:asset" element={<LoadGate onUnlock={onAuthExpired} />} />
+                <Route path="*" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
+              </Routes>
+              <ToastContainer />
+            </PortfolioProvider>
+          </ThemeProvider>
+        </ToastProvider>
+      </ErrorBoundary>
+    </HashRouter>
   );
 }
 

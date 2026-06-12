@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, LockKeyhole, RefreshCw } from 'lucide-react';
+import { AlertCircle, LockKeyhole, RefreshCw } from './icons/AppIcons';
 
 interface DashboardErrorProps {
   message: string;

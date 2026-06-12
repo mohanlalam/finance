@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { DocumentMetadata, RDAccount } from '../../types/portfolio';
 import { formatINR } from '../../utils/formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../utils/rdUtils';
-import { Plus, TrendingUp, Calendar, Clock } from 'lucide-react';
+import { Plus, TrendingUp, Calendar, Clock } from '../icons/AppIcons';
 import ConfirmModal from '../ConfirmModal';
 import EmptyState from '../EmptyState';
 import RDAccountCard from './RDAccountCard';

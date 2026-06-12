@@ -79,8 +79,8 @@ export default defineConfig(({ command }) => ({
             if (id.includes('react-window')) {
               return 'react-window';
             }
-            if (id.includes('lucide-react')) {
-              return 'lucide';
+            if (id.includes('react-router-dom') || id.includes('@remix-run/router')) {
+              return 'router';
             }
           }
         }

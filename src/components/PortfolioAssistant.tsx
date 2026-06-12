@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Portfolio } from '../types/portfolio';
 import { askAssistant, AssistantResponse } from '../utils/assistant';
-import { Send, Sparkles, Trash2, Copy, Check } from 'lucide-react';
+import { Send, Sparkles, Trash2, Copy, Check } from './icons/AppIcons';
 
 interface PortfolioAssistantProps {
   portfolios: Portfolio[];

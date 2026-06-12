@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { X, TrendingUp, TrendingDown, Landmark, Shield, Activity, AlertTriangle, FileText } from 'lucide-react';
+import { X, TrendingUp, TrendingDown, Landmark, Shield, Activity, AlertTriangle, FileText } from './icons/AppIcons';
 import { Alert, AlertType } from '../hooks/useAlerts';
 
 interface AlertsBannerProps {

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { SlidersHorizontal, X, RotateCcw } from 'lucide-react';
+import { SlidersHorizontal, X, RotateCcw } from './icons/AppIcons';
 import Modal from './Modal';
 import {
   AllocationTargets,

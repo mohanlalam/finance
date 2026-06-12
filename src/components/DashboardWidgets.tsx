@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Portfolio } from '../types/portfolio';
 import { formatINR, formatPercent, getFDEffectiveValue } from '../utils/formatters';
-import { Landmark, TrendingUp, ShieldAlert, Award } from 'lucide-react';
+import { Landmark, TrendingUp, ShieldAlert, Award } from './icons/AppIcons';
 
 interface DashboardWidgetsProps {
   portfolios: Portfolio[];

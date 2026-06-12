@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { GoldHolding, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/formatters';
-import { Plus, Trash2, Edit2, Coins, TrendingUp, Scale, FileText, X, StickyNote } from 'lucide-react';
+import { Plus, Trash2, Edit2, Coins, TrendingUp, Scale, FileText, X, StickyNote } from './icons/AppIcons';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
 import { usePortfolioState } from '../contexts/PortfolioContext';

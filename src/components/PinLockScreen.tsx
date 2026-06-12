@@ -269,6 +269,13 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
 
       {/* Shaking & Custom Keypad Animations */}
       <style>{`
+        .glass-card {
+          background: rgba(30, 41, 59, 0.7);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
           10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }

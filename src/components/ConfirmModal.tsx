@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { AlertTriangle, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Trash2, X } from './icons/AppIcons';
 import Modal from './Modal';
 
 interface ConfirmModalProps {

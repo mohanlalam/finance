@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, Loader2 } from 'lucide-react';
+import { X, Check, Loader2 } from './icons/AppIcons';
 import Modal from './Modal';
 
 interface RenamePortfolioModalProps {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FixedDeposit, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../../utils/formatters';
-import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote } from 'lucide-react';
+import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote } from '../icons/AppIcons';
 
 interface ModeConfig {
   title: string;

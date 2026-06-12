@@ -282,6 +282,8 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   const [isMutating, setIsMutating] = useState(false);
   const mutationQueue = useRef<Promise<unknown>>(Promise.resolve());
   const lastRefreshRef = useRef<number>(0);
+  // Guard: prevents IDB cache from applying after SWR has already hydrated state
+  const hasHydratedRef = useRef(false);
 
   const runMutation = useCallback(async <T>(fn: () => Promise<T>): Promise<T> => {
     const nextPromise = new Promise<T>((resolve, reject) => {
@@ -356,7 +358,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
     const uniqueSchemeCodes = Array.from(new Set(sipAccounts.map((s) => s.mf_scheme_code!)));
 
-    const BATCH_SIZE = 4;
+    const BATCH_SIZE = 10;
     for (let i = 0; i < uniqueSchemeCodes.length; i += BATCH_SIZE) {
       const batch = uniqueSchemeCodes.slice(i, i + BATCH_SIZE);
       await Promise.allSettled(
@@ -389,7 +391,8 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       try {
         const cached = await idb.get('portfolio_data_cache');
         if (!isMounted) return;
-        if (cached && portfolios.length === 0) {
+        if (cached && !hasHydratedRef.current) {
+          hasHydratedRef.current = true;
           const parsed = cached as { portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[]; cachedAt: string };
           setPortfolios(parsed.portfolios);
           setNetWorthHistory(parsed.netWorthHistory || []);
@@ -522,6 +525,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         return buildPortfolio(dbP, holdings, fds, rds, sips, gold, realEstate, insurances, docs);
       });
 
+      hasHydratedRef.current = true;
       setPortfolios(built);
       setNetWorthHistory(dbNetWorthHistory);
       setIsUsingCachedData(false);
@@ -538,9 +542,9 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       });
 
       // Let SWR key handle live price / NAV fetching.
-      // Trigger a prompt SWR update:
+      // Deferred to after React paints the dashboard to avoid CPU contention.
       setPriceStatus('loading');
-      setTimeout(() => {
+      const scheduleRefresh = () => {
         refreshPricesSWR().catch((priceErr) => {
           console.error('[portfolio] initial SWR price fetch failed:', priceErr);
           if (priceErr instanceof AppApiError && priceErr.code === 'auth') {
@@ -548,7 +552,12 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           }
           setPriceStatus('error');
         });
-      }, 0);
+      };
+      if ('requestIdleCallback' in window) {
+        (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => void }).requestIdleCallback(scheduleRefresh, { timeout: 2000 });
+      } else {
+        setTimeout(scheduleRefresh, 50);
+      }
 
     } catch (err) {
       console.error('[portfolio] Database parsing error:', err);

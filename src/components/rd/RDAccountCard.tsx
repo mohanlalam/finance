@@ -2,7 +2,7 @@ import React from 'react';
 import { RDAccount, DocumentMetadata, RDPayload } from '../../types/portfolio';
 import { formatINR, getDocumentUrl } from '../../utils/formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../utils/rdUtils';
-import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote } from 'lucide-react';
+import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote } from '../icons/AppIcons';
 import RDInstallmentSchedule from './RDInstallmentSchedule';
 
 interface RDAccountCardProps {

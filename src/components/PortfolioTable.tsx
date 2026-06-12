@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { ArrowUpDown, TrendingUp, TrendingDown, Trash2, Pencil, Loader2, Check, X, SlidersHorizontal } from 'lucide-react';
+import { ArrowUpDown, TrendingUp, TrendingDown, Trash2, Pencil, Loader2, Check, X, SlidersHorizontal } from './icons/AppIcons';
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent, pnlColor } from '../utils/formatters';
 

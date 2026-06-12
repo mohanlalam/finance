@@ -2,7 +2,7 @@ import React from 'react';
 import { SIPAccount, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, getDocumentUrl, formatPercent } from '../../utils/formatters';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../utils/sipUtils';
-import { FileText, Edit2, Trash2, StickyNote, Wifi } from 'lucide-react';
+import { FileText, Edit2, Trash2, StickyNote, Wifi } from '../icons/AppIcons';
 
 interface SIPAccountCardProps {
   account: SIPAccount;

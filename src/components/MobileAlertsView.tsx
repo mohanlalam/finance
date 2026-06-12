@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, TrendingUp, TrendingDown, Landmark, Shield, Activity, FileText, Bell, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { X, TrendingUp, TrendingDown, Landmark, Shield, Activity, FileText, Bell, AlertTriangle, CheckCircle2 } from './icons/AppIcons';
 import { Alert, AlertType, AlertSeverity } from '../hooks/useAlerts';
 
 interface MobileAlertsViewProps {

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
-import { Plus, TrendingUp, Landmark, Calendar } from 'lucide-react';
+import { Plus, TrendingUp, Landmark, Calendar } from './icons/AppIcons';
 import ConfirmModal from './ConfirmModal';
 import EmptyState from './EmptyState';
 import StandardFormFields from './fd/StandardFormFields';

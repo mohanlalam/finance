@@ -10,7 +10,7 @@ import {
   Holding,
 } from '../types/portfolio';
 import { getSupabase } from '../utils/supabaseClient';
-import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X } from 'lucide-react';
+import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X } from './icons/AppIcons';
 import { getDocumentUrl } from '../utils/formatters';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';

@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Insurance, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import { formatINR, getDocumentUrl } from '../utils/formatters';
-import { Plus, Trash2, Edit2, Shield, ShieldAlert, FileText, Calendar, Clock, X, StickyNote } from 'lucide-react';
+import { Plus, Trash2, Edit2, Shield, ShieldAlert, FileText, Calendar, Clock, X, StickyNote } from './icons/AppIcons';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
 import { usePortfolioState } from '../contexts/PortfolioContext';

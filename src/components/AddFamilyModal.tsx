@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, UserPlus, Loader2 } from 'lucide-react';
+import { X, UserPlus, Loader2 } from './icons/AppIcons';
 import Modal from './Modal';
 
 interface AddFamilyModalProps {

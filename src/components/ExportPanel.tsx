@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, FileSpreadsheet, FileText, Database, X, Loader2, CheckCircle, AlertCircle, TrendingUp, Landmark, FolderOpen } from 'lucide-react';
+import { Upload, FileSpreadsheet, FileText, Database, X, Loader2, CheckCircle, AlertCircle, TrendingUp, Landmark, FolderOpen } from './icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
 import { getRDEffectiveValue } from '../utils/rdUtils';

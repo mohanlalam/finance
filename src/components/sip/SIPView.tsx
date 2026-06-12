@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { DocumentMetadata, SIPAccount } from '../../types/portfolio';
 import { formatINR } from '../../utils/formatters';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../utils/sipUtils';
-import { Plus, TrendingUp, Calendar, ArrowUpRight } from 'lucide-react';
+import { Plus, TrendingUp, Calendar, ArrowUpRight } from '../icons/AppIcons';
 import ConfirmModal from '../ConfirmModal';
 import EmptyState from '../EmptyState';
 import SIPAccountCard from './SIPAccountCard';
