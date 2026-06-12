@@ -647,6 +647,8 @@ export default function AppShell() {
               todayPnL={todayPnL}
               label={summaryData.label}
               isLoading={isLoading}
+              portfolios={portfolios}
+              activePortfolio={portfolio}
             />
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">

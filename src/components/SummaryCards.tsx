@@ -1,6 +1,8 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, IndianRupee, BarChart2, Activity } from './icons/AppIcons';
 import { formatINR, formatPercent, pnlColor } from '../utils/formatters';
+import { Portfolio } from '../types/portfolio';
+import { estimateTodayPnL } from '../utils/portfolioCalcs';
 
 interface SummaryCardsProps {
   totalInvested: number;
@@ -10,6 +12,8 @@ interface SummaryCardsProps {
   todayPnL?: number;
   label?: string;
   isLoading?: boolean;
+  portfolios?: Portfolio[];
+  activePortfolio?: Portfolio | null;
 }
 
 function SummaryCards({
@@ -20,6 +24,8 @@ function SummaryCards({
   todayPnL,
   label = 'Family',
   isLoading = false,
+  portfolios = [],
+  activePortfolio = null,
 }: SummaryCardsProps) {
   const isGain = totalPnL >= 0;
   const isTodayGain = todayPnL !== undefined ? todayPnL >= 0 : true;
@@ -47,6 +53,22 @@ function SummaryCards({
         <p className="text-[10px] sm:text-xs text-slate-500 relative z-10">
           {isLoading ? 'Fetching live prices...' : 'Based on latest prices'}
         </p>
+        {activePortfolio === null && portfolios && portfolios.length > 0 && (
+          <div className="mt-1.5 pt-1.5 border-t border-slate-800/40 flex flex-wrap gap-x-2 gap-y-1 text-[10px] font-medium text-slate-400 relative z-10">
+            {portfolios.map((p, idx) => {
+              const val = p.totalCurrentValue;
+              return (
+                <span key={p.id} className="flex items-center gap-0.5">
+                  <span>{p.label}:</span>
+                  <span className="text-slate-200 font-bold">
+                    {formatINR(val)}
+                  </span>
+                  {idx < portfolios.length - 1 && <span className="text-slate-700 ml-1.5">|</span>}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* 2. Invested Card (Clean Slate Glass) */}
@@ -60,6 +82,22 @@ function SummaryCards({
         </div>
         <p className="text-lg sm:text-2xl font-extrabold text-slate-800 dark:text-slate-100">{formatINR(totalInvested)}</p>
         <p className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 hidden sm:block">Cost basis across all holdings</p>
+        {activePortfolio === null && portfolios && portfolios.length > 0 && (
+          <div className="mt-1.5 pt-1.5 border-t border-slate-200/50 dark:border-slate-800/40 flex flex-wrap gap-x-2 gap-y-1 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+            {portfolios.map((p, idx) => {
+              const val = p.totalInvested;
+              return (
+                <span key={p.id} className="flex items-center gap-0.5">
+                  <span>{p.label}:</span>
+                  <span className="text-slate-700 dark:text-slate-300 font-bold">
+                    {formatINR(val)}
+                  </span>
+                  {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* 3. Total P&L Card (Color-coded Border & Soft BG) */}
@@ -84,6 +122,22 @@ function SummaryCards({
         <p className={`text-[10px] sm:text-xs font-bold ${pnlColor(totalPnL)}`}>
           {formatPercent(totalPnLPercent)} total return
         </p>
+        {activePortfolio === null && portfolios && portfolios.length > 0 && (
+          <div className="mt-1.5 pt-1.5 border-t border-slate-200/50 dark:border-slate-800/40 flex flex-wrap gap-x-2 gap-y-1 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+            {portfolios.map((p, idx) => {
+              const pnl = p.totalPnL;
+              return (
+                <span key={p.id} className="flex items-center gap-0.5">
+                  <span>{p.label}:</span>
+                  <span className={pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-red-500 dark:text-red-400 font-bold'}>
+                    {pnl >= 0 ? '+' : ''}{formatINR(pnl)}
+                  </span>
+                  {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* 4. Today's P&L Card (Color-coded daily returns) */}
@@ -109,6 +163,22 @@ function SummaryCards({
           <p className={`text-[10px] sm:text-xs font-bold ${pnlColor(todayPnL)}`}>
             Daily change
           </p>
+          {activePortfolio === null && portfolios && portfolios.length > 0 && (
+            <div className="mt-1.5 pt-1.5 border-t border-slate-200/50 dark:border-slate-800/40 flex flex-wrap gap-x-2 gap-y-1 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+              {portfolios.map((p, idx) => {
+                const pnl = estimateTodayPnL(p, [p]);
+                return (
+                  <span key={p.id} className="flex items-center gap-0.5">
+                    <span>{p.label}:</span>
+                    <span className={pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-red-500 dark:text-red-400 font-bold'}>
+                      {pnl >= 0 ? '+' : ''}{formatINR(pnl)}
+                    </span>
+                    {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
       ) : (
         <div className="glass-panel premium-card rounded-2xl shadow-sm p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2">

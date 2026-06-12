@@ -3,6 +3,8 @@ import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpe
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { Alert } from '../hooks/useAlerts';
+import { estimateTodayPnL } from '../utils/portfolioCalcs';
+
 
 interface MobileHomeSummaryProps {
   summaryData: {
@@ -173,6 +175,23 @@ function MobileHomeSummary({
         <h2 className="text-4xl font-extrabold tracking-tight mt-3 bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent relative z-10">
           {formatINR(summaryData.totalCurrentValue)}
         </h2>
+        {/* Individual Net Worth breakdown for mobile */}
+        {activePortfolio === null && portfolios && portfolios.length > 0 && (
+          <div className="mt-2.5 flex flex-wrap gap-x-2.5 gap-y-1 text-[10px] font-medium text-slate-400 relative z-10">
+            {portfolios.map((p, idx) => {
+              const val = p.totalCurrentValue;
+              return (
+                <span key={p.id} className="flex items-center gap-0.5">
+                  <span>{p.label}:</span>
+                  <span className="text-white font-bold">
+                    {formatINR(val)}
+                  </span>
+                  {idx < portfolios.length - 1 && <span className="text-white/20 ml-2">|</span>}
+                </span>
+              );
+            })}
+          </div>
+        )}
 
         {/* PNL Grid */}
         <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-white/10 relative z-10">
@@ -213,6 +232,41 @@ function MobileHomeSummary({
             </div>
           </div>
         </div>
+        {/* Individual Today's & Total P&L breakdowns for mobile */}
+        {activePortfolio === null && portfolios && portfolios.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-white/10 space-y-2 text-[10px] font-medium text-slate-400">
+            <div className="flex flex-wrap gap-x-2 gap-y-1">
+              <span className="text-slate-300 font-semibold mr-1">Today's P&amp;L:</span>
+              {portfolios.map((p, idx) => {
+                const pnl = estimateTodayPnL(p, [p]);
+                return (
+                  <span key={p.id} className="flex items-center gap-0.5">
+                    <span>{p.label}:</span>
+                    <span className={pnl >= 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
+                      {pnl >= 0 ? '+' : ''}{formatINR(pnl)}
+                    </span>
+                    {idx < portfolios.length - 1 && <span className="text-white/20 ml-2">|</span>}
+                  </span>
+                );
+              })}
+            </div>
+            <div className="flex flex-wrap gap-x-2 gap-y-1 pt-1.5 border-t border-white/5">
+              <span className="text-slate-300 font-semibold mr-1">Total P&amp;L:</span>
+              {portfolios.map((p, idx) => {
+                const pnl = p.totalPnL;
+                return (
+                  <span key={p.id} className="flex items-center gap-0.5">
+                    <span>{p.label}:</span>
+                    <span className={pnl >= 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
+                      {pnl >= 0 ? '+' : ''}{formatINR(pnl)}
+                    </span>
+                    {idx < portfolios.length - 1 && <span className="text-white/20 ml-2">|</span>}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Sticky Mini Refresh Status Bar */}
