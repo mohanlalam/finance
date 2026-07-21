@@ -157,22 +157,26 @@ function MobileHomeSummary({
   return (
     <div className="space-y-5 md:hidden">
       {/* Net Worth Summary Card */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-white rounded-3xl p-6 border border-slate-800 dark:border-slate-800/80 shadow-xl">
-        {/* Glowing background accent elements */}
-        <div className="absolute top-0 right-0 w-36 h-36 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl p-6 border border-white/[0.08] shadow-2xl" style={{ background: 'linear-gradient(145deg, #080d1a 0%, #0d1833 40%, #0a1535 70%, #080d1a 100%)' }}>
+        {/* Mesh grid overlay */}
+        <div className="absolute inset-0 mesh-grid opacity-30 pointer-events-none rounded-3xl" />
+        {/* Glowing background orbs */}
+        <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/15 rounded-full blur-3xl pointer-events-none animate-float-pulse" />
+        <div className="absolute bottom-0 left-0 w-36 h-36 bg-indigo-500/12 rounded-full blur-3xl pointer-events-none" />
+        {/* Top accent line */}
+        <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-blue-400/30 to-transparent" />
 
         <div className="flex items-center justify-between relative z-10">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
             {summaryData.label} Net Worth
           </span>
-          <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-sm">
+          <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-            Intraday Live
+            Live
           </span>
         </div>
 
-        <h2 className="text-4xl font-extrabold tracking-tight mt-3 bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent relative z-10">
+        <h2 className="text-4xl font-extrabold tracking-tight mt-3 bg-gradient-to-r from-white via-blue-50 to-slate-200 bg-clip-text text-transparent relative z-10 tnum">
           {formatINR(summaryData.totalCurrentValue)}
         </h2>
         {/* Individual Net Worth breakdown for mobile */}
@@ -183,7 +187,7 @@ function MobileHomeSummary({
               return (
                 <span key={p.id} className="flex items-center gap-0.5">
                   <span>{p.label}:</span>
-                  <span className="text-white font-bold">
+                  <span className="text-white font-bold tnum">
                     {formatINR(val)}
                   </span>
                   {idx < portfolios.length - 1 && <span className="text-white/20 ml-2">|</span>}
@@ -194,7 +198,7 @@ function MobileHomeSummary({
         )}
 
         {/* PNL Grid */}
-        <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-white/10 relative z-10">
+        <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-white/[0.08] relative z-10">
           <div className="space-y-1">
             <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Today's P&amp;L</p>
             <div className={`flex items-start gap-1.5 ${todayPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -204,10 +208,10 @@ function MobileHomeSummary({
                 <TrendingDown size={16} className="shrink-0 mt-0.5" />
               )}
               <div className="flex flex-col">
-                <span className="text-base font-bold whitespace-nowrap leading-tight">
+                <span className="text-base font-bold whitespace-nowrap leading-tight tnum">
                   {todayPnL >= 0 ? '+' : ''}{formatINR(todayPnL)}
                 </span>
-                <span className="text-[11px] font-semibold whitespace-nowrap opacity-90 leading-none mt-0.5">
+                <span className="text-[11px] font-semibold whitespace-nowrap opacity-90 leading-none mt-0.5 tnum">
                   ({todayPnL >= 0 ? '+' : ''}{formatPercent(todayPnLPercent)})
                 </span>
               </div>
@@ -222,10 +226,10 @@ function MobileHomeSummary({
                 <TrendingDown size={16} className="shrink-0 mt-0.5" />
               )}
               <div className="flex flex-col">
-                <span className="text-base font-bold whitespace-nowrap leading-tight">
+                <span className="text-base font-bold whitespace-nowrap leading-tight tnum">
                   {summaryData.totalPnL >= 0 ? '+' : ''}{formatINR(summaryData.totalPnL)}
                 </span>
-                <span className="text-[11px] font-semibold whitespace-nowrap opacity-90 leading-none mt-0.5">
+                <span className="text-[11px] font-semibold whitespace-nowrap opacity-90 leading-none mt-0.5 tnum">
                   ({summaryData.totalPnL >= 0 ? '+' : ''}{formatPercent(summaryData.totalPnLPercent)})
                 </span>
               </div>

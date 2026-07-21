@@ -102,54 +102,66 @@ function Header({
   const handleDismissAll = onDismissAll;
 
   return (
-    <header className="bg-slate-900/95 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-800/65 text-white relative z-40">
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-4">
+    <header className="relative z-40 overflow-hidden" style={{ background: 'linear-gradient(135deg, #080d1a 0%, #0e1628 50%, #0a1020 100%)' }}>
+      {/* Subtle gradient accent line at top */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/60 to-transparent" />
+      {/* Background glow orbs */}
+      <div className="absolute top-0 left-1/4 w-64 h-16 bg-blue-600/8 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute top-0 right-1/3 w-48 h-16 bg-indigo-500/6 rounded-full blur-2xl pointer-events-none" />
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-white/[0.05]">
+        <div className="flex items-center justify-between py-3.5">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-              <TrendingUp size={20} className="text-white" />
+            <div className="relative">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-600/40 ring-1 ring-white/10">
+                <TrendingUp size={18} className="text-white" />
+              </div>
+              <div className="absolute inset-0 rounded-xl bg-blue-400/20 animate-ping" style={{ animationDuration: '3s' }} />
             </div>
             <div>
-              <h1 className="text-base font-bold leading-tight">Family Portfolio</h1>
-              <p className="text-xs text-slate-400">Investment Dashboard</p>
+              <h1 className="text-[15px] font-bold leading-tight text-white tracking-tight">Family Portfolio</h1>
+              <p className="text-[10px] text-slate-400 tracking-wide">Investment Dashboard</p>
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             {/* Stats (Desktop Only) */}
-            <div className="hidden sm:flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-3">
               <div className="text-right">
-                <p className="text-xs text-slate-400 mb-0.5">Family Net Worth</p>
-                <p className={`text-lg font-bold transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
+                <p className="text-[10px] text-slate-500 mb-0.5 tracking-wide uppercase">Net Worth</p>
+                <p className={`text-lg font-bold text-white tnum transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
                   {formatINR(totalCurrentValue)}
                 </p>
               </div>
-              <div className={`text-right px-3 py-1.5 rounded-xl ${isGain ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
-                <p className="text-xs text-slate-400 mb-0.5">Total P&amp;L</p>
-                <p className={`text-base font-bold ${isGain ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {formatPercent(totalPnLPercent)}
+              <div className={`text-right px-3 py-2 rounded-xl border ${
+                isGain
+                  ? 'bg-emerald-500/10 border-emerald-500/20'
+                  : 'bg-red-500/10 border-red-500/20'
+              }`}>
+                <p className="text-[10px] text-slate-500 mb-0.5 tracking-wide uppercase">Total P&amp;L</p>
+                <p className={`text-sm font-bold tnum ${isGain ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {isGain ? '+' : ''}{formatPercent(totalPnLPercent)}
                 </p>
               </div>
             </div>
 
             {/* Actions (Mobile & Desktop) */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={onRefresh}
                 disabled={isLoading}
                 aria-label={isLoading ? 'Fetching live prices' : 'Refresh live prices'}
-                className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 text-xs text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 rounded-lg disabled:opacity-40"
+                className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 text-xs text-slate-400 hover:text-blue-400 transition-all border border-white/[0.08] hover:border-blue-500/40 rounded-lg disabled:opacity-40 hover:bg-white/[0.04] active:scale-95"
                 title={isLoading ? 'Fetching...' : lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Fetch live prices'}
               >
                 <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
-                <span className="hidden sm:inline sm:ml-1.5">
-                  {isLoading ? 'Fetching...' : lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Fetch live prices'}
+                <span className="hidden sm:inline sm:ml-1.5 font-medium">
+                  {isLoading ? 'Fetching...' : lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Fetch prices'}
                 </span>
               </button>
-              {/* Last synced badge — always visible */}
+              {/* Last synced badge */}
               {lastUpdated && !isLoading && (
-                <span className="text-[10px] font-medium text-slate-500 bg-slate-800 border border-slate-700 px-2 py-1 rounded-md hidden sm:inline-flex items-center gap-1" title={lastUpdated.toLocaleString('en-IN')}>
+                <span className="text-[10px] font-medium text-slate-500 bg-white/[0.04] border border-white/[0.06] px-2 py-1 rounded-md hidden sm:inline-flex items-center gap-1.5" title={lastUpdated.toLocaleString('en-IN')}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Synced {formatRelativeTime(lastUpdated)}
+                  {formatRelativeTime(lastUpdated)}
                 </span>
               )}
               <Suspense fallback={<div className="w-8 h-8 rounded-lg bg-slate-800 animate-pulse" />}>
@@ -164,8 +176,8 @@ function Header({
               <button
                 onClick={onToggleDarkMode}
                 aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-                className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 hover:border-slate-600"
-                title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-all border border-white/[0.08] hover:border-slate-600 hover:bg-white/[0.04] active:scale-95"
               >
                 {darkMode ? <Sun size={14} /> : <Moon size={14} />}
               </button>
@@ -177,12 +189,12 @@ function Header({
                   aria-expanded={openAlerts}
                   aria-haspopup="true"
                   aria-label={`Notifications${visibleAlerts.length > 0 ? `, ${visibleAlerts.length} active` : ''}`}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-colors border border-slate-700 hover:border-slate-600 relative"
+                  className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-all border border-white/[0.08] hover:border-slate-600 hover:bg-white/[0.04] active:scale-95 relative"
                   title="Notifications"
                 >
                   <Bell size={14} />
                   {visibleAlerts.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-rose-500 to-pink-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-rose-500/40 animate-pulse">
                       {visibleAlerts.length}
                     </span>
                   )}
@@ -192,9 +204,9 @@ function Header({
                 <div
                   role="region"
                   aria-label="Notifications panel"
-                  className="fixed left-3 right-3 top-16 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96"
+                  className="fixed left-3 right-3 top-16 bg-white dark:bg-[#0e1628] border border-slate-200 dark:border-white/[0.08] rounded-2xl shadow-2xl z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96"
                 >
-                  <div className="px-4 py-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                    <div className="px-4 py-3 bg-slate-50 dark:bg-white/[0.03] border-b border-slate-100 dark:border-white/[0.05] flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                       Active Alerts ({visibleAlerts.length})
                     </span>
@@ -208,7 +220,7 @@ function Header({
                     )}
                   </div>
 
-                  <div className="max-h-[300px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
+                    <div className="max-h-[300px] overflow-y-auto divide-y divide-slate-100 dark:divide-white/[0.04]">
                     {visibleAlerts.length === 0 ? (
                       <div className="px-4 py-8 text-center text-slate-400 dark:text-slate-500">
                         <Check size={20} className="mx-auto text-emerald-500 mb-2" />
@@ -225,7 +237,7 @@ function Header({
                         };
 
                         return (
-                          <div key={alert.id} className="p-3 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors flex items-start gap-2.5">
+                            <div key={alert.id} className="p-3 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors flex items-start gap-2.5">
                             <span className={`shrink-0 p-1.5 rounded-lg border ${config.bg} ${config.border} ${config.color} mt-0.5`}>
                               {config.icon}
                             </span>

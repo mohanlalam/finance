@@ -2,14 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Design Token System ── */
+:root {
+  /* Color tokens */
+  --color-bg-base: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-2: #f1f5f9;
+  --color-accent: hsl(220, 90%, 60%);
+  --color-accent-glow: hsla(220, 90%, 60%, 0.18);
+  --color-emerald: hsl(158, 72%, 46%);
+  --color-emerald-glow: hsla(158, 72%, 46%, 0.15);
+  --color-gold: hsl(43, 96%, 56%);
+  --color-gold-glow: hsla(43, 96%, 56%, 0.15);
+  --color-rose: hsl(350, 84%, 60%);
+  --color-rose-glow: hsla(350, 84%, 60%, 0.15);
+
+  /* Radius tokens */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+
+  /* Shadow tokens */
+  --shadow-xs: 0 1px 4px 0 rgba(0,0,0,0.04);
+  --shadow-sm: 0 2px 12px -2px rgba(0,0,0,0.06), 0 1px 4px -1px rgba(0,0,0,0.04);
+  --shadow-md: 0 6px 24px -4px rgba(0,0,0,0.08), 0 2px 8px -2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 16px 40px -8px rgba(0,0,0,0.12), 0 4px 16px -4px rgba(0,0,0,0.06);
+
+  /* Z-index hierarchy */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-overlay: 400;
+  --z-toast: 500;
+
+  /* Card styling */
+  --radius-card: var(--radius-md);
+  --shadow-card: var(--shadow-sm);
+  --shadow-card-hover: var(--shadow-md);
+}
+
+.dark {
+  --color-bg-base: #080d1a;
+  --color-surface: #0e1628;
+  --color-surface-2: #131d30;
+  --color-accent-glow: hsla(220, 90%, 60%, 0.12);
+  --shadow-sm: 0 2px 12px -2px rgba(0,0,0,0.3), 0 1px 4px -1px rgba(0,0,0,0.2);
+  --shadow-md: 0 6px 24px -4px rgba(0,0,0,0.4), 0 2px 8px -2px rgba(0,0,0,0.2);
+  --shadow-lg: 0 16px 40px -8px rgba(0,0,0,0.5), 0 4px 16px -4px rgba(0,0,0,0.3);
+}
+
 /* Global scrollbars and transitions */
 body {
   font-family: 'Inter', 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4, h5, h6, .font-bold, .font-extrabold {
   font-family: 'Outfit', 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Financial number tabular alignment */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 @keyframes stitchFadeIn {
@@ -229,47 +289,112 @@ h1, h2, h3, h4, h5, h6, .font-bold, .font-extrabold {
 
 /* ── Premium UI Design System Utilities ── */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  box-shadow: 0 2px 12px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8);
 }
 .dark .glass-panel {
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(14, 22, 40, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 12px -2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03);
 }
 
 .premium-card {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
 }
 .premium-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.04), 0 4px 16px -4px rgba(0, 0, 0, 0.02);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.08), 0 4px 16px -4px rgba(0, 0, 0, 0.04);
+}
+.dark .premium-card:hover {
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.4), 0 4px 16px -4px rgba(0, 0, 0, 0.2);
 }
 
 .interactive-btn {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .interactive-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
 }
 
+/* Enhanced glow utilities */
 .glow-blue {
-  box-shadow: 0 0 20px -3px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 28px -4px rgba(59, 130, 246, 0.22), 0 0 8px -2px rgba(59, 130, 246, 0.12);
 }
 .glow-emerald {
-  box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0 28px -4px rgba(16, 185, 129, 0.22), 0 0 8px -2px rgba(16, 185, 129, 0.12);
 }
 .glow-indigo {
-  box-shadow: 0 0 20px -3px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 28px -4px rgba(99, 102, 241, 0.25), 0 0 8px -2px rgba(99, 102, 241, 0.12);
 }
 .glow-purple {
-  box-shadow: 0 0 20px -3px rgba(168, 85, 247, 0.15);
+  box-shadow: 0 0 28px -4px rgba(168, 85, 247, 0.22), 0 0 8px -2px rgba(168, 85, 247, 0.12);
 }
 .glow-pink {
-  box-shadow: 0 0 20px -3px rgba(236, 72, 153, 0.15);
+  box-shadow: 0 0 28px -4px rgba(236, 72, 153, 0.22), 0 0 8px -2px rgba(236, 72, 153, 0.12);
+}
+.glow-rose {
+  box-shadow: 0 0 28px -4px rgba(244, 63, 94, 0.22), 0 0 8px -2px rgba(244, 63, 94, 0.12);
+}
+.glow-amber {
+  box-shadow: 0 0 28px -4px rgba(245, 158, 11, 0.22), 0 0 8px -2px rgba(245, 158, 11, 0.12);
+}
+
+/* Gradient border card — uses box-shadow layering for CSS-only gradient borders */
+.gradient-border-card {
+  position: relative;
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 1px rgba(226,232,240,0.8), var(--shadow-sm);
+}
+.dark .gradient-border-card {
+  background: rgba(14, 22, 40, 0.9);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.07), var(--shadow-sm);
+}
+
+/* Animated float pulse for hero card */
+@keyframes floatPulse {
+  0%, 100% { transform: translateY(0px) scale(1); opacity: 0.6; }
+  50% { transform: translateY(-8px) scale(1.04); opacity: 0.9; }
+}
+.animate-float-pulse {
+  animation: floatPulse 6s ease-in-out infinite;
+}
+
+/* Mesh grid texture overlay (CSS-only) */
+.mesh-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Premium glow radial overlay */
+.premium-glow-before {
+  position: relative;
+  isolation: isolate;
+}
+.premium-glow-before::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at 30% 20%, var(--color-accent-glow) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glass card (dark-optimized) */
+.glass-card {
+  background: rgba(14, 22, 40, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
 @keyframes shimmerAnimation {
@@ -330,21 +455,6 @@ h1, h2, h3, h4, h5, h6, .font-bold, .font-extrabold {
 
 /* ── Unified Design System & Animation Upgrades ── */
 
-:root {
-  /* Z-index hierarchy variables */
-  --z-base: 1;
-  --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-modal: 300;
-  --z-overlay: 400;
-  --z-toast: 500;
-
-  /* Card styling variables */
-  --radius-card: 14px;
-  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 8px -1px rgba(0, 0, 0, 0.03);
-  --shadow-card-hover: 0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
-}
-
 /* Keyframes for Toast entry */
 @keyframes slideInFromTop {
   0% {
@@ -364,17 +474,17 @@ h1, h2, h3, h4, h5, h6, .font-bold, .font-extrabold {
 .asset-card {
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
   background-color: white;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border: 1px solid rgba(226, 232, 240, 0.7);
 }
 .dark .asset-card {
-  background-color: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3), 0 2px 8px -1px rgba(0, 0, 0, 0.2);
+  background-color: rgba(14, 22, 40, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35), 0 2px 8px -1px rgba(0, 0, 0, 0.2);
 }
 .asset-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   box-shadow: var(--shadow-card-hover);
 }
 

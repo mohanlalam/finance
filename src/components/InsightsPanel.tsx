@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { TrendingUp, TrendingDown, AlertTriangle, Landmark, Shield, Activity, Crown, Target, BarChart3, Filter } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import {
@@ -151,7 +151,13 @@ const AllocationDrift = React.memo(function AllocationDrift({
     calculateRebalancing(portfolios, activePortfolio, targetPcts)
   );
 
+  const isFirstMountRebalance = useRef(true);
+
   useEffect(() => {
+    if (isFirstMountRebalance.current) {
+      isFirstMountRebalance.current = false;
+      return;
+    }
     let active = true;
     calculateRebalancingAsync(portfolios, activePortfolio, targetPcts).then((advice) => {
       if (active) setRebalancingAdvice(advice);
@@ -342,7 +348,13 @@ export default React.memo(function InsightsPanel({
     calculateHealthScore(portfolios, activePortfolio)
   );
 
+  const isFirstMountHealth = useRef(true);
+
   useEffect(() => {
+    if (isFirstMountHealth.current) {
+      isFirstMountHealth.current = false;
+      return;
+    }
     let active = true;
     calculateHealthScoreAsync(portfolios, activePortfolio).then((report) => {
       if (active) setHealthReport(report);

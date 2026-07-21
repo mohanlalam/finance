@@ -19,13 +19,23 @@ const familyIcons: Record<string, React.ReactNode> = {
 };
 
 const familyColors: Record<string, string> = {
-  personal: 'bg-blue-600 text-white dark:bg-blue-500',
-  mother: 'bg-rose-500 text-white dark:bg-rose-600',
-  wife: 'bg-teal-500 text-white dark:bg-teal-600',
+  personal: 'bg-blue-600 text-white dark:bg-blue-500 shadow-blue-500/40',
+  mother: 'bg-rose-500 text-white dark:bg-rose-600 shadow-rose-500/40',
+  wife: 'bg-teal-500 text-white dark:bg-teal-600 shadow-teal-500/40',
+};
+
+const familyDotColors: Record<string, string> = {
+  personal: 'bg-blue-500',
+  mother: 'bg-rose-500',
+  wife: 'bg-teal-500',
 };
 
 function getFamilyColor(name: string): string {
-  return familyColors[name] ?? 'bg-violet-600 text-white dark:bg-violet-600';
+  return familyColors[name] ?? 'bg-violet-600 text-white dark:bg-violet-600 shadow-violet-500/40';
+}
+
+function getFamilyDotColor(name: string): string {
+  return familyDotColors[name] ?? 'bg-violet-500';
 }
 
 function getFamilyIcon(name: string): React.ReactNode {
@@ -52,10 +62,10 @@ export default React.memo(function FamilyTabBar({
         aria-controls="portfolio-content"
         id="tab-all"
         onClick={() => onTabChange('all')}
-        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-150 outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${
           activeTab === 'all'
-            ? 'bg-slate-800 text-white shadow-md scale-[1.02] dark:bg-slate-100 dark:text-slate-900'
-            : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:shadow-sm dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:border-slate-600'
+            ? 'bg-slate-800 text-white shadow-md shadow-slate-900/40 scale-[1.02] dark:bg-slate-100 dark:text-slate-900'
+            : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:shadow-sm dark:bg-white/[0.04] dark:text-slate-300 dark:border-white/[0.08] dark:hover:border-white/[0.14]'
         }`}
       >
         <LayoutDashboard size={15} />
@@ -72,21 +82,25 @@ export default React.memo(function FamilyTabBar({
               aria-controls="portfolio-content"
               id={`tab-${p.name}`}
               onClick={() => onTabChange(p.name)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-150 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${
                 isActive
-                  ? `${getFamilyColor(p.name)} shadow-md scale-[1.02]`
-                  : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:shadow-sm dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:border-slate-600'
+                  ? `${getFamilyColor(p.name)} shadow-lg scale-[1.02]`
+                  : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:shadow-sm dark:bg-white/[0.04] dark:text-slate-300 dark:border-white/[0.08] dark:hover:border-white/[0.14]'
               }`}
             >
-              {getFamilyIcon(p.name)}
+              {/* Colored dot indicator on inactive tabs */}
+              {!isActive && (
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${getFamilyDotColor(p.name)}`} />
+              )}
+              {isActive && getFamilyIcon(p.name)}
               <span>{p.label}</span>
               <span
                 className={`text-xs px-1.5 py-0.5 rounded-md font-bold ${
                   isActive
                     ? 'bg-white/20 text-white'
                     : p.totalPnL >= 0
-                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
-                    : 'bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400'
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
+                    : 'bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400'
                 }`}
               >
                 {formatPercent(p.totalPnLPercent, 1)}
