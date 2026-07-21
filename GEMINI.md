@@ -108,6 +108,7 @@ The application implements a series of high-performance strategies to guarantee 
 * **Rollup manualChunks Splitting**: Configures a dynamic module path filter for manual chunks in [vite.config.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/vite.config.ts) to explicitly split heavy modules (`@supabase/supabase-js`, `swr`, `idb-keyval`, and `react-window`) into separate vendor chunks. This keeps the initial paint payload for the PIN Lock screen exceptionally light.
 * **Target and Compression Settings**: Configures compiler target as `es2020` in [vite.config.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/vite.config.ts), enabling modern ES features and reducing output bundle size by ~10-15%. Minimizes CSS via `cssMinify: true`, and disables `reportCompressedSize` to accelerate build pipelines.
 * **PWA Chunks Offline Caching**: Updates workbox caching patterns within the Vite PWA plugin to cache all compiled assets (`assets/*.js` and `assets/*.css`). This guarantees that all lazily-loaded sub-route chunks and CSS files are pre-cached and fully available offline on first load.
+* **Tailwind CSS Font Override**: Configures Tailwind's default `sans` stack in [tailwind.config.js](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/tailwind.config.js) to map directly to the quiet system font stack, ensuring uniform system typography across all Tailwind classes (including lock screen keypad and asset cards) with zero CSS load overhead.
 
 ---
 
