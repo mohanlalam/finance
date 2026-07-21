@@ -62,6 +62,7 @@ This document provides a high-level overview of the folder structure, data flow,
 
 ### 4. Modular UI Components
 Component folders are isolated by asset domain to ensure clean separation of concerns:
+* **[src/components/ui/](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/ui/)**: Shared reusable design system primitive components (`Button.tsx`, `Card.tsx`, `Badge.tsx`, `IconButton.tsx`, `SegmentedControl.tsx`), maintaining uniform border styles, focus rings, interactive states, and typography.
 * **[src/components/fd/](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/fd/)**: Standard Fixed Deposit cards (`DepositDetailsCard.tsx`) and form controls (`StandardFormFields.tsx`).
 * **[src/components/rd/](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/rd/)**: Recurring Deposit lists (`RDView.tsx`, `RDAccountCard.tsx`), modals (`RDFormModal.tsx`), and monthly contributions trackers (`RDInstallmentSchedule.tsx`).
 * **[src/components/sip/](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/sip/)**: Mutual Fund SIP views (`SIPView.tsx`, `SIPAccountCard.tsx`), modals (`SIPFormModal.tsx`), and live schema lookup fields (`SIPFormFields.tsx`).
