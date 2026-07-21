@@ -29,7 +29,7 @@ const PortfolioAssistant = React.lazy(() => import('../components/PortfolioAssis
 const InsightsPanel = React.lazy(() => import('../components/InsightsPanel'));
 
 import { useParams, useNavigate } from 'react-router-dom';
-import { formatINR, formatPercent, pnlColor } from '../utils/formatters';
+import { formatINR, formatPercent } from '../utils/formatters';
 import { usePortfolioState, usePortfolioActions } from '../contexts/PortfolioContext';
 import { useToastActions } from '../contexts/ToastContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -39,6 +39,7 @@ import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { getBreakdownSlices } from '../utils/chartHelpers';
 import { classBreakdown, estimateTodayPnL } from '../utils/portfolioCalcs';
+import { Badge } from '../components/ui/Badge';
 
 // Lazy viewport container that loads child components only when they are visible
 function LazyViewport({ children, placeholderHeight = 240 }: { children: React.ReactNode; placeholderHeight?: number }) {
@@ -322,13 +323,8 @@ export default function AppShell() {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-safe-content md:pb-0 text-slate-800 dark:text-slate-100 transition-colors relative overflow-x-hidden"
+      className="min-h-screen bg-[var(--app-background)] pb-safe-content md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden"
     >
-      {/* Decorative background glow shapes — blur reduced from 120-140px to 60-70px
-           (perceptually same, ~4× cheaper GPU compositing on mobile) */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 dark:bg-blue-500/3 rounded-full blur-[60px] pointer-events-none z-0 will-change-transform" />
-      <div className="absolute top-[30vh] right-1/4 w-[600px] h-[600px] bg-indigo-500/5 dark:bg-indigo-500/3 rounded-full blur-[70px] pointer-events-none z-0 will-change-transform" />
-
       {/* Print-only report header */}
       <div className="print-report-header hidden items-center justify-between px-8 py-6 border-b-2 border-slate-200 mb-6">
         <div>
@@ -337,7 +333,7 @@ export default function AppShell() {
         </div>
         <div className="text-right">
           <p className="text-lg font-bold text-slate-800">{formatINR(summaryData.totalCurrentValue)}</p>
-          <p className={`text-sm font-semibold ${summaryData.totalPnL >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+          <p className={`text-sm font-semibold ${summaryData.totalPnL >= 0 ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
             {summaryData.totalPnL >= 0 ? '+' : ''}{formatINR(summaryData.totalPnL)} ({formatPercent(summaryData.totalPnLPercent)})
           </p>
         </div>
@@ -358,9 +354,10 @@ export default function AppShell() {
         onDismissAll={handleDismissAll}
         darkMode={darkMode}
         onToggleDarkMode={toggleDarkMode}
+        activePortfolioLabel={summaryData.label}
       />
 
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {isUsingCachedData && (
           <div className="flex flex-col gap-1 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/20 px-4 py-3 text-sm text-blue-900 dark:text-blue-300 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
@@ -557,44 +554,62 @@ export default function AppShell() {
               onDeleteClick={handleDeletePortfolio}
             />
 
+            {/* Summary metrics placed directly below active tab bar */}
+            <SummaryCards
+              totalInvested={summaryData.totalInvested}
+              totalCurrentValue={summaryData.totalCurrentValue}
+              totalPnL={summaryData.totalPnL}
+              totalPnLPercent={summaryData.totalPnLPercent}
+              todayPnL={todayPnL}
+              label={summaryData.label}
+              isLoading={isLoading}
+              portfolios={portfolios}
+              activePortfolio={portfolio}
+            />
+
             {/* Family Overview - drill-down cards */}
             {activeTab === 'all' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {portfolios.map((p) => (
-                  <button
-                    key={p.name}
-                    onClick={() => setActiveTab(p.name)}
-                    className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 text-left hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600 transition-all duration-150 group"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{p.label}</span>
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${p.totalPnL >= 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' : 'bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400'}`}>
-                        {formatPercent(p.totalPnLPercent, 1)}
-                      </span>
-                    </div>
-                    <p className={`text-xl font-bold text-slate-800 dark:text-slate-100 mb-1 transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>
-                      {formatINR(p.totalCurrentValue)}
-                    </p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">Invested: {formatINR(p.totalInvested)}</p>
-                    <p className={`text-sm font-semibold mt-1 ${pnlColor(p.totalPnL)}`}>
-                      {p.totalPnL >= 0 ? '+' : ''}{formatINR(p.totalPnL)} P&L
-                    </p>
-                    <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 grid grid-cols-3 gap-1 text-[10px] text-slate-500 dark:text-slate-400">
+                {portfolios.map((p) => {
+                  const pnlGain = p.totalPnL >= 0;
+                  return (
+                    <button
+                      key={p.name}
+                      onClick={() => setActiveTab(p.name)}
+                      className="apple-card p-4 text-left hover:shadow-md transition-all duration-200 flex flex-col justify-between h-48 focus:ring-2 focus:ring-[#007aff]"
+                    >
                       <div>
-                        <p className="text-slate-400 dark:text-slate-500">Stocks</p>
-                        <p className="font-semibold text-slate-700 dark:text-slate-300">{p.holdings.length}</p>
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <span className="text-xs font-semibold text-[var(--text-secondary)]">{p.label}</span>
+                          <Badge variant={pnlGain ? 'positive' : 'negative'} className="text-[10px] py-0 px-2">
+                            {pnlGain ? '+' : ''}{formatPercent(p.totalPnLPercent, 1)}
+                          </Badge>
+                        </div>
+                        <p className={`text-xl font-bold text-[var(--text-primary)] tnum transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>
+                          {formatINR(p.totalCurrentValue)}
+                        </p>
+                        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                          Invested: <span className="font-medium tnum">{formatINR(p.totalInvested)}</span>
+                        </p>
                       </div>
-                      <div>
-                        <p className="text-slate-400 dark:text-slate-500">FDs</p>
-                        <p className="font-semibold text-slate-700 dark:text-slate-300">{p.fixedDeposits.length}</p>
+
+                      <div className="pt-3 border-t border-[var(--border-subtle)] grid grid-cols-3 gap-2 text-[10px] text-[var(--text-secondary)]">
+                        <div>
+                          <p className="font-normal text-[var(--text-tertiary)]">Stocks</p>
+                          <p className="font-semibold text-[var(--text-primary)] mt-0.5 tnum">{p.holdings.length}</p>
+                        </div>
+                        <div>
+                          <p className="font-normal text-[var(--text-tertiary)]">FDs</p>
+                          <p className="font-semibold text-[var(--text-primary)] mt-0.5 tnum">{p.fixedDeposits.length}</p>
+                        </div>
+                        <div>
+                          <p className="font-normal text-[var(--text-tertiary)]">Properties</p>
+                          <p className="font-semibold text-[var(--text-primary)] mt-0.5 tnum">{p.realEstate.length}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-slate-400 dark:text-slate-500">Properties</p>
-                        <p className="font-semibold text-slate-700 dark:text-slate-300">{p.realEstate.length}</p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             )}
 
@@ -609,19 +624,17 @@ export default function AppShell() {
                   { label: 'Gold', value: breakdown.gold },
                   { label: 'Real Estate', value: breakdown.realEstate },
                 ].map((item) => (
-                  <div key={item.label} className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
-                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
-                      {item.label}
-                    </div>
-                    <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(item.value)}</p>
+                  <div key={item.label} className="apple-card p-3 flex flex-col justify-between">
+                    <span className="text-[10px] font-semibold text-[var(--text-secondary)]">{item.label}</span>
+                    <p className="text-sm font-bold text-[var(--text-primary)] mt-1 tnum">{formatINR(item.value)}</p>
                   </div>
                 ))}
-                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
-                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
-                    Insurance
+                <div className="apple-card p-3 flex flex-col justify-between">
+                  <span className="text-[10px] font-semibold text-[var(--text-secondary)]">Insurance</span>
+                  <div>
+                    <p className="text-sm font-bold text-[var(--text-primary)] mt-1 tnum">{formatINR(breakdown.insuranceCover)}</p>
+                    <p className="text-[9px] text-[var(--text-tertiary)] mt-0.5 tnum">{formatINR(breakdown.insurancePremium)}/yr premium</p>
                   </div>
-                  <p className="text-base font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(breakdown.insuranceCover)}</p>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{formatINR(breakdown.insurancePremium)}/yr prem</p>
                 </div>
               </div>
             )}
@@ -639,17 +652,7 @@ export default function AppShell() {
               </SectionErrorBoundary>
             )}
 
-            <SummaryCards
-              totalInvested={summaryData.totalInvested}
-              totalCurrentValue={summaryData.totalCurrentValue}
-              totalPnL={summaryData.totalPnL}
-              totalPnLPercent={summaryData.totalPnLPercent}
-              todayPnL={todayPnL}
-              label={summaryData.label}
-              isLoading={isLoading}
-              portfolios={portfolios}
-              activePortfolio={portfolio}
-            />
+
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <SectionErrorBoundary sectionName="Net Worth Timeline">
@@ -688,34 +691,58 @@ export default function AppShell() {
             </div>
 
             {/* Desktop Asset Switcher */}
-            <div className="hidden md:flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-px mb-2">
-              {([
-                { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={16} /> },
-                { id: 'fd', label: 'Fixed Deposits', icon: <Landmark size={16} /> },
-                { id: 'rd', label: 'Recurring Deposits', icon: <Clock size={16} /> },
-                { id: 'sip', label: 'SIP Mutual Funds', icon: <TrendingUp size={16} /> },
-                { id: 'gold', label: 'Gold Holdings', icon: <Coins size={16} /> },
-                { id: 'real_estate', label: 'Real Estate', icon: <Home size={16} /> },
-                { id: 'insurance', label: 'Insurance Cover', icon: <Shield size={16} /> },
-                { id: 'documents', label: 'Document Vault', icon: <FolderOpen size={16} /> },
-                { id: 'what_if', label: 'What-If Calc', icon: <Calculator size={16} /> },
-              ] as const).map((tab) => {
-                const isActive = effectiveAsset === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveAsset(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-2.5 border-b-2 font-semibold text-sm transition-all duration-150 outline-none -mb-px ${
-                      isActive
-                        ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400 font-bold'
-                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:border-slate-700'
-                    }`}
-                  >
-                    {tab.icon}
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
+            <div className="hidden md:flex items-center justify-between border-b border-[var(--border-subtle)] pb-px mb-3">
+              <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
+                {([
+                  { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={14} /> },
+                  { id: 'fd', label: 'Fixed Deposits', icon: <Landmark size={14} /> },
+                  { id: 'rd', label: 'Recurring Deposits', icon: <Clock size={14} /> },
+                  { id: 'sip', label: 'SIP Mutual Funds', icon: <TrendingUp size={14} /> },
+                  { id: 'gold', label: 'Gold Holdings', icon: <Coins size={14} /> },
+                  { id: 'real_estate', label: 'Real Estate', icon: <Home size={14} /> },
+                  { id: 'insurance', label: 'Insurance Cover', icon: <Shield size={14} /> },
+                ] as const).map((tab) => {
+                  const isActive = effectiveAsset === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveAsset(tab.id)}
+                      className={`flex items-center gap-1.5 px-3.5 py-2 border-b-2 font-semibold text-xs transition-all duration-150 outline-none -mb-px ${
+                        isActive
+                          ? 'border-[#007aff] text-[#007aff] dark:border-[#60a5fa] dark:text-[#60a5fa] font-bold'
+                          : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-slate-200'
+                      }`}
+                    >
+                      {tab.icon}
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Secondary Tools */}
+              <div className="flex items-center gap-1 pl-4 border-l border-[var(--border-subtle)]">
+                {([
+                  { id: 'documents', label: 'Vault', icon: <FolderOpen size={14} /> },
+                  { id: 'what_if', label: 'What-If Calc', icon: <Calculator size={14} /> },
+                ] as const).map((tab) => {
+                  const isActive = effectiveAsset === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveAsset(tab.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 outline-none ${
+                        isActive
+                          ? 'bg-[#eaf3ff] text-[#007aff] dark:bg-blue-950/20 dark:text-[#60a5fa]'
+                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      }`}
+                    >
+                      {tab.icon}
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Asset Tab Views */}
@@ -741,7 +768,7 @@ export default function AppShell() {
       </div>
 
       <footer className="mt-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+        <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <p className="text-xs text-slate-400 dark:text-slate-500">
             Family Wealth Tracker
             {lastUpdated && (

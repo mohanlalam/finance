@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { formatINR } from '../utils/formatters';
+import { SegmentedControl } from './ui/SegmentedControl';
 
 interface NetWorthTimelineChartProps {
   history: NetWorthSnapshot[];
@@ -89,8 +90,8 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
 
   // SVG Chart Layout Bounds
   const { width, height } = dimensions;
-  const paddingLeft = 60;
-  const paddingRight = 20;
+  const paddingLeft = 55;
+  const paddingRight = 15;
   const paddingTop = 20;
   const paddingBottom = 40;
 
@@ -128,14 +129,23 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
     });
   }, [chartData, maxVal, minVal, chartWidth, chartHeight]);
 
-  // Generate SVG path strings
+  // Generate SVG path strings (smooth curve)
   const paths = useMemo(() => {
     if (points.length === 0) return { linePath: '', areaPath: '' };
-    const linePath = points
-      .map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`)
-      .join(' ');
+    
+    // Smooth bezier curve builder
+    let linePath = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const curr = points[i];
+      const next = points[i + 1];
+      const cpX1 = curr.x + (next.x - curr.x) / 3;
+      const cpY1 = curr.y;
+      const cpX2 = curr.x + 2 * (next.x - curr.x) / 3;
+      const cpY2 = next.y;
+      linePath += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${next.x} ${next.y}`;
+    }
       
-    const areaPath = `M ${points[0].x} ${paddingTop + chartHeight} L ${points.map(p => `${p.x} ${p.y}`).join(' L ')} L ${points[points.length - 1].x} ${paddingTop + chartHeight} Z`;
+    const areaPath = `${linePath} L ${points[points.length - 1].x} ${paddingTop + chartHeight} L ${points[0].x} ${paddingTop + chartHeight} Z`;
     
     return { linePath, areaPath };
   }, [points, chartHeight]);
@@ -173,39 +183,35 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
   const hoverPoint = hoveredIdx !== null ? points[hoveredIdx] : null;
 
   return (
-    <div ref={containerRef} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 relative overflow-hidden">
+    <div ref={containerRef} className="apple-card p-5 relative overflow-hidden">
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <div>
-          <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-            Net Worth Growth Timeline
+          <h3 className="text-card-title font-semibold text-slate-800 dark:text-slate-200">
+            Net worth timeline
           </h3>
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-            Historical compound valuation history
+          <p className="text-supporting mt-0.5">
+            Compound net worth valuation history
           </p>
         </div>
         
         <div className="flex items-center gap-2">
           {history.length < 2 && (
-            <span className="text-[9px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+            <span className="text-[9px] font-bold bg-[#eaf3ff] text-[#007aff] px-2 py-0.5 rounded-full uppercase tracking-wider">
               Simulated
             </span>
           )}
-          {/* Time range selector */}
-          <div className="flex bg-slate-100 dark:bg-slate-750/70 p-1 rounded-xl gap-0.5 border border-slate-200/40 dark:border-slate-700/30">
-            {(['1M', '3M', '6M', '1Y', 'ALL'] as DateRange[]).map((r) => (
-              <button
-                key={r}
-                onClick={() => setRange(r)}
-                className={`px-2 py-0.5 rounded-lg text-[9px] font-bold transition-all ${
-                  range === r
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-                }`}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
+          {/* Apple Segmented date range control */}
+          <SegmentedControl
+            options={[
+              { id: '1M', label: '1M' },
+              { id: '3M', label: '3M' },
+              { id: '6M', label: '6M' },
+              { id: '1Y', label: '1Y' },
+              { id: 'ALL', label: 'All' },
+            ] as const}
+            value={range}
+            onChange={setRange}
+          />
         </div>
       </div>
 
@@ -214,8 +220,8 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
           {/* Gradients */}
           <defs>
             <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#007aff" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#007aff" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
@@ -227,7 +233,7 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
                 y1={tick.y}
                 x2={width - paddingRight}
                 y2={tick.y}
-                className="stroke-slate-100 dark:stroke-slate-700/50"
+                className="stroke-slate-100 dark:stroke-zinc-800/50"
                 strokeWidth={1}
                 strokeDasharray="4 4"
               />
@@ -243,19 +249,26 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
             </g>
           ))}
 
-          {/* X Axis Labels */}
-          {points.map((p, idx) => (
-            <text
-              key={idx}
-              x={p.x}
-              y={height - paddingBottom + 18}
-              textAnchor="middle"
-              className="fill-slate-400 dark:fill-slate-500 font-semibold"
-              fontSize={8.5}
-            >
-              {formatDateLabel(p.date)}
-            </text>
-          ))}
+          {/* X Axis Labels (fewer labels spacing) */}
+          {points.map((p, idx) => {
+            const total = points.length;
+            const skip = Math.max(1, Math.floor(total / 4));
+            const shouldShowLabel = idx === 0 || idx === total - 1 || idx % skip === 0;
+            if (!shouldShowLabel) return null;
+
+            return (
+              <text
+                key={idx}
+                x={p.x}
+                y={height - paddingBottom + 18}
+                textAnchor="middle"
+                className="fill-slate-400 dark:fill-slate-500 font-semibold"
+                fontSize={8.5}
+              >
+                {formatDateLabel(p.date)}
+              </text>
+            );
+          })}
 
           {/* Fill Area */}
           <path d={areaPath} fill="url(#areaGrad)" />
@@ -264,8 +277,8 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
           <path
             d={linePath}
             fill="none"
-            stroke="#3b82f6"
-            strokeWidth={2.5}
+            stroke="#007aff"
+            strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -276,11 +289,11 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
               key={idx}
               cx={p.x}
               cy={p.y}
-              r={hoveredIdx === idx ? 6 : 4}
+              r={hoveredIdx === idx ? 5 : 3.5}
               className={`cursor-pointer transition-all ${
                 hoveredIdx === idx
-                  ? 'fill-blue-500 stroke-white dark:stroke-slate-800'
-                  : 'fill-transparent hover:fill-blue-500/20'
+                  ? 'fill-[#007aff] stroke-white dark:stroke-zinc-900'
+                  : 'fill-transparent hover:fill-[#007aff]/20'
               }`}
               strokeWidth={hoveredIdx === idx ? 2 : 0}
               onMouseEnter={() => setHoveredIdx(idx)}
@@ -289,23 +302,23 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
           ))}
         </svg>
 
-          {/* Floating Tooltip details */}
-          {hoverPoint && (
-            <div
-              className="absolute bg-slate-900/95 text-white p-3 rounded-xl border border-slate-700 shadow-2xl z-50 text-[10px] pointer-events-none transform -translate-x-1/2 -translate-y-full"
-              style={{
-                left: `${(hoverPoint.x / width) * 100}%`,
-                top: `${(hoverPoint.y / height) * 100 - 5}%`,
-              }}
-            >
-              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
-                {new Date(hoverPoint.date).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}
-              </p>
-              <p className="text-sm font-extrabold text-blue-400 mt-0.5">
-                {formatINR(hoverPoint.value)}
-              </p>
-            </div>
-          )}
+        {/* Floating Tooltip details */}
+        {hoverPoint && (
+          <div
+            className="absolute bg-slate-900/95 dark:bg-zinc-900/95 text-white p-2.5 rounded-xl border border-slate-700/60 shadow-floating z-50 text-[10px] pointer-events-none transform -translate-x-1/2 -translate-y-full"
+            style={{
+              left: `${(hoverPoint.x / width) * 100}%`,
+              top: `${(hoverPoint.y / height) * 100 - 5}%`,
+            }}
+          >
+            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+              {new Date(hoverPoint.date).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </p>
+            <p className="text-xs font-extrabold text-[#60a5fa] mt-0.5 tnum">
+              {formatINR(hoverPoint.value)}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

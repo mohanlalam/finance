@@ -119,7 +119,13 @@ export default React.memo(function AssetTabContent({
           {activeAsset === 'stocks' && (
           <div>
             <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-              <h2 className="text-base font-bold text-slate-700 dark:text-slate-200">{visiblePortfolio.label} — Stocks & ETFs</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-bold text-slate-800 dark:text-slate-200">{visiblePortfolio.label}</h2>
+                <span className={`flex items-center gap-1.5 text-xs font-bold ${pnlColor(visiblePortfolio.totalPnL)}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${visiblePortfolio.totalPnL >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                  {formatPercent(visiblePortfolio.totalPnLPercent, 2)} ({formatINR(visiblePortfolio.totalPnL)})
+                </span>
+              </div>
               <div className="flex items-center gap-2 flex-wrap">
                 {priceStatus === 'success' && (
                   <span className="flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded-lg">
@@ -274,7 +280,8 @@ export default React.memo(function AssetTabContent({
                 <div className="flex items-center gap-3">
                   <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
                   <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
-                  <span className={`text-xs font-bold ${pnlColor(p.totalPnL)}`}>
+                  <span className={`flex items-center gap-1.5 text-xs font-bold ${pnlColor(p.totalPnL)}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p.totalPnL >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`} />
                     {formatPercent(p.totalPnLPercent, 2)} ({formatINR(p.totalPnL)})
                   </span>
                 </div>

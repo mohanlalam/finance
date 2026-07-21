@@ -5,6 +5,8 @@ import { getFDEffectiveValue } from '../utils/formatters';
 import { getRDEffectiveValue } from '../utils/rdUtils';
 import { getSIPEffectiveValue } from '../utils/sipUtils';
 import Modal from './Modal';
+import { Button } from './ui/Button';
+import { IconButton } from './ui/IconButton';
 
 interface ExportPanelProps {
   portfolios: Portfolio[];
@@ -367,7 +369,6 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
         )}
       </div>
 
-      {/* Import Modal using standard Modal wrapper */}
       <Modal
         isOpen={showImport}
         onClose={() => !importing && setShowImport(false)}
@@ -375,18 +376,17 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
         preventClose={importing}
         maxWidth="max-w-lg"
       >
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center bg-slate-50/50 dark:bg-zinc-800/10">
           <div>
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Import Holdings from CSV</h3>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Columns: stock_name, ticker, yahoo_symbol, qty, avg_price</p>
+            <h3 className="text-card-title font-semibold text-slate-800 dark:text-slate-200">Import Holdings from CSV</h3>
+            <p className="text-supporting mt-0.5">Columns: stock_name, ticker, yahoo_symbol, qty, avg_price</p>
           </div>
-          <button
+          <IconButton
+            icon={<X size={15} />}
+            title="Close dialog"
             onClick={() => !importing && setShowImport(false)}
-            className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 transition-colors"
-            aria-label="Close dialog"
-          >
-            <X size={16} />
-          </button>
+            disabled={importing}
+          />
         </div>
 
         <div className="px-6 py-5 space-y-4">
@@ -395,7 +395,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             <select
               value={importTarget}
               onChange={(e) => setImportTarget(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+              className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
@@ -410,28 +410,28 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
               type="file"
               accept=".csv"
               onChange={handleFileSelect}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 file:mr-3 file:border-0 file:bg-blue-50 dark:file:bg-blue-950/40 file:text-blue-700 dark:file:text-blue-400 file:text-xs file:font-semibold file:rounded-lg file:px-3 file:py-1 cursor-pointer"
+              className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none file:mr-3 file:border-0 file:bg-blue-50 dark:file:bg-blue-950/40 file:text-[#007aff] dark:file:text-[#60a5fa] file:text-xs file:font-semibold file:rounded-lg file:px-3 file:py-1 cursor-pointer"
             />
           </div>
 
           {importErrors.length > 0 && (
-            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl px-3 py-2 text-xs text-amber-700 dark:text-amber-400 max-h-24 overflow-y-auto">
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-250 dark:border-amber-900/50 rounded-xl px-3 py-2 text-xs text-amber-700 dark:text-amber-400 max-h-24 overflow-y-auto">
               {importErrors.map((e, i) => <p key={i}>{e}</p>)}
             </div>
           )}
 
           {importRows.length > 0 && (
-            <div className="bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-              <div className="px-3 py-2 bg-slate-100 dark:bg-slate-800/80 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <div className="bg-slate-50 dark:bg-zinc-800/10 border border-[var(--border-subtle)] rounded-xl overflow-hidden">
+              <div className="px-3 py-2 bg-slate-100 dark:bg-zinc-850 text-[10px] font-bold text-slate-550 dark:text-slate-400 uppercase tracking-wider">
                 Preview — {importRows.length} holdings
               </div>
-              <div className="max-h-40 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50">
+              <div className="max-h-40 overflow-y-auto divide-y divide-[var(--border-subtle)]">
                 {importRows.slice(0, 20).map((r, i) => (
-                  <div key={i} className="px-3 py-1.5 flex items-center gap-3 text-xs dark:text-slate-300">
+                  <div key={i} className="px-3 py-1.5 flex items-center gap-3 text-xs dark:text-slate-350">
                     <span className="font-bold text-slate-700 dark:text-slate-200 w-16 truncate">{r.ticker}</span>
                     <span className="text-slate-500 dark:text-slate-400 flex-1 truncate">{r.stock_name}</span>
                     <span className="text-slate-400 dark:text-slate-500">×{r.qty}</span>
-                    <span className="text-slate-400 dark:text-slate-500">₹{r.avg_price.toLocaleString('en-IN')}</span>
+                    <span className="text-slate-400 dark:text-slate-500 tnum">₹{r.avg_price.toLocaleString('en-IN')}</span>
                   </div>
                 ))}
                 {importRows.length > 20 && (
@@ -456,22 +456,24 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
           )}
 
           <div className="flex gap-3 pt-2">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               disabled={importing}
               onClick={() => setShowImport(false)}
-              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+              className="flex-1"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="primary"
               onClick={handleImport}
               disabled={importing || importRows.length === 0}
-              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="flex-1"
             >
-              {importing ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+              {importing ? <Loader2 size={14} className="animate-spin mr-1.5" /> : <Upload size={14} className="mr-1.5" />}
               {importing ? 'Importing...' : `Import ${importRows.length} holdings`}
-            </button>
+            </Button>
           </div>
         </div>
       </Modal>

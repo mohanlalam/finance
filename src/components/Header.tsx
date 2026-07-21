@@ -5,6 +5,8 @@ import { FetchStatus } from '../hooks/useMarketData';
 import { Portfolio } from '../types/portfolio';
 import type { ImportRow } from './ExportPanel';
 import { Alert } from '../hooks/useAlerts';
+import { IconButton } from './ui/IconButton';
+import { Badge } from './ui/Badge';
 
 const ExportPanel = React.lazy(() => import('./ExportPanel'));
 
@@ -23,58 +25,41 @@ interface HeaderProps {
   onDismissAll: () => void;
   darkMode: boolean;
   onToggleDarkMode: () => void;
+  activePortfolioLabel?: string;
 }
 
 const ALERTS_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
   '52w_high': {
     icon: <TrendingUp size={13} />,
-    color: 'text-blue-700 dark:text-blue-400',
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
-    border: 'border-blue-200 dark:border-blue-800',
+    color: 'text-blue-600',
+    bg: 'bg-blue-50 dark:bg-blue-950/20',
+    border: 'border-blue-100 dark:border-blue-900/30',
   },
   '52w_low': {
     icon: <TrendingDown size={13} />,
-    color: 'text-amber-700 dark:text-amber-400',
-    bg: 'bg-amber-50 dark:bg-amber-900/20',
-    border: 'border-amber-200 dark:border-amber-800',
+    color: 'text-amber-600',
+    bg: 'bg-amber-50 dark:bg-amber-950/20',
+    border: 'border-amber-100 dark:border-amber-900/30',
   },
   fd_maturity: {
     icon: <Landmark size={13} />,
-    color: 'text-indigo-700 dark:text-indigo-400',
-    bg: 'bg-indigo-50 dark:bg-indigo-900/20',
-    border: 'border-indigo-200 dark:border-indigo-800',
+    color: 'text-indigo-600',
+    bg: 'bg-indigo-50 dark:bg-indigo-950/20',
+    border: 'border-indigo-100 dark:border-indigo-900/30',
   },
   insurance_renewal: {
     icon: <Shield size={13} />,
-    color: 'text-rose-700 dark:text-rose-400',
-    bg: 'bg-rose-50 dark:bg-rose-900/20',
-    border: 'border-rose-200 dark:border-rose-800',
+    color: 'text-rose-600',
+    bg: 'bg-rose-50 dark:bg-rose-950/20',
+    border: 'border-rose-100 dark:border-rose-900/30',
   },
   portfolio_swing: {
     icon: <Activity size={13} />,
-    color: 'text-violet-700 dark:text-violet-400',
-    bg: 'bg-violet-50 dark:bg-violet-900/20',
-    border: 'border-violet-200 dark:border-violet-800',
+    color: 'text-purple-600',
+    bg: 'bg-purple-50 dark:bg-purple-950/20',
+    border: 'border-purple-100 dark:border-purple-900/30',
   },
 };
-
-const SEVERITY_BADGE: Record<string, string> = {
-  critical: 'bg-red-500 text-white',
-  warning: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
-  info: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-};
-
-function formatRelativeTime(date: Date | null): string {
-  if (!date) return '';
-  const diffMs = Date.now() - date.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 30) return 'just now';
-  if (diffSec < 60) return `${diffSec}s ago`;
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m ago`;
-  const diffHr = Math.floor(diffMin / 60);
-  return `${diffHr}h ago`;
-}
 
 function Header({
   totalCurrentValue,
@@ -91,6 +76,7 @@ function Header({
   onDismissAll,
   darkMode,
   onToggleDarkMode,
+  activePortfolioLabel = 'Family',
 }: HeaderProps) {
   const isGain = totalPnL >= 0;
   const isLoading = status === 'loading';
@@ -98,73 +84,57 @@ function Header({
 
   const visibleAlerts = alerts;
 
-  const handleDismissAlert = onDismissAlert;
-  const handleDismissAll = onDismissAll;
-
   return (
-    <header className="relative z-40 overflow-hidden" style={{ background: 'linear-gradient(135deg, #080d1a 0%, #0e1628 50%, #0a1020 100%)' }}>
-      {/* Subtle gradient accent line at top */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/60 to-transparent" />
-      {/* Background glow orbs */}
-      <div className="absolute top-0 left-1/4 w-64 h-16 bg-blue-600/8 rounded-full blur-2xl pointer-events-none" />
-      <div className="absolute top-0 right-1/3 w-48 h-16 bg-indigo-500/6 rounded-full blur-2xl pointer-events-none" />
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-white/[0.05]">
-        <div className="flex items-center justify-between py-3.5">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-600/40 ring-1 ring-white/10">
-                <TrendingUp size={18} className="text-white" />
-              </div>
-              <div className="absolute inset-0 rounded-xl bg-blue-400/20 animate-ping" style={{ animationDuration: '3s' }} />
+    <header className="sticky top-0 z-40 bg-white/80 dark:bg-black/75 backdrop-blur-md border-b border-[var(--border-subtle)] text-[var(--text-primary)] transition-colors">
+      <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14">
+          
+          {/* Left: App Logo & Selected Context */}
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-[#007aff] flex items-center justify-center shadow-sm">
+              <TrendingUp size={15} className="text-white" />
             </div>
-            <div>
-              <h1 className="text-[15px] font-bold leading-tight text-white tracking-tight">Family Portfolio</h1>
-              <p className="text-[10px] text-slate-400 tracking-wide">Investment Dashboard</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            {/* Stats (Desktop Only) */}
-            <div className="hidden sm:flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-[10px] text-slate-500 mb-0.5 tracking-wide uppercase">Net Worth</p>
-                <p className={`text-lg font-bold text-white tnum transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
-                  {formatINR(totalCurrentValue)}
-                </p>
-              </div>
-              <div className={`text-right px-3 py-2 rounded-xl border ${
-                isGain
-                  ? 'bg-emerald-500/10 border-emerald-500/20'
-                  : 'bg-red-500/10 border-red-500/20'
-              }`}>
-                <p className="text-[10px] text-slate-500 mb-0.5 tracking-wide uppercase">Total P&amp;L</p>
-                <p className={`text-sm font-bold tnum ${isGain ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {isGain ? '+' : ''}{formatPercent(totalPnLPercent)}
-                </p>
-              </div>
-            </div>
-
-            {/* Actions (Mobile & Desktop) */}
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={onRefresh}
-                disabled={isLoading}
-                aria-label={isLoading ? 'Fetching live prices' : 'Refresh live prices'}
-                className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 text-xs text-slate-400 hover:text-blue-400 transition-all border border-white/[0.08] hover:border-blue-500/40 rounded-lg disabled:opacity-40 hover:bg-white/[0.04] active:scale-95"
-                title={isLoading ? 'Fetching...' : lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Fetch live prices'}
-              >
-                <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
-                <span className="hidden sm:inline sm:ml-1.5 font-medium">
-                  {isLoading ? 'Fetching...' : lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Fetch prices'}
-                </span>
-              </button>
-              {/* Last synced badge */}
-              {lastUpdated && !isLoading && (
-                <span className="text-[10px] font-medium text-slate-500 bg-white/[0.04] border border-white/[0.06] px-2 py-1 rounded-md hidden sm:inline-flex items-center gap-1.5" title={lastUpdated.toLocaleString('en-IN')}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  {formatRelativeTime(lastUpdated)}
+            <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
+              <span className="text-sm font-semibold tracking-tight">Family Portfolio</span>
+              {activePortfolioLabel && (
+                <span className="text-[11px] text-[var(--text-secondary)] font-normal hidden sm:inline">
+                  • {activePortfolioLabel}
                 </span>
               )}
-              <Suspense fallback={<div className="w-8 h-8 rounded-lg bg-slate-800 animate-pulse" />}>
+            </div>
+          </div>
+
+          {/* Right: Net Worth Summary & Utility Buttons */}
+          <div className="flex items-center gap-3">
+            
+            {/* Value Indicators (Neutral Net Worth, subtle colored P&L) */}
+            <div className="flex items-center gap-2.5 text-right">
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold tnum leading-tight">
+                  {formatINR(totalCurrentValue)}
+                </span>
+                <span className="text-[10px] text-[var(--text-secondary)] leading-none mt-0.5">
+                  Net Worth
+                </span>
+              </div>
+              <Badge variant={isGain ? 'positive' : 'negative'} className="text-[10px] py-0">
+                {isGain ? '+' : ''}{formatPercent(totalPnLPercent, 1)}
+              </Badge>
+            </div>
+
+            <div className="h-4 w-px bg-[var(--border-subtle)]" />
+
+            {/* Compact Action Icons */}
+            <div className="flex items-center gap-1">
+              {/* Sync Status / Refresh button */}
+              <IconButton
+                icon={<RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />}
+                title={isLoading ? 'Fetching prices...' : lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : 'Sync prices'}
+                onClick={onRefresh}
+                disabled={isLoading}
+              />
+
+              <Suspense fallback={<div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-zinc-800 animate-pulse" />}>
                 <ExportPanel
                   portfolios={portfolios}
                   onImportCSV={onImportCSV}
@@ -172,107 +142,99 @@ function Header({
                 />
               </Suspense>
 
-              {/* Dark Mode Toggle */}
-              <button
+              {/* Theme Toggle */}
+              <IconButton
+                icon={darkMode ? <Sun size={13} /> : <Moon size={13} />}
+                title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
                 onClick={onToggleDarkMode}
-                aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-                title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-all border border-white/[0.08] hover:border-slate-600 hover:bg-white/[0.04] active:scale-95"
-              >
-                {darkMode ? <Sun size={14} /> : <Moon size={14} />}
-              </button>
+              />
 
-              {/* Alerts Bell Popover */}
+              {/* Alerts bell */}
               <div className="relative">
-                <button
+                <IconButton
+                  icon={<Bell size={13} />}
+                  title={`Notifications (${visibleAlerts.length})`}
                   onClick={() => setOpenAlerts(!openAlerts)}
-                  aria-expanded={openAlerts}
-                  aria-haspopup="true"
-                  aria-label={`Notifications${visibleAlerts.length > 0 ? `, ${visibleAlerts.length} active` : ''}`}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-400 transition-all border border-white/[0.08] hover:border-slate-600 hover:bg-white/[0.04] active:scale-95 relative"
-                  title="Notifications"
-                >
-                  <Bell size={14} />
-                  {visibleAlerts.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-rose-500 to-pink-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-rose-500/40 animate-pulse">
-                      {visibleAlerts.length}
-                    </span>
-                  )}
-                </button>
+                  className={openAlerts ? 'bg-[#f2f2f7] dark:bg-zinc-800' : ''}
+                />
+                {visibleAlerts.length > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-[#ff3b30] rounded-full" />
+                )}
 
-              {openAlerts && (
-                <div
-                  role="region"
-                  aria-label="Notifications panel"
-                  className="fixed left-3 right-3 top-16 bg-white dark:bg-[#0e1628] border border-slate-200 dark:border-white/[0.08] rounded-2xl shadow-2xl z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96"
-                >
-                    <div className="px-4 py-3 bg-slate-50 dark:bg-white/[0.03] border-b border-slate-100 dark:border-white/[0.05] flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
-                      Active Alerts ({visibleAlerts.length})
-                    </span>
-                    {visibleAlerts.length > 1 && (
-                      <button
-                        onClick={handleDismissAll}
-                        className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                      >
-                        Dismiss all
-                      </button>
-                    )}
-                  </div>
+                {openAlerts && (
+                  <div
+                    role="region"
+                    aria-label="Notifications panel"
+                    className="fixed left-4 right-4 top-16 bg-white dark:bg-[#1c1c1e] border border-[var(--border-subtle)] rounded-2xl shadow-floating z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80"
+                  >
+                    <div className="px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-800/40 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                        Alerts ({visibleAlerts.length})
+                      </span>
+                      {visibleAlerts.length > 1 && (
+                        <button
+                          onClick={onDismissAll}
+                          className="text-[10px] font-semibold text-[#007aff] hover:underline"
+                        >
+                          Dismiss all
+                        </button>
+                      )}
+                    </div>
 
-                    <div className="max-h-[300px] overflow-y-auto divide-y divide-slate-100 dark:divide-white/[0.04]">
-                    {visibleAlerts.length === 0 ? (
-                      <div className="px-4 py-8 text-center text-slate-400 dark:text-slate-500">
-                        <Check size={20} className="mx-auto text-emerald-500 mb-2" />
-                        <p className="text-xs font-semibold">All caught up!</p>
-                        <p className="text-[10px] mt-0.5">No active portfolio alerts.</p>
-                      </div>
-                    ) : (
-                      visibleAlerts.map((alert) => {
-                        const config = ALERTS_TYPE_CONFIG[alert.type] || {
-                          icon: <Bell size={13} />,
-                          color: 'text-slate-600 dark:text-slate-300',
-                          bg: 'bg-slate-50 dark:bg-slate-900',
-                          border: 'border-slate-200 dark:border-slate-700',
-                        };
+                    <div className="max-h-64 overflow-y-auto divide-y divide-[var(--border-subtle)]">
+                      {visibleAlerts.length === 0 ? (
+                        <div className="p-5 text-center text-[var(--text-secondary)]">
+                          <Check size={16} className="mx-auto text-[#16a765] mb-1.5" />
+                          <p className="text-xs font-semibold text-[var(--text-primary)]">All caught up!</p>
+                        </div>
+                      ) : (
+                        visibleAlerts.map((alert) => {
+                          const config = ALERTS_TYPE_CONFIG[alert.type] || {
+                            icon: <Bell size={12} />,
+                            color: 'text-[var(--text-secondary)]',
+                            bg: 'bg-slate-50 dark:bg-zinc-850',
+                            border: 'border-slate-200 dark:border-zinc-800',
+                          };
 
-                        return (
-                            <div key={alert.id} className="p-3 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors flex items-start gap-2.5">
-                            <span className={`shrink-0 p-1.5 rounded-lg border ${config.bg} ${config.border} ${config.color} mt-0.5`}>
-                              {config.icon}
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{alert.title}</p>
-                                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${SEVERITY_BADGE[alert.severity]}`}>
-                                  {alert.severity}
-                                </span>
+                          return (
+                            <div key={alert.id} className="p-3 hover:bg-slate-50/50 dark:hover:bg-zinc-800/40 transition-colors flex items-start gap-2">
+                              <span className={`shrink-0 p-1 rounded-md border ${config.bg} ${config.border} ${config.color} mt-0.5`}>
+                                {config.icon}
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <p className="text-xs font-semibold text-[var(--text-primary)] truncate">{alert.title}</p>
+                                  {alert.severity === 'critical' && (
+                                    <span className="text-[9px] bg-[#fff0ef] text-[#ff3b30] px-1 rounded font-bold uppercase">
+                                      {alert.severity}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 leading-snug">{alert.message}</p>
+                                {alert.portfolioLabel && (
+                                  <p className="text-[9px] text-[var(--text-tertiary)] mt-0.5">Portfolio: {alert.portfolioLabel}</p>
+                                )}
                               </div>
-                              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{alert.message}</p>
-                              {alert.portfolioLabel && (
-                                <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 font-medium">Portfolio: {alert.portfolioLabel}</p>
-                              )}
+                              <button
+                                onClick={() => onDismissAlert(alert.id)}
+                                className="shrink-0 p-0.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+                              >
+                                <X size={11} />
+                              </button>
                             </div>
-                            <button
-                              onClick={() => handleDismissAlert(alert.id)}
-                              aria-label={`Dismiss alert: ${alert.title}`}
-                              className="shrink-0 p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                            >
-                              <X size={12} />
-                            </button>
-                          </div>
-                        );
-                      })
-                    )}
+                          );
+                        })
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
+
           </div>
         </div>
       </div>
-    </div>
-  </header>
+    </header>
   );
 }
 

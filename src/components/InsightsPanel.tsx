@@ -23,31 +23,24 @@ interface InsightsPanelProps {
   onTargetsChanged?: () => void;
 }
 
-/* ── Tiny reusable card wrapper ── */
-const Card = React.memo(function Card({ title, icon, children, accent = 'slate', action }: {
+/* ── Clean Apple-style card wrapper ── */
+const Card = React.memo(function Card({ title, icon, children, action }: {
   title: string;
   icon: React.ReactNode;
   children: React.ReactNode;
   accent?: string;
   action?: React.ReactNode;
 }) {
-  const borderMap: Record<string, string> = {
-    slate: 'border-slate-100 dark:border-slate-700',
-    emerald: 'border-emerald-100 dark:border-emerald-800/40',
-    red: 'border-red-100 dark:border-red-800/40',
-    amber: 'border-amber-100 dark:border-amber-800/40',
-    blue: 'border-blue-100 dark:border-blue-800/40',
-    rose: 'border-rose-100 dark:border-rose-800/40',
-    violet: 'border-violet-100 dark:border-violet-800/40',
-  };
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-2xl border ${borderMap[accent] ?? borderMap.slate} shadow-sm p-4 hover:shadow-md transition-shadow duration-200`}>
+    <div className="apple-card p-4 flex flex-col h-full min-w-0 transition-shadow hover:shadow-md">
       <div className="flex items-center gap-2 mb-3">
         {icon}
-        <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex-1">{title}</h4>
+        <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider flex-1">{title}</h4>
         {action}
       </div>
-      {children}
+      <div className="flex-1 flex flex-col justify-center">
+        {children}
+      </div>
     </div>
   );
 });
@@ -63,17 +56,17 @@ const TopHoldings = React.memo(function TopHoldings({ items }: { items: HoldingI
         const alloc = totalVal > 0 ? (item.holding.currentValue / totalVal) * 100 : 0;
         return (
           <div key={`${item.holding.ticker}-${idx}`} className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center text-[10px] font-bold shrink-0">
+            <span className="w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-650 dark:text-blue-400 flex items-center justify-center text-[10px] font-bold shrink-0">
               {idx + 1}
             </span>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{item.holding.ticker}</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-350 truncate">{item.holding.ticker}</span>
                 <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate hidden sm:inline">{item.portfolioLabel}</span>
               </div>
             </div>
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 shrink-0">{formatINR(item.holding.currentValue)}</span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 w-10 text-right">{alloc.toFixed(1)}%</span>
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 shrink-0 tnum">{formatINR(item.holding.currentValue)}</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 w-10 text-right tnum">{alloc.toFixed(1)}%</span>
           </div>
         );
       })}
@@ -87,11 +80,11 @@ const GainersList = React.memo(function GainersList({ items, type }: { items: Ho
     <div className="space-y-2">
       {items.map((item, idx) => (
         <div key={`${item.holding.ticker}-${idx}`} className="flex items-center gap-2">
-          <span className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${type === 'gain' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400' : 'bg-red-50 dark:bg-red-950/20 text-red-500 dark:text-red-400'}`}>
+          <span className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${type === 'gain' ? 'bg-[#e8f8ef] text-[#16a765]' : 'bg-[#fff0ef] text-[#ff3b30]'}`}>
             {type === 'gain' ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
           </span>
-          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate flex-1">{item.holding.ticker}</span>
-          <span className={`text-xs font-bold shrink-0 ${type === 'gain' ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-500 dark:text-red-400'}`}>
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-350 truncate flex-1">{item.holding.ticker}</span>
+          <span className={`text-xs font-bold shrink-0 tnum ${type === 'gain' ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
             {formatPercent(item.holding.pnlPercent, 1)}
           </span>
         </div>
@@ -109,8 +102,8 @@ const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: Ho
         const isUp = h.todayPnLPercent >= 0;
         return (
           <div key={`${h.ticker}-${idx}`} className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isUp ? 'bg-emerald-50 dark:bg-emerald-950/30' : 'bg-red-50 dark:bg-red-950/30'}`}>
-              {isUp ? <TrendingUp size={16} className="text-emerald-600 dark:text-emerald-400" /> : <TrendingDown size={16} className="text-red-500 dark:text-red-400" />}
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isUp ? 'bg-[#e8f8ef] text-[#16a765]' : 'bg-[#fff0ef] text-[#ff3b30]'}`}>
+              {isUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
@@ -120,7 +113,7 @@ const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: Ho
               <p className="text-[9px] text-slate-400 dark:text-slate-500 truncate leading-none mt-0.5">{h.stockName}</p>
             </div>
             <div className="text-right shrink-0">
-              <p className={`text-xs font-bold ${isUp ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-500 dark:text-red-400'}`}>
+              <p className={`text-xs font-bold tnum ${isUp ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
                 {formatPercent(h.todayPnLPercent, 2)}
               </p>
             </div>
@@ -173,27 +166,28 @@ const AllocationDrift = React.memo(function AllocationDrift({
       {slices.map((s) => {
         const driftAbs = Math.abs(s.drift);
         const isOver = s.drift > 0;
-        const severity = driftAbs > 20 ? 'text-red-500 dark:text-red-400' : driftAbs > 10 ? 'text-amber-500 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400';
+        const severityColor = driftAbs > 20 ? 'text-[#ff3b30]' : driftAbs > 10 ? 'text-[#ff9500]' : 'text-[#16a765]';
+        const barColor = driftAbs > 20 ? '#ff3b30' : driftAbs > 10 ? '#ff9500' : '#16a765';
+        
         return (
           <div key={s.label}>
             <div className="flex items-center justify-between mb-0.5">
-              <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{s.label}</span>
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{s.label}</span>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-slate-400 dark:text-slate-500">{s.target.toFixed(0)}% target</span>
-                <span className={`text-xs font-bold ${severity}`}>
+                <span className="text-[10px] text-slate-450 dark:text-slate-500">{s.target.toFixed(0)}% target</span>
+                <span className={`text-xs font-bold tnum ${severityColor}`}>
                   {s.actual.toFixed(1)}% {isOver ? '↑' : '↓'}
                 </span>
               </div>
             </div>
-            <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden relative">
+            <div className="h-1.5 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden relative">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${Math.min(s.actual, 100)}%`,
-                  backgroundColor: driftAbs > 20 ? '#ef4444' : driftAbs > 10 ? '#f59e0b' : '#10b981',
+                  backgroundColor: barColor,
                 }}
               />
-              {/* Target marker */}
               <div
                 className="absolute top-0 h-full w-0.5 bg-slate-400 dark:bg-slate-500"
                 style={{ left: `${s.target}%` }}
@@ -203,18 +197,17 @@ const AllocationDrift = React.memo(function AllocationDrift({
         );
       })}
 
-      {/* Actionable Rebalancing Recommendations */}
-      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/50 space-y-2">
-        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-          Rebalancing Recommendations
+      <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] space-y-2">
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          Rebalancing Advice
         </p>
         <div className="grid grid-cols-2 gap-2 text-[10.5px]">
           {rebalancingAdvice.map((advice) => {
             const isAligned = advice.recommendation === 'Aligned';
             return (
-              <div key={advice.assetClass} className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/35 px-2.5 py-1.5 rounded-xl">
-                <span className="font-semibold text-slate-500">{advice.assetClass}</span>
-                <span className={`font-bold ${isAligned ? 'text-slate-400' : advice.diffAmount > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+              <div key={advice.assetClass} className="flex justify-between items-center bg-[#f2f2f7] dark:bg-zinc-800/60 px-2.5 py-1.5 rounded-xl">
+                <span className="font-semibold text-slate-500 dark:text-slate-400">{advice.assetClass}</span>
+                <span className={`font-bold ${isAligned ? 'text-slate-400' : advice.diffAmount > 0 ? 'text-[#ff3b30]' : 'text-[#16a765]'}`}>
                   {advice.recommendation}
                 </span>
               </div>
@@ -229,9 +222,9 @@ const AllocationDrift = React.memo(function AllocationDrift({
 const ConcentrationRisk = React.memo(function ConcentrationRisk({ warnings }: { warnings: ConcentrationWarning[] }) {
   if (warnings.length === 0) {
     return (
-      <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-        <div className="w-6 h-6 rounded-full bg-emerald-50 dark:bg-emerald-950/20 flex items-center justify-center">✓</div>
-        <span className="text-xs font-medium">No concentration risk detected</span>
+      <div className="flex items-center gap-2 text-[#16a765]">
+        <span className="w-5 h-5 rounded-full bg-[#e8f8ef] flex items-center justify-center text-xs font-bold">✓</span>
+        <span className="text-xs font-medium">Safe concentration limits</span>
       </div>
     );
   }
@@ -239,9 +232,9 @@ const ConcentrationRisk = React.memo(function ConcentrationRisk({ warnings }: { 
     <div className="space-y-2">
       {warnings.slice(0, 5).map((w, i) => (
         <div key={`${w.ticker}-${i}`} className="flex items-center gap-2">
-          <AlertTriangle size={12} className="text-amber-500 dark:text-amber-500 shrink-0" />
-          <span className="text-xs text-slate-600 dark:text-slate-300 flex-1 truncate">
-            <span className="font-bold">{w.ticker}</span> is {w.pct.toFixed(1)}% of {w.portfolioLabel}
+          <AlertTriangle size={12} className="text-[#ff9500] shrink-0" />
+          <span className="text-xs text-slate-600 dark:text-slate-350 flex-1 truncate">
+            <span className="font-bold">{w.ticker}</span> is <span className="tnum">{w.pct.toFixed(1)}%</span> of {w.portfolioLabel}
           </span>
         </div>
       ))}
@@ -255,14 +248,14 @@ const FDReminders = React.memo(function FDReminders({ alerts }: { alerts: FDMatu
     <div className="space-y-2">
       {alerts.map((a, i) => (
         <div key={`fd-${i}`} className="flex items-center gap-2">
-          <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${a.daysLeft <= 7 ? 'bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400' : 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400'}`}>
+          <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${a.daysLeft <= 7 ? 'bg-[#fff0ef] text-[#ff3b30]' : 'bg-[#fff5e6] text-[#ff9500]'}`}>
             <Landmark size={12} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">{a.fd.bank_name}</p>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500">{a.portfolioLabel} · {formatINR(Number(a.fd.principal_amount))}</p>
+            <p className="text-[10px] text-slate-450 dark:text-slate-500">{a.portfolioLabel} · <span className="tnum">{formatINR(Number(a.fd.principal_amount))}</span></p>
           </div>
-          <span className={`text-xs font-bold shrink-0 ${a.daysLeft <= 7 ? 'text-red-500 dark:text-red-400' : 'text-amber-600 dark:text-amber-500'}`}>
+          <span className={`text-xs font-bold shrink-0 tnum ${a.daysLeft <= 7 ? 'text-[#ff3b30]' : 'text-[#ff9500]'}`}>
             {a.daysLeft === 0 ? 'Today' : `${a.daysLeft}d`}
           </span>
         </div>
@@ -277,14 +270,14 @@ const InsuranceReminders = React.memo(function InsuranceReminders({ alerts }: { 
     <div className="space-y-2">
       {alerts.map((a, i) => (
         <div key={`ins-${i}`} className="flex items-center gap-2">
-          <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${a.daysLeft <= 15 ? 'bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400' : 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-500'}`}>
+          <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${a.daysLeft <= 15 ? 'bg-[#fff0ef] text-[#ff3b30]' : 'bg-slate-100 dark:bg-zinc-800 text-[var(--text-secondary)]'}`}>
             <Shield size={12} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">{a.insurance.policy_name}</p>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500">{a.portfolioLabel} · {formatINR(Number(a.insurance.premium_amount))}/yr</p>
+            <p className="text-[10px] text-slate-450 dark:text-slate-500">{a.portfolioLabel} · <span className="tnum">{formatINR(Number(a.insurance.premium_amount))}</span>/yr</p>
           </div>
-          <span className={`text-xs font-bold shrink-0 ${a.daysLeft <= 15 ? 'text-red-500 dark:text-red-400' : 'text-rose-600 dark:text-rose-400'}`}>
+          <span className={`text-xs font-bold shrink-0 tnum ${a.daysLeft <= 15 ? 'text-[#ff3b30]' : 'text-[var(--text-secondary)]'}`}>
             {a.daysLeft}d
           </span>
         </div>
@@ -300,20 +293,20 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
     <div className="space-y-3">
       {valid.map((pw, i) => (
         <div key={i}>
-          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">{pw.portfolioLabel}</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{pw.portfolioLabel}</p>
           <div className="grid grid-cols-2 gap-2">
             {pw.best && (
-              <div className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-lg px-2 py-1.5">
-                <TrendingUp size={10} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 truncate">{pw.best.ticker}</span>
-                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 ml-auto shrink-0">{formatPercent(pw.best.pnlPercent, 1)}</span>
+              <div className="flex items-center gap-1.5 bg-[#e8f8ef] rounded-lg px-2 py-1">
+                <TrendingUp size={10} className="text-[#16a765] shrink-0" />
+                <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 truncate">{pw.best.ticker}</span>
+                <span className="text-[10px] font-bold text-[#16a765] ml-auto shrink-0 tnum">{formatPercent(pw.best.pnlPercent, 1)}</span>
               </div>
             )}
             {pw.worst && (
-              <div className="flex items-center gap-1.5 bg-red-50 dark:bg-red-950/30 rounded-lg px-2 py-1.5">
-                <TrendingDown size={10} className="text-red-500 dark:text-red-400 shrink-0" />
-                <span className="text-[11px] font-bold text-red-600 dark:text-red-300 truncate">{pw.worst.ticker}</span>
-                <span className="text-[10px] font-bold text-red-500 dark:text-red-400 ml-auto shrink-0">{formatPercent(pw.worst.pnlPercent, 1)}</span>
+              <div className="flex items-center gap-1.5 bg-[#fff0ef] rounded-lg px-2 py-1">
+                <TrendingDown size={10} className="text-[#ff3b30] shrink-0" />
+                <span className="text-[10px] font-bold text-red-800 dark:text-red-300 truncate">{pw.worst.ticker}</span>
+                <span className="text-[10px] font-bold text-[#ff3b30] ml-auto shrink-0 tnum">{formatPercent(pw.worst.pnlPercent, 1)}</span>
               </div>
             )}
           </div>
@@ -328,12 +321,12 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
 type InsightFilter = 'all' | 'stocks' | 'fds' | 'insurance' | 'high_risk' | 'due_soon';
 
 const FILTERS: { id: InsightFilter; label: string }[] = [
-  { id: 'all', label: 'All' },
+  { id: 'all', label: 'All Insights' },
   { id: 'stocks', label: 'Stocks' },
-  { id: 'fds', label: 'FDs' },
+  { id: 'fds', label: 'Deposits' },
   { id: 'insurance', label: 'Insurance' },
-  { id: 'high_risk', label: 'High Risk' },
-  { id: 'due_soon', label: 'Due Soon' },
+  { id: 'high_risk', label: 'Risk & Drift' },
+  { id: 'due_soon', label: 'Upcoming' },
 ];
 
 export default React.memo(function InsightsPanel({
@@ -371,188 +364,156 @@ export default React.memo(function InsightsPanel({
   const showRisk = f === 'all' || f === 'high_risk';
   const showDrift = f === 'all' || f === 'high_risk' || f === 'fds';
 
+  // Section visibility checks
+  const hasPerformanceCards = showStocks;
+  const hasHealthCards = showStocks || showDrift || showRisk;
+  const hasUpcomingCards = showFDs || showInsurance;
+
   return (
-    <div
-      role="region"
-      aria-label="Portfolio Insights"
-      className="space-y-4"
-    >
-      <div className="flex items-center gap-2 flex-wrap">
-        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm">
-          <BarChart3 size={14} className="text-white" />
+    <div role="region" aria-label="Portfolio Insights" className="space-y-6">
+      
+      {/* Header and Filter pills */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-[#007aff] flex items-center justify-center">
+            <BarChart3 size={13} />
+          </div>
+          <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider">Portfolio Insights</h3>
         </div>
-        <h2 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Portfolio Insights</h2>
+
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+          <Filter size={12} className="text-slate-400 shrink-0" />
+          {FILTERS.map((filter) => {
+            const isActive = activeFilter === filter.id;
+            return (
+              <button
+                key={filter.id}
+                onClick={() => setActiveFilter(filter.id)}
+                className={`shrink-0 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all duration-150 outline-none ${
+                  isActive
+                    ? 'bg-[#007aff] text-white shadow-sm'
+                    : 'bg-white dark:bg-zinc-800 text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:text-[var(--text-primary)] hover:border-slate-350'
+                }`}
+              >
+                {filter.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Filter pills */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 -mb-1 scrollbar-none">
-        <Filter size={13} className="text-slate-400 dark:text-slate-500 shrink-0" />
-        {FILTERS.map((filter) => {
-          const isActive = activeFilter === filter.id;
-          return (
-            <button
-              key={filter.id}
-              onClick={() => setActiveFilter(filter.id)}
-              className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
-                isActive
-                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20'
-                  : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              {filter.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Row 1 — Biggest Mover + Top Holdings + Health Score */}
-      {showStocks && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card
-            title="Portfolio Health Score"
-            icon={<Activity size={14} className="text-emerald-500" />}
-            accent="emerald"
-          >
-            <div className="flex items-center gap-4">
-              <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
-                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="15.915"
-                    className="text-slate-100 dark:text-slate-700/60"
-                    strokeWidth="3.5"
-                    stroke="currentColor"
-                    fill="none"
-                  />
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="15.915"
-                    className="text-emerald-500 transition-all duration-500"
-                    strokeDasharray={`${healthReport.score} 100`}
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    stroke="currentColor"
-                    fill="none"
-                  />
-                </svg>
-                <div className="absolute text-center">
-                  <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100">{healthReport.score}</span>
-                  <span className="text-[6.5px] text-slate-400 block -mt-1.5">/100</span>
-                </div>
-              </div>
-              <div className="flex-1 space-y-1 overflow-y-auto max-h-[85px] pr-1 scrollbar-none">
-                {healthReport.strengths.slice(0, 2).map((s, idx) => (
-                  <p key={`str-${idx}`} className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 truncate">{s}</p>
-                ))}
-                {healthReport.risks.slice(0, 2).map((r, idx) => (
-                  <p key={`risk-${idx}`} className="text-[9px] font-semibold text-amber-600 dark:text-amber-400 truncate">{r}</p>
-                ))}
-              </div>
-            </div>
-          </Card>
-
-          <Card
-            title="Today's Top 3 Movers"
-            icon={<Activity size={14} className="text-amber-500 dark:text-amber-400" />}
-            accent="amber"
-          >
-            <BiggestMovers movers={insights.biggestMovers} />
-          </Card>
-
-          <Card
-            title="Top 5 by Value"
-            icon={<Crown size={14} className="text-blue-500" />}
-            accent="blue"
-          >
-            <TopHoldings items={insights.topByValue} />
-          </Card>
-
-          <Card
-            title="Best / Worst by Member"
-            icon={<Target size={14} className="text-violet-500" />}
-            accent="violet"
-          >
-            <BestWorstPerformers items={insights.portfolioBestWorst} />
-          </Card>
-        </div>
-      )}
-
-      {/* Row 2 — Gainers, Losers, Allocation Drift */}
-      {(showStocks || showDrift) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {showStocks && (
-            <Card
-              title="Top Gainers"
-              icon={<TrendingUp size={14} className="text-emerald-500" />}
-              accent="emerald"
-            >
+      {/* 1. Performance Overview Section */}
+      {hasPerformanceCards && (
+        <div className="space-y-3">
+          <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">Performance Overview</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card title="Today's Movers" icon={<Activity size={13} className="text-[#ff9500]" />}>
+              <BiggestMovers movers={insights.biggestMovers} />
+            </Card>
+            <Card title="Top Holdings by Value" icon={<Crown size={13} className="text-[#007aff]" />}>
+              <TopHoldings items={insights.topByValue} />
+            </Card>
+            <Card title="Best / Worst performers" icon={<Target size={13} className="text-purple-500" />}>
+              <BestWorstPerformers items={insights.portfolioBestWorst} />
+            </Card>
+            <Card title="Top Gainers" icon={<TrendingUp size={13} className="text-[#16a765]" />}>
               <GainersList items={insights.topGainers} type="gain" />
             </Card>
-          )}
-
-          {showStocks && (
-            <Card
-              title="Top Losers"
-              icon={<TrendingDown size={14} className="text-red-500" />}
-              accent="red"
-            >
-              <GainersList items={insights.topLosers} type="loss" />
-            </Card>
-          )}
-
-          {showDrift && (
-            <Card
-              title="Asset Allocation Drift"
-              icon={<Target size={14} className="text-slate-500" />}
-              accent="slate"
-              action={<AllocationTargetsSettings onSaved={onTargetsChanged} />}
-            >
-              <AllocationDrift
-                slices={insights.allocationSlices}
-                portfolios={portfolios}
-                activePortfolio={activePortfolio}
-              />
-            </Card>
-          )}
+          </div>
         </div>
       )}
 
-      {/* Row 3 — Concentration + Reminders */}
-      {(showRisk || showFDs || showInsurance) && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {showRisk && (
-            <Card
-              title="Concentration Risk"
-              icon={<AlertTriangle size={14} className="text-amber-500" />}
-              accent="amber"
-            >
-              <ConcentrationRisk warnings={insights.concentrationWarnings} />
+      {/* 2. Portfolio Health Section */}
+      {hasHealthCards && (
+        <div className="space-y-3">
+          <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">Portfolio Health &amp; Risk</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <Card title="Health Score" icon={<Activity size={13} className="text-[#16a765]" />}>
+              <div className="flex items-center gap-4">
+                <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <circle
+                      cx="18"
+                      cy="18"
+                      r="15.915"
+                      className="text-slate-100 dark:text-zinc-700/60"
+                      strokeWidth="3.5"
+                      stroke="currentColor"
+                      fill="none"
+                    />
+                    <circle
+                      cx="18"
+                      cy="18"
+                      r="15.915"
+                      className="text-[#16a765] transition-all duration-500"
+                      strokeDasharray={`${healthReport.score} 100`}
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      stroke="currentColor"
+                      fill="none"
+                    />
+                  </svg>
+                  <div className="absolute text-center">
+                    <span className="text-xs font-extrabold text-[var(--text-primary)]">{healthReport.score}</span>
+                    <span className="text-[6.5px] text-[var(--text-secondary)] block -mt-1">/100</span>
+                  </div>
+                </div>
+                <div className="flex-1 space-y-1 overflow-y-auto max-h-[85px] pr-1 scrollbar-none">
+                  {healthReport.strengths.slice(0, 2).map((s, idx) => (
+                    <p key={`str-${idx}`} className="text-[9px] font-semibold text-[#16a765] truncate">{s}</p>
+                  ))}
+                  {healthReport.risks.slice(0, 2).map((r, idx) => (
+                    <p key={`risk-${idx}`} className="text-[9px] font-semibold text-[#ff9500] truncate">{r}</p>
+                  ))}
+                </div>
+              </div>
             </Card>
-          )}
 
-          {showFDs && (
-            <Card
-              title="FD Maturity (30d)"
-              icon={<Landmark size={14} className="text-blue-500" />}
-              accent="blue"
-            >
-              <FDReminders alerts={insights.fdMaturityAlerts} />
-            </Card>
-          )}
+            {showDrift && (
+              <Card
+                title="Asset Allocation Drift"
+                icon={<Target size={13} className="text-[var(--text-secondary)]" />}
+                action={<AllocationTargetsSettings onSaved={onTargetsChanged} />}
+              >
+                <AllocationDrift
+                  slices={insights.allocationSlices}
+                  portfolios={portfolios}
+                  activePortfolio={activePortfolio}
+                />
+              </Card>
+            )}
 
-          {showInsurance && (
-            <Card
-              title="Insurance Renewal (60d)"
-              icon={<Shield size={14} className="text-rose-500" />}
-              accent="rose"
-            >
-              <InsuranceReminders alerts={insights.insuranceRenewalAlerts} />
-            </Card>
-          )}
+            {showRisk && (
+              <Card title="Concentration Risk" icon={<AlertTriangle size={13} className="text-[#ff9500]" />}>
+                <ConcentrationRisk warnings={insights.concentrationWarnings} />
+              </Card>
+            )}
+
+          </div>
         </div>
       )}
+
+      {/* 3. Upcoming Actions Section */}
+      {hasUpcomingCards && (
+        <div className="space-y-3">
+          <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">Upcoming Actions</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {showFDs && (
+              <Card title="Upcoming FD Maturities (30d)" icon={<Landmark size={13} className="text-[#007aff]" />}>
+                <FDReminders alerts={insights.fdMaturityAlerts} />
+              </Card>
+            )}
+
+            {showInsurance && (
+              <Card title="Upcoming Insurance Renewals (60d)" icon={<Shield size={13} className="text-rose-500" />}>
+                <InsuranceReminders alerts={insights.insuranceRenewalAlerts} />
+              </Card>
+            )}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 });

@@ -157,40 +157,33 @@ function MobileHomeSummary({
   return (
     <div className="space-y-5 md:hidden">
       {/* Net Worth Summary Card */}
-      <div className="relative overflow-hidden rounded-3xl p-6 border border-white/[0.08] shadow-2xl" style={{ background: 'linear-gradient(145deg, #080d1a 0%, #0d1833 40%, #0a1535 70%, #080d1a 100%)' }}>
-        {/* Mesh grid overlay */}
-        <div className="absolute inset-0 mesh-grid opacity-30 pointer-events-none rounded-3xl" />
-        {/* Glowing background orbs */}
-        <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/15 rounded-full blur-3xl pointer-events-none animate-float-pulse" />
-        <div className="absolute bottom-0 left-0 w-36 h-36 bg-indigo-500/12 rounded-full blur-3xl pointer-events-none" />
-        {/* Top accent line */}
-        <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-blue-400/30 to-transparent" />
-
-        <div className="flex items-center justify-between relative z-10">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+      <div className="apple-card p-6 relative overflow-hidden">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
             {summaryData.label} Net Worth
           </span>
-          <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+          <span className="text-[10px] font-bold bg-[#eaf3ff] dark:bg-blue-950/20 text-[#007aff] dark:text-[#60a5fa] px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 bg-[#007aff] dark:bg-[#60a5fa] rounded-full animate-pulse" />
             Live
           </span>
         </div>
 
-        <h2 className="text-4xl font-extrabold tracking-tight mt-3 bg-gradient-to-r from-white via-blue-50 to-slate-200 bg-clip-text text-transparent relative z-10 tnum">
+        <h2 className="text-financial mt-3 text-slate-800 dark:text-slate-100 tnum">
           {formatINR(summaryData.totalCurrentValue)}
         </h2>
+        
         {/* Individual Net Worth breakdown for mobile */}
         {activePortfolio === null && portfolios && portfolios.length > 0 && (
-          <div className="mt-2.5 flex flex-wrap gap-x-2.5 gap-y-1 text-[10px] font-medium text-slate-400 relative z-10">
+          <div className="mt-3 flex flex-wrap gap-x-2.5 gap-y-1 text-[11px] font-medium text-slate-500 dark:text-zinc-400">
             {portfolios.map((p, idx) => {
               const val = p.totalCurrentValue;
               return (
                 <span key={p.id} className="flex items-center gap-0.5">
                   <span>{p.label}:</span>
-                  <span className="text-white font-bold tnum">
+                  <span className="text-slate-700 dark:text-slate-300 font-bold tnum">
                     {formatINR(val)}
                   </span>
-                  {idx < portfolios.length - 1 && <span className="text-white/20 ml-2">|</span>}
+                  {idx < portfolios.length - 1 && <span className="text-slate-200 dark:text-zinc-800 ml-2">|</span>}
                 </span>
               );
             })}
@@ -198,10 +191,10 @@ function MobileHomeSummary({
         )}
 
         {/* PNL Grid */}
-        <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-white/[0.08] relative z-10">
+        <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-[var(--border-subtle)]">
           <div className="space-y-1">
-            <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Today's P&amp;L</p>
-            <div className={`flex items-start gap-1.5 ${todayPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+            <p className="text-xs text-slate-450 dark:text-slate-400">Today's Return</p>
+            <div className={`flex items-start gap-1.5 ${todayPnL >= 0 ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
               {todayPnL >= 0 ? (
                 <TrendingUp size={16} className="shrink-0 mt-0.5" />
               ) : (
@@ -218,8 +211,8 @@ function MobileHomeSummary({
             </div>
           </div>
           <div className="space-y-1">
-            <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Total P&amp;L</p>
-            <div className={`flex items-start gap-1.5 ${summaryData.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+            <p className="text-xs text-slate-450 dark:text-slate-400">Total Return</p>
+            <div className={`flex items-start gap-1.5 ${summaryData.totalPnL >= 0 ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
               {summaryData.totalPnL >= 0 ? (
                 <TrendingUp size={16} className="shrink-0 mt-0.5" />
               ) : (
@@ -236,35 +229,36 @@ function MobileHomeSummary({
             </div>
           </div>
         </div>
+        
         {/* Individual Today's & Total P&L breakdowns for mobile */}
         {activePortfolio === null && portfolios && portfolios.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-white/10 space-y-2 text-[10px] font-medium text-slate-400">
+          <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] space-y-2 text-[10px] font-medium text-slate-500 dark:text-zinc-400">
             <div className="flex flex-wrap gap-x-2 gap-y-1">
-              <span className="text-slate-300 font-semibold mr-1">Today's P&amp;L:</span>
+              <span className="text-slate-600 dark:text-slate-300 font-semibold mr-1">Today's Return:</span>
               {portfolios.map((p, idx) => {
                 const pnl = estimateTodayPnL(p, [p]);
                 return (
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
-                    <span className={pnl >= 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
+                    <span className={pnl >= 0 ? 'text-[#16a765] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
                       {pnl >= 0 ? '+' : ''}{formatINR(pnl)}
                     </span>
-                    {idx < portfolios.length - 1 && <span className="text-white/20 ml-2">|</span>}
+                    {idx < portfolios.length - 1 && <span className="text-slate-200 dark:text-zinc-800 ml-2">|</span>}
                   </span>
                 );
               })}
             </div>
-            <div className="flex flex-wrap gap-x-2 gap-y-1 pt-1.5 border-t border-white/5">
-              <span className="text-slate-300 font-semibold mr-1">Total P&amp;L:</span>
+            <div className="flex flex-wrap gap-x-2 gap-y-1 pt-1.5 border-t border-slate-100 dark:border-zinc-800/60">
+              <span className="text-slate-600 dark:text-slate-300 font-semibold mr-1">Total Return:</span>
               {portfolios.map((p, idx) => {
                 const pnl = p.totalPnL;
                 return (
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
-                    <span className={pnl >= 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
+                    <span className={pnl >= 0 ? 'text-[#16a765] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
                       {pnl >= 0 ? '+' : ''}{formatINR(pnl)}
                     </span>
-                    {idx < portfolios.length - 1 && <span className="text-white/20 ml-2">|</span>}
+                    {idx < portfolios.length - 1 && <span className="text-slate-200 dark:text-zinc-800 ml-2">|</span>}
                   </span>
                 );
               })}

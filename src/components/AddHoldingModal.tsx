@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Plus, Loader2 } from './icons/AppIcons';
 import Modal from './Modal';
+import { Button } from './ui/Button';
+import { IconButton } from './ui/IconButton';
 
 interface PortfolioOption {
   name: string;
@@ -90,6 +92,9 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
     }
   }
 
+  const selectStyle = "w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none";
+  const inputStyle = "w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-450 dark:placeholder-zinc-650 focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none";
+
   return (
     <Modal
       isOpen={true}
@@ -98,27 +103,26 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
       preventClose={saving}
       maxWidth="max-w-lg"
     >
-      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] bg-slate-50/50 dark:bg-zinc-800/10">
         <div>
-          <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">Add New Holding</h2>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Stock will be fetched from Yahoo Finance on next refresh</p>
+          <h2 className="text-card-title font-semibold text-slate-800 dark:text-slate-200">Add New Holding</h2>
+          <p className="text-supporting mt-0.5">Stock will be fetched from Yahoo Finance on next refresh</p>
         </div>
-        <button
+        <IconButton
+          icon={<X size={15} />}
+          title="Close dialog"
           onClick={onClose}
-          className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors"
-          aria-label="Close dialog"
-        >
-          <X size={16} className="text-slate-400 dark:text-slate-500" />
-        </button>
+          disabled={saving}
+        />
       </div>
 
-      <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+      <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
         <div>
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
           <select
             value={form.portfolioName}
             onChange={(e) => set('portfolioName', e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
+            className={selectStyle}
           >
             {portfolioOptions.map((o) => (
               <option key={o.name} value={o.name}>{o.label}</option>
@@ -133,7 +137,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             placeholder="e.g. Reliance Industries Limited"
             value={form.stockName}
             onChange={(e) => set('stockName', e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+            className={inputStyle}
           />
         </div>
 
@@ -145,7 +149,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               placeholder="e.g. RELIANCE"
               value={form.ticker}
               onChange={(e) => set('ticker', e.target.value.toUpperCase())}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors uppercase"
+              className={`${inputStyle} uppercase`}
             />
           </div>
           <div>
@@ -153,7 +157,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             <select
               value={form.exchange}
               onChange={(e) => set('exchange', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
+              className={selectStyle}
             >
               {EXCHANGE_OPTIONS.map((o) => (
                 <option key={o} value={o.split(' ')[0]}>{o}</option>
@@ -165,14 +169,14 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
         <div>
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
             Yahoo Finance Symbol
-            <span className="font-normal text-slate-400 dark:text-slate-500 ml-1">(auto-filled, edit if needed)</span>
+            <span className="font-normal text-slate-400 dark:text-slate-500 ml-1">(auto-filled)</span>
           </label>
           <input
             type="text"
             placeholder="e.g. RELIANCE.NS"
             value={form.yahooSymbol}
             onChange={(e) => setForm((p) => ({ ...p, yahooSymbol: e.target.value }))}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+            className={inputStyle}
           />
         </div>
 
@@ -186,7 +190,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               step="any"
               value={form.qty}
               onChange={(e) => set('qty', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+              className={inputStyle}
             />
           </div>
           <div>
@@ -198,7 +202,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               step="any"
               value={form.avgPrice}
               onChange={(e) => set('avgPrice', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+              className={inputStyle}
             />
           </div>
         </div>
@@ -206,7 +210,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
         <div>
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
             Amount Invested (₹)
-            <span className="font-normal text-slate-400 dark:text-slate-500 ml-1">(auto-computed from qty × avg price)</span>
+            <span className="font-normal text-slate-400 dark:text-slate-550 ml-1">(auto-computed)</span>
           </label>
           <input
             type="number"
@@ -215,13 +219,13 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             step="any"
             value={form.amountInvested}
             onChange={(e) => setForm((p) => ({ ...p, amountInvested: e.target.value }))}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+            className={inputStyle}
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">52W Low (₹) <span className="font-normal text-slate-400 dark:text-slate-500">optional</span></label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">52W Low (₹) <span className="font-normal text-slate-400 dark:text-slate-550">optional</span></label>
             <input
               type="number"
               placeholder="0.00"
@@ -229,11 +233,11 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               step="any"
               value={form.weekLow52}
               onChange={(e) => set('weekLow52', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+              className={inputStyle}
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">52W High (₹) <span className="font-normal text-slate-400 dark:text-slate-500">optional</span></label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">52W High (₹) <span className="font-normal text-slate-400 dark:text-slate-550">optional</span></label>
             <input
               type="number"
               placeholder="0.00"
@@ -241,7 +245,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               step="any"
               value={form.weekHigh52}
               onChange={(e) => set('weekHigh52', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+              className={inputStyle}
             />
           </div>
         </div>
@@ -250,22 +254,24 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
           <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl px-3 py-2">{error}</p>
         )}
 
-        <div className="flex items-center gap-3 pt-1">
-          <button
+        <div className="flex items-center gap-3 pt-2">
+          <Button
             type="button"
+            variant="secondary"
             onClick={onClose}
-            className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            className="flex-1"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
+            variant="primary"
             disabled={saving}
-            className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="flex-1"
           >
-            {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+            {saving ? <Loader2 size={14} className="animate-spin mr-1.5" /> : <Plus size={14} className="mr-1.5" />}
             {saving ? 'Adding...' : 'Add Holding'}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

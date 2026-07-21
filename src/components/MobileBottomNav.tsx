@@ -42,7 +42,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
       {/* Backdrop for More Drawer */}
       {isDrawerOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/40 z-30 backdrop-blur-xs transition-opacity duration-300 md:hidden"
+          className="fixed inset-0 bg-[#000000]/30 z-30 backdrop-blur-md transition-opacity duration-300 md:hidden"
           onClick={() => setIsDrawerOpen(false)}
           aria-hidden="true"
         />
@@ -50,17 +50,17 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
 
       {/* More Drawer */}
       <div
-        className={`fixed bottom-14 left-0 right-0 z-30 bg-white/96 dark:bg-[#0e1628]/98 backdrop-blur-xl border-t border-slate-200/60 dark:border-white/[0.06] rounded-t-2xl shadow-[0_-16px_48px_-8px_rgba(0,0,0,0.15)] dark:shadow-[0_-16px_48px_-8px_rgba(0,0,0,0.5)] p-5 md:hidden transition-transform duration-300 ease-out transform pb-safe ${
+        className={`fixed bottom-14 left-0 right-0 z-30 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border-t border-[var(--border-subtle)] rounded-t-2xl shadow-floating p-5 md:hidden transition-transform duration-300 ease-out transform pb-safe ${
           isDrawerOpen ? 'translate-y-0' : 'translate-y-full'
         }`}
       >
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             More Asset Classes
           </h4>
           <button
             onClick={() => setIsDrawerOpen(false)}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-all"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-semibold px-2.5 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all"
             aria-label="Close menu"
           >
             Close
@@ -79,8 +79,8 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                 }}
                 className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border transition-all active:scale-95 ${
                   isActive
-                    ? 'bg-blue-500/10 border-blue-500/25 dark:bg-blue-500/15 dark:border-blue-500/30 text-blue-600 dark:text-blue-400 font-bold shadow-sm shadow-blue-500/10'
-                    : 'bg-slate-50/60 border-slate-100 dark:bg-white/[0.03] dark:border-white/[0.06] text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06]'
+                    ? 'bg-[#eaf3ff] border-transparent dark:bg-blue-950/20 text-[#007aff] dark:text-[#60a5fa] font-bold'
+                    : 'bg-[#f2f2f7] border-transparent dark:bg-zinc-800 text-slate-550 dark:text-slate-450 hover:bg-slate-100 dark:hover:bg-zinc-750'
                 }`}
               >
                 <div className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>{tab.icon}</div>
@@ -95,8 +95,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
       <nav
         role="navigation"
         aria-label="Asset navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#080d1a]/95 backdrop-blur-xl border-t-0 shadow-[0_-8px_32px_-4px_rgba(0,0,0,0.10)] dark:shadow-[0_-8px_32px_-4px_rgba(0,0,0,0.45)] md:hidden pb-safe"
-        style={{ borderTop: '1px solid rgba(226,232,240,0.6)' }}
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border-t border-[var(--border-subtle)] shadow-sm md:hidden pb-safe"
       >
         <div
           ref={containerRef}
@@ -113,64 +112,58 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                 }}
                 aria-current={isActive ? 'page' : undefined}
                 className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 h-full transition-all duration-200 active:scale-90 outline-none ${
-                isActive
-                  ? 'text-blue-600 dark:text-blue-400 font-bold'
-                  : 'text-slate-400 dark:text-slate-500 active:text-slate-600 dark:active:text-slate-300'
-              }`}
-            >
-              {/* Active pill bubble */}
-              {isActive && (
-                <div className="absolute inset-x-1.5 top-1.5 bottom-1.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/15" />
-              )}
-              <div className={`transition-all duration-200 relative z-10 ${isActive ? 'scale-110 -translate-y-0.5' : ''} relative`}>
+                  isActive
+                    ? 'text-[#007aff] dark:text-[#60a5fa] font-bold'
+                    : 'text-slate-400 dark:text-slate-500 active:text-slate-650 dark:active:text-slate-300'
+                }`}
+              >
+                {/* Active pill bubble */}
+                {isActive && (
+                  <div className="absolute inset-x-2 top-2 bottom-2 rounded-xl bg-[#eaf3ff] dark:bg-blue-950/20" />
+                )}
+                <div className={`transition-all duration-200 relative z-10 ${isActive ? 'scale-110' : ''} relative`}>
                   {tab.icon}
                   {tab.id === 'home' && alertCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white text-[8px] font-bold flex items-center justify-center px-0.5 leading-none">
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] rounded-full bg-[#ff3b30] text-white text-[8px] font-bold flex items-center justify-center px-0.5 leading-none">
                       {alertCount > 9 ? '9+' : alertCount}
                     </span>
                   )}
                 </div>
-                <span className={`text-[9.5px] font-semibold tracking-wide leading-none transition-all duration-200 relative z-10 ${
+                <span className={`text-[9px] font-semibold tracking-wide leading-none transition-all duration-200 relative z-10 ${
                   isActive
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-slate-400 dark:text-slate-500'
+                    ? 'text-[#007aff] dark:text-[#60a5fa]'
+                    : 'text-slate-450 dark:text-slate-500'
                 }`}>
                   {tab.label}
                 </span>
-                {isActive && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-5 h-[2px] bg-gradient-to-r from-blue-500 to-indigo-500 dark:from-blue-400 dark:to-indigo-400 rounded-full" />
-                )}
               </button>
             );
           })}
 
-          {/* More Tab (Up Arrow / ChevronUp) */}
+          {/* More Tab */}
           <button
             onClick={() => setIsDrawerOpen(!isDrawerOpen)}
             aria-expanded={isDrawerOpen}
             className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 h-full transition-all duration-200 active:scale-90 outline-none ${
               isMoreActive || isDrawerOpen
-                ? 'text-blue-600 dark:text-blue-400 font-bold'
-                : 'text-slate-400 dark:text-slate-500 active:text-slate-600 dark:active:text-slate-300'
+                ? 'text-[#007aff] dark:text-[#60a5fa] font-bold'
+                : 'text-slate-455 dark:text-slate-500 active:text-slate-650 dark:active:text-slate-300'
             }`}
           >
             {/* Active pill bubble */}
             {(isMoreActive || isDrawerOpen) && (
-              <div className="absolute inset-x-1.5 top-1.5 bottom-1.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/15" />
+              <div className="absolute inset-x-2 top-2 bottom-2 rounded-xl bg-[#eaf3ff] dark:bg-blue-950/20" />
             )}
-            <div className={`transition-all duration-200 ${isMoreActive || isDrawerOpen ? 'scale-110 -translate-y-0.5 rotate-180' : ''} relative z-10`}>
+            <div className={`transition-all duration-200 ${isMoreActive || isDrawerOpen ? 'scale-110 rotate-180' : ''} relative z-10`}>
               <ChevronUp size={18} />
             </div>
-            <span className={`text-[9.5px] font-semibold tracking-wide leading-none transition-all duration-200 relative z-10 ${
+            <span className={`text-[9px] font-semibold tracking-wide leading-none transition-all duration-200 relative z-10 ${
               isMoreActive || isDrawerOpen
-                ? 'text-blue-600 dark:text-blue-400'
-                : 'text-slate-400 dark:text-slate-500'
+                ? 'text-[#007aff] dark:text-[#60a5fa]'
+                : 'text-slate-455 dark:text-slate-500'
             }`}>
               More
             </span>
-            {(isMoreActive || isDrawerOpen) && (
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-5 h-[2px] bg-gradient-to-r from-blue-500 to-indigo-500 dark:from-blue-400 dark:to-indigo-400 rounded-full" />
-            )}
           </button>
         </div>
       </nav>

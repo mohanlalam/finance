@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, UserPlus, Loader2 } from './icons/AppIcons';
 import Modal from './Modal';
+import { Button } from './ui/Button';
+import { IconButton } from './ui/IconButton';
 
 interface AddFamilyModalProps {
   isOpen: boolean;
@@ -48,18 +50,17 @@ export default React.memo(function AddFamilyModal({
       ariaLabel="Add Family Member"
       preventClose={submitting}
     >
-      <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+      <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center bg-slate-50/50 dark:bg-zinc-800/10">
         <div>
-          <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Add Family Member</h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">A new portfolio shell will appear in the family tabs</p>
+          <h3 className="text-card-title font-semibold text-slate-800 dark:text-slate-200">Add Family Member</h3>
+          <p className="text-supporting mt-0.5">A new portfolio shell will appear in the family tabs</p>
         </div>
-        <button
+        <IconButton
+          icon={<X size={15} />}
+          title="Close dialog"
           onClick={onClose}
-          className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
-          aria-label="Close dialog"
-        >
-          <X size={16} />
-        </button>
+          disabled={submitting}
+        />
       </div>
       <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
         <div>
@@ -69,19 +70,19 @@ export default React.memo(function AddFamilyModal({
             placeholder="e.g. Father's Portfolio"
             value={newFamilyLabel}
             onChange={(e) => setNewFamilyLabel(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+            className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-450 dark:placeholder-zinc-650 focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none"
           />
         </div>
         <div>
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
-            Machine Key <span className="text-slate-400 dark:text-slate-550 font-normal">(optional, lowercase no spaces)</span>
+            Machine Key <span className="text-slate-400 dark:text-slate-550 font-normal">(optional)</span>
           </label>
           <input
             type="text"
-            placeholder="e.g. father (auto-derived from label if empty)"
+            placeholder="e.g. father"
             value={newFamilyName}
             onChange={(e) => setNewFamilyName(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+            className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-450 dark:placeholder-zinc-650 focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none"
           />
         </div>
 
@@ -92,22 +93,24 @@ export default React.memo(function AddFamilyModal({
         )}
 
         <div className="flex gap-3 pt-2">
-          <button
+          <Button
             type="button"
+            variant="secondary"
             disabled={submitting}
             onClick={onClose}
-            className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+            className="flex-1"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
+            variant="primary"
             disabled={submitting}
-            className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="flex-1"
           >
-            {submitting ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
+            {submitting ? <Loader2 size={14} className="animate-spin mr-1.5" /> : <UserPlus size={14} className="mr-1.5" />}
             {submitting ? 'Adding...' : 'Add Member'}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

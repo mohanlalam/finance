@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { ArrowUpDown, TrendingUp, TrendingDown, Trash2, Pencil, Loader2, Check, X, SlidersHorizontal } from './icons/AppIcons';
+import { Trash2, Pencil, Loader2, Check, X, SlidersHorizontal } from './icons/AppIcons';
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent, pnlColor } from '../utils/formatters';
 
@@ -31,12 +31,14 @@ const Th = React.memo(({
   sortKey,
   sortAsc,
   handleSort,
+  hideArrow = false,
 }: {
   label: string;
   k: SortKey;
   sortKey: SortKey;
   sortAsc: boolean;
   handleSort: (key: SortKey) => void;
+  hideArrow?: boolean;
 }) => {
   const getSortAria = (k: SortKey) => {
     if (sortKey !== k) return 'none';
@@ -48,11 +50,15 @@ const Th = React.memo(({
       role="columnheader"
       aria-sort={getSortAria(k)}
       className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-200 transition-colors whitespace-nowrap"
-      onClick={() => handleSort(k)}
+      onClick={() => !hideArrow && handleSort(k)}
     >
       <span className="flex items-center gap-1">
         {label}
-        <ArrowUpDown size={11} className={sortKey === k ? 'text-blue-500' : 'text-slate-300 dark:text-slate-600'} />
+        {!hideArrow && (
+          <span className={`text-[10px] ${sortKey === k ? 'text-blue-500 font-bold' : 'text-slate-300 dark:text-zinc-600'}`}>
+            {sortKey === k ? (sortAsc ? '▲' : '▼') : '⇅'}
+          </span>
+        )}
       </span>
     </th>
   );
@@ -389,7 +395,7 @@ export default React.memo(function PortfolioTable({
               <Th label="P&L" k="unrealizedPnL" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
               <Th label="% P&L" k="pnlPercent" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
               <Th label="Today %" k="todayPnLPercent" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
-              <Th label="Alloc %" k={"_allocation" as SortKey} sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
+              <Th label="Allocation %" k={"_allocation" as SortKey} sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} hideArrow={true} />
               {onDelete && <th role="columnheader" className="px-4 py-3 w-10" />}
             </tr>
           </thead>
@@ -492,8 +498,8 @@ export default React.memo(function PortfolioTable({
                     {h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}
                   </td>
                   <td role="cell" className="px-4 py-3 text-right">
-                    <span className={`inline-flex items-center gap-0.5 text-xs font-bold px-2 py-0.5 rounded-full ${h.pnlPercent >= 0 ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400'}`}>
-                      {h.pnlPercent >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                    <span className={`inline-flex items-center gap-0.5 text-xs font-bold px-2 py-0.5 rounded-full ${h.pnlPercent >= 0 ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-[#60a5fa]' : 'bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400'}`}>
+                      <span className="text-[10px] font-extrabold mr-0.5">{h.pnlPercent >= 0 ? '↗' : '↘'}</span>
                       {formatPercent(h.pnlPercent)}
                     </span>
                   </td>

@@ -11,12 +11,12 @@ interface ModalProps {
 }
 
 /**
- * Reusable modal wrapper with:
+ * Reusable modal wrapper with Apple bottom-sheet behavior on mobile:
+ * - Slide-up drawer on mobile devices, centered panel on desktop
+ * - Frosted backdrop blur filter
  * - Focus trap (Tab cycles within modal)
  * - Escape key to close
  * - Body scroll lock
- * - Fade-in / slide-up enter animation
- * - Backdrop click to close
  * - ARIA dialog semantics
  */
 export default function Modal({
@@ -102,23 +102,23 @@ export default function Modal({
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modal-overlay"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 animate-modal-overlay"
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
       onKeyDown={handleKeyDown}
     >
-      {/* Backdrop */}
+      {/* Backdrop (high blur frosted panel) */}
       <div
-        className="absolute inset-0 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-[#000000]/30 dark:bg-[#000000]/60 backdrop-blur-md"
         onClick={() => !preventClose && onClose()}
         aria-hidden="true"
       />
 
-      {/* Content */}
+      {/* Content wrapper: slides up on mobile, scales on desktop */}
       <div
         ref={contentRef}
-        className={`relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full ${maxWidth} overflow-hidden animate-modal-content`}
+        className={`relative bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-medium)] shadow-floating w-full ${maxWidth} overflow-hidden animate-slide-up sm:animate-modal-content border border-[var(--border-subtle)] pb-safe`}
       >
         {children}
       </div>
