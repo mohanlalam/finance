@@ -203,7 +203,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
                 <button
                   key={num}
                   type="button"
-                  className="w-full aspect-square flex items-center justify-center rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-100 font-outfit text-2xl font-bold border border-slate-700/40 shadow-sm active:scale-95 transition-all duration-100"
+                  className="w-full aspect-square flex items-center justify-center rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-100 text-2xl font-bold border border-slate-700/40 shadow-sm active:scale-95 transition-all duration-100"
                   onClick={() => handlePressKey(num)}
                   disabled={success}
                 >
@@ -220,7 +220,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
               </button>
               <button
                 type="button"
-                className="w-full aspect-square flex items-center justify-center rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-100 font-outfit text-2xl font-bold border border-slate-700/40 shadow-sm active:scale-95 transition-all duration-100"
+                className="w-full aspect-square flex items-center justify-center rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-100 text-2xl font-bold border border-slate-700/40 shadow-sm active:scale-95 transition-all duration-100"
                 onClick={() => handlePressKey('0')}
                 disabled={success}
               >

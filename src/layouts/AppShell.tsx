@@ -691,8 +691,8 @@ export default function AppShell() {
             </div>
 
             {/* Desktop Asset Switcher */}
-            <div className="hidden md:flex items-center justify-between border-b border-[var(--border-subtle)] pb-px mb-3">
-              <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
+            <div className="hidden md:flex items-center border-b border-[var(--border-subtle)] pb-px mb-3 overflow-x-auto scrollbar-none">
+              <div className="flex items-center gap-1 shrink-0">
                 {([
                   { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={14} /> },
                   { id: 'fd', label: 'Fixed Deposits', icon: <Landmark size={14} /> },
@@ -720,8 +720,11 @@ export default function AppShell() {
                 })}
               </div>
 
+              {/* Separator */}
+              <div className="h-4 w-px bg-[var(--border-subtle)] mx-3 shrink-0" />
+
               {/* Secondary Tools */}
-              <div className="flex items-center gap-1 pl-4 border-l border-[var(--border-subtle)]">
+              <div className="flex items-center gap-1 shrink-0">
                 {([
                   { id: 'documents', label: 'Vault', icon: <FolderOpen size={14} /> },
                   { id: 'what_if', label: 'What-If Calc', icon: <Calculator size={14} /> },
