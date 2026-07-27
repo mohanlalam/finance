@@ -13,13 +13,13 @@ interface FamilyTabBarProps {
 }
 
 const familyIcons: Record<string, React.ReactNode> = {
-  personal: <User size={13} />,
-  mother: <Heart size={13} />,
-  wife: <Users size={13} />,
+  personal: <User size={15} />,
+  mother: <Heart size={15} />,
+  wife: <Users size={15} />,
 };
 
 function getFamilyIcon(name: string): React.ReactNode {
-  return familyIcons[name] ?? <User size={13} />;
+  return familyIcons[name] ?? <User size={15} />;
 }
 
 export default React.memo(function FamilyTabBar({
@@ -52,7 +52,7 @@ export default React.memo(function FamilyTabBar({
               : 'text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#98989d] dark:hover:text-[#f5f5f7]'
           }`}
         >
-          <LayoutDashboard size={13} />
+          <LayoutDashboard size={15} />
           <span>Family Overview</span>
         </button>
 
@@ -95,7 +95,7 @@ export default React.memo(function FamilyTabBar({
                   title={`Rename ${p.label}`}
                   aria-label={`Rename portfolio ${p.label}`}
                 >
-                  <Pencil size={9} />
+                  <Pencil size={11} />
                 </button>
                 <button
                   onClick={(e) => {
@@ -106,7 +106,7 @@ export default React.memo(function FamilyTabBar({
                   title={`Delete ${p.label}`}
                   aria-label={`Delete portfolio ${p.label}`}
                 >
-                  <Trash2 size={9} />
+                  <Trash2 size={11} />
                 </button>
               </div>
             </div>
@@ -120,7 +120,7 @@ export default React.memo(function FamilyTabBar({
         className="flex items-center gap-1.5 px-3 h-10 rounded-2xl text-xs font-semibold border border-slate-200 hover:border-[#007aff] hover:text-[#007aff] dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-[#60a5fa] dark:hover:border-[#60a5fa] transition-colors shrink-0"
         aria-label="Add family member"
       >
-        <UserPlus size={13} />
+        <UserPlus size={15} />
         <span>Add Member</span>
       </button>
 
