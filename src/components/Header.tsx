@@ -118,7 +118,7 @@ function Header({
                 </span>
               </div>
               <Badge variant={isGain ? 'positive' : 'negative'} className="text-[10px] py-0">
-                {isGain ? '+' : ''}{formatPercent(totalPnLPercent, 1)}
+                {formatPercent(totalPnLPercent, 1)}
               </Badge>
             </div>
 

@@ -80,7 +80,7 @@ export default React.memo(function FamilyTabBar({
                     ? 'text-[#007aff] dark:text-[#60a5fa]' 
                     : p.totalPnL >= 0 ? 'text-[#16a765]' : 'text-[#ff3b30]'
                 }`}>
-                  {p.totalPnL >= 0 ? '+' : ''}{formatPercent(p.totalPnLPercent, 1)}
+                  {formatPercent(p.totalPnLPercent, 1)}
                 </span>
               </button>
 

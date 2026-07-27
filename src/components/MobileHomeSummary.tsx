@@ -205,7 +205,7 @@ function MobileHomeSummary({
                   {todayPnL >= 0 ? '+' : ''}{formatINR(todayPnL)}
                 </span>
                 <span className="text-[11px] font-semibold whitespace-nowrap opacity-90 leading-none mt-0.5 tnum">
-                  ({todayPnL >= 0 ? '+' : ''}{formatPercent(todayPnLPercent)})
+                  ({formatPercent(todayPnLPercent)})
                 </span>
               </div>
             </div>
@@ -223,7 +223,7 @@ function MobileHomeSummary({
                   {summaryData.totalPnL >= 0 ? '+' : ''}{formatINR(summaryData.totalPnL)}
                 </span>
                 <span className="text-[11px] font-semibold whitespace-nowrap opacity-90 leading-none mt-0.5 tnum">
-                  ({summaryData.totalPnL >= 0 ? '+' : ''}{formatPercent(summaryData.totalPnLPercent)})
+                  ({formatPercent(summaryData.totalPnLPercent)})
                 </span>
               </div>
             </div>

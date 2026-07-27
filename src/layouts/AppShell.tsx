@@ -582,7 +582,7 @@ export default function AppShell() {
                         <div className="flex items-center justify-between gap-2 mb-2">
                           <span className="text-xs font-semibold text-[var(--text-secondary)]">{p.label}</span>
                           <Badge variant={pnlGain ? 'positive' : 'negative'} className="text-[10px] py-0 px-2">
-                            {pnlGain ? '+' : ''}{formatPercent(p.totalPnLPercent, 1)}
+                            {formatPercent(p.totalPnLPercent, 1)}
                           </Badge>
                         </div>
                         <p className={`text-xl font-bold text-[var(--text-primary)] tnum transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>

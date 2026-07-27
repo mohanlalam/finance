@@ -95,7 +95,7 @@ export function SIPAccountCard({
             <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatINR(currentVal)}</p>
             {invested > 0 && (
               <p className={`text-[10px] font-bold mt-0.5 ${isProfit ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
-                {isProfit ? '+' : ''}{formatPercent(plPercent, 2)} ({formatINR(profitLoss)})
+                {formatPercent(plPercent, 2)} ({formatINR(profitLoss)})
               </p>
             )}
           </div>
