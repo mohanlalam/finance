@@ -476,7 +476,9 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     async () => {
       const allHoldings = portfolios.flatMap((p) => p.holdings);
       const allSips = portfolios.flatMap((p) => p.sipAccounts || []);
-      if (allHoldings.length === 0 && allSips.length === 0) return null;
+      if (allHoldings.length === 0 && allSips.length === 0) {
+        return { priceMap: {}, navData: { navMap: {}, staleSchemes: new Set<string>() } };
+      }
       const [priceMap, navData] = await Promise.all([
         allHoldings.length > 0 ? fetchLivePrices(allHoldings) : Promise.resolve({}),
         fetchLiveMFNavs(allSips),
