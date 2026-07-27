@@ -62,7 +62,7 @@ export default function DashboardWidgets({ portfolios, activePortfolio }: Dashbo
         <p className="text-[10px] text-slate-400 mt-0.5">Capacitor Native Webview Ports</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-sm w-full">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:max-w-4xl w-full">
         {/* Widget 1: Net Worth Widget */}
         <div className="bg-slate-800 border border-slate-700/60 rounded-3xl p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between aspect-square">
           <div className="absolute top-0 right-0 p-4">

@@ -109,7 +109,7 @@ function SummaryCards({
               {isGain ? <TrendingUp size={13} className="text-[#16a765]" /> : <TrendingDown size={13} className="text-[#ff3b30]" />}
             </span>
           </div>
-          <p className={`text-financial tnum ${isGain ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
+          <p className={`text-financial tnum ${isGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
             {isGain ? '+' : ''}{formatINR(totalPnL)}
           </p>
           <p className="text-supporting">
@@ -124,7 +124,7 @@ function SummaryCards({
                 return (
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
-                    <span className={`font-bold tnum ${localGain ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
+                    <span className={`font-bold tnum ${localGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
                       {localGain ? '+' : ''}{formatINR(pnl)}
                     </span>
                     {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-zinc-700 ml-1.5">|</span>}
@@ -146,7 +146,7 @@ function SummaryCards({
                 {isTodayGain ? <TrendingUp size={13} className="text-[#16a765]" /> : <TrendingDown size={13} className="text-[#ff3b30]" />}
               </span>
             </div>
-            <p className={`text-financial tnum ${isTodayGain ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
+            <p className={`text-financial tnum ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
               {isTodayGain ? '+' : ''}{formatINR(todayPnL)}
             </p>
             <p className="text-supporting">

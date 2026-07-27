@@ -16,7 +16,7 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
   
   // Resize tracking
   const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 600, height: 240 });
+  const [dimensions, setDimensions] = useState({ width: 0, height: 240 });
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -47,7 +47,18 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
       );
     }
 
-    // Mock history: 6 months of simulated growth ending in the current net worth
+    // Exactly 1 real snapshot: show a flat line anchored one month earlier
+    if (history.length === 1) {
+      const point = history[0];
+      const anchor = new Date(point.snapshot_date);
+      anchor.setMonth(anchor.getMonth() - 1);
+      return [
+        { ...point, id: 'anchor-start', snapshot_date: anchor.toISOString().split('T')[0] },
+        point,
+      ];
+    }
+
+    // No real data at all: generate 6 months of illustrative mock data
     const mockList: NetWorthSnapshot[] = [];
     const baseVal = currentNetWorth > 0 ? currentNetWorth : 1500000;
     const now = new Date();

@@ -158,7 +158,7 @@ export default React.memo(function GoldHoldingView({
         <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Cost Basis</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(totalPurchase)}</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1 truncate">{formatINR(totalPurchase)}</p>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Purchase price total</p>
           </div>
           <Scale size={40} className="text-amber-500/20 shrink-0" />
@@ -220,7 +220,7 @@ export default React.memo(function GoldHoldingView({
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">{g.item_name}</h4>
+                          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{g.item_name}</h4>
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400">
                             {g.purity}
                           </span>

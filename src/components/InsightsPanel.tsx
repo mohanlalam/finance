@@ -80,11 +80,11 @@ const GainersList = React.memo(function GainersList({ items, type }: { items: Ho
     <div className="space-y-2">
       {items.map((item, idx) => (
         <div key={`${item.holding.ticker}-${idx}`} className="flex items-center gap-2">
-          <span className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${type === 'gain' ? 'bg-[#e8f8ef] text-[#16a765]' : 'bg-[#fff0ef] text-[#ff3b30]'}`}>
+          <span className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${type === 'gain' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400'}`}>
             {type === 'gain' ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
           </span>
           <span className="text-xs font-bold text-slate-700 dark:text-slate-350 truncate flex-1">{item.holding.ticker}</span>
-          <span className={`text-xs font-bold shrink-0 tnum ${type === 'gain' ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
+          <span className={`text-xs font-bold shrink-0 tnum ${type === 'gain' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
             {formatPercent(item.holding.pnlPercent, 1)}
           </span>
         </div>
@@ -102,7 +102,7 @@ const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: Ho
         const isUp = h.todayPnLPercent >= 0;
         return (
           <div key={`${h.ticker}-${idx}`} className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isUp ? 'bg-[#e8f8ef] text-[#16a765]' : 'bg-[#fff0ef] text-[#ff3b30]'}`}>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isUp ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400'}`}>
               {isUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
             </div>
             <div className="min-w-0 flex-1">
@@ -113,7 +113,7 @@ const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: Ho
               <p className="text-[9px] text-slate-400 dark:text-slate-500 truncate leading-none mt-0.5">{h.stockName}</p>
             </div>
             <div className="text-right shrink-0">
-              <p className={`text-xs font-bold tnum ${isUp ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
+              <p className={`text-xs font-bold tnum ${isUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
                 {formatPercent(h.todayPnLPercent, 2)}
               </p>
             </div>
@@ -207,7 +207,7 @@ const AllocationDrift = React.memo(function AllocationDrift({
             return (
               <div key={advice.assetClass} className="flex justify-between items-center bg-[#f2f2f7] dark:bg-zinc-800/60 px-2.5 py-1.5 rounded-xl">
                 <span className="font-semibold text-slate-500 dark:text-slate-400">{advice.assetClass}</span>
-                <span className={`font-bold ${isAligned ? 'text-slate-400' : advice.diffAmount > 0 ? 'text-[#ff3b30]' : 'text-[#16a765]'}`}>
+                <span className={`font-bold ${isAligned ? 'text-slate-400 dark:text-slate-500' : advice.diffAmount > 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                   {advice.recommendation}
                 </span>
               </div>
@@ -248,14 +248,14 @@ const FDReminders = React.memo(function FDReminders({ alerts }: { alerts: FDMatu
     <div className="space-y-2">
       {alerts.map((a, i) => (
         <div key={`fd-${i}`} className="flex items-center gap-2">
-          <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${a.daysLeft <= 7 ? 'bg-[#fff0ef] text-[#ff3b30]' : 'bg-[#fff5e6] text-[#ff9500]'}`}>
+          <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${a.daysLeft <= 7 ? 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400' : 'bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400'}`}>
             <Landmark size={12} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">{a.fd.bank_name}</p>
             <p className="text-[10px] text-slate-450 dark:text-slate-500">{a.portfolioLabel} · <span className="tnum">{formatINR(Number(a.fd.principal_amount))}</span></p>
           </div>
-          <span className={`text-xs font-bold shrink-0 tnum ${a.daysLeft <= 7 ? 'text-[#ff3b30]' : 'text-[#ff9500]'}`}>
+          <span className={`text-xs font-bold shrink-0 tnum ${a.daysLeft <= 7 ? 'text-red-500 dark:text-red-400' : 'text-amber-500 dark:text-amber-400'}`}>
             {a.daysLeft === 0 ? 'Today' : `${a.daysLeft}d`}
           </span>
         </div>
@@ -296,17 +296,17 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{pw.portfolioLabel}</p>
           <div className="grid grid-cols-2 gap-2">
             {pw.best && (
-              <div className="flex items-center gap-1.5 bg-[#e8f8ef] rounded-lg px-2 py-1">
-                <TrendingUp size={10} className="text-[#16a765] shrink-0" />
+              <div className="flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-950/40 rounded-lg px-2 py-1">
+                <TrendingUp size={10} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 truncate">{pw.best.ticker}</span>
-                <span className="text-[10px] font-bold text-[#16a765] ml-auto shrink-0 tnum">{formatPercent(pw.best.pnlPercent, 1)}</span>
+                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 ml-auto shrink-0 tnum">{formatPercent(pw.best.pnlPercent, 1)}</span>
               </div>
             )}
             {pw.worst && (
-              <div className="flex items-center gap-1.5 bg-[#fff0ef] rounded-lg px-2 py-1">
-                <TrendingDown size={10} className="text-[#ff3b30] shrink-0" />
+              <div className="flex items-center gap-1.5 bg-red-100 dark:bg-red-950/40 rounded-lg px-2 py-1">
+                <TrendingDown size={10} className="text-red-500 dark:text-red-400 shrink-0" />
                 <span className="text-[10px] font-bold text-red-800 dark:text-red-300 truncate">{pw.worst.ticker}</span>
-                <span className="text-[10px] font-bold text-[#ff3b30] ml-auto shrink-0 tnum">{formatPercent(pw.worst.pnlPercent, 1)}</span>
+                <span className="text-[10px] font-bold text-red-500 dark:text-red-400 ml-auto shrink-0 tnum">{formatPercent(pw.worst.pnlPercent, 1)}</span>
               </div>
             )}
           </div>

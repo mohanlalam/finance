@@ -436,10 +436,10 @@ export default React.memo(function PortfolioTable({
                           <Loader2 size={14} className="animate-spin text-blue-500" />
                         ) : (
                           <>
-                            <button onClick={() => saveEdit(h)} className="w-6 h-6 rounded-md flex items-center justify-center text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors" title="Save">
+                            <button onClick={() => saveEdit(h)} className="w-6 h-6 rounded-md flex items-center justify-center text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors" title="Save" aria-label="Save changes">
                               <Check size={13} />
                             </button>
-                            <button onClick={cancelEdit} className="w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="Cancel">
+                            <button onClick={cancelEdit} className="w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="Cancel" aria-label="Cancel edit">
                               <X size={13} />
                             </button>
                           </>

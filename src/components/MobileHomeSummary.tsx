@@ -159,7 +159,7 @@ function MobileHomeSummary({
       {/* Net Worth Summary Card */}
       <div className="apple-card p-6 relative overflow-hidden">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[180px]">
             {summaryData.label} Net Worth
           </span>
           <span className="text-[10px] font-bold bg-[#eaf3ff] dark:bg-blue-950/20 text-[#007aff] dark:text-[#60a5fa] px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
@@ -451,7 +451,7 @@ function MobileHomeSummary({
                 <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 truncate uppercase tracking-wide">
                   {card.label}
                 </p>
-                <p className="text-[14px] font-extrabold text-slate-800 dark:text-slate-100 mt-0.5">
+                <p className="text-[14px] font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 truncate">
                   {card.value !== null ? formatINR(card.value) : 'Vault'}
                 </p>
                 <p className="text-[9.5px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5 leading-none">

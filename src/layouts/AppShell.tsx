@@ -580,7 +580,7 @@ export default function AppShell() {
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="text-xs font-semibold text-[var(--text-secondary)]">{p.label}</span>
+                          <span className="text-xs font-semibold text-[var(--text-secondary)] truncate">{p.label}</span>
                           <Badge variant={pnlGain ? 'positive' : 'negative'} className="text-[10px] py-0 px-2">
                             {formatPercent(p.totalPnLPercent, 1)}
                           </Badge>
@@ -626,7 +626,7 @@ export default function AppShell() {
                 ].map((item) => (
                   <div key={item.label} className="apple-card p-3 flex flex-col justify-between">
                     <span className="text-[10px] font-semibold text-[var(--text-secondary)]">{item.label}</span>
-                    <p className="text-sm font-bold text-[var(--text-primary)] mt-1 tnum">{formatINR(item.value)}</p>
+                    <p className="text-sm font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(item.value)}</p>
                   </div>
                 ))}
                 <div className="apple-card p-3 flex flex-col justify-between">
