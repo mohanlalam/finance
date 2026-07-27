@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Check, Sun, Moon } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { FetchStatus } from '../hooks/useMarketData';
@@ -26,6 +26,8 @@ interface HeaderProps {
   darkMode: boolean;
   onToggleDarkMode: () => void;
   activePortfolioLabel?: string;
+  isPriceStale?: boolean;
+  isUsingCachedData?: boolean;
 }
 
 const ALERTS_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
@@ -77,10 +79,24 @@ function Header({
   darkMode,
   onToggleDarkMode,
   activePortfolioLabel = 'Family',
+  isPriceStale = false,
+  isUsingCachedData = false,
 }: HeaderProps) {
   const isGain = totalPnL >= 0;
   const isLoading = status === 'loading';
   const [openAlerts, setOpenAlerts] = useState(false);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const visibleAlerts = alerts;
 
@@ -125,7 +141,55 @@ function Header({
             <div className="h-4 w-px bg-[var(--border-subtle)]" />
 
             {/* Compact Action Icons */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
+              {/* Status Pill Badge */}
+              <button
+                onClick={onRefresh}
+                title={
+                  !isOnline
+                    ? 'Offline mode. Connect to the internet to sync.'
+                    : isUsingCachedData
+                    ? 'Displaying cached portfolio data.'
+                    : isLoading
+                    ? 'Syncing live market prices...'
+                    : isPriceStale || status === 'error'
+                    ? 'Prices may be outdated (>15m). Click to refresh.'
+                    : `Prices live & up to date.${lastUpdated ? ` Last synced at ${lastUpdated.toLocaleTimeString()}` : ''}`
+                }
+                className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
+                  !isOnline || isUsingCachedData
+                    ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/40'
+                    : isLoading
+                    ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/40'
+                    : isPriceStale || status === 'error'
+                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/40 hover:bg-amber-500/20'
+                    : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40'
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    !isOnline || isUsingCachedData
+                      ? 'bg-rose-500'
+                      : isLoading
+                      ? 'bg-blue-500 animate-pulse'
+                      : isPriceStale || status === 'error'
+                      ? 'bg-amber-500'
+                      : 'bg-emerald-500'
+                  }`}
+                />
+                <span>
+                  {!isOnline
+                    ? 'Offline'
+                    : isUsingCachedData
+                    ? 'Cached'
+                    : isLoading
+                    ? 'Syncing'
+                    : isPriceStale || status === 'error'
+                    ? 'Stale'
+                    : 'Live'}
+                </span>
+              </button>
+
               {/* Sync Status / Refresh button */}
               <IconButton
                 icon={<RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />}

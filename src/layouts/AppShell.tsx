@@ -355,6 +355,8 @@ export default function AppShell() {
         darkMode={darkMode}
         onToggleDarkMode={toggleDarkMode}
         activePortfolioLabel={summaryData.label}
+        isPriceStale={isPriceStale}
+        isUsingCachedData={isUsingCachedData}
       />
 
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">

@@ -184,6 +184,11 @@ function parseCSV(text: string): string[][] {
 function csvToImportRows(rows: string[][]): { parsed: ImportRow[]; errors: string[] } {
   if (rows.length < 2) return { parsed: [], errors: ['File is empty or has no data rows'] };
 
+  const MAX_IMPORT_ROWS = 500;
+  if (rows.length - 1 > MAX_IMPORT_ROWS) {
+    return { parsed: [], errors: [`CSV import exceeds maximum limit of ${MAX_IMPORT_ROWS} rows.`] };
+  }
+
   const headers = rows[0].map((h) => h.toLowerCase().replace(/[^a-z_]/g, ''));
   const nameIdx = headers.findIndex((h) => h.includes('stock_name') || h.includes('stockname') || h.includes('name'));
   const tickerIdx = headers.findIndex((h) => h.includes('ticker') || h.includes('symbol'));
@@ -197,21 +202,42 @@ function csvToImportRows(rows: string[][]): { parsed: ImportRow[]; errors: strin
 
   const parsed: ImportRow[] = [];
   const errors: string[] = [];
+  const seenTickers = new Set<string>();
 
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
-    const ticker = row[tickerIdx] || '';
+    if (!row || row.length === 0 || row.every((c) => !c.trim())) continue; // Skip blank lines
+
+    // Sanitize string inputs: strip HTML/script tags and special control characters
+    const rawTicker = (row[tickerIdx] || '').trim().replace(/[^\w.-]/g, '').toUpperCase().slice(0, 20);
+    const rawName = nameIdx >= 0 ? (row[nameIdx] || '').trim().replace(/<[^>]*>/g, '').slice(0, 100) : '';
+    const rawYahoo = yahooIdx >= 0 ? (row[yahooIdx] || '').trim().replace(/<[^>]*>/g, '').slice(0, 50) : '';
     const qty = parseFloat(row[qtyIdx] || '0');
     const avg_price = parseFloat(row[priceIdx] || '0');
 
-    if (!ticker) { errors.push(`Row ${i + 1}: Missing ticker`); continue; }
-    if (isNaN(qty) || qty <= 0) { errors.push(`Row ${i + 1}: Invalid qty`); continue; }
-    if (isNaN(avg_price) || avg_price < 0) { errors.push(`Row ${i + 1}: Invalid price`); continue; }
+    if (!rawTicker) {
+      errors.push(`Row ${i + 1}: Missing or invalid stock ticker symbol.`);
+      continue;
+    }
+    if (isNaN(qty) || qty <= 0 || !isFinite(qty) || qty > 10_000_000) {
+      errors.push(`Row ${i + 1} (${rawTicker}): Invalid quantity '${row[qtyIdx]}'. Must be a positive number up to 10,000,000.`);
+      continue;
+    }
+    if (isNaN(avg_price) || avg_price < 0 || !isFinite(avg_price) || avg_price > 100_000_000) {
+      errors.push(`Row ${i + 1} (${rawTicker}): Invalid price '${row[priceIdx]}'. Must be a non-negative number up to 100,000,000.`);
+      continue;
+    }
+
+    if (seenTickers.has(rawTicker)) {
+      errors.push(`Row ${i + 1}: Duplicate ticker '${rawTicker}' found in CSV. Combine holdings into a single row before importing.`);
+      continue;
+    }
+    seenTickers.add(rawTicker);
 
     parsed.push({
-      stock_name: nameIdx >= 0 ? (row[nameIdx] || ticker) : ticker,
-      ticker,
-      yahoo_symbol: yahooIdx >= 0 ? (row[yahooIdx] || `${ticker}.NS`) : `${ticker}.NS`,
+      stock_name: rawName || rawTicker,
+      ticker: rawTicker,
+      yahoo_symbol: rawYahoo || `${rawTicker}.NS`,
       qty,
       avg_price,
     });

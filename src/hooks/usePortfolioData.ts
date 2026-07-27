@@ -39,6 +39,34 @@ interface DBHolding {
   created_at?: string;
 }
 
+const VALID_ASSET_TYPES = new Set([
+  'holding',
+  'fixed_deposit',
+  'rd_account',
+  'sip_account',
+  'gold_holding',
+  'real_estate',
+  'insurance',
+  'document',
+  'portfolio',
+]);
+
+function validateMutationInput(assetType: string, id?: string, payload?: Record<string, unknown>) {
+  if (!VALID_ASSET_TYPES.has(assetType)) {
+    throw new AppApiError(`Invalid asset type '${assetType}'`, 'config');
+  }
+  if (id !== undefined && (!id || typeof id !== 'string' || !id.trim())) {
+    throw new AppApiError('Valid Asset ID is required for mutation', 'config');
+  }
+  if (payload) {
+    for (const [key, val] of Object.entries(payload)) {
+      if (typeof val === 'number' && (isNaN(val) || !isFinite(val))) {
+        throw new AppApiError(`Invalid number for field '${key}'`, 'config');
+      }
+    }
+  }
+}
+
 interface DBPortfolio {
   id: string;
   name: string;
@@ -708,11 +736,20 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   }, [load]);
 
   const addPortfolio = useCallback(async (name: string, label: string) => {
+    const trimmedName = (name || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    const trimmedLabel = (label || '').trim();
+    if (!trimmedName || !trimmedLabel) {
+      throw new AppApiError('Portfolio name and label are required', 'config');
+    }
+    if (trimmedLabel.length > 50) {
+      throw new AppApiError('Portfolio label cannot exceed 50 characters', 'config');
+    }
+
     return runMutation(async () => {
       try {
         await invokeFunction<unknown>('holdings-crud?action=add_portfolio', {
           method: 'POST',
-          body: { name, label },
+          body: { name: trimmedName, label: trimmedLabel },
         });
         await invalidateIDBCache();
         await load();
@@ -724,6 +761,14 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   }, [runMutation, load, handleAuthExpired, invalidateIDBCache]);
 
   const renamePortfolio = useCallback(async (portfolioId: string, newLabel: string) => {
+    const trimmedLabel = (newLabel || '').trim();
+    if (!portfolioId || !trimmedLabel) {
+      throw new AppApiError('Portfolio ID and non-empty label are required', 'config');
+    }
+    if (trimmedLabel.length > 50) {
+      throw new AppApiError('Portfolio label cannot exceed 50 characters', 'config');
+    }
+
     return runMutation(async () => {
       try {
         await invokeFunction<unknown>('holdings-crud?action=update', {
@@ -731,12 +776,12 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           body: {
             asset_type: 'portfolio',
             id: portfolioId,
-            label: newLabel,
+            label: trimmedLabel,
           },
         });
         await invalidateIDBCache();
         setPortfolios((prev) =>
-          prev.map((p) => (p.id === portfolioId ? { ...p, label: newLabel } : p))
+          prev.map((p) => (p.id === portfolioId ? { ...p, label: trimmedLabel } : p))
         );
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
@@ -751,6 +796,12 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     payload: AssetPayload,
     options: AssetMutationOptions = {}
   ) => {
+    const recordPayload = (payload as unknown) as Record<string, unknown>;
+    validateMutationInput(assetType, undefined, recordPayload);
+    if (!portfolioName || !portfolioName.trim()) {
+      throw new AppApiError('Target portfolio name is required', 'config');
+    }
+
     return runMutation(async () => {
       try {
         const finalPayload = { ...payload } as Record<string, unknown>;
@@ -774,6 +825,9 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   }, [runMutation, load, handleAuthExpired, invalidateIDBCache]);
 
   const updateAsset = useCallback(async (assetType: string, id: string, payload: Partial<AssetPayload>) => {
+    const recordPayload = (payload as unknown) as Record<string, unknown>;
+    validateMutationInput(assetType, id, recordPayload);
+
     return runMutation(async () => {
       try {
         const finalPayload = { ...payload } as Record<string, unknown>;
@@ -795,6 +849,8 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   }, [runMutation, load, handleAuthExpired, invalidateIDBCache]);
 
   const deleteAsset = useCallback(async (assetType: string, id: string) => {
+    validateMutationInput(assetType, id);
+
     return runMutation(async () => {
       try {
         await invokeFunction<unknown>('holdings-crud?action=delete', {
