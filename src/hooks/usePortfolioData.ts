@@ -103,13 +103,6 @@ function dbToHolding(h: DBHolding): Holding {
   };
 }
 
-function isGoldHolding(h: Holding): boolean {
-  const ticker = (h.ticker || '').toLowerCase();
-  const name = (h.stockName || '').toLowerCase();
-  const symbol = (h.yahooSymbol || '').toLowerCase();
-  return ticker.includes('gold') || name.includes('gold') || symbol.includes('gold');
-}
-
 function recalcPortfolioTotals(
   holdings: Holding[],
   fds: FixedDeposit[],
@@ -118,11 +111,8 @@ function recalcPortfolioTotals(
   gold: GoldHolding[],
   realEstate: RealEstate[]
 ) {
-  const goldHoldingsFromStocks = holdings.filter(isGoldHolding);
-  const actualStocks = holdings.filter((h) => !isGoldHolding(h));
-
-  const stockInvested = actualStocks.reduce((sum, h) => sum + h.amountInvested, 0);
-  const stockCurrent = actualStocks.reduce((sum, h) => sum + h.currentValue, 0);
+  const stockInvested = holdings.reduce((sum, h) => sum + h.amountInvested, 0);
+  const stockCurrent = holdings.reduce((sum, h) => sum + h.currentValue, 0);
 
   const fdInvested = fds.reduce((sum, f) => sum + getFDInvestedAmount(f), 0);
   const fdCurrent = fds.reduce((sum, f) => sum + getFDEffectiveValue(f), 0);
@@ -133,11 +123,8 @@ function recalcPortfolioTotals(
   const sipInvested = sipAccounts.reduce((sum, s) => sum + getSIPInvestedAmount(s), 0);
   const sipCurrent = sipAccounts.reduce((sum, s) => sum + getSIPEffectiveValue(s), 0);
 
-  const goldInvestedFromStocks = goldHoldingsFromStocks.reduce((sum, h) => sum + h.amountInvested, 0);
-  const goldCurrentFromStocks = goldHoldingsFromStocks.reduce((sum, h) => sum + h.currentValue, 0);
-
-  const goldInvested = gold.reduce((sum, g) => sum + Number(g.purchase_price), 0) + goldInvestedFromStocks;
-  const goldCurrent = gold.reduce((sum, g) => sum + Number(g.current_valuation), 0) + goldCurrentFromStocks;
+  const goldInvested = gold.reduce((sum, g) => sum + Number(g.purchase_price), 0);
+  const goldCurrent = gold.reduce((sum, g) => sum + Number(g.current_valuation), 0);
 
   const reInvested = realEstate.reduce((sum, r) => sum + Number(r.purchase_price), 0);
   const reCurrent = realEstate.reduce((sum, r) => sum + Number(r.current_valuation), 0);
