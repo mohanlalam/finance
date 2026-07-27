@@ -10,7 +10,7 @@ export function getRDInvestedAmount(account: RDAccount): number {
   }
   const startDate = new Date(account.start_date);
   const now = new Date();
-  const elapsedMonths = Math.max(1, (now.getFullYear() - startDate.getFullYear()) * 12 + now.getMonth() - startDate.getMonth());
+  const elapsedMonths = Math.max(0, (now.getFullYear() - startDate.getFullYear()) * 12 + now.getMonth() - startDate.getMonth());
   return elapsedMonths * Number(account.monthly_deposit);
 }
 

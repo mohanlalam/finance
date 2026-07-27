@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 export function useKeyboardShortcuts(onRefresh: () => void) {
   useEffect(() => {
     function handleKeyboard(e: KeyboardEvent) {
-      // Ctrl+Shift+R — Refresh prices
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
+      // Ctrl+Shift+R — Refresh prices (case-insensitive to handle Caps Lock variations)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'r') {
         e.preventDefault();
         onRefresh();
       }

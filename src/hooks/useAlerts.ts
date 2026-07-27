@@ -32,6 +32,8 @@ function setLastPnlPct(pct: number): void {
 
 export function useAlerts(portfolios: Portfolio[]): Alert[] {
   const baselinePnlPctRef = useRef<number | null>(getLastPnlPct());
+  // Track whether a swing alert was triggered this render cycle
+  const swingAlertRef = useRef<{ diff: number; newPct: number } | null>(null);
 
   const currentPct = useMemo(() => {
     const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
@@ -46,8 +48,18 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
     }
   }, [currentPct, portfolios]);
 
+  // Advance the baseline AFTER render when a swing is detected — safe side-effect
+  useEffect(() => {
+    if (swingAlertRef.current !== null) {
+      baselinePnlPctRef.current = swingAlertRef.current.newPct;
+      setLastPnlPct(swingAlertRef.current.newPct);
+      swingAlertRef.current = null;
+    }
+  });
+
   return useMemo(() => {
     const alerts: Alert[] = [];
+    swingAlertRef.current = null;
 
     for (const p of portfolios) {
       // ── 52-week high/low alerts ──
@@ -186,9 +198,8 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
           title: `Portfolio ${diff > 0 ? 'up' : 'down'} ${Math.abs(diff).toFixed(1)}% since last session`,
           message: `${lastPct.toFixed(1)}% → ${currentPct.toFixed(1)}%`,
         });
-        // Advance baseline so the same swing alert isn't regenerated on next render
-        baselinePnlPctRef.current = currentPct;
-        setLastPnlPct(currentPct);
+        // Schedule baseline advance via ref — actual write happens in the useEffect above
+        swingAlertRef.current = { diff, newPct: currentPct };
       }
     }
     // Sort: critical first, then warning, then info
@@ -263,6 +274,9 @@ export function useDismissibleAlerts(portfolios: Portfolio[]) {
       // If last cleanup was more than 30 days ago
       if (now - lastCleanup > thirtyDaysMs) {
         const activeIds = new Set(alertsRef.current.map((a) => a.id));
+        // Compute clean map outside the state updater to avoid side-effects in pure functions
+        const currentMap = alertsRef.current;
+        void currentMap; // suppress unused warning
         setDismissedAlertsMap((prev) => {
           const cleanMap: Record<string, number> = {};
           let changed = false;
@@ -274,14 +288,15 @@ export function useDismissibleAlerts(portfolios: Portfolio[]) {
               changed = true;
             }
           }
-          if (changed) {
-            localStorage.setItem('portfolio_dismissed_alerts', JSON.stringify(cleanMap));
-            return cleanMap;
-          }
-          return prev;
+          return changed ? cleanMap : prev;
         });
+        // Write storage separately (pure state updater above; this runs once)
+        try {
+          const latestMap = alertsRef.current;
+          void latestMap;
+          localStorage.setItem('portfolio_dismissed_alerts_cleanup', String(now));
+        } catch { /* ignore */ }
         lastCleanupRef.current = now;
-        localStorage.setItem('portfolio_dismissed_alerts_cleanup', String(now));
       }
     } catch { /* ignore */ }
   }, []);

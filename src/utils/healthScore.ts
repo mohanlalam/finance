@@ -46,13 +46,14 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
 
   // Check if any single asset class exceeds 60% of total wealth (only if totalValue > 0)
   if (totalValue > 0) {
-    const stockPct = (breakdown.stocks / totalValue) * 100;
+    // Include SIP mutual funds in equity exposure — they are also equities
+    const equityPct = ((breakdown.stocks + breakdown.sip) / totalValue) * 100;
     const debtPct = ((breakdown.fd + breakdown.rd) / totalValue) * 100;
     const rePct = (breakdown.realEstate / totalValue) * 100;
 
-    if (stockPct > 60) {
+    if (equityPct > 60) {
       score -= 5;
-      risks.push(`⚠ High equity exposure (${stockPct.toFixed(0)}%): vulnerable to market volatility`);
+      risks.push(`⚠ High equity exposure (${equityPct.toFixed(0)}%): vulnerable to market volatility`);
     }
     if (debtPct > 70) {
       score -= 5;

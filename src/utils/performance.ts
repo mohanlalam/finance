@@ -137,7 +137,8 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
     for (const rd of portfolio.rdAccounts) {
       const age = processDate(rd.start_date) ?? 0;
       const invested = getRDInvestedAmount(rd);
-      weightedTimeSum += invested * age;
+      // RD contributions are spread monthly, so average capital age is ~half of total elapsed time
+      weightedTimeSum += invested * (age / 2);
       totalInvested += invested;
     }
   }
@@ -149,7 +150,8 @@ export function calculateWeightedAge(portfolio: Portfolio): number {
     for (const sip of portfolio.sipAccounts) {
       const age = processDate(sip.start_date) ?? 0;
       const invested = getSIPInvestedAmount(sip);
-      weightedTimeSum += invested * age;
+      // SIP contributions are spread monthly, so average capital age is ~half of total elapsed time
+      weightedTimeSum += invested * (age / 2);
       totalInvested += invested;
     }
   }
@@ -275,7 +277,12 @@ export function getPortfolioCashFlows(portfolio: Portfolio): CashFlow[] {
         const elapsed = rawMonths + (currentDayOfMonth >= dayOfMonth ? 1 : 0);
         const monthlyAmount = Number(rd.monthly_deposit);
         for (let m = 0; m < elapsed; m++) {
-          const flowDate = new Date(start.getFullYear(), start.getMonth() + m, start.getDate());
+          const targetYear = start.getFullYear();
+          const targetMonth = start.getMonth() + m;
+          // Clamp day to last valid day of target month to avoid JS date rollover (e.g. Jan 31 -> Mar 2)
+          const lastDayOfMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+          const clampedDay = Math.min(start.getDate(), lastDayOfMonth);
+          const flowDate = new Date(targetYear, targetMonth, clampedDay);
           if (flowDate.getTime() <= end.getTime()) {
             addFlow(flowDate.toISOString().split('T')[0], monthlyAmount);
           }
@@ -302,7 +309,12 @@ export function getPortfolioCashFlows(portfolio: Portfolio): CashFlow[] {
       const monthlyAmount = Number(sip.monthly_sip);
 
       for (let m = 0; m < elapsed; m++) {
-        const flowDate = new Date(start.getFullYear(), start.getMonth() + m, start.getDate());
+        const targetYear = start.getFullYear();
+        const targetMonth = start.getMonth() + m;
+        // Clamp day to last valid day of target month to avoid JS date rollover (e.g. Jan 31 -> Mar 2)
+        const lastDayOfMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+        const clampedDay = Math.min(start.getDate(), lastDayOfMonth);
+        const flowDate = new Date(targetYear, targetMonth, clampedDay);
         if (flowDate.getTime() <= end.getTime()) {
           addFlow(flowDate.toISOString().split('T')[0], monthlyAmount);
         }

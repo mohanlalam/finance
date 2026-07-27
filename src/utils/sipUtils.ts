@@ -15,7 +15,7 @@ export function getSIPInvestedAmount(account: SIPAccount): number {
   const dayOfMonth = start.getDate();
   const currentDayOfMonth = end.getDate();
   const elapsed = rawMonths + (currentDayOfMonth >= dayOfMonth ? 1 : 0);
-  return Number(account.monthly_sip) * Math.max(1, elapsed);
+  return Number(account.monthly_sip) * Math.max(0, elapsed);
 }
 
 const navCache = new Map<string, { value: number; name: string; fetchedAt: number }>();
