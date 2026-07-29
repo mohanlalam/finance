@@ -40,15 +40,29 @@ interface DBHolding {
 }
 
 const VALID_ASSET_TYPES = new Set([
+  'stock',
+  'stocks',
   'holding',
+  'holdings',
+  'fd',
   'fixed_deposit',
+  'fixed_deposits',
+  'rd',
   'rd_account',
+  'rd_accounts',
+  'sip',
   'sip_account',
+  'sip_accounts',
+  'gold',
   'gold_holding',
+  'gold_holdings',
   'real_estate',
   'insurance',
+  'insurances',
   'document',
+  'documents',
   'portfolio',
+  'portfolios',
 ]);
 
 function validateMutationInput(assetType: string, id?: string, payload?: Record<string, unknown>) {

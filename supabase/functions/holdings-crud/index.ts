@@ -161,7 +161,7 @@ Deno.serve(async (req: Request) => {
       let insertData;
       let insertError;
 
-      if (!asset_type || asset_type === "stock") {
+      if (!asset_type || asset_type === "stock" || asset_type === "holding" || asset_type === "stocks") {
         const { data: maxSno } = await supabase
           .from("holdings")
           .select("sno")
@@ -190,7 +190,7 @@ Deno.serve(async (req: Request) => {
           .single();
         insertData = res.data;
         insertError = res.error;
-      } else if (asset_type === "fd") {
+      } else if (asset_type === "fd" || asset_type === "fixed_deposit") {
         const res = await supabase
           .from("fixed_deposits")
           .insert({
@@ -215,7 +215,7 @@ Deno.serve(async (req: Request) => {
         insertData = res.data;
         insertError = res.error;
 
-      } else if (asset_type === "rd_account") {
+      } else if (asset_type === "rd_account" || asset_type === "rd") {
         const res = await supabase
           .from("rd_accounts")
           .insert({
@@ -234,7 +234,7 @@ Deno.serve(async (req: Request) => {
           .single();
         insertData = res.data;
         insertError = res.error;
-      } else if (asset_type === "sip_account") {
+      } else if (asset_type === "sip_account" || asset_type === "sip") {
         const res = await supabase
           .from("sip_accounts")
           .insert({
@@ -253,7 +253,7 @@ Deno.serve(async (req: Request) => {
           .single();
         insertData = res.data;
         insertError = res.error;
-      } else if (asset_type === "gold") {
+      } else if (asset_type === "gold" || asset_type === "gold_holding") {
         const res = await supabase
           .from("gold_holdings")
           .insert({
@@ -343,12 +343,12 @@ Deno.serve(async (req: Request) => {
       const updates: Record<string, unknown> = {};
       let table = "holdings";
 
-      if (!asset_type || asset_type === "stock") {
+      if (!asset_type || asset_type === "stock" || asset_type === "holding" || asset_type === "stocks") {
         table = "holdings";
         if (payload.qty !== undefined) updates.qty = Number(payload.qty);
         if (payload.avgPrice !== undefined) updates.avg_price = Number(payload.avgPrice);
         if (payload.amountInvested !== undefined) updates.amount_invested = Number(payload.amountInvested);
-      } else if (asset_type === "fd") {
+      } else if (asset_type === "fd" || asset_type === "fixed_deposit") {
         table = "fixed_deposits";
         if (payload.bankName !== undefined) updates.bank_name = payload.bankName;
         if (payload.principalAmount !== undefined) updates.principal_amount = Number(payload.principalAmount);
@@ -363,7 +363,7 @@ Deno.serve(async (req: Request) => {
         if (payload.units !== undefined) updates.units = payload.units !== null ? Number(payload.units) : null;
         if (payload.notes !== undefined) updates.notes = payload.notes;
 
-      } else if (asset_type === "rd_account") {
+      } else if (asset_type === "rd_account" || asset_type === "rd") {
         table = "rd_accounts";
         if (payload.bank_name !== undefined) updates.bank_name = payload.bank_name;
         if (payload.monthly_deposit !== undefined) updates.monthly_deposit = Number(payload.monthly_deposit);
@@ -374,7 +374,7 @@ Deno.serve(async (req: Request) => {
         if (payload.status !== undefined) updates.status = payload.status;
         if (payload.contributions !== undefined) updates.contributions = payload.contributions;
         if (payload.notes !== undefined) updates.notes = payload.notes;
-      } else if (asset_type === "sip_account") {
+      } else if (asset_type === "sip_account" || asset_type === "sip") {
         table = "sip_accounts";
         if (payload.fund_name !== undefined) updates.fund_name = payload.fund_name;
         if (payload.monthly_sip !== undefined) updates.monthly_sip = Number(payload.monthly_sip);
@@ -385,7 +385,7 @@ Deno.serve(async (req: Request) => {
         if (payload.fallback_valuation !== undefined) updates.fallback_valuation = Number(payload.fallback_valuation);
         if (payload.mf_scheme_code !== undefined) updates.mf_scheme_code = payload.mf_scheme_code;
         if (payload.notes !== undefined) updates.notes = payload.notes;
-      } else if (asset_type === "gold") {
+      } else if (asset_type === "gold" || asset_type === "gold_holding") {
         table = "gold_holdings";
         if (payload.itemName !== undefined) updates.item_name = payload.itemName;
         if (payload.purity !== undefined) updates.purity = payload.purity;
@@ -450,16 +450,15 @@ Deno.serve(async (req: Request) => {
       if (!targetId) throw new Error("ID is required");
 
       let table = "holdings";
-      if (!asset_type || asset_type === "stock") {
+      if (!asset_type || asset_type === "stock" || asset_type === "holding" || asset_type === "stocks") {
         table = "holdings";
-      } else if (asset_type === "fd") {
+      } else if (asset_type === "fd" || asset_type === "fixed_deposit") {
         table = "fixed_deposits";
-
-      } else if (asset_type === "rd_account") {
+      } else if (asset_type === "rd_account" || asset_type === "rd") {
         table = "rd_accounts";
-      } else if (asset_type === "sip_account") {
+      } else if (asset_type === "sip_account" || asset_type === "sip") {
         table = "sip_accounts";
-      } else if (asset_type === "gold") {
+      } else if (asset_type === "gold" || asset_type === "gold_holding") {
         table = "gold_holdings";
       } else if (asset_type === "real_estate") {
         table = "real_estate";
