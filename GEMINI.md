@@ -24,6 +24,7 @@ This document provides a high-level overview of the folder structure, data flow,
   * Connects to Supabase Edge Functions via [apiClient.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/apiClient.ts). Now implements session-level in-memory caching of the computed SHA-256 PIN hash (`_cachedPinHash`) to eliminate encryption overhead on every API call. This cache is automatically cleared if a 401 Unauthorized response is received.
   * Manages stock price caching (15-minute TTL) and live polling.
   * Implements a fallback response in SWR fetchers to prevent hanging promises and stuck `"Syncing prices..."` loading screens when a portfolio contains no stock holdings or active SIPs.
+  * Validates all mutation payload inputs against a comprehensive `VALID_ASSET_TYPES` registry covering all frontend/backend aliases (`stock`, `stocks`, `holding`, `holdings`, `fd`, `rd`, `sip`, `gold`, `documents`, etc.).
 * **[supabaseClient.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/supabaseClient.ts)**
   * Dynmically initializes the Supabase JS SDK. Refactored to dynamically import `@supabase/supabase-js` only when `getSupabase()` is executed, preventing the large client library (~117 kB) from loading inside the initial auth bundle.
 * **[useRDData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useRDData.ts)**
