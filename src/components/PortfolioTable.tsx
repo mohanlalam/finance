@@ -393,7 +393,7 @@ export default React.memo(function PortfolioTable({
               <Th label="% P&L" k="pnlPercent" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
               <Th label="Today %" k="todayPnLPercent" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
               <Th label="Allocation %" k={"_allocation" as SortKey} sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} hideArrow={true} />
-              {onDelete && <th role="columnheader" className="px-4 py-3 w-10" />}
+              {(onDelete || onUpdate) && <th role="columnheader" className="px-4 py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-700/40" role="rowgroup">
@@ -443,13 +443,13 @@ export default React.memo(function PortfolioTable({
                       </div>
                     ) : (
                       <span
-                        className={`inline-flex items-center gap-1 ${onUpdate && h.id ? 'cursor-pointer group/qty hover:text-blue-600' : ''}`}
+                        className={`inline-flex items-center gap-1 ${onUpdate && h.id ? 'cursor-pointer hover:text-blue-600' : ''}`}
                         onClick={() => startEdit(h)}
                         title={onUpdate && h.id ? 'Click to edit quantity' : undefined}
                       >
                         {formatNumber(h.qty, 0)}
                         {onUpdate && h.id && (
-                          <Pencil size={11} className="opacity-0 group-hover/qty:opacity-100 text-blue-400 transition-opacity" />
+                          <Pencil size={11} className="text-blue-500/70 dark:text-blue-400/70 hover:text-blue-600 transition-colors" />
                         )}
                       </span>
                     )}
@@ -476,13 +476,13 @@ export default React.memo(function PortfolioTable({
                       </div>
                     ) : (
                       <span
-                        className={`inline-flex items-center gap-1 ${onUpdate && h.id ? 'cursor-pointer group/price hover:text-blue-600' : ''}`}
+                        className={`inline-flex items-center gap-1 ${onUpdate && h.id ? 'cursor-pointer hover:text-blue-600' : ''}`}
                         onClick={() => startEdit(h)}
                         title={onUpdate && h.id ? 'Click to edit average price' : undefined}
                       >
                         ₹{formatNumber(h.avgPrice)}
                         {onUpdate && h.id && (
-                          <Pencil size={11} className="opacity-0 group-hover/price:opacity-100 text-blue-400 transition-opacity" />
+                          <Pencil size={11} className="text-blue-500/70 dark:text-blue-400/70 hover:text-blue-600 transition-colors" />
                         )}
                       </span>
                     )}
@@ -509,16 +509,31 @@ export default React.memo(function PortfolioTable({
                       {((h as Record<string, unknown>)._allocation as number).toFixed(1)}%
                     </span>
                   </td>
-                  {onDelete && (
-                    <td role="cell" className="px-2 py-3">
-                      <button
-                        onClick={() => handleDelete(h)}
-                        disabled={isDeleting}
-                        title="Delete holding"
-                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
-                      >
-                        <Trash2 size={13} />
-                      </button>
+                  {(onDelete || onUpdate) && (
+                    <td role="cell" className="px-2 py-3 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        {onUpdate && h.id && (
+                          <button
+                            onClick={() => startEdit(h)}
+                            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                            title="Edit quantity & avg price"
+                            aria-label="Edit holding quantity and price"
+                          >
+                            <Pencil size={13} />
+                          </button>
+                        )}
+                        {onDelete && h.id && (
+                          <button
+                            onClick={() => handleDelete(h)}
+                            disabled={isDeleting}
+                            title="Delete holding"
+                            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                            aria-label="Delete holding"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   )}
                 </tr>
@@ -533,7 +548,7 @@ export default React.memo(function PortfolioTable({
               <td role="cell" className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
                 {totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}
               </td>
-              <td role="cell" colSpan={onDelete ? 4 : 3} className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
+              <td role="cell" colSpan={(onDelete || onUpdate) ? 4 : 3} className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
                 {formatPercent(totalPnLPercent)}
               </td>
             </tr>
