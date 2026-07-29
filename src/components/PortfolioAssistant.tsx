@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { Portfolio } from '../types/portfolio';
 import { askAssistant, AssistantResponse } from '../utils/assistant';
 import { Send, Sparkles, Trash2, Copy, Check } from './icons/AppIcons';
+import ConfirmModal from './ConfirmModal';
 
 interface PortfolioAssistantProps {
   portfolios: Portfolio[];
@@ -294,8 +295,15 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
     triggerAssistant(suggestedQuery);
   };
 
+  const [showConfirmClear, setShowConfirmClear] = useState(false);
+
   const handleClear = () => {
+    setShowConfirmClear(true);
+  };
+
+  const confirmClearChat = () => {
     setMessages([welcomeMessage]);
+    setShowConfirmClear(false);
   };
 
   return (
@@ -426,6 +434,16 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
           <Send size={13} />
         </button>
       </form>
+
+      <ConfirmModal
+        isOpen={showConfirmClear}
+        onClose={() => setShowConfirmClear(false)}
+        onConfirm={confirmClearChat}
+        title="Clear Chat History"
+        message="Are you sure you want to clear your conversation history with the AI Assistant?"
+        confirmLabel="Clear"
+        variant="danger"
+      />
     </div>
   );
 }

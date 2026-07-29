@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { Trash2, Pencil, Loader2, Check, X, SlidersHorizontal } from './icons/AppIcons';
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent, pnlColor } from '../utils/formatters';
+import ConfirmModal from './ConfirmModal';
 
 type SortPreset = 'value' | 'pnl' | 'pnlPct' | 'todayPct' | 'allocation';
 
@@ -77,7 +78,7 @@ export default React.memo(function PortfolioTable({
   const [sortAsc, setSortAsc] = useState(false);
   const [activePreset, setActivePreset] = useState<SortPreset | null>('value');
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Holding | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editQty, setEditQty] = useState('');
   const [editAvgPrice, setEditAvgPrice] = useState('');
@@ -132,20 +133,21 @@ export default React.memo(function PortfolioTable({
     setSortAsc(p.asc);
   }
 
-  async function handleDelete(h: Holding) {
+  function handleDelete(h: Holding) {
     if (!onDelete || !h.id) return;
-    if (confirmId !== h.id) {
-      setConfirmId(h.id);
-      return;
-    }
-    setDeletingId(h.id);
-    setConfirmId(null);
+    setConfirmDelete(h);
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete || !onDelete || !confirmDelete.id) return;
+    setDeletingId(confirmDelete.id);
     try {
-      await onDelete(h.id);
+      await onDelete(confirmDelete.id);
+      setConfirmDelete(null);
     } finally {
       setDeletingId(null);
     }
-  }
+  };
 
   function startEdit(h: Holding) {
     if (!onUpdate || !h.id) return;
@@ -249,7 +251,6 @@ export default React.memo(function PortfolioTable({
           ) : (
             sorted.map((h) => {
             const isDeleting = deletingId === h.id;
-            const isConfirming = confirmId === h.id;
             const isEditing = editingId === h.id;
 
             return (
@@ -360,12 +361,8 @@ export default React.memo(function PortfolioTable({
                       {onDelete && h.id && (
                         <button
                           onClick={() => handleDelete(h)}
-                          className={`p-1 rounded transition-colors ${
-                            isConfirming
-                              ? 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400'
-                              : 'text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20'
-                          }`}
-                          aria-label={isConfirming ? 'Confirm delete' : 'Delete holding'}
+                          className="p-1 rounded transition-colors text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                          aria-label="Delete holding"
                         >
                           <Trash2 size={11} />
                         </button>
@@ -402,7 +399,6 @@ export default React.memo(function PortfolioTable({
           <tbody className="divide-y divide-slate-50 dark:divide-slate-700/40" role="rowgroup">
             {sorted.map((h) => {
               const isDeleting = deletingId === h.id;
-              const isConfirming = confirmId === h.id;
               return (
                 <tr
                   role="row"
@@ -518,13 +514,8 @@ export default React.memo(function PortfolioTable({
                       <button
                         onClick={() => handleDelete(h)}
                         disabled={isDeleting}
-                        title={isConfirming ? 'Click again to confirm delete' : 'Delete holding'}
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
-                          isConfirming
-                            ? 'bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400 hover:bg-red-200'
-                            : 'text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20'
-                        }`}
-                        onBlur={() => setConfirmId(null)}
+                        title="Delete holding"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -549,6 +540,17 @@ export default React.memo(function PortfolioTable({
           </tfoot>
         </table>
       </div>
+
+      <ConfirmModal
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Holding"
+        message={confirmDelete ? `Are you sure you want to delete "${confirmDelete.stockName || confirmDelete.ticker}"? This action cannot be undone.` : ''}
+        confirmLabel="Delete"
+        variant="danger"
+        isLoading={deletingId === confirmDelete?.id}
+      />
     </div>
   );
 });
