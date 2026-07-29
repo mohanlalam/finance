@@ -133,16 +133,21 @@ export default React.memo(function PortfolioTable({
     setSortAsc(p.asc);
   }
 
+  function getHoldingId(h: Holding): string {
+    return h.id || h.ticker || String(h.sno);
+  }
+
   function handleDelete(h: Holding) {
-    if (!onDelete || !h.id) return;
+    if (!onDelete) return;
     setConfirmDelete(h);
   }
 
   const handleConfirmDelete = async () => {
-    if (!confirmDelete || !onDelete || !confirmDelete.id) return;
-    setDeletingId(confirmDelete.id);
+    if (!confirmDelete || !onDelete) return;
+    const targetId = getHoldingId(confirmDelete);
+    setDeletingId(targetId);
     try {
-      await onDelete(confirmDelete.id);
+      await onDelete(targetId);
       setConfirmDelete(null);
     } finally {
       setDeletingId(null);
@@ -150,8 +155,9 @@ export default React.memo(function PortfolioTable({
   };
 
   function startEdit(h: Holding) {
-    if (!onUpdate || !h.id) return;
-    setEditingId(h.id);
+    if (!onUpdate) return;
+    const targetId = getHoldingId(h);
+    setEditingId(targetId);
     setEditQty(String(h.qty));
     setEditAvgPrice(String(h.avgPrice));
     setEditError('');
@@ -165,7 +171,8 @@ export default React.memo(function PortfolioTable({
   }
 
   async function saveEdit(h: Holding) {
-    if (!onUpdate || !h.id) return;
+    if (!onUpdate) return;
+    const targetId = getHoldingId(h);
     const newQty = parseFloat(editQty);
     const newAvgPrice = parseFloat(editAvgPrice);
     if (isNaN(newQty) || newQty <= 0) {
@@ -180,10 +187,10 @@ export default React.memo(function PortfolioTable({
       cancelEdit();
       return;
     }
-    setUpdatingId(h.id);
+    setUpdatingId(targetId);
     setEditError('');
     try {
-      await onUpdate(h.id, newQty, newAvgPrice);
+      await onUpdate(targetId, newQty, newAvgPrice);
       setEditingId(null);
       setEditQty('');
       setEditAvgPrice('');
@@ -348,23 +355,25 @@ export default React.memo(function PortfolioTable({
                   </div>
 
                   {!isEditing && (
-                    <div className="flex items-center gap-2">
-                      {onUpdate && h.id && (
+                    <div className="flex items-center gap-1.5">
+                      {onUpdate && (
                         <button
                           onClick={() => startEdit(h)}
-                          className="p-1 rounded text-slate-400 hover:text-blue-500 hover:bg-slate-100 dark:hover:bg-slate-700"
+                          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all bg-blue-50/80 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200/50 dark:border-blue-800/50 shadow-sm"
                           aria-label="Edit holding quantity and price"
+                          title="Edit holding"
                         >
-                          <Pencil size={11} />
+                          <Pencil size={13} />
                         </button>
                       )}
-                      {onDelete && h.id && (
+                      {onDelete && (
                         <button
                           onClick={() => handleDelete(h)}
-                          className="p-1 rounded transition-colors text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all bg-red-50/80 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 border border-red-200/50 dark:border-red-800/50 shadow-sm"
                           aria-label="Delete holding"
+                          title="Delete holding"
                         >
-                          <Trash2 size={11} />
+                          <Trash2 size={13} />
                         </button>
                       )}
                     </div>
@@ -443,22 +452,22 @@ export default React.memo(function PortfolioTable({
                       </div>
                     ) : (
                       <span
-                        className={`inline-flex items-center gap-1 ${onUpdate && h.id ? 'cursor-pointer hover:text-blue-600' : ''}`}
+                        className={`inline-flex items-center gap-1 ${onUpdate ? 'cursor-pointer hover:text-blue-600' : ''}`}
                         onClick={() => startEdit(h)}
-                        title={onUpdate && h.id ? 'Click to edit quantity' : undefined}
+                        title={onUpdate ? 'Click to edit quantity' : undefined}
                       >
                         {formatNumber(h.qty, 0)}
-                        {onUpdate && h.id && (
+                        {onUpdate && (
                           <Pencil size={11} className="text-blue-500/70 dark:text-blue-400/70 hover:text-blue-600 transition-colors" />
                         )}
                       </span>
                     )}
-                    {editError && editingId === h.id && (
+                    {editError && editingId === getHoldingId(h) && (
                       <p className="text-[10px] text-red-500 mt-0.5">{editError}</p>
                     )}
                   </td>
                   <td role="cell" className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 text-right">
-                    {editingId === h.id ? (
+                    {editingId === getHoldingId(h) ? (
                       <div className="flex items-center justify-end">
                         <input
                           type="number"
@@ -470,18 +479,18 @@ export default React.memo(function PortfolioTable({
                             if (e.key === 'Enter') saveEdit(h);
                             if (e.key === 'Escape') cancelEdit();
                           }}
-                          disabled={updatingId === h.id}
+                          disabled={updatingId === getHoldingId(h)}
                           className="w-24 border border-blue-300 dark:border-blue-800 rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500/30 bg-blue-50/50 dark:bg-blue-950/20 text-slate-800 dark:text-slate-100"
                         />
                       </div>
                     ) : (
                       <span
-                        className={`inline-flex items-center gap-1 ${onUpdate && h.id ? 'cursor-pointer hover:text-blue-600' : ''}`}
+                        className={`inline-flex items-center gap-1 ${onUpdate ? 'cursor-pointer hover:text-blue-600' : ''}`}
                         onClick={() => startEdit(h)}
-                        title={onUpdate && h.id ? 'Click to edit average price' : undefined}
+                        title={onUpdate ? 'Click to edit average price' : undefined}
                       >
                         ₹{formatNumber(h.avgPrice)}
-                        {onUpdate && h.id && (
+                        {onUpdate && (
                           <Pencil size={11} className="text-blue-500/70 dark:text-blue-400/70 hover:text-blue-600 transition-colors" />
                         )}
                       </span>
@@ -511,23 +520,23 @@ export default React.memo(function PortfolioTable({
                   </td>
                   {(onDelete || onUpdate) && (
                     <td role="cell" className="px-2 py-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        {onUpdate && h.id && (
+                      <div className="flex items-center justify-center gap-1.5">
+                        {onUpdate && (
                           <button
                             onClick={() => startEdit(h)}
-                            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all bg-blue-50/80 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200/50 dark:border-blue-800/50 shadow-sm"
                             title="Edit quantity & avg price"
                             aria-label="Edit holding quantity and price"
                           >
                             <Pencil size={13} />
                           </button>
                         )}
-                        {onDelete && h.id && (
+                        {onDelete && (
                           <button
                             onClick={() => handleDelete(h)}
                             disabled={isDeleting}
                             title="Delete holding"
-                            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all bg-red-50/80 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 border border-red-200/50 dark:border-red-800/50 shadow-sm"
                             aria-label="Delete holding"
                           >
                             <Trash2 size={13} />

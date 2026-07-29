@@ -126,7 +126,7 @@ function dbToHolding(h: DBHolding): Holding {
   const unrealizedPnL = currentValue - h.amount_invested;
   const pnlPercent = h.amount_invested > 0 ? (unrealizedPnL / h.amount_invested) * 100 : 0;
   return {
-    id: h.id,
+    id: h.id || h.ticker || String(h.sno),
     sno: h.sno,
     stockName: h.stock_name,
     ticker: h.ticker,
