@@ -55,7 +55,7 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
       setLastPnlPct(swingAlertRef.current.newPct);
       swingAlertRef.current = null;
     }
-  });
+  }, [currentPct]);
 
   return useMemo(() => {
     const alerts: Alert[] = [];

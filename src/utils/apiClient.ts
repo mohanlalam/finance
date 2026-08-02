@@ -81,6 +81,8 @@ function friendlyError(status: number, fallback: string): AppApiError {
   });
 }
 
+const inflightRequests = new Map<string, Promise<unknown>>();
+
 export async function invokeFunction<T>(pathAndQuery: string, options: FunctionRequestOptions = {}): Promise<T> {
   if (pathAndQuery.startsWith('verify-pin') && import.meta.env.DEV) {
     const body = options.body as { pin_hash?: string } | undefined;
@@ -97,41 +99,57 @@ export async function invokeFunction<T>(pathAndQuery: string, options: FunctionR
     throw new AppApiError(envIssue, 'config');
   }
 
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs ?? REQUEST_TIMEOUT_MS);
-
-  try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/${pathAndQuery}`, {
-      ...options,
-      headers: await buildHeaders(),
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
-      signal: controller.signal,
-    });
-
-    const text = await res.text().catch(() => '');
-    if (!res.ok) {
-      let message = text;
-      try {
-        const json = JSON.parse(text) as { error?: string; message?: string };
-        message = json.error ?? json.message ?? text;
-      } catch {
-        // Plain text response; keep it as-is for diagnostics.
-      }
-      throw friendlyError(res.status, message);
-    }
-
-    if (!text) return null as T;
-    return JSON.parse(text) as T;
-  } catch (err) {
-    if (err instanceof AppApiError) throw err;
-    if (err instanceof DOMException && err.name === 'AbortError') {
-      throw new AppApiError('Request timed out. Please check your connection and try again.', 'timeout');
-    }
-    throw new AppApiError('Unable to connect right now. Please check your connection and try again.', 'network', {
-      rawMessage: err instanceof Error ? err.message : String(err),
-    });
-  } finally {
-    window.clearTimeout(timeout);
+  const isGetLike = !options.method || options.method.toUpperCase() === 'GET' || (options.method.toUpperCase() === 'POST' && pathAndQuery.includes('market-data'));
+  const cacheKey = `${options.method || 'GET'}:${pathAndQuery}:${options.body ? JSON.stringify(options.body) : ''}`;
+  
+  if (isGetLike && inflightRequests.has(cacheKey)) {
+    return inflightRequests.get(cacheKey) as Promise<T>;
   }
+
+  const promise = (async () => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs ?? REQUEST_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/${pathAndQuery}`, {
+        ...options,
+        headers: await buildHeaders(),
+        body: options.body === undefined ? undefined : JSON.stringify(options.body),
+        signal: controller.signal,
+      });
+
+      const text = await res.text().catch(() => '');
+      if (!res.ok) {
+        let message = text;
+        try {
+          const json = JSON.parse(text) as { error?: string; message?: string };
+          message = json.error ?? json.message ?? text;
+        } catch {
+          // Plain text response; keep it as-is for diagnostics.
+        }
+        throw friendlyError(res.status, message);
+      }
+
+      if (!text) return null as T;
+      return JSON.parse(text) as T;
+    } catch (err) {
+      if (err instanceof AppApiError) throw err;
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        throw new AppApiError('Request timed out. Please check your connection and try again.', 'timeout');
+      }
+      throw new AppApiError('Unable to connect right now. Please check your connection and try again.', 'network', {
+        rawMessage: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      window.clearTimeout(timeout);
+    }
+  })();
+
+  if (isGetLike) {
+    inflightRequests.set(cacheKey, promise);
+    promise.finally(() => inflightRequests.delete(cacheKey));
+  }
+
+  return promise;
 }
 

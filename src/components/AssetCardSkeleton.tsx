@@ -9,7 +9,8 @@ export function AssetCardSkeleton({ count = 3 }: AssetCardSkeletonProps) {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="p-5 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 rounded-2xl flex flex-col justify-between space-y-4 shadow-sm"
+          className="p-5 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 rounded-2xl flex flex-col justify-between space-y-4 shadow-sm opacity-0 animate-fade-in"
+          style={{ animationDelay: `${i * 75}ms` }}
         >
           {/* Header row */}
           <div className="flex items-center justify-between">

@@ -146,7 +146,7 @@ export default React.memo(function GoldHoldingView({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-tr from-amber-500 to-yellow-600 rounded-2xl p-5 text-white shadow-md flex items-center justify-between">
+        <div className="bg-gradient-to-tr from-amber-500 to-yellow-600 rounded-2xl p-4 text-white shadow-md flex items-center justify-between">
           <div>
             <p className="text-xs text-amber-100 font-semibold uppercase tracking-wider">Total Gold Value</p>
             <p className="text-2xl font-bold mt-1">{formatINR(totalCurrent)}</p>
@@ -155,7 +155,7 @@ export default React.memo(function GoldHoldingView({
           <Coins size={40} className="opacity-20 shrink-0" />
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Cost Basis</p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1 truncate">{formatINR(totalPurchase)}</p>
@@ -164,7 +164,7 @@ export default React.memo(function GoldHoldingView({
           <Scale size={40} className="text-amber-500/20 shrink-0" />
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Appreciation</p>
             <p className={`text-2xl font-bold mt-1 ${pnlColor(totalGain)}`}>{formatINR(totalGain)}</p>
@@ -187,7 +187,7 @@ export default React.memo(function GoldHoldingView({
         </div>
 
         {isMutating ? (
-          <div className="p-6">
+          <div className="p-4">
             <AssetCardSkeleton count={Math.max(1, goldHoldings.length || 3)} />
           </div>
         ) : goldHoldings.length === 0 ? (
@@ -212,7 +212,7 @@ export default React.memo(function GoldHoldingView({
               const pct = Number(g.purchase_price) > 0 ? (gain / Number(g.purchase_price)) * 100 : 0;
               const docs = documents.filter((d) => d.asset_type === 'gold' && d.asset_id === g.id);
               return (
-                <div key={g.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                <div key={g.id} className="p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
@@ -232,7 +232,7 @@ export default React.memo(function GoldHoldingView({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 md:text-right">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:text-right">
                       <div>
                         <p className="text-xs text-slate-400 dark:text-slate-500">Purchase</p>
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{formatINR(Number(g.purchase_price))}</p>

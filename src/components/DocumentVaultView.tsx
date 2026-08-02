@@ -244,7 +244,7 @@ export default React.memo(function DocumentVaultView({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-tr from-slate-700 to-slate-900 rounded-2xl p-5 text-white shadow-md flex items-center justify-between">
+        <div className="bg-gradient-to-tr from-slate-700 to-slate-900 rounded-2xl p-4 text-white shadow-md flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Document Vault</p>
             <p className="text-2xl font-bold mt-1">{portfolio.documents.length}</p>
@@ -253,7 +253,7 @@ export default React.memo(function DocumentVaultView({
           <FileText size={40} className="opacity-20 shrink-0" />
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Linked Documents</p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
@@ -264,7 +264,7 @@ export default React.memo(function DocumentVaultView({
           <Paperclip size={40} className="text-blue-500/20 shrink-0" />
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">General Files</p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
@@ -320,7 +320,7 @@ export default React.memo(function DocumentVaultView({
         </div>
 
         {isMutating ? (
-          <div className="p-6">
+          <div className="p-4">
             <AssetCardSkeleton count={Math.max(1, folderDocs.length || 3)} />
           </div>
         ) : folderDocs.length === 0 ? (

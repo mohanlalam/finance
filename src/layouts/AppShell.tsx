@@ -237,6 +237,73 @@ export default function AppShell() {
   const breakdownSlices = useMemo(() => getBreakdownSlices(breakdown), [breakdown]);
 
   // ─── Handlers ───
+  const renderDashboardWidgets = (isMobileLayout: boolean) => {
+    const netWorthChart = (
+      <SectionErrorBoundary sectionName="Net Worth Timeline">
+        <LazyChartWrapper
+          importFunc={() => import('../components/NetWorthTimelineChart')}
+          placeholderHeight={240}
+          fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
+          props={{ history: netWorthHistory, currentNetWorth: summaryData.totalCurrentValue }}
+        />
+      </SectionErrorBoundary>
+    );
+
+    const portfolioAssistant = (
+      <SectionErrorBoundary sectionName="AI Portfolio Assistant">
+        <LazyViewport placeholderHeight={200}>
+          <Suspense fallback={<div className="h-[200px] bg-slate-900 border border-slate-700/60 rounded-2xl animate-pulse" />}>
+            <PortfolioAssistant portfolios={portfolios} />
+          </Suspense>
+        </LazyViewport>
+      </SectionErrorBoundary>
+    );
+
+    const pieChart = (
+      <SectionErrorBoundary sectionName="Asset Class Pie Chart">
+        <LazyViewport placeholderHeight={280}>
+          <Suspense fallback={<div className="h-[280px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+            <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
+          </Suspense>
+        </LazyViewport>
+      </SectionErrorBoundary>
+    );
+
+    const barChart = (
+      <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
+        <LazyViewport placeholderHeight={280}>
+          <Suspense fallback={<div className="h-[280px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+            <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
+          </Suspense>
+        </LazyViewport>
+      </SectionErrorBoundary>
+    );
+
+    if (isMobileLayout) {
+      return (
+        <div className="space-y-4">
+          {netWorthChart}
+          {portfolioAssistant}
+          {pieChart}
+          {barChart}
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          {netWorthChart}
+          {portfolioAssistant}
+        </div>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          {pieChart}
+          {barChart}
+        </div>
+      </>
+    );
+  };
+
   const handleSearchNavigate = useCallback((portfolioName: string, assetTab: string) => {
     navigate(`/${portfolioName}/${assetTab}`);
   }, [navigate]);
@@ -452,41 +519,7 @@ export default function AppShell() {
                   </SectionErrorBoundary>
                 )}
 
-                <div className="space-y-4">
-                  <SectionErrorBoundary sectionName="Net Worth Timeline">
-                    <LazyChartWrapper
-                      importFunc={() => import('../components/NetWorthTimelineChart')}
-                      placeholderHeight={240}
-                      fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
-                      props={{ history: netWorthHistory, currentNetWorth: summaryData.totalCurrentValue }}
-                    />
-                  </SectionErrorBoundary>
-
-
-                  <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-                    <LazyViewport placeholderHeight={200}>
-                      <Suspense fallback={<div className="h-[200px] bg-slate-900 border border-slate-700/60 rounded-2xl animate-pulse" />}>
-                        <PortfolioAssistant portfolios={portfolios} />
-                      </Suspense>
-                    </LazyViewport>
-                  </SectionErrorBoundary>
-
-                  <SectionErrorBoundary sectionName="Asset Class Pie Chart">
-                    <LazyViewport placeholderHeight={280}>
-                      <Suspense fallback={<div className="h-[280px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                        <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
-                      </Suspense>
-                    </LazyViewport>
-                  </SectionErrorBoundary>
-
-                  <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
-                    <LazyViewport placeholderHeight={280}>
-                      <Suspense fallback={<div className="h-[280px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                        <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
-                      </Suspense>
-                    </LazyViewport>
-                  </SectionErrorBoundary>
-                </div>
+                {renderDashboardWidgets(true)}
               </div>
             ) : (
               <div className="space-y-4">
@@ -656,44 +689,10 @@ export default function AppShell() {
 
 
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-              <SectionErrorBoundary sectionName="Net Worth Timeline">
-                <LazyChartWrapper
-                  importFunc={() => import('../components/NetWorthTimelineChart')}
-                  placeholderHeight={240}
-                  fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
-                  props={{ history: netWorthHistory, currentNetWorth: summaryData.totalCurrentValue }}
-                />
-              </SectionErrorBoundary>
-              <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-                <LazyViewport placeholderHeight={200}>
-                  <Suspense fallback={<div className="h-[200px] bg-slate-900 border border-slate-700/60 rounded-2xl animate-pulse" />}>
-                    <PortfolioAssistant portfolios={portfolios} />
-                  </Suspense>
-                </LazyViewport>
-              </SectionErrorBoundary>
-            </div>
-
-
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-              <SectionErrorBoundary sectionName="Asset Class Pie Chart">
-                <LazyViewport placeholderHeight={280}>
-                  <Suspense fallback={<div className="h-[280px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                    <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
-                  </Suspense>
-                </LazyViewport>
-              </SectionErrorBoundary>
-              <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
-                <LazyViewport placeholderHeight={280}>
-                  <Suspense fallback={<div className="h-[280px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                    <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
-                  </Suspense>
-                </LazyViewport>
-              </SectionErrorBoundary>
-            </div>
+            {renderDashboardWidgets(false)}
 
             {/* Desktop Asset Switcher */}
-            <div className="hidden md:flex items-center border-b border-[var(--border-subtle)] pb-px mb-3 overflow-x-auto scrollbar-none">
+            <div role="tablist" className="hidden md:flex items-center border-b border-[var(--border-subtle)] pb-px mb-3 overflow-x-auto scrollbar-none">
               <div className="flex items-center gap-1 shrink-0">
                 {([
                   { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={14} /> },
@@ -708,6 +707,8 @@ export default function AppShell() {
                   return (
                     <button
                       key={tab.id}
+                      role="tab"
+                      aria-selected={isActive}
                       onClick={() => setActiveAsset(tab.id)}
                       className={`flex items-center gap-1.5 px-3.5 py-2 border-b-2 font-semibold text-xs transition-all duration-150 outline-none -mb-px ${
                         isActive
@@ -735,6 +736,8 @@ export default function AppShell() {
                   return (
                     <button
                       key={tab.id}
+                      role="tab"
+                      aria-selected={isActive}
                       onClick={() => setActiveAsset(tab.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 outline-none ${
                         isActive
@@ -751,9 +754,10 @@ export default function AppShell() {
             </div>
 
             {/* Asset Tab Views */}
-            <SectionErrorBoundary sectionName="Asset Tab Content">
-              <AssetTabContent
-                activeAsset={effectiveAsset}
+            <div role="tabpanel">
+              <SectionErrorBoundary sectionName="Asset Tab Content">
+                <AssetTabContent
+                  activeAsset={effectiveAsset}
                 visiblePortfolio={visiblePortfolio}
                 portfolios={portfolios}
                 priceStatus={priceStatus}
@@ -766,8 +770,9 @@ export default function AppShell() {
                 quickAddTarget={quickAddTarget}
                 onQuickAddComplete={() => setQuickAddTarget(null)}
                 portfolioOptions={portfolioOptionsForModal}
-              />
-            </SectionErrorBoundary>
+                />
+              </SectionErrorBoundary>
+            </div>
           </>
         )}
       </div>

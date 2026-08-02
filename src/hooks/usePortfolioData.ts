@@ -8,6 +8,10 @@ import useSWR from 'swr';
 import * as idb from 'idb-keyval';
 import { SWR_DEDUPING_INTERVAL, SWR_ERROR_RETRY_COUNT, STOCK_PRICE_CACHE_TTL } from '../utils/constants';
 
+function isValidCachedData(data: unknown): data is { portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[]; cachedAt: string } {
+  return data != null && typeof data === 'object' && Array.isArray((data as Record<string, unknown>).portfolios);
+}
+
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallbackValue: T): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout>;
   const timeoutPromise = new Promise<T>((resolve) => {
@@ -474,13 +478,16 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         const cached = await withTimeout(idb.get('portfolio_data_cache'), 1500, null);
         if (!isMounted) return;
         if (cached && !hasHydratedRef.current) {
-          hasHydratedRef.current = true;
-          const parsed = cached as { portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[]; cachedAt: string };
-          setPortfolios(parsed.portfolios);
-          setNetWorthHistory(parsed.netWorthHistory || []);
-          setCacheUpdatedAt(new Date(parsed.cachedAt));
-          setIsUsingCachedData(true);
-          setLoadStatus('success');
+          if (isValidCachedData(cached)) {
+            hasHydratedRef.current = true;
+            setPortfolios(cached.portfolios);
+            setNetWorthHistory(cached.netWorthHistory || []);
+            setCacheUpdatedAt(new Date(cached.cachedAt));
+            setIsUsingCachedData(true);
+            setLoadStatus('success');
+          } else {
+            await idb.del('portfolio_data_cache').catch(() => {});
+          }
         }
       } catch (err) {
         console.warn('[portfolio] IndexedDB read error:', err);
@@ -490,7 +497,6 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     return () => {
       isMounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 2. SWR fetch for Database assets (Phase 2)
@@ -666,14 +672,19 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         idb.get('portfolio_data_cache').then((cached) => {
           if (!isMounted) return;
           if (cached) {
-            const parsed = cached as { portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[]; cachedAt: string };
-            setPortfolios(parsed.portfolios);
-            setNetWorthHistory(parsed.netWorthHistory || []);
-            setCacheUpdatedAt(new Date(parsed.cachedAt));
-            setIsUsingCachedData(true);
-            setLoadError(getFriendlyMessage(swrError));
-            setLoadStatus('success');
-            setPriceStatus('error');
+            if (isValidCachedData(cached)) {
+              setPortfolios(cached.portfolios);
+              setNetWorthHistory(cached.netWorthHistory || []);
+              setCacheUpdatedAt(new Date(cached.cachedAt));
+              setIsUsingCachedData(true);
+              setLoadError(getFriendlyMessage(swrError));
+              setLoadStatus('success');
+              setPriceStatus('error');
+            } else {
+              idb.del('portfolio_data_cache').catch(() => {});
+              setLoadError(getFriendlyMessage(swrError));
+              setLoadStatus('error');
+            }
           } else {
             setLoadError(getFriendlyMessage(swrError));
             setLoadStatus('error');

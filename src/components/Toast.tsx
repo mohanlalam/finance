@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useToast, ToastMessage } from '../contexts/ToastContext';
 
 // Inline SVGs for Toast Icons to prevent bundle-size bloat
@@ -43,6 +44,31 @@ function IconClose() {
 
 function ToastItem({ toast }: { toast: ToastMessage }) {
   const { removeToast } = useToast();
+  const [isExiting, setIsExiting] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout>();
+  const startTimeRef = useRef<number>(Date.now());
+  const remainingTimeRef = useRef<number>(3000);
+
+  const handleClose = useCallback(() => {
+    setIsExiting(true);
+    setTimeout(() => {
+      removeToast(toast.id);
+    }, 250);
+  }, [removeToast, toast.id]);
+
+  useEffect(() => {
+    if (!isHovered) {
+      startTimeRef.current = Date.now();
+      timerRef.current = setTimeout(handleClose, remainingTimeRef.current);
+    } else {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      remainingTimeRef.current -= Date.now() - startTimeRef.current;
+    }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [isHovered, handleClose]);
 
   const getToastStyles = () => {
     switch (toast.type) {
@@ -79,12 +105,14 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
   return (
     <div
       role="alert"
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-md shadow-lg animate-slide-in pointer-events-auto max-w-sm w-full md:w-auto transition-all ${styles.bg} ${styles.shadow}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-md shadow-lg pointer-events-auto max-w-sm w-full md:w-auto transition-all ${styles.bg} ${styles.shadow} ${isExiting ? 'animate-slide-out' : 'animate-slide-in'}`}
     >
       {styles.icon}
       <p className="text-xs font-semibold flex-1 tracking-wide">{toast.message}</p>
       <button
-        onClick={() => removeToast(toast.id)}
+        onClick={handleClose}
         className="text-slate-400 hover:text-slate-200 transition-colors p-1 rounded-lg hover:bg-white/5"
         aria-label="Close notification"
       >

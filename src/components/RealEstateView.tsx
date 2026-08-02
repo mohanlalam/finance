@@ -160,7 +160,7 @@ export default React.memo(function RealEstateView({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-tr from-emerald-600 to-teal-600 rounded-2xl p-5 text-white shadow-md flex items-center justify-between">
+        <div className="bg-gradient-to-tr from-emerald-600 to-teal-600 rounded-2xl p-4 text-white shadow-md flex items-center justify-between">
           <div>
             <p className="text-xs text-emerald-100 font-semibold uppercase tracking-wider">Portfolio Value</p>
             <p className="text-2xl font-bold mt-1">{formatINR(totalCurrent)}</p>
@@ -169,7 +169,7 @@ export default React.memo(function RealEstateView({
           <Building2 size={40} className="opacity-20 shrink-0" />
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Capital Appreciation</p>
             <p className={`text-2xl font-bold mt-1 ${pnlColor(totalGain)}`}>{formatINR(totalGain)}</p>
@@ -178,7 +178,7 @@ export default React.memo(function RealEstateView({
           <TrendingUp size={40} className="text-emerald-500/20 shrink-0" />
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Monthly Rent</p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(totalMonthlyRent)}</p>
@@ -187,7 +187,7 @@ export default React.memo(function RealEstateView({
           <Home size={40} className="text-blue-500/20 shrink-0" />
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Rental Yield</p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{yieldPct.toFixed(2)}%</p>
@@ -210,7 +210,7 @@ export default React.memo(function RealEstateView({
         </div>
 
         {isMutating ? (
-          <div className="p-6">
+          <div className="p-4">
             <AssetCardSkeleton count={Math.max(1, realEstate.length || 3)} />
           </div>
         ) : realEstate.length === 0 ? (
@@ -236,7 +236,7 @@ export default React.memo(function RealEstateView({
               const propertyYield = Number(r.current_valuation) > 0 ? ((Number(r.monthly_rent) * 12) / Number(r.current_valuation)) * 100 : 0;
               const docs = documents.filter((d) => d.asset_type === 'real_estate' && d.asset_id === r.id);
               return (
-                <div key={r.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                <div key={r.id} className="p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-500 flex items-center justify-center shrink-0">
@@ -257,7 +257,7 @@ export default React.memo(function RealEstateView({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:text-right">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:text-right">
                       <div>
                         <p className="text-xs text-slate-400 dark:text-slate-500">Purchase</p>
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{formatINR(Number(r.purchase_price))}</p>

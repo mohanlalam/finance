@@ -200,7 +200,7 @@ function FixedDepositView({
     <div className="space-y-6">
       {/* Metrics Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="region" aria-label={`${CFG.title} summary metrics`}>
-        <div className={`bg-gradient-to-tr ${CFG.themeColor} rounded-2xl p-5 text-white shadow-md flex items-center justify-between`}>
+        <div className={`bg-gradient-to-tr ${CFG.themeColor} rounded-2xl p-4 text-white shadow-md flex items-center justify-between`}>
           <div>
             <p className="text-xs text-white/80 font-semibold uppercase tracking-wider">{CFG.totalLabel}</p>
             <p className="text-2xl font-bold mt-1">{formatINR(totalPrincipal)}</p>
@@ -209,7 +209,7 @@ function FixedDepositView({
           <Landmark size={40} className="opacity-20 shrink-0" aria-hidden="true" />
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">{CFG.estMaturityLabel}</p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(totalMaturity)}</p>
@@ -220,7 +220,7 @@ function FixedDepositView({
           <TrendingUp size={40} className="text-emerald-500/20 shrink-0" aria-hidden="true" />
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">
               Weighted Interest Rate
@@ -247,7 +247,7 @@ function FixedDepositView({
         </div>
 
         {isMutating ? (
-          <div className="p-6">
+          <div className="p-4">
             <AssetCardSkeleton count={Math.max(1, fixedDeposits.length || 3)} />
           </div>
                 ) : fixedDeposits.length === 0 ? (

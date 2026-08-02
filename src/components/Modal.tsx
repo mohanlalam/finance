@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, ReactNode } from 'react';
+import { useEffect, useRef, useCallback, useState, ReactNode } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -30,10 +30,26 @@ export default function Modal({
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const [isRendered, setIsRendered] = useState(isOpen);
+  const [isExiting, setIsExiting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsRendered(true);
+      setIsExiting(false);
+    } else if (isRendered) {
+      setIsExiting(true);
+      const timer = setTimeout(() => {
+        setIsRendered(false);
+        setIsExiting(false);
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isRendered]);
 
   // Lock body scroll & store previous focus
   useEffect(() => {
-    if (isOpen) {
+    if (isRendered && !isExiting) {
       previouslyFocused.current = document.activeElement as HTMLElement;
       document.body.style.overflow = 'hidden';
 
@@ -46,7 +62,7 @@ export default function Modal({
           focusable[0].focus();
         }
       });
-    } else {
+    } else if (!isRendered) {
       document.body.style.overflow = '';
       previouslyFocused.current?.focus();
     }
@@ -54,7 +70,7 @@ export default function Modal({
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, [isRendered, isExiting]);
 
   // Escape key handler
   useEffect(() => {
@@ -97,12 +113,12 @@ export default function Modal({
     [],
   );
 
-  if (!isOpen) return null;
+  if (!isRendered) return null;
 
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 animate-modal-overlay"
+      className={`fixed inset-0 z-[300] flex items-end sm:items-center justify-center sm:p-4 ${isExiting ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop'}`}
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
@@ -118,7 +134,7 @@ export default function Modal({
       {/* Content wrapper: slides up on mobile, scales on desktop */}
       <div
         ref={contentRef}
-        className={`relative bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-medium)] shadow-floating w-full ${maxWidth} overflow-hidden animate-slide-up sm:animate-modal-content border border-[var(--border-subtle)] pb-safe`}
+        className={`relative bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-medium)] shadow-floating w-full ${maxWidth} overflow-hidden ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)] pb-safe`}
       >
         {children}
       </div>

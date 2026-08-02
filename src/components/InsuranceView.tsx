@@ -166,7 +166,7 @@ export default React.memo(function InsuranceView({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-tr from-rose-500 to-pink-600 rounded-2xl p-5 text-white shadow-md flex items-center justify-between">
+        <div className="bg-gradient-to-tr from-rose-500 to-pink-600 rounded-2xl p-4 text-white shadow-md flex items-center justify-between">
           <div>
             <p className="text-xs text-rose-100 font-semibold uppercase tracking-wider">Total Coverage</p>
             <p className="text-2xl font-bold mt-1">{formatINR(totalCoverage)}</p>
@@ -175,7 +175,7 @@ export default React.memo(function InsuranceView({
           <Shield size={40} className="opacity-20 shrink-0" />
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Annual Premium</p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(totalPremium)}</p>
@@ -184,7 +184,7 @@ export default React.memo(function InsuranceView({
           <Calendar size={40} className="text-blue-500/20 shrink-0" />
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Renewals in 60d</p>
             <p className={`text-2xl font-bold mt-1 ${upcomingRenewals > 0 ? 'text-amber-600 dark:text-amber-500' : 'text-slate-800 dark:text-slate-100'}`}>{upcomingRenewals}</p>
@@ -207,7 +207,7 @@ export default React.memo(function InsuranceView({
         </div>
 
         {isMutating ? (
-          <div className="p-6">
+          <div className="p-4">
             <AssetCardSkeleton count={Math.max(1, insurances.length || 3)} />
           </div>
         ) : insurances.length === 0 ? (
@@ -236,7 +236,7 @@ export default React.memo(function InsuranceView({
               const docs = documents.filter((d) => d.asset_type === 'insurance' && d.asset_id === i.id);
 
               return (
-                <div key={i.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                <div key={i.id} className="p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
                       <div className={`w-10 h-10 rounded-xl ${style.bg} ${style.text} flex items-center justify-center shrink-0`}>
@@ -270,7 +270,7 @@ export default React.memo(function InsuranceView({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 md:text-right">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:text-right">
                       <div>
                         <p className="text-xs text-slate-400 dark:text-slate-500">Sum Assured</p>
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{formatINR(Number(i.sum_assured))}</p>

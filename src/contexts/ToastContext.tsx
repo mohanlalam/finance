@@ -30,12 +30,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const addToast = useCallback((message: string, type: ToastType = 'info') => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
-
-    // Auto-dismiss after 3 seconds (3000ms)
-    setTimeout(() => {
-      removeToast(id);
-    }, 3000);
-  }, [removeToast]);
+  }, []);
 
   const stateValue = useMemo(() => ({ toasts }), [toasts]);
   const actionsValue = useMemo(() => ({ addToast, removeToast }), [addToast, removeToast]);

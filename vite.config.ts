@@ -11,10 +11,7 @@ export default defineConfig(({ command }) => ({
       injectRegister: false,
       workbox: {
         globPatterns: [
-          'index.html',
-          'manifest.webmanifest',
-          'assets/*.js',   // pre-cache entry + all lazy vendor chunks (supabase, swr, idb, lucide…)
-          'assets/*.css',
+          '**/*.{js,css,html,ico,png,svg,woff2}'
         ],
         runtimeCaching: [
           {
@@ -51,7 +48,11 @@ export default defineConfig(({ command }) => ({
         background_color: '#0f172a',
         display: 'standalone',
         orientation: 'portrait',
-        icons: []
+        icons: [
+          { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+        ]
       }
     })
   ],

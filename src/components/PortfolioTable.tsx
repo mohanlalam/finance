@@ -3,6 +3,7 @@ import { Trash2, Pencil, Loader2, Check, X, SlidersHorizontal } from './icons/Ap
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent, pnlColor } from '../utils/formatters';
 import ConfirmModal from './ConfirmModal';
+import EmptyState from './EmptyState';
 
 type SortPreset = 'value' | 'pnl' | 'pnlPct' | 'todayPct' | 'allocation';
 
@@ -254,7 +255,13 @@ export default React.memo(function PortfolioTable({
 
         <div className="divide-y divide-slate-100 dark:divide-slate-700/50 p-3 space-y-3">
           {sorted.length === 0 ? (
-            <p className="text-xs text-slate-400 dark:text-slate-400 text-center py-4">No stock holdings yet.</p>
+            <div className="py-4">
+              <EmptyState 
+                type="stocks" 
+                title="No stock holdings yet" 
+                description="Add your first stock or ETF to start tracking" 
+              />
+            </div>
           ) : (
             sorted.map((h) => {
             const isDeleting = deletingId === h.id;
@@ -406,7 +413,17 @@ export default React.memo(function PortfolioTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-700/40" role="rowgroup">
-            {sorted.map((h) => {
+            {sorted.length === 0 ? (
+              <tr role="row">
+                <td role="cell" colSpan={(onDelete || onUpdate) ? 12 : 11} className="p-4">
+                  <EmptyState 
+                    type="stocks" 
+                    title="No stock holdings yet" 
+                    description="Add your first stock or ETF to start tracking" 
+                  />
+                </td>
+              </tr>
+            ) : sorted.map((h) => {
               const isDeleting = deletingId === h.id;
               return (
                 <tr

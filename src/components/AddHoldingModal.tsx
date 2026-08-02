@@ -33,6 +33,7 @@ const EXCHANGE_OPTIONS = ['.NS (NSE)', '.BO (BSE)'];
 export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOptions, defaultPortfolio }: AddHoldingModalProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const initialPortfolio = defaultPortfolio && portfolioOptions.some((o) => o.name === defaultPortfolio)
     ? defaultPortfolio
     : portfolioOptions[0]?.name ?? '';
@@ -49,7 +50,29 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
     weekHigh52: '',
   });
 
+  const validateField = (field: string) => {
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      if (field === 'ticker' && !form.ticker) next.ticker = 'Ticker is required';
+      else if (field === 'ticker') delete next.ticker;
+      
+      if (field === 'qty' && (!form.qty || isNaN(Number(form.qty)))) next.qty = 'Valid quantity is required';
+      else if (field === 'qty') delete next.qty;
+      
+      if (field === 'avgPrice' && (!form.avgPrice || isNaN(Number(form.avgPrice)))) next.avgPrice = 'Valid price is required';
+      else if (field === 'avgPrice') delete next.avgPrice;
+      
+      return next;
+    });
+  };
+
   function set(field: string, value: string) {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
     setForm((prev) => {
       const next = { ...prev, [field]: value };
       if (field === 'ticker' || field === 'exchange') {
@@ -149,8 +172,10 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               placeholder="e.g. RELIANCE"
               value={form.ticker}
               onChange={(e) => set('ticker', e.target.value.toUpperCase())}
+              onBlur={() => validateField('ticker')}
               className={`${inputStyle} uppercase`}
             />
+            {fieldErrors.ticker && <p className="text-[10px] text-red-500 mt-1">{fieldErrors.ticker}</p>}
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Exchange</label>
@@ -190,8 +215,10 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               step="any"
               value={form.qty}
               onChange={(e) => set('qty', e.target.value)}
+              onBlur={() => validateField('qty')}
               className={inputStyle}
             />
+            {fieldErrors.qty && <p className="text-[10px] text-red-500 mt-1">{fieldErrors.qty}</p>}
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Avg Buy Price (₹)</label>
@@ -202,8 +229,10 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               step="any"
               value={form.avgPrice}
               onChange={(e) => set('avgPrice', e.target.value)}
+              onBlur={() => validateField('avgPrice')}
               className={inputStyle}
             />
+            {fieldErrors.avgPrice && <p className="text-[10px] text-red-500 mt-1">{fieldErrors.avgPrice}</p>}
           </div>
         </div>
 
