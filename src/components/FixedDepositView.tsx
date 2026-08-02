@@ -3,6 +3,7 @@ import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfoli
 import { formatINR, getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
 import { Plus, TrendingUp, Landmark, Calendar } from './icons/AppIcons';
 import ConfirmModal from './ConfirmModal';
+import Modal from './Modal';
 import EmptyState from './EmptyState';
 import StandardFormFields from './fd/StandardFormFields';
 import DepositDetailsCard from './fd/DepositDetailsCard';
@@ -311,94 +312,94 @@ function FixedDepositView({
       </div>
 
       {/* Modal Form */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="fd-modal-title">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowModal(false)} aria-hidden="true" />
-          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
-              <div>
-                <h3 id="fd-modal-title" className="text-base font-bold text-slate-800 dark:text-slate-100">
-                  {editingFd ? CFG.editTitle : CFG.createTitle}
-                </h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Enter details to track valuation and timeline</p>
-              </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors text-xl font-bold"
-                aria-label="Close modal"
-              >
-                &times;
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
-                <select
-                  value={formPortfolio}
-                  onChange={(e) => setFormPortfolio(e.target.value)}
-                  disabled={!!editingFd}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors disabled:opacity-50"
-                >
-                  {portfolioOptions.map((o) => (
-                    <option key={o.name} value={o.name}>{o.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <StandardFormFields
-                bankName={bankName}
-                setBankName={setBankName}
-                principalAmount={principalAmount}
-                setPrincipalAmount={setPrincipalAmount}
-                interestRate={interestRate}
-                setInterestRate={setInterestRate}
-                startDate={startDate}
-                setStartDate={setStartDate}
-                maturityDate={maturityDate}
-                setMaturityDate={setMaturityDate}
-                maturityAmount={maturityAmount}
-                setMaturityAmount={setMaturityAmount}
-                status={status}
-                setStatus={setStatus}
-                calculateMaturity={calculateMaturity}
-              />
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Notes <span className="font-normal text-slate-400">(optional)</span></label>
-                <textarea
-                  rows={2}
-                  placeholder={`e.g. Linked to child education, monthly auto-debit`}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors resize-none"
-                />
-              </div>
-
-              {error && (
-                <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-3 py-2" role="alert">{error}</p>
-              )}
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-indigo-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-indigo-700 transition-colors disabled:opacity-50"
-                >
-                  {loading ? 'Saving...' : editingFd ? 'Save Changes' : `Create ${CFG.title}`}
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        maxWidth="max-w-lg"
+        ariaLabel={editingFd ? CFG.editTitle : CFG.createTitle}
+      >
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
+          <div>
+            <h3 id="fd-modal-title" className="text-base font-bold text-slate-800 dark:text-slate-100">
+              {editingFd ? CFG.editTitle : CFG.createTitle}
+            </h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Enter details to track valuation and timeline</p>
           </div>
+          <button
+            onClick={() => setShowModal(false)}
+            className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors text-xl font-bold"
+            aria-label="Close modal"
+          >
+            &times;
+          </button>
         </div>
-      )}
+
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
+            <select
+              value={formPortfolio}
+              onChange={(e) => setFormPortfolio(e.target.value)}
+              disabled={!!editingFd}
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors disabled:opacity-50"
+            >
+              {portfolioOptions.map((o) => (
+                <option key={o.name} value={o.name}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <StandardFormFields
+            bankName={bankName}
+            setBankName={setBankName}
+            principalAmount={principalAmount}
+            setPrincipalAmount={setPrincipalAmount}
+            interestRate={interestRate}
+            setInterestRate={setInterestRate}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            maturityDate={maturityDate}
+            setMaturityDate={setMaturityDate}
+            maturityAmount={maturityAmount}
+            setMaturityAmount={setMaturityAmount}
+            status={status}
+            setStatus={setStatus}
+            calculateMaturity={calculateMaturity}
+          />
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Notes <span className="font-normal text-slate-400">(optional)</span></label>
+            <textarea
+              rows={2}
+              placeholder={`e.g. Linked to child education, monthly auto-debit`}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors resize-none"
+            />
+          </div>
+
+          {error && (
+            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-3 py-2" role="alert">{error}</p>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowModal(false)}
+              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-indigo-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : editingFd ? 'Save Changes' : `Create ${CFG.title}`}
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Confirm delete dialog */}
       <ConfirmModal

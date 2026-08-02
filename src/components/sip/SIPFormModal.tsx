@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SIPAccount, SIPPayload } from '../../types/portfolio';
 import SIPFormFields from './SIPFormFields';
 import { fetchAMFIScheme } from '../../utils/amfiClient';
+import Modal from '../Modal';
 
 interface PortfolioOption {
   name: string;
@@ -140,26 +141,29 @@ export function SIPFormModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="sip-modal-title">
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 dark:border-slate-700/50">
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
-          <div>
-            <h3 id="sip-modal-title" className="text-base font-bold text-slate-800 dark:text-slate-100">
-              {editingAccount ? 'Edit SIP' : 'Create SIP'}
-            </h3>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Enter details to track fund growth and units</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors text-xl font-bold"
-            aria-label="Close modal"
-          >
-            &times;
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      maxWidth="max-w-lg"
+      ariaLabel={editingAccount ? 'Edit SIP' : 'Create SIP'}
+    >
+      <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
+        <div>
+          <h3 id="sip-modal-title" className="text-base font-bold text-slate-800 dark:text-slate-100">
+            {editingAccount ? 'Edit SIP' : 'Create SIP'}
+          </h3>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Enter details to track fund growth and units</p>
         </div>
+        <button
+          onClick={onClose}
+          className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors text-xl font-bold"
+          aria-label="Close modal"
+        >
+          &times;
+        </button>
+      </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
+      <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
           {/* Portfolio Select */}
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio Owner</label>
@@ -233,7 +237,6 @@ export function SIPFormModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

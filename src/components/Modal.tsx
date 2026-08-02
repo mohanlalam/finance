@@ -97,13 +97,16 @@ export default function Modal({
 
   // Drag-to-move handlers
   const handleDragStart = useCallback((e: React.MouseEvent) => {
-    // Only activate on the drag handle area (header with border-b or elements with data-drag-handle)
+    // Don't drag if clicking interactive form controls
     const target = e.target as HTMLElement;
-    const handle = target.closest('[data-drag-handle]') || target.closest('.modal-drag-handle');
-    if (!handle) return;
+    if (target.closest('button, input, select, textarea, a, label, [role="button"]')) return;
 
-    // Don't drag if clicking buttons or inputs inside the header
-    if ((e.target as HTMLElement).closest('button, input, select, textarea, a')) return;
+    // Check if click is on header, drag handle, or top section of modal
+    const isHeaderTarget =
+      Boolean(target.closest('[data-drag-handle], .modal-drag-handle, header, div[class*="border-b"]')) ||
+      (contentRef.current ? (e.clientY - contentRef.current.getBoundingClientRect().top <= 70) : false);
+
+    if (!isHeaderTarget) return;
 
     e.preventDefault();
     isDragging.current = true;
