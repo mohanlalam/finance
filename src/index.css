@@ -249,7 +249,7 @@ h3, .text-card-title {
 }
 
 .animate-modal-content {
-  animation: modalScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .animate-modal-content-out {
   animation: modalScaleOut 0.2s ease-in forwards;

@@ -334,55 +334,57 @@ function FixedDepositView({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 overflow-y-auto min-h-0 flex-1">
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
-            <select
-              value={formPortfolio}
-              onChange={(e) => setFormPortfolio(e.target.value)}
-              disabled={!!editingFd}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors disabled:opacity-50"
-            >
-              {portfolioOptions.map((o) => (
-                <option key={o.name} value={o.name}>{o.label}</option>
-              ))}
-            </select>
-          </div>
+        <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col overflow-hidden">
+          <div className="px-6 py-4 space-y-4 overflow-y-auto min-h-0 flex-1">
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
+              <select
+                value={formPortfolio}
+                onChange={(e) => setFormPortfolio(e.target.value)}
+                disabled={!!editingFd}
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors disabled:opacity-50"
+              >
+                {portfolioOptions.map((o) => (
+                  <option key={o.name} value={o.name}>{o.label}</option>
+                ))}
+              </select>
+            </div>
 
-          <StandardFormFields
-            bankName={bankName}
-            setBankName={setBankName}
-            principalAmount={principalAmount}
-            setPrincipalAmount={setPrincipalAmount}
-            interestRate={interestRate}
-            setInterestRate={setInterestRate}
-            startDate={startDate}
-            setStartDate={setStartDate}
-            maturityDate={maturityDate}
-            setMaturityDate={setMaturityDate}
-            maturityAmount={maturityAmount}
-            setMaturityAmount={setMaturityAmount}
-            status={status}
-            setStatus={setStatus}
-            calculateMaturity={calculateMaturity}
-          />
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Notes <span className="font-normal text-slate-400">(optional)</span></label>
-            <textarea
-              rows={2}
-              placeholder={`e.g. Linked to child education, monthly auto-debit`}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors resize-none"
+            <StandardFormFields
+              bankName={bankName}
+              setBankName={setBankName}
+              principalAmount={principalAmount}
+              setPrincipalAmount={setPrincipalAmount}
+              interestRate={interestRate}
+              setInterestRate={setInterestRate}
+              startDate={startDate}
+              setStartDate={setStartDate}
+              maturityDate={maturityDate}
+              setMaturityDate={setMaturityDate}
+              maturityAmount={maturityAmount}
+              setMaturityAmount={setMaturityAmount}
+              status={status}
+              setStatus={setStatus}
+              calculateMaturity={calculateMaturity}
             />
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Notes <span className="font-normal text-slate-400">(optional)</span></label>
+              <textarea
+                rows={2}
+                placeholder={`e.g. Linked to child education, monthly auto-debit`}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors resize-none"
+              />
+            </div>
+
+            {error && (
+              <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-3 py-2" role="alert">{error}</p>
+            )}
           </div>
 
-          {error && (
-            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-3 py-2" role="alert">{error}</p>
-          )}
-
-          <div className="flex gap-3 pt-2">
+          <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex gap-3 shrink-0">
             <button
               type="button"
               onClick={() => setShowModal(false)}
