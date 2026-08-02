@@ -329,7 +329,7 @@ export default React.memo(function InsuranceView({
         ariaLabel={editing ? 'Edit Insurance Policy' : 'Add Insurance Policy'}
         preventClose={loading}
       >
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
           <div>
             <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">
               {editing ? 'Edit Insurance Policy' : 'Add Insurance Policy'}
@@ -345,7 +345,7 @@ export default React.memo(function InsuranceView({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
             <select

@@ -55,7 +55,7 @@ export default React.memo(function RenamePortfolioModal({
       preventClose={submitting}
       maxWidth="max-w-sm"
     >
-      <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+      <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
         <div>
           <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Rename Portfolio</h3>
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Change the display name for this family member</p>

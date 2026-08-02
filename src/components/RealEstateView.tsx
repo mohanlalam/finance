@@ -321,7 +321,7 @@ export default React.memo(function RealEstateView({
         ariaLabel={editing ? 'Edit Property' : 'Add Property'}
         preventClose={loading}
       >
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
           <div>
             <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">
               {editing ? 'Edit Property' : 'Add Property'}

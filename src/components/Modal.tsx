@@ -18,6 +18,8 @@ interface ModalProps {
  * - Escape key to close
  * - Body scroll lock
  * - ARIA dialog semantics
+ * - Drag-to-move on desktop (grab the header to reposition)
+ * - Scrollable content area for tall forms
  */
 export default function Modal({
   isOpen,
@@ -33,10 +35,19 @@ export default function Modal({
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isExiting, setIsExiting] = useState(false);
 
+  // Drag state
+  const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const isDragging = useRef(false);
+  const dragStart = useRef<{ mouseX: number; mouseY: number; offsetX: number; offsetY: number }>({
+    mouseX: 0, mouseY: 0, offsetX: 0, offsetY: 0,
+  });
+
+  // Reset drag position when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       setIsRendered(true);
       setIsExiting(false);
+      setDragOffset({ x: 0, y: 0 });
     } else if (isRendered) {
       setIsExiting(true);
       const timer = setTimeout(() => {
@@ -84,6 +95,59 @@ export default function Modal({
     return () => window.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose, preventClose]);
 
+  // Drag-to-move handlers
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    // Only activate on the drag handle area (header with border-b or elements with data-drag-handle)
+    const target = e.target as HTMLElement;
+    const handle = target.closest('[data-drag-handle]') || target.closest('.modal-drag-handle');
+    if (!handle) return;
+
+    // Don't drag if clicking buttons or inputs inside the header
+    if ((e.target as HTMLElement).closest('button, input, select, textarea, a')) return;
+
+    e.preventDefault();
+    isDragging.current = true;
+    dragStart.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      offsetX: dragOffset.x,
+      offsetY: dragOffset.y,
+    };
+
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'grabbing';
+  }, [dragOffset]);
+
+  useEffect(() => {
+    if (!isRendered) return;
+
+    function handleMouseMove(e: MouseEvent) {
+      if (!isDragging.current) return;
+      const dx = e.clientX - dragStart.current.mouseX;
+      const dy = e.clientY - dragStart.current.mouseY;
+      setDragOffset({
+        x: dragStart.current.offsetX + dx,
+        y: dragStart.current.offsetY + dy,
+      });
+    }
+
+    function handleMouseUp() {
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    }
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+  }, [isRendered]);
+
   // Focus trap
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -115,6 +179,8 @@ export default function Modal({
 
   if (!isRendered) return null;
 
+  const hasDragOffset = dragOffset.x !== 0 || dragOffset.y !== 0;
+
   return (
     <div
       ref={overlayRef}
@@ -131,10 +197,12 @@ export default function Modal({
         aria-hidden="true"
       />
 
-      {/* Content wrapper: slides up on mobile, scales on desktop */}
+      {/* Content wrapper: slides up on mobile, scales on desktop, draggable */}
       <div
         ref={contentRef}
-        className={`relative bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-medium)] shadow-floating w-full ${maxWidth} overflow-hidden ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)] pb-safe`}
+        className={`relative bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-medium)] shadow-floating w-full ${maxWidth} max-h-[90vh] sm:max-h-[85vh] flex flex-col ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)] pb-safe`}
+        style={hasDragOffset ? { transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` } : undefined}
+        onMouseDown={handleDragStart}
       >
         {children}
       </div>

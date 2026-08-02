@@ -126,7 +126,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
       preventClose={saving}
       maxWidth="max-w-lg"
     >
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] bg-slate-50/50 dark:bg-zinc-800/10">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] bg-slate-50/50 dark:bg-zinc-800/10 modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
         <div>
           <h2 className="text-card-title font-semibold text-slate-800 dark:text-slate-200">Add New Holding</h2>
           <p className="text-supporting mt-0.5">Stock will be fetched from Yahoo Finance on next refresh</p>
