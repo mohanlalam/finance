@@ -163,7 +163,7 @@ export function SIPFormModal({
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
+      <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 overflow-y-auto min-h-0 flex-1">
           {/* Portfolio Select */}
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio Owner</label>

@@ -139,7 +139,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
         />
       </div>
 
-      <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+      <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 overflow-y-auto min-h-0 flex-1">
         <div>
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
           <select

@@ -95,8 +95,8 @@ export default function Modal({
     return () => window.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose, preventClose]);
 
-  // Drag-to-move handlers
-  const handleDragStart = useCallback((e: React.MouseEvent) => {
+  // Drag-to-move pointer handlers (supports mouse + touch + stylus)
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
     // Don't drag if clicking interactive form controls
     const target = e.target as HTMLElement;
     if (target.closest('button, input, select, textarea, a, label, [role="button"]')) return;
@@ -104,11 +104,10 @@ export default function Modal({
     // Check if click is on header, drag handle, or top section of modal
     const isHeaderTarget =
       Boolean(target.closest('[data-drag-handle], .modal-drag-handle, header, div[class*="border-b"]')) ||
-      (contentRef.current ? (e.clientY - contentRef.current.getBoundingClientRect().top <= 70) : false);
+      (contentRef.current ? (e.clientY - contentRef.current.getBoundingClientRect().top <= 75) : false);
 
     if (!isHeaderTarget) return;
 
-    e.preventDefault();
     isDragging.current = true;
     dragStart.current = {
       mouseX: e.clientX,
@@ -124,7 +123,7 @@ export default function Modal({
   useEffect(() => {
     if (!isRendered) return;
 
-    function handleMouseMove(e: MouseEvent) {
+    function handlePointerMove(e: PointerEvent) {
       if (!isDragging.current) return;
       const dx = e.clientX - dragStart.current.mouseX;
       const dy = e.clientY - dragStart.current.mouseY;
@@ -134,18 +133,20 @@ export default function Modal({
       });
     }
 
-    function handleMouseUp() {
+    function handlePointerUp() {
       if (!isDragging.current) return;
       isDragging.current = false;
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
     }
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
     };
@@ -187,7 +188,7 @@ export default function Modal({
   return (
     <div
       ref={overlayRef}
-      className={`fixed inset-0 z-[300] flex items-end sm:items-center justify-center sm:p-4 ${isExiting ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop'}`}
+      className={`fixed inset-0 z-[300] flex items-end sm:items-center justify-center p-2 sm:p-4 ${isExiting ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop'}`}
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
@@ -203,9 +204,9 @@ export default function Modal({
       {/* Content wrapper: slides up on mobile, scales on desktop, draggable */}
       <div
         ref={contentRef}
-        className={`relative bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-medium)] shadow-floating w-full ${maxWidth} max-h-[90vh] sm:max-h-[85vh] flex flex-col ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)] pb-safe`}
-        style={hasDragOffset ? { transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` } : undefined}
-        onMouseDown={handleDragStart}
+        className={`relative bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-medium)] shadow-floating w-full ${maxWidth} max-h-[85vh] flex flex-col min-h-0 overflow-hidden ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)] pb-safe`}
+        style={hasDragOffset ? { transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)` } : undefined}
+        onPointerDown={handlePointerDown}
       >
         {children}
       </div>
