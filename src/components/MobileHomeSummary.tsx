@@ -4,6 +4,8 @@ import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { Alert } from '../hooks/useAlerts';
 import { estimateTodayPnL } from '../utils/portfolioCalcs';
+import { NetWorthSnapshot } from '../hooks/usePortfolioData';
+import { Sparkline } from './ui/Sparkline';
 
 
 interface MobileHomeSummaryProps {
@@ -36,6 +38,7 @@ interface MobileHomeSummaryProps {
   onOpenAlerts: () => void;
   portfolios: Portfolio[];
   activePortfolio: Portfolio | null;
+  netWorthHistory?: NetWorthSnapshot[];
 }
 
 function MobileHomeSummary({
@@ -53,8 +56,19 @@ function MobileHomeSummary({
   onOpenAlerts,
   portfolios,
   activePortfolio,
+  netWorthHistory = [],
 }: MobileHomeSummaryProps) {
   // Single-pass count computation — avoids 9 separate reduce() calls on every render
+
+  const sparklineData = useMemo(() => {
+    if (!netWorthHistory || netWorthHistory.length === 0) return [];
+    return netWorthHistory.slice(-7).map((snap) => snap.total_value);
+  }, [netWorthHistory]);
+
+  const sparklineColor = useMemo(() => {
+    if (sparklineData.length < 2) return '#10b981';
+    return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? '#10b981' : '#ef4444';
+  }, [sparklineData]);
   const {
     stockCount, fdCount, rdCount, sipCount,
     goldCount, propertyCount, insuranceCount, docCount
@@ -168,9 +182,16 @@ function MobileHomeSummary({
           </span>
         </div>
 
-        <h2 className="text-financial mt-3 text-slate-800 dark:text-slate-100 tnum">
-          {formatINR(summaryData.totalCurrentValue)}
-        </h2>
+        <div className="flex items-end justify-between mt-3">
+          <h2 className="text-financial text-slate-800 dark:text-slate-100 tnum">
+            {formatINR(summaryData.totalCurrentValue)}
+          </h2>
+          {sparklineData.length > 1 && (
+            <div className="mb-1 ml-2 shrink-0">
+              <Sparkline data={sparklineData} color={sparklineColor} width={60} height={20} />
+            </div>
+          )}
+        </div>
         
         {/* Individual Net Worth breakdown for mobile */}
         {activePortfolio === null && portfolios && portfolios.length > 0 && (

@@ -505,6 +505,7 @@ export default function AppShell() {
                   onOpenAlerts={() => setShowMobileAlerts(true)}
                   portfolios={portfolios}
                   activePortfolio={portfolio}
+                  netWorthHistory={netWorthHistory}
                 />
 
                 {activeTab === 'all' && (
@@ -600,6 +601,7 @@ export default function AppShell() {
               isLoading={isLoading}
               portfolios={portfolios}
               activePortfolio={portfolio}
+              netWorthHistory={netWorthHistory}
             />
 
             {/* Family Overview - drill-down cards */}

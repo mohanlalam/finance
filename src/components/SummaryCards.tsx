@@ -4,6 +4,8 @@ import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { estimateTodayPnL } from '../utils/portfolioCalcs';
 import { Card } from './ui/Card';
+import { NetWorthSnapshot } from '../hooks/usePortfolioData';
+import { Sparkline } from './ui/Sparkline';
 
 interface SummaryCardsProps {
   totalInvested: number;
@@ -15,6 +17,7 @@ interface SummaryCardsProps {
   isLoading?: boolean;
   portfolios?: Portfolio[];
   activePortfolio?: Portfolio | null;
+  netWorthHistory?: NetWorthSnapshot[];
 }
 
 function SummaryCards({
@@ -27,9 +30,20 @@ function SummaryCards({
   isLoading = false,
   portfolios = [],
   activePortfolio = null,
+  netWorthHistory = [],
 }: SummaryCardsProps) {
   const isGain = totalPnL >= 0;
   const isTodayGain = todayPnL !== undefined ? todayPnL >= 0 : true;
+
+  const sparklineData = React.useMemo(() => {
+    if (!netWorthHistory || netWorthHistory.length === 0) return [];
+    return netWorthHistory.slice(-7).map((snap) => snap.total_value);
+  }, [netWorthHistory]);
+
+  const sparklineColor = React.useMemo(() => {
+    if (sparklineData.length < 2) return '#10b981';
+    return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? '#10b981' : '#ef4444';
+  }, [sparklineData]);
 
   return (
     <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4">
@@ -42,12 +56,21 @@ function SummaryCards({
             <IndianRupee size={13} className="text-[var(--text-secondary)]" />
           </span>
         </div>
-        <p className={`text-financial tnum transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
-          {formatINR(totalCurrentValue)}
-        </p>
-        <p className="text-supporting">
-          {isLoading ? 'Syncing prices...' : 'Current valuation'}
-        </p>
+        <div className="flex items-end justify-between">
+          <div>
+            <p className={`text-financial tnum transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
+              {formatINR(totalCurrentValue)}
+            </p>
+            <p className="text-supporting">
+              {isLoading ? 'Syncing prices...' : 'Current valuation'}
+            </p>
+          </div>
+          {sparklineData.length > 1 && (
+            <div className="mb-1 ml-2 shrink-0">
+              <Sparkline data={sparklineData} color={sparklineColor} />
+            </div>
+          )}
+        </div>
 
         {activePortfolio === null && portfolios && portfolios.length > 0 && (
           <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-[10px] font-medium text-[var(--text-secondary)]">

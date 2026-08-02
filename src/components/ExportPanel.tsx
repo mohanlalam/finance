@@ -4,6 +4,7 @@ import { Portfolio } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
 import { getRDEffectiveValue } from '../utils/rdUtils';
 import { getSIPEffectiveValue } from '../utils/sipUtils';
+import { openPDFReportInNewTab } from '../utils/pdfReport';
 import Modal from './Modal';
 import { Button } from './ui/Button';
 import { IconButton } from './ui/IconButton';
@@ -283,7 +284,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
   }
 
   function handleExportPDF() {
-    window.print();
+    openPDFReportInNewTab(portfolios);
     setOpen(false);
   }
 
