@@ -204,7 +204,7 @@ export default function Modal({
       {/* Content wrapper: slides up on mobile, scales on desktop, draggable */}
       <div
         ref={contentRef}
-        className={`relative bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-medium)] shadow-floating w-full ${maxWidth} max-h-[85vh] flex flex-col min-h-0 overflow-hidden ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)] pb-safe`}
+        className={`relative bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-medium)] shadow-floating w-full ${maxWidth} max-h-[75vh] my-auto flex flex-col min-h-0 overflow-hidden ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)] pb-safe`}
         style={hasDragOffset ? { transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)` } : undefined}
         onPointerDown={handlePointerDown}
       >
