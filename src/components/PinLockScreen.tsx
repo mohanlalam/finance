@@ -11,6 +11,36 @@ function IconDelete({ size = 22 }: { size?: number }) {
   );
 }
 
+function IconLock({ isUnlocked = false }: { isUnlocked?: boolean }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`transition-all duration-300 ${isUnlocked ? 'scale-110 text-[#34C759]' : 'text-white/80'}`}
+      aria-hidden="true"
+    >
+      {isUnlocked ? (
+        <>
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+        </>
+      ) : (
+        <>
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 const APP_PIN = (import.meta.env.VITE_APP_PIN as string | undefined) ?? '';
 const PIN_LENGTH = APP_PIN.length || 4;
 
@@ -35,6 +65,13 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
   const [error, setError] = useState('');
   const [shake, setShake] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Live iOS clock updater
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleClear = useCallback(() => {
     if (success) return;
@@ -76,10 +113,10 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     if (success && pin.length === PIN_LENGTH) {
       hashPin(pin).then((hash) => {
         markSessionVerified(hash);
-        // Small delay to let user see filled dots before unlocking
+        // Small delay to let user see filled dots & unlocked icon before opening vault
         setTimeout(() => {
           onUnlock();
-        }, 300);
+        }, 350);
       });
     }
   }, [success, pin, onUnlock]);
@@ -99,19 +136,47 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handlePressKey, handleBackspace, handleClear, success]);
 
+  const formattedDate = currentTime.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const formattedTime = currentTime.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
   const dots = Array.from({ length: PIN_LENGTH });
 
   return (
-    <div className="pin-lock-root min-h-screen text-white flex flex-col items-center justify-center font-sans select-none overflow-hidden">
+    <div className="pin-lock-root min-h-screen text-white flex flex-col items-center justify-between py-10 font-sans select-none overflow-hidden">
       {/* Animated aurora gradient background */}
       <div className="pin-lock-bg" aria-hidden="true" />
       <div className="pin-lock-stars" aria-hidden="true" />
 
-      <main className="relative z-10 flex flex-col items-center justify-center w-full max-w-sm px-6">
+      {/* iOS Top Status Bar / Lock Header */}
+      <header className="relative z-10 flex flex-col items-center mt-2 sm:mt-6 text-center">
+        <div className="mb-2 p-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 shadow-sm">
+          <IconLock isUnlocked={success} />
+        </div>
+        <p className="text-xs sm:text-sm font-semibold tracking-wider text-white/80 uppercase mb-0.5 drop-shadow">
+          {formattedDate}
+        </p>
+        <h2 className="ios-clock-display text-5xl sm:text-6xl font-bold tracking-tight text-white drop-shadow-md">
+          {formattedTime}
+        </h2>
+      </header>
+
+      {/* iOS Passcode Entry Form */}
+      <main className="relative z-10 flex flex-col items-center justify-center w-full max-w-sm px-6 my-auto">
         
         <div className={`flex flex-col items-center w-full transition-all duration-300 ${shake ? 'animate-shake' : ''}`}>
           
-          <h1 className="text-xl font-medium mb-6 tracking-wide drop-shadow-lg">Enter Passcode</h1>
+          <h1 className="text-sm font-medium mb-5 tracking-wide text-white/90 drop-shadow">
+            {success ? 'Vault Unlocked' : 'Enter Passcode'}
+          </h1>
           
           <div className="flex gap-4 mb-4 h-6 items-center">
             {dots.map((_, index) => {
@@ -121,81 +186,94 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
                   key={index}
                   className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-150 ${
                     isFilled
-                      ? 'bg-white border-white shadow-[0_0_8px_rgba(255,255,255,0.6)]'
-                      : 'bg-transparent border-white/70'
+                      ? 'bg-white border-white shadow-[0_0_12px_rgba(255,255,255,0.85)] scale-105'
+                      : 'bg-transparent border-white/60'
                   }`}
                 />
               );
             })}
           </div>
 
-          <div className="h-6 mb-8 flex items-center justify-center">
+          <div className="h-6 mb-6 flex items-center justify-center">
             {error && (
-              <p className="text-red-300 text-sm font-medium drop-shadow-sm" role="alert">
+              <p className="text-red-300 text-xs font-semibold tracking-wide drop-shadow-sm" role="alert">
                 {error}
               </p>
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-5 mb-8">
+          <div className="grid grid-cols-3 gap-5 mb-4">
             {keypadLayout.map(({ num, letters }) => (
               <button
                 key={num}
                 type="button"
-                className="pin-key w-[77px] h-[77px] flex flex-col items-center justify-center rounded-full transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                className="pin-key w-[75px] h-[75px] flex flex-col items-center justify-center rounded-full transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
                 onClick={() => handlePressKey(num)}
                 disabled={success}
                 aria-label={`Digit ${num}`}
               >
-                <span className="text-[32px] leading-none mb-0.5 drop-shadow-sm">{num}</span>
+                <span className="ios-number text-[30px] leading-none mb-0.5 drop-shadow-sm font-semibold">{num}</span>
                 {letters && (
                   <span className="text-[9px] text-white/60 tracking-[2px] uppercase font-bold leading-none">{letters}</span>
                 )}
               </button>
             ))}
             
-            <div className="w-[77px] h-[77px]"></div>
+            <div className="w-[75px] h-[75px]"></div>
             
             <button
               type="button"
-              className="pin-key w-[77px] h-[77px] flex flex-col items-center justify-center rounded-full transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+              className="pin-key w-[75px] h-[75px] flex flex-col items-center justify-center rounded-full transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
               onClick={() => handlePressKey('0')}
               disabled={success}
               aria-label="Digit 0"
             >
-              <span className="text-[32px] leading-none drop-shadow-sm">0</span>
+              <span className="ios-number text-[30px] leading-none drop-shadow-sm font-semibold">0</span>
             </button>
             
             <button
               type="button"
-              className="w-[77px] h-[77px] flex items-center justify-center rounded-full active:bg-white/15 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+              className="w-[75px] h-[75px] flex items-center justify-center rounded-full active:bg-white/15 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
               onClick={handleBackspace}
               disabled={success || pin.length === 0}
               aria-label="Delete last digit"
             >
-              {pin.length > 0 && <IconDelete size={24} />}
+              {pin.length > 0 && <IconDelete size={22} />}
             </button>
           </div>
           
         </div>
       </main>
 
+      {/* iOS Lock Screen Footer Badge */}
+      <footer className="relative z-10 text-center">
+        <p className="text-[11px] font-medium text-white/50 tracking-wider uppercase">
+          Family Wealth Office • Encrypted Storage
+        </p>
+      </footer>
+
       <style>{`
         .pin-lock-root {
           position: relative;
-          background: #0a0a1a;
+          background: #090916;
+        }
+
+        .ios-clock-display {
+          font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display", "Inter", sans-serif;
+          font-variant-numeric: tabular-nums;
+          font-feature-settings: "tnum" 1;
         }
 
         .pin-lock-bg {
           position: absolute;
           inset: 0;
           background:
-            radial-gradient(ellipse 120% 60% at 20% 100%, rgba(88, 28, 135, 0.8) 0%, transparent 70%),
-            radial-gradient(ellipse 100% 50% at 80% 90%, rgba(30, 58, 138, 0.75) 0%, transparent 65%),
-            radial-gradient(ellipse 80% 40% at 50% 110%, rgba(139, 92, 246, 0.5) 0%, transparent 60%),
-            radial-gradient(ellipse 60% 35% at 70% 80%, rgba(59, 130, 246, 0.35) 0%, transparent 55%),
-            radial-gradient(ellipse 50% 50% at 30% 20%, rgba(88, 28, 135, 0.2) 0%, transparent 70%),
-            linear-gradient(180deg, #0a0a1a 0%, #0f0b2e 40%, #1a1145 100%);
+            radial-gradient(ellipse 120% 60% at 20% 100%, rgba(88, 28, 135, 0.85) 0%, transparent 70%),
+            radial-gradient(ellipse 100% 50% at 80% 90%, rgba(30, 58, 138, 0.8) 0%, transparent 65%),
+            radial-gradient(ellipse 80% 40% at 50% 110%, rgba(139, 92, 246, 0.55) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 35% at 70% 80%, rgba(59, 130, 246, 0.4) 0%, transparent 55%),
+            radial-gradient(ellipse 50% 50% at 30% 20%, rgba(88, 28, 135, 0.25) 0%, transparent 70%),
+            linear-gradient(180deg, #070712 0%, #0d0928 40%, #160e3b 100%);
           animation: auroraShift 12s ease-in-out infinite alternate;
         }
 
@@ -237,16 +315,16 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
         }
 
         .pin-key {
-          background: rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.11);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
         .pin-key:active {
-          background: rgba(255, 255, 255, 0.25);
-          transform: scale(0.95);
-          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+          background: rgba(255, 255, 255, 0.28);
+          transform: scale(0.94);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         @keyframes shake {

@@ -51,15 +51,32 @@
   --z-toast: 500;
 
   /* Animation Curves */
-  --ios-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ios-spring: cubic-bezier(0.32, 1.2, 0.64, 1);
+  --ios-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ios-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* iOS Tactile Press Feedback */
 .ios-press {
-  transition: transform 0.15s var(--ios-spring);
+  transition: transform 0.12s var(--ios-spring), background-color 0.15s ease, opacity 0.15s ease;
 }
 .ios-press:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
+  opacity: 0.88;
+}
+
+/* iOS Glassmorphism Materials */
+.ios-glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.dark .ios-glass {
+  background: rgba(28, 28, 30, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .dark {
@@ -84,7 +101,7 @@
 
 /* Global scrollbars and transitions */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro Rounded", "Inter", system-ui, sans-serif;
   background-color: var(--app-background);
   color: var(--text-primary);
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -96,19 +113,20 @@ body {
 h1, .text-page-title {
   font-size: 28px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   line-height: 1.2;
 }
 @media (min-width: 640px) {
   h1, .text-page-title {
     font-size: 34px;
+    letter-spacing: -0.03em;
   }
 }
 
 h2, .text-section-title {
   font-size: 20px;
   font-weight: 700;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
   line-height: 1.3;
 }
 @media (min-width: 640px) {
@@ -154,7 +172,9 @@ h3, .text-card-title {
 .text-financial {
   font-size: 26px;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "cv05" 1, "cv01" 1;
 }
 @media (min-width: 640px) {
   .text-financial {
@@ -176,17 +196,20 @@ h3, .text-card-title {
 /* Financial number tabular alignment */
 .tnum {
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font-feature-settings: "tnum" 1, "cv05" 1;
 }
 
 .ios-number {
-  letter-spacing: -0.03em;
-  font-feature-settings: "tnum" 1;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display", "Inter", sans-serif;
+  letter-spacing: -0.035em;
+  font-feature-settings: "tnum" 1, "cv05" 1;
   font-variant-numeric: tabular-nums;
 }
 
 .ios-currency {
   font-weight: 300;
+  opacity: 0.85;
+  margin-right: 1px;
 }
 
 @keyframes stitchFadeIn {

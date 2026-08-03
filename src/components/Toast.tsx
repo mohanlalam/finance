@@ -74,28 +74,24 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
     switch (toast.type) {
       case 'success':
         return {
-          bg: 'bg-emerald-950/80 border-emerald-500/30 text-emerald-100',
+          bg: 'bg-[#0f172a]/90 text-white border-emerald-500/40 dark:bg-[#1e293b]/95',
           icon: <IconCheck />,
-          shadow: 'shadow-emerald-900/10'
         };
       case 'error':
         return {
-          bg: 'bg-red-950/80 border-red-500/30 text-red-100',
+          bg: 'bg-[#0f172a]/90 text-white border-red-500/40 dark:bg-[#1e293b]/95',
           icon: <IconError />,
-          shadow: 'shadow-red-900/10'
         };
       case 'warning':
         return {
-          bg: 'bg-amber-950/80 border-amber-500/30 text-amber-100',
+          bg: 'bg-[#0f172a]/90 text-white border-amber-500/40 dark:bg-[#1e293b]/95',
           icon: <IconWarning />,
-          shadow: 'shadow-amber-900/10'
         };
       case 'info':
       default:
         return {
-          bg: 'bg-slate-900/80 border-blue-500/30 text-blue-100',
+          bg: 'bg-[#0f172a]/90 text-white border-blue-500/40 dark:bg-[#1e293b]/95',
           icon: <IconInfo />,
-          shadow: 'shadow-blue-900/10'
         };
     }
   };
@@ -107,13 +103,13 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
       role="alert"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-md shadow-lg pointer-events-auto max-w-sm w-full md:w-auto transition-all ${styles.bg} ${styles.shadow} ${isExiting ? 'animate-slide-out' : 'animate-slide-in'}`}
+      className={`flex items-center gap-3 px-5 py-2.5 rounded-full border backdrop-blur-xl shadow-2xl pointer-events-auto max-w-sm w-auto transition-all duration-200 ${styles.bg} ${isExiting ? 'animate-slide-out scale-95 opacity-0' : 'animate-slide-in scale-100 opacity-100'}`}
     >
       {styles.icon}
-      <p className="text-xs font-semibold flex-1 tracking-wide">{toast.message}</p>
+      <p className="text-xs font-semibold tracking-tight text-white flex-1">{toast.message}</p>
       <button
         onClick={handleClose}
-        className="text-slate-400 hover:text-slate-200 transition-colors p-1 rounded-lg hover:bg-white/5"
+        className="text-white/60 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
         aria-label="Close notification"
       >
         <IconClose />
