@@ -57,7 +57,7 @@ const Th = React.memo(({
       <span className="flex items-center gap-1">
         {label}
         {!hideArrow && (
-          <span className={`text-[10px] ${sortKey === k ? 'text-indigo-500 font-bold' : 'text-slate-300 dark:text-zinc-600'}`}>
+          <span className={`text-[10px] ${sortKey === k ? 'text-[#007aff] dark:text-[#60a5fa] font-bold' : 'text-slate-300 dark:text-zinc-600'}`}>
             {sortKey === k ? (sortAsc ? '▲' : '▼') : '⇅'}
           </span>
         )}

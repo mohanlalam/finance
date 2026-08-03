@@ -37,7 +37,7 @@ export function generatePDFReport(portfolios: Portfolio[], label: string = 'Fami
           .page-break { page-break-before: always; }
         }
         body { 
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+          font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif; 
           color: #333; 
           line-height: 1.5; 
           margin: 0; 

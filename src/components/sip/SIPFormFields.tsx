@@ -51,13 +51,13 @@ export function SIPFormFields({
             placeholder="e.g. 102867"
             value={mfSchemeCode}
             onChange={(e) => setMfSchemeCode(e.target.value)}
-            className="flex-1 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
+            className="flex-1 border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
           />
           <button
             type="button"
             onClick={onValidateScheme}
             disabled={isValidatingScheme}
-            className="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all disabled:opacity-50 shrink-0"
+            className="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-4 py-2 rounded-[14px] transition-all disabled:opacity-50 shrink-0"
           >
             {isValidatingScheme ? 'Validating...' : 'Fetch Fund'}
           </button>
@@ -70,7 +70,7 @@ export function SIPFormFields({
           placeholder="e.g. HDFC Top 100 Mutual Fund"
           value={fundName}
           onChange={(e) => setFundName(e.target.value)}
-          className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
+          className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
         />
       </div>
 
@@ -82,7 +82,7 @@ export function SIPFormFields({
             placeholder="0"
             value={monthlySip}
             onChange={(e) => setMonthlySip(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
           />
         </div>
         <div>
@@ -93,7 +93,7 @@ export function SIPFormFields({
             placeholder="e.g. 12.00"
             value={expectedCagr}
             onChange={(e) => setExpectedCagr(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
           />
         </div>
         <div>
@@ -104,7 +104,7 @@ export function SIPFormFields({
             placeholder="0.000"
             value={units}
             onChange={(e) => setUnits(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
           />
         </div>
       </div>
@@ -116,7 +116,7 @@ export function SIPFormFields({
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
           />
         </div>
         <div>
@@ -127,7 +127,7 @@ export function SIPFormFields({
             type="date"
             value={nextSipDate}
             onChange={(e) => setNextSipDate(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
           />
         </div>
       </div>
@@ -139,7 +139,7 @@ export function SIPFormFields({
           placeholder="Manual / Fallback valuation"
           value={fallbackValuation}
           onChange={(e) => setFallbackValuation(e.target.value)}
-          className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
+          className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors"
         />
         <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
           Note: If a valid Scheme Code is set, live valuation is auto-calculated using the fetched NAV. Otherwise, this manual value is used.

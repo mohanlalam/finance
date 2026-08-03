@@ -286,7 +286,7 @@ export default React.memo(function DocumentVaultView({
                 <button
                   key={f.key}
                   onClick={() => setActiveFolder(f.key)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${isActive
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-semibold transition-all ${isActive
                     ? f.color + ' ring-1 ring-current/20'
                     : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600'
                     }`}
@@ -311,7 +311,7 @@ export default React.memo(function DocumentVaultView({
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-[10px] transition-colors shadow-sm"
             >
               <Upload size={13} />
               Upload to {FOLDERS.find((f) => f.key === activeFolder)?.label}
@@ -331,7 +331,7 @@ export default React.memo(function DocumentVaultView({
             actionButton={
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-600 dark:hover:bg-slate-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+                className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-600 dark:hover:bg-slate-500 text-white text-xs font-bold px-5 py-2.5 rounded-[14px] transition-colors shadow-sm"
               >
                 <Upload size={15} />
                 Upload Your First Document
@@ -345,7 +345,7 @@ export default React.memo(function DocumentVaultView({
               return (
                 <div key={doc.id} className="px-6 py-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-[14px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
                       <FileText size={18} />
                     </div>
                     <div className="min-w-0">
@@ -369,14 +369,14 @@ export default React.memo(function DocumentVaultView({
                       href={getDocumentUrl(doc.file_path)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
+                      className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
                       title="Open"
                     >
                       <ExternalLink size={14} />
                     </a>
                     <button
                       onClick={() => handleDelete(doc)}
-                      className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
+                      className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
                       title="Delete"
                     >
                       <Trash2 size={14} />
@@ -404,7 +404,7 @@ export default React.memo(function DocumentVaultView({
               </div>
               <button
                 onClick={() => !uploading && setShowLinkModal(false)}
-                className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
+                className="w-8 h-8 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
                 aria-label="Close dialog"
               >
                 <X size={16} />
@@ -417,7 +417,7 @@ export default React.memo(function DocumentVaultView({
                 <select
                   value={formPortfolio}
                   onChange={(e) => setFormPortfolio(e.target.value)}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
                 >
                   {portfolioOptions.map((o) => (
                     <option key={o.name} value={o.name}>{o.label}</option>
@@ -431,7 +431,7 @@ export default React.memo(function DocumentVaultView({
                   type="text"
                   value={documentName}
                   onChange={(e) => setDocumentName(e.target.value)}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
                 />
               </div>
 
@@ -441,7 +441,7 @@ export default React.memo(function DocumentVaultView({
                   type="date"
                   value={expiryDate}
                   onChange={(e) => setExpiryDate(e.target.value)}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors bg-white dark:bg-slate-900"
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors bg-white dark:bg-slate-900"
                 />
               </div>
 
@@ -451,7 +451,7 @@ export default React.memo(function DocumentVaultView({
                   <select
                     value={linkedAssetId}
                     onChange={(e) => setLinkedAssetId(e.target.value)}
-                    className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
+                    className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
                   >
                     <option value="">— Not linked —</option>
                     {assetOptions.map((opt) => (
@@ -462,7 +462,7 @@ export default React.memo(function DocumentVaultView({
               )}
 
               {uploadError && (
-                <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl px-3 py-2" role="alert">{uploadError}</p>
+                <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2" role="alert">{uploadError}</p>
               )}
 
               <div className="flex gap-3 pt-2">
@@ -470,14 +470,14 @@ export default React.memo(function DocumentVaultView({
                   type="button"
                   disabled={uploading}
                   onClick={() => setShowLinkModal(false)}
-                  className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+                  className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-900 transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-900 transition-colors disabled:opacity-50"
                 >
                   {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
                   {uploading ? 'Uploading...' : 'Upload'}

@@ -101,7 +101,7 @@
 
 /* Global scrollbars and transitions */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro Rounded", "Inter", system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
   background-color: var(--app-background);
   color: var(--text-primary);
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -200,7 +200,6 @@ h3, .text-card-title {
 }
 
 .ios-number {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display", "Inter", sans-serif;
   letter-spacing: -0.035em;
   font-feature-settings: "tnum" 1, "cv05" 1;
   font-variant-numeric: tabular-nums;

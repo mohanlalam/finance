@@ -259,7 +259,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
         }
 
         .ios-clock-display {
-          font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display", "Inter", sans-serif;
+          font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display", sans-serif;
           font-variant-numeric: tabular-nums;
           font-feature-settings: "tnum" 1;
         }

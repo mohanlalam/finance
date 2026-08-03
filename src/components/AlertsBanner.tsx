@@ -91,7 +91,7 @@ function AlertsBanner({ alerts }: AlertsBannerProps) {
           return (
             <div
               key={alert.id}
-              className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs ${config.bg} ${config.border} ${config.color} transition-all duration-200 animate-in fade-in`}
+              className={`flex items-center gap-2 rounded-[10px] border px-3 py-2 text-xs ${config.bg} ${config.border} ${config.color} transition-all duration-200 animate-in fade-in`}
             >
               <span className="shrink-0">{config.icon}</span>
               <div className="min-w-0">

@@ -78,7 +78,7 @@ export default function ConfirmModal({
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors shrink-0 disabled:opacity-40"
+            className="w-7 h-7 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors shrink-0 disabled:opacity-40"
             aria-label="Close"
           >
             <X size={14} />

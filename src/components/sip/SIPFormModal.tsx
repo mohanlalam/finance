@@ -171,7 +171,7 @@ export function SIPFormModal({
               value={formPortfolio}
               onChange={(e) => setFormPortfolio(e.target.value)}
               disabled={!!editingAccount}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors disabled:opacity-50"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors disabled:opacity-50"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
@@ -208,13 +208,13 @@ export function SIPFormModal({
               placeholder="e.g. Linked to child education, monthly auto-debit"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors resize-none"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors resize-none"
             />
           </div>
 
           {/* Error message */}
           {error && (
-            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-3 py-2" role="alert">
+            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-[14px] px-3 py-2" role="alert">
               {error}
             </p>
           )}
@@ -224,14 +224,14 @@ export function SIPFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-sky-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-sky-700 transition-colors disabled:opacity-50"
+              className="flex-1 bg-sky-600 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-sky-700 transition-colors disabled:opacity-50"
             >
               {loading ? 'Saving...' : editingAccount ? 'Save Changes' : 'Create SIP'}
             </button>

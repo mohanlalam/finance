@@ -35,14 +35,14 @@ export function RDAccountCard({
         {/* Left Side: Meta & Dates */}
         <div className="space-y-1.5 flex-1 min-w-[200px]">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse" aria-hidden="true" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#34C759] animate-pulse" aria-hidden="true" />
             <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">{account.bank_name}</h4>
             {isMatured ? (
               <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-500 px-2 py-0.5 rounded-full flex items-center gap-0.5">
                 <CheckCircle size={10} /> Matured
               </span>
             ) : (
-              <span className="text-[10px] font-bold bg-pink-50 text-pink-600 dark:bg-pink-950/20 dark:text-pink-400 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+              <span className="text-[10px] font-bold bg-[#34C759]/10 text-[#34C759] dark:bg-[#34C759]/15 dark:text-[#34C759] px-2 py-0.5 rounded-full flex items-center gap-0.5">
                 <Clock size={10} /> Active
               </span>
             )}
@@ -55,7 +55,7 @@ export function RDAccountCard({
           </div>
 
           {account.notes && (
-            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 bg-slate-50 dark:bg-slate-900/40 px-2.5 py-1 rounded-lg w-fit mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 bg-slate-50 dark:bg-slate-900/40 px-2.5 py-1 rounded-[10px] w-fit mt-1">
               <StickyNote size={11} className="text-slate-400" />
               {account.notes}
             </p>
@@ -95,21 +95,21 @@ export function RDAccountCard({
               target="_blank"
               rel="noopener noreferrer"
               title={`View Attached Document: ${linkedDocs[0].name}`}
-              className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
+              className="w-8 h-8 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
             >
               <FileText size={15} />
             </a>
           )}
           <button
             onClick={() => onOpenEdit(account)}
-            className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors hover:text-indigo-600"
+            className="w-8 h-8 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors hover:text-indigo-600"
             aria-label="Edit Recurring Deposit"
           >
             <Edit2 size={14} />
           </button>
           <button
             onClick={() => onConfirmDelete(account)}
-            className="w-8 h-8 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors hover:text-red-600"
+            className="w-8 h-8 rounded-[10px] hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors hover:text-red-600"
             aria-label="Delete Recurring Deposit"
           >
             <Trash2 size={14} />

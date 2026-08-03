@@ -179,7 +179,7 @@ export default React.memo(function GoldHoldingView({
           <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Gold Holdings</h3>
           <button
             onClick={handleOpenAdd}
-            className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+            className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 rounded-[10px] transition-colors shadow-sm"
           >
             <Plus size={13} />
             Add Gold Item
@@ -198,7 +198,7 @@ export default React.memo(function GoldHoldingView({
             actionButton={
               <button
                 onClick={handleOpenAdd}
-                className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-amber-500/20"
+                className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-5 py-2.5 rounded-[14px] transition-colors shadow-sm shadow-amber-500/20"
               >
                 <Plus size={15} />
                 Add Your First Gold Item
@@ -215,7 +215,7 @@ export default React.memo(function GoldHoldingView({
                 <div key={g.id} className="p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-[14px] bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
                         <Coins size={20} />
                       </div>
                       <div>
@@ -249,7 +249,7 @@ export default React.memo(function GoldHoldingView({
                             href={getDocumentUrl(doc.file_path)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-200 dark:hover:border-amber-800 transition-colors"
+                            className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-200 dark:hover:border-amber-800 transition-colors"
                             title={doc.name}
                           >
                             <FileText size={14} />
@@ -257,14 +257,14 @@ export default React.memo(function GoldHoldingView({
                         ))}
                         <button
                           onClick={() => handleOpenEdit(g)}
-                          className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
+                          className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
                           title="Edit"
                         >
                           <Edit2 size={14} />
                         </button>
                         <button
                           onClick={() => setConfirmDelete(g)}
-                          className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
+                          className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
                           title="Delete"
                         >
                           <Trash2 size={14} />
@@ -300,7 +300,7 @@ export default React.memo(function GoldHoldingView({
           </div>
           <button
             onClick={() => !loading && setShowModal(false)}
-            className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
+            className="w-8 h-8 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
             aria-label="Close dialog"
           >
             <X size={16} />
@@ -314,7 +314,7 @@ export default React.memo(function GoldHoldingView({
               value={formPortfolio}
               onChange={(e) => setFormPortfolio(e.target.value)}
               disabled={!!editing}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-colors disabled:opacity-50"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-colors disabled:opacity-50"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
@@ -329,7 +329,7 @@ export default React.memo(function GoldHoldingView({
               placeholder="e.g. 24K Gold Coins, Bridal Necklace"
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
             />
           </div>
 
@@ -339,7 +339,7 @@ export default React.memo(function GoldHoldingView({
               <select
                 value={purity}
                 onChange={(e) => setPurity(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-colors"
               >
                 {PURITY_OPTIONS.map((p) => (
                   <option key={p} value={p}>{p}</option>
@@ -354,7 +354,7 @@ export default React.memo(function GoldHoldingView({
                 placeholder="0.00"
                 value={weightGrams}
                 onChange={(e) => setWeightGrams(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
               />
             </div>
           </div>
@@ -367,7 +367,7 @@ export default React.memo(function GoldHoldingView({
                 placeholder="0"
                 value={purchasePrice}
                 onChange={(e) => setPurchasePrice(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
               />
             </div>
             <div>
@@ -377,7 +377,7 @@ export default React.memo(function GoldHoldingView({
                 placeholder="0"
                 value={currentValuation}
                 onChange={(e) => setCurrentValuation(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
               />
             </div>
           </div>
@@ -388,7 +388,7 @@ export default React.memo(function GoldHoldingView({
               type="date"
               value={purchaseDate}
               onChange={(e) => setPurchaseDate(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
             />
           </div>
 
@@ -399,26 +399,26 @@ export default React.memo(function GoldHoldingView({
               placeholder="e.g. Inherited from grandfather, stored in locker"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors resize-none"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors resize-none"
             />
           </div>
 
           {error && (
-            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl px-3 py-2" role="alert">{error}</p>
+            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2" role="alert">{error}</p>
           )}
 
           <div className="flex gap-3 pt-2">
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-amber-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-amber-700 transition-colors disabled:opacity-50"
+              className="flex-1 bg-amber-600 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-amber-700 transition-colors disabled:opacity-50"
             >
               {loading ? 'Saving...' : editing ? 'Save Changes' : 'Add Gold'}
             </button>

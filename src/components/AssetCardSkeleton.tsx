@@ -16,7 +16,7 @@ export function AssetCardSkeleton({ count = 3 }: AssetCardSkeletonProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* Icon placeholder */}
-              <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700/50 shimmer-bar shrink-0" />
+              <div className="w-10 h-10 rounded-[14px] bg-slate-100 dark:bg-slate-700/50 shimmer-bar shrink-0" />
               {/* Labels placeholder */}
               <div className="space-y-2">
                 <div className="h-4 w-32 bg-slate-100 dark:bg-slate-700/50 shimmer-bar rounded" />

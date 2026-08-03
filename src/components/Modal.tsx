@@ -210,7 +210,7 @@ export default function Modal({
       >
         {/* iOS bottom sheet drag handle indicator pill */}
         <div className="w-full flex justify-center pt-2 pb-0.5 sm:hidden cursor-grab active:cursor-grabbing modal-drag-handle" data-drag-handle="true" aria-hidden="true">
-          <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-700 opacity-80" />
+          <div className="w-10 h-1 rounded-full bg-[#e5e5ea] dark:bg-[#38383a] opacity-80" />
         </div>
         {children}
       </div>

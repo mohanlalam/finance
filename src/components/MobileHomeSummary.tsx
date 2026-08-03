@@ -299,7 +299,7 @@ function MobileHomeSummary({
         <button
           onClick={onRefresh}
           disabled={isLoadingPrices}
-          className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 active:scale-95 transition-all shrink-0 ml-2"
+          className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 active:scale-[0.97] transition-all shrink-0 ml-2"
         >
           <RefreshCw size={11} className={isLoadingPrices ? 'animate-spin' : ''} />
           Refresh
@@ -367,7 +367,7 @@ function MobileHomeSummary({
       {/* Alerts Indicator Widget */}
       <button
         onClick={onOpenAlerts}
-        className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow active:scale-98 transition-all text-left"
+        className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow active:scale-[0.97] transition-all text-left"
       >
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${alertCount > 0 ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-500' : 'bg-slate-50 dark:bg-slate-900 text-slate-400'}`}>
@@ -406,7 +406,7 @@ function MobileHomeSummary({
               <div
                 key={alert.id}
                 onClick={onOpenAlerts}
-                className={`p-3 border rounded-2xl shadow-sm hover:shadow flex items-start gap-3 active:scale-98 transition-all cursor-pointer ${
+                className={`p-3 border rounded-2xl shadow-sm hover:shadow flex items-start gap-3 active:scale-[0.97] transition-all cursor-pointer ${
                   alert.severity === 'critical'
                     ? 'bg-red-50/70 border-red-100 dark:bg-red-950/20 dark:border-red-900/30'
                     : alert.severity === 'warning'
@@ -460,7 +460,7 @@ function MobileHomeSummary({
             <button
               key={card.id}
               onClick={() => onNavigateAsset(card.id)}
-              className="relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 text-left shadow-sm hover:shadow active:scale-98 transition-all flex flex-col justify-between h-28"
+              className="relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 text-left shadow-sm hover:shadow active:scale-[0.97] transition-all flex flex-col justify-between h-28"
             >
               <div className="flex items-center justify-between w-full">
                 <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center">
@@ -492,7 +492,7 @@ function MobileHomeSummary({
         <div className="grid grid-cols-1 gap-3">
           <button
             onClick={() => onNavigateAsset('what_if')}
-            className="relative overflow-hidden bg-gradient-to-br from-indigo-50/40 to-blue-50/20 dark:from-indigo-950/10 dark:to-blue-950/5 border border-indigo-100/40 dark:border-indigo-900/20 rounded-2xl p-4 text-left shadow-sm hover:shadow active:scale-98 transition-all flex items-center justify-between"
+            className="relative overflow-hidden bg-gradient-to-br from-indigo-50/40 to-blue-50/20 dark:from-indigo-950/10 dark:to-blue-950/5 border border-indigo-100/40 dark:border-indigo-900/20 rounded-2xl p-4 text-left shadow-sm hover:shadow active:scale-[0.97] transition-all flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center animate-pulse">

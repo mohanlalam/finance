@@ -40,7 +40,7 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset }: FloatingAddM
               <button
                 key={idx}
                 onClick={item.onClick}
-                className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-md active:scale-95 transition-all text-xs font-bold text-slate-700 dark:text-slate-250 animate-modal-content"
+                className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-md active:scale-[0.97] transition-all text-xs font-bold text-slate-700 dark:text-slate-250 animate-modal-content"
                 style={{ animationDelay: `${(menuItems.length - 1 - idx) * 40}ms` }}
               >
                 <span>{item.label}</span>
@@ -57,7 +57,7 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset }: FloatingAddM
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Open quick add menu"
           aria-expanded={isOpen}
-          className="pointer-events-auto w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white flex items-center justify-center shadow-lg active:scale-90 transition-all outline-none"
+          className="pointer-events-auto w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white flex items-center justify-center shadow-lg active:scale-[0.97] transition-all outline-none"
         >
           <Plus
             size={24}

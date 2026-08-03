@@ -70,7 +70,7 @@ export default React.memo(function AddFamilyModal({
             placeholder="e.g. Father's Portfolio"
             value={newFamilyLabel}
             onChange={(e) => setNewFamilyLabel(e.target.value)}
-            className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-450 dark:placeholder-zinc-650 focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none"
+            className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-450 dark:placeholder-zinc-650 focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none"
           />
         </div>
         <div>
@@ -82,12 +82,12 @@ export default React.memo(function AddFamilyModal({
             placeholder="e.g. father"
             value={newFamilyName}
             onChange={(e) => setNewFamilyName(e.target.value)}
-            className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-450 dark:placeholder-zinc-650 focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none"
+            className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-450 dark:placeholder-zinc-650 focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none"
           />
         </div>
 
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl px-3 py-2" role="alert">
+          <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2" role="alert">
             {error}
           </p>
         )}

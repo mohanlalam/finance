@@ -107,7 +107,7 @@ function Header({
           
           {/* Left: App Logo & Selected Context */}
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#007aff] flex items-center justify-center shadow-sm">
+            <div className="w-7 h-7 rounded-[10px] bg-[#007aff] flex items-center justify-center shadow-sm">
               <TrendingUp size={15} className="text-white" />
             </div>
             <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">

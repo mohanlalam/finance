@@ -202,7 +202,7 @@ export default React.memo(function RealEstateView({
           <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Properties</h3>
           <button
             onClick={handleOpenAdd}
-            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-[10px] transition-colors shadow-sm"
           >
             <Plus size={13} />
             Add Property
@@ -221,7 +221,7 @@ export default React.memo(function RealEstateView({
             actionButton={
               <button
                 onClick={handleOpenAdd}
-                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-emerald-500/20"
+                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2.5 rounded-[14px] transition-colors shadow-sm shadow-emerald-500/20"
               >
                 <Plus size={15} />
                 Add Your First Property
@@ -239,7 +239,7 @@ export default React.memo(function RealEstateView({
                 <div key={r.id} className="p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-500 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-[14px] bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-500 flex items-center justify-center shrink-0">
                         <Home size={20} />
                       </div>
                       <div>
@@ -279,7 +279,7 @@ export default React.memo(function RealEstateView({
                             href={getDocumentUrl(doc.file_path)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-650 dark:hover:text-emerald-400 hover:border-emerald-200 dark:hover:border-emerald-800 transition-colors"
+                            className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-650 dark:hover:text-emerald-400 hover:border-emerald-200 dark:hover:border-emerald-800 transition-colors"
                             title={doc.name}
                           >
                             <FileText size={14} />
@@ -287,14 +287,14 @@ export default React.memo(function RealEstateView({
                         ))}
                         <button
                           onClick={() => handleOpenEdit(r)}
-                          className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-650 dark:hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
+                          className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-650 dark:hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
                           title="Edit"
                         >
                           <Edit2 size={14} />
                         </button>
                         <button
                           onClick={() => setConfirmDelete(r)}
-                          className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
+                          className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
                           title="Delete"
                         >
                           <Trash2 size={14} />
@@ -330,7 +330,7 @@ export default React.memo(function RealEstateView({
           </div>
           <button
             onClick={() => !loading && setShowModal(false)}
-            className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
+            className="w-8 h-8 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
             aria-label="Close dialog"
           >
             <X size={16} />
@@ -344,7 +344,7 @@ export default React.memo(function RealEstateView({
               value={formPortfolio}
               onChange={(e) => setFormPortfolio(e.target.value)}
               disabled={!!editing}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors disabled:opacity-50"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors disabled:opacity-50"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
@@ -359,7 +359,7 @@ export default React.memo(function RealEstateView({
               placeholder="e.g. 2BHK Apartment (Whitefield)"
               value={propertyName}
               onChange={(e) => setPropertyName(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
             />
           </div>
 
@@ -369,7 +369,7 @@ export default React.memo(function RealEstateView({
               <select
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value as RealEstate['property_type'])}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors capitalize"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors capitalize"
               >
                 {TYPE_OPTIONS.map((t) => (
                   <option key={t} value={t}>{t}</option>
@@ -383,7 +383,7 @@ export default React.memo(function RealEstateView({
                 placeholder="City, State"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
               />
             </div>
           </div>
@@ -396,7 +396,7 @@ export default React.memo(function RealEstateView({
                 placeholder="0"
                 value={purchasePrice}
                 onChange={(e) => setPurchasePrice(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
               />
             </div>
             <div>
@@ -406,7 +406,7 @@ export default React.memo(function RealEstateView({
                 placeholder="0"
                 value={currentValuation}
                 onChange={(e) => setCurrentValuation(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
               />
             </div>
           </div>
@@ -418,7 +418,7 @@ export default React.memo(function RealEstateView({
                 type="date"
                 value={purchaseDate}
                 onChange={(e) => setPurchaseDate(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
               />
             </div>
             <div>
@@ -428,7 +428,7 @@ export default React.memo(function RealEstateView({
                 placeholder="0"
                 value={monthlyRent}
                 onChange={(e) => setMonthlyRent(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
               />
             </div>
           </div>
@@ -440,26 +440,26 @@ export default React.memo(function RealEstateView({
               placeholder="e.g. Disputed title, under renovation, used as collateral"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors resize-none"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors resize-none"
             />
           </div>
 
           {error && (
-            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl px-3 py-2" role="alert">{error}</p>
+            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2" role="alert">{error}</p>
           )}
 
           <div className="flex gap-3 pt-2">
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-emerald-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-emerald-700 transition-colors disabled:opacity-50"
+              className="flex-1 bg-emerald-600 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-emerald-700 transition-colors disabled:opacity-50"
             >
               {loading ? 'Saving...' : editing ? 'Save Changes' : 'Add Property'}
             </button>

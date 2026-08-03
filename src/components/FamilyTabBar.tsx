@@ -46,7 +46,7 @@ export default React.memo(function FamilyTabBar({
           aria-controls="portfolio-content"
           id="tab-all"
           onClick={() => onTabChange('all')}
-          className={`flex items-center gap-1.5 h-8 px-3.5 rounded-xl text-xs font-semibold transition-all duration-200 outline-none shrink-0 ${
+          className={`flex items-center gap-1.5 h-8 px-3.5 rounded-[10px] text-xs font-semibold transition-all duration-200 outline-none shrink-0 ${
             activeTab === 'all'
               ? 'bg-white text-[#1d1d1f] shadow-sm dark:bg-zinc-700 dark:text-[#f5f5f7]'
               : 'text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#98989d] dark:hover:text-[#f5f5f7]'
@@ -67,7 +67,7 @@ export default React.memo(function FamilyTabBar({
                 aria-controls="portfolio-content"
                 id={`tab-${p.name}`}
                 onClick={() => onTabChange(p.name)}
-                className={`flex items-center gap-1.5 h-8 px-3.5 rounded-xl text-xs font-semibold transition-all duration-200 outline-none ${
+                className={`flex items-center gap-1.5 h-8 px-3.5 rounded-[10px] text-xs font-semibold transition-all duration-200 outline-none ${
                   isActive
                     ? 'bg-white text-[#1d1d1f] shadow-sm dark:bg-zinc-700 dark:text-[#f5f5f7]'
                     : 'text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#98989d] dark:hover:text-[#f5f5f7]'

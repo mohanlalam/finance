@@ -323,7 +323,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
           <button
             type="button"
             onClick={handleClear}
-            className="flex items-center gap-1.5 text-[9px] font-bold text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors bg-slate-200/50 dark:bg-slate-800/40 hover:bg-slate-200 dark:hover:bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-200/30 dark:border-slate-700/25 active:scale-95"
+            className="flex items-center gap-1.5 text-[9px] font-bold text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors bg-slate-200/50 dark:bg-slate-800/40 hover:bg-slate-200 dark:hover:bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-200/30 dark:border-slate-700/25 active:scale-[0.97]"
             title="Reset conversation"
           >
             <Trash2 size={11} />
@@ -406,7 +406,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
                 key={idx}
                 type="button"
                 onClick={() => handleSuggestion(s)}
-                className="text-left text-[9.5px] text-blue-600 dark:text-blue-450 hover:text-blue-800 dark:hover:text-blue-300 font-semibold bg-slate-100/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/35 px-2.5 py-1.5 rounded-xl transition-all active:scale-95"
+                className="text-left text-[9.5px] text-blue-600 dark:text-blue-450 hover:text-blue-800 dark:hover:text-blue-300 font-semibold bg-slate-100/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/35 px-2.5 py-1.5 rounded-xl transition-all active:scale-[0.97]"
               >
                 &ldquo;{s}&rdquo;
               </button>
@@ -428,7 +428,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
         <button
           type="submit"
           disabled={!query.trim() || isLoading}
-          className="w-9 h-9 rounded-xl bg-blue-600 hover:bg-blue-500 flex items-center justify-center text-white transition-all active:scale-95 shadow-lg shadow-blue-500/15 disabled:opacity-40 disabled:hover:bg-blue-600 disabled:active:scale-100"
+          className="w-9 h-9 rounded-xl bg-blue-600 hover:bg-blue-500 flex items-center justify-center text-white transition-all active:scale-[0.97] shadow-lg shadow-blue-500/15 disabled:opacity-40 disabled:hover:bg-blue-600 disabled:active:scale-100"
           aria-label="Send query"
         >
           <Send size={13} />

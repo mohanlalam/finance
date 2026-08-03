@@ -134,7 +134,7 @@ export function RDInstallmentSchedule({ account, onUpdate }: RDInstallmentSchedu
                       <button
                         type="button"
                         onClick={() => void handleRecordInstallment(account, monthDate)}
-                        className={`text-[9px] font-extrabold text-white px-2 py-0.5 rounded-md transition-all active:scale-95 shadow-xs ${
+                        className={`text-[9px] font-extrabold text-white px-2 py-0.5 rounded-md transition-all active:scale-[0.97] shadow-xs ${
                           isPastMonth
                             ? 'bg-rose-600 hover:bg-rose-700'
                             : 'bg-amber-600 hover:bg-amber-700'

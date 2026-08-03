@@ -535,7 +535,7 @@ export default function AppShell() {
                   <button
                     onClick={refreshPrices}
                     disabled={isLoadingPrices}
-                    className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 active:scale-95 transition-all shrink-0 ml-2"
+                    className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 active:scale-[0.97] transition-all shrink-0 ml-2"
                   >
                     <RefreshCw size={11} className={isLoadingPrices ? 'animate-spin' : ''} />
                     Refresh

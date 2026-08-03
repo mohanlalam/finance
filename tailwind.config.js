@@ -13,6 +13,7 @@ export default {
           '"Segoe UI"',
           'sans-serif'
         ],
+        mono: ['"SF Mono"', 'ui-monospace', 'Menlo', 'Monaco', 'Consolas', 'monospace']
       },
       colors: {
         slate: {

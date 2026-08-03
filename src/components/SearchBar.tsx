@@ -208,7 +208,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setSelectedIdx(-1); }}
                 placeholder="Search holdings, policies, files..."
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-xl pl-9 pr-9 py-2.5 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-[14px] pl-9 pr-9 py-2.5 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               />
               {query && (
                 <button
@@ -253,9 +253,9 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                     <button
                       key={type}
                       onClick={() => setActiveFilter(type as SearchFilter)}
-                      className="flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-700/30 rounded-2xl text-left transition-all active:scale-95"
+                      className="flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-700/30 rounded-2xl text-left transition-all active:scale-[0.97]"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900 shadow-3xs flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-[10px] bg-white dark:bg-slate-900 shadow-3xs flex items-center justify-center shrink-0">
                         {TYPE_ICONS[type]}
                       </div>
                       <div>
@@ -344,7 +344,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
           }}
           onKeyDown={handleKeyDown}
           placeholder='Search stocks, FDs, insurance, documents...  Press "/" to focus'
-          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-9 py-2.5 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
+          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[14px] pl-9 pr-9 py-2.5 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
         />
         {query && (
           <button

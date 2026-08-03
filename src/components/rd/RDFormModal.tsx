@@ -174,7 +174,7 @@ export function RDFormModal({
               value={formPortfolio}
               onChange={(e) => setFormPortfolio(e.target.value)}
               disabled={!!editingAccount}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors disabled:opacity-50"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors disabled:opacity-50"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
@@ -190,7 +190,7 @@ export function RDFormModal({
               placeholder="e.g. SBI, Post Office"
               value={bankName}
               onChange={(e) => setBankName(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
             />
           </div>
 
@@ -204,7 +204,7 @@ export function RDFormModal({
                 value={monthlyDeposit}
                 onChange={(e) => setMonthlyDeposit(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
               />
             </div>
             <div>
@@ -216,7 +216,7 @@ export function RDFormModal({
                 value={interestRate}
                 onChange={(e) => setInterestRate(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
               />
             </div>
           </div>
@@ -230,7 +230,7 @@ export function RDFormModal({
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
               />
             </div>
             <div>
@@ -240,7 +240,7 @@ export function RDFormModal({
                 value={maturityDate}
                 onChange={(e) => setMaturityDate(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
               />
             </div>
           </div>
@@ -254,7 +254,7 @@ export function RDFormModal({
                 placeholder="Auto-computed"
                 value={maturityAmount}
                 onChange={(e) => setMaturityAmount(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
               />
             </div>
             <div>
@@ -262,7 +262,7 @@ export function RDFormModal({
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as 'active' | 'matured')}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors"
               >
                 <option value="active">Active</option>
                 <option value="matured">Matured</option>
@@ -278,13 +278,13 @@ export function RDFormModal({
               placeholder="e.g. Linked to child marriage, Post office scheme"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors resize-none"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition-colors resize-none"
             />
           </div>
 
           {/* Error message */}
           {error && (
-            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-3 py-2" role="alert">
+            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-[14px] px-3 py-2" role="alert">
               {error}
             </p>
           )}
@@ -294,14 +294,14 @@ export function RDFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-pink-600 text-white font-semibold text-sm rounded-xl py-2.5 hover:bg-pink-700 transition-colors disabled:opacity-50"
+              className="flex-1 bg-pink-600 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-pink-700 transition-colors disabled:opacity-50"
             >
               {loading ? 'Saving...' : editingAccount ? 'Save Changes' : 'Create RD'}
             </button>

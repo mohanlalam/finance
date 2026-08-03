@@ -115,8 +115,8 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
     }
   }
 
-  const selectStyle = "w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none";
-  const inputStyle = "w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-450 dark:placeholder-zinc-650 focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none";
+  const selectStyle = "w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none";
+  const inputStyle = "w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-450 dark:placeholder-zinc-650 focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none";
 
   return (
     <Modal
@@ -280,7 +280,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
         </div>
 
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl px-3 py-2">{error}</p>
+          <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2">{error}</p>
         )}
 
         <div className="flex items-center gap-3 pt-2">
