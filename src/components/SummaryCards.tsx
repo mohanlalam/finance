@@ -6,6 +6,7 @@ import { estimateTodayPnL } from '../utils/portfolioCalcs';
 import { Card } from './ui/Card';
 import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { Sparkline } from './ui/Sparkline';
+import { AnimatedNumber } from './ui/AnimatedNumber';
 
 interface SummaryCardsProps {
   totalInvested: number;
@@ -59,7 +60,7 @@ function SummaryCards({
         <div className="flex items-end justify-between">
           <div>
             <p className={`text-financial tnum transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
-              {formatINR(totalCurrentValue)}
+              <AnimatedNumber value={totalCurrentValue} formatter={formatINR} />
             </p>
             <p className="text-supporting">
               {isLoading ? 'Syncing prices...' : 'Current valuation'}
@@ -80,7 +81,7 @@ function SummaryCards({
                 <span key={p.id} className="flex items-center gap-0.5">
                   <span>{p.label}:</span>
                   <span className="text-[var(--text-primary)] font-bold tnum">
-                    {formatINR(val)}
+                    <AnimatedNumber value={val} formatter={formatINR} />
                   </span>
                   {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-zinc-700 ml-1.5">|</span>}
                 </span>
@@ -101,7 +102,7 @@ function SummaryCards({
               <BarChart2 size={13} className="text-[var(--text-secondary)]" />
             </span>
           </div>
-          <p className="text-financial tnum">{formatINR(totalInvested)}</p>
+          <p className="text-financial tnum"><AnimatedNumber value={totalInvested} formatter={formatINR} /></p>
           <p className="text-supporting">Total capital deployed</p>
 
           {activePortfolio === null && portfolios && portfolios.length > 0 && (
@@ -112,7 +113,7 @@ function SummaryCards({
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
                     <span className="text-[var(--text-primary)] font-bold tnum">
-                      {formatINR(val)}
+                      <AnimatedNumber value={val} formatter={formatINR} />
                     </span>
                     {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-zinc-700 ml-1.5">|</span>}
                   </span>
@@ -133,7 +134,7 @@ function SummaryCards({
             </span>
           </div>
           <p className={`text-financial tnum ${isGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
-            {isGain ? '+' : ''}{formatINR(totalPnL)}
+            {isGain ? '+' : ''}<AnimatedNumber value={totalPnL} formatter={formatINR} />
           </p>
           <p className="text-supporting">
             {formatPercent(totalPnLPercent)} gain
@@ -148,7 +149,7 @@ function SummaryCards({
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
                     <span className={`font-bold tnum ${localGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
-                      {localGain ? '+' : ''}{formatINR(pnl)}
+                      {localGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} />
                     </span>
                     {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-zinc-700 ml-1.5">|</span>}
                   </span>
@@ -170,7 +171,7 @@ function SummaryCards({
               </span>
             </div>
             <p className={`text-financial tnum ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
-              {isTodayGain ? '+' : ''}{formatINR(todayPnL)}
+              {isTodayGain ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} />
             </p>
             <p className="text-supporting">
               Intraday delta
@@ -185,7 +186,7 @@ function SummaryCards({
                     <span key={p.id} className="flex items-center gap-0.5">
                       <span>{p.label}:</span>
                       <span className={`font-bold tnum ${localTodayGain ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
-                        {localTodayGain ? '+' : ''}{formatINR(pnl)}
+                        {localTodayGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} />
                       </span>
                       {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-zinc-700 ml-1.5">|</span>}
                     </span>

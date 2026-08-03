@@ -57,7 +57,7 @@ const Th = React.memo(({
       <span className="flex items-center gap-1">
         {label}
         {!hideArrow && (
-          <span className={`text-[10px] ${sortKey === k ? 'text-blue-500 font-bold' : 'text-slate-300 dark:text-zinc-600'}`}>
+          <span className={`text-[10px] ${sortKey === k ? 'text-indigo-500 font-bold' : 'text-slate-300 dark:text-zinc-600'}`}>
             {sortKey === k ? (sortAsc ? '▲' : '▼') : '⇅'}
           </span>
         )}
@@ -65,6 +65,8 @@ const Th = React.memo(({
     </th>
   );
 });
+
+type FilterType = 'all' | 'gainers' | 'losers' | 'etfs';
 
 export default React.memo(function PortfolioTable({
   holdings,
@@ -75,6 +77,7 @@ export default React.memo(function PortfolioTable({
   onDelete,
   onUpdate,
 }: PortfolioTableProps) {
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [sortKey, setSortKey] = useState<SortKey>('currentValue');
   const [sortAsc, setSortAsc] = useState(false);
   const [activePreset, setActivePreset] = useState<SortPreset | null>('value');
@@ -94,8 +97,40 @@ export default React.memo(function PortfolioTable({
     }));
   }, [holdings, totalCurrentValue]);
 
+  const counts = useMemo(() => {
+    let gainers = 0;
+    let losers = 0;
+    let etfs = 0;
+    holdingsWithAlloc.forEach(h => {
+      if (h.unrealizedPnL > 0) gainers++;
+      if (h.unrealizedPnL < 0) losers++;
+      
+      const typeStr = (h as Holding & { type?: string }).type?.toLowerCase();
+      const nameStr = h.stockName.toLowerCase();
+      const tickerStr = h.ticker.toLowerCase();
+      if (typeStr === 'etf' || nameStr.includes('etf') || tickerStr.includes('etf')) {
+        etfs++;
+      }
+    });
+    return { all: holdingsWithAlloc.length, gainers, losers, etfs };
+  }, [holdingsWithAlloc]);
+
+  const filteredHoldings = useMemo(() => {
+    return holdingsWithAlloc.filter(h => {
+      if (activeFilter === 'gainers') return h.unrealizedPnL > 0;
+      if (activeFilter === 'losers') return h.unrealizedPnL < 0;
+      if (activeFilter === 'etfs') {
+        const typeStr = (h as Holding & { type?: string }).type?.toLowerCase();
+        const nameStr = h.stockName.toLowerCase();
+        const tickerStr = h.ticker.toLowerCase();
+        return typeStr === 'etf' || nameStr.includes('etf') || tickerStr.includes('etf');
+      }
+      return true;
+    });
+  }, [holdingsWithAlloc, activeFilter]);
+
   const sorted = useMemo(() => {
-    return [...holdingsWithAlloc].sort((a, b) => {
+    return [...filteredHoldings].sort((a, b) => {
       const av = (a as Record<string, unknown>)[sortKey];
       const bv = (b as Record<string, unknown>)[sortKey];
 
@@ -111,7 +146,7 @@ export default React.memo(function PortfolioTable({
       const bNum = Number(bv ?? 0);
       return sortAsc ? aNum - bNum : bNum - aNum;
     });
-  }, [holdingsWithAlloc, sortKey, sortAsc]);
+  }, [filteredHoldings, sortKey, sortAsc]);
 
   const handleSort = useCallback((key: SortKey) => {
     setActivePreset(null);
@@ -211,6 +246,31 @@ export default React.memo(function PortfolioTable({
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+      {/* Quick Filters */}
+      <div className="px-4 pt-4 pb-2 flex items-center gap-2 overflow-x-auto">
+        {[
+          { id: 'all', label: 'All', count: counts.all },
+          { id: 'gainers', label: 'Gainers', count: counts.gainers },
+          { id: 'losers', label: 'Losers', count: counts.losers },
+          { id: 'etfs', label: 'ETFs', count: counts.etfs },
+        ].map((filter) => {
+          const isActive = activeFilter === filter.id;
+          return (
+            <button
+              key={filter.id}
+              onClick={() => setActiveFilter(filter.id as FilterType)}
+              className={`px-3 py-1.5 rounded-full text-xs transition-all whitespace-nowrap border ${
+                isActive
+                  ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold border-indigo-200 dark:border-indigo-800/50'
+                  : 'bg-transparent text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              {filter.label} <span className="opacity-70 ml-1">({filter.count})</span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Sorting presets */}
       <div className="px-4 py-2.5 border-b border-slate-50 dark:border-slate-700/60 flex items-center gap-2 overflow-x-auto">
         <SlidersHorizontal size={12} className="text-slate-400 dark:text-slate-550 shrink-0" />
