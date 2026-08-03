@@ -68,11 +68,12 @@ npm run build
 - **SWR & IndexedDB Caching**: Remote portfolio and market data fetching must use `SWR` with SWR keys. Local caching is strictly offloaded to IndexedDB (`idb-keyval`) to avoid `localStorage` size limits.
 
 ### 2. Styling & Dark Mode
-- **Tailwind & Dark Mode**: Never use hardcoded light-only colors (e.g. `#16a765`, `#ff3b30`) without providing corresponding `dark:` variants (e.g. `text-emerald-600 dark:text-emerald-400`).
+- **Tailwind & Dark Mode**: Never use hardcoded light-only colors without providing corresponding `dark:` variants (e.g. `text-[#34C759] dark:text-emerald-400`). Use System Green (`#34C759`) for positive financial gains.
 - **Consistent Dark Scale**: Always use the `slate` scale for dark mode neutrals (e.g. `dark:bg-slate-800`, `dark:border-slate-700`). Never mix `zinc` into dark variants.
 - **Valid Tailwind Classes**: Only use standard Tailwind color stops (`50`, `100`, `200`, ..., `900`, `950`). Invalid stops like `text-blue-650` or `text-slate-350` produce no CSS output.
-- **Tabular Numerals**: Apply the `.tnum` class to financial numbers and percentages for consistent monospace alignment.
+- **Tabular Numerals & Typography**: Apply the `.tnum` or `.ios-number` class to financial numbers and percentages for consistent monospace alignment and tabular display.
 - **Animated Numbers**: Use the `<AnimatedNumber>` component from `src/components/ui/AnimatedNumber.tsx` for all dashboard financial metrics (Net Worth, P&L, Invested). Never display raw jumping number changes.
+- **Spring Animations & Press Feedback**: Apply `.ios-press` (`scale(0.97)` active state) and spring transition curves (`cubic-bezier(0.34, 1.56, 0.64, 1)`) for buttons and cards.
 - **Theme-Aware Widgets**: Widget and card components must respect the global light/dark theme. Never force a fixed dark background (`bg-slate-900`) regardless of mode.
 
 ### 3. Date Arithmetic & Calculations
