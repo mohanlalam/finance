@@ -69,7 +69,11 @@ npm run build
 
 ### 2. Styling & Dark Mode
 - **Tailwind & Dark Mode**: Never use hardcoded light-only colors (e.g. `#16a765`, `#ff3b30`) without providing corresponding `dark:` variants (e.g. `text-emerald-600 dark:text-emerald-400`).
+- **Consistent Dark Scale**: Always use the `slate` scale for dark mode neutrals (e.g. `dark:bg-slate-800`, `dark:border-slate-700`). Never mix `zinc` into dark variants.
+- **Valid Tailwind Classes**: Only use standard Tailwind color stops (`50`, `100`, `200`, ..., `900`, `950`). Invalid stops like `text-blue-650` or `text-slate-350` produce no CSS output.
 - **Tabular Numerals**: Apply the `.tnum` class to financial numbers and percentages for consistent monospace alignment.
+- **Animated Numbers**: Use the `<AnimatedNumber>` component from `src/components/ui/AnimatedNumber.tsx` for all dashboard financial metrics (Net Worth, P&L, Invested). Never display raw jumping number changes.
+- **Theme-Aware Widgets**: Widget and card components must respect the global light/dark theme. Never force a fixed dark background (`bg-slate-900`) regardless of mode.
 
 ### 3. Date Arithmetic & Calculations
 - **Month Rollover Clamping**: When generating monthly cash-flow dates, always clamp the day of the month to the last valid day of the target month (`new Date(year, month + 1, 0).getDate()`) to prevent JavaScript date-rollover bugs (e.g., Jan 31 rolling into March 3).
@@ -77,6 +81,18 @@ npm run build
 - **Equity Concentration Checks**: Combine both direct stock holdings and Mutual Fund SIP values (`stocks + sip`) when evaluating equity concentration percentages.
 
 ### 4. Code Splitting & Performance
-- **Lazy Loading**: Registry view components (`FixedDepositView`, `SIPView`, `RDView`, etc.) and SVG charts must be dynamically imported with `React.lazy` and wrapped in `<Suspense>`.
+- **Lazy Loading**: Registry view components (`FixedDepositView`, `SIPView`, `RDView`, etc.) and SVG charts must be dynamically imported with `React.lazy` and wrapped in `<Suspense>`. Use shimmer skeleton placeholders (not `null`) as fallbacks to prevent Cumulative Layout Shift.
 - **Web Worker Offloading**: Offload CPU-heavy calculations (XIRR solvers, health scores, allocation rebalancing) to Web Workers in `src/workers/` with main-thread synchronous fallbacks.
 - **Asset Truncation**: Use `truncate` on user-provided strings (stock names, bank names, labels) within fixed-size grid or flex containers.
+- **Tab Transitions**: Apply the `.tab-transition` CSS class to active tab panels in `AssetTabContent.tsx` with a unique `key` prop to trigger smooth fade-in animations on tab switch.
+
+### 5. Modal System
+- **Use `<Modal>` Component**: All popups and form dialogs must use the unified `Modal.tsx` component. Never create inline `<div className="fixed inset-0 ...">` modal markup.
+- **Fixed Header + Footer Architecture**: Modal forms must have a pinned top header (`shrink-0 border-b`), a scrollable middle body (`flex-1 min-h-0 overflow-y-auto`), and a pinned bottom action footer (`shrink-0 border-t`). Action buttons (Cancel/Save) must never scroll offscreen.
+- **Drag-to-Move**: The `Modal.tsx` component supports `PointerEvent`-based drag-to-move on the header area. Do not override or duplicate this behavior.
+
+### 6. Accessibility
+- **ARIA Labels**: All interactive buttons (especially icon-only buttons and keypad digits) must include descriptive `aria-label` attributes.
+- **Focus Rings**: Interactive elements must have `focus-visible:ring-2` styles for keyboard navigation visibility.
+- **Live Regions**: Status indicators that update dynamically (e.g. price sync status) should use `aria-live="polite"` for screen reader announcements.
+- **Touch Device Support**: Never gate interactive controls behind `hover:` states only. Touch devices must have permanent visibility (use `opacity-50 sm:opacity-0 sm:group-hover:opacity-100` pattern).
