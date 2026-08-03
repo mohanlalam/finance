@@ -17,8 +17,8 @@
   --accent-blue: #007aff;
   --accent-blue-soft: #eaf3ff;
 
-  --positive: #16a765;
-  --positive-soft: #e8f8ef;
+  --positive: #34C759;
+  --positive-soft: #e6f9ed;
 
   --negative: #ff3b30;
   --negative-soft: #fff0ef;
@@ -49,6 +49,17 @@
   --z-modal: 300;
   --z-overlay: 400;
   --z-toast: 500;
+
+  /* Animation Curves */
+  --ios-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ios-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.ios-press {
+  transition: transform 0.15s var(--ios-spring);
+}
+.ios-press:active {
+  transform: scale(0.97);
 }
 
 .dark {
@@ -143,7 +154,7 @@ h3, .text-card-title {
 .text-financial {
   font-size: 26px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 @media (min-width: 640px) {
   .text-financial {
@@ -166,6 +177,16 @@ h3, .text-card-title {
 .tnum {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+}
+
+.ios-number {
+  letter-spacing: -0.03em;
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ios-currency {
+  font-weight: 300;
 }
 
 @keyframes stitchFadeIn {
@@ -222,7 +243,7 @@ h3, .text-card-title {
 @keyframes modalScaleIn {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(12px);
+    transform: scale(0.92) translateY(12px);
   }
   to {
     opacity: 1;
@@ -263,7 +284,7 @@ h3, .text-card-title {
 }
 
 .animate-modal-content {
-  animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: modalScaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .animate-modal-content-out {
   animation: modalScaleOut 0.2s ease-in forwards;
@@ -436,7 +457,7 @@ h3, .text-card-title {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-medium);
   box-shadow: var(--shadow-card);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .apple-card-hover:hover {
@@ -448,10 +469,10 @@ h3, .text-card-title {
 }
 
 .interactive-btn {
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .interactive-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 /* Shimmer load states */
@@ -509,7 +530,7 @@ h3, .text-card-title {
   }
 }
 .tab-transition {
-  animation: tabFadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: tabFadeIn 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 /* Accessible focus ring indicators */

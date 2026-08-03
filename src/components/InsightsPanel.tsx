@@ -166,8 +166,8 @@ const AllocationDrift = React.memo(function AllocationDrift({
       {slices.map((s) => {
         const driftAbs = Math.abs(s.drift);
         const isOver = s.drift > 0;
-        const severityColor = driftAbs > 20 ? 'text-[#ff3b30]' : driftAbs > 10 ? 'text-[#ff9500]' : 'text-[#16a765]';
-        const barColor = driftAbs > 20 ? '#ff3b30' : driftAbs > 10 ? '#ff9500' : '#16a765';
+        const severityColor = driftAbs > 20 ? 'text-[#ff3b30]' : driftAbs > 10 ? 'text-[#ff9500]' : 'text-[#34C759]';
+        const barColor = driftAbs > 20 ? '#ff3b30' : driftAbs > 10 ? '#ff9500' : '#34C759';
         
         return (
           <div key={s.label}>
@@ -222,7 +222,7 @@ const AllocationDrift = React.memo(function AllocationDrift({
 const ConcentrationRisk = React.memo(function ConcentrationRisk({ warnings }: { warnings: ConcentrationWarning[] }) {
   if (warnings.length === 0) {
     return (
-      <div className="flex items-center gap-2 text-[#16a765]">
+      <div className="flex items-center gap-2 text-[#34C759]">
         <span className="w-5 h-5 rounded-full bg-[#e8f8ef] flex items-center justify-center text-xs font-bold">✓</span>
         <span className="text-xs font-medium">Safe concentration limits</span>
       </div>
@@ -416,7 +416,7 @@ export default React.memo(function InsightsPanel({
             <Card title="Best / Worst performers" icon={<Target size={13} className="text-purple-500" />}>
               <BestWorstPerformers items={insights.portfolioBestWorst} />
             </Card>
-            <Card title="Top Gainers" icon={<TrendingUp size={13} className="text-[#16a765]" />}>
+            <Card title="Top Gainers" icon={<TrendingUp size={13} className="text-[#34C759]" />}>
               <GainersList items={insights.topGainers} type="gain" />
             </Card>
           </div>
@@ -429,7 +429,7 @@ export default React.memo(function InsightsPanel({
           <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">Portfolio Health &amp; Risk</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             
-            <Card title="Health Score" icon={<Activity size={13} className="text-[#16a765]" />}>
+            <Card title="Health Score" icon={<Activity size={13} className="text-[#34C759]" />}>
               <div className="flex items-center gap-4">
                 <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
@@ -446,7 +446,7 @@ export default React.memo(function InsightsPanel({
                       cx="18"
                       cy="18"
                       r="15.915"
-                      className="text-[#16a765] transition-all duration-500"
+                      className="text-[#34C759] transition-all duration-500"
                       strokeDasharray={`${healthReport.score} 100`}
                       strokeWidth="3.5"
                       strokeLinecap="round"
@@ -461,7 +461,7 @@ export default React.memo(function InsightsPanel({
                 </div>
                 <div className="flex-1 space-y-1 overflow-y-auto max-h-[85px] pr-1 scrollbar-none">
                   {healthReport.strengths.slice(0, 2).map((s, idx) => (
-                    <p key={`str-${idx}`} className="text-[9px] font-semibold text-[#16a765] truncate">{s}</p>
+                    <p key={`str-${idx}`} className="text-[9px] font-semibold text-[#34C759] truncate">{s}</p>
                   ))}
                   {healthReport.risks.slice(0, 2).map((r, idx) => (
                     <p key={`risk-${idx}`} className="text-[9px] font-semibold text-[#ff9500] truncate">{r}</p>

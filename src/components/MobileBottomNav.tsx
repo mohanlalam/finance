@@ -77,7 +77,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                   onChangeAsset(tab.id);
                   setIsDrawerOpen(false);
                 }}
-                className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border transition-all active:scale-95 ${
+                className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border transition-all active:scale-[0.97] ${
                   isActive
                     ? 'bg-[#eaf3ff] border-transparent dark:bg-blue-950/20 text-[#007aff] dark:text-[#60a5fa] font-bold'
                     : 'bg-[#f2f2f7] border-transparent dark:bg-zinc-800 text-slate-550 dark:text-slate-450 hover:bg-slate-100 dark:hover:bg-zinc-750'
@@ -111,7 +111,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                   setIsDrawerOpen(false);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 h-full transition-all duration-200 active:scale-90 outline-none ${
+                className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 h-full transition-all duration-200 active:scale-[0.97] outline-none ${
                   isActive
                     ? 'text-[#007aff] dark:text-[#60a5fa] font-bold'
                     : 'text-slate-400 dark:text-slate-500 active:text-slate-650 dark:active:text-slate-300'
@@ -144,7 +144,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
           <button
             onClick={() => setIsDrawerOpen(!isDrawerOpen)}
             aria-expanded={isDrawerOpen}
-            className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 h-full transition-all duration-200 active:scale-90 outline-none ${
+            className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 h-full transition-all duration-200 active:scale-[0.97] outline-none ${
               isMoreActive || isDrawerOpen
                 ? 'text-[#007aff] dark:text-[#60a5fa] font-bold'
                 : 'text-slate-455 dark:text-slate-500 active:text-slate-650 dark:active:text-slate-300'

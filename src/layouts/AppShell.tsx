@@ -400,7 +400,7 @@ export default function AppShell() {
         </div>
         <div className="text-right">
           <p className="text-lg font-bold text-slate-800">{formatINR(summaryData.totalCurrentValue)}</p>
-          <p className={`text-sm font-semibold ${summaryData.totalPnL >= 0 ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
+          <p className={`text-sm font-semibold ${summaryData.totalPnL >= 0 ? 'text-[#34C759]' : 'text-[#ff3b30]'}`}>
             {summaryData.totalPnL >= 0 ? '+' : ''}{formatINR(summaryData.totalPnL)} ({formatPercent(summaryData.totalPnLPercent)})
           </p>
         </div>
@@ -712,7 +712,7 @@ export default function AppShell() {
                       role="tab"
                       aria-selected={isActive}
                       onClick={() => setActiveAsset(tab.id)}
-                      className={`flex items-center gap-1.5 px-3.5 py-2 border-b-2 font-semibold text-xs transition-all duration-150 active:scale-95 transition-transform duration-100 outline-none -mb-px ${
+                      className={`flex items-center gap-1.5 px-3.5 py-2 border-b-2 font-semibold text-xs transition-all duration-150 active:scale-[0.97] transition-transform duration-100 outline-none -mb-px ${
                         isActive
                           ? 'border-[#007aff] text-[#007aff] dark:border-[#60a5fa] dark:text-[#60a5fa] font-bold'
                           : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-slate-200'
@@ -741,7 +741,7 @@ export default function AppShell() {
                       role="tab"
                       aria-selected={isActive}
                       onClick={() => setActiveAsset(tab.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 active:scale-95 transition-transform duration-100 outline-none ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 active:scale-[0.97] transition-transform duration-100 outline-none ${
                         isActive
                           ? 'bg-[#eaf3ff] text-[#007aff] dark:bg-blue-950/20 dark:text-[#60a5fa]'
                           : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'

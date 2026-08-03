@@ -56,7 +56,7 @@ export function generatePDFReport(portfolios: Portfolio[], label: string = 'Fami
         
         .text-right { text-align: right; }
         .text-center { text-align: center; }
-        .positive { color: #16a765; }
+        .positive { color: #34C759; }
         .negative { color: #ff3b30; }
         
         .header { 

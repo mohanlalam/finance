@@ -104,7 +104,7 @@ function BarChart({ portfolios }: BarChartProps) {
                         ? 'fill-[#128f55]'
                         : 'fill-[#e03027]'
                       : isGain
-                      ? 'fill-[#16a765]'
+                      ? 'fill-[#34C759]'
                       : 'fill-[#ff3b30]'
                   }`}
                   onMouseEnter={() => setHovered({ portfolioIdx: pi, type: 'current' })}
@@ -115,7 +115,7 @@ function BarChart({ portfolios }: BarChartProps) {
                     x={groupX + barWidth + gap + barWidth / 2}
                     y={paddingTop + chartHeight - currentH - 6}
                     textAnchor="middle"
-                    className={`font-bold tnum animate-fade-in ${isGain ? 'fill-[#16a765]' : 'fill-[#ff3b30]'}`}
+                    className={`font-bold tnum animate-fade-in ${isGain ? 'fill-[#34C759]' : 'fill-[#ff3b30]'}`}
                     fontSize={9}
                   >
                     {formatINR(p.totalCurrentValue)}
@@ -136,7 +136,7 @@ function BarChart({ portfolios }: BarChartProps) {
                   x={groupX + barWidth + gap / 2}
                   y={paddingTop + chartHeight + 30}
                   textAnchor="middle"
-                  className={`font-bold tnum ${isGain ? 'fill-[#16a765]' : 'fill-[#ff3b30]'}`}
+                  className={`font-bold tnum ${isGain ? 'fill-[#34C759]' : 'fill-[#ff3b30]'}`}
                   fontSize={9}
                 >
                   {isGain ? '+' : ''}{p.totalPnLPercent.toFixed(1)}%
@@ -149,7 +149,7 @@ function BarChart({ portfolios }: BarChartProps) {
           <g>
             <rect x={paddingLeft + 4} y={paddingTop - 18} width={10} height={10} rx={2} fill="#8e8e93" />
             <text x={paddingLeft + 18} y={paddingTop - 9} className="fill-slate-500 font-medium" fontSize={10}>Invested</text>
-            <rect x={paddingLeft + 72} y={paddingTop - 18} width={10} height={10} rx={2} fill="#16a765" />
+            <rect x={paddingLeft + 72} y={paddingTop - 18} width={10} height={10} rx={2} fill="#34C759" />
             <text x={paddingLeft + 86} y={paddingTop - 9} className="fill-slate-500 font-medium" fontSize={10}>Current Value</text>
           </g>
         </svg>

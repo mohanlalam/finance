@@ -131,9 +131,9 @@ function SummaryCards({
           <div className="flex items-center justify-between">
             <span className="text-label-small">Total Return</span>
             <span className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-              isGain ? 'bg-[#16a765]/10' : 'bg-[#ff3b30]/10'
+              isGain ? 'bg-[#34C759]/10' : 'bg-[#ff3b30]/10'
             }`}>
-              {isGain ? <TrendingUp size={13} className="text-[#16a765]" /> : <TrendingDown size={13} className="text-[#ff3b30]" />}
+              {isGain ? <TrendingUp size={13} className="text-[#34C759]" /> : <TrendingDown size={13} className="text-[#ff3b30]" />}
             </span>
           </div>
           <p className={`text-financial tnum ${isGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
@@ -168,9 +168,9 @@ function SummaryCards({
             <div className="flex items-center justify-between">
               <span className="text-label-small">Today's Return</span>
               <span className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-                isTodayGain ? 'bg-[#16a765]/10' : 'bg-[#ff3b30]/10'
+                isTodayGain ? 'bg-[#34C759]/10' : 'bg-[#ff3b30]/10'
               }`}>
-                {isTodayGain ? <TrendingUp size={13} className="text-[#16a765]" /> : <TrendingDown size={13} className="text-[#ff3b30]" />}
+                {isTodayGain ? <TrendingUp size={13} className="text-[#34C759]" /> : <TrendingDown size={13} className="text-[#ff3b30]" />}
               </span>
             </div>
             <p className={`text-financial tnum ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
@@ -188,7 +188,7 @@ function SummaryCards({
                   return (
                     <span key={p.id} className="flex items-center gap-0.5">
                       <span>{p.label}:</span>
-                      <span className={`font-bold tnum ${localTodayGain ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
+                      <span className={`font-bold tnum ${localTodayGain ? 'text-[#34C759]' : 'text-[#ff3b30]'}`}>
                         {localTodayGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} />
                       </span>
                       {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}

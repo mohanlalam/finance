@@ -215,7 +215,7 @@ function MobileHomeSummary({
         <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-[var(--border-subtle)]">
           <div className="space-y-1">
             <p className="text-xs text-slate-450 dark:text-slate-400">Today's Return</p>
-            <div className={`flex items-start gap-1.5 ${todayPnL >= 0 ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
+            <div className={`flex items-start gap-1.5 ${todayPnL >= 0 ? 'text-[#34C759]' : 'text-[#ff3b30]'}`}>
               {todayPnL >= 0 ? (
                 <TrendingUp size={16} className="shrink-0 mt-0.5" />
               ) : (
@@ -233,7 +233,7 @@ function MobileHomeSummary({
           </div>
           <div className="space-y-1">
             <p className="text-xs text-slate-450 dark:text-slate-400">Total Return</p>
-            <div className={`flex items-start gap-1.5 ${summaryData.totalPnL >= 0 ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
+            <div className={`flex items-start gap-1.5 ${summaryData.totalPnL >= 0 ? 'text-[#34C759]' : 'text-[#ff3b30]'}`}>
               {summaryData.totalPnL >= 0 ? (
                 <TrendingUp size={16} className="shrink-0 mt-0.5" />
               ) : (
@@ -261,7 +261,7 @@ function MobileHomeSummary({
                 return (
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
-                    <span className={pnl >= 0 ? 'text-[#16a765] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
+                    <span className={pnl >= 0 ? 'text-[#34C759] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
                       {pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} />
                     </span>
                     {idx < portfolios.length - 1 && <span className="text-slate-200 dark:text-zinc-800 ml-2">|</span>}
@@ -276,7 +276,7 @@ function MobileHomeSummary({
                 return (
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
-                    <span className={pnl >= 0 ? 'text-[#16a765] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
+                    <span className={pnl >= 0 ? 'text-[#34C759] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
                       {pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} />
                     </span>
                     {idx < portfolios.length - 1 && <span className="text-slate-200 dark:text-zinc-800 ml-2">|</span>}

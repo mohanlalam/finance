@@ -248,7 +248,7 @@ function Header({
                     <div className="max-h-64 overflow-y-auto divide-y divide-[var(--border-subtle)]">
                       {visibleAlerts.length === 0 ? (
                         <div className="p-5 text-center text-[var(--text-secondary)]">
-                          <Check size={16} className="mx-auto text-[#16a765] mb-1.5" />
+                          <Check size={16} className="mx-auto text-[#34C759] mb-1.5" />
                           <p className="text-xs font-semibold text-[var(--text-primary)]">All caught up!</p>
                         </div>
                       ) : (

@@ -78,7 +78,7 @@ export default React.memo(function FamilyTabBar({
                 <span className={`text-[10px] font-bold ${
                   isActive 
                     ? 'text-[#007aff] dark:text-[#60a5fa]' 
-                    : p.totalPnL >= 0 ? 'text-[#16a765]' : 'text-[#ff3b30]'
+                    : p.totalPnL >= 0 ? 'text-[#34C759]' : 'text-[#ff3b30]'
                 }`}>
                   {formatPercent(p.totalPnLPercent, 1)}
                 </span>
