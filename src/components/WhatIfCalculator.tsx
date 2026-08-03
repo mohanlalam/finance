@@ -21,22 +21,22 @@ export default function WhatIfCalculator() {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    let timeoutId: number | null = null;
+    let frameId: number;
     const resizeObserver = new ResizeObserver((entries) => {
       if (!entries || entries.length === 0) return;
       const { width } = entries[0].contentRect;
-      if (timeoutId) window.clearTimeout(timeoutId);
-      timeoutId = window.setTimeout(() => {
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
         setDimensions((prev) => ({
           width: width > 100 ? width : prev.width,
           height: 260,
         }));
-      }, 100);
+      });
     });
     resizeObserver.observe(containerRef.current);
     return () => {
       resizeObserver.disconnect();
-      if (timeoutId) window.clearTimeout(timeoutId);
+      if (frameId) cancelAnimationFrame(frameId);
     };
   }, []);
 

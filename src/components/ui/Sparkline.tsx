@@ -72,6 +72,7 @@ export function Sparkline({
         strokeWidth={1.5}
         strokeLinecap="round"
         strokeLinejoin="round"
+        className="animate-sparkline-draw"
       />
     </svg>
   );

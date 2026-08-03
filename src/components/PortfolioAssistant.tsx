@@ -31,7 +31,7 @@ function CopyButton({ text }: { text: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="absolute top-2 right-2 p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-white/90 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-200 z-20"
+      className="absolute top-2 right-2 p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-white/90 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm opacity-60 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 hover:opacity-100 transition-opacity duration-200 z-20"
       title="Copy answer"
     >
       {copied ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}

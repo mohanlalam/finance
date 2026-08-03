@@ -203,35 +203,38 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
                 <button
                   key={num}
                   type="button"
-                  className="w-full aspect-square flex items-center justify-center rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-100 text-2xl font-bold border border-slate-700/40 shadow-sm active:scale-95 transition-all duration-100"
+                  className="w-full aspect-square flex items-center justify-center rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-100 text-2xl font-bold border border-slate-700/40 shadow-sm active:scale-95 transition-all duration-100 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                   onClick={() => handlePressKey(num)}
                   disabled={success}
+                  aria-label={`Digit ${num}`}
                 >
                   {num}
                 </button>
               ))}
               <button
                 type="button"
-                className="w-full aspect-square flex items-center justify-center rounded-full text-red-400 hover:bg-red-500/10 font-semibold text-xs active:scale-95 transition-all duration-100"
+                className="w-full aspect-square flex items-center justify-center rounded-full text-red-400 hover:bg-red-500/10 font-semibold text-xs active:scale-95 transition-all duration-100 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                 onClick={handleClear}
                 disabled={success}
+                aria-label="Clear PIN"
               >
                 CLEAR
               </button>
               <button
                 type="button"
-                className="w-full aspect-square flex items-center justify-center rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-100 text-2xl font-bold border border-slate-700/40 shadow-sm active:scale-95 transition-all duration-100"
+                className="w-full aspect-square flex items-center justify-center rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-100 text-2xl font-bold border border-slate-700/40 shadow-sm active:scale-95 transition-all duration-100 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                 onClick={() => handlePressKey('0')}
                 disabled={success}
+                aria-label="Digit 0"
               >
                 0
               </button>
               <button
                 type="button"
-                className="w-full aspect-square flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-500/10 active:scale-95 transition-all duration-100"
+                className="w-full aspect-square flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-500/10 active:scale-95 transition-all duration-100 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                 onClick={handleBackspace}
                 disabled={success}
-                aria-label="backspace"
+                aria-label="Delete last digit"
               >
                 <IconDelete size={22} />
               </button>

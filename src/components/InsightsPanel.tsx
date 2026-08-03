@@ -56,12 +56,12 @@ const TopHoldings = React.memo(function TopHoldings({ items }: { items: HoldingI
         const alloc = totalVal > 0 ? (item.holding.currentValue / totalVal) * 100 : 0;
         return (
           <div key={`${item.holding.ticker}-${idx}`} className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-650 dark:text-blue-400 flex items-center justify-center text-[10px] font-bold shrink-0">
+            <span className="w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center text-[10px] font-bold shrink-0">
               {idx + 1}
             </span>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-350 truncate">{item.holding.ticker}</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-400 truncate">{item.holding.ticker}</span>
                 <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate hidden sm:inline">{item.portfolioLabel}</span>
               </div>
             </div>
@@ -83,7 +83,7 @@ const GainersList = React.memo(function GainersList({ items, type }: { items: Ho
           <span className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${type === 'gain' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400'}`}>
             {type === 'gain' ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
           </span>
-          <span className="text-xs font-bold text-slate-700 dark:text-slate-350 truncate flex-1">{item.holding.ticker}</span>
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-400 truncate flex-1">{item.holding.ticker}</span>
           <span className={`text-xs font-bold shrink-0 tnum ${type === 'gain' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
             {formatPercent(item.holding.pnlPercent, 1)}
           </span>
@@ -233,7 +233,7 @@ const ConcentrationRisk = React.memo(function ConcentrationRisk({ warnings }: { 
       {warnings.slice(0, 5).map((w, i) => (
         <div key={`${w.ticker}-${i}`} className="flex items-center gap-2">
           <AlertTriangle size={12} className="text-[#ff9500] shrink-0" />
-          <span className="text-xs text-slate-600 dark:text-slate-350 flex-1 truncate">
+          <span className="text-xs text-slate-600 dark:text-slate-400 flex-1 truncate">
             <span className="font-bold">{w.ticker}</span> is <span className="tnum">{w.pct.toFixed(1)}%</span> of {w.portfolioLabel}
           </span>
         </div>

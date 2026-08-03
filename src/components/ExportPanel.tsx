@@ -258,6 +258,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
   const [importing, setImporting] = useState(false);
   const [importDone, setImportDone] = useState(false);
   const [importError, setImportError] = useState('');
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -283,9 +284,16 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
     setOpen(false);
   }
 
-  function handleExportPDF() {
-    openPDFReportInNewTab(portfolios);
-    setOpen(false);
+  async function handleExportPDF() {
+    setIsGeneratingPDF(true);
+    // Yield to let the UI update the spinner
+    await new Promise(resolve => setTimeout(resolve, 50));
+    try {
+      openPDFReportInNewTab(portfolios);
+    } finally {
+      setIsGeneratingPDF(false);
+      setOpen(false);
+    }
   }
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -346,10 +354,15 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             </button>
             <button
               onClick={handleExportPDF}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+              disabled={isGeneratingPDF}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left disabled:opacity-50"
             >
-              <FileText size={14} className="text-red-500" />
-              PDF Report (Print)
+              {isGeneratingPDF ? (
+                <svg className="animate-spin h-3.5 w-3.5 text-red-500" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+              ) : (
+                <FileText size={14} className="text-red-500" />
+              )}
+              {isGeneratingPDF ? 'Generating...' : 'PDF Report (Print)'}
             </button>
             <button
               onClick={handleExportJSON}

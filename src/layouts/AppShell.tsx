@@ -473,7 +473,7 @@ export default function AppShell() {
           <div className="space-y-4">
             {/* Search Bar on Mobile */}
             <div data-search-bar className="px-0.5">
-              <Suspense fallback={null}>
+              <Suspense fallback={<div className="h-10 w-full max-w-md bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />}>
                 <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
               </Suspense>
             </div>
@@ -526,7 +526,7 @@ export default function AppShell() {
               <div className="space-y-4">
                 {/* Sticky Mini Refresh Status Bar */}
                 <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/70 dark:bg-slate-800/70 border border-slate-200/50 dark:border-slate-700/30 rounded-2xl text-[11px] text-slate-500 dark:text-slate-400 backdrop-blur shadow-sm">
-                  <div className="flex items-center gap-1.5 min-w-0">
+                  <div className="flex items-center gap-1.5 min-w-0" aria-live="polite">
                     <span className={`w-2 h-2 rounded-full shrink-0 ${priceStatus === 'success' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
                     <span className="font-semibold shrink-0">{priceStatus === 'success' ? 'Live Prices' : 'Snapshot'}</span>
                     <span className="text-slate-400 dark:text-slate-700 shrink-0">•</span>
@@ -566,7 +566,7 @@ export default function AppShell() {
           <>
             {/* Search Bar */}
             <div data-search-bar>
-              <Suspense fallback={null}>
+              <Suspense fallback={<div className="h-10 w-full max-w-md bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />}>
                 <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
               </Suspense>
             </div>
@@ -712,7 +712,7 @@ export default function AppShell() {
                       role="tab"
                       aria-selected={isActive}
                       onClick={() => setActiveAsset(tab.id)}
-                      className={`flex items-center gap-1.5 px-3.5 py-2 border-b-2 font-semibold text-xs transition-all duration-150 outline-none -mb-px ${
+                      className={`flex items-center gap-1.5 px-3.5 py-2 border-b-2 font-semibold text-xs transition-all duration-150 active:scale-95 transition-transform duration-100 outline-none -mb-px ${
                         isActive
                           ? 'border-[#007aff] text-[#007aff] dark:border-[#60a5fa] dark:text-[#60a5fa] font-bold'
                           : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-slate-200'
@@ -741,7 +741,7 @@ export default function AppShell() {
                       role="tab"
                       aria-selected={isActive}
                       onClick={() => setActiveAsset(tab.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 outline-none ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 active:scale-95 transition-transform duration-100 outline-none ${
                         isActive
                           ? 'bg-[#eaf3ff] text-[#007aff] dark:bg-blue-950/20 dark:text-[#60a5fa]'
                           : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'

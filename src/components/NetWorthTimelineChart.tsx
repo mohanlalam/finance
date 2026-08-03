@@ -227,7 +227,17 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
       </div>
 
       <div className="relative w-full h-[240px]">
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
+        {history.length < 2 && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none mt-8">
+            <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-full px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 shadow-sm mb-1 border border-slate-200/50 dark:border-slate-700/50">
+              Sample Preview
+            </div>
+            <div className="text-xs font-medium text-slate-400 dark:text-slate-500 bg-white/40 dark:bg-slate-900/40 px-3 py-1 rounded-full backdrop-blur-sm">
+              Add assets to track your wealth over time
+            </div>
+          </div>
+        )}
+        <svg viewBox={`0 0 ${width} ${height}`} className={`w-full h-full ${history.length < 2 ? 'opacity-40' : ''}`}>
           {/* Gradients */}
           <defs>
             <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">

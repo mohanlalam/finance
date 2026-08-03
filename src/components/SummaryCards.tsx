@@ -83,7 +83,7 @@ function SummaryCards({
                   <span className="text-[var(--text-primary)] font-bold tnum">
                     <AnimatedNumber value={val} formatter={formatINR} />
                   </span>
-                  {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-zinc-700 ml-1.5">|</span>}
+                  {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
                 </span>
               );
             })}
@@ -92,7 +92,10 @@ function SummaryCards({
       </Card>
 
       {/* Remaining Cards: Horizontal scroll on mobile, normal grid columns on desktop */}
-      <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none lg:contents">
+      <div className="relative block lg:contents">
+        <div className="absolute -left-4 top-0 bottom-2 w-8 bg-gradient-to-r from-slate-50 dark:from-slate-950 to-transparent pointer-events-none sm:hidden z-10" />
+        <div className="absolute -right-4 top-0 bottom-2 w-12 bg-gradient-to-l from-slate-50 dark:from-slate-950 to-transparent pointer-events-none sm:hidden z-10" />
+        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none lg:contents">
         
         {/* 2. Invested Card (Neutral) */}
         <Card padding="md" className="shrink-0 w-[240px] sm:w-auto sm:shrink flex flex-col gap-1">
@@ -115,7 +118,7 @@ function SummaryCards({
                     <span className="text-[var(--text-primary)] font-bold tnum">
                       <AnimatedNumber value={val} formatter={formatINR} />
                     </span>
-                    {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-zinc-700 ml-1.5">|</span>}
+                    {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
                   </span>
                 );
               })}
@@ -151,7 +154,7 @@ function SummaryCards({
                     <span className={`font-bold tnum ${localGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
                       {localGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} />
                     </span>
-                    {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-zinc-700 ml-1.5">|</span>}
+                    {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
                   </span>
                 );
               })}
@@ -188,7 +191,7 @@ function SummaryCards({
                       <span className={`font-bold tnum ${localTodayGain ? 'text-[#16a765]' : 'text-[#ff3b30]'}`}>
                         {localTodayGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} />
                       </span>
-                      {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-zinc-700 ml-1.5">|</span>}
+                      {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
                     </span>
                   );
                 })}
@@ -208,6 +211,7 @@ function SummaryCards({
           </Card>
         )}
 
+        </div>
       </div>
     </div>
   );

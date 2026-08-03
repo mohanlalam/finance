@@ -56,7 +56,7 @@ export default function DashboardWidgets({ portfolios, activePortfolio }: Dashbo
   }, [portfolios, activePortfolio]);
 
   return (
-    <div className="bg-slate-900 text-slate-100 min-h-screen p-6 space-y-6 flex flex-col items-center justify-center">
+    <div className="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 min-h-screen p-6 space-y-6 flex flex-col items-center justify-center">
       <div className="text-center">
         <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Android Home Widgets</h2>
         <p className="text-[10px] text-slate-400 mt-0.5">Capacitor Native Webview Ports</p>
@@ -64,7 +64,7 @@ export default function DashboardWidgets({ portfolios, activePortfolio }: Dashbo
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:max-w-4xl w-full">
         {/* Widget 1: Net Worth Widget */}
-        <div className="bg-slate-800 border border-slate-700/60 rounded-3xl p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between aspect-square">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-3xl p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between aspect-square">
           <div className="absolute top-0 right-0 p-4">
             <Award className="text-blue-400" size={20} />
           </div>
@@ -83,7 +83,7 @@ export default function DashboardWidgets({ portfolios, activePortfolio }: Dashbo
         </div>
 
         {/* Widget 2: Today's Gain Widget */}
-        <div className="bg-slate-800 border border-slate-700/60 rounded-3xl p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between aspect-square">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-3xl p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between aspect-square">
           <div className="absolute top-0 right-0 p-4">
             <TrendingUp className="text-emerald-400" size={20} />
           </div>
@@ -102,7 +102,7 @@ export default function DashboardWidgets({ portfolios, activePortfolio }: Dashbo
         </div>
 
         {/* Widget 3: Upcoming FD Maturity Widget */}
-        <div className="bg-slate-800 border border-slate-700/60 rounded-3xl p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between aspect-square">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-3xl p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between aspect-square">
           <div className="absolute top-0 right-0 p-4">
             <Landmark className="text-purple-400" size={20} />
           </div>
