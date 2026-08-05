@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react';
 // Inline SVG icons — keeps lucide-react out of the critical post-unlock bundle
-import { WifiOff, AlertCircle, RefreshCw, TrendingUp, Landmark, Coins, Home, Shield, FolderOpen, Clock, Calculator } from '../components/icons/AppIcons';
+import { WifiOff, AlertCircle, RefreshCw, TrendingUp, TrendingDown, Landmark, Coins, Home, Shield, FolderOpen, Clock, Calculator } from '../components/icons/AppIcons';
 import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
 import AddHoldingModal from '../components/AddHoldingModal';
@@ -130,7 +130,7 @@ function LazyChartWrapper<TProps extends object>({
   );
 }
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'what_if';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'what_if' | 'tax';
 
 export default function AppShell() {
   const {
@@ -781,6 +781,7 @@ export default function AppShell() {
                 {([
                   { id: 'documents', label: 'Vault', icon: <FolderOpen size={14} /> },
                   { id: 'what_if', label: 'What-If Calc', icon: <Calculator size={14} /> },
+                  { id: 'tax', label: 'Tax Harvesting', icon: <TrendingDown size={14} /> },
                 ] as const).map((tab) => {
                   const isActive = effectiveAsset === tab.id;
                   return (

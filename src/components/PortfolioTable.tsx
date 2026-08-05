@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Trash2, Pencil, Loader2, Check, X, SlidersHorizontal } from './icons/AppIcons';
+import { Trash2, Pencil, Loader2, Check, X, SlidersHorizontal, Share2 } from './icons/AppIcons';
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent, pnlColor } from '../utils/formatters';
 import { usePrivacy } from '../contexts/PrivacyContext';
+import { shareHolding } from '../utils/shareUtils';
+import { useToastActions } from '../contexts/ToastContext';
 import ConfirmModal from './ConfirmModal';
 import EmptyState from './EmptyState';
 
@@ -92,6 +94,7 @@ export default React.memo(function PortfolioTable({
   const editInputRef = useRef<HTMLInputElement>(null);
 
   const { isBalancesHidden } = usePrivacy();
+  const { addToast } = useToastActions();
 
   const renderValue = (val: number, formatter = formatINR) => {
     if (isBalancesHidden) return '••••••';
@@ -431,6 +434,14 @@ export default React.memo(function PortfolioTable({
 
                   {!isEditing && (
                     <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => shareHolding(h, addToast)}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all bg-emerald-50/80 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200/50 dark:border-emerald-800/50 shadow-sm"
+                        title="Share holding"
+                        aria-label="Share holding summary"
+                      >
+                        <Share2 size={13} />
+                      </button>
                       {onUpdate && (
                         <button
                           onClick={() => startEdit(h)}
@@ -606,6 +617,14 @@ export default React.memo(function PortfolioTable({
                   {(onDelete || onUpdate) && (
                     <td role="cell" className="px-2 py-3 text-center">
                       <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => shareHolding(h, addToast)}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all bg-emerald-50/80 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200/50 dark:border-emerald-800/50 shadow-sm"
+                          title="Share holding summary"
+                          aria-label="Share holding summary"
+                        >
+                          <Share2 size={13} />
+                        </button>
                         {onUpdate && (
                           <button
                             onClick={() => startEdit(h)}

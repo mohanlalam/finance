@@ -316,6 +316,8 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
   );
 });
 
+import BenchmarkComparison from './BenchmarkComparison';
+
 /* ── Main Component ── */
 
 type InsightFilter = 'all' | 'stocks' | 'fds' | 'insurance' | 'high_risk' | 'due_soon';
@@ -369,6 +371,10 @@ export default React.memo(function InsightsPanel({
   const hasHealthCards = showStocks || showDrift || showRisk;
   const hasUpcomingCards = showFDs || showInsurance;
 
+  const totalInvested = activePortfolio ? activePortfolio.totalInvested : portfolios.reduce((s, p) => s + p.totalInvested, 0);
+  const totalValue = activePortfolio ? activePortfolio.totalCurrentValue : portfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
+  const portfolioReturnPercent = totalInvested > 0 ? ((totalValue - totalInvested) / totalInvested) * 100 : 0;
+
   return (
     <div role="region" aria-label="Portfolio Insights" className="space-y-6">
       
@@ -406,7 +412,7 @@ export default React.memo(function InsightsPanel({
       {hasPerformanceCards && (
         <div className="space-y-3">
           <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">Performance Overview</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <Card title="Today's Movers" icon={<Activity size={13} className="text-[#ff9500]" />}>
               <BiggestMovers movers={insights.biggestMovers} />
             </Card>
@@ -419,6 +425,10 @@ export default React.memo(function InsightsPanel({
             <Card title="Top Gainers" icon={<TrendingUp size={13} className="text-[#34C759]" />}>
               <GainersList items={insights.topGainers} type="gain" />
             </Card>
+          </div>
+          
+          <div className="mt-4">
+            <BenchmarkComparison portfolioReturnPercent={portfolioReturnPercent} />
           </div>
         </div>
       )}

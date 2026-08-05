@@ -1,5 +1,5 @@
 import React from 'react';
-import { IndianRupee, BarChart2, TrendingUp, TrendingDown, Activity } from './icons/AppIcons';
+import { IndianRupee, BarChart2, TrendingUp, TrendingDown, Activity, Share2 } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { estimateTodayPnL } from '../utils/portfolioCalcs';
@@ -8,6 +8,8 @@ import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { Sparkline } from './ui/Sparkline';
 import { AnimatedNumber } from './ui/AnimatedNumber';
 import { usePrivacy } from '../contexts/PrivacyContext';
+import { sharePortfolioSummary } from '../utils/shareUtils';
+import { useToastActions } from '../contexts/ToastContext';
 
 interface SummaryCardsProps {
   totalInvested: number;
@@ -48,6 +50,7 @@ function SummaryCards({
   }, [sparklineData]);
 
   const { isBalancesHidden } = usePrivacy();
+  const { addToast } = useToastActions();
 
   const renderValue = (val: number, formatter = formatINR) => {
     if (isBalancesHidden) return '••••••';
@@ -61,9 +64,19 @@ function SummaryCards({
       <Card padding="md" className="relative overflow-hidden flex flex-col gap-1">
         <div className="flex items-center justify-between">
           <span className="text-label-small">{label} Net Worth</span>
-          <span className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
-            <IndianRupee size={13} className="text-[var(--text-secondary)]" />
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => sharePortfolioSummary({ name: label, totalValue: totalCurrentValue, totalPnL, totalPnLPercent }, addToast)}
+              className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors"
+              title="Share Summary"
+              aria-label="Share Portfolio Summary"
+            >
+              <Share2 size={13} />
+            </button>
+            <span className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
+              <IndianRupee size={13} className="text-[var(--text-secondary)]" />
+            </span>
+          </div>
         </div>
         <div className="flex items-end justify-between">
           <div>

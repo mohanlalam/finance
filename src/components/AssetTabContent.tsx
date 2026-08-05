@@ -18,9 +18,9 @@ const FixedDepositView  = React.lazy(() => import('./FixedDepositView'));
 const RDView            = React.lazy(() => import('./rd/RDView'));
 const SIPView           = React.lazy(() => import('./sip/SIPView'));
 const WhatIfCalculator  = React.lazy(() => import('./WhatIfCalculator'));
+const TaxHarvestingView = React.lazy(() => import('./TaxHarvestingView'));
 
-
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'what_if';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'what_if' | 'tax';
 
 interface PortfolioOption {
   name: string;
@@ -100,6 +100,16 @@ export default React.memo(function AssetTabContent({
       <div className="tab-transition">
         <React.Suspense fallback={<AssetCardSkeleton />}>
           <WhatIfCalculator />
+        </React.Suspense>
+      </div>
+    );
+  }
+  
+  if (activeAsset === 'tax') {
+    return (
+      <div className="tab-transition">
+        <React.Suspense fallback={<AssetCardSkeleton />}>
+          <TaxHarvestingView portfolio={visiblePortfolio} portfolios={portfolios} />
         </React.Suspense>
       </div>
     );
