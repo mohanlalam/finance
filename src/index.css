@@ -561,21 +561,4 @@ h3, .text-card-title {
   outline-offset: 2px;
 }
 
-/* Tablet Responsive Breakpoint (768px - 1024px) */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .tablet-grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-  .tablet-p-4 {
-    padding: 1rem !important;
-  }
-  .tablet-gap-4 {
-    gap: 1rem !important;
-  }
-  .tablet-w-full {
-    width: 100% !important;
-  }
-  .tablet-text-sm {
-    font-size: 0.875rem !important;
-  }
-}
+

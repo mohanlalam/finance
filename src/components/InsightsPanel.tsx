@@ -316,7 +316,6 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
   );
 });
 
-import BenchmarkComparison from './BenchmarkComparison';
 
 /* ── Main Component ── */
 
@@ -425,10 +424,6 @@ export default React.memo(function InsightsPanel({
             <Card title="Top Gainers" icon={<TrendingUp size={13} className="text-[#34C759]" />}>
               <GainersList items={insights.topGainers} type="gain" />
             </Card>
-          </div>
-          
-          <div className="mt-4">
-            <BenchmarkComparison portfolioReturnPercent={portfolioReturnPercent} />
           </div>
         </div>
       )}

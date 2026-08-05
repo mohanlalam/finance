@@ -228,7 +228,7 @@ export default function AppShell() {
   const { visibleAlerts, handleDismissAlert, handleDismissAll } = useDismissibleAlerts(portfolios);
 
   const isLoadingPrices = priceStatus === 'loading';
-  const isLoading = priceStatus === 'loading';
+  const isLoading = isLoadingPrices; // alias for SummaryCards prop
 
   const liveTotals = useMemo(() => {
     const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);

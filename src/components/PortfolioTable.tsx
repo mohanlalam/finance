@@ -599,7 +599,7 @@ export default React.memo(function PortfolioTable({
                     {isBalancesHidden ? '••••••' : <>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</>}
                   </td>
                   <td role="cell" className="px-2 py-3 text-right">
-                    <span className={`inline-flex items-center gap-0.5 text-xs font-bold px-2 py-0.5 rounded-full ${h.pnlPercent >= 0 ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-[#60a5fa]' : 'bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400'}`}>
+                     <span className={`inline-flex items-center gap-0.5 text-xs font-bold px-2 py-0.5 rounded-full ${h.pnlPercent >= 0 ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400' : 'bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400'}`}>
                       <span className="text-[10px] font-extrabold mr-0.5">{h.pnlPercent >= 0 ? '↗' : '↘'}</span>
                       {isBalancesHidden ? '••••••' : formatPercent(h.pnlPercent)}
                     </span>
