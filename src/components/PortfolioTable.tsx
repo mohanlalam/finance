@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { Trash2, Pencil, Loader2, Check, X, SlidersHorizontal } from './icons/AppIcons';
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent, pnlColor } from '../utils/formatters';
+import { usePrivacy } from '../contexts/PrivacyContext';
 import ConfirmModal from './ConfirmModal';
 import EmptyState from './EmptyState';
 
@@ -89,6 +90,13 @@ export default React.memo(function PortfolioTable({
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [editError, setEditError] = useState('');
   const editInputRef = useRef<HTMLInputElement>(null);
+
+  const { isBalancesHidden } = usePrivacy();
+
+  const renderValue = (val: number, formatter = formatINR) => {
+    if (isBalancesHidden) return '••••••';
+    return formatter(val);
+  };
 
   const holdingsWithAlloc = useMemo(() => {
     return holdings.map((h) => ({
@@ -296,17 +304,17 @@ export default React.memo(function PortfolioTable({
           <div className="px-4 py-3 bg-slate-50/50 dark:bg-slate-900/30 border-b border-slate-100 dark:border-slate-700/50 grid grid-cols-2 gap-4">
             <div>
               <p className="text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase tracking-wider">Total Value</p>
-              <p className="text-base font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 whitespace-nowrap">{formatINR(totalCurrentValue)}</p>
-              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 whitespace-nowrap">Invested: {formatINR(totalInvested)}</p>
+              <p className="text-base font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 whitespace-nowrap">{renderValue(totalCurrentValue)}</p>
+              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 whitespace-nowrap">Invested: {renderValue(totalInvested)}</p>
             </div>
             <div>
               <p className="text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase tracking-wider">Total P&amp;L</p>
               <div className="flex flex-wrap items-baseline gap-x-1 mt-0.5">
                 <span className={`text-base font-extrabold whitespace-nowrap ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                  {totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}
+                  {isBalancesHidden ? '••••••' : <>{totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}</>}
                 </span>
                 <span className={`text-xs font-semibold whitespace-nowrap opacity-90 ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                  ({formatPercent(totalPnLPercent)})
+                  ({isBalancesHidden ? '••••••' : formatPercent(totalPnLPercent)})
                 </span>
               </div>
             </div>
@@ -395,21 +403,21 @@ export default React.memo(function PortfolioTable({
                       </div>
                     ) : (
                       <p className="text-[10px] text-slate-400 dark:text-slate-550 mt-0.5">
-                        {formatNumber(h.qty, 0)} shares @ ₹{formatNumber(h.avgPrice)} (LTP: ₹{formatNumber(h.ltp)})
+                        {isBalancesHidden ? '••••••' : <>{formatNumber(h.qty, 0)} shares @ ₹{formatNumber(h.avgPrice)}</>} (LTP: ₹{formatNumber(h.ltp)})
                       </p>
                     )}
                   </div>
 
                   <div className="text-right">
                     <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                      {formatINR(h.currentValue)}
+                      {renderValue(h.currentValue)}
                     </p>
                     <div className="flex items-center gap-1 justify-end mt-0.5 flex-wrap">
                       <span className={`text-[10px] font-bold whitespace-nowrap ${pnlColor(h.unrealizedPnL)}`}>
-                        {h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}
+                        {isBalancesHidden ? '••••••' : <>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</>}
                       </span>
                       <span className={`inline-flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.2 rounded-full whitespace-nowrap ${h.pnlPercent >= 0 ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400'}`}>
-                        {formatPercent(h.pnlPercent)}
+                        {isBalancesHidden ? '••••••' : formatPercent(h.pnlPercent)}
                       </span>
                     </div>
                   </div>
@@ -533,7 +541,7 @@ export default React.memo(function PortfolioTable({
                         onClick={() => startEdit(h)}
                         title={onUpdate ? 'Click to edit quantity' : undefined}
                       >
-                        {formatNumber(h.qty, 0)}
+                        {renderValue(h.qty, (v) => formatNumber(v, 0))}
                         {onUpdate && (
                           <Pencil size={11} className="text-blue-500/70 dark:text-blue-400/70 hover:text-blue-600 transition-colors" />
                         )}
@@ -566,7 +574,7 @@ export default React.memo(function PortfolioTable({
                         onClick={() => startEdit(h)}
                         title={onUpdate ? 'Click to edit average price' : undefined}
                       >
-                        ₹{formatNumber(h.avgPrice)}
+                        {isBalancesHidden ? '••••••' : <>₹{formatNumber(h.avgPrice)}</>}
                         {onUpdate && (
                           <Pencil size={11} className="text-blue-500/70 dark:text-blue-400/70 hover:text-blue-600 transition-colors" />
                         )}
@@ -574,20 +582,20 @@ export default React.memo(function PortfolioTable({
                     )}
                   </td>
                   <td role="cell" className="px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 text-right">₹{formatNumber(h.ltp)}</td>
-                  <td role="cell" className="px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 text-right">{formatINR(h.currentValue)}</td>
-                  <td role="cell" className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400 text-right">{formatINR(h.amountInvested)}</td>
+                  <td role="cell" className="px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 text-right">{renderValue(h.currentValue)}</td>
+                  <td role="cell" className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400 text-right">{renderValue(h.amountInvested)}</td>
                   <td role="cell" className={`px-4 py-3 text-sm font-semibold text-right ${pnlColor(h.unrealizedPnL)}`}>
-                    {h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}
+                    {isBalancesHidden ? '••••••' : <>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</>}
                   </td>
                   <td role="cell" className="px-4 py-3 text-right">
                     <span className={`inline-flex items-center gap-0.5 text-xs font-bold px-2 py-0.5 rounded-full ${h.pnlPercent >= 0 ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-[#60a5fa]' : 'bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400'}`}>
                       <span className="text-[10px] font-extrabold mr-0.5">{h.pnlPercent >= 0 ? '↗' : '↘'}</span>
-                      {formatPercent(h.pnlPercent)}
+                      {isBalancesHidden ? '••••••' : formatPercent(h.pnlPercent)}
                     </span>
                   </td>
                   <td role="cell" className="px-4 py-3 text-right">
                     <span className={`text-xs font-semibold ${pnlColor(h.todayPnLPercent)}`}>
-                      {formatPercent(h.todayPnLPercent)}
+                      {isBalancesHidden ? '••••••' : formatPercent(h.todayPnLPercent)}
                     </span>
                   </td>
                   <td role="cell" className="px-4 py-3 text-right">
@@ -629,13 +637,13 @@ export default React.memo(function PortfolioTable({
           <tfoot className="bg-slate-800 dark:bg-slate-950 text-white dark:text-slate-200">
             <tr role="row">
               <td role="cell" colSpan={5} className="px-4 py-3 text-sm font-bold">Portfolio Total</td>
-              <td role="cell" className="px-4 py-3 text-sm font-bold text-right">{formatINR(totalCurrentValue)}</td>
-              <td role="cell" className="px-4 py-3 text-sm font-bold text-right text-slate-300 dark:text-slate-400">{formatINR(totalInvested)}</td>
+              <td role="cell" className="px-4 py-3 text-sm font-bold text-right">{renderValue(totalCurrentValue)}</td>
+              <td role="cell" className="px-4 py-3 text-sm font-bold text-right text-slate-300 dark:text-slate-400">{renderValue(totalInvested)}</td>
               <td role="cell" className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
-                {totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}
+                {isBalancesHidden ? '••••••' : <>{totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}</>}
               </td>
               <td role="cell" colSpan={(onDelete || onUpdate) ? 4 : 3} className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
-                {formatPercent(totalPnLPercent)}
+                {isBalancesHidden ? '••••••' : formatPercent(totalPnLPercent)}
               </td>
             </tr>
           </tfoot>

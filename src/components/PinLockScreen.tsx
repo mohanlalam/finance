@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { markSessionVerified, hashPin } from '../utils/auth';
+import { markSessionVerified, hashPin, getPinLength, verifyPin } from '../utils/auth';
 
 function IconDelete({ size = 22 }: { size?: number }) {
   return (
@@ -40,9 +40,6 @@ function IconLock({ isUnlocked = false }: { isUnlocked?: boolean }) {
     </svg>
   );
 }
-
-const APP_PIN = (import.meta.env.VITE_APP_PIN as string | undefined) ?? '';
-const PIN_LENGTH = APP_PIN.length || 4;
 
 const keypadLayout = [
   { num: '1', letters: '' },
@@ -89,28 +86,31 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     if (success) return;
     
     setPin((prev) => {
-      if (prev.length >= PIN_LENGTH) return prev;
+      const pinLength = getPinLength();
+      if (prev.length >= pinLength) return prev;
       const nextPin = prev + num;
       setError('');
 
-      if (nextPin.length === PIN_LENGTH) {
-        if (nextPin === APP_PIN) {
-          setSuccess(true);
-        } else {
-          setShake(true);
-          setError('Incorrect PIN');
-          setTimeout(() => {
-            setShake(false);
-            setPin('');
-          }, 600);
-        }
+      if (nextPin.length === pinLength) {
+        verifyPin(nextPin).then((isValid) => {
+          if (isValid) {
+            setSuccess(true);
+          } else {
+            setShake(true);
+            setError('Incorrect PIN');
+            setTimeout(() => {
+              setShake(false);
+              setPin('');
+            }, 600);
+          }
+        });
       }
       return nextPin;
     });
   }, [success]);
 
   useEffect(() => {
-    if (success && pin.length === PIN_LENGTH) {
+    if (success && pin.length === getPinLength()) {
       hashPin(pin).then((hash) => {
         markSessionVerified(hash);
         // Small delay to let user see filled dots & unlocked icon before opening vault
@@ -148,7 +148,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     hour12: false,
   });
 
-  const dots = Array.from({ length: PIN_LENGTH });
+  const dots = Array.from({ length: getPinLength() });
 
   return (
     <div className="pin-lock-root min-h-screen text-white flex flex-col items-center justify-between py-10 font-sans select-none overflow-hidden">

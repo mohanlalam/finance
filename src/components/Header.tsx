@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Check, Sun, Moon } from './icons/AppIcons';
+import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Check, Sun, Moon, LockKeyhole, Eye, EyeOff } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { FetchStatus } from '../hooks/useMarketData';
 import { Portfolio } from '../types/portfolio';
@@ -7,6 +7,8 @@ import type { ImportRow } from './ExportPanel';
 import { Alert } from '../hooks/useAlerts';
 import { IconButton } from './ui/IconButton';
 import { Badge } from './ui/Badge';
+
+import { usePrivacy } from '../contexts/PrivacyContext';
 
 const ExportPanel = React.lazy(() => import('./ExportPanel'));
 
@@ -28,6 +30,7 @@ interface HeaderProps {
   activePortfolioLabel?: string;
   isPriceStale?: boolean;
   isUsingCachedData?: boolean;
+  onChangePinClick?: () => void;
 }
 
 const ALERTS_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
@@ -81,11 +84,13 @@ function Header({
   activePortfolioLabel = 'Family',
   isPriceStale = false,
   isUsingCachedData = false,
+  onChangePinClick,
 }: HeaderProps) {
   const isGain = totalPnL >= 0;
   const isLoading = status === 'loading';
   const [openAlerts, setOpenAlerts] = useState(false);
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const { isBalancesHidden, toggleHideBalances } = usePrivacy();
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -205,6 +210,22 @@ function Header({
                   portfolioOptions={portfolioOptions}
                 />
               </Suspense>
+
+              {/* Change PIN */}
+              {onChangePinClick && (
+                <IconButton
+                  icon={<LockKeyhole size={13} />}
+                  title="Change PIN"
+                  onClick={onChangePinClick}
+                />
+              )}
+
+              {/* Privacy Toggle */}
+              <IconButton
+                icon={isBalancesHidden ? <EyeOff size={13} /> : <Eye size={13} />}
+                title={isBalancesHidden ? "Show Balances" : "Hide Balances"}
+                onClick={toggleHideBalances}
+              />
 
               {/* Theme Toggle */}
               <IconButton

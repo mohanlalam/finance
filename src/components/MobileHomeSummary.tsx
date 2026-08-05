@@ -7,6 +7,7 @@ import { estimateTodayPnL } from '../utils/portfolioCalcs';
 import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { Sparkline } from './ui/Sparkline';
 import { AnimatedNumber } from './ui/AnimatedNumber';
+import { usePrivacy } from '../contexts/PrivacyContext';
 
 interface MobileHomeSummaryProps {
   summaryData: {
@@ -59,6 +60,13 @@ function MobileHomeSummary({
   netWorthHistory = [],
 }: MobileHomeSummaryProps) {
   // Single-pass count computation — avoids 9 separate reduce() calls on every render
+
+  const { isBalancesHidden } = usePrivacy();
+
+  const renderValue = (val: number, formatter = formatINR) => {
+    if (isBalancesHidden) return '••••••';
+    return <AnimatedNumber value={val} formatter={formatter} />;
+  };
 
   const sparklineData = useMemo(() => {
     if (!netWorthHistory || netWorthHistory.length === 0) return [];
@@ -184,7 +192,7 @@ function MobileHomeSummary({
 
         <div className="flex items-end justify-between mt-3">
           <h2 className="text-financial text-slate-800 dark:text-slate-100 tnum">
-            <AnimatedNumber value={summaryData.totalCurrentValue} formatter={formatINR} />
+            {renderValue(summaryData.totalCurrentValue)}
           </h2>
           {sparklineData.length > 1 && (
             <div className="mb-1 ml-2 shrink-0">
@@ -202,7 +210,7 @@ function MobileHomeSummary({
                 <span key={p.id} className="flex items-center gap-0.5">
                   <span>{p.label}:</span>
                   <span className="text-slate-700 dark:text-slate-300 font-bold tnum">
-                    <AnimatedNumber value={val} formatter={formatINR} />
+                    {renderValue(val)}
                   </span>
                   {idx < portfolios.length - 1 && <span className="text-slate-200 dark:text-zinc-800 ml-2">|</span>}
                 </span>
@@ -223,7 +231,7 @@ function MobileHomeSummary({
               )}
               <div className="flex flex-col">
                 <span className="text-base font-bold whitespace-nowrap leading-tight tnum">
-                  {todayPnL >= 0 ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} />
+                  {isBalancesHidden ? '••••••' : <>{todayPnL >= 0 ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
                 </span>
                 <span className="text-[11px] font-semibold whitespace-nowrap opacity-90 leading-none mt-0.5 tnum">
                   ({formatPercent(todayPnLPercent)})
@@ -241,7 +249,7 @@ function MobileHomeSummary({
               )}
               <div className="flex flex-col">
                 <span className="text-base font-bold whitespace-nowrap leading-tight tnum">
-                  {summaryData.totalPnL >= 0 ? '+' : ''}<AnimatedNumber value={summaryData.totalPnL} formatter={formatINR} />
+                  {isBalancesHidden ? '••••••' : <>{summaryData.totalPnL >= 0 ? '+' : ''}<AnimatedNumber value={summaryData.totalPnL} formatter={formatINR} /></>}
                 </span>
                 <span className="text-[11px] font-semibold whitespace-nowrap opacity-90 leading-none mt-0.5 tnum">
                   ({formatPercent(summaryData.totalPnLPercent)})
@@ -262,7 +270,7 @@ function MobileHomeSummary({
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
                     <span className={pnl >= 0 ? 'text-[#34C759] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
-                      {pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} />
+                      {isBalancesHidden ? '••••••' : <>{pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
                     </span>
                     {idx < portfolios.length - 1 && <span className="text-slate-200 dark:text-zinc-800 ml-2">|</span>}
                   </span>
@@ -277,7 +285,7 @@ function MobileHomeSummary({
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
                     <span className={pnl >= 0 ? 'text-[#34C759] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
-                      {pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} />
+                      {isBalancesHidden ? '••••••' : <>{pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
                     </span>
                     {idx < portfolios.length - 1 && <span className="text-slate-200 dark:text-zinc-800 ml-2">|</span>}
                   </span>
@@ -311,7 +319,7 @@ function MobileHomeSummary({
         <div className="bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-800/80 rounded-2xl p-4 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Asset Allocation</span>
-            <span className="text-xs font-bold text-slate-600 dark:text-slate-300"><AnimatedNumber value={totalValue} formatter={formatINR} /></span>
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{renderValue(totalValue)}</span>
           </div>
           
           <div className="w-full h-3.5 bg-slate-100 dark:bg-slate-700 rounded-full flex overflow-hidden shadow-inner">
@@ -473,7 +481,7 @@ function MobileHomeSummary({
                   {card.label}
                 </p>
                 <p className="text-[14px] font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 truncate">
-                  {card.value !== null ? <AnimatedNumber value={card.value} formatter={formatINR} /> : 'Vault'}
+                  {card.value !== null ? renderValue(card.value) : 'Vault'}
                 </p>
                 <p className="text-[9.5px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5 leading-none">
                   {card.subtext}

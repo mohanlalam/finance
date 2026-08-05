@@ -8,13 +8,14 @@ interface UseSwipeNavigationProps {
 }
 
 export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavigationProps) {
-  const touchStart = useRef({ x: 0, y: 0 });
+  const touchStart = useRef({ x: 0, y: 0, time: 0 });
   const touchEnd = useRef({ x: 0, y: 0 });
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStart.current = {
       x: e.targetTouches[0].clientX,
       y: e.targetTouches[0].clientY,
+      time: Date.now(),
     };
     touchEnd.current = {
       x: e.targetTouches[0].clientX,
@@ -29,17 +30,36 @@ export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavi
     };
   }, []);
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     const globalWin = window as unknown as { __lastShortcutTime?: number };
     const lastShortcut = globalWin.__lastShortcutTime || 0;
     if (Date.now() - lastShortcut < 300) {
       return;
     }
 
+    let target = e.target as HTMLElement | null;
+    let levels = 0;
+    while (target && levels < 5) {
+      const style = window.getComputedStyle(target);
+      if (
+        style.overflowX === 'scroll' ||
+        style.overflowX === 'auto' ||
+        target.classList.contains('overflow-x-auto') ||
+        target.classList.contains('scroll-fade-right') ||
+        target.tagName.toLowerCase() === 'table'
+      ) {
+        return; // Ignore swipe inside scrollable container
+      }
+      target = target.parentElement;
+      levels++;
+    }
+
     const diffX = touchStart.current.x - touchEnd.current.x;
     const diffY = touchStart.current.y - touchEnd.current.y;
+    const durationMs = Date.now() - touchStart.current.time;
+    const velocity = durationMs > 0 ? Math.abs(diffX) / durationMs : 0;
 
-    if (Math.abs(diffX) > 70 && Math.abs(diffY) < 40) {
+    if (Math.abs(diffX) > 90 && Math.abs(diffY) < 30 && velocity > 0.3) {
       const tabOrder: AssetTab[] = ['home', 'stocks', 'fd', 'rd', 'sip', 'gold', 'real_estate', 'insurance', 'documents', 'what_if'];
       const currentIndex = tabOrder.indexOf(activeAsset);
 

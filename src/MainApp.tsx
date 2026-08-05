@@ -7,6 +7,7 @@ import ToastContainer from './components/Toast';
 import ErrorBoundary from './components/ErrorBoundary';
 import DashboardLoading from './components/DashboardLoading';
 import DashboardError from './components/DashboardError';
+import { PrivacyProvider } from './contexts/PrivacyContext';
 
 const AppShell = lazy(() => import('./layouts/AppShell'));
 
@@ -32,14 +33,16 @@ export default function MainApp({ onAuthExpired }: MainAppProps) {
       <ErrorBoundary>
         <ToastProvider>
           <ThemeProvider>
-            <PortfolioProvider onAuthExpired={onAuthExpired}>
-              <Routes>
-                <Route path="/" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
-                <Route path="/:family/:asset" element={<LoadGate onUnlock={onAuthExpired} />} />
-                <Route path="*" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
-              </Routes>
-              <ToastContainer />
-            </PortfolioProvider>
+            <PrivacyProvider>
+              <PortfolioProvider onAuthExpired={onAuthExpired}>
+                <Routes>
+                  <Route path="/" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
+                  <Route path="/:family/:asset" element={<LoadGate onUnlock={onAuthExpired} />} />
+                  <Route path="*" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
+                </Routes>
+                <ToastContainer />
+              </PortfolioProvider>
+            </PrivacyProvider>
           </ThemeProvider>
         </ToastProvider>
       </ErrorBoundary>

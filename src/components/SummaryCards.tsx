@@ -7,6 +7,7 @@ import { Card } from './ui/Card';
 import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { Sparkline } from './ui/Sparkline';
 import { AnimatedNumber } from './ui/AnimatedNumber';
+import { usePrivacy } from '../contexts/PrivacyContext';
 
 interface SummaryCardsProps {
   totalInvested: number;
@@ -46,6 +47,13 @@ function SummaryCards({
     return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? '#10b981' : '#ef4444';
   }, [sparklineData]);
 
+  const { isBalancesHidden } = usePrivacy();
+
+  const renderValue = (val: number, formatter = formatINR) => {
+    if (isBalancesHidden) return '••••••';
+    return <AnimatedNumber value={val} formatter={formatter} />;
+  };
+
   return (
     <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4">
       
@@ -60,7 +68,7 @@ function SummaryCards({
         <div className="flex items-end justify-between">
           <div>
             <p className={`text-financial tnum transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
-              <AnimatedNumber value={totalCurrentValue} formatter={formatINR} />
+              {renderValue(totalCurrentValue)}
             </p>
             <p className="text-supporting">
               {isLoading ? 'Syncing prices...' : 'Current valuation'}
@@ -81,7 +89,7 @@ function SummaryCards({
                 <span key={p.id} className="flex items-center gap-0.5">
                   <span>{p.label}:</span>
                   <span className="text-[var(--text-primary)] font-bold tnum">
-                    <AnimatedNumber value={val} formatter={formatINR} />
+                    {renderValue(val)}
                   </span>
                   {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
                 </span>
@@ -105,7 +113,7 @@ function SummaryCards({
               <BarChart2 size={13} className="text-[var(--text-secondary)]" />
             </span>
           </div>
-          <p className="text-financial tnum"><AnimatedNumber value={totalInvested} formatter={formatINR} /></p>
+          <p className="text-financial tnum">{renderValue(totalInvested)}</p>
           <p className="text-supporting">Total capital deployed</p>
 
           {activePortfolio === null && portfolios && portfolios.length > 0 && (
@@ -116,7 +124,7 @@ function SummaryCards({
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
                     <span className="text-[var(--text-primary)] font-bold tnum">
-                      <AnimatedNumber value={val} formatter={formatINR} />
+                      {renderValue(val)}
                     </span>
                     {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
                   </span>
@@ -137,7 +145,7 @@ function SummaryCards({
             </span>
           </div>
           <p className={`text-financial tnum ${isGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
-            {isGain ? '+' : ''}<AnimatedNumber value={totalPnL} formatter={formatINR} />
+            {isBalancesHidden ? '••••••' : <>{isGain ? '+' : ''}<AnimatedNumber value={totalPnL} formatter={formatINR} /></>}
           </p>
           <p className="text-supporting">
             {formatPercent(totalPnLPercent)} gain
@@ -152,7 +160,7 @@ function SummaryCards({
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
                     <span className={`font-bold tnum ${localGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
-                      {localGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} />
+                      {isBalancesHidden ? '••••••' : <>{localGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
                     </span>
                     {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
                   </span>
@@ -174,7 +182,7 @@ function SummaryCards({
               </span>
             </div>
             <p className={`text-financial tnum ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
-              {isTodayGain ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} />
+              {isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
             </p>
             <p className="text-supporting">
               Intraday delta
@@ -189,7 +197,7 @@ function SummaryCards({
                     <span key={p.id} className="flex items-center gap-0.5">
                       <span>{p.label}:</span>
                       <span className={`font-bold tnum ${localTodayGain ? 'text-[#34C759]' : 'text-[#ff3b30]'}`}>
-                        {localTodayGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} />
+                        {isBalancesHidden ? '••••••' : <>{localTodayGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
                       </span>
                       {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
                     </span>

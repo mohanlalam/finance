@@ -11,6 +11,7 @@ import FamilyTabBar from '../components/FamilyTabBar';
 import AddFamilyModal from '../components/AddFamilyModal';
 import RenamePortfolioModal from '../components/RenamePortfolioModal';
 import ConfirmModal from '../components/ConfirmModal';
+import ChangePinModal from '../components/ChangePinModal';
 import AssetTabContent from '../components/AssetTabContent';
 import SectionErrorBoundary from '../components/SectionErrorBoundary';
 import QuickActions from '../components/QuickActions';
@@ -36,6 +37,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { usePortfolioInsights } from '../hooks/usePortfolioInsights';
 import { useDismissibleAlerts } from '../hooks/useAlerts';
 import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
+import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { getBreakdownSlices } from '../utils/chartHelpers';
 import { classBreakdown, estimateTodayPnL } from '../utils/portfolioCalcs';
@@ -171,6 +173,7 @@ export default function AppShell() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string; label: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showMobileAlerts, setShowMobileAlerts] = useState(false);
+  const [showChangePinModal, setShowChangePinModal] = useState(false);
 
   // Persist active asset tab
   useEffect(() => {
@@ -181,10 +184,29 @@ export default function AppShell() {
   useKeyboardShortcuts(useCallback(() => refreshPrices(), [refreshPrices]));
 
   // Swipe tab navigation
-  const { handleTouchStart, handleTouchMove, handleTouchEnd } = useSwipeNavigation({
+  const swipeNav = useSwipeNavigation({
     activeAsset,
     setActiveAsset,
   });
+
+  const ptr = usePullToRefresh({
+    onRefresh: refreshPrices,
+  });
+
+  const handleCombinedTouchStart = useCallback((e: React.TouchEvent) => {
+    swipeNav.handleTouchStart(e);
+    ptr.handleTouchStart(e);
+  }, [swipeNav, ptr]);
+
+  const handleCombinedTouchMove = useCallback((e: React.TouchEvent) => {
+    swipeNav.handleTouchMove(e);
+    ptr.handleTouchMove(e);
+  }, [swipeNav, ptr]);
+
+  const handleCombinedTouchEnd = useCallback((e: React.TouchEvent) => {
+    swipeNav.handleTouchEnd(e);
+    ptr.handleTouchEnd();
+  }, [swipeNav, ptr]);
 
   const portfolio = activePortfolio;
   const todayPnL = useMemo(() => estimateTodayPnL(portfolio, portfolios), [portfolio, portfolios]);
@@ -387,11 +409,35 @@ export default function AppShell() {
 
   return (
     <div
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      onTouchStart={handleCombinedTouchStart}
+      onTouchMove={handleCombinedTouchMove}
+      onTouchEnd={handleCombinedTouchEnd}
       className="min-h-screen bg-[var(--app-background)] pb-safe-content md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden"
     >
+      {/* Pull to refresh indicator */}
+      {(ptr.pullDistance > 0 || ptr.isRefreshing) && (
+        <div className="absolute top-4 left-0 right-0 flex justify-center z-50 pointer-events-none">
+          <div 
+            className="w-9 h-9 rounded-full glass-panel flex items-center justify-center shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur"
+            style={{ 
+              transform: ptr.isRefreshing ? 'translateY(20px)' : `translateY(${Math.min(ptr.pullDistance, 60)}px)`,
+              transition: ptr.isRefreshing ? 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
+            }}
+          >
+            <div
+              style={{
+                transform: ptr.isRefreshing ? 'none' : `rotate(${ptr.pullDistance * 2}deg)`,
+                transition: ptr.isRefreshing ? 'none' : 'transform 0.1s linear'
+              }}
+            >
+              <RefreshCw 
+                size={18} 
+                className={`text-[#007aff] dark:text-[#60a5fa] ${ptr.isRefreshing ? 'animate-spin' : ''}`}
+              />
+            </div>
+          </div>
+        </div>
+      )}
       {/* Print-only report header */}
       <div className="print-report-header hidden items-center justify-between px-8 py-6 border-b-2 border-slate-200 mb-6">
         <div>
@@ -424,6 +470,7 @@ export default function AppShell() {
         activePortfolioLabel={summaryData.label}
         isPriceStale={isPriceStale}
         isUsingCachedData={isUsingCachedData}
+        onChangePinClick={() => setShowChangePinModal(true)}
       />
 
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -849,6 +896,17 @@ export default function AppShell() {
         variant="danger"
         isLoading={isDeleting}
       />
+
+      {/* Change PIN Modal */}
+      {showChangePinModal && (
+        <ChangePinModal
+          onClose={() => setShowChangePinModal(false)}
+          onSuccess={() => {
+            setShowChangePinModal(false);
+            addToast('PIN changed successfully', 'success');
+          }}
+        />
+      )}
 
       {/* Mobile Alerts Full-Screen View */}
       {showMobileAlerts && (
