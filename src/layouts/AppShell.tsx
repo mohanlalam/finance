@@ -22,6 +22,7 @@ import type { ImportRow } from '../components/ExportPanel'; // type-only: erased
 import { AddHoldingPayload } from '../components/AddHoldingModal';
 
 import DashboardWidgets from '../components/DashboardWidgets';
+import PWAInstallBanner from '../components/PWAInstallBanner';
 
 const PieChart = React.lazy(() => import('../components/PieChart'));
 const BarChart = React.lazy(() => import('../components/BarChart'));
@@ -907,6 +908,9 @@ export default function AppShell() {
           }}
         />
       )}
+
+      {/* PWA Install Banner */}
+      <PWAInstallBanner />
 
       {/* Mobile Alerts Full-Screen View */}
       {showMobileAlerts && (

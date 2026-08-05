@@ -1,7 +1,9 @@
 import React from 'react';
 import { FixedDeposit, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../../utils/formatters';
-import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote } from '../icons/AppIcons';
+import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote, Share2 } from '../icons/AppIcons';
+import { useLongPress } from '../../hooks/useLongPress';
+import { ContextMenu } from '../ui/ContextMenu';
 
 interface ModeConfig {
   title: string;
@@ -29,6 +31,30 @@ export function DepositDetailsCard({
   onConfirmDelete,
 }: DepositDetailsCardProps) {
   const IconComponent = cfg.iconClass;
+  const [contextMenu, setContextMenu] = React.useState<{ isOpen: boolean; x: number; y: number }>({
+    isOpen: false,
+    x: 0,
+    y: 0,
+  });
+
+  const handleLongPress = (e: React.TouchEvent | React.MouseEvent) => {
+    let clientX = 0;
+    let clientY = 0;
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    setContextMenu({ isOpen: true, x: clientX, y: clientY });
+    // Vibrate if supported
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+  };
+
+  const longPressProps = useLongPress({ onLongPress: handleLongPress, delay: 500 });
 
   // Helper to compute progress bar percentage
   const getProgressPercent = (item: FixedDeposit) => {
@@ -47,7 +73,12 @@ export function DepositDetailsCard({
   const isMatured = fd.status === 'matured' || progress >= 100;
 
   return (
-    <div className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors" role="listitem">
+    <>
+      <div 
+        className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors select-none" 
+        role="listitem"
+        {...longPressProps}
+      >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 ${isMatured ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' : cfg.iconBg}`}>
@@ -135,7 +166,39 @@ export function DepositDetailsCard({
           </p>
         )}
       </div>
-    </div>
+      </div>
+      <ContextMenu
+        isOpen={contextMenu.isOpen}
+        position={{ x: contextMenu.x, y: contextMenu.y }}
+        onClose={() => setContextMenu({ ...contextMenu, isOpen: false })}
+        items={[
+          {
+            label: 'Edit Details',
+            icon: <Edit2 size={16} />,
+            onClick: () => onOpenEdit(fd),
+          },
+          {
+            label: 'Share Summary',
+            icon: <Share2 size={16} />,
+            onClick: () => {
+              const summary = `${cfg.title} at ${fd.bank_name}\nPrincipal: ${formatINR(Number(fd.principal_amount))}\nMaturity: ${fd.maturity_date || 'Ongoing'}`;
+              if (navigator.share) {
+                navigator.share({ title: `${cfg.title} Summary`, text: summary }).catch(console.error);
+              } else {
+                navigator.clipboard.writeText(summary);
+                alert('Summary copied to clipboard!');
+              }
+            },
+          },
+          {
+            label: 'Delete Account',
+            icon: <Trash2 size={16} />,
+            onClick: () => onConfirmDelete(fd),
+            danger: true,
+          },
+        ]}
+      />
+    </>
   );
 }
 

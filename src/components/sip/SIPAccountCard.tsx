@@ -2,7 +2,9 @@ import React from 'react';
 import { SIPAccount, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, getDocumentUrl, formatPercent } from '../../utils/formatters';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../utils/sipUtils';
-import { FileText, Edit2, Trash2, StickyNote, Wifi } from '../icons/AppIcons';
+import { FileText, Edit2, Trash2, StickyNote, Wifi, Share2 } from '../icons/AppIcons';
+import { useLongPress } from '../../hooks/useLongPress';
+import { ContextMenu } from '../ui/ContextMenu';
 
 interface SIPAccountCardProps {
   account: SIPAccount;
@@ -17,6 +19,30 @@ export function SIPAccountCard({
   onOpenEdit,
   onConfirmDelete,
 }: SIPAccountCardProps) {
+  const [contextMenu, setContextMenu] = React.useState<{ isOpen: boolean; x: number; y: number }>({
+    isOpen: false,
+    x: 0,
+    y: 0,
+  });
+
+  const handleLongPress = (e: React.TouchEvent | React.MouseEvent) => {
+    let clientX = 0;
+    let clientY = 0;
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    setContextMenu({ isOpen: true, x: clientX, y: clientY });
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+  };
+
+  const longPressProps = useLongPress({ onLongPress: handleLongPress, delay: 500 });
+
   const invested = getSIPInvestedAmount(account);
   const currentVal = getSIPEffectiveValue(account);
   const profitLoss = currentVal - invested;
@@ -28,8 +54,12 @@ export function SIPAccountCard({
   );
 
   return (
-    <div className="py-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all px-4 sm:px-6 rounded-2xl border border-transparent hover:border-slate-100 dark:hover:border-slate-700/50">
-      <div className="flex items-start justify-between gap-4 flex-wrap sm:flex-nowrap">
+    <>
+      <div 
+        className="py-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all px-4 sm:px-6 rounded-2xl border border-transparent hover:border-slate-100 dark:hover:border-slate-700/50 select-none"
+        {...longPressProps}
+      >
+        <div className="flex items-start justify-between gap-4 flex-wrap sm:flex-nowrap">
         {/* Left Side: Meta & Dates */}
         <div className="space-y-1.5 flex-1 min-w-[200px]">
           <div className="flex items-center gap-2 flex-wrap">
@@ -131,6 +161,38 @@ export function SIPAccountCard({
         </div>
       </div>
     </div>
+      <ContextMenu
+        isOpen={contextMenu.isOpen}
+        position={{ x: contextMenu.x, y: contextMenu.y }}
+        onClose={() => setContextMenu({ ...contextMenu, isOpen: false })}
+        items={[
+          {
+            label: 'Edit Details',
+            icon: <Edit2 size={16} />,
+            onClick: () => onOpenEdit(account),
+          },
+          {
+            label: 'Share Summary',
+            icon: <Share2 size={16} />,
+            onClick: () => {
+              const summary = `SIP in ${account.fund_name}\nMonthly: ${formatINR(account.monthly_sip)}\nValue: ${formatINR(currentVal)}`;
+              if (navigator.share) {
+                navigator.share({ title: `SIP Summary`, text: summary }).catch(console.error);
+              } else {
+                navigator.clipboard.writeText(summary);
+                alert('Summary copied to clipboard!');
+              }
+            },
+          },
+          {
+            label: 'Delete Account',
+            icon: <Trash2 size={16} />,
+            onClick: () => onConfirmDelete(account),
+            danger: true,
+          },
+        ]}
+      />
+    </>
   );
 }
 
