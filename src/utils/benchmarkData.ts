@@ -5,12 +5,24 @@ export interface BenchmarkReturn {
   fd: number;
 }
 
+export const BENCHMARK_LAST_UPDATED = 'Aug 2025';
+
+const ANNUAL_RATES = {
+  nifty50: 15.0,
+  sensex: 14.2,
+  fd: 7.0
+};
+
+const calcReturn = (annualRate: number, months: number) => {
+  return (Math.pow(1 + annualRate / 100, months / 12) - 1) * 100;
+};
+
 const BENCHMARK_DATA: Record<string, BenchmarkReturn> = {
-  '1M': { period: '1M', nifty50: 1.2, sensex: 1.1, fd: 7.0 / 12 },
-  '3M': { period: '3M', nifty50: 4.5, sensex: 4.3, fd: 7.0 / 4 },
-  '6M': { period: '6M', nifty50: 8.2, sensex: 7.9, fd: 7.0 / 2 },
-  '1Y': { period: '1Y', nifty50: 15.4, sensex: 14.8, fd: 7.0 },
-  'ALL': { period: 'ALL', nifty50: 22.1, sensex: 21.5, fd: 7.0 }, // using 1Y fd for ALL for simplicity
+  '1M': { period: '1M', nifty50: calcReturn(ANNUAL_RATES.nifty50, 1), sensex: calcReturn(ANNUAL_RATES.sensex, 1), fd: calcReturn(ANNUAL_RATES.fd, 1) },
+  '3M': { period: '3M', nifty50: calcReturn(ANNUAL_RATES.nifty50, 3), sensex: calcReturn(ANNUAL_RATES.sensex, 3), fd: calcReturn(ANNUAL_RATES.fd, 3) },
+  '6M': { period: '6M', nifty50: calcReturn(ANNUAL_RATES.nifty50, 6), sensex: calcReturn(ANNUAL_RATES.sensex, 6), fd: calcReturn(ANNUAL_RATES.fd, 6) },
+  '1Y': { period: '1Y', nifty50: calcReturn(ANNUAL_RATES.nifty50, 12), sensex: calcReturn(ANNUAL_RATES.sensex, 12), fd: calcReturn(ANNUAL_RATES.fd, 12) },
+  'ALL': { period: 'ALL', nifty50: calcReturn(ANNUAL_RATES.nifty50, 24), sensex: calcReturn(ANNUAL_RATES.sensex, 24), fd: calcReturn(ANNUAL_RATES.fd, 24) },
 };
 
 export function getBenchmarkReturns(period: string): BenchmarkReturn {

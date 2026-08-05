@@ -19,6 +19,7 @@ export function useLongPress({ onLongPress, delay = 500 }: UseLongPressOptions) 
       }
 
       timeout.current = setTimeout(() => {
+        if ('vibrate' in navigator) { try { navigator.vibrate(10); } catch { /* ignore vibrate error */ } }
         onLongPress(e);
       }, delay);
     },

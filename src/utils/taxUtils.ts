@@ -4,7 +4,11 @@ export interface TaxHarvestingDetails {
   holding: Holding;
   isLTCG: boolean;
   unrealizedPnL: number;
+  washSaleWarning: boolean;
+  isDebtOrGold: boolean;
 }
+
+export const TAX_DISCLAIMER = "Estimates are for educational purposes. Consult a chartered accountant for tax filing.";
 
 export interface TaxSummary {
   realizedSTCG: number;
@@ -35,6 +39,8 @@ export function calculateTaxHarvesting(holdings: Holding[]): TaxSummary {
       isLTCG = ageMs >= ONE_YEAR_MS;
     }
 
+    const isDebtOrGold = h.ticker?.toUpperCase().includes('GOLD') || h.ticker?.toUpperCase().includes('LIQUID') || false;
+
     if (isLTCG) {
       unrealizedLTCG += pnl;
     } else {
@@ -45,7 +51,9 @@ export function calculateTaxHarvesting(holdings: Holding[]): TaxSummary {
       opportunities.push({
         holding: h,
         isLTCG,
-        unrealizedPnL: pnl
+        unrealizedPnL: pnl,
+        washSaleWarning: true,
+        isDebtOrGold
       });
     }
   }

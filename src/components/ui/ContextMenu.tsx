@@ -31,11 +31,12 @@ export function ContextMenu({ isOpen, position, onClose, items }: ContextMenuPro
   if (!isOpen) return null;
 
   const content = (
-    <div className="fixed inset-0 z-[400]" style={{ pointerEvents: 'auto' }}>
+    <div className="fixed inset-0 z-[400]" style={{ pointerEvents: 'auto' }} role="menu">
       {/* Click-away backdrop */}
       <div 
         className="absolute inset-0 bg-black/5 dark:bg-black/20"
         onClick={onClose}
+        aria-label="Context menu backdrop"
       />
       
       {/* Menu positioning container */}
@@ -56,6 +57,7 @@ export function ContextMenu({ isOpen, position, onClose, items }: ContextMenuPro
             {items.map((item, index) => (
               <button
                 key={index}
+                role="menuitem"
                 onClick={() => {
                   item.onClick();
                   onClose();

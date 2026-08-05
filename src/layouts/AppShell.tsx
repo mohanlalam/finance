@@ -1,23 +1,24 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react';
 // Inline SVG icons — keeps lucide-react out of the critical post-unlock bundle
 import { WifiOff, AlertCircle, RefreshCw, TrendingUp, TrendingDown, Landmark, Coins, Home, Shield, FolderOpen, Clock, Calculator } from '../components/icons/AppIcons';
+// SearchBar lazy-loaded — saves 17 KB from the initial AppShell parse
+const SearchBar = React.lazy(() => import('../components/SearchBar'));
 import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
 import AddHoldingModal from '../components/AddHoldingModal';
 import MobileBottomNav from '../components/MobileBottomNav';
-// SearchBar lazy-loaded — saves 17 KB from the initial AppShell parse
-const SearchBar = React.lazy(() => import('../components/SearchBar'));
 import FamilyTabBar from '../components/FamilyTabBar';
+import AssetTabContent from '../components/AssetTabContent';
+import SectionErrorBoundary from '../components/SectionErrorBoundary';
+import QuickActions from '../components/QuickActions';
 import AddFamilyModal from '../components/AddFamilyModal';
 import RenamePortfolioModal from '../components/RenamePortfolioModal';
 import ConfirmModal from '../components/ConfirmModal';
 import ChangePinModal from '../components/ChangePinModal';
-import AssetTabContent from '../components/AssetTabContent';
-import SectionErrorBoundary from '../components/SectionErrorBoundary';
-import QuickActions from '../components/QuickActions';
 import FloatingAddMenu from '../components/FloatingAddMenu';
 import MobileHomeSummary from '../components/MobileHomeSummary';
 import MobileAlertsView from '../components/MobileAlertsView';
+import DesktopSidebar from './DesktopSidebar';
 import type { ImportRow } from '../components/ExportPanel'; // type-only: erased at build time
 import { AddHoldingPayload } from '../components/AddHoldingModal';
 
@@ -737,8 +738,6 @@ export default function AppShell() {
               </SectionErrorBoundary>
             )}
 
-
-
             {renderDashboardWidgets(false)}
 
             {/* Desktop Asset Switcher */}
@@ -759,7 +758,7 @@ export default function AppShell() {
                       key={tab.id}
                       role="tab"
                       aria-selected={isActive}
-                      onClick={() => setActiveAsset(tab.id)}
+                      onClick={() => setActiveAsset(tab.id as AssetTab)}
                       className={`flex items-center gap-1.5 px-3.5 py-2 border-b-2 font-semibold text-xs transition-all duration-150 active:scale-[0.97] transition-transform duration-100 outline-none -mb-px ${
                         isActive
                           ? 'border-[#007aff] text-[#007aff] dark:border-[#60a5fa] dark:text-[#60a5fa] font-bold'
@@ -789,7 +788,7 @@ export default function AppShell() {
                       key={tab.id}
                       role="tab"
                       aria-selected={isActive}
-                      onClick={() => setActiveAsset(tab.id)}
+                      onClick={() => setActiveAsset(tab.id as AssetTab)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 active:scale-[0.97] transition-transform duration-100 outline-none ${
                         isActive
                           ? 'bg-[#eaf3ff] text-[#007aff] dark:bg-blue-950/20 dark:text-[#60a5fa]'
@@ -806,21 +805,30 @@ export default function AppShell() {
 
             {/* Asset Tab Views */}
             <div role="tabpanel">
+              <DesktopSidebar
+                activeTab={effectiveAsset}
+                onTabChange={(tabId: string) => setActiveAsset(tabId as AssetTab)}
+                portfolios={portfolios}
+                selectedPortfolioId={activeTab}
+                onSelectPortfolio={setActiveTab}
+                onOpenAddFamily={() => setShowAddFamily(true)}
+                onOpenRename={(target: { id: string; name: string; label: string }) => setRenameTarget(target)}
+              />
               <SectionErrorBoundary sectionName="Asset Tab Content">
                 <AssetTabContent
                   activeAsset={effectiveAsset}
-                visiblePortfolio={visiblePortfolio}
-                portfolios={portfolios}
-                priceStatus={priceStatus}
-                onAddHoldingClick={() => setShowAddModal(true)}
-                onDeleteStock={tableDeleteHandler}
-                onUpdateStock={tableUpdateHandler}
-                onAddAsset={addAsset}
-                onUpdateAsset={updateAsset}
-                onDeleteAsset={deleteAsset}
-                quickAddTarget={quickAddTarget}
-                onQuickAddComplete={() => setQuickAddTarget(null)}
-                portfolioOptions={portfolioOptionsForModal}
+                  visiblePortfolio={visiblePortfolio}
+                  portfolios={portfolios}
+                  priceStatus={priceStatus}
+                  onAddHoldingClick={() => setShowAddModal(true)}
+                  onDeleteStock={tableDeleteHandler}
+                  onUpdateStock={tableUpdateHandler}
+                  onAddAsset={addAsset}
+                  onUpdateAsset={updateAsset}
+                  onDeleteAsset={deleteAsset}
+                  quickAddTarget={quickAddTarget}
+                  onQuickAddComplete={() => setQuickAddTarget(null)}
+                  portfolioOptions={portfolioOptionsForModal}
                 />
               </SectionErrorBoundary>
             </div>

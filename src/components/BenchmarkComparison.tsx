@@ -1,23 +1,23 @@
 import { useState } from 'react';
-import { getBenchmarkReturns, calculateDelta } from '../utils/benchmarkData';
+import { getBenchmarkReturns, calculateDelta, BENCHMARK_LAST_UPDATED } from '../utils/benchmarkData';
 import { formatPercent } from '../utils/formatters';
 import { TrendingUp, BarChart2 } from './icons/AppIcons';
 
 interface BenchmarkComparisonProps {
   portfolioReturnPercent: number; // For simplicity, we assume this is the 1Y return or ALL return. 
-  // A real app would pass a map of returns for each period, but we'll adapt to what's available.
+  portfolioReturns?: Record<string, number>;
 }
 
 const PERIODS = ['1M', '3M', '6M', '1Y', 'ALL'];
 
-export default function BenchmarkComparison({ portfolioReturnPercent }: BenchmarkComparisonProps) {
+export default function BenchmarkComparison({ portfolioReturnPercent, portfolioReturns }: BenchmarkComparisonProps) {
   const [activePeriod, setActivePeriod] = useState('1Y');
   
   const benchmarks = getBenchmarkReturns(activePeriod);
   
   // In a real app, portfolioReturnPercent would vary by period. Here we'll just mock it slightly based on period for visual effect.
   const periodMultiplier = activePeriod === '1M' ? 0.1 : activePeriod === '3M' ? 0.25 : activePeriod === '6M' ? 0.5 : activePeriod === '1Y' ? 1 : 1.5;
-  const currentPortfolioReturn = portfolioReturnPercent * periodMultiplier;
+  const currentPortfolioReturn = portfolioReturns?.[activePeriod] ?? (portfolioReturnPercent * periodMultiplier);
 
   const compareCards = [
     { name: 'Nifty 50', return: benchmarks.nifty50 },
@@ -49,7 +49,11 @@ export default function BenchmarkComparison({ portfolioReturnPercent }: Benchmar
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="bg-indigo-50/80 dark:bg-indigo-900/20 rounded-xl p-3 border border-indigo-100/50 dark:border-indigo-700/30 flex flex-col justify-center items-center gap-1 shadow-sm">
+          <span className="text-[10px] uppercase tracking-wider font-bold text-indigo-500 dark:text-indigo-400">Your Portfolio</span>
+          <span className="text-lg font-black text-indigo-700 dark:text-indigo-300">{formatPercent(currentPortfolioReturn)}</span>
+        </div>
         {compareCards.map((b) => {
           const delta = calculateDelta(currentPortfolioReturn, b.return);
           const isBeat = delta >= 0;
@@ -78,7 +82,10 @@ export default function BenchmarkComparison({ portfolioReturnPercent }: Benchmar
           <div className="absolute top-0 bottom-0 w-0.5 bg-slate-800 dark:bg-slate-200 left-1/2 -ml-[1px] z-10" />
         </div>
       </div>
-      <p className="text-[10px] text-slate-400 text-center mt-2">Visual comparison against Nifty 50 (Center = Parity)</p>
+      <div className="flex items-center justify-between mt-2">
+        <p className="text-[10px] text-slate-400">Visual comparison against Nifty 50 (Center = Parity)</p>
+        <p className="text-[10px] text-slate-400 font-medium italic">Last updated: {BENCHMARK_LAST_UPDATED}</p>
+      </div>
     </div>
   );
 }

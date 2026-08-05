@@ -1,6 +1,6 @@
 import React from 'react';
 import { Portfolio } from '../types/portfolio';
-import { calculateTaxHarvesting } from '../utils/taxUtils';
+import { calculateTaxHarvesting, TAX_DISCLAIMER } from '../utils/taxUtils';
 import { formatINR } from '../utils/formatters';
 import { TrendingDown, ShieldAlert } from './icons/AppIcons';
 
@@ -31,7 +31,13 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
               Sell these holdings before March 31st to offset taxable gains and save up to <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatINR(taxData.potentialTaxSavings)}</span> in taxes.
             </p>
+            <div className="mt-2 text-xs font-semibold text-slate-500 bg-slate-100 dark:bg-slate-800 inline-block px-2 py-1 rounded">
+              Financial Year 2025–26 (Apr 2025 – Mar 2026)
+            </div>
           </div>
+        </div>
+        <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg flex items-center gap-2">
+          <span className="text-amber-700 dark:text-amber-400 text-sm font-semibold">⚠️ Wash Sale Alert: Re-buying sold stock within 30 days may disallow tax loss benefit</span>
         </div>
       </div>
 
@@ -114,8 +120,8 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
                     <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-200">{opp.holding.ticker}</td>
                     <td className="px-4 py-3 text-right font-bold text-red-500 tnum">{formatINR(opp.unrealizedPnL)}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full ${opp.isLTCG ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'}`}>
-                        {opp.isLTCG ? 'LTCG' : 'STCG'}
+                      <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full ${opp.isDebtOrGold ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' : opp.isLTCG ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'}`}>
+                        {opp.isDebtOrGold ? 'Slab Rate' : opp.isLTCG ? 'LTCG' : 'STCG'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -130,6 +136,10 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
             </table>
           </div>
         )}
+      </div>
+
+      <div className="mt-8 text-center text-xs text-slate-400 dark:text-slate-500">
+        {TAX_DISCLAIMER}
       </div>
     </div>
   );
