@@ -85,14 +85,14 @@ function MobileHomeSummary({
         goldCount = 0, propertyCount = 0, insuranceCount = 0, docCount = 0;
     const ps = activePortfolio ? [activePortfolio] : portfolios;
     for (const p of ps) {
-      stockCount += p.holdings.length;
-      fdCount += p.fixedDeposits.length;
+      stockCount += p.holdings?.length || 0;
+      fdCount += p.fixedDeposits?.length || 0;
       rdCount += p.rdAccounts?.length || 0;
       sipCount += p.sipAccounts?.length || 0;
-      goldCount      += p.goldHoldings.length;
-      propertyCount  += p.realEstate.length;
-      insuranceCount += p.insurances.length;
-      docCount       += p.documents.length;
+      goldCount += p.goldHoldings?.length || 0;
+      propertyCount += p.realEstate?.length || 0;
+      insuranceCount += p.insurances?.length || 0;
+      docCount += p.documents?.length || 0;
     }
     return { stockCount, fdCount, rdCount, sipCount, goldCount, propertyCount, insuranceCount, docCount };
   }, [activePortfolio, portfolios]);
