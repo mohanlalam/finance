@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react';
 // Inline SVG icons — keeps lucide-react out of the critical post-unlock bundle
+import { WifiOff, AlertCircle, RefreshCw, TrendingUp, TrendingDown, Landmark, Coins, Home, Shield, FolderOpen, Clock, Calculator } from '../components/icons/AppIcons';
+
 // SearchBar lazy-loaded for mobile view
 const SearchBar = React.lazy(() => import('../components/SearchBar'));
 
