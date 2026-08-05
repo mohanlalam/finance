@@ -54,7 +54,7 @@ const Th = React.memo(({
     <th
       role="columnheader"
       aria-sort={getSortAria(k)}
-      className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-200 transition-colors whitespace-nowrap"
+      className="px-2 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-200 transition-colors whitespace-nowrap"
       onClick={() => !hideArrow && handleSort(k)}
     >
       <span className="flex items-center gap-1">
@@ -473,8 +473,8 @@ export default React.memo(function PortfolioTable({
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto">
-        <table role="table" className="min-w-full">
+      <div className="hidden md:block">
+        <table role="table" className="w-full">
           <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700">
             <tr role="row">
               <Th label="Stock" k="stockName" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
@@ -488,7 +488,7 @@ export default React.memo(function PortfolioTable({
               <Th label="% P&L" k="pnlPercent" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
               <Th label="Today %" k="todayPnLPercent" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
               <Th label="Allocation %" k={"_allocation" as SortKey} sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} hideArrow={true} />
-              {(onDelete || onUpdate) && <th role="columnheader" className="px-4 py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">Actions</th>}
+              {(onDelete || onUpdate) && <th role="columnheader" className="px-2 py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-700/40" role="rowgroup">
@@ -510,13 +510,13 @@ export default React.memo(function PortfolioTable({
                   key={`${h.ticker}-${h.sno}`}
                   className={`hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors ${isDeleting ? 'opacity-40' : ''}`}
                 >
-                  <td role="cell" className="px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 max-w-[180px]">
+                  <td role="cell" className="px-2 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 max-w-[140px]">
                     <span className="truncate block" title={h.stockName}>{h.stockName}</span>
                   </td>
-                  <td role="cell" className="px-4 py-3">
+                  <td role="cell" className="px-2 py-3">
                     <span className="inline-block bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-xs font-bold px-2 py-0.5 rounded-md">{h.ticker}</span>
                   </td>
-                  <td role="cell" className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 text-right">
+                  <td role="cell" className="px-2 py-3 text-sm text-slate-600 dark:text-slate-300 text-right">
                     {editingId === h.id ? (
                       <div className="flex items-center gap-1 justify-end">
                         <input
@@ -562,7 +562,7 @@ export default React.memo(function PortfolioTable({
                       <p className="text-[10px] text-red-500 mt-0.5">{editError}</p>
                     )}
                   </td>
-                  <td role="cell" className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 text-right">
+                  <td role="cell" className="px-2 py-3 text-sm text-slate-600 dark:text-slate-300 text-right">
                     {editingId === getHoldingId(h) ? (
                       <div className="flex items-center justify-end">
                         <input
@@ -592,24 +592,24 @@ export default React.memo(function PortfolioTable({
                       </span>
                     )}
                   </td>
-                  <td role="cell" className="px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 text-right">₹{formatNumber(h.ltp)}</td>
-                  <td role="cell" className="px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 text-right">{renderValue(h.currentValue)}</td>
-                  <td role="cell" className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400 text-right">{renderValue(h.amountInvested)}</td>
-                  <td role="cell" className={`px-4 py-3 text-sm font-semibold text-right ${pnlColor(h.unrealizedPnL)}`}>
+                  <td role="cell" className="px-2 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 text-right">₹{formatNumber(h.ltp)}</td>
+                  <td role="cell" className="px-2 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 text-right">{renderValue(h.currentValue)}</td>
+                  <td role="cell" className="px-2 py-3 text-sm text-slate-500 dark:text-slate-400 text-right">{renderValue(h.amountInvested)}</td>
+                  <td role="cell" className={`px-2 py-3 text-sm font-semibold text-right ${pnlColor(h.unrealizedPnL)}`}>
                     {isBalancesHidden ? '••••••' : <>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</>}
                   </td>
-                  <td role="cell" className="px-4 py-3 text-right">
+                  <td role="cell" className="px-2 py-3 text-right">
                     <span className={`inline-flex items-center gap-0.5 text-xs font-bold px-2 py-0.5 rounded-full ${h.pnlPercent >= 0 ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-[#60a5fa]' : 'bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400'}`}>
                       <span className="text-[10px] font-extrabold mr-0.5">{h.pnlPercent >= 0 ? '↗' : '↘'}</span>
                       {isBalancesHidden ? '••••••' : formatPercent(h.pnlPercent)}
                     </span>
                   </td>
-                  <td role="cell" className="px-4 py-3 text-right">
+                  <td role="cell" className="px-2 py-3 text-right">
                     <span className={`text-xs font-semibold ${pnlColor(h.todayPnLPercent)}`}>
                       {isBalancesHidden ? '••••••' : formatPercent(h.todayPnLPercent)}
                     </span>
                   </td>
-                  <td role="cell" className="px-4 py-3 text-right">
+                  <td role="cell" className="px-2 py-3 text-right">
                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       {((h as Record<string, unknown>)._allocation as number).toFixed(1)}%
                     </span>
@@ -655,13 +655,13 @@ export default React.memo(function PortfolioTable({
           </tbody>
           <tfoot className="bg-slate-800 dark:bg-slate-950 text-white dark:text-slate-200">
             <tr role="row">
-              <td role="cell" colSpan={5} className="px-4 py-3 text-sm font-bold">Portfolio Total</td>
-              <td role="cell" className="px-4 py-3 text-sm font-bold text-right">{renderValue(totalCurrentValue)}</td>
-              <td role="cell" className="px-4 py-3 text-sm font-bold text-right text-slate-300 dark:text-slate-400">{renderValue(totalInvested)}</td>
-              <td role="cell" className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
+              <td role="cell" colSpan={5} className="px-2 py-3 text-sm font-bold">Portfolio Total</td>
+              <td role="cell" className="px-2 py-3 text-sm font-bold text-right">{renderValue(totalCurrentValue)}</td>
+              <td role="cell" className="px-2 py-3 text-sm font-bold text-right text-slate-300 dark:text-slate-400">{renderValue(totalInvested)}</td>
+              <td role="cell" className={`px-2 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
                 {isBalancesHidden ? '••••••' : <>{totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}</>}
               </td>
-              <td role="cell" colSpan={(onDelete || onUpdate) ? 4 : 3} className={`px-4 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
+              <td role="cell" colSpan={(onDelete || onUpdate) ? 4 : 3} className={`px-2 py-3 text-sm font-bold text-right ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-400'}`}>
                 {isBalancesHidden ? '••••••' : formatPercent(totalPnLPercent)}
               </td>
             </tr>

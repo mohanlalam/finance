@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react';
 // Inline SVG icons — keeps lucide-react out of the critical post-unlock bundle
 import { WifiOff, AlertCircle, RefreshCw, TrendingUp, TrendingDown, Landmark, Coins, Home, Shield, FolderOpen, Clock, Calculator } from '../components/icons/AppIcons';
-// SearchBar lazy-loaded — saves 17 KB from the initial AppShell parse
-const SearchBar = React.lazy(() => import('../components/SearchBar'));
+
 import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
 import AddHoldingModal from '../components/AddHoldingModal';
@@ -10,7 +9,7 @@ import MobileBottomNav from '../components/MobileBottomNav';
 import FamilyTabBar from '../components/FamilyTabBar';
 import AssetTabContent from '../components/AssetTabContent';
 import SectionErrorBoundary from '../components/SectionErrorBoundary';
-import QuickActions from '../components/QuickActions';
+
 import AddFamilyModal from '../components/AddFamilyModal';
 import RenamePortfolioModal from '../components/RenamePortfolioModal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -266,8 +265,8 @@ export default function AppShell() {
       <SectionErrorBoundary sectionName="Net Worth Timeline">
         <LazyChartWrapper
           importFunc={() => import('../components/NetWorthTimelineChart')}
-          placeholderHeight={240}
-          fallback={<div className="h-[240px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
+          placeholderHeight={370}
+          fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
           props={{ history: netWorthHistory, currentNetWorth: summaryData.totalCurrentValue }}
         />
       </SectionErrorBoundary>
@@ -275,8 +274,8 @@ export default function AppShell() {
 
     const portfolioAssistant = (
       <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-        <LazyViewport placeholderHeight={200}>
-          <Suspense fallback={<div className="h-[200px] bg-slate-900 border border-slate-700/60 rounded-2xl animate-pulse" />}>
+        <LazyViewport placeholderHeight={370}>
+          <Suspense fallback={<div className="h-[370px] bg-slate-900 border border-slate-700/60 rounded-2xl animate-pulse" />}>
             <PortfolioAssistant portfolios={portfolios} />
           </Suspense>
         </LazyViewport>
@@ -285,8 +284,8 @@ export default function AppShell() {
 
     const pieChart = (
       <SectionErrorBoundary sectionName="Asset Class Pie Chart">
-        <LazyViewport placeholderHeight={280}>
-          <Suspense fallback={<div className="h-[280px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+        <LazyViewport placeholderHeight={370}>
+          <Suspense fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
             <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
           </Suspense>
         </LazyViewport>
@@ -295,8 +294,8 @@ export default function AppShell() {
 
     const barChart = (
       <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
-        <LazyViewport placeholderHeight={280}>
-          <Suspense fallback={<div className="h-[280px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+        <LazyViewport placeholderHeight={370}>
+          <Suspense fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
             <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
           </Suspense>
         </LazyViewport>
@@ -315,16 +314,12 @@ export default function AppShell() {
     }
 
     return (
-      <>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-          {netWorthChart}
-          {portfolioAssistant}
-        </div>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-          {pieChart}
-          {barChart}
-        </div>
-      </>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {netWorthChart}
+        {portfolioAssistant}
+        {pieChart}
+        {barChart}
+      </div>
     );
   };
 
@@ -613,198 +608,8 @@ export default function AppShell() {
           </div>
         ) : (
           <>
-            {/* Search Bar */}
-            <div data-search-bar>
-              <Suspense fallback={<div className="h-10 w-full max-w-md bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />}>
-                <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
-              </Suspense>
-            </div>
-
-            {/* Quick Actions */}
-            <QuickActions
-              onAddStock={() => setShowAddModal(true)}
-              onAddFD={() => { setActiveAsset('fd'); setQuickAddTarget('fd'); }}
-              onAddGold={() => { setActiveAsset('gold'); setQuickAddTarget('gold'); }}
-              onRefresh={refreshPrices}
-              isRefreshing={isLoadingPrices}
-            />
-
-            {/* Family Tabs Row */}
-            <FamilyTabBar
-              portfolios={portfolios}
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-              onAddFamilyClick={handleAddFamilyClick}
-              onRenameClick={handleRenameClick}
-              onDeleteClick={handleDeletePortfolio}
-            />
-
-            {/* Summary metrics placed directly below active tab bar */}
-            <SummaryCards
-              totalInvested={summaryData.totalInvested}
-              totalCurrentValue={summaryData.totalCurrentValue}
-              totalPnL={summaryData.totalPnL}
-              totalPnLPercent={summaryData.totalPnLPercent}
-              todayPnL={todayPnL}
-              label={summaryData.label}
-              isLoading={isLoading}
-              portfolios={portfolios}
-              activePortfolio={portfolio}
-              netWorthHistory={netWorthHistory}
-            />
-
-            {/* Family Overview - drill-down cards */}
-            {activeTab === 'all' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {portfolios.map((p) => {
-                  const pnlGain = p.totalPnL >= 0;
-                  return (
-                    <button
-                      key={p.name}
-                      onClick={() => setActiveTab(p.name)}
-                      className="apple-card p-4 text-left hover:shadow-md transition-all duration-200 flex flex-col justify-between h-48 focus:ring-2 focus:ring-[#007aff]"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="text-xs font-semibold text-[var(--text-secondary)] truncate">{p.label}</span>
-                          <Badge variant={pnlGain ? 'positive' : 'negative'} className="text-[10px] py-0 px-2">
-                            {formatPercent(p.totalPnLPercent, 1)}
-                          </Badge>
-                        </div>
-                        <p className={`text-xl font-bold text-[var(--text-primary)] tnum transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>
-                          {formatINR(p.totalCurrentValue)}
-                        </p>
-                        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
-                          Invested: <span className="font-medium tnum">{formatINR(p.totalInvested)}</span>
-                        </p>
-                      </div>
-
-                      <div className="pt-3 border-t border-[var(--border-subtle)] grid grid-cols-3 gap-2 text-[10px] text-[var(--text-secondary)]">
-                        <div>
-                          <p className="font-normal text-[var(--text-tertiary)]">Stocks</p>
-                          <p className="font-semibold text-[var(--text-primary)] mt-0.5 tnum">{p.holdings.length}</p>
-                        </div>
-                        <div>
-                          <p className="font-normal text-[var(--text-tertiary)]">FDs</p>
-                          <p className="font-semibold text-[var(--text-primary)] mt-0.5 tnum">{p.fixedDeposits.length}</p>
-                        </div>
-                        <div>
-                          <p className="font-normal text-[var(--text-tertiary)]">Properties</p>
-                          <p className="font-semibold text-[var(--text-primary)] mt-0.5 tnum">{p.realEstate.length}</p>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Wealth Mosaic for All view */}
-            {activeTab === 'all' && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-                {[
-                  { label: 'Stocks', value: breakdown.stocks },
-                  { label: 'FDs', value: breakdown.fd },
-                  { label: 'RDs', value: breakdown.rd },
-                  { label: 'SIPs', value: breakdown.sip },
-                  { label: 'Gold', value: breakdown.gold },
-                  { label: 'Real Estate', value: breakdown.realEstate },
-                ].map((item) => (
-                  <div key={item.label} className="apple-card p-3 flex flex-col justify-between">
-                    <span className="text-[10px] font-semibold text-[var(--text-secondary)]">{item.label}</span>
-                    <p className="text-sm font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(item.value)}</p>
-                  </div>
-                ))}
-                <div className="apple-card p-3 flex flex-col justify-between">
-                  <span className="text-[10px] font-semibold text-[var(--text-secondary)]">Insurance</span>
-                  <div>
-                    <p className="text-sm font-bold text-[var(--text-primary)] mt-1 tnum">{formatINR(breakdown.insuranceCover)}</p>
-                    <p className="text-[9px] text-[var(--text-tertiary)] mt-0.5 tnum">{formatINR(breakdown.insurancePremium)}/yr premium</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Insights Panel — only on family overview */}
-            {activeTab === 'all' && (
-              <SectionErrorBoundary sectionName="Portfolio Insights">
-                <Suspense fallback={<div className="h-40 bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                  <InsightsPanel
-                    insights={insights}
-                    portfolios={portfolios}
-                    activePortfolio={portfolio}
-                  />
-                </Suspense>
-              </SectionErrorBoundary>
-            )}
-
-            {renderDashboardWidgets(false)}
-
-            {/* Desktop Asset Switcher */}
-            <div role="tablist" className="hidden md:flex items-center border-b border-[var(--border-subtle)] pb-px mb-3 overflow-x-auto scrollbar-none">
-              <div className="flex items-center gap-1 shrink-0">
-                {([
-                  { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={14} /> },
-                  { id: 'fd', label: 'Fixed Deposits', icon: <Landmark size={14} /> },
-                  { id: 'rd', label: 'Recurring Deposits', icon: <Clock size={14} /> },
-                  { id: 'sip', label: 'SIP Mutual Funds', icon: <TrendingUp size={14} /> },
-                  { id: 'gold', label: 'Gold Holdings', icon: <Coins size={14} /> },
-                  { id: 'real_estate', label: 'Real Estate', icon: <Home size={14} /> },
-                  { id: 'insurance', label: 'Insurance Cover', icon: <Shield size={14} /> },
-                ] as const).map((tab) => {
-                  const isActive = effectiveAsset === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      role="tab"
-                      aria-selected={isActive}
-                      onClick={() => setActiveAsset(tab.id as AssetTab)}
-                      className={`flex items-center gap-1.5 px-3.5 py-2 border-b-2 font-semibold text-xs transition-all duration-150 active:scale-[0.97] transition-transform duration-100 outline-none -mb-px ${
-                        isActive
-                          ? 'border-[#007aff] text-[#007aff] dark:border-[#60a5fa] dark:text-[#60a5fa] font-bold'
-                          : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-slate-200'
-                      }`}
-                    >
-                      {tab.icon}
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Separator */}
-              <div className="h-4 w-px bg-[var(--border-subtle)] mx-3 shrink-0" />
-
-              {/* Secondary Tools */}
-              <div className="flex items-center gap-1 shrink-0">
-                {([
-                  { id: 'documents', label: 'Vault', icon: <FolderOpen size={14} /> },
-                  { id: 'what_if', label: 'What-If Calc', icon: <Calculator size={14} /> },
-                  { id: 'tax', label: 'Tax Harvesting', icon: <TrendingDown size={14} /> },
-                ] as const).map((tab) => {
-                  const isActive = effectiveAsset === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      role="tab"
-                      aria-selected={isActive}
-                      onClick={() => setActiveAsset(tab.id as AssetTab)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 active:scale-[0.97] transition-transform duration-100 outline-none ${
-                        isActive
-                          ? 'bg-[#eaf3ff] text-[#007aff] dark:bg-blue-950/20 dark:text-[#60a5fa]'
-                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                      }`}
-                    >
-                      {tab.icon}
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Asset Tab Views */}
-            <div role="tabpanel">
+            {/* Desktop layout: sidebar + main content area */}
+            <div role="tabpanel" className="flex gap-0">
               <DesktopSidebar
                 activeTab={effectiveAsset}
                 onTabChange={(tabId: string) => setActiveAsset(tabId as AssetTab)}
@@ -814,23 +619,130 @@ export default function AppShell() {
                 onOpenAddFamily={() => setShowAddFamily(true)}
                 onOpenRename={(target: { id: string; name: string; label: string }) => setRenameTarget(target)}
               />
-              <SectionErrorBoundary sectionName="Asset Tab Content">
-                <AssetTabContent
-                  activeAsset={effectiveAsset}
-                  visiblePortfolio={visiblePortfolio}
+
+              {/* Main content area */}
+              <div className="flex-1 min-w-0 space-y-6">
+                {/* Summary metrics */}
+                <SummaryCards
+                  totalInvested={summaryData.totalInvested}
+                  totalCurrentValue={summaryData.totalCurrentValue}
+                  totalPnL={summaryData.totalPnL}
+                  totalPnLPercent={summaryData.totalPnLPercent}
+                  todayPnL={todayPnL}
+                  label={summaryData.label}
+                  isLoading={isLoading}
                   portfolios={portfolios}
-                  priceStatus={priceStatus}
-                  onAddHoldingClick={() => setShowAddModal(true)}
-                  onDeleteStock={tableDeleteHandler}
-                  onUpdateStock={tableUpdateHandler}
-                  onAddAsset={addAsset}
-                  onUpdateAsset={updateAsset}
-                  onDeleteAsset={deleteAsset}
-                  quickAddTarget={quickAddTarget}
-                  onQuickAddComplete={() => setQuickAddTarget(null)}
-                  portfolioOptions={portfolioOptionsForModal}
+                  activePortfolio={portfolio}
+                  netWorthHistory={netWorthHistory}
                 />
-              </SectionErrorBoundary>
+
+                {/* Family Overview - drill-down member cards */}
+                {activeTab === 'all' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {portfolios.map((p) => {
+                      const pnlGain = p.totalPnL >= 0;
+                      return (
+                        <button
+                          key={p.name}
+                          onClick={() => setActiveTab(p.name)}
+                          className="apple-card p-4 text-left hover:shadow-md transition-all duration-200 flex flex-col justify-between h-48 focus:ring-2 focus:ring-[#007aff]"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                              <span className="text-xs font-semibold text-[var(--text-secondary)] truncate">{p.label}</span>
+                              <Badge variant={pnlGain ? 'positive' : 'negative'} className="text-[10px] py-0 px-2">
+                                {formatPercent(p.totalPnLPercent, 1)}
+                              </Badge>
+                            </div>
+                            <p className={`text-xl font-bold text-[var(--text-primary)] tnum transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>
+                              {formatINR(p.totalCurrentValue)}
+                            </p>
+                            <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                              Invested: <span className="font-medium tnum">{formatINR(p.totalInvested)}</span>
+                            </p>
+                          </div>
+
+                          <div className="pt-3 border-t border-[var(--border-subtle)] grid grid-cols-3 gap-2 text-[10px] text-[var(--text-secondary)]">
+                            <div>
+                              <p className="font-normal text-[var(--text-tertiary)]">Stocks</p>
+                              <p className="font-semibold text-[var(--text-primary)] mt-0.5 tnum">{p.holdings.length}</p>
+                            </div>
+                            <div>
+                              <p className="font-normal text-[var(--text-tertiary)]">FDs</p>
+                              <p className="font-semibold text-[var(--text-primary)] mt-0.5 tnum">{p.fixedDeposits.length}</p>
+                            </div>
+                            <div>
+                              <p className="font-normal text-[var(--text-tertiary)]">Properties</p>
+                              <p className="font-semibold text-[var(--text-primary)] mt-0.5 tnum">{p.realEstate.length}</p>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Wealth Mosaic — asset class totals */}
+                {activeTab === 'all' && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+                    {[
+                      { label: 'Stocks', value: breakdown.stocks },
+                      { label: 'FDs', value: breakdown.fd },
+                      { label: 'RDs', value: breakdown.rd },
+                      { label: 'SIPs', value: breakdown.sip },
+                      { label: 'Gold', value: breakdown.gold },
+                      { label: 'Real Estate', value: breakdown.realEstate },
+                    ].map((item) => (
+                      <div key={item.label} className="apple-card p-3 flex flex-col justify-between">
+                        <span className="text-[10px] font-semibold text-[var(--text-secondary)]">{item.label}</span>
+                        <p className="text-sm font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(item.value)}</p>
+                      </div>
+                    ))}
+                    <div className="apple-card p-3 flex flex-col justify-between">
+                      <span className="text-[10px] font-semibold text-[var(--text-secondary)]">Insurance</span>
+                      <div>
+                        <p className="text-sm font-bold text-[var(--text-primary)] mt-1 tnum">{formatINR(breakdown.insuranceCover)}</p>
+                        <p className="text-[9px] text-[var(--text-tertiary)] mt-0.5 tnum">{formatINR(breakdown.insurancePremium)}/yr premium</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Insights Panel — only on family overview */}
+                {activeTab === 'all' && (
+                  <SectionErrorBoundary sectionName="Portfolio Insights">
+                    <Suspense fallback={<div className="h-40 bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                      <InsightsPanel
+                        insights={insights}
+                        portfolios={portfolios}
+                        activePortfolio={portfolio}
+                      />
+                    </Suspense>
+                  </SectionErrorBoundary>
+                )}
+
+                {/* Dashboard charts — only on family overview */}
+                {activeTab === 'all' && renderDashboardWidgets(false)}
+
+                {/* Stock holdings — always at the bottom */}
+                <SectionErrorBoundary sectionName="Asset Tab Content">
+                  <AssetTabContent
+                    activeAsset={effectiveAsset}
+                    visiblePortfolio={visiblePortfolio}
+                    portfolios={portfolios}
+                    priceStatus={priceStatus}
+                    onAddHoldingClick={() => setShowAddModal(true)}
+                    onDeleteStock={tableDeleteHandler}
+                    onUpdateStock={tableUpdateHandler}
+                    onAddAsset={addAsset}
+                    onUpdateAsset={updateAsset}
+                    onDeleteAsset={deleteAsset}
+                    quickAddTarget={quickAddTarget}
+                    onQuickAddComplete={() => setQuickAddTarget(null)}
+                    portfolioOptions={portfolioOptionsForModal}
+                  />
+                </SectionErrorBoundary>
+              </div>
             </div>
           </>
         )}

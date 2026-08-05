@@ -194,7 +194,7 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
   const hoverPoint = hoveredIdx !== null ? points[hoveredIdx] : null;
 
   return (
-    <div ref={containerRef} className="apple-card p-5 relative overflow-hidden">
+    <div ref={containerRef} className="apple-card p-5 relative overflow-hidden flex flex-col h-[370px] justify-between">
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <div>
           <h3 className="text-card-title font-semibold text-slate-800 dark:text-slate-200">

@@ -307,7 +307,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
   };
 
   return (
-    <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 sm:p-5 text-slate-800 dark:text-slate-100 shadow-xl relative overflow-hidden flex flex-col h-[480px]">
+    <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 sm:p-5 text-slate-800 dark:text-slate-100 shadow-xl relative overflow-hidden flex flex-col h-[370px]">
       {/* Decorative background accent */}
       <div className="absolute top-[-50px] right-[-50px] w-[150px] h-[150px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[40px] pointer-events-none" />
 

@@ -26,7 +26,7 @@ function BarChart({ portfolios }: BarChartProps) {
   const yTicks = 5;
 
   return (
-    <div className="apple-card p-5">
+    <div className="apple-card p-5 flex flex-col h-[370px] justify-between">
       <h3 className="text-card-title font-semibold text-slate-800 dark:text-slate-200">Invested vs Current Value</h3>
       <p className="text-supporting mt-0.5 mb-4">Portfolio comparison</p>
 

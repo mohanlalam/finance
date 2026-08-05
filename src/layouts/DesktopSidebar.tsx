@@ -21,7 +21,7 @@ export default function DesktopSidebar({
   onOpenRename
 }: DesktopSidebarProps) {
   return (
-    <div role="tablist" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-64 min-h-screen">
+    <div role="tablist" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-64 self-start sticky top-6">
       {/* Portfolio Selector Placeholder (could be a dropdown if desired, for now keeping simple) */}
       <div className="mb-6">
         <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Portfolios</h3>

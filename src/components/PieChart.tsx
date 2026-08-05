@@ -104,7 +104,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation' }
   const hoverSlice = hovered !== null ? slices[hovered] : null;
 
   return (
-    <div className="apple-card p-5">
+    <div className="apple-card p-5 flex flex-col h-[370px] justify-between">
       <h3 className="text-card-title font-semibold text-slate-800 dark:text-slate-200 mb-4">{title}</h3>
       {slices.length === 0 || total === 0 ? (
         <div className="flex items-center justify-center h-[240px] text-xs text-slate-400 dark:text-slate-500">
