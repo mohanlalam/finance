@@ -518,13 +518,6 @@ export default function AppShell() {
 
         {isMobile ? (
           <div className="space-y-4">
-            {/* Search Bar on Mobile */}
-            <div data-search-bar className="px-0.5">
-              <Suspense fallback={<div className="h-10 w-full max-w-md bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />}>
-                <SearchBar portfolios={portfolios} onNavigate={handleSearchNavigate} />
-              </Suspense>
-            </div>
-
             {/* Family Tabs Row on Mobile */}
             <FamilyTabBar
               portfolios={portfolios}

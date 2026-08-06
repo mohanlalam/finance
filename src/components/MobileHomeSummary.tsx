@@ -203,17 +203,17 @@ function MobileHomeSummary({
         
         {/* Individual Net Worth breakdown for mobile */}
         {activePortfolio === null && portfolios && portfolios.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-x-2.5 gap-y-1 text-[11px] font-medium text-slate-500 dark:text-zinc-400">
-            {portfolios.map((p, idx) => {
+          <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-zinc-800/80 space-y-1.5 text-xs font-medium text-slate-500 dark:text-zinc-400">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Net Worth by Member</p>
+            {portfolios.map((p) => {
               const val = p.totalCurrentValue;
               return (
-                <span key={p.id} className="flex items-center gap-0.5">
-                  <span>{p.label}:</span>
-                  <span className="text-slate-700 dark:text-slate-300 font-bold tnum">
+                <div key={p.id} className="flex items-center justify-between py-0.5">
+                  <span className="text-slate-600 dark:text-slate-300 font-medium">{p.label}</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-bold tnum">
                     {renderValue(val)}
                   </span>
-                  {idx < portfolios.length - 1 && <span className="text-slate-200 dark:text-zinc-800 ml-2">|</span>}
-                </span>
+                </div>
               );
             })}
           </div>
@@ -261,36 +261,39 @@ function MobileHomeSummary({
         
         {/* Individual Today's & Total P&L breakdowns for mobile */}
         {activePortfolio === null && portfolios && portfolios.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] space-y-2 text-[10px] font-medium text-slate-500 dark:text-zinc-400">
-            <div className="flex flex-wrap gap-x-2 gap-y-1">
-              <span className="text-slate-600 dark:text-slate-300 font-semibold mr-1">Today's Return:</span>
-              {portfolios.map((p, idx) => {
-                const pnl = estimateTodayPnL(p, [p]);
-                return (
-                  <span key={p.id} className="flex items-center gap-0.5">
-                    <span>{p.label}:</span>
-                    <span className={pnl >= 0 ? 'text-[#34C759] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
-                      {isBalancesHidden ? '••••••' : <>{pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
-                    </span>
-                    {idx < portfolios.length - 1 && <span className="text-slate-200 dark:text-zinc-800 ml-2">|</span>}
-                  </span>
-                );
-              })}
+          <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] space-y-3.5 text-xs font-medium text-slate-500 dark:text-zinc-400">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">Today's Return by Member</p>
+              <div className="space-y-1">
+                {portfolios.map((p) => {
+                  const pnl = estimateTodayPnL(p, [p]);
+                  return (
+                    <div key={p.id} className="flex items-center justify-between py-0.5">
+                      <span className="text-slate-600 dark:text-slate-300 font-medium">{p.label}</span>
+                      <span className={pnl >= 0 ? 'text-[#34C759] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
+                        {isBalancesHidden ? '••••••' : <>{pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-x-2 gap-y-1 pt-1.5 border-t border-slate-100 dark:border-zinc-800/60">
-              <span className="text-slate-600 dark:text-slate-300 font-semibold mr-1">Total Return:</span>
-              {portfolios.map((p, idx) => {
-                const pnl = p.totalPnL;
-                return (
-                  <span key={p.id} className="flex items-center gap-0.5">
-                    <span>{p.label}:</span>
-                    <span className={pnl >= 0 ? 'text-[#34C759] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
-                      {isBalancesHidden ? '••••••' : <>{pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
-                    </span>
-                    {idx < portfolios.length - 1 && <span className="text-slate-200 dark:text-zinc-800 ml-2">|</span>}
-                  </span>
-                );
-              })}
+
+            <div className="pt-2.5 border-t border-slate-100 dark:border-zinc-800/60">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">Total Return by Member</p>
+              <div className="space-y-1">
+                {portfolios.map((p) => {
+                  const pnl = p.totalPnL;
+                  return (
+                    <div key={p.id} className="flex items-center justify-between py-0.5">
+                      <span className="text-slate-600 dark:text-slate-300 font-medium">{p.label}</span>
+                      <span className={pnl >= 0 ? 'text-[#34C759] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
+                        {isBalancesHidden ? '••••••' : <>{pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}

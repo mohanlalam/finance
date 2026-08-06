@@ -31,13 +31,13 @@ export default React.memo(function FamilyTabBar({
   onDeleteClick,
 }: FamilyTabBarProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 overflow-x-auto scrollbar-none">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
       
       {/* Apple-style segmented track */}
       <div
         role="tablist"
         aria-label="Family members portfolios"
-        className="flex items-center bg-[#f2f2f7] dark:bg-zinc-800 p-1 rounded-2xl border border-slate-200/40 dark:border-zinc-700/30 overflow-x-auto scrollbar-none"
+        className="flex flex-wrap items-center gap-1 bg-[#f2f2f7] dark:bg-zinc-800 p-1 rounded-2xl border border-slate-200/40 dark:border-zinc-700/30 max-w-full"
       >
         {/* Overview Tab */}
         <button
