@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+﻿import { memo, useMemo } from 'react';
 import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock, Calculator } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
@@ -59,12 +59,12 @@ function MobileHomeSummary({
   activePortfolio,
   netWorthHistory = [],
 }: MobileHomeSummaryProps) {
-  // Single-pass count computation — avoids 9 separate reduce() calls on every render
+  // Single-pass count computation â€” avoids 9 separate reduce() calls on every render
 
   const { isBalancesHidden } = usePrivacy();
 
   const renderValue = (val: number, formatter = formatINR) => {
-    if (isBalancesHidden) return '••••••';
+    if (isBalancesHidden) return 'â€¢â€¢â€¢â€¢â€¢â€¢';
     return <AnimatedNumber value={val} formatter={formatter} />;
   };
 
@@ -98,362 +98,266 @@ function MobileHomeSummary({
   }, [activePortfolio, portfolios]);
 
   const totalValue =
-    breakdown.stocks +
-    breakdown.fd +
-    breakdown.rd +
-    breakdown.sip +
-    breakdown.gold +
-    breakdown.realEstate;
+    breakdown.stocks + breakdown.fd + breakdown.rd +
+    breakdown.sip + breakdown.gold + breakdown.realEstate;
+  const getPercent = (val: number) => (totalValue > 0 ? (val / totalValue) * 100 : 0);
 
-  const getPercent = (val: number) => {
-    return totalValue > 0 ? (val / totalValue) * 100 : 0;
-  };
+  // Member avatar color palette
+  const memberColors = [
+    { bg: 'bg-blue-500' },
+    { bg: 'bg-rose-500' },
+    { bg: 'bg-violet-500' },
+    { bg: 'bg-emerald-500' },
+    { bg: 'bg-amber-500' },
+  ];
 
-  const assetCards = [
-    {
-      id: 'stocks' as const,
-      label: 'Stocks & ETFs',
-      value: breakdown.stocks,
-      subtext: `${stockCount} Holdings`,
-      icon: <TrendingUp size={20} className="text-blue-500" />,
-      bg: 'from-blue-50/50 to-indigo-50/20 dark:from-blue-950/20 dark:to-indigo-950/5 border-blue-100/50 dark:border-blue-900/30',
-    },
-    {
-      id: 'fd' as const,
-      label: 'Fixed Deposits',
-      value: breakdown.fd,
-      subtext: `${fdCount} Active FDs`,
-      icon: <Landmark size={20} className="text-indigo-500" />,
-      bg: 'from-indigo-50/50 to-purple-50/20 dark:from-indigo-950/20 dark:to-purple-950/5 border-indigo-100/50 dark:border-indigo-900/30',
-    },
-    {
-      id: 'rd' as const,
-      label: 'Recurring Deposits',
-      value: breakdown.rd,
-      subtext: `${rdCount} Active RDs`,
-      icon: <Clock size={20} className="text-pink-500" />,
-      bg: 'from-pink-50/50 to-rose-50/20 dark:from-pink-950/20 dark:to-rose-950/5 border-pink-100/50 dark:border-pink-900/30',
-    },
-    {
-      id: 'sip' as const,
-      label: 'SIP Mutual Funds',
-      value: breakdown.sip,
-      subtext: `${sipCount} SIPs`,
-      icon: <TrendingUp size={20} className="text-sky-500" />,
-      bg: 'from-sky-50/50 to-cyan-50/20 dark:from-sky-950/20 dark:to-cyan-950/5 border-sky-100/50 dark:border-sky-900/30',
-    },
-    {
-      id: 'gold' as const,
-      label: 'Gold Holdings',
-      value: breakdown.gold,
-      subtext: `${goldCount} Items`,
-      icon: <Coins size={20} className="text-amber-500" />,
-      bg: 'from-amber-50/50 to-orange-50/20 dark:from-amber-950/20 dark:to-orange-950/5 border-amber-100/50 dark:border-amber-900/30',
-    },
-    {
-      id: 'real_estate' as const,
-      label: 'Real Estate',
-      value: breakdown.realEstate,
-      subtext: `${propertyCount} Properties`,
-      icon: <Building2 size={20} className="text-emerald-500" />,
-      bg: 'from-emerald-50/50 to-teal-50/20 dark:from-emerald-950/20 dark:to-teal-950/5 border-emerald-100/50 dark:border-emerald-900/30',
-    },
-    {
-      id: 'insurance' as const,
-      label: 'Insurance Cover',
-      value: breakdown.insuranceCover,
-      subtext: `${insuranceCount} Policies`,
-      icon: <Shield size={20} className="text-rose-500" />,
-      bg: 'from-rose-50/50 to-pink-50/20 dark:from-rose-950/20 dark:to-pink-950/5 border-rose-100/50 dark:border-rose-900/30',
-    },
-    {
-      id: 'documents' as const,
-      label: 'Documents',
-      value: null,
-      subtext: `${docCount} Documents`,
-      icon: <FolderOpen size={20} className="text-slate-500 dark:text-slate-400" />,
-      bg: 'from-slate-50/50 to-slate-100/20 dark:from-slate-800/30 dark:to-slate-900/10 border-slate-200/50 dark:border-slate-700/50',
-    },
+  const isTodayGain = todayPnL >= 0;
+  const isTotalGain = summaryData.totalPnL >= 0;
+
+  // Asset card definitions with accent colors
+  const assetCardDefs = [
+    { id: 'stocks' as const, label: 'Stocks & ETFs', value: breakdown.stocks, subtext: `${stockCount} Holdings`, icon: <TrendingUp size={18} />, iconBg: 'bg-blue-500', grad: 'from-blue-50 to-indigo-50/30 dark:from-blue-950/30 dark:to-indigo-950/10', border: 'border-blue-100/60 dark:border-blue-900/30', bar: 'bg-blue-500' },
+    { id: 'fd' as const, label: 'Fixed Deposits', value: breakdown.fd, subtext: `${fdCount} Active FDs`, icon: <Landmark size={18} />, iconBg: 'bg-indigo-500', grad: 'from-indigo-50 to-purple-50/30 dark:from-indigo-950/30 dark:to-purple-950/10', border: 'border-indigo-100/60 dark:border-indigo-900/30', bar: 'bg-indigo-500' },
+    { id: 'rd' as const, label: 'Recurring Dep.', value: breakdown.rd, subtext: `${rdCount} Active RDs`, icon: <Clock size={18} />, iconBg: 'bg-pink-500', grad: 'from-pink-50 to-rose-50/30 dark:from-pink-950/30 dark:to-rose-950/10', border: 'border-pink-100/60 dark:border-pink-900/30', bar: 'bg-pink-500' },
+    { id: 'sip' as const, label: 'SIP Mutual Funds', value: breakdown.sip, subtext: `${sipCount} SIPs`, icon: <TrendingUp size={18} />, iconBg: 'bg-sky-500', grad: 'from-sky-50 to-cyan-50/30 dark:from-sky-950/30 dark:to-cyan-950/10', border: 'border-sky-100/60 dark:border-sky-900/30', bar: 'bg-sky-500' },
+    { id: 'gold' as const, label: 'Gold Holdings', value: breakdown.gold, subtext: `${goldCount} Items`, icon: <Coins size={18} />, iconBg: 'bg-amber-500', grad: 'from-amber-50 to-orange-50/30 dark:from-amber-950/30 dark:to-orange-950/10', border: 'border-amber-100/60 dark:border-amber-900/30', bar: 'bg-amber-500' },
+    { id: 'real_estate' as const, label: 'Real Estate', value: breakdown.realEstate, subtext: `${propertyCount} Properties`, icon: <Building2 size={18} />, iconBg: 'bg-emerald-500', grad: 'from-emerald-50 to-teal-50/30 dark:from-emerald-950/30 dark:to-teal-950/10', border: 'border-emerald-100/60 dark:border-emerald-900/30', bar: 'bg-emerald-500' },
+    { id: 'insurance' as const, label: 'Insurance Cover', value: breakdown.insuranceCover, subtext: `${insuranceCount} Policies`, icon: <Shield size={18} />, iconBg: 'bg-rose-500', grad: 'from-rose-50 to-pink-50/30 dark:from-rose-950/30 dark:to-pink-950/10', border: 'border-rose-100/60 dark:border-rose-900/30', bar: 'bg-rose-500' },
+    { id: 'documents' as const, label: 'Document Vault', value: null, subtext: `${docCount} Documents`, icon: <FolderOpen size={18} />, iconBg: 'bg-slate-500 dark:bg-slate-600', grad: 'from-slate-50 to-slate-100/30 dark:from-slate-800/40 dark:to-slate-900/10', border: 'border-slate-200/60 dark:border-slate-700/40', bar: 'bg-slate-400' },
   ];
 
   return (
-    <div className="space-y-3.5 md:hidden">
-      {/* Net Worth Summary Card */}
-      <div className="apple-card p-4 sm:p-5 relative overflow-hidden">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[180px]">
-            {summaryData.label} Net Worth
-          </span>
-          <span className="text-[10px] font-bold bg-[#eaf3ff] dark:bg-blue-950/20 text-[#007aff] dark:text-[#60a5fa] px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-[#007aff] dark:bg-[#60a5fa] rounded-full animate-pulse" />
-            Live
-          </span>
-        </div>
+    <div className="space-y-3 md:hidden">
 
-        <div className="flex items-end justify-between mt-2.5">
-          <h2 className="text-financial text-slate-800 dark:text-slate-100 tnum">
-            {renderValue(summaryData.totalCurrentValue)}
-          </h2>
-          {sparklineData.length > 1 && (
-            <div className="mb-1 ml-2 shrink-0">
-              <Sparkline data={sparklineData} color={sparklineColor} width={60} height={20} />
+      {/* â”€â”€ Hero Net Worth Card â”€â”€ */}
+      <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-[#1a1f3c] via-[#0f172a] to-[#1e1b4b] dark:from-[#0a0f1f] dark:via-[#080d1a] dark:to-[#12103a] shadow-xl animate-glow-pulse">
+        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 p-5 pb-4">
+          {/* Header row */}
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[11px] font-semibold text-slate-400 tracking-wide">{summaryData.label} Net Worth</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] font-bold text-emerald-400 tracking-wide">Live</span>
+            </div>
+          </div>
+
+          {/* Value + Sparkline */}
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="text-[32px] font-bold text-white tnum leading-none tracking-tight">
+                {renderValue(summaryData.totalCurrentValue)}
+              </h2>
+              <p className="text-[11px] text-slate-400 mt-1 font-medium">
+                Invested: {isBalancesHidden ? 'â€¢â€¢â€¢â€¢â€¢â€¢' : formatINR(summaryData.totalInvested)}
+              </p>
+            </div>
+            {sparklineData.length > 1 && (
+              <div className="mb-4 ml-2 shrink-0 opacity-80">
+                <Sparkline data={sparklineData} color={sparklineColor} width={64} height={24} />
+              </div>
+            )}
+          </div>
+
+          {/* Net Worth by member */}
+          {activePortfolio === null && portfolios && portfolios.length > 0 && (
+            <div className="mt-3.5 pt-3 border-t border-white/10 space-y-1.5">
+              <p className="text-[9.5px] font-bold uppercase tracking-widest text-slate-500 mb-1">By Member</p>
+              {portfolios.map((p, i) => (
+                <div key={p.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${memberColors[i % memberColors.length].bg} shrink-0`} />
+                    <span className="text-[12px] text-slate-300 font-medium">{p.label}</span>
+                  </div>
+                  <span className="text-[12px] text-white font-bold tnum">{renderValue(p.totalCurrentValue)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* P&L Chips */}
+          <div className="flex gap-3 mt-4">
+            <div className={`flex-1 rounded-xl px-3 py-2.5 ${isTodayGain ? 'bg-emerald-500/15 border border-emerald-400/20' : 'bg-red-500/15 border border-red-400/20'}`}>
+              <p className="text-[9.5px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Today</p>
+              <div className={`flex items-center gap-1 ${isTodayGain ? 'text-emerald-400' : 'text-red-400'}`}>
+                {isTodayGain ? <TrendingUp size={13} className="shrink-0" /> : <TrendingDown size={13} className="shrink-0" />}
+                <span className="text-[13px] font-extrabold tnum leading-tight">
+                  {isBalancesHidden ? 'â€¢â€¢â€¢â€¢' : <>{todayPnL >= 0 ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
+                </span>
+              </div>
+              <p className="text-[10px] font-semibold mt-0.5 tnum opacity-80 text-slate-400">{formatPercent(todayPnLPercent)}</p>
+            </div>
+            <div className={`flex-1 rounded-xl px-3 py-2.5 ${isTotalGain ? 'bg-emerald-500/15 border border-emerald-400/20' : 'bg-red-500/15 border border-red-400/20'}`}>
+              <p className="text-[9.5px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Total Return</p>
+              <div className={`flex items-center gap-1 ${isTotalGain ? 'text-emerald-400' : 'text-red-400'}`}>
+                {isTotalGain ? <TrendingUp size={13} className="shrink-0" /> : <TrendingDown size={13} className="shrink-0" />}
+                <span className="text-[13px] font-extrabold tnum leading-tight">
+                  {isBalancesHidden ? 'â€¢â€¢â€¢â€¢' : <>{summaryData.totalPnL >= 0 ? '+' : ''}<AnimatedNumber value={summaryData.totalPnL} formatter={formatINR} /></>}
+                </span>
+              </div>
+              <p className="text-[10px] font-semibold mt-0.5 tnum opacity-80 text-slate-400">{formatPercent(summaryData.totalPnLPercent)}</p>
+            </div>
+          </div>
+
+          {/* Member P&L breakdowns */}
+          {activePortfolio === null && portfolios && portfolios.length > 0 && (
+            <div className="mt-3.5 pt-3 border-t border-white/10 space-y-3">
+              <div>
+                <p className="text-[9.5px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">Today's Return by Member</p>
+                <div className="space-y-1">
+                  {portfolios.map((p, i) => {
+                    const pnl = estimateTodayPnL(p, [p]);
+                    return (
+                      <div key={p.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${memberColors[i % memberColors.length].bg} shrink-0`} />
+                          <span className="text-[11.5px] text-slate-400 font-medium">{p.label}</span>
+                        </div>
+                        <span className={`text-[11.5px] font-bold tnum ${pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {isBalancesHidden ? 'â€¢â€¢â€¢â€¢' : <>{pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="pt-2.5 border-t border-white/10">
+                <p className="text-[9.5px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">Total Return by Member</p>
+                <div className="space-y-1">
+                  {portfolios.map((p, i) => (
+                    <div key={p.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${memberColors[i % memberColors.length].bg} shrink-0`} />
+                        <span className="text-[11.5px] text-slate-400 font-medium">{p.label}</span>
+                      </div>
+                      <span className={`text-[11.5px] font-bold tnum ${p.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {isBalancesHidden ? 'â€¢â€¢â€¢â€¢' : <>{p.totalPnL >= 0 ? '+' : ''}<AnimatedNumber value={p.totalPnL} formatter={formatINR} /></>}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>
-        
-        {/* Individual Net Worth breakdown for mobile */}
-        {activePortfolio === null && portfolios && portfolios.length > 0 && (
-          <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-zinc-800/80 space-y-1 text-xs font-medium text-slate-500 dark:text-zinc-400">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">Net Worth by Member</p>
-            {portfolios.map((p) => {
-              const val = p.totalCurrentValue;
-              return (
-                <div key={p.id} className="flex items-center justify-between py-0.5">
-                  <span className="text-slate-600 dark:text-slate-300 font-medium">{p.label}</span>
-                  <span className="text-slate-900 dark:text-slate-100 font-bold tnum">
-                    {renderValue(val)}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* PNL Grid */}
-        <div className="grid grid-cols-2 gap-3 mt-3.5 pt-3.5 border-t border-[var(--border-subtle)]">
-          <div className="space-y-1">
-            <p className="text-xs text-slate-450 dark:text-slate-400">Today's Return</p>
-            <div className={`flex items-start gap-1.5 ${todayPnL >= 0 ? 'text-[#34C759]' : 'text-[#ff3b30]'}`}>
-              {todayPnL >= 0 ? (
-                <TrendingUp size={16} className="shrink-0 mt-0.5" />
-              ) : (
-                <TrendingDown size={16} className="shrink-0 mt-0.5" />
-              )}
-              <div className="flex flex-col">
-                <span className="text-base font-bold whitespace-nowrap leading-tight tnum">
-                  {isBalancesHidden ? '••••••' : <>{todayPnL >= 0 ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
-                </span>
-                <span className="text-[11px] font-semibold whitespace-nowrap opacity-90 leading-none mt-0.5 tnum">
-                  ({formatPercent(todayPnLPercent)})
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-slate-450 dark:text-slate-400">Total Return</p>
-            <div className={`flex items-start gap-1.5 ${summaryData.totalPnL >= 0 ? 'text-[#34C759]' : 'text-[#ff3b30]'}`}>
-              {summaryData.totalPnL >= 0 ? (
-                <TrendingUp size={16} className="shrink-0 mt-0.5" />
-              ) : (
-                <TrendingDown size={16} className="shrink-0 mt-0.5" />
-              )}
-              <div className="flex flex-col">
-                <span className="text-base font-bold whitespace-nowrap leading-tight tnum">
-                  {isBalancesHidden ? '••••••' : <>{summaryData.totalPnL >= 0 ? '+' : ''}<AnimatedNumber value={summaryData.totalPnL} formatter={formatINR} /></>}
-                </span>
-                <span className="text-[11px] font-semibold whitespace-nowrap opacity-90 leading-none mt-0.5 tnum">
-                  ({formatPercent(summaryData.totalPnLPercent)})
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Individual Today's & Total P&L breakdowns for mobile */}
-        {activePortfolio === null && portfolios && portfolios.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] space-y-3.5 text-xs font-medium text-slate-500 dark:text-zinc-400">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">Today's Return by Member</p>
-              <div className="space-y-1">
-                {portfolios.map((p) => {
-                  const pnl = estimateTodayPnL(p, [p]);
-                  return (
-                    <div key={p.id} className="flex items-center justify-between py-0.5">
-                      <span className="text-slate-600 dark:text-slate-300 font-medium">{p.label}</span>
-                      <span className={pnl >= 0 ? 'text-[#34C759] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
-                        {isBalancesHidden ? '••••••' : <>{pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="pt-2.5 border-t border-slate-100 dark:border-zinc-800/60">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">Total Return by Member</p>
-              <div className="space-y-1">
-                {portfolios.map((p) => {
-                  const pnl = p.totalPnL;
-                  return (
-                    <div key={p.id} className="flex items-center justify-between py-0.5">
-                      <span className="text-slate-600 dark:text-slate-300 font-medium">{p.label}</span>
-                      <span className={pnl >= 0 ? 'text-[#34C759] font-bold tnum' : 'text-[#ff3b30] font-bold tnum'}>
-                        {isBalancesHidden ? '••••••' : <>{pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Sticky Mini Refresh Status Bar */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/70 dark:bg-slate-800/70 border border-slate-200/50 dark:border-slate-700/30 rounded-2xl text-[11px] text-slate-500 dark:text-slate-400 backdrop-blur shadow-sm">
-        <div className="flex items-center gap-1.5 min-w-0">
+      {/* â”€â”€ Refresh Status Bar â”€â”€ */}
+      <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl text-[11px] bg-white/80 dark:bg-zinc-900/80 backdrop-blur border border-[var(--border-subtle)] shadow-sm">
+        <div className="flex items-center gap-2 min-w-0">
           <span className={`w-2 h-2 rounded-full shrink-0 ${priceStatus === 'success' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
-          <span className="font-semibold shrink-0">{priceStatus === 'success' ? 'Live Prices' : 'Snapshot'}</span>
-          <span className="text-slate-300 dark:text-slate-700 shrink-0">•</span>
-          <span className="truncate">Updated {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Never'}</span>
+          <span className="font-semibold text-slate-600 dark:text-slate-300 shrink-0">{priceStatus === 'success' ? 'Live Prices' : 'Snapshot'}</span>
+          <span className="text-slate-300 dark:text-slate-700 shrink-0">Â·</span>
+          <span className="truncate text-slate-400 dark:text-slate-500">{lastUpdated ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Never'}</span>
         </div>
-        <button
-          onClick={onRefresh}
-          disabled={isLoadingPrices}
-          className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 active:scale-[0.97] transition-all shrink-0 ml-2"
-        >
+        <button onClick={onRefresh} disabled={isLoadingPrices} className="flex items-center gap-1.5 font-bold text-[#007aff] dark:text-[#60a5fa] active:opacity-60 transition-opacity shrink-0 ml-2 disabled:opacity-40">
           <RefreshCw size={11} className={isLoadingPrices ? 'animate-spin' : ''} />
-          Refresh
+          Sync
         </button>
       </div>
 
-      {/* Asset Allocation Section */}
+      {/* â”€â”€ Asset Allocation Bar â”€â”€ */}
       {totalValue > 0 && (
-        <div className="bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-800/80 rounded-2xl p-4 shadow-sm space-y-3">
+        <div className="apple-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Asset Allocation</span>
-            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{renderValue(totalValue)}</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{renderValue(totalValue)}</span>
           </div>
-          
-          <div className="w-full h-3.5 bg-slate-100 dark:bg-slate-700 rounded-full flex overflow-hidden shadow-inner">
-            {breakdown.stocks > 0 && <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.stocks)}%` }} />}
-            {breakdown.fd > 0 && <div className="h-full bg-indigo-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.fd)}%` }} />}
-            {breakdown.rd > 0 && <div className="h-full bg-pink-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.rd)}%` }} />}
-            {breakdown.sip > 0 && <div className="h-full bg-sky-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.sip)}%` }} />}
-            {breakdown.gold > 0 && <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.gold)}%` }} />}
-            {breakdown.realEstate > 0 && <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${getPercent(breakdown.realEstate)}%` }} />}
+          <div className="w-full h-3 bg-slate-100 dark:bg-zinc-800 rounded-full flex overflow-hidden shadow-inner gap-px">
+            {breakdown.stocks > 0 && <div className="h-full bg-blue-500 animate-bar-fill" style={{ width: `${getPercent(breakdown.stocks)}%` }} />}
+            {breakdown.fd > 0 && <div className="h-full bg-indigo-500 animate-bar-fill" style={{ width: `${getPercent(breakdown.fd)}%`, animationDelay: '80ms' }} />}
+            {breakdown.rd > 0 && <div className="h-full bg-pink-500 animate-bar-fill" style={{ width: `${getPercent(breakdown.rd)}%`, animationDelay: '150ms' }} />}
+            {breakdown.sip > 0 && <div className="h-full bg-sky-500 animate-bar-fill" style={{ width: `${getPercent(breakdown.sip)}%`, animationDelay: '220ms' }} />}
+            {breakdown.gold > 0 && <div className="h-full bg-amber-400 animate-bar-fill" style={{ width: `${getPercent(breakdown.gold)}%`, animationDelay: '280ms' }} />}
+            {breakdown.realEstate > 0 && <div className="h-full bg-emerald-500 animate-bar-fill" style={{ width: `${getPercent(breakdown.realEstate)}%`, animationDelay: '330ms' }} />}
           </div>
-
-          <div className="grid grid-cols-3 gap-y-2 gap-x-2 pt-1 text-[9.5px] font-bold text-slate-500 dark:text-slate-400">
-            {breakdown.stocks > 0 && (
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="w-2.5 h-2.5 rounded bg-blue-500 shrink-0" />
-                <span className="truncate">Stocks ({getPercent(breakdown.stocks).toFixed(0)}%)</span>
+          <div className="grid grid-cols-3 gap-x-2 gap-y-1.5 pt-0.5">
+            {[
+              { k: 'stocks', label: 'Stocks', color: 'bg-blue-500', val: breakdown.stocks },
+              { k: 'fd', label: 'Fixed D.', color: 'bg-indigo-500', val: breakdown.fd },
+              { k: 'rd', label: 'Recurring', color: 'bg-pink-500', val: breakdown.rd },
+              { k: 'sip', label: 'SIP MF', color: 'bg-sky-500', val: breakdown.sip },
+              { k: 'gold', label: 'Gold', color: 'bg-amber-400', val: breakdown.gold },
+              { k: 'realty', label: 'Realty', color: 'bg-emerald-500', val: breakdown.realEstate },
+            ].filter(i => i.val > 0).map(item => (
+              <div key={item.k} className="flex items-center gap-1.5 min-w-0">
+                <span className={`w-2 h-2 rounded-full ${item.color} shrink-0`} />
+                <span className="text-[9.5px] font-semibold text-slate-500 dark:text-slate-400 truncate">{item.label} ({getPercent(item.val).toFixed(0)}%)</span>
               </div>
-            )}
-            {breakdown.fd > 0 && (
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="w-2.5 h-2.5 rounded bg-indigo-500 shrink-0" />
-                <span className="truncate">FD ({getPercent(breakdown.fd).toFixed(0)}%)</span>
-              </div>
-            )}
-            {breakdown.rd > 0 && (
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="w-2.5 h-2.5 rounded bg-pink-500 shrink-0" />
-                <span className="truncate">RD ({getPercent(breakdown.rd).toFixed(0)}%)</span>
-              </div>
-            )}
-            {breakdown.sip > 0 && (
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="w-2.5 h-2.5 rounded bg-sky-500 shrink-0" />
-                <span className="truncate">SIP ({getPercent(breakdown.sip).toFixed(0)}%)</span>
-              </div>
-            )}
-            {breakdown.gold > 0 && (
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="w-2.5 h-2.5 rounded bg-amber-500 shrink-0" />
-                <span className="truncate">Gold ({getPercent(breakdown.gold).toFixed(0)}%)</span>
-              </div>
-            )}
-            {breakdown.realEstate > 0 && (
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="w-2.5 h-2.5 rounded bg-emerald-500 shrink-0" />
-                <span className="truncate">RE ({getPercent(breakdown.realEstate).toFixed(0)}%)</span>
-              </div>
-            )}
+            ))}
           </div>
         </div>
       )}
 
-      {/* Alerts Indicator Widget */}
+      {/* â”€â”€ Portfolio Alerts Widget â”€â”€ */}
       <button
         onClick={onOpenAlerts}
-        className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow active:scale-[0.97] transition-all text-left"
+        className={`w-full flex items-center justify-between p-4 rounded-2xl mobile-asset-card text-left border ${
+          alertCount > 0
+            ? 'bg-rose-50/80 dark:bg-rose-950/20 border-rose-200/60 dark:border-rose-900/30'
+            : 'bg-white dark:bg-zinc-900 border-[var(--border-subtle)]'
+        }`}
       >
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${alertCount > 0 ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-500' : 'bg-slate-50 dark:bg-slate-900 text-slate-400'}`}>
-            <AlertCircle size={20} className={alertCount > 0 ? 'animate-bounce' : ''} />
+          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
+            alertCount > 0 ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30' : 'bg-slate-100 dark:bg-zinc-800 text-slate-400'
+          }`}>
+            <AlertCircle size={18} />
           </div>
           <div>
-            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-200">Portfolio Alerts</h4>
+            <h4 className="text-[12.5px] font-bold text-slate-800 dark:text-slate-100">Portfolio Alerts</h4>
             <p className="text-[10.5px] text-slate-400 dark:text-slate-500 mt-0.5">
-              {alertCount > 0 ? `You have ${alertCount} active alerts requiring review` : 'All assets are healthy'}
+              {alertCount > 0 ? `${alertCount} alerts need your attention` : 'All assets are looking healthy'}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-slate-400">
+        <div className="flex items-center gap-2 shrink-0">
           {alertCount > 0 && (
-            <span className="bg-rose-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full mr-1">
-              {alertCount}
+            <span className="bg-rose-500 text-white text-[9px] font-bold min-w-[20px] h-5 flex items-center justify-center rounded-full px-1">
+              {alertCount > 9 ? '9+' : alertCount}
             </span>
           )}
-          <ChevronRight size={14} />
+          <ChevronRight size={15} className="text-slate-300 dark:text-slate-600" />
         </div>
       </button>
 
-      {/* Quick Alert Strips */}
+      {/* â”€â”€ Alert Strips â”€â”€ */}
       {alerts.length > 0 && (
         <div className="space-y-2">
-          <div className="flex items-center justify-between pl-1">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-              Critical Alerts
-            </span>
-            <button onClick={onOpenAlerts} className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-              View All ({alerts.length})
-            </button>
+          <div className="flex items-center justify-between px-0.5">
+            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Critical Alerts</span>
+            <button onClick={onOpenAlerts} className="text-[10px] font-bold text-[#007aff] dark:text-[#60a5fa]">View All ({alerts.length})</button>
           </div>
           <div className="space-y-2">
             {alerts.slice(0, 2).map((alert) => (
               <div
                 key={alert.id}
                 onClick={onOpenAlerts}
-                className={`p-3 border rounded-2xl shadow-sm hover:shadow flex items-start gap-3 active:scale-[0.97] transition-all cursor-pointer ${
-                  alert.severity === 'critical'
-                    ? 'bg-red-50/70 border-red-100 dark:bg-red-950/20 dark:border-red-900/30'
-                    : alert.severity === 'warning'
-                    ? 'bg-amber-50/70 border-amber-100 dark:bg-amber-950/20 dark:border-amber-900/30'
-                    : 'bg-blue-50/70 border-blue-100 dark:bg-blue-950/20 dark:border-blue-900/30'
+                className={`p-3.5 border rounded-2xl mobile-asset-card cursor-pointer flex items-start gap-3 ${
+                  alert.severity === 'critical' ? 'bg-red-50/80 border-red-100 dark:bg-red-950/20 dark:border-red-900/30'
+                    : alert.severity === 'warning' ? 'bg-amber-50/80 border-amber-100 dark:bg-amber-950/20 dark:border-amber-900/30'
+                    : 'bg-blue-50/80 border-blue-100 dark:bg-blue-950/20 dark:border-blue-900/30'
                 }`}
               >
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                  alert.severity === 'critical'
-                    ? 'bg-red-500/10 text-red-500'
-                    : alert.severity === 'warning'
-                    ? 'bg-amber-500/10 text-amber-500'
-                    : 'bg-blue-500/10 text-blue-500'
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-white ${
+                  alert.severity === 'critical' ? 'bg-red-500' : alert.severity === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
                 }`}>
-                  <AlertCircle size={16} className={alert.severity === 'critical' ? 'animate-pulse' : ''} />
+                  <AlertCircle size={16} />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 justify-between">
                     <h5 className={`text-xs font-bold truncate ${
-                      alert.severity === 'critical'
-                        ? 'text-red-800 dark:text-red-300'
-                        : alert.severity === 'warning'
-                        ? 'text-amber-800 dark:text-amber-300'
+                      alert.severity === 'critical' ? 'text-red-800 dark:text-red-300'
+                        : alert.severity === 'warning' ? 'text-amber-800 dark:text-amber-300'
                         : 'text-blue-800 dark:text-blue-300'
-                    }`}>
-                      {alert.title}
-                    </h5>
+                    }`}>{alert.title}</h5>
                     {alert.portfolioLabel && (
-                      <span className="text-[8.5px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-md uppercase tracking-wider shrink-0">
-                        {alert.portfolioLabel}
-                      </span>
+                      <span className="text-[8.5px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-md uppercase tracking-wider shrink-0">{alert.portfolioLabel}</span>
                     )}
                   </div>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5 leading-tight">
-                    {alert.message}
-                  </p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5 leading-tight">{alert.message}</p>
                 </div>
               </div>
             ))}
@@ -461,64 +365,48 @@ function MobileHomeSummary({
         </div>
       )}
 
-      {/* Quick Asset Grid */}
+      {/* â”€â”€ Quick Asset Summary Grid â”€â”€ */}
       <div className="space-y-2.5">
-        <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">
-          Quick Asset Summary
-        </h3>
-        <div className="grid grid-cols-2 gap-3">
-          {assetCards.map((card) => (
+        <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-0.5">Asset Summary</h3>
+        <div className="grid grid-cols-2 gap-2.5">
+          {assetCardDefs.map((card, idx) => (
             <button
               key={card.id}
               onClick={() => onNavigateAsset(card.id)}
-              className="relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 text-left shadow-sm hover:shadow active:scale-[0.97] transition-all flex flex-col justify-between h-28"
+              className={`mobile-card-enter mobile-asset-card relative overflow-hidden bg-gradient-to-br ${card.grad} border ${card.border} rounded-[18px] p-3.5 text-left flex flex-col justify-between h-[108px]`}
+              style={{ animationDelay: `${idx * 40}ms` }}
             >
+              <div className={`absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full ${card.bar}`} />
               <div className="flex items-center justify-between w-full">
-                <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center">
-                  {card.icon}
-                </div>
+                <div className={`w-8 h-8 rounded-xl ${card.iconBg} text-white flex items-center justify-center shadow-sm`}>{card.icon}</div>
                 <ChevronRight size={13} className="text-slate-300 dark:text-slate-600" />
               </div>
-              <div className="mt-2">
-                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 truncate uppercase tracking-wide">
-                  {card.label}
-                </p>
-                <p className="text-[14px] font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 truncate">
-                  {card.value !== null ? renderValue(card.value) : 'Vault'}
-                </p>
-                <p className="text-[9.5px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5 leading-none">
-                  {card.subtext}
-                </p>
+              <div className="mt-1">
+                <p className="text-[9.5px] font-bold text-slate-400 dark:text-slate-500 truncate uppercase tracking-wide leading-none mb-1">{card.label}</p>
+                <p className="text-[14.5px] font-extrabold text-slate-800 dark:text-slate-100 tnum truncate leading-tight">{card.value !== null ? renderValue(card.value) : 'Vault'}</p>
+                <p className="text-[9.5px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5 leading-none">{card.subtext}</p>
               </div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Tools & Calculators Section */}
-      <div className="space-y-2.5 pt-2">
-        <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">
-          Tools &amp; Calculators
-        </h3>
-        <div className="grid grid-cols-1 gap-3">
-          <button
-            onClick={() => onNavigateAsset('what_if')}
-            className="relative overflow-hidden bg-gradient-to-br from-indigo-50/40 to-blue-50/20 dark:from-indigo-950/10 dark:to-blue-950/5 border border-indigo-100/40 dark:border-indigo-900/20 rounded-2xl p-4 text-left shadow-sm hover:shadow active:scale-[0.97] transition-all flex items-center justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center animate-pulse">
-                <Calculator size={20} />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-700 dark:text-slate-200">What-If Investment Calculator</h4>
-                <p className="text-[10.5px] text-slate-400 dark:text-slate-500 mt-0.5">
-                  Project future portfolio growth with compound interest and returns
-                </p>
-              </div>
+      {/* â”€â”€ Tools & Calculators â”€â”€ */}
+      <div className="space-y-2.5 pb-2">
+        <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-0.5">Tools & Calculators</h3>
+        <button onClick={() => onNavigateAsset('what_if')} className="mobile-asset-card w-full relative overflow-hidden bg-gradient-to-br from-indigo-600 via-blue-600 to-violet-700 rounded-[18px] p-4 text-left shadow-lg shadow-indigo-500/20 flex items-center justify-between">
+          <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10 blur-lg pointer-events-none" />
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="w-11 h-11 rounded-2xl bg-white/20 text-white flex items-center justify-center border border-white/10">
+              <Calculator size={20} />
             </div>
-            <ChevronRight size={14} className="text-slate-400" />
-          </button>
-        </div>
+            <div>
+              <h4 className="text-[13px] font-bold text-white">What-If Calculator</h4>
+              <p className="text-[10.5px] text-blue-200/80 mt-0.5">Project future portfolio growth</p>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-white/60 relative z-10 shrink-0" />
+        </button>
       </div>
     </div>
   );

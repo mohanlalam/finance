@@ -561,4 +561,83 @@ h3, .text-card-title {
   outline-offset: 2px;
 }
 
+/* ── Mobile Premium Animation System ── */
 
+/* Staggered card slide-up for asset grid entries */
+@keyframes mobileSlideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.mobile-card-enter {
+  animation: mobileSlideUpFade 0.4s cubic-bezier(0.32, 1.2, 0.64, 1) both;
+}
+.mobile-card-enter:nth-child(1) { animation-delay: 0ms; }
+.mobile-card-enter:nth-child(2) { animation-delay: 50ms; }
+.mobile-card-enter:nth-child(3) { animation-delay: 90ms; }
+.mobile-card-enter:nth-child(4) { animation-delay: 130ms; }
+.mobile-card-enter:nth-child(5) { animation-delay: 160ms; }
+.mobile-card-enter:nth-child(6) { animation-delay: 190ms; }
+.mobile-card-enter:nth-child(7) { animation-delay: 215ms; }
+.mobile-card-enter:nth-child(8) { animation-delay: 240ms; }
+
+/* Premium allocation bar segment fill animation */
+@keyframes barFill {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+.animate-bar-fill {
+  animation: barFill 0.6s cubic-bezier(0.32, 1.2, 0.64, 1) both;
+}
+
+/* Floating hero card ambient glow pulse */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0); }
+  50%       { box-shadow: 0 0 24px 4px rgba(0, 122, 255, 0.08); }
+}
+.animate-glow-pulse {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+/* Mobile asset card press feedback */
+.mobile-asset-card {
+  transition:
+    transform 0.12s cubic-bezier(0.32, 1.2, 0.64, 1),
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+.mobile-asset-card:active {
+  transform: scale(0.965);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Bottom drawer spring animation */
+@keyframes drawerSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0.5;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.animate-drawer-up {
+  animation: drawerSlideUp 0.32s cubic-bezier(0.32, 1.2, 0.64, 1) forwards;
+}
+
+/* Pill filter active pop */
+@keyframes pillPop {
+  0% { transform: scale(0.9); }
+  60% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.animate-pill-pop {
+  animation: pillPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}

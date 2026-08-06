@@ -12,14 +12,30 @@ interface FamilyTabBarProps {
   onDeleteClick: (portfolio: { id: string; name: string; label: string }) => void;
 }
 
-const familyIcons: Record<string, React.ReactNode> = {
-  personal: <User size={17} />,
-  mother: <Heart size={17} />,
-  wife: <Users size={17} />,
+const familyIconConfigs: Record<string, { icon: React.ReactNode; bg: string; text: string }> = {
+  personal: {
+    icon: <User size={13} />,
+    bg: 'bg-blue-500/15 dark:bg-blue-400/20',
+    text: 'text-blue-600 dark:text-blue-400',
+  },
+  mother: {
+    icon: <Heart size={13} />,
+    bg: 'bg-rose-500/15 dark:bg-rose-400/20',
+    text: 'text-rose-600 dark:text-rose-400',
+  },
+  wife: {
+    icon: <Users size={13} />,
+    bg: 'bg-purple-500/15 dark:bg-purple-400/20',
+    text: 'text-purple-600 dark:text-purple-400',
+  },
 };
 
-function getFamilyIcon(name: string): React.ReactNode {
-  return familyIcons[name] ?? <User size={17} />;
+function getFamilyIconConfig(name: string) {
+  return familyIconConfigs[name] ?? {
+    icon: <User size={13} />,
+    bg: 'bg-teal-500/15 dark:bg-teal-400/20',
+    text: 'text-teal-600 dark:text-teal-400',
+  };
 }
 
 export default React.memo(function FamilyTabBar({
@@ -37,7 +53,7 @@ export default React.memo(function FamilyTabBar({
       <div
         role="tablist"
         aria-label="Family members portfolios"
-        className="flex flex-wrap items-center gap-1 bg-[#f2f2f7] dark:bg-zinc-800 p-1 rounded-2xl border border-slate-200/40 dark:border-zinc-700/30 max-w-full"
+        className="flex flex-wrap items-center gap-1.5 bg-[#f2f2f7] dark:bg-zinc-800 p-1.5 rounded-2xl border border-slate-200/40 dark:border-zinc-700/30 max-w-full"
       >
         {/* Overview Tab */}
         <button
@@ -46,19 +62,24 @@ export default React.memo(function FamilyTabBar({
           aria-controls="portfolio-content"
           id="tab-all"
           onClick={() => onTabChange('all')}
-          className={`flex items-center gap-1.5 h-8 px-3.5 rounded-[10px] text-xs font-semibold transition-all duration-200 outline-none shrink-0 ${
+          className={`flex items-center gap-2 h-9 px-3.5 rounded-xl text-xs font-bold transition-all duration-200 outline-none shrink-0 ${
             activeTab === 'all'
               ? 'bg-white text-[#1d1d1f] shadow-sm dark:bg-zinc-700 dark:text-[#f5f5f7]'
               : 'text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#98989d] dark:hover:text-[#f5f5f7]'
           }`}
         >
-          <LayoutDashboard size={17} />
+          <div className="w-5 h-5 rounded-lg bg-indigo-500/15 dark:bg-indigo-400/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+            <LayoutDashboard size={13} />
+          </div>
           <span>Family Overview</span>
         </button>
 
         {/* Member Tabs */}
         {portfolios.map((p) => {
           const isActive = activeTab === p.name;
+          const iconConfig = getFamilyIconConfig(p.name);
+          const isPositive = p.totalPnL >= 0;
+
           return (
             <div key={p.name} className="relative group flex items-center shrink-0">
               <button
@@ -67,19 +88,27 @@ export default React.memo(function FamilyTabBar({
                 aria-controls="portfolio-content"
                 id={`tab-${p.name}`}
                 onClick={() => onTabChange(p.name)}
-                className={`flex items-center gap-1.5 h-8 px-3.5 rounded-[10px] text-xs font-semibold transition-all duration-200 outline-none ${
+                className={`flex items-center gap-2 h-9 px-3.5 rounded-xl text-xs font-bold transition-all duration-200 outline-none ${
                   isActive
                     ? 'bg-white text-[#1d1d1f] shadow-sm dark:bg-zinc-700 dark:text-[#f5f5f7]'
                     : 'text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#98989d] dark:hover:text-[#f5f5f7]'
                 }`}
               >
-                {getFamilyIcon(p.name)}
+                {/* Styled icon badge */}
+                <div className={`w-5 h-5 rounded-lg ${iconConfig.bg} ${iconConfig.text} flex items-center justify-center shrink-0`}>
+                  {iconConfig.icon}
+                </div>
+
                 <span>{p.label}</span>
-                <span className={`text-[10px] font-bold ${
-                  isActive 
-                    ? 'text-[#007aff] dark:text-[#60a5fa]' 
-                    : p.totalPnL >= 0 ? 'text-[#34C759]' : 'text-[#ff3b30]'
-                }`}>
+
+                {/* Return Percentage Badge */}
+                <span
+                  className={`text-[10.5px] font-extrabold px-1.5 py-0.5 rounded-md tnum transition-colors ${
+                    isPositive
+                      ? 'bg-emerald-500/10 text-[#34C759] dark:bg-emerald-500/20 dark:text-[#34C759]'
+                      : 'bg-red-500/10 text-[#ff3b30] dark:bg-red-500/20 dark:text-[#ff3b30]'
+                  }`}
+                >
                   {formatPercent(p.totalPnLPercent, 1)}
                 </span>
               </button>
@@ -117,10 +146,10 @@ export default React.memo(function FamilyTabBar({
       {/* Add family control */}
       <button
         onClick={onAddFamilyClick}
-        className="flex items-center gap-1.5 px-3 h-10 rounded-2xl text-xs font-semibold border border-slate-200 hover:border-[#007aff] hover:text-[#007aff] dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-[#60a5fa] dark:hover:border-[#60a5fa] transition-colors shrink-0"
+        className="flex items-center gap-1.5 px-3.5 h-9 rounded-xl text-xs font-bold border border-slate-200 hover:border-[#007aff] hover:text-[#007aff] dark:border-zinc-700 dark:text-zinc-300 dark:hover:text-[#60a5fa] dark:hover:border-[#60a5fa] transition-colors shrink-0"
         aria-label="Add family member"
       >
-        <UserPlus size={17} />
+        <UserPlus size={15} />
         <span>Add Member</span>
       </button>
 

@@ -50,12 +50,16 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
 
       {/* More Drawer */}
       <div
-        className={`fixed bottom-14 left-0 right-0 z-30 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border-t border-[var(--border-subtle)] rounded-t-2xl shadow-floating p-5 md:hidden transition-transform duration-300 ease-out transform pb-safe ${
-          isDrawerOpen ? 'translate-y-0' : 'translate-y-full'
+        className={`fixed bottom-14 left-0 right-0 z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border-t border-[var(--border-subtle)] rounded-t-3xl shadow-floating p-5 md:hidden pb-safe transition-all duration-300 ease-out ${
+          isDrawerOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'
         }`}
       >
+        {/* Drag handle indicator */}
+        <div className="flex justify-center mb-3 -mt-1">
+          <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-zinc-600" />
+        </div>
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <h4 className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
             More Asset Classes
           </h4>
           <button
@@ -67,7 +71,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2.5">
           {moreTabs.map((tab) => {
             const isActive = activeAsset === tab.id;
             return (
@@ -77,14 +81,18 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                   onChangeAsset(tab.id);
                   setIsDrawerOpen(false);
                 }}
-                className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border transition-all active:scale-[0.97] ${
+                className={`flex flex-col items-center justify-center gap-2 h-[72px] rounded-2xl border transition-all active:scale-[0.96] ${
                   isActive
-                    ? 'bg-[#eaf3ff] border-transparent dark:bg-blue-950/20 text-[#007aff] dark:text-[#60a5fa] font-bold'
-                    : 'bg-[#f2f2f7] border-transparent dark:bg-zinc-800 text-slate-550 dark:text-slate-450 hover:bg-slate-100 dark:hover:bg-zinc-750'
+                    ? 'bg-[#eaf3ff] border-transparent dark:bg-blue-950/30 text-[#007aff] dark:text-[#60a5fa] font-bold shadow-sm'
+                    : 'bg-[#f2f2f7] border-transparent dark:bg-zinc-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-700'
                 }`}
               >
-                <div className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>{tab.icon}</div>
-                <span className="text-[10px] font-semibold">{tab.label}</span>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                  isActive ? 'bg-[#007aff]/15 dark:bg-[#60a5fa]/15' : 'bg-white/60 dark:bg-zinc-700/60'
+                }`}>
+                  {tab.icon}
+                </div>
+                <span className="text-[10px] font-semibold leading-none">{tab.label}</span>
               </button>
             );
           })}
