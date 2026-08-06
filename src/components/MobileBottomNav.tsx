@@ -95,11 +95,11 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
       <nav
         role="navigation"
         aria-label="Asset navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border-t border-[var(--border-subtle)] shadow-sm md:hidden pb-safe"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-2xl border-t border-slate-200/80 dark:border-zinc-800 shadow-2xl md:hidden pb-safe"
       >
         <div
           ref={containerRef}
-          className="flex items-center justify-around h-14 px-2"
+          className="flex items-center justify-around h-14 px-1.5"
         >
           {mainTabs.map((tab) => {
             const isActive = activeAsset === tab.id;
@@ -111,7 +111,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                   setIsDrawerOpen(false);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 h-full transition-all duration-200 active:scale-[0.97] outline-none ${
+                className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 h-full transition-all duration-200 active:scale-[0.95] outline-none ${
                   isActive
                     ? 'text-[#007aff] dark:text-[#60a5fa] font-bold'
                     : 'text-slate-400 dark:text-slate-500 active:text-slate-650 dark:active:text-slate-300'
@@ -119,9 +119,9 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
               >
                 {/* Active pill bubble */}
                 {isActive && (
-                  <div className="absolute inset-x-2 top-2 bottom-2 rounded-xl bg-[#eaf3ff] dark:bg-blue-950/20" />
+                  <div className="absolute inset-x-1.5 top-1.5 bottom-1.5 rounded-xl bg-[#007aff]/10 dark:bg-[#60a5fa]/15 transition-all" />
                 )}
-                <div className={`transition-all duration-200 relative z-10 ${isActive ? 'scale-110' : ''} relative`}>
+                <div className={`transition-all duration-200 relative z-10 ${isActive ? 'scale-105' : ''}`}>
                   {tab.icon}
                   {tab.id === 'home' && alertCount > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] rounded-full bg-[#ff3b30] text-white text-[8px] font-bold flex items-center justify-center px-0.5 leading-none">
@@ -136,6 +136,9 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                 }`}>
                   {tab.label}
                 </span>
+                {isActive && (
+                  <span className="w-1 h-1 rounded-full bg-[#007aff] dark:bg-[#60a5fa] mt-0.5" />
+                )}
               </button>
             );
           })}
@@ -144,26 +147,29 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
           <button
             onClick={() => setIsDrawerOpen(!isDrawerOpen)}
             aria-expanded={isDrawerOpen}
-            className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 h-full transition-all duration-200 active:scale-[0.97] outline-none ${
+            className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 h-full transition-all duration-200 active:scale-[0.95] outline-none ${
               isMoreActive || isDrawerOpen
                 ? 'text-[#007aff] dark:text-[#60a5fa] font-bold'
-                : 'text-slate-455 dark:text-slate-500 active:text-slate-650 dark:active:text-slate-300'
+                : 'text-slate-450 dark:text-slate-500 active:text-slate-650 dark:active:text-slate-300'
             }`}
           >
             {/* Active pill bubble */}
             {(isMoreActive || isDrawerOpen) && (
-              <div className="absolute inset-x-2 top-2 bottom-2 rounded-xl bg-[#eaf3ff] dark:bg-blue-950/20" />
+              <div className="absolute inset-x-1.5 top-1.5 bottom-1.5 rounded-xl bg-[#007aff]/10 dark:bg-[#60a5fa]/15 transition-all" />
             )}
-            <div className={`transition-all duration-200 ${isMoreActive || isDrawerOpen ? 'scale-110 rotate-180' : ''} relative z-10`}>
+            <div className={`transition-all duration-200 ${isMoreActive || isDrawerOpen ? 'scale-105 rotate-180' : ''} relative z-10`}>
               <ChevronUp size={18} />
             </div>
             <span className={`text-[9px] font-semibold tracking-wide leading-none transition-all duration-200 relative z-10 ${
               isMoreActive || isDrawerOpen
                 ? 'text-[#007aff] dark:text-[#60a5fa]'
-                : 'text-slate-455 dark:text-slate-500'
+                : 'text-slate-450 dark:text-slate-500'
             }`}>
               More
             </span>
+            {(isMoreActive || isDrawerOpen) && (
+              <span className="w-1 h-1 rounded-full bg-[#007aff] dark:bg-[#60a5fa] mt-0.5" />
+            )}
           </button>
         </div>
       </nav>

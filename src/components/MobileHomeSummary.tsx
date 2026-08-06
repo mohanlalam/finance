@@ -177,9 +177,9 @@ function MobileHomeSummary({
   ];
 
   return (
-    <div className="space-y-5 md:hidden">
+    <div className="space-y-3.5 md:hidden">
       {/* Net Worth Summary Card */}
-      <div className="apple-card p-6 relative overflow-hidden">
+      <div className="apple-card p-4 sm:p-5 relative overflow-hidden">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[180px]">
             {summaryData.label} Net Worth
@@ -190,7 +190,7 @@ function MobileHomeSummary({
           </span>
         </div>
 
-        <div className="flex items-end justify-between mt-3">
+        <div className="flex items-end justify-between mt-2.5">
           <h2 className="text-financial text-slate-800 dark:text-slate-100 tnum">
             {renderValue(summaryData.totalCurrentValue)}
           </h2>
@@ -203,8 +203,8 @@ function MobileHomeSummary({
         
         {/* Individual Net Worth breakdown for mobile */}
         {activePortfolio === null && portfolios && portfolios.length > 0 && (
-          <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-zinc-800/80 space-y-1.5 text-xs font-medium text-slate-500 dark:text-zinc-400">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Net Worth by Member</p>
+          <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-zinc-800/80 space-y-1 text-xs font-medium text-slate-500 dark:text-zinc-400">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">Net Worth by Member</p>
             {portfolios.map((p) => {
               const val = p.totalCurrentValue;
               return (
@@ -220,7 +220,7 @@ function MobileHomeSummary({
         )}
 
         {/* PNL Grid */}
-        <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-[var(--border-subtle)]">
+        <div className="grid grid-cols-2 gap-3 mt-3.5 pt-3.5 border-t border-[var(--border-subtle)]">
           <div className="space-y-1">
             <p className="text-xs text-slate-450 dark:text-slate-400">Today's Return</p>
             <div className={`flex items-start gap-1.5 ${todayPnL >= 0 ? 'text-[#34C759]' : 'text-[#ff3b30]'}`}>
