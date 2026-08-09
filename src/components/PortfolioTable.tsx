@@ -344,6 +344,7 @@ export default React.memo(function PortfolioTable({
                 className={`py-3 flex flex-col gap-2 transition-opacity ${isDeleting ? 'opacity-40' : ''}`}
               >
                 <div className="flex justify-between items-start">
+                  <div>
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500/15 to-indigo-500/15 text-blue-600 dark:text-blue-400 font-extrabold text-xs flex items-center justify-center shrink-0 border border-blue-200/40 dark:border-blue-800/30 uppercase">
                         {h.ticker.slice(0, 2)}
