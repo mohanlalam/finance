@@ -84,30 +84,35 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
   });
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 dark:bg-slate-950/80 backdrop-blur-sm z-50 flex flex-col md:hidden animate-fade-in">
-      <div className="flex-1 mt-12 bg-white dark:bg-slate-900 rounded-t-3xl flex flex-col shadow-2xl overflow-hidden animate-slide-up pb-safe">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Active Portfolio Alerts"
+      className="fixed inset-0 bg-black/50 z-50 flex flex-col md:hidden"
+    >
+      <div className="flex-1 mt-12 bg-white dark:bg-slate-900 rounded-t-xl flex flex-col shadow-xl overflow-hidden pb-safe">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="px-4 py-3.5 border-b border-[var(--border-subtle)] flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-              <Bell size={18} />
+              <Bell size={16} />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-200">Active Alerts</h2>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{alerts.length} action items require attention</p>
+              <h2 className="text-sm font-extrabold text-[var(--text-primary)]">Active Alerts</h2>
+              <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{alerts.length} action items require attention</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300 transition-colors"
+            className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
             aria-label="Close Alerts"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="px-4 py-2 border-b border-slate-50 dark:border-slate-800/50 flex gap-1 overflow-x-auto scrollbar-none shrink-0">
+        <div className="px-3 py-2 border-b border-[var(--border-subtle)] flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
           {tabs.map((tab) => {
             const count = alerts.filter((a) => {
               if (tab.key === 'due_soon') return a.type === 'fd_maturity' || a.type === 'insurance_renewal' || a.type === 'document_expiry';
@@ -122,16 +127,16 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-md text-xs font-bold transition-all shrink-0 ${
                   isActive
                     ? 'bg-blue-600 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                 }`}
               >
                 <span>{tab.label}</span>
                 {count > 0 && (
-                  <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
                   }`}>
                     {count}
                   </span>
@@ -145,11 +150,11 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {filteredAlerts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 dark:text-emerald-400 flex items-center justify-center mb-4">
-                <CheckCircle2 size={32} />
+              <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
+                <CheckCircle2 size={24} />
               </div>
-              <h3 className="text-sm font-bold text-slate-700 dark:text-slate-250 mb-1">All Clear!</h3>
-              <p className="text-xs text-slate-400 dark:text-slate-500 max-w-[200px]">
+              <h3 className="text-sm font-extrabold text-[var(--text-primary)] mb-1">All Clear!</h3>
+              <p className="text-xs text-[var(--text-tertiary)] max-w-[220px]">
                 No active notifications in this category. You're completely up to date.
               </p>
             </div>
@@ -166,34 +171,34 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
               return (
                 <div
                   key={alert.id}
-                  className={`flex flex-col rounded-2xl border p-4 shadow-xs relative transition-all active:scale-[0.99] ${cfg.bg} ${cfg.border} ${cfg.color}`}
+                  className={`flex flex-col rounded-xl border p-3.5 shadow-xs relative transition-all ${cfg.bg} ${cfg.border} ${cfg.color}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex gap-3">
-                      <div className="mt-0.5 w-7 h-7 rounded-lg bg-white/80 dark:bg-slate-900/50 flex items-center justify-center shadow-2xs shrink-0">
+                      <div className="mt-0.5 w-7 h-7 rounded-md bg-white/80 dark:bg-slate-900/50 flex items-center justify-center shadow-2xs shrink-0">
                         {cfg.icon}
                       </div>
                       <div>
-                        <p className="text-xs font-extrabold leading-tight text-slate-800 dark:text-slate-200">{alert.title}</p>
-                        <p className="text-[11px] font-medium opacity-80 mt-1">{alert.message}</p>
+                        <p className="text-xs font-extrabold leading-tight text-[var(--text-primary)]">{alert.title}</p>
+                        <p className="text-xs font-medium opacity-90 mt-1">{alert.message}</p>
                         {alert.portfolioLabel && (
-                          <span className="inline-block mt-2 text-[9px] font-extrabold uppercase bg-white/70 dark:bg-slate-900/40 px-2 py-0.5 rounded-md">
-                            Portfolio: {alert.portfolioLabel}
+                          <span className="inline-block mt-2 text-[10px] font-bold uppercase bg-white/80 dark:bg-slate-900/60 px-2 py-0.5 rounded">
+                            Member: {alert.portfolioLabel}
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-1.5 shrink-0">
-                      <span className={`text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-full ${severity.bg}`}>
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${severity.bg}`}>
                         {alert.severity}
                       </span>
                       <button
                         onClick={() => onDismissAlert(alert.id)}
                         aria-label="Dismiss Alert"
-                        className="w-7 h-7 rounded-lg bg-white/40 dark:bg-slate-900/20 flex items-center justify-center hover:bg-white/80 dark:hover:bg-slate-900/50 text-slate-400 hover:text-slate-600 transition-colors"
+                        className="w-8 h-8 rounded-lg bg-white/60 dark:bg-slate-900/40 flex items-center justify-center hover:bg-white dark:hover:bg-slate-900 text-slate-400 hover:text-slate-700 transition-colors"
                       >
-                        <X size={13} />
+                        <X size={14} />
                       </button>
                     </div>
                   </div>
@@ -205,16 +210,16 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
 
         {/* Footer actions */}
         {alerts.length > 0 && (
-          <div className="p-4 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30 flex gap-3">
+          <div className="p-3.5 border-t border-[var(--border-subtle)] bg-[var(--surface)] flex gap-3">
             <button
               onClick={onDismissAll}
-              className="flex-1 py-3 text-xs font-bold text-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-all"
+              className="flex-1 py-2.5 text-xs font-bold text-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-all"
             >
               Clear All ({alerts.length})
             </button>
             <button
               onClick={onClose}
-              className="flex-1 py-3 text-xs font-bold text-center bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-xs"
+              className="flex-1 py-2.5 text-xs font-bold text-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow-xs"
             >
               Back to Dashboard
             </button>
