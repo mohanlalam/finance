@@ -448,7 +448,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     const symbolsToFetch = Array.from(
       new Map(
         queryItems.flatMap((item) =>
-          item.candidates.map((c) => [c, { ticker: item.ticker, yahooSymbol: c }])
+          item.candidates.map((c) => [c, { ticker: c, yahooSymbol: c }])
         )
       ).values()
     );
