@@ -1,5 +1,5 @@
-﻿import { memo, useMemo } from 'react';
-import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock, Calculator } from './icons/AppIcons';
+import { memo, useMemo } from 'react';
+import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock, Calculator, IndianRupee, PieChart } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { Alert } from '../hooks/useAlerts';
@@ -59,12 +59,10 @@ function MobileHomeSummary({
   activePortfolio,
   netWorthHistory = [],
 }: MobileHomeSummaryProps) {
-  // Single-pass count computation â€” avoids 9 separate reduce() calls on every render
-
   const { isBalancesHidden } = usePrivacy();
 
   const renderValue = (val: number, formatter = formatINR) => {
-    if (isBalancesHidden) return 'â€¢â€¢â€¢â€¢â€¢â€¢';
+    if (isBalancesHidden) return '••••••';
     return <AnimatedNumber value={val} formatter={formatter} />;
   };
 
@@ -77,12 +75,15 @@ function MobileHomeSummary({
     if (sparklineData.length < 2) return '#10b981';
     return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? '#10b981' : '#ef4444';
   }, [sparklineData]);
+
   const {
     stockCount, fdCount, rdCount, sipCount,
-    goldCount, propertyCount, insuranceCount, docCount
+    goldCount, propertyCount, insuranceCount, docCount,
+    stocksInvested, sipInvested
   } = useMemo(() => {
     let stockCount = 0, fdCount = 0, rdCount = 0, sipCount = 0,
-        goldCount = 0, propertyCount = 0, insuranceCount = 0, docCount = 0;
+        goldCount = 0, propertyCount = 0, insuranceCount = 0, docCount = 0,
+        stocksInvested = 0, sipInvested = 0;
     const ps = activePortfolio ? [activePortfolio] : portfolios;
     for (const p of ps) {
       stockCount += p.holdings?.length || 0;
@@ -93,163 +94,281 @@ function MobileHomeSummary({
       propertyCount += p.realEstate?.length || 0;
       insuranceCount += p.insurances?.length || 0;
       docCount += p.documents?.length || 0;
+
+      for (const h of p.holdings || []) {
+        stocksInvested += h.amountInvested || 0;
+      }
+      for (const s of p.sipAccounts || []) {
+        sipInvested += s.fallback_valuation || 0;
+      }
     }
-    return { stockCount, fdCount, rdCount, sipCount, goldCount, propertyCount, insuranceCount, docCount };
+    return { stockCount, fdCount, rdCount, sipCount, goldCount, propertyCount, insuranceCount, docCount, stocksInvested, sipInvested };
   }, [activePortfolio, portfolios]);
+
+  const stocksPnL = breakdown.stocks - stocksInvested;
+  const stocksPnLPercent = stocksInvested > 0 ? (stocksPnL / stocksInvested) * 100 : 0;
 
   const totalValue =
     breakdown.stocks + breakdown.fd + breakdown.rd +
     breakdown.sip + breakdown.gold + breakdown.realEstate;
   const getPercent = (val: number) => (totalValue > 0 ? (val / totalValue) * 100 : 0);
 
-  // Member avatar color palette
+  // Member identity badge colors
   const memberColors = [
-    { bg: 'bg-blue-500' },
-    { bg: 'bg-rose-500' },
-    { bg: 'bg-violet-500' },
-    { bg: 'bg-emerald-500' },
-    { bg: 'bg-amber-500' },
+    { bg: 'bg-blue-500', text: 'text-blue-400', border: 'border-blue-500/30' },
+    { bg: 'bg-rose-500', text: 'text-rose-400', border: 'border-rose-500/30' },
+    { bg: 'bg-purple-500', text: 'text-purple-400', border: 'border-purple-500/30' },
+    { bg: 'bg-emerald-500', text: 'text-emerald-400', border: 'border-emerald-500/30' },
+    { bg: 'bg-amber-500', text: 'text-amber-400', border: 'border-amber-500/30' },
   ];
 
   const isTodayGain = todayPnL >= 0;
   const isTotalGain = summaryData.totalPnL >= 0;
 
-  // Asset card definitions with accent colors
+  // Asset card definitions with accent colors and returns
   const assetCardDefs = [
-    { id: 'stocks' as const, label: 'Stocks & ETFs', value: breakdown.stocks, subtext: `${stockCount} Holdings`, icon: <TrendingUp size={18} />, iconBg: 'bg-blue-500', grad: 'from-blue-50 to-indigo-50/30 dark:from-blue-950/30 dark:to-indigo-950/10', border: 'border-blue-100/60 dark:border-blue-900/30', bar: 'bg-blue-500' },
-    { id: 'fd' as const, label: 'Fixed Deposits', value: breakdown.fd, subtext: `${fdCount} Active FDs`, icon: <Landmark size={18} />, iconBg: 'bg-indigo-500', grad: 'from-indigo-50 to-purple-50/30 dark:from-indigo-950/30 dark:to-purple-950/10', border: 'border-indigo-100/60 dark:border-indigo-900/30', bar: 'bg-indigo-500' },
-    { id: 'rd' as const, label: 'Recurring Dep.', value: breakdown.rd, subtext: `${rdCount} Active RDs`, icon: <Clock size={18} />, iconBg: 'bg-pink-500', grad: 'from-pink-50 to-rose-50/30 dark:from-pink-950/30 dark:to-rose-950/10', border: 'border-pink-100/60 dark:border-pink-900/30', bar: 'bg-pink-500' },
-    { id: 'sip' as const, label: 'SIP Mutual Funds', value: breakdown.sip, subtext: `${sipCount} SIPs`, icon: <TrendingUp size={18} />, iconBg: 'bg-sky-500', grad: 'from-sky-50 to-cyan-50/30 dark:from-sky-950/30 dark:to-cyan-950/10', border: 'border-sky-100/60 dark:border-sky-900/30', bar: 'bg-sky-500' },
-    { id: 'gold' as const, label: 'Gold Holdings', value: breakdown.gold, subtext: `${goldCount} Items`, icon: <Coins size={18} />, iconBg: 'bg-amber-500', grad: 'from-amber-50 to-orange-50/30 dark:from-amber-950/30 dark:to-orange-950/10', border: 'border-amber-100/60 dark:border-amber-900/30', bar: 'bg-amber-500' },
-    { id: 'real_estate' as const, label: 'Real Estate', value: breakdown.realEstate, subtext: `${propertyCount} Properties`, icon: <Building2 size={18} />, iconBg: 'bg-emerald-500', grad: 'from-emerald-50 to-teal-50/30 dark:from-emerald-950/30 dark:to-teal-950/10', border: 'border-emerald-100/60 dark:border-emerald-900/30', bar: 'bg-emerald-500' },
-    { id: 'insurance' as const, label: 'Insurance Cover', value: breakdown.insuranceCover, subtext: `${insuranceCount} Policies`, icon: <Shield size={18} />, iconBg: 'bg-rose-500', grad: 'from-rose-50 to-pink-50/30 dark:from-rose-950/30 dark:to-pink-950/10', border: 'border-rose-100/60 dark:border-rose-900/30', bar: 'bg-rose-500' },
-    { id: 'documents' as const, label: 'Document Vault', value: null, subtext: `${docCount} Documents`, icon: <FolderOpen size={18} />, iconBg: 'bg-slate-500 dark:bg-slate-600', grad: 'from-slate-50 to-slate-100/30 dark:from-slate-800/40 dark:to-slate-900/10', border: 'border-slate-200/60 dark:border-slate-700/40', bar: 'bg-slate-400' },
+    {
+      id: 'stocks' as const,
+      label: 'Stocks & ETFs',
+      value: breakdown.stocks,
+      subtext: `${stockCount} Holdings`,
+      returnBadge: stocksInvested > 0 ? formatPercent(stocksPnLPercent, 1) : null,
+      isReturnGain: stocksPnL >= 0,
+      icon: <TrendingUp size={18} />,
+      iconBg: 'bg-blue-500',
+      grad: 'from-blue-50 to-indigo-50/30 dark:from-blue-950/30 dark:to-indigo-950/10',
+      border: 'border-blue-100/60 dark:border-blue-900/30',
+      bar: 'bg-blue-500'
+    },
+    {
+      id: 'fd' as const,
+      label: 'Fixed Deposits',
+      value: breakdown.fd,
+      subtext: `${fdCount} Active FDs`,
+      returnBadge: breakdown.fd > 0 ? `${getPercent(breakdown.fd).toFixed(0)}% Share` : null,
+      isReturnGain: true,
+      icon: <Landmark size={18} />,
+      iconBg: 'bg-indigo-500',
+      grad: 'from-indigo-50 to-purple-50/30 dark:from-indigo-950/30 dark:to-purple-950/10',
+      border: 'border-indigo-100/60 dark:border-indigo-900/30',
+      bar: 'bg-indigo-500'
+    },
+    {
+      id: 'rd' as const,
+      label: 'Recurring Dep.',
+      value: breakdown.rd,
+      subtext: `${rdCount} Active RDs`,
+      returnBadge: breakdown.rd > 0 ? `${getPercent(breakdown.rd).toFixed(0)}% Share` : null,
+      isReturnGain: true,
+      icon: <Clock size={18} />,
+      iconBg: 'bg-pink-500',
+      grad: 'from-pink-50 to-rose-50/30 dark:from-pink-950/30 dark:to-rose-950/10',
+      border: 'border-pink-100/60 dark:border-pink-900/30',
+      bar: 'bg-pink-500'
+    },
+    {
+      id: 'sip' as const,
+      label: 'SIP Mutual Funds',
+      value: breakdown.sip,
+      subtext: `${sipCount} SIPs`,
+      returnBadge: breakdown.sip > 0 ? `${getPercent(breakdown.sip).toFixed(0)}% Share` : null,
+      isReturnGain: true,
+      icon: <TrendingUp size={18} />,
+      iconBg: 'bg-sky-500',
+      grad: 'from-sky-50 to-cyan-50/30 dark:from-sky-950/30 dark:to-cyan-950/10',
+      border: 'border-sky-100/60 dark:border-sky-900/30',
+      bar: 'bg-sky-500'
+    },
+    {
+      id: 'gold' as const,
+      label: 'Gold Holdings',
+      value: breakdown.gold,
+      subtext: `${goldCount} Items`,
+      returnBadge: breakdown.gold > 0 ? `${getPercent(breakdown.gold).toFixed(0)}% Share` : null,
+      isReturnGain: true,
+      icon: <Coins size={18} />,
+      iconBg: 'bg-amber-500',
+      grad: 'from-amber-50 to-orange-50/30 dark:from-amber-950/30 dark:to-orange-950/10',
+      border: 'border-amber-100/60 dark:border-amber-900/30',
+      bar: 'bg-amber-500'
+    },
+    {
+      id: 'real_estate' as const,
+      label: 'Real Estate',
+      value: breakdown.realEstate,
+      subtext: `${propertyCount} Properties`,
+      returnBadge: breakdown.realEstate > 0 ? `${getPercent(breakdown.realEstate).toFixed(0)}% Share` : null,
+      isReturnGain: true,
+      icon: <Building2 size={18} />,
+      iconBg: 'bg-emerald-500',
+      grad: 'from-emerald-50 to-teal-50/30 dark:from-emerald-950/30 dark:to-teal-950/10',
+      border: 'border-emerald-100/60 dark:border-emerald-900/30',
+      bar: 'bg-emerald-500'
+    },
+    {
+      id: 'insurance' as const,
+      label: 'Insurance Cover',
+      value: breakdown.insuranceCover,
+      subtext: `${insuranceCount} Policies`,
+      returnBadge: null,
+      isReturnGain: true,
+      icon: <Shield size={18} />,
+      iconBg: 'bg-rose-500',
+      grad: 'from-rose-50 to-pink-50/30 dark:from-rose-950/30 dark:to-pink-950/10',
+      border: 'border-rose-100/60 dark:border-rose-900/30',
+      bar: 'bg-rose-500'
+    },
+    {
+      id: 'documents' as const,
+      label: 'Document Vault',
+      value: null,
+      subtext: `${docCount} Documents`,
+      returnBadge: null,
+      isReturnGain: true,
+      icon: <FolderOpen size={18} />,
+      iconBg: 'bg-slate-500 dark:bg-slate-600',
+      grad: 'from-slate-50 to-slate-100/30 dark:from-slate-800/40 dark:to-slate-900/10',
+      border: 'border-slate-200/60 dark:border-slate-700/40',
+      bar: 'bg-slate-400'
+    },
   ];
 
   return (
     <div className="space-y-3 md:hidden">
 
-      {/* â”€â”€ Hero Net Worth Card â”€â”€ */}
-      <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-[#1a1f3c] via-[#0f172a] to-[#1e1b4b] dark:from-[#0a0f1f] dark:via-[#080d1a] dark:to-[#12103a] shadow-xl animate-glow-pulse">
+      {/* ── Hero Net Worth & Investment Card ── */}
+      <div className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-[#1a1f3c] via-[#0f172a] to-[#1e1b4b] dark:from-[#0a0f1f] dark:via-[#080d1a] dark:to-[#12103a] shadow-xl animate-glow-pulse">
+        {/* Ambient background blur orbs */}
         <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
         <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
 
         <div className="relative z-10 p-5 pb-4">
           {/* Header row */}
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[11px] font-semibold text-slate-400 tracking-wide">{summaryData.label} Net Worth</span>
+          <div className="flex items-center justify-between mb-3.5">
+            <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">{summaryData.label} Portfolio Summary</span>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/20">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-bold text-emerald-400 tracking-wide">Live</span>
+              <span className="text-[10px] font-bold text-emerald-400 tracking-wide">Live Sync</span>
             </div>
           </div>
 
-          {/* Value + Sparkline */}
-          <div className="flex items-end justify-between">
-            <div>
-              <h2 className="text-[32px] font-bold text-white tnum leading-none tracking-tight">
+          {/* Primary Valuation & Investment Grid */}
+          <div className="grid grid-cols-2 gap-3 mb-4 p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+            {/* Current Net Worth */}
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Current Net Worth</p>
+              <h2 className="text-[22px] font-extrabold text-white tnum leading-tight tracking-tight">
                 {renderValue(summaryData.totalCurrentValue)}
               </h2>
-              <p className="text-[11px] text-slate-400 mt-1 font-medium">
-                Invested: {isBalancesHidden ? 'â€¢â€¢â€¢â€¢â€¢â€¢' : formatINR(summaryData.totalInvested)}
-              </p>
             </div>
-            {sparklineData.length > 1 && (
-              <div className="mb-4 ml-2 shrink-0 opacity-80">
-                <Sparkline data={sparklineData} color={sparklineColor} width={64} height={24} />
-              </div>
-            )}
+            {/* Total Invested */}
+            <div className="space-y-0.5 border-l border-white/10 pl-3">
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Invested</p>
+              <h3 className="text-[22px] font-extrabold text-slate-200 tnum leading-tight tracking-tight">
+                {renderValue(summaryData.totalInvested)}
+              </h3>
+            </div>
           </div>
 
-          {/* Net Worth by member */}
-          {activePortfolio === null && portfolios && portfolios.length > 0 && (
-            <div className="mt-3.5 pt-3 border-t border-white/10 space-y-1.5">
-              <p className="text-[9.5px] font-bold uppercase tracking-widest text-slate-500 mb-1">By Member</p>
-              {portfolios.map((p, i) => (
-                <div key={p.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${memberColors[i % memberColors.length].bg} shrink-0`} />
-                    <span className="text-[12px] text-slate-300 font-medium">{p.label}</span>
-                  </div>
-                  <span className="text-[12px] text-white font-bold tnum">{renderValue(p.totalCurrentValue)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* P&L Chips */}
-          <div className="flex gap-3 mt-4">
-            <div className={`flex-1 rounded-xl px-3 py-2.5 ${isTodayGain ? 'bg-emerald-500/15 border border-emerald-400/20' : 'bg-red-500/15 border border-red-400/20'}`}>
-              <p className="text-[9.5px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Today</p>
-              <div className={`flex items-center gap-1 ${isTodayGain ? 'text-emerald-400' : 'text-red-400'}`}>
-                {isTodayGain ? <TrendingUp size={13} className="shrink-0" /> : <TrendingDown size={13} className="shrink-0" />}
-                <span className="text-[13px] font-extrabold tnum leading-tight">
-                  {isBalancesHidden ? 'â€¢â€¢â€¢â€¢' : <>{todayPnL >= 0 ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
+          {/* Key P&L Chips Row (Amount + Return % Badge) */}
+          <div className="flex gap-3">
+            {/* Total Profit / Return chip */}
+            <div className={`flex-1 rounded-2xl p-3 ${isTotalGain ? 'bg-emerald-500/15 border border-emerald-400/25' : 'bg-red-500/15 border border-red-400/25'}`}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[9.5px] text-slate-300 font-bold uppercase tracking-wider">Total Profit</span>
+                <span className={`text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-md tnum ${isTotalGain ? 'bg-emerald-400/20 text-emerald-300' : 'bg-red-400/20 text-red-300'}`}>
+                  {formatPercent(summaryData.totalPnLPercent, 1)}
                 </span>
               </div>
-              <p className="text-[10px] font-semibold mt-0.5 tnum opacity-80 text-slate-400">{formatPercent(todayPnLPercent)}</p>
-            </div>
-            <div className={`flex-1 rounded-xl px-3 py-2.5 ${isTotalGain ? 'bg-emerald-500/15 border border-emerald-400/20' : 'bg-red-500/15 border border-red-400/20'}`}>
-              <p className="text-[9.5px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Total Return</p>
               <div className={`flex items-center gap-1 ${isTotalGain ? 'text-emerald-400' : 'text-red-400'}`}>
-                {isTotalGain ? <TrendingUp size={13} className="shrink-0" /> : <TrendingDown size={13} className="shrink-0" />}
-                <span className="text-[13px] font-extrabold tnum leading-tight">
-                  {isBalancesHidden ? 'â€¢â€¢â€¢â€¢' : <>{summaryData.totalPnL >= 0 ? '+' : ''}<AnimatedNumber value={summaryData.totalPnL} formatter={formatINR} /></>}
+                {isTotalGain ? <TrendingUp size={14} className="shrink-0" /> : <TrendingDown size={14} className="shrink-0" />}
+                <span className="text-[15px] font-extrabold tnum leading-tight">
+                  {isBalancesHidden ? '••••••' : <>{summaryData.totalPnL >= 0 ? '+' : ''}<AnimatedNumber value={summaryData.totalPnL} formatter={formatINR} /></>}
                 </span>
               </div>
-              <p className="text-[10px] font-semibold mt-0.5 tnum opacity-80 text-slate-400">{formatPercent(summaryData.totalPnLPercent)}</p>
+            </div>
+
+            {/* Today's Return chip */}
+            <div className={`flex-1 rounded-2xl p-3 ${isTodayGain ? 'bg-emerald-500/15 border border-emerald-400/25' : 'bg-red-500/15 border border-red-400/25'}`}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[9.5px] text-slate-300 font-bold uppercase tracking-wider">Today's Return</span>
+                <span className={`text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-md tnum ${isTodayGain ? 'bg-emerald-400/20 text-emerald-300' : 'bg-red-400/20 text-red-300'}`}>
+                  {formatPercent(todayPnLPercent, 1)}
+                </span>
+              </div>
+              <div className={`flex items-center gap-1 ${isTodayGain ? 'text-emerald-400' : 'text-red-400'}`}>
+                {isTodayGain ? <TrendingUp size={14} className="shrink-0" /> : <TrendingDown size={14} className="shrink-0" />}
+                <span className="text-[15px] font-extrabold tnum leading-tight">
+                  {isBalancesHidden ? '••••••' : <>{todayPnL >= 0 ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Member P&L breakdowns */}
+          {/* Member Detailed Breakdown (Net Worth, Invested, Profit & % Return per Member) */}
           {activePortfolio === null && portfolios && portfolios.length > 0 && (
-            <div className="mt-3.5 pt-3 border-t border-white/10 space-y-3">
-              <div>
-                <p className="text-[9.5px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">Today's Return by Member</p>
-                <div className="space-y-1">
-                  {portfolios.map((p, i) => {
-                    const pnl = estimateTodayPnL(p, [p]);
-                    return (
-                      <div key={p.id} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${memberColors[i % memberColors.length].bg} shrink-0`} />
-                          <span className="text-[11.5px] text-slate-400 font-medium">{p.label}</span>
-                        </div>
-                        <span className={`text-[11.5px] font-bold tnum ${pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {isBalancesHidden ? 'â€¢â€¢â€¢â€¢' : <>{pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
+            <div className="mt-4 pt-3.5 border-t border-white/10 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <p className="text-[9.5px] font-extrabold uppercase tracking-widest text-slate-400">Family Members Overview</p>
+                <span className="text-[9.5px] font-semibold text-slate-400">{portfolios.length} Members</span>
               </div>
-              <div className="pt-2.5 border-t border-white/10">
-                <p className="text-[9.5px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">Total Return by Member</p>
-                <div className="space-y-1">
-                  {portfolios.map((p, i) => (
-                    <div key={p.id} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${memberColors[i % memberColors.length].bg} shrink-0`} />
-                        <span className="text-[11.5px] text-slate-400 font-medium">{p.label}</span>
+
+              <div className="space-y-2">
+                {portfolios.map((p, i) => {
+                  const mColor = memberColors[i % memberColors.length];
+                  const pnl = p.totalPnL;
+                  const pnlPct = p.totalPnLPercent;
+                  const isMemGain = pnl >= 0;
+
+                  return (
+                    <div
+                      key={p.id}
+                      className="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-1.5 transition-colors"
+                    >
+                      {/* Top row: Member name + Return % badge */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2.5 h-2.5 rounded-full ${mColor.bg} shrink-0`} />
+                          <span className="text-[13px] text-white font-bold">{p.label}</span>
+                        </div>
+                        <div className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-extrabold tnum ${isMemGain ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-400/30' : 'bg-red-500/20 text-red-400 border border-red-400/30'}`}>
+                          {isMemGain ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+                          <span>{formatPercent(pnlPct, 1)} Return</span>
+                        </div>
                       </div>
-                      <span className={`text-[11.5px] font-bold tnum ${p.totalPnL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {isBalancesHidden ? 'â€¢â€¢â€¢â€¢' : <>{p.totalPnL >= 0 ? '+' : ''}<AnimatedNumber value={p.totalPnL} formatter={formatINR} /></>}
-                      </span>
+
+                      {/* Bottom row: Net Worth | Invested | Profit */}
+                      <div className="grid grid-cols-3 gap-1 pt-1 border-t border-white/10 text-[11px]">
+                        <div>
+                          <p className="text-[9px] font-medium text-slate-400 uppercase">Net Worth</p>
+                          <p className="text-[11.5px] font-extrabold text-white tnum leading-tight">{renderValue(p.totalCurrentValue)}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-medium text-slate-400 uppercase">Invested</p>
+                          <p className="text-[11.5px] font-bold text-slate-300 tnum leading-tight">{renderValue(p.totalInvested)}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-medium text-slate-400 uppercase">Profit / Loss</p>
+                          <p className={`text-[11.5px] font-extrabold tnum leading-tight ${isMemGain ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {isBalancesHidden ? '••••' : <>{pnl >= 0 ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* â”€â”€ Refresh Status Bar â”€â”€ */}
+      {/* ── Refresh Status Bar ── */}
       <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl text-[11px] bg-white/80 dark:bg-zinc-900/80 backdrop-blur border border-[var(--border-subtle)] shadow-sm">
         <div className="flex items-center gap-2 min-w-0">
           <span className={`w-2 h-2 rounded-full shrink-0 ${priceStatus === 'success' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
           <span className="font-semibold text-slate-600 dark:text-slate-300 shrink-0">{priceStatus === 'success' ? 'Live Prices' : 'Snapshot'}</span>
-          <span className="text-slate-300 dark:text-slate-700 shrink-0">Â·</span>
+          <span className="text-slate-300 dark:text-slate-700 shrink-0">·</span>
           <span className="truncate text-slate-400 dark:text-slate-500">{lastUpdated ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Never'}</span>
         </div>
         <button onClick={onRefresh} disabled={isLoadingPrices} className="flex items-center gap-1.5 font-bold text-[#007aff] dark:text-[#60a5fa] active:opacity-60 transition-opacity shrink-0 ml-2 disabled:opacity-40">
@@ -258,7 +377,7 @@ function MobileHomeSummary({
         </button>
       </div>
 
-      {/* â”€â”€ Asset Allocation Bar â”€â”€ */}
+      {/* ── Asset Allocation Bar ── */}
       {totalValue > 0 && (
         <div className="apple-card p-4 space-y-3">
           <div className="flex items-center justify-between">
@@ -291,7 +410,7 @@ function MobileHomeSummary({
         </div>
       )}
 
-      {/* â”€â”€ Portfolio Alerts Widget â”€â”€ */}
+      {/* ── Portfolio Alerts Widget ── */}
       <button
         onClick={onOpenAlerts}
         className={`w-full flex items-center justify-between p-4 rounded-2xl mobile-asset-card text-left border ${
@@ -323,7 +442,7 @@ function MobileHomeSummary({
         </div>
       </button>
 
-      {/* â”€â”€ Alert Strips â”€â”€ */}
+      {/* ── Alert Strips ── */}
       {alerts.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between px-0.5">
@@ -365,7 +484,7 @@ function MobileHomeSummary({
         </div>
       )}
 
-      {/* â”€â”€ Quick Asset Summary Grid â”€â”€ */}
+      {/* ── Quick Asset Summary Grid ── */}
       <div className="space-y-2.5">
         <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-0.5">Asset Summary</h3>
         <div className="grid grid-cols-2 gap-2.5">
@@ -373,13 +492,19 @@ function MobileHomeSummary({
             <button
               key={card.id}
               onClick={() => onNavigateAsset(card.id)}
-              className={`mobile-card-enter mobile-asset-card relative overflow-hidden bg-gradient-to-br ${card.grad} border ${card.border} rounded-[18px] p-3.5 text-left flex flex-col justify-between h-[108px]`}
+              className={`mobile-card-enter mobile-asset-card relative overflow-hidden bg-gradient-to-br ${card.grad} border ${card.border} rounded-[18px] p-3.5 text-left flex flex-col justify-between h-[116px]`}
               style={{ animationDelay: `${idx * 40}ms` }}
             >
               <div className={`absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full ${card.bar}`} />
               <div className="flex items-center justify-between w-full">
                 <div className={`w-8 h-8 rounded-xl ${card.iconBg} text-white flex items-center justify-center shadow-sm`}>{card.icon}</div>
-                <ChevronRight size={13} className="text-slate-300 dark:text-slate-600" />
+                {card.returnBadge ? (
+                  <span className={`text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-md tnum ${card.isReturnGain ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/15 text-red-600 dark:text-red-400'}`}>
+                    {card.returnBadge}
+                  </span>
+                ) : (
+                  <ChevronRight size={13} className="text-slate-300 dark:text-slate-600" />
+                )}
               </div>
               <div className="mt-1">
                 <p className="text-[9.5px] font-bold text-slate-400 dark:text-slate-500 truncate uppercase tracking-wide leading-none mb-1">{card.label}</p>
@@ -391,7 +516,7 @@ function MobileHomeSummary({
         </div>
       </div>
 
-      {/* â”€â”€ Tools & Calculators â”€â”€ */}
+      {/* ── Tools & Calculators ── */}
       <div className="space-y-2.5 pb-2">
         <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-0.5">Tools & Calculators</h3>
         <button onClick={() => onNavigateAsset('what_if')} className="mobile-asset-card w-full relative overflow-hidden bg-gradient-to-br from-indigo-600 via-blue-600 to-violet-700 rounded-[18px] p-4 text-left shadow-lg shadow-indigo-500/20 flex items-center justify-between">
