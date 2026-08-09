@@ -739,3 +739,14 @@ export function ArrowUpRight({ size = 24, className = '' }: IconProps) {
     </svg>
   );
 }
+
+export function ArrowRightLeft({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="m16 3 4 4-4 4" />
+      <path d="M20 7H4" />
+      <path d="m8 21-4-4 4-4" />
+      <path d="M4 17h16" />
+    </svg>
+  );
+}
