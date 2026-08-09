@@ -39,16 +39,24 @@ export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavi
 
     let target = e.target as HTMLElement | null;
     let levels = 0;
-    while (target && levels < 5) {
+    while (target && levels < 6) {
       const style = window.getComputedStyle(target);
+      const tagName = target.tagName.toLowerCase();
       if (
         style.overflowX === 'scroll' ||
         style.overflowX === 'auto' ||
         target.classList.contains('overflow-x-auto') ||
         target.classList.contains('scroll-fade-right') ||
-        target.tagName.toLowerCase() === 'table'
+        target.classList.contains('no-swipe') ||
+        tagName === 'table' ||
+        tagName === 'input' ||
+        tagName === 'button' ||
+        tagName === 'svg' ||
+        tagName === 'canvas' ||
+        target.closest('[role="dialog"]') ||
+        target.closest('[role="slider"]')
       ) {
-        return; // Ignore swipe inside scrollable container
+        return; // Ignore swipe inside scrollable, interactive, slider, or dialog containers
       }
       target = target.parentElement;
       levels++;
@@ -57,9 +65,16 @@ export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavi
     const diffX = touchStart.current.x - touchEnd.current.x;
     const diffY = touchStart.current.y - touchEnd.current.y;
     const durationMs = Date.now() - touchStart.current.time;
-    const velocity = durationMs > 0 ? Math.abs(diffX) / durationMs : 0;
+    const absX = Math.abs(diffX);
+    const absY = Math.abs(diffY);
+    const velocity = durationMs > 0 ? absX / durationMs : 0;
 
-    if (Math.abs(diffX) > 90 && Math.abs(diffY) < 30 && velocity > 0.3) {
+    // Strict intentional swipe criteria to prevent accidental tab switches:
+    // 1. Min horizontal distance: 130px (calibrated up from 90px)
+    // 2. Max vertical drift: 45px
+    // 3. Dominant horizontal ratio: X movement must be at least 2.5x Y movement
+    // 4. Min swipe velocity: 0.4 px/ms
+    if (absX > 130 && absY < 45 && absX > absY * 2.5 && velocity > 0.4) {
       const tabOrder: AssetTab[] = ['home', 'stocks', 'fd', 'rd', 'sip', 'gold', 'real_estate', 'insurance', 'documents', 'what_if'];
       const currentIndex = tabOrder.indexOf(activeAsset);
 
