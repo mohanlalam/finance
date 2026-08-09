@@ -131,13 +131,3 @@ export default function DesktopSidebar({
     </div>
   );
 }
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
