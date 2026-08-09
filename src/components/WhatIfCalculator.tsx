@@ -227,13 +227,23 @@ export default function WhatIfCalculator() {
 
           {/* Slider 1: Investment Amount */}
           <div className="space-y-2.5">
-            <div className="flex justify-between items-center text-xs">
+            <div className="flex justify-between items-center text-xs gap-2">
               <span className="font-bold text-slate-600 dark:text-slate-400">
                 {calcMode === 'sip' ? 'Monthly SIP Amount' : 'One-time Investment'}
               </span>
-              <span className="font-extrabold text-blue-600 dark:text-blue-400 text-sm">
-                {formatINR(investment)}
-              </span>
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-xl px-2.5 py-1 focus-within:ring-2 focus-within:ring-blue-500/30 transition-all">
+                <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400">₹</span>
+                <input
+                  type="number"
+                  min={calcMode === 'sip' ? 100 : 1000}
+                  max={calcMode === 'sip' ? 5000000 : 50000000}
+                  step={calcMode === 'sip' ? 500 : 5000}
+                  value={investment || ''}
+                  onChange={(e) => setInvestment(Math.max(0, Number(e.target.value)))}
+                  className="w-24 sm:w-28 text-right text-xs sm:text-sm font-extrabold text-blue-600 dark:text-blue-400 bg-transparent focus:outline-none tnum"
+                  aria-label="Enter Investment Amount"
+                />
+              </div>
             </div>
             <input
               type="range"
@@ -253,11 +263,21 @@ export default function WhatIfCalculator() {
 
           {/* Slider 2: Rate of Return */}
           <div className="space-y-2.5">
-            <div className="flex justify-between items-center text-xs">
+            <div className="flex justify-between items-center text-xs gap-2">
               <span className="font-bold text-slate-600 dark:text-slate-400">Expected Annual Return</span>
-              <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-sm">
-                {rate}% p.a.
-              </span>
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-xl px-2.5 py-1 focus-within:ring-2 focus-within:ring-emerald-500/30 transition-all">
+                <input
+                  type="number"
+                  min="0.1"
+                  max="100"
+                  step="0.5"
+                  value={rate || ''}
+                  onChange={(e) => setRate(Math.min(100, Math.max(0, Number(e.target.value))))}
+                  className="w-12 text-right text-xs sm:text-sm font-extrabold text-emerald-600 dark:text-emerald-400 bg-transparent focus:outline-none tnum"
+                  aria-label="Enter Expected Return Percentage"
+                />
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">% p.a.</span>
+              </div>
             </div>
             <input
               type="range"
@@ -277,11 +297,21 @@ export default function WhatIfCalculator() {
 
           {/* Slider 3: Duration */}
           <div className="space-y-2.5">
-            <div className="flex justify-between items-center text-xs">
+            <div className="flex justify-between items-center text-xs gap-2">
               <span className="font-bold text-slate-600 dark:text-slate-400">Duration Period</span>
-              <span className="font-extrabold text-indigo-600 dark:text-indigo-400 text-sm">
-                {duration} Years
-              </span>
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-xl px-2.5 py-1 focus-within:ring-2 focus-within:ring-indigo-500/30 transition-all">
+                <input
+                  type="number"
+                  min="1"
+                  max="50"
+                  step="1"
+                  value={duration || ''}
+                  onChange={(e) => setDuration(Math.min(50, Math.max(1, Number(e.target.value))))}
+                  className="w-10 text-right text-xs sm:text-sm font-extrabold text-indigo-600 dark:text-indigo-400 bg-transparent focus:outline-none tnum"
+                  aria-label="Enter Duration Period in Years"
+                />
+                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">Yrs</span>
+              </div>
             </div>
             <input
               type="range"
