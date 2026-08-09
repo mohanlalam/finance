@@ -308,68 +308,6 @@ function Header({
         </div>
       </div>
     </header>
-                          onClick={onDismissAll}
-                          className="text-[10px] font-semibold text-[#007aff] hover:underline"
-                        >
-                          Dismiss all
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="max-h-64 overflow-y-auto divide-y divide-[var(--border-subtle)]">
-                      {visibleAlerts.length === 0 ? (
-                        <div className="p-5 text-center text-[var(--text-secondary)]">
-                          <Check size={16} className="mx-auto text-[#34C759] mb-1.5" />
-                          <p className="text-xs font-semibold text-[var(--text-primary)]">All caught up!</p>
-                        </div>
-                      ) : (
-                        visibleAlerts.map((alert) => {
-                          const config = ALERTS_TYPE_CONFIG[alert.type] || {
-                            icon: <Bell size={12} />,
-                            color: 'text-[var(--text-secondary)]',
-                            bg: 'bg-slate-50 dark:bg-zinc-850',
-                            border: 'border-slate-200 dark:border-zinc-800',
-                          };
-
-                          return (
-                            <div key={alert.id} className="p-3 hover:bg-slate-50/50 dark:hover:bg-zinc-800/40 transition-colors flex items-start gap-2">
-                              <span className={`shrink-0 p-1 rounded-md border ${config.bg} ${config.border} ${config.color} mt-0.5`}>
-                                {config.icon}
-                              </span>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <p className="text-xs font-semibold text-[var(--text-primary)] truncate">{alert.title}</p>
-                                  {alert.severity === 'critical' && (
-                                    <span className="text-[9px] bg-[#fff0ef] text-[#ff3b30] px-1 rounded font-bold uppercase">
-                                      {alert.severity}
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 leading-snug">{alert.message}</p>
-                                {alert.portfolioLabel && (
-                                  <p className="text-[9px] text-[var(--text-tertiary)] mt-0.5">Portfolio: {alert.portfolioLabel}</p>
-                                )}
-                              </div>
-                              <button
-                                onClick={() => onDismissAlert(alert.id)}
-                                className="shrink-0 p-0.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
-                              >
-                                <X size={11} />
-                              </button>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </header>
   );
 }
 
