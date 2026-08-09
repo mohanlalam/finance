@@ -23,6 +23,12 @@ export interface ImportRow {
   avg_price: number;
 }
 
+export interface ParseResult {
+  parsed: ImportRow[];
+  errors: string[];
+  detectedFormat: string;
+}
+
 /* ── Export helpers ── */
 
 function portfoliosToJSON(portfolios: Portfolio[]): string {
@@ -182,23 +188,56 @@ function parseCSV(text: string): string[][] {
   });
 }
 
-function csvToImportRows(rows: string[][]): { parsed: ImportRow[]; errors: string[] } {
-  if (rows.length < 2) return { parsed: [], errors: ['File is empty or has no data rows'] };
+function csvToImportRows(rows: string[][]): ParseResult {
+  if (rows.length < 2) return { parsed: [], errors: ['File is empty or has no data rows'], detectedFormat: 'Unknown' };
 
   const MAX_IMPORT_ROWS = 500;
   if (rows.length - 1 > MAX_IMPORT_ROWS) {
-    return { parsed: [], errors: [`CSV import exceeds maximum limit of ${MAX_IMPORT_ROWS} rows.`] };
+    return { parsed: [], errors: [`CSV import exceeds maximum limit of ${MAX_IMPORT_ROWS} rows.`], detectedFormat: 'Unknown' };
   }
 
-  const headers = rows[0].map((h) => h.toLowerCase().replace(/[^a-z_]/g, ''));
-  const nameIdx = headers.findIndex((h) => h.includes('stock_name') || h.includes('stockname') || h.includes('name'));
-  const tickerIdx = headers.findIndex((h) => h.includes('ticker') || h.includes('symbol'));
-  const yahooIdx = headers.findIndex((h) => h.includes('yahoo'));
-  const qtyIdx = headers.findIndex((h) => h.includes('qty') || h.includes('quantity'));
-  const priceIdx = headers.findIndex((h) => h.includes('avg') || h.includes('price'));
+  // Normalize header names
+  const rawHeaders = rows[0].map(h => h.trim().toLowerCase().replace(/[^a-z0-9_.]/g, ''));
+
+  // Detect broker format
+  let format = 'Standard CSV Format';
+  if (rawHeaders.some(h => h === 'instrument' || h.includes('avgcost'))) {
+    format = 'Zerodha Holdings';
+  } else if (rawHeaders.some(h => h.includes('groww') || (rawHeaders.includes('stockname') && rawHeaders.includes('symbol')))) {
+    format = 'Groww Holdings';
+  } else if (rawHeaders.includes('isin') && rawHeaders.includes('symbol')) {
+    format = 'CAS / Demat Statement';
+  } else if (rawHeaders.includes('symbol') && rawHeaders.includes('trade_type')) {
+    format = 'Zerodha Tradebook';
+  } else if (rawHeaders.includes('symbol') && (rawHeaders.includes('avgcost') || rawHeaders.includes('avgprice'))) {
+    format = 'AngelOne / Upstox';
+  }
+
+  // Dynamic column matching with fallback lookup
+  const tickerIdx = rawHeaders.findIndex(h =>
+    h === 'symbol' || h === 'ticker' || h === 'instrument' || h === 'tradingsymbol' || h.includes('symbol') || h.includes('ticker')
+  );
+
+  const nameIdx = rawHeaders.findIndex(h =>
+    h.includes('stockname') || h.includes('companyname') || h.includes('name') || h === 'instrument'
+  );
+
+  const qtyIdx = rawHeaders.findIndex(h =>
+    h === 'qty.' || h === 'qty' || h === 'quantity' || h === 'units' || h.includes('qty') || h.includes('quantity')
+  );
+
+  const priceIdx = rawHeaders.findIndex(h =>
+    h === 'avg.cost' || h === 'avgcost' || h === 'averageprice' || h === 'avgprice' || h === 'buyprice' || h === 'costprice' || h.includes('price') || h.includes('cost')
+  );
+
+  const yahooIdx = rawHeaders.findIndex(h => h.includes('yahoo'));
 
   if (tickerIdx === -1 || qtyIdx === -1 || priceIdx === -1) {
-    return { parsed: [], errors: ['CSV must have columns: ticker, qty, avg_price (at minimum)'] };
+    return {
+      parsed: [],
+      errors: ['CSV must contain Ticker/Symbol, Quantity, and Avg Price/Cost columns.'],
+      detectedFormat: format
+    };
   }
 
   const parsed: ImportRow[] = [];
@@ -207,30 +246,41 @@ function csvToImportRows(rows: string[][]): { parsed: ImportRow[]; errors: strin
 
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
-    if (!row || row.length === 0 || row.every((c) => !c.trim())) continue; // Skip blank lines
+    if (!row || row.length === 0 || row.every((c) => !c.trim())) continue;
 
-    // Sanitize string inputs: strip HTML/script tags and special control characters
-    const rawTicker = (row[tickerIdx] || '').trim().replace(/[^\w.-]/g, '').toUpperCase().slice(0, 20);
-    const rawName = nameIdx >= 0 ? (row[nameIdx] || '').trim().replace(/<[^>]*>/g, '').slice(0, 100) : '';
-    const rawYahoo = yahooIdx >= 0 ? (row[yahooIdx] || '').trim().replace(/<[^>]*>/g, '').slice(0, 50) : '';
-    const qty = parseFloat(row[qtyIdx] || '0');
-    const avg_price = parseFloat(row[priceIdx] || '0');
+    // Ticker cleaning: remove exchange suffixes (-EQ, -BE)
+    let rawTicker = (row[tickerIdx] || '').trim().toUpperCase();
+    rawTicker = rawTicker.replace(/-EQ$/, '').replace(/-BE$/, '').replace(/[^\w.-]/g, '').slice(0, 20);
 
-    if (!rawTicker) {
-      errors.push(`Row ${i + 1}: Missing or invalid stock ticker symbol.`);
-      continue;
-    }
+    const rawName = nameIdx >= 0 ? (row[nameIdx] || '').trim().replace(/<[^>]*>/g, '').slice(0, 100) : rawTicker;
+    const rawYahoo = yahooIdx >= 0 ? (row[yahooIdx] || '').trim().replace(/<[^>]*>/g, '').slice(0, 50) : `${rawTicker}.NS`;
+
+    // Clean numeric strings (remove commas, currency symbols like ₹ or $)
+    const cleanQty = (row[qtyIdx] || '0').replace(/[^0-9.]/g, '');
+    const cleanPrice = (row[priceIdx] || '0').replace(/[^0-9.]/g, '');
+
+    const qty = parseFloat(cleanQty);
+    const avg_price = parseFloat(cleanPrice);
+
+    if (!rawTicker) continue;
     if (isNaN(qty) || qty <= 0 || !isFinite(qty) || qty > 10_000_000) {
-      errors.push(`Row ${i + 1} (${rawTicker}): Invalid quantity '${row[qtyIdx]}'. Must be a positive number up to 10,000,000.`);
+      errors.push(`Row ${i + 1} (${rawTicker}): Invalid quantity '${row[qtyIdx]}'.`);
       continue;
     }
     if (isNaN(avg_price) || avg_price < 0 || !isFinite(avg_price) || avg_price > 100_000_000) {
-      errors.push(`Row ${i + 1} (${rawTicker}): Invalid price '${row[priceIdx]}'. Must be a non-negative number up to 100,000,000.`);
+      errors.push(`Row ${i + 1} (${rawTicker}): Invalid price '${row[priceIdx]}'.`);
       continue;
     }
 
     if (seenTickers.has(rawTicker)) {
-      errors.push(`Row ${i + 1}: Duplicate ticker '${rawTicker}' found in CSV. Combine holdings into a single row before importing.`);
+      // Aggregate quantity & weighted average price if same stock appears multiple times
+      const existing = parsed.find(p => p.ticker === rawTicker);
+      if (existing) {
+        const totalQty = existing.qty + qty;
+        const weightedAvgPrice = ((existing.qty * existing.avg_price) + (qty * avg_price)) / totalQty;
+        existing.qty = totalQty;
+        existing.avg_price = weightedAvgPrice;
+      }
       continue;
     }
     seenTickers.add(rawTicker);
@@ -244,7 +294,7 @@ function csvToImportRows(rows: string[][]): { parsed: ImportRow[]; errors: strin
     });
   }
 
-  return { parsed, errors };
+  return { parsed, errors, detectedFormat: format };
 }
 
 /* ── Component ── */
@@ -296,6 +346,8 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
     }
   }
 
+  const [detectedFormat, setDetectedFormat] = useState('');
+
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -304,9 +356,10 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
     reader.onload = () => {
       const text = reader.result as string;
       const rows = parseCSV(text);
-      const { parsed, errors } = csvToImportRows(rows);
+      const { parsed, errors, detectedFormat } = csvToImportRows(rows);
       setImportRows(parsed);
       setImportErrors(errors);
+      setDetectedFormat(detectedFormat);
       setImportDone(false);
       setImportError('');
     };
@@ -397,13 +450,13 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             </button>
 
             <div className="border-t border-slate-100 dark:border-slate-700 my-1" />
-            <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Import</div>
+            <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Import Broker Data</div>
             <button
               onClick={() => { setShowImport(true); setOpen(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/30 transition-colors text-left"
             >
               <Upload size={14} className="text-violet-500" />
-              Import from CSV
+              Import Zerodha / Groww / CAS
             </button>
           </div>
         )}
@@ -412,14 +465,14 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
       <Modal
         isOpen={showImport}
         onClose={() => !importing && setShowImport(false)}
-        ariaLabel="Import Holdings from CSV"
+        ariaLabel="Import Holdings from Broker or CAS CSV"
         preventClose={importing}
         maxWidth="max-w-lg"
       >
         <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center bg-slate-50/50 dark:bg-zinc-800/10">
           <div>
-            <h3 className="text-card-title font-semibold text-slate-800 dark:text-slate-200">Import Holdings from CSV</h3>
-            <p className="text-supporting mt-0.5">Columns: stock_name, ticker, yahoo_symbol, qty, avg_price</p>
+            <h3 className="text-card-title font-semibold text-slate-800 dark:text-slate-200">Import Holdings (Zerodha, Groww, CAS)</h3>
+            <p className="text-supporting mt-0.5">Supports Zerodha, Groww, AngelOne, Upstox & CAS CSV formats</p>
           </div>
           <IconButton
             icon={<X size={15} />}
@@ -431,28 +484,38 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
 
         <div className="px-6 py-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Target Portfolio</label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Target Family Member Portfolio</label>
             <select
               value={importTarget}
               onChange={(e) => setImportTarget(e.target.value)}
-              className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none"
+              className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3.5 py-2.5 text-sm font-semibold text-[var(--text-primary)] focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none"
             >
               {portfolioOptions.map((o) => (
-                <option key={o.name} value={o.name}>{o.label}</option>
+                <option key={o.name} value={o.name}>{o.label} Portfolio</option>
               ))}
             </select>
+            <p className="text-[10.5px] text-slate-400 dark:text-slate-500 mt-1">
+              Select which family member's portfolio to add these imported holdings to.
+            </p>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">CSV File</label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Broker Holdings CSV File</label>
             <input
               ref={fileRef}
               type="file"
               accept=".csv"
               onChange={handleFileSelect}
-              className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none file:mr-3 file:border-0 file:bg-blue-50 dark:file:bg-blue-950/40 file:text-[#007aff] dark:file:text-[#60a5fa] file:text-xs file:font-semibold file:rounded-[10px] file:px-3 file:py-1 cursor-pointer"
+              className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none file:mr-3 file:border-0 file:bg-violet-100 dark:file:bg-violet-950/50 file:text-violet-700 dark:file:text-violet-300 file:text-xs file:font-bold file:rounded-[10px] file:px-3 file:py-1 cursor-pointer"
             />
           </div>
+
+          {detectedFormat && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
+              <span>Format Detected: {detectedFormat}</span>
+            </div>
+          )}
 
           {importErrors.length > 0 && (
             <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-250 dark:border-amber-900/50 rounded-[14px] px-3 py-2 text-xs text-amber-700 dark:text-amber-400 max-h-24 overflow-y-auto">
@@ -462,16 +525,21 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
 
           {importRows.length > 0 && (
             <div className="bg-slate-50 dark:bg-zinc-800/10 border border-[var(--border-subtle)] rounded-[14px] overflow-hidden">
-              <div className="px-3 py-2 bg-slate-100 dark:bg-zinc-850 text-[10px] font-bold text-slate-550 dark:text-slate-400 uppercase tracking-wider">
-                Preview — {importRows.length} holdings
+              <div className="px-3 py-2 bg-slate-100 dark:bg-zinc-850 flex items-center justify-between text-[10px] font-bold text-slate-550 dark:text-slate-400 uppercase tracking-wider">
+                <span>Holdings Preview ({importRows.length} stocks)</span>
+                <span className="text-blue-600 dark:text-blue-400 font-extrabold">Total: ₹{importRows.reduce((sum, r) => sum + (r.qty * r.avg_price), 0).toLocaleString('en-IN')}</span>
               </div>
-              <div className="max-h-40 overflow-y-auto divide-y divide-[var(--border-subtle)]">
+              <div className="max-h-48 overflow-y-auto divide-y divide-[var(--border-subtle)]">
                 {importRows.slice(0, 20).map((r, i) => (
-                  <div key={i} className="px-3 py-1.5 flex items-center gap-3 text-xs dark:text-slate-350">
-                    <span className="font-bold text-slate-700 dark:text-slate-200 w-16 truncate">{r.ticker}</span>
-                    <span className="text-slate-500 dark:text-slate-400 flex-1 truncate">{r.stock_name}</span>
-                    <span className="text-slate-400 dark:text-slate-500">×{r.qty}</span>
-                    <span className="text-slate-400 dark:text-slate-500 tnum">₹{r.avg_price.toLocaleString('en-IN')}</span>
+                  <div key={i} className="px-3 py-2 flex items-center justify-between text-xs dark:text-slate-350">
+                    <div className="min-w-0 flex-1 pr-2">
+                      <span className="font-bold text-slate-700 dark:text-slate-200 mr-2">{r.ticker}</span>
+                      <span className="text-slate-500 dark:text-slate-400 text-[11px] truncate">{r.stock_name}</span>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-slate-500 dark:text-slate-400 font-semibold mr-2">{r.qty} Qty</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-100 tnum">₹{r.avg_price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                    </div>
                   </div>
                 ))}
                 {importRows.length > 20 && (
@@ -484,8 +552,8 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
           )}
 
           {importDone && (
-            <div className="flex items-center gap-2 text-xs text-emerald-650 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 rounded-[14px] px-3 py-2">
-              <CheckCircle size={14} /> Import successful!
+            <div className="flex items-center gap-2 text-xs font-bold text-emerald-650 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 rounded-[14px] px-3.5 py-2.5">
+              <CheckCircle size={15} /> Successfully imported {importRows.length} holdings into {portfolioOptions.find(p => p.name === importTarget)?.label || importTarget}!
             </div>
           )}
 
@@ -512,7 +580,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
               className="flex-1"
             >
               {importing ? <Loader2 size={14} className="animate-spin mr-1.5" /> : <Upload size={14} className="mr-1.5" />}
-              {importing ? 'Importing...' : `Import ${importRows.length} holdings`}
+              {importing ? 'Importing...' : `Import into ${portfolioOptions.find(p => p.name === importTarget)?.label || 'Portfolio'}`}
             </Button>
           </div>
         </div>
