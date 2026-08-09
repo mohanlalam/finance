@@ -482,7 +482,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
           />
         </div>
 
-        <div className="px-6 py-5 space-y-4">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Target Family Member Portfolio</label>
             <select

@@ -188,7 +188,7 @@ export default function Modal({
   return (
     <div
       ref={overlayRef}
-      className={`fixed inset-0 z-[300] flex items-start sm:items-center justify-center p-3 sm:p-6 overflow-y-auto ${isExiting ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop'}`}
+      className={`fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-6 overflow-y-auto ${isExiting ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop'}`}
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
@@ -201,10 +201,10 @@ export default function Modal({
         aria-hidden="true"
       />
 
-      {/* Content wrapper: slides up on mobile, scales on desktop, draggable */}
+      {/* Content wrapper: centered on screen, draggable, constrained height */}
       <div
         ref={contentRef}
-        className={`relative bg-[var(--surface)] text-[var(--text-primary)] rounded-2xl shadow-floating w-full ${maxWidth} max-h-[calc(100vh-5rem)] sm:max-h-[72vh] my-auto flex flex-col min-h-0 overflow-hidden ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
+        className={`relative bg-[var(--surface)] text-[var(--text-primary)] rounded-2xl shadow-floating w-full ${maxWidth} max-h-[88vh] sm:max-h-[84vh] my-auto flex flex-col min-h-0 overflow-hidden ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
         style={hasDragOffset ? { transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)` } : undefined}
         onPointerDown={handlePointerDown}
       >
