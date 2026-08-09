@@ -81,43 +81,43 @@ function MobileHomeSummary({
 
   // Counts for each asset type
   const stockCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.holdings.length;
-    return portfolios.reduce((sum, p) => sum + p.holdings.length, 0);
+    if (activePortfolio) return activePortfolio.holdings?.length || 0;
+    return portfolios.reduce((sum, p) => sum + (p.holdings?.length || 0), 0);
   }, [activePortfolio, portfolios]);
 
   const fdCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.fixedDeposits.length;
-    return portfolios.reduce((sum, p) => sum + p.fixedDeposits.length, 0);
+    if (activePortfolio) return activePortfolio.fixedDeposits?.length || 0;
+    return portfolios.reduce((sum, p) => sum + (p.fixedDeposits?.length || 0), 0);
   }, [activePortfolio, portfolios]);
 
   const rdCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.recurringDeposits.length;
-    return portfolios.reduce((sum, p) => sum + p.recurringDeposits.length, 0);
+    if (activePortfolio) return activePortfolio.recurringDeposits?.length || 0;
+    return portfolios.reduce((sum, p) => sum + (p.recurringDeposits?.length || 0), 0);
   }, [activePortfolio, portfolios]);
 
   const sipCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.sips.length;
-    return portfolios.reduce((sum, p) => sum + p.sips.length, 0);
+    if (activePortfolio) return activePortfolio.sips?.length || 0;
+    return portfolios.reduce((sum, p) => sum + (p.sips?.length || 0), 0);
   }, [activePortfolio, portfolios]);
 
   const goldCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.goldHoldings.length;
-    return portfolios.reduce((sum, p) => sum + p.goldHoldings.length, 0);
+    if (activePortfolio) return activePortfolio.goldHoldings?.length || 0;
+    return portfolios.reduce((sum, p) => sum + (p.goldHoldings?.length || 0), 0);
   }, [activePortfolio, portfolios]);
 
   const propertyCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.realEstateProperties.length;
-    return portfolios.reduce((sum, p) => sum + p.realEstateProperties.length, 0);
+    if (activePortfolio) return activePortfolio.realEstateProperties?.length || 0;
+    return portfolios.reduce((sum, p) => sum + (p.realEstateProperties?.length || 0), 0);
   }, [activePortfolio, portfolios]);
 
   const insuranceCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.insurancePolicies.length;
-    return portfolios.reduce((sum, p) => sum + p.insurancePolicies.length, 0);
+    if (activePortfolio) return activePortfolio.insurancePolicies?.length || 0;
+    return portfolios.reduce((sum, p) => sum + (p.insurancePolicies?.length || 0), 0);
   }, [activePortfolio, portfolios]);
 
   const docCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.documents.length;
-    return portfolios.reduce((sum, p) => sum + p.documents.length, 0);
+    if (activePortfolio) return activePortfolio.documents?.length || 0;
+    return portfolios.reduce((sum, p) => sum + (p.documents?.length || 0), 0);
   }, [activePortfolio, portfolios]);
 
   const totalAllocated = useMemo(() => {
