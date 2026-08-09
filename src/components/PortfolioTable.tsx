@@ -344,14 +344,20 @@ export default React.memo(function PortfolioTable({
                 className={`py-3 flex flex-col gap-2 transition-opacity ${isDeleting ? 'opacity-40' : ''}`}
               >
                 <div className="flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="inline-block bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-                        {h.ticker}
-                      </span>
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[150px]">
-                        {h.stockName}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500/15 to-indigo-500/15 text-blue-600 dark:text-blue-400 font-extrabold text-xs flex items-center justify-center shrink-0 border border-blue-200/40 dark:border-blue-800/30 uppercase">
+                        {h.ticker.slice(0, 2)}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="inline-block bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-[10px] font-extrabold px-1.5 py-0.5 rounded-md">
+                            {h.ticker}
+                          </span>
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[150px]">
+                            {h.stockName}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                     {isEditing ? (
                       <div className="mt-2 space-y-2 border border-blue-200 dark:border-blue-900/50 bg-blue-50/20 dark:bg-blue-950/20 rounded-lg p-2">
@@ -510,8 +516,13 @@ export default React.memo(function PortfolioTable({
                   key={`${h.ticker}-${h.sno}`}
                   className={`hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors ${isDeleting ? 'opacity-40' : ''}`}
                 >
-                  <td role="cell" className="px-2 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 max-w-[140px]">
-                    <span className="truncate block" title={h.stockName}>{h.stockName}</span>
+                  <td role="cell" className="px-2 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 max-w-[160px]">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500/15 to-indigo-500/15 text-blue-600 dark:text-blue-400 font-extrabold text-[11px] flex items-center justify-center shrink-0 border border-blue-200/40 dark:border-blue-800/30 uppercase">
+                        {h.ticker.slice(0, 2)}
+                      </div>
+                      <span className="truncate block font-semibold" title={h.stockName}>{h.stockName}</span>
+                    </div>
                   </td>
                   <td role="cell" className="px-2 py-3">
                     <span className="inline-block bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-xs font-bold px-2 py-0.5 rounded-md">{h.ticker}</span>

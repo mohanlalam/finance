@@ -111,17 +111,17 @@ function Header({
         <div className="flex items-center justify-between h-14">
           
           {/* Left: App Logo & Selected Context */}
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-[10px] bg-[#007aff] flex items-center justify-center shadow-sm">
-              <TrendingUp size={15} className="text-white" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 via-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/25 transition-transform duration-200 hover:scale-105">
+              <TrendingUp size={16} className="text-white" />
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
-              <span className="text-sm font-semibold tracking-tight">Family Portfolio</span>
-              {activePortfolioLabel && (
-                <span className="text-[11px] text-[var(--text-secondary)] font-normal hidden sm:inline">
-                  • {activePortfolioLabel}
-                </span>
-              )}
+            <div className="flex flex-col">
+              <span className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+                Family Wealth
+              </span>
+              <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 leading-none">
+                {activePortfolioLabel || 'Portfolio Tracker'}
+              </span>
             </div>
           </div>
 
@@ -131,14 +131,14 @@ function Header({
             {/* Value Indicators (Neutral Net Worth, subtle colored P&L) */}
             <div className="flex items-center gap-2.5 text-right">
               <div className="flex flex-col">
-                <span className="text-xs font-semibold tnum leading-tight">
+                <span className="text-xs font-extrabold tnum leading-tight text-slate-900 dark:text-white">
                   {formatINR(totalCurrentValue)}
                 </span>
-                <span className="text-[10px] text-[var(--text-secondary)] leading-none mt-0.5">
+                <span className="text-[10px] text-[var(--text-secondary)] font-semibold leading-none mt-0.5">
                   Net Worth
                 </span>
               </div>
-              <Badge variant={isGain ? 'positive' : 'negative'} className="text-[10px] py-0">
+              <Badge variant={isGain ? 'positive' : 'negative'} className="text-[10.5px] font-extrabold px-2 py-0.5">
                 {formatPercent(totalPnLPercent, 1)}
               </Badge>
             </div>
