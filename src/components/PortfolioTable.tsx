@@ -254,7 +254,7 @@ export default React.memo(function PortfolioTable({
   }, [editingId]);
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs overflow-hidden">
       {/* Quick Filters */}
       <div className="px-4 pt-4 pb-2 flex items-center gap-2 overflow-x-auto">
         {[

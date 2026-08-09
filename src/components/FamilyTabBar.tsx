@@ -49,11 +49,11 @@ export default React.memo(function FamilyTabBar({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
       
-      {/* Apple-style segmented track */}
+      {/* Segmented Track */}
       <div
         role="tablist"
         aria-label="Family members portfolios"
-        className="flex flex-wrap items-center gap-1.5 bg-[#f2f2f7] dark:bg-zinc-800 p-1.5 rounded-2xl border border-slate-200/40 dark:border-zinc-700/30 max-w-full"
+        className="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-800/90 p-1 rounded-lg border border-slate-200/60 dark:border-slate-700/60 max-w-full"
       >
         {/* Overview Tab */}
         <button
@@ -62,14 +62,14 @@ export default React.memo(function FamilyTabBar({
           aria-controls="portfolio-content"
           id="tab-all"
           onClick={() => onTabChange('all')}
-          className={`flex items-center gap-2 h-9 px-3.5 rounded-xl text-xs font-bold transition-all duration-200 outline-none shrink-0 ${
+          className={`flex items-center gap-2 h-8 px-3 rounded-md text-xs font-bold transition-all outline-none shrink-0 ${
             activeTab === 'all'
-              ? 'bg-white text-[#1d1d1f] shadow-sm dark:bg-zinc-700 dark:text-[#f5f5f7]'
-              : 'text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#98989d] dark:hover:text-[#f5f5f7]'
+              ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600'
+              : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
           }`}
         >
-          <div className="w-5 h-5 rounded-lg bg-indigo-500/15 dark:bg-indigo-400/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-            <LayoutDashboard size={13} />
+          <div className="w-4 h-4 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+            <LayoutDashboard size={12} />
           </div>
           <span>Family Overview</span>
         </button>
@@ -88,14 +88,14 @@ export default React.memo(function FamilyTabBar({
                 aria-controls="portfolio-content"
                 id={`tab-${p.name}`}
                 onClick={() => onTabChange(p.name)}
-                className={`flex items-center gap-2 h-9 px-3.5 rounded-xl text-xs font-bold transition-all duration-200 outline-none ${
+                className={`flex items-center gap-2 h-8 px-3 rounded-md text-xs font-bold transition-all outline-none ${
                   isActive
-                    ? 'bg-white text-[#1d1d1f] shadow-sm dark:bg-zinc-700 dark:text-[#f5f5f7]'
-                    : 'text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#98989d] dark:hover:text-[#f5f5f7]'
+                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600'
+                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
                 {/* Styled icon badge */}
-                <div className={`w-5 h-5 rounded-lg ${iconConfig.bg} ${iconConfig.text} flex items-center justify-center shrink-0`}>
+                <div className={`w-4 h-4 rounded ${iconConfig.bg} ${iconConfig.text} flex items-center justify-center shrink-0`}>
                   {iconConfig.icon}
                 </div>
 
@@ -103,10 +103,10 @@ export default React.memo(function FamilyTabBar({
 
                 {/* Return Percentage Badge */}
                 <span
-                  className={`text-[10.5px] font-extrabold px-1.5 py-0.5 rounded-md tnum transition-colors ${
+                  className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded tnum transition-colors ${
                     isPositive
-                      ? 'bg-emerald-500/10 text-[#34C759] dark:bg-emerald-500/20 dark:text-[#34C759]'
-                      : 'bg-red-500/10 text-[#ff3b30] dark:bg-red-500/20 dark:text-[#ff3b30]'
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                      : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
                   }`}
                 >
                   {formatPercent(p.totalPnLPercent, 1)}

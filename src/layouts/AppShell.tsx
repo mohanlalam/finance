@@ -269,7 +269,7 @@ export default function AppShell() {
         <LazyChartWrapper
           importFunc={() => import('../components/NetWorthTimelineChart')}
           placeholderHeight={370}
-          fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}
+          fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
           props={{ history: netWorthHistory, currentNetWorth: summaryData.totalCurrentValue }}
         />
       </SectionErrorBoundary>
@@ -278,7 +278,7 @@ export default function AppShell() {
     const portfolioAssistant = (
       <SectionErrorBoundary sectionName="AI Portfolio Assistant">
         <LazyViewport placeholderHeight={370}>
-          <Suspense fallback={<div className="h-[370px] bg-slate-900 border border-slate-700/60 rounded-2xl animate-pulse" />}>
+          <Suspense fallback={<div className="h-[370px] bg-slate-900 border border-slate-700/60 rounded-xl animate-pulse" />}>
             <PortfolioAssistant portfolios={portfolios} />
           </Suspense>
         </LazyViewport>
@@ -288,7 +288,7 @@ export default function AppShell() {
     const pieChart = (
       <SectionErrorBoundary sectionName="Asset Class Pie Chart">
         <LazyViewport placeholderHeight={370}>
-          <Suspense fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+          <Suspense fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
             <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
           </Suspense>
         </LazyViewport>
@@ -298,7 +298,7 @@ export default function AppShell() {
     const barChart = (
       <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
         <LazyViewport placeholderHeight={370}>
-          <Suspense fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+          <Suspense fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
             <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
           </Suspense>
         </LazyViewport>
@@ -412,9 +412,8 @@ export default function AppShell() {
       onTouchStart={handleCombinedTouchStart}
       onTouchMove={handleCombinedTouchMove}
       onTouchEnd={handleCombinedTouchEnd}
-      className="min-h-screen bg-[var(--app-background)] pb-safe-content md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden aurora-mesh-bg"
+      className="min-h-screen bg-[var(--app-background)] pb-safe-content md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden"
     >
-      <div className="aurora-mesh-orb-bottom" />
       {/* Pull to refresh indicator */}
       {(ptr.pullDistance > 0 || ptr.isRefreshing) && (
         <div className="absolute top-4 left-0 right-0 flex justify-center z-50 pointer-events-none">

@@ -128,6 +128,34 @@ The application implements a series of high-performance strategies to guarantee 
 
 ---
 
+## 🎨 Clean Data-First Design System Architecture
+
+The application enforces a calm, professional, data-first design system engineered for maximum financial clarity and scannability:
+
+### 1. Flat Surface & Neutral Canvas
+* **Background Canvas**: Flat background system (`#f8fafc` light / `#090d16` dark) with zero background mesh noise or animated glowing orbs, providing optimal contrast for complex financial data.
+* **Single Card Surface (`.apple-card`)**: Standardized solid surface (`var(--surface)`), 1px crisp border (`var(--border-subtle)`), and quiet static shadows (`var(--shadow-card)`). Eliminates redundant glassmorphic layers.
+
+### 2. Tightened Border Radius Tokens (8-12px)
+* `--radius-small`: `6px`
+* `--radius-medium`: `10px`
+* `--radius-large`: `12px`
+* Crisp, professional geometry across all cards, table containers, form controls, and modals.
+
+### 3. Compact Financial Typography Scale
+* **`.text-financial`**: Compacted desktop size to `26px` (`22px` mobile) with tabular font features (`.tnum` / `font-variant-numeric: tabular-nums`). Preserves bold visual hierarchy without overcrowding dense card containers.
+
+### 4. Standardized Status & Functional Palette
+* **Blue (`#2563eb`)**: Primary controls, active navigation indicators, neutral info badges.
+* **Amber (`#d97706`)**: Warnings, stale pricing status, upcoming maturity alerts.
+* **Green (`#16a34a`) & Red (`#dc2626`)**: Strictly reserved for positive gain and negative loss financial indicators.
+
+### 5. Quiet Hover Signals & Calibrated Touch Controls
+* Card hovers quietly signal clickability via subtle border highlight (`rgba(0, 0, 0, 0.15)` light / `rgba(255, 255, 255, 0.18)` dark) without layout-lifting motion (`translateY(-2px)`).
+* Touch swipe navigation calibrated with a strict `130px` distance threshold, `2.5x` horizontal-to-vertical ratio, and automatic interactive control exclusion.
+
+---
+
 ## 💾 Database Schema & Table Mappings
 
 Every deposit registry maps to its own separate database table. This guarantees clean migrations and isolation of relational data:
