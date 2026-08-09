@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 interface ModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface ModalProps {
 /**
  * Reusable modal wrapper with Apple bottom-sheet behavior on mobile:
  * - Slide-up drawer on mobile devices, centered panel on desktop
+ * - React Portal rendering (escapes parent stacking contexts)
  * - Frosted backdrop blur filter
  * - Focus trap (Tab cycles within modal)
  * - Escape key to close
@@ -185,10 +187,10 @@ export default function Modal({
 
   const hasDragOffset = dragOffset.x !== 0 || dragOffset.y !== 0;
 
-  return (
+  const modalContentNode = (
     <div
       ref={overlayRef}
-      className={`fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-6 overflow-y-auto ${isExiting ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop'}`}
+      className={`fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 overflow-y-auto ${isExiting ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop'}`}
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
@@ -196,15 +198,15 @@ export default function Modal({
     >
       {/* Backdrop (high blur frosted panel) */}
       <div
-        className="absolute inset-0 bg-[#000000]/30 dark:bg-[#000000]/60 backdrop-blur-md"
+        className="fixed inset-0 bg-[#000000]/60 dark:bg-[#000000]/80 backdrop-blur-md"
         onClick={() => !preventClose && onClose()}
         aria-hidden="true"
       />
 
-      {/* Content wrapper: centered on screen, draggable, constrained height */}
+      {/* Content wrapper: centered on screen, draggable, top z-index */}
       <div
         ref={contentRef}
-        className={`relative bg-[var(--surface)] text-[var(--text-primary)] rounded-2xl shadow-floating w-full ${maxWidth} max-h-[88vh] sm:max-h-[84vh] my-auto flex flex-col min-h-0 overflow-hidden ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
+        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-2xl shadow-2xl w-full ${maxWidth} max-h-[85vh] sm:max-h-[80vh] my-auto flex flex-col min-h-0 overflow-hidden ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
         style={hasDragOffset ? { transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)` } : undefined}
         onPointerDown={handlePointerDown}
       >
@@ -216,4 +218,6 @@ export default function Modal({
       </div>
     </div>
   );
+
+  return createPortal(modalContentNode, document.body);
 }
