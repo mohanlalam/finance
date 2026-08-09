@@ -1,8 +1,8 @@
-import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, Calculator, TrendingDown } from '../components/icons/AppIcons';
+import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, Calculator, TrendingDown, Pencil, Plus } from '../components/icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
 
 export interface DesktopSidebarProps {
-  activeTab: string; // The active asset tab (e.g., 'stocks', 'fd')
+  activeTab: string;
   onTabChange: (tabId: string) => void;
   portfolios: Portfolio[];
   selectedPortfolioId: string;
@@ -20,62 +20,69 @@ export default function DesktopSidebar({
   onOpenAddFamily,
   onOpenRename
 }: DesktopSidebarProps) {
+  const getNavItemClass = (isActive: boolean) =>
+    `flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-md text-xs font-bold transition-all outline-none ${
+      isActive
+        ? 'bg-blue-50/80 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border-l-2 border-blue-600 dark:border-blue-500 shadow-2xs'
+        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-200 border-l-2 border-transparent'
+    }`;
+
   return (
-    <div role="tablist" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-64 self-start sticky top-6">
-      {/* Portfolio Selector Placeholder (could be a dropdown if desired, for now keeping simple) */}
-      <div className="mb-6">
-        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Portfolios</h3>
-        <div className="space-y-1">
+    <div role="tablist" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-60 self-start sticky top-6">
+      {/* Portfolios Section */}
+      <div className="mb-5">
+        <h3 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-3">
+          Family Members
+        </h3>
+        <div className="space-y-0.5">
           <button
             onClick={() => onSelectPortfolio('all')}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-              selectedPortfolioId === 'all'
-                ? 'bg-[#eaf3ff] text-[#007aff] dark:bg-blue-950/20 dark:text-[#60a5fa] font-bold'
-                : 'text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
+            className={getNavItemClass(selectedPortfolioId === 'all')}
           >
             Family Overview
           </button>
-          {portfolios.map(p => (
+          {portfolios.map((p) => (
             <div key={p.name} className="flex items-center group">
               <button
                 onClick={() => onSelectPortfolio(p.name)}
-                className={`flex-1 text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                  selectedPortfolioId === p.name
-                    ? 'bg-[#eaf3ff] text-[#007aff] dark:bg-blue-950/20 dark:text-[#60a5fa] font-bold'
-                    : 'text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
+                className={getNavItemClass(selectedPortfolioId === p.name)}
               >
                 {p.label}
               </button>
               <button
                 onClick={() => onOpenRename({ id: p.id, name: p.name, label: p.label })}
-                className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-slate-600 transition-opacity"
+                className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-opacity"
+                title={`Rename ${p.label}`}
+                aria-label={`Rename ${p.label}`}
               >
-                ✏️
+                <Pencil size={13} />
               </button>
             </div>
           ))}
           <button
             onClick={onOpenAddFamily}
-            className="w-full text-left px-3 py-2 rounded-lg text-sm text-[#007aff] dark:text-[#60a5fa] hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors mt-2"
+            className="flex items-center gap-1.5 w-full text-left px-3 py-1.5 rounded-md text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors mt-1"
           >
-            + Add Member
+            <Plus size={13} />
+            <span>Add Member</span>
           </button>
         </div>
       </div>
 
-      <div className="mb-6">
-        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Assets</h3>
-        <div className="space-y-1">
+      {/* Assets Section */}
+      <div className="mb-5">
+        <h3 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-3">
+          Assets &amp; Holdings
+        </h3>
+        <div className="space-y-0.5">
           {([
-            { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={16} /> },
-            { id: 'fd', label: 'Fixed Deposits', icon: <Landmark size={16} /> },
-            { id: 'rd', label: 'Recurring Deposits', icon: <Clock size={16} /> },
-            { id: 'sip', label: 'SIP Mutual Funds', icon: <TrendingUp size={16} /> },
-            { id: 'gold', label: 'Gold Holdings', icon: <Coins size={16} /> },
-            { id: 'real_estate', label: 'Real Estate', icon: <Home size={16} /> },
-            { id: 'insurance', label: 'Insurance Cover', icon: <Shield size={16} /> },
+            { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={14} /> },
+            { id: 'fd', label: 'Fixed Deposits', icon: <Landmark size={14} /> },
+            { id: 'rd', label: 'Recurring Deposits', icon: <Clock size={14} /> },
+            { id: 'sip', label: 'SIP Mutual Funds', icon: <TrendingUp size={14} /> },
+            { id: 'gold', label: 'Gold Holdings', icon: <Coins size={14} /> },
+            { id: 'real_estate', label: 'Real Estate', icon: <Home size={14} /> },
+            { id: 'insurance', label: 'Insurance Cover', icon: <Shield size={14} /> },
           ] as const).map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -84,11 +91,7 @@ export default function DesktopSidebar({
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => onTabChange(tab.id)}
-                className={`flex items-center gap-3 w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                  isActive
-                    ? 'bg-[#eaf3ff] text-[#007aff] dark:bg-blue-950/20 dark:text-[#60a5fa] font-bold'
-                    : 'text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
+                className={getNavItemClass(isActive)}
               >
                 {tab.icon}
                 <span>{tab.label}</span>
@@ -98,13 +101,16 @@ export default function DesktopSidebar({
         </div>
       </div>
 
+      {/* Tools Section */}
       <div>
-        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Tools</h3>
-        <div className="space-y-1">
+        <h3 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-3">
+          Tools &amp; Vault
+        </h3>
+        <div className="space-y-0.5">
           {([
-            { id: 'documents', label: 'Vault', icon: <FolderOpen size={16} /> },
-            { id: 'what_if', label: 'What-If Calc', icon: <Calculator size={16} /> },
-            { id: 'tax', label: 'Tax Harvesting', icon: <TrendingDown size={16} /> },
+            { id: 'documents', label: 'Document Vault', icon: <FolderOpen size={14} /> },
+            { id: 'what_if', label: 'What-If Calculator', icon: <Calculator size={14} /> },
+            { id: 'tax', label: 'Tax Harvesting', icon: <TrendingDown size={14} /> },
           ] as const).map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -113,12 +119,18 @@ export default function DesktopSidebar({
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => onTabChange(tab.id)}
-                className={`flex items-center gap-3 w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                  isActive
-                    ? 'bg-[#eaf3ff] text-[#007aff] dark:bg-blue-950/20 dark:text-[#60a5fa] font-bold'
-                    : 'text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
+                className={getNavItemClass(isActive)}
               >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
                 {tab.icon}
                 <span>{tab.label}</span>
               </button>
