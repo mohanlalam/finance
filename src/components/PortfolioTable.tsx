@@ -349,16 +349,9 @@ export default React.memo(function PortfolioTable({
                       <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500/15 to-indigo-500/15 text-blue-600 dark:text-blue-400 font-extrabold text-xs flex items-center justify-center shrink-0 border border-blue-200/40 dark:border-blue-800/30 uppercase">
                         {h.ticker.slice(0, 2)}
                       </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="inline-block bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-[10px] font-extrabold px-1.5 py-0.5 rounded-md">
-                            {h.ticker}
-                          </span>
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[150px]">
-                            {h.stockName}
-                          </span>
-                        </div>
-                      </div>
+                      <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100 tracking-tight" title={h.stockName}>
+                        {h.ticker}
+                      </span>
                     </div>
                     {isEditing ? (
                       <div className="mt-2 space-y-2 border border-blue-200 dark:border-blue-900/50 bg-blue-50/20 dark:bg-blue-950/20 rounded-lg p-2">
@@ -484,8 +477,7 @@ export default React.memo(function PortfolioTable({
         <table role="table" className="w-full">
           <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700">
             <tr role="row">
-              <Th label="Stock" k="stockName" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
-              <Th label="Ticker" k="ticker" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
+              <Th label="Ticker Symbol" k="ticker" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
               <Th label="Qty" k="qty" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
               <Th label="Avg Price" k="avgPrice" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
               <Th label="LTP" k="ltp" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
@@ -501,7 +493,7 @@ export default React.memo(function PortfolioTable({
           <tbody className="divide-y divide-slate-50 dark:divide-slate-700/40" role="rowgroup">
             {sorted.length === 0 ? (
               <tr role="row">
-                <td role="cell" colSpan={(onDelete || onUpdate) ? 12 : 11} className="p-4">
+                <td role="cell" colSpan={(onDelete || onUpdate) ? 11 : 10} className="p-4">
                   <EmptyState 
                     type="stocks" 
                     title="No stock holdings yet" 
@@ -517,16 +509,15 @@ export default React.memo(function PortfolioTable({
                   key={`${h.ticker}-${h.sno}`}
                   className={`hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors ${isDeleting ? 'opacity-40' : ''}`}
                 >
-                  <td role="cell" className="px-2 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 max-w-[160px]">
-                    <div className="flex items-center gap-2 min-w-0">
+                  <td role="cell" className="px-2 py-3 text-sm font-bold text-slate-800 dark:text-slate-200">
+                    <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500/15 to-indigo-500/15 text-blue-600 dark:text-blue-400 font-extrabold text-[11px] flex items-center justify-center shrink-0 border border-blue-200/40 dark:border-blue-800/30 uppercase">
                         {h.ticker.slice(0, 2)}
                       </div>
-                      <span className="truncate block font-semibold" title={h.stockName}>{h.stockName}</span>
+                      <span className="font-extrabold text-slate-900 dark:text-slate-100 tracking-tight" title={h.stockName}>
+                        {h.ticker}
+                      </span>
                     </div>
-                  </td>
-                  <td role="cell" className="px-2 py-3">
-                    <span className="inline-block bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-xs font-bold px-2 py-0.5 rounded-md">{h.ticker}</span>
                   </td>
                   <td role="cell" className="px-2 py-3 text-sm text-slate-600 dark:text-slate-300 text-right">
                     {editingId === h.id ? (
