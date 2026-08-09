@@ -412,24 +412,81 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
   const fetchLivePrices = useCallback(async (holdings: Holding[]): Promise<Record<string, { ltp: number; todayPct: number }>> => {
     if (holdings.length === 0) return {};
-    const uniqueSymbols = Array.from(
-      new Map(holdings.map((h) => [h.yahooSymbol, { ticker: h.ticker, yahooSymbol: h.yahooSymbol }])).values()
+
+    const SYMBOL_ALIASES: Record<string, string[]> = {
+      MOMENTUM50: ['MOM50.NS', 'MOMENTUM.NS', 'MOM30.NS', 'MOMENTUM50.NS'],
+      MOMENTUM: ['MOMENTUM.NS', 'MOM50.NS', 'MOM30.NS'],
+      MOM50: ['MOM50.NS', 'MOMENTUM50.NS', 'MOMENTUM.NS'],
+      ALPHA50: ['ALPHA50.NS', 'ALPHA.NS'],
+      ALPHA: ['ALPHA.NS', 'ALPHA50.NS'],
+      MIDCAP: ['MID150BEES.NS', 'MIDCAP.NS'],
+      MID150BEES: ['MID150BEES.NS', 'MIDCAPBEES.NS'],
+      JUNIORBEES: ['JUNIORBEES.NS', 'NEXT50.NS'],
+      NEXT50: ['NEXT50.NS', 'JUNIORBEES.NS'],
+      SENSEX: ['SENSEXBEES.NS', 'BSESENSEX.NS'],
+      SMALLCAP: ['SMALLCAP.NS', 'HDFCSMALL.NS'],
+    };
+
+    // Build query items with candidate symbols for aliases
+    const queryItems: { ticker: string; yahooSymbol: string; candidates: string[] }[] = [];
+
+    holdings.forEach((h) => {
+      const cleanTicker = (h.ticker || '').toUpperCase().trim();
+      const cleanYahoo = (h.yahooSymbol || '').toUpperCase().trim();
+      const aliasCandidates = SYMBOL_ALIASES[cleanTicker] || [];
+
+      // Ensure primary yahooSymbol is in candidates list first
+      const candidates = Array.from(new Set([cleanYahoo, `${cleanTicker}.NS`, ...aliasCandidates])).filter(Boolean);
+      queryItems.push({
+        ticker: h.ticker,
+        yahooSymbol: h.yahooSymbol,
+        candidates,
+      });
+    });
+
+    // Flatten unique symbols to request from market-data API
+    const symbolsToFetch = Array.from(
+      new Map(
+        queryItems.flatMap((item) =>
+          item.candidates.map((c) => [c, { ticker: item.ticker, yahooSymbol: c }])
+        )
+      ).values()
     );
+
     const json = await invokeFunction<{ data: QuoteResult[] }>('market-data', {
       method: 'POST',
-      body: { symbols: uniqueSymbols },
+      body: { symbols: symbolsToFetch },
     });
-    const map: Record<string, { ltp: number; todayPct: number }> = {};
-    const failed: string[] = [];
+
+    const resultMap = new Map<string, { ltp: number; todayPct: number }>();
     json.data.forEach((r) => {
-      const sym = uniqueSymbols.find((s) => s.ticker === r.ticker);
-      if (!sym) return;
       if (r.ltp !== null && r.todayPct !== null) {
-        map[sym.yahooSymbol] = { ltp: r.ltp, todayPct: r.todayPct };
-      } else {
-        failed.push(r.ticker);
+        resultMap.set(r.ticker.toUpperCase(), { ltp: r.ltp, todayPct: r.todayPct });
       }
     });
+
+    const map: Record<string, { ltp: number; todayPct: number }> = {};
+    const failed: string[] = [];
+
+    queryItems.forEach((item) => {
+      let resolvedPrice: { ltp: number; todayPct: number } | undefined;
+
+      // Try candidates in priority order
+      for (const cand of item.candidates) {
+        const price = resultMap.get(cand.toUpperCase());
+        if (price) {
+          resolvedPrice = price;
+          break;
+        }
+      }
+
+      if (resolvedPrice) {
+        map[item.yahooSymbol] = resolvedPrice;
+      } else {
+        failed.push(item.ticker);
+      }
+    });
+
     setFailedSymbols(failed);
     return map;
   }, []);
