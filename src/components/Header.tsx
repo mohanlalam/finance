@@ -106,20 +106,20 @@ function Header({
   const visibleAlerts = alerts;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 dark:bg-black/75 backdrop-blur-md border-b border-[var(--border-subtle)] text-[var(--text-primary)] transition-colors">
+    <header className="sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-[var(--border-subtle)] text-[var(--text-primary)] transition-colors">
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           
           {/* Left: App Logo & Selected Context */}
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 via-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/25 transition-transform duration-200 hover:scale-105">
-              <TrendingUp size={16} className="text-white" />
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0">
+              <TrendingUp size={16} />
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-extrabold tracking-tight text-[var(--text-primary)] truncate">
                 Family Wealth
               </span>
-              <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 leading-none">
+              <span className="text-[10px] font-semibold text-[var(--text-tertiary)] leading-none truncate">
                 {activePortfolioLabel || 'Portfolio Tracker'}
               </span>
             </div>
@@ -128,13 +128,13 @@ function Header({
           {/* Right: Net Worth Summary & Utility Buttons */}
           <div className="flex items-center gap-3">
             
-            {/* Value Indicators (Neutral Net Worth, subtle colored P&L) */}
-            <div className="flex items-center gap-2.5 text-right">
+            {/* Value Indicators (Desktop & Tablet) */}
+            <div className="hidden sm:flex items-center gap-2.5 text-right">
               <div className="flex flex-col">
-                <span className="text-xs font-extrabold tnum leading-tight text-slate-900 dark:text-white">
+                <span className="text-xs font-extrabold tnum leading-tight text-[var(--text-primary)]">
                   {formatINR(totalCurrentValue)}
                 </span>
-                <span className="text-[10px] text-[var(--text-secondary)] font-semibold leading-none mt-0.5">
+                <span className="text-[10px] text-[var(--text-tertiary)] font-semibold leading-none mt-0.5">
                   Net Worth
                 </span>
               </div>
@@ -143,11 +143,11 @@ function Header({
               </Badge>
             </div>
 
-            <div className="h-4 w-px bg-[var(--border-subtle)]" />
+            <div className="hidden sm:block h-4 w-px bg-[var(--border-subtle)]" />
 
-            {/* Compact Action Icons */}
-            <div className="flex items-center gap-1.5">
-              {/* Status Pill Badge */}
+            {/* Action Icons */}
+            <div className="flex items-center gap-1">
+              {/* Status Pill Badge (Desktop) */}
               <button
                 onClick={onRefresh}
                 title={
@@ -161,13 +161,13 @@ function Header({
                     ? 'Prices may be outdated (>15m). Click to refresh.'
                     : `Prices live & up to date.${lastUpdated ? ` Last synced at ${lastUpdated.toLocaleTimeString()}` : ''}`
                 }
-                className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
+                className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
                   !isOnline || isUsingCachedData
                     ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/40'
                     : isLoading
                     ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/40'
                     : isPriceStale || status === 'error'
-                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/40 hover:bg-amber-500/20'
+                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/40'
                     : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40'
                 }`}
               >
@@ -197,39 +197,44 @@ function Header({
 
               {/* Sync Status / Refresh button */}
               <IconButton
-                icon={<RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />}
+                icon={<RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />}
                 title={isLoading ? 'Fetching prices...' : lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : 'Sync prices'}
                 onClick={onRefresh}
                 disabled={isLoading}
               />
 
-              <Suspense fallback={<div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-zinc-800 animate-pulse" />}>
-                <ExportPanel
-                  portfolios={portfolios}
-                  onImportCSV={onImportCSV}
-                  portfolioOptions={portfolioOptions}
-                />
-              </Suspense>
+              {/* Export Panel (Desktop) */}
+              <div className="hidden sm:block">
+                <Suspense fallback={<div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />}>
+                  <ExportPanel
+                    portfolios={portfolios}
+                    onImportCSV={onImportCSV}
+                    portfolioOptions={portfolioOptions}
+                  />
+                </Suspense>
+              </div>
 
-              {/* Change PIN */}
+              {/* Change PIN (Desktop) */}
               {onChangePinClick && (
-                <IconButton
-                  icon={<LockKeyhole size={13} />}
-                  title="Change PIN"
-                  onClick={onChangePinClick}
-                />
+                <div className="hidden sm:block">
+                  <IconButton
+                    icon={<LockKeyhole size={14} />}
+                    title="Change PIN"
+                    onClick={onChangePinClick}
+                  />
+                </div>
               )}
 
               {/* Privacy Toggle */}
               <IconButton
-                icon={isBalancesHidden ? <EyeOff size={13} /> : <Eye size={13} />}
+                icon={isBalancesHidden ? <EyeOff size={14} /> : <Eye size={14} />}
                 title={isBalancesHidden ? "Show Balances" : "Hide Balances"}
                 onClick={toggleHideBalances}
               />
 
               {/* Theme Toggle */}
               <IconButton
-                icon={darkMode ? <Sun size={13} /> : <Moon size={13} />}
+                icon={darkMode ? <Sun size={14} /> : <Moon size={14} />}
                 title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
                 onClick={onToggleDarkMode}
               />
@@ -237,27 +242,72 @@ function Header({
               {/* Alerts bell */}
               <div className="relative">
                 <IconButton
-                  icon={<Bell size={13} />}
+                  icon={<Bell size={14} />}
                   title={`Notifications (${visibleAlerts.length})`}
                   onClick={() => setOpenAlerts(!openAlerts)}
-                  className={openAlerts ? 'bg-[#f2f2f7] dark:bg-zinc-800' : ''}
+                  className={openAlerts ? 'bg-slate-100 dark:bg-slate-800' : ''}
                 />
                 {visibleAlerts.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-[#ff3b30] rounded-full" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-rose-600 rounded-full" />
                 )}
 
                 {openAlerts && (
                   <div
                     role="region"
                     aria-label="Notifications panel"
-                    className="fixed left-4 right-4 top-16 bg-white dark:bg-[#1c1c1e] border border-[var(--border-subtle)] rounded-2xl shadow-floating z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80"
+                    className="fixed left-4 right-4 top-16 bg-white dark:bg-slate-900 border border-[var(--border-subtle)] rounded-xl shadow-xl z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80"
                   >
-                    <div className="px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-800/40 border-b border-[var(--border-subtle)] flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                    <div className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/60 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                      <span className="text-xs font-extrabold text-[var(--text-primary)] uppercase tracking-wider">
                         Alerts ({visibleAlerts.length})
                       </span>
                       {visibleAlerts.length > 1 && (
                         <button
+                          onClick={onDismissAll}
+                          className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          Clear All
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="max-h-72 overflow-y-auto divide-y divide-[var(--border-subtle)]">
+                      {visibleAlerts.length === 0 ? (
+                        <div className="p-4 text-center text-xs text-[var(--text-tertiary)]">
+                          No active notifications
+                        </div>
+                      ) : (
+                        visibleAlerts.map((alert) => (
+                          <div
+                            key={alert.id}
+                            className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex items-start gap-2.5"
+                          >
+                            <div className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-[var(--text-secondary)] shrink-0 mt-0.5">
+                              <Bell size={13} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-bold text-[var(--text-primary)] truncate">{alert.title}</p>
+                              <p className="text-[11px] text-[var(--text-tertiary)] line-clamp-2 mt-0.5">{alert.message}</p>
+                            </div>
+                            <button
+                              onClick={() => onDismissAlert(alert.id)}
+                              className="w-6 h-6 flex items-center justify-center rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                              aria-label="Dismiss alert"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
                           onClick={onDismissAll}
                           className="text-[10px] font-semibold text-[#007aff] hover:underline"
                         >

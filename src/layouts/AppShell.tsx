@@ -528,36 +528,6 @@ export default function AppShell() {
               onDeleteClick={handleDeletePortfolio}
             />
 
-            {/* Quick Asset Filter Pills on Mobile */}
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1 px-0.5 -mx-1">
-              {[
-                { id: 'home', label: 'Overview' },
-                { id: 'stocks', label: 'Stocks' },
-                { id: 'fd', label: 'FDs' },
-                { id: 'rd', label: 'RDs' },
-                { id: 'sip', label: 'SIPs' },
-                { id: 'gold', label: 'Gold' },
-                { id: 'real_estate', label: 'Realty' },
-                { id: 'insurance', label: 'Insurance' },
-                { id: 'documents', label: 'Vault' },
-              ].map((pill) => {
-                const isActive = activeAsset === pill.id;
-                return (
-                  <button
-                    key={pill.id}
-                    onClick={() => setActiveAsset(pill.id as any)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all duration-200 active:scale-[0.96] ${
-                      isActive
-                        ? 'bg-[#007aff] text-white shadow-sm dark:bg-[#007aff]'
-                        : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700'
-                    }`}
-                  >
-                    {pill.label}
-                  </button>
-                );
-              })}
-            </div>
-
             {activeAsset === 'home' ? (
               <div className="space-y-4">
                 <MobileHomeSummary
@@ -800,6 +770,7 @@ export default function AppShell() {
 
       {/* Floating Add Menu (FAB) */}
       <FloatingAddMenu
+        isHidden={showAddModal || showAddFamily || !!renameTarget || !!deleteTarget || showChangePinModal || !!quickAddTarget || showMobileAlerts}
         onAddStock={() => setShowAddModal(true)}
         onAddAsset={(type) => {
           setActiveAsset(type);
