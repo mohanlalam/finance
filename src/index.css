@@ -79,6 +79,121 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* ── Aurora Mesh Background & iOS 18 Glass Material ── */
+@keyframes auroraPulse1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); opacity: 0.55; }
+  50% { transform: translate(60px, -40px) scale(1.18); opacity: 0.8; }
+}
+
+@keyframes auroraPulse2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); opacity: 0.5; }
+  50% { transform: translate(-50px, 50px) scale(1.15); opacity: 0.75; }
+}
+
+@keyframes auroraPulse3 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); opacity: 0.45; }
+  50% { transform: translate(40px, 30px) scale(1.12); opacity: 0.7; }
+}
+
+.aurora-mesh-bg {
+  position: relative;
+}
+
+.aurora-mesh-bg::before {
+  content: '';
+  position: absolute;
+  top: -8%;
+  left: -8%;
+  width: 55vw;
+  height: 55vw;
+  max-width: 650px;
+  max-height: 650px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(139, 92, 246, 0.08) 50%, transparent 75%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: auroraPulse1 18s ease-in-out infinite;
+}
+
+.dark .aurora-mesh-bg::before {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.28) 0%, rgba(139, 92, 246, 0.15) 50%, transparent 75%);
+  filter: blur(100px);
+}
+
+.aurora-mesh-bg::after {
+  content: '';
+  position: absolute;
+  top: 15%;
+  right: -5%;
+  width: 50vw;
+  height: 50vw;
+  max-width: 600px;
+  max-height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.16) 0%, rgba(59, 130, 246, 0.06) 50%, transparent 75%);
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+  animation: auroraPulse2 22s ease-in-out infinite;
+}
+
+.dark .aurora-mesh-bg::after {
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.25) 0%, rgba(59, 130, 246, 0.14) 50%, transparent 75%);
+  filter: blur(110px);
+}
+
+.aurora-mesh-orb-bottom {
+  position: absolute;
+  bottom: 5%;
+  left: 25%;
+  width: 45vw;
+  height: 45vw;
+  max-width: 550px;
+  max-height: 550px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.14) 0%, rgba(52, 211, 153, 0.05) 50%, transparent 75%);
+  filter: blur(85px);
+  pointer-events: none;
+  z-index: 0;
+  animation: auroraPulse3 20s ease-in-out infinite;
+}
+
+.dark .aurora-mesh-orb-bottom {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, rgba(52, 211, 153, 0.12) 50%, transparent 75%);
+  filter: blur(105px);
+}
+
+/* iOS 18 Glass Material */
+.ios18-glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: transform 0.3s var(--ios-ease), box-shadow 0.3s var(--ios-ease), border-color 0.3s ease;
+}
+
+.ios18-glass:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.03);
+  border-color: rgba(255, 255, 255, 0.85);
+}
+
+.dark .ios18-glass {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.dark .ios18-glass:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 44px rgba(0, 122, 255, 0.18), 0 2px 8px rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
 .dark {
   --app-background: #000000;
   --surface: #1c1c1e;
@@ -475,19 +590,33 @@ h3, .text-card-title {
 }
 
 .apple-card {
-  background-color: var(--surface);
-  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: var(--radius-medium);
-  box-shadow: var(--shadow-card);
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.25s ease;
 }
 
-.apple-card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 12px 30px rgba(0, 0, 0, 0.05);
+.dark .apple-card {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
 }
-.dark .apple-card-hover:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 12px 35px rgba(0, 0, 0, 0.35);
+
+.apple-card-hover:hover, .apple-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.07), 0 2px 6px rgba(0, 0, 0, 0.03);
+  border-color: rgba(255, 255, 255, 0.85);
+}
+
+.dark .apple-card-hover:hover, .dark .apple-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(0, 122, 255, 0.16), 0 4px 12px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .interactive-btn {

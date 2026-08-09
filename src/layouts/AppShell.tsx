@@ -412,8 +412,9 @@ export default function AppShell() {
       onTouchStart={handleCombinedTouchStart}
       onTouchMove={handleCombinedTouchMove}
       onTouchEnd={handleCombinedTouchEnd}
-      className="min-h-screen bg-[var(--app-background)] pb-safe-content md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden"
+      className="min-h-screen bg-[var(--app-background)] pb-safe-content md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden aurora-mesh-bg"
     >
+      <div className="aurora-mesh-orb-bottom" />
       {/* Pull to refresh indicator */}
       {(ptr.pullDistance > 0 || ptr.isRefreshing) && (
         <div className="absolute top-4 left-0 right-0 flex justify-center z-50 pointer-events-none">
