@@ -7,6 +7,7 @@ import { shareHolding } from '../utils/shareUtils';
 import { useToastActions } from '../contexts/ToastContext';
 import ConfirmModal from './ConfirmModal';
 import EmptyState from './EmptyState';
+import EditStockModal from './EditStockModal';
 
 type SortPreset = 'value' | 'pnl' | 'pnlPct' | 'todayPct' | 'allocation';
 
@@ -86,6 +87,7 @@ export default React.memo(function PortfolioTable({
   const [activePreset, setActivePreset] = useState<SortPreset | null>('value');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Holding | null>(null);
+  const [editingHolding, setEditingHolding] = useState<Holding | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editQty, setEditQty] = useState('');
   const [editAvgPrice, setEditAvgPrice] = useState('');
@@ -203,11 +205,7 @@ export default React.memo(function PortfolioTable({
 
   function startEdit(h: Holding) {
     if (!onUpdate) return;
-    const targetId = getHoldingId(h);
-    setEditingId(targetId);
-    setEditQty(String(h.qty));
-    setEditAvgPrice(String(h.avgPrice));
-    setEditError('');
+    setEditingHolding(h);
   }
 
   function cancelEdit() {
@@ -682,6 +680,19 @@ export default React.memo(function PortfolioTable({
         variant="danger"
         isLoading={deletingId === confirmDelete?.id}
       />
+
+      {editingHolding && onUpdate && (
+        <EditStockModal
+          holding={editingHolding}
+          isOpen={!!editingHolding}
+          onClose={() => setEditingHolding(null)}
+          onSave={async (id, qty, avgPrice) => {
+            await onUpdate(id, qty, avgPrice);
+            addToast(`Updated ${editingHolding.ticker} holding`, 'success');
+            setEditingHolding(null);
+          }}
+        />
+      )}
     </div>
   );
 });
