@@ -264,9 +264,11 @@ h3, .text-card-title {
 
 .animate-modal-backdrop {
   animation: modalFadeIn 0.2s ease-out forwards;
+  will-change: opacity, backdrop-filter;
 }
 .animate-modal-backdrop-out {
   animation: modalFadeOut 0.2s ease-out forwards;
+  will-change: opacity, backdrop-filter;
 }
 
 @keyframes sparklineDraw {
@@ -541,24 +543,7 @@ h3, .text-card-title {
   outline-offset: 2px;
 }
 
-/* -- Apple Flat Card Surfaces -- */
-.apple-card {
-  background-color: var(--surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-large);
-  box-shadow: var(--shadow-card);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
 
-.apple-card-hover:hover, .apple-card:hover {
-  border-color: rgba(0, 0, 0, 0.12);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-}
-
-.dark .apple-card-hover:hover, .dark .apple-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-}
 
 /* -- Mobile Asset Card Press Feedback -- */
 .mobile-asset-card {

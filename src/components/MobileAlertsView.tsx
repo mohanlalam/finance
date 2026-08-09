@@ -175,7 +175,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex gap-3">
-                      <div className="mt-0.5 w-7 h-7 rounded-md bg-white/80 dark:bg-slate-900/50 flex items-center justify-center shadow-2xs shrink-0">
+                      <div className="mt-0.5 w-7 h-7 rounded-md bg-white/80 dark:bg-slate-900/50 flex items-center justify-center shadow-xs shrink-0">
                         {cfg.icon}
                       </div>
                       <div>

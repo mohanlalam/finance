@@ -53,7 +53,7 @@ export default React.memo(function FamilyTabBar({
       <div
         role="tablist"
         aria-label="Family members portfolios"
-        className="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-800/90 p-1 rounded-lg border border-slate-200/60 dark:border-slate-700/60 max-w-full"
+        className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-800/90 p-1 rounded-lg border border-slate-200/60 dark:border-slate-700/60 w-full sm:w-auto"
       >
         {/* Overview Tab */}
         <button
@@ -62,7 +62,7 @@ export default React.memo(function FamilyTabBar({
           aria-controls="portfolio-content"
           id="tab-all"
           onClick={() => onTabChange('all')}
-          className={`flex items-center gap-2 h-8 px-3 rounded-md text-xs font-bold transition-all outline-none shrink-0 ${
+          className={`flex items-center gap-2 h-8 px-2.5 rounded-md text-xs font-bold transition-all outline-none min-w-0 ${
             activeTab === 'all'
               ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600'
               : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
@@ -71,7 +71,7 @@ export default React.memo(function FamilyTabBar({
           <div className="w-4 h-4 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
             <LayoutDashboard size={12} />
           </div>
-          <span>Family Overview</span>
+          <span className="truncate">Family Overview</span>
         </button>
 
         {/* Member Tabs */}
@@ -81,29 +81,31 @@ export default React.memo(function FamilyTabBar({
           const isPositive = p.totalPnL >= 0;
 
           return (
-            <div key={p.name} className="relative group flex items-center shrink-0">
+            <div key={p.name} className="relative group flex items-center justify-between min-w-0">
               <button
                 role="tab"
                 aria-selected={isActive}
                 aria-controls="portfolio-content"
                 id={`tab-${p.name}`}
                 onClick={() => onTabChange(p.name)}
-                className={`flex items-center gap-2 h-8 px-3 rounded-md text-xs font-bold transition-all outline-none ${
+                className={`flex items-center justify-between gap-1 h-8 px-2 rounded-md text-xs font-bold transition-all outline-none flex-1 min-w-0 ${
                   isActive
                     ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
-                {/* Styled icon badge */}
-                <div className={`w-4 h-4 rounded ${iconConfig.bg} ${iconConfig.text} flex items-center justify-center shrink-0`}>
-                  {iconConfig.icon}
-                </div>
+                <div className="flex items-center gap-1.5 min-w-0 truncate">
+                  {/* Styled icon badge */}
+                  <div className={`w-4 h-4 rounded ${iconConfig.bg} ${iconConfig.text} flex items-center justify-center shrink-0`}>
+                    {iconConfig.icon}
+                  </div>
 
-                <span>{p.label}</span>
+                  <span className="truncate">{p.label}</span>
+                </div>
 
                 {/* Return Percentage Badge */}
                 <span
-                  className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded tnum transition-colors ${
+                  className={`text-[10px] font-extrabold px-1 py-0.5 rounded tnum transition-colors shrink-0 ${
                     isPositive
                       ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                       : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
@@ -114,28 +116,28 @@ export default React.memo(function FamilyTabBar({
               </button>
 
               {/* Action buttons (pencil, trash) displayed on hover */}
-              <div className="flex items-center gap-0.5 ml-1 mr-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 shrink-0">
+              <div className="flex items-center gap-0.5 ml-0.5 opacity-40 group-hover:opacity-100 transition-opacity duration-150 shrink-0">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onRenameClick({ id: p.id, name: p.name, label: p.label });
                   }}
-                  className="w-5 h-5 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:bg-zinc-600 transition-colors"
+                  className="w-4 h-4 rounded flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:bg-zinc-600 transition-colors"
                   title={`Rename ${p.label}`}
                   aria-label={`Rename portfolio ${p.label}`}
                 >
-                  <Pencil size={11} />
+                  <Pencil size={10} />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteClick({ id: p.id, name: p.name, label: p.label });
                   }}
-                  className="w-5 h-5 rounded-md flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                  className="w-4 h-4 rounded flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
                   title={`Delete ${p.label}`}
                   aria-label={`Delete portfolio ${p.label}`}
                 >
-                  <Trash2 size={11} />
+                  <Trash2 size={10} />
                 </button>
               </div>
             </div>

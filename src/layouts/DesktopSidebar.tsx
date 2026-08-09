@@ -23,12 +23,12 @@ export default function DesktopSidebar({
   const getNavItemClass = (isActive: boolean) =>
     `flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-md text-xs font-bold transition-all outline-none ${
       isActive
-        ? 'bg-blue-50/80 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border-l-2 border-blue-600 dark:border-blue-500 shadow-2xs'
+        ? 'bg-blue-50/80 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border-l-2 border-blue-600 dark:border-blue-500 shadow-xs'
         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-200 border-l-2 border-transparent'
     }`;
 
   return (
-    <div role="tablist" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-60 self-start sticky top-6">
+    <div role="tablist" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-60 self-start sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto">
       {/* Portfolios Section */}
       <div className="mb-5">
         <h3 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-3">

@@ -268,7 +268,7 @@ function MobileHomeSummary({
       {/* ── Portfolio Member Breakdown ── */}
       {activePortfolio === null && portfolios && portfolios.length > 0 && (
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] p-3.5 shadow-xs space-y-2.5">
-          <span className="text-xs font-extrabold text-[var(--text-secondary)] uppercase tracking-wider block">
+          <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block">
             Family Breakdown
           </span>
           <div className="space-y-2">
@@ -330,7 +330,7 @@ function MobileHomeSummary({
       {/* ── Flatter Asset Summary Cards List ── */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-extrabold text-[var(--text-secondary)] uppercase tracking-wider">Asset Classes</span>
+          <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Asset Classes</span>
           <span className="text-xs font-semibold text-[var(--text-tertiary)]">{assetList.length} Categories</span>
         </div>
 
@@ -344,7 +344,7 @@ function MobileHomeSummary({
               {/* Left Accent Indicator Pill */}
               <div className={`w-1.5 h-7 rounded-full ${item.accentColor} shrink-0`} />
               <div className="min-w-0">
-                <h4 className="text-xs font-extrabold text-[var(--text-primary)] truncate">{item.label}</h4>
+                <h4 className="text-xs font-bold text-[var(--text-primary)] truncate">{item.label}</h4>
                 <p className="text-[11px] font-medium text-[var(--text-tertiary)] mt-0.5 truncate">{item.subtext}</p>
               </div>
             </div>

@@ -252,55 +252,71 @@ function Header({
                 )}
 
                 {openAlerts && (
-                  <div
-                    role="region"
-                    aria-label="Notifications panel"
-                    className="fixed left-4 right-4 top-16 bg-white dark:bg-slate-900 border border-[var(--border-subtle)] rounded-xl shadow-xl z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80"
-                  >
-                    <div className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/60 border-b border-[var(--border-subtle)] flex items-center justify-between">
-                      <span className="text-xs font-extrabold text-[var(--text-primary)] uppercase tracking-wider">
-                        Alerts ({visibleAlerts.length})
-                      </span>
-                      {visibleAlerts.length > 1 && (
-                        <button
-                          onClick={onDismissAll}
-                          className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline"
-                        >
-                          Clear All
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="max-h-72 overflow-y-auto divide-y divide-[var(--border-subtle)]">
-                      {visibleAlerts.length === 0 ? (
-                        <div className="p-4 text-center text-xs text-[var(--text-tertiary)]">
-                          No active notifications
-                        </div>
-                      ) : (
-                        visibleAlerts.map((alert) => (
-                          <div
-                            key={alert.id}
-                            className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex items-start gap-2.5"
+                  <>
+                    {/* Backdrop to dismiss alerts panel */}
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setOpenAlerts(false)}
+                      aria-hidden="true"
+                    />
+                    <div
+                      role="region"
+                      aria-label="Notifications panel"
+                      className="fixed left-4 right-4 top-16 bg-white dark:bg-slate-900 border border-[var(--border-subtle)] rounded-xl shadow-xl z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80"
+                    >
+                      <div className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/60 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                        <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                          Alerts ({visibleAlerts.length})
+                        </span>
+                        {visibleAlerts.length > 1 && (
+                          <button
+                            onClick={onDismissAll}
+                            className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline"
                           >
-                            <div className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-[var(--text-secondary)] shrink-0 mt-0.5">
-                              <Bell size={13} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-bold text-[var(--text-primary)] truncate">{alert.title}</p>
-                              <p className="text-[11px] text-[var(--text-tertiary)] line-clamp-2 mt-0.5">{alert.message}</p>
-                            </div>
-                            <button
-                              onClick={() => onDismissAlert(alert.id)}
-                              className="w-6 h-6 flex items-center justify-center rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                              aria-label="Dismiss alert"
-                            >
-                              <X size={12} />
-                            </button>
+                            Clear All
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="max-h-72 overflow-y-auto divide-y divide-[var(--border-subtle)]">
+                        {visibleAlerts.length === 0 ? (
+                          <div className="p-4 text-center text-xs text-[var(--text-tertiary)]">
+                            No active notifications
                           </div>
-                        ))
-                      )}
+                        ) : (
+                          visibleAlerts.map((alert) => {
+                            const cfg = ALERTS_TYPE_CONFIG[alert.type] ?? {
+                              icon: <Bell size={13} />,
+                              color: 'text-slate-600',
+                              bg: 'bg-slate-50 dark:bg-slate-800',
+                              border: 'border-slate-100 dark:border-slate-700',
+                            };
+                            return (
+                              <div
+                                key={alert.id}
+                                className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex items-start gap-2.5"
+                              >
+                                <div className={`p-1 rounded ${cfg.bg} ${cfg.color} shrink-0 mt-0.5`}>
+                                  {cfg.icon}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-bold text-[var(--text-primary)] truncate">{alert.title}</p>
+                                  <p className="text-[11px] text-[var(--text-tertiary)] line-clamp-2 mt-0.5">{alert.message}</p>
+                                </div>
+                                <button
+                                  onClick={() => onDismissAlert(alert.id)}
+                                  className="w-6 h-6 flex items-center justify-center rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                  aria-label="Dismiss alert"
+                                >
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             </div>

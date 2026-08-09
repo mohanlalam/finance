@@ -28,12 +28,9 @@ function DashboardWidgets({ portfolios, activePortfolio }: DashboardWidgetsProps
   const holdings = activePortfolio ? activePortfolio.holdings : portfolios.flatMap((p) => p.holdings);
   const todayPnL = useMemo(() => {
     return holdings.reduce((sum, h) => {
-      const price = h.ltp || h.buyPrice;
-      const change = h.change || 0;
-      const prevPrice = price - change;
-      const prevValue = prevPrice * h.shares;
-      const currentValue = price * h.shares;
-      return sum + (currentValue - prevValue);
+      const factor = 1 + h.todayPnLPercent / 100;
+      const yesterdayValue = factor !== 0 ? h.currentValue / factor : h.currentValue;
+      return sum + (h.currentValue - yesterdayValue);
     }, 0);
   }, [holdings]);
 
@@ -64,7 +61,7 @@ function DashboardWidgets({ portfolios, activePortfolio }: DashboardWidgetsProps
     <div className="flex justify-center mb-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:max-w-4xl w-full">
         {/* Widget 1: Net Worth Widget */}
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-3xl p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between aspect-square">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between aspect-square">
           <div className="absolute top-0 right-0 p-4">
             <Award className="text-blue-400" size={20} />
           </div>
@@ -83,7 +80,7 @@ function DashboardWidgets({ portfolios, activePortfolio }: DashboardWidgetsProps
         </div>
 
         {/* Widget 2: Today's Gain Widget */}
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-3xl p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between aspect-square">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between aspect-square">
           <div className="absolute top-0 right-0 p-4">
             <TrendingUp className="text-emerald-400" size={20} />
           </div>
@@ -102,7 +99,7 @@ function DashboardWidgets({ portfolios, activePortfolio }: DashboardWidgetsProps
         </div>
 
         {/* Widget 3: Upcoming FD Maturity Widget */}
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-3xl p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between aspect-square">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between aspect-square">
           <div className="absolute top-0 right-0 p-4">
             <Landmark className="text-purple-400" size={20} />
           </div>

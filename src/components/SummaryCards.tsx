@@ -114,8 +114,8 @@ function SummaryCards({
 
       {/* Remaining Cards: Horizontal scroll on mobile, normal grid columns on desktop */}
       <div className="relative block lg:contents">
-        <div className="absolute -left-4 top-0 bottom-2 w-8 bg-gradient-to-r from-slate-50 dark:from-slate-950 to-transparent pointer-events-none sm:hidden z-10" />
-        <div className="absolute -right-4 top-0 bottom-2 w-12 bg-gradient-to-l from-slate-50 dark:from-slate-950 to-transparent pointer-events-none sm:hidden z-10" />
+        <div className="absolute -left-4 top-0 bottom-2 w-8 bg-gradient-to-r from-[#f8fafc] dark:from-[#090d16] to-transparent pointer-events-none sm:hidden z-10" />
+        <div className="absolute -right-4 top-0 bottom-2 w-12 bg-gradient-to-l from-[#f8fafc] dark:from-[#090d16] to-transparent pointer-events-none sm:hidden z-10" />
         <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none lg:contents">
         
         {/* 2. Invested Card (Neutral) */}

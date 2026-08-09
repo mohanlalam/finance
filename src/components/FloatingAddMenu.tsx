@@ -88,7 +88,7 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
             className="pointer-events-auto w-72 max-h-[65vh] overflow-y-auto bg-white dark:bg-slate-900 border border-[var(--border-subtle)] rounded-xl shadow-xl p-3 mb-2 space-y-3"
           >
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <span className="text-xs font-extrabold text-[var(--text-secondary)] uppercase tracking-wider">
+              <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
                 Quick Add Asset
               </span>
               <button

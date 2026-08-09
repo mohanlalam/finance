@@ -49,13 +49,13 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
   return (
     <>
       {/* Backdrop for More Drawer */}
-      {isDrawerOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-30 transition-opacity duration-200 md:hidden"
-          onClick={() => setIsDrawerOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      <div
+        className={`fixed inset-0 z-30 transition-opacity duration-200 md:hidden ${
+          isDrawerOpen ? 'bg-black/40 opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setIsDrawerOpen(false)}
+        aria-hidden="true"
+      />
 
       {/* More Drawer - Compact Vertical List */}
       <div
@@ -68,7 +68,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
       >
         {/* Header */}
         <div className="flex items-center justify-between pb-3 mb-2 border-b border-[var(--border-subtle)]">
-          <h4 className="text-xs font-extrabold text-[var(--text-secondary)] uppercase tracking-wider">
+          <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
             All Asset Categories
           </h4>
           <button

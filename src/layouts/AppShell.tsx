@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react';
 // Inline SVG icons — keeps lucide-react out of the critical post-unlock bundle
-import { WifiOff, AlertCircle, RefreshCw, TrendingUp, TrendingDown, Landmark, Coins, Home, Shield, FolderOpen, Clock, Calculator } from '../components/icons/AppIcons';
+import { WifiOff, AlertCircle, RefreshCw } from '../components/icons/AppIcons';
 
-// SearchBar lazy-loaded for mobile view
-const SearchBar = React.lazy(() => import('../components/SearchBar'));
 
 import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
@@ -71,7 +69,7 @@ function LazyViewport({ children, placeholderHeight = 240 }: { children: React.R
     <div ref={ref} style={{ minHeight: isIntersected ? undefined : placeholderHeight }}>
       {isIntersected ? children : (
         <div 
-          className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 animate-pulse" 
+          className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 animate-pulse" 
           style={{ height: placeholderHeight }} 
         />
       )}
@@ -125,7 +123,7 @@ function LazyChartWrapper<TProps extends object>({
         </Suspense>
       ) : (
         <div 
-          className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 animate-pulse" 
+          className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 animate-pulse" 
           style={{ height: placeholderHeight }} 
         />
       )}
@@ -326,9 +324,6 @@ export default function AppShell() {
     );
   };
 
-  const handleSearchNavigate = useCallback((portfolioName: string, assetTab: string) => {
-    navigate(`/${portfolioName}/${assetTab}`);
-  }, [navigate]);
 
   const handleImportCSV = useCallback(async (rows: ImportRow[], portfolioName: string) => {
     // Parallelize in batches of 5 for performance
@@ -565,7 +560,7 @@ export default function AppShell() {
             ) : (
               <div className="space-y-4">
                 {/* Sticky Mini Refresh Status Bar */}
-                <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/70 dark:bg-slate-800/70 border border-slate-200/50 dark:border-slate-700/30 rounded-2xl text-[11px] text-slate-500 dark:text-slate-400 backdrop-blur shadow-sm">
+                <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/70 dark:bg-slate-800/70 border border-slate-200/50 dark:border-slate-700/30 rounded-xl text-[11px] text-slate-500 dark:text-slate-400 backdrop-blur shadow-sm">
                   <div className="flex items-center gap-1.5 min-w-0" aria-live="polite">
                     <span className={`w-2 h-2 rounded-full shrink-0 ${priceStatus === 'success' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
                     <span className="font-semibold shrink-0">{priceStatus === 'success' ? 'Live Prices' : 'Snapshot'}</span>
