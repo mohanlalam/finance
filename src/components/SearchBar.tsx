@@ -189,10 +189,10 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
     ];
 
     return (
-      <div className="fixed inset-0 bg-slate-900/50 dark:bg-slate-950/80 backdrop-blur-sm z-50 flex flex-col md:hidden animate-fade-in">
+      <div className="fixed inset-0 bg-slate-900/80 dark:bg-slate-950/90 z-50 flex flex-col md:hidden animate-fade-in">
         <div className="flex-1 bg-white dark:bg-slate-900 flex flex-col overflow-hidden pb-safe">
           {/* Mobile Search Header */}
-          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+          <div className="px-4 py-3 border-b border-[var(--border-subtle)] flex items-center gap-3">
             <button
               onClick={handleMobileClose}
               aria-label="Back to dashboard"
@@ -208,7 +208,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setSelectedIdx(-1); }}
                 placeholder="Search holdings, policies, files..."
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-[14px] pl-9 pr-9 py-2.5 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-[var(--border-subtle)] rounded-lg pl-9 pr-9 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               />
               {query && (
                 <button
@@ -223,7 +223,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
           </div>
 
           {/* Quick-Jump Category Filters Scroll Row */}
-          <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/30 border-b border-slate-100 dark:border-slate-800/60 flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
+          <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/30 border-b border-[var(--border-subtle)] flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
             {filterTabs.map((tab) => {
               const isActive = activeFilter === tab.key;
               return (
@@ -247,20 +247,20 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
             {/* If query and filter are empty, show helpful Category cards */}
             {!query.trim() && activeFilter === 'all' && (
               <div className="space-y-4">
-                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Browse by Category</p>
+                <p className="text-xs font-extrabold text-[var(--text-tertiary)] uppercase tracking-wider">Browse by Category</p>
                 <div className="grid grid-cols-2 gap-2.5">
                   {(Object.keys(TYPE_LABELS) as Array<keyof typeof TYPE_LABELS>).map((type) => (
                     <button
                       key={type}
                       onClick={() => setActiveFilter(type as SearchFilter)}
-                      className="flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-700/30 rounded-2xl text-left transition-all active:scale-[0.97]"
+                      className="flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-[var(--border-subtle)] rounded-xl text-left transition-all active:scale-[0.97]"
                     >
-                      <div className="w-8 h-8 rounded-[10px] bg-white dark:bg-slate-900 shadow-3xs flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900 shadow-xs flex items-center justify-center shrink-0">
                         {TYPE_ICONS[type]}
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{TYPE_LABELS[type]}</p>
-                        <p className="text-[9px] text-slate-400 mt-0.5">
+                        <p className="text-xs font-bold text-[var(--text-primary)]">{TYPE_LABELS[type]}</p>
+                        <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
                           {allResults.filter((r) => r.type === type).length} item(s)
                         </p>
                       </div>
@@ -274,7 +274,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
               <div className="space-y-3 pb-8">
                 {Array.from(grouped.entries()).map(([type, items]) => (
                   <div key={type} className="space-y-2">
-                    <div className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5 pt-1">
+                    <div className="text-xs font-extrabold text-[var(--text-tertiary)] uppercase tracking-wider flex items-center gap-1.5 pt-1">
                       {TYPE_ICONS[type]}
                       {TYPE_LABELS[type]}
                     </div>
@@ -283,13 +283,13 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                         <button
                           key={`${type}-${idx}`}
                           onClick={() => handleSelect(item)}
-                          className="w-full text-left p-3.5 bg-white dark:bg-slate-800 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 border border-slate-200/40 dark:border-slate-800/80 rounded-2xl flex items-center justify-between gap-3 transition-colors active:scale-[0.99]"
+                          className="w-full text-left p-3.5 bg-[var(--surface)] hover:bg-blue-50/50 dark:hover:bg-blue-950/20 border border-[var(--border-subtle)] rounded-xl flex items-center justify-between gap-3 transition-colors active:scale-[0.99]"
                         >
                           <div className="min-w-0">
-                            <p className="text-xs font-extrabold text-slate-800 dark:text-slate-250 truncate">{item.label}</p>
-                            <p className="text-[10px] font-medium text-slate-400 dark:text-slate-400 truncate mt-0.5">{item.sublabel}</p>
+                            <p className="text-xs font-extrabold text-[var(--text-primary)] truncate">{item.label}</p>
+                            <p className="text-[11px] font-medium text-[var(--text-tertiary)] truncate mt-0.5">{item.sublabel}</p>
                           </div>
-                          <span className="text-[9px] font-bold uppercase bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-2 py-0.5 rounded-md shrink-0">
+                          <span className="text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md shrink-0">
                             {item.portfolioLabel}
                           </span>
                         </button>
@@ -302,11 +302,11 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
               // Empty search state
               (query.trim() || activeFilter !== 'all') && (
                 <div className="py-16 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto mb-3 shadow-3xs">
-                    <Search size={24} />
+                  <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto mb-3">
+                    <Search size={20} />
                   </div>
-                  <h4 className="text-xs font-bold text-slate-600 dark:text-slate-300">No results found</h4>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-550 max-w-[200px] mx-auto mt-1">
+                  <h4 className="text-xs font-bold text-[var(--text-secondary)]">No results found</h4>
+                  <p className="text-[11px] text-[var(--text-tertiary)] max-w-[220px] mx-auto mt-1">
                     Try checking spelling or choosing a different filter.
                   </p>
                 </div>

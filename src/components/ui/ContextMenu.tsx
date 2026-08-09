@@ -50,7 +50,7 @@ export function ContextMenu({ isOpen, position, onClose, items }: ContextMenuPro
         {/* Menu card */}
         <div 
           ref={menuRef}
-          className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-2xl shadow-floating overflow-hidden min-w-[180px] origin-top-left animate-in fade-in zoom-in-95 duration-200"
+          className="bg-white dark:bg-slate-900 border border-[var(--border-subtle)] rounded-xl shadow-xl overflow-hidden min-w-[180px] origin-top-left animate-in fade-in zoom-in-95 duration-200"
           style={{ animationTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
         >
           <div className="flex flex-col">

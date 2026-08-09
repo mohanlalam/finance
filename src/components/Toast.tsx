@@ -103,7 +103,7 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
       role="alert"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`flex items-center gap-3 px-5 py-2.5 rounded-full border backdrop-blur-xl shadow-2xl pointer-events-auto max-w-sm w-auto transition-all duration-200 ${styles.bg} ${isExiting ? 'animate-slide-out scale-95 opacity-0' : 'animate-slide-in scale-100 opacity-100'}`}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-700/50 shadow-xl pointer-events-auto max-w-sm w-auto transition-all duration-200 ${styles.bg} ${isExiting ? 'animate-slide-out scale-95 opacity-0' : 'animate-slide-in scale-100 opacity-100'}`}
     >
       {styles.icon}
       <p className="text-xs font-semibold tracking-tight text-white flex-1">{toast.message}</p>

@@ -152,12 +152,12 @@ function SummaryCards({
           <div className="flex items-center justify-between">
             <span className="text-label-small">Total Return</span>
             <span className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-              isGain ? 'bg-[#34C759]/10' : 'bg-[#ff3b30]/10'
+              isGain ? 'bg-emerald-500/10' : 'bg-rose-500/10'
             }`}>
-              {isGain ? <TrendingUp size={13} className="text-[#34C759]" /> : <TrendingDown size={13} className="text-[#ff3b30]" />}
+              {isGain ? <TrendingUp size={13} className="text-emerald-600 dark:text-emerald-400" /> : <TrendingDown size={13} className="text-rose-600 dark:text-rose-400" />}
             </span>
           </div>
-          <p className={`text-financial tnum ${isGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+          <p className={`text-financial tnum ${isGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
             {isBalancesHidden ? '••••••' : <>{isGain ? '+' : ''}<AnimatedNumber value={totalPnL} formatter={formatINR} /></>}
           </p>
           <p className="text-supporting">
@@ -172,7 +172,7 @@ function SummaryCards({
                 return (
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
-                    <span className={`font-bold tnum ${localGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                    <span className={`font-bold tnum ${localGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                       {isBalancesHidden ? '••••••' : <>{localGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
                     </span>
                     {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
@@ -189,12 +189,12 @@ function SummaryCards({
             <div className="flex items-center justify-between">
               <span className="text-label-small">Today's Return</span>
               <span className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-                isTodayGain ? 'bg-[#34C759]/10' : 'bg-[#ff3b30]/10'
+                isTodayGain ? 'bg-emerald-500/10' : 'bg-rose-500/10'
               }`}>
-                {isTodayGain ? <TrendingUp size={13} className="text-[#34C759]" /> : <TrendingDown size={13} className="text-[#ff3b30]" />}
+                {isTodayGain ? <TrendingUp size={13} className="text-emerald-600 dark:text-emerald-400" /> : <TrendingDown size={13} className="text-rose-600 dark:text-rose-400" />}
               </span>
             </div>
-            <p className={`text-financial tnum ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+            <p className={`text-financial tnum ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
               {isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
             </p>
             <p className="text-supporting">
@@ -209,7 +209,7 @@ function SummaryCards({
                   return (
                     <span key={p.id} className="flex items-center gap-0.5">
                       <span>{p.label}:</span>
-                      <span className={`font-bold tnum ${localTodayGain ? 'text-[#34C759]' : 'text-[#ff3b30]'}`}>
+                      <span className={`font-bold tnum ${localTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                         {isBalancesHidden ? '••••••' : <>{localTodayGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
                       </span>
                       {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
