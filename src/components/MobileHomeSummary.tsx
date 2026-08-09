@@ -265,17 +265,45 @@ function MobileHomeSummary({
         </div>
       </div>
 
-      {/* ── Portfolio Member Breakdown (Lower position) ── */}
+      {/* ── Portfolio Member Breakdown ── */}
       {activePortfolio === null && portfolios && portfolios.length > 0 && (
-        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] p-3.5 shadow-xs space-y-2">
-          <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block">Family Breakdown</span>
-          <div className="grid grid-cols-2 gap-2">
-            {portfolios.map((p) => (
-              <div key={p.id} className="p-2 rounded-md bg-slate-50 dark:bg-slate-800/50 border border-slate-200/40 dark:border-slate-700/30">
-                <span className="text-xs font-semibold text-[var(--text-secondary)] block truncate">{p.label}</span>
-                <span className="text-xs font-extrabold text-[var(--text-primary)] tnum block mt-0.5">{renderValue(p.totalCurrentValue)}</span>
-              </div>
-            ))}
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] p-3.5 shadow-xs space-y-2.5">
+          <span className="text-xs font-extrabold text-[var(--text-secondary)] uppercase tracking-wider block">
+            Family Breakdown
+          </span>
+          <div className="space-y-2">
+            {portfolios.map((p) => {
+              const pTodayPnL = estimateTodayPnL(p, [p]);
+              const isGain = p.totalPnL >= 0;
+              const isTodayGain = pTodayPnL >= 0;
+              return (
+                <div key={p.id} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/40 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[var(--text-primary)]">{p.label} Portfolio</span>
+                    <span className="text-xs font-extrabold text-[var(--text-primary)] tnum">{renderValue(p.totalCurrentValue)}</span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-1 pt-2 border-t border-slate-200/60 dark:border-slate-700/40 text-xs">
+                    <div>
+                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block">Invested</span>
+                      <span className="font-extrabold tnum text-[var(--text-secondary)]">{renderValue(p.totalInvested)}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block">Total Return</span>
+                      <span className={`font-extrabold tnum ${isGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                        {isBalancesHidden ? '••••••' : <>{isGain ? '+' : ''}{formatPercent(p.totalPnLPercent, 1)}</>}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block">Today's P&amp;L</span>
+                      <span className={`font-extrabold tnum ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                        {isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}{formatINR(pTodayPnL)}</>}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
