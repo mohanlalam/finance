@@ -291,7 +291,7 @@ function MobileHomeSummary({
                     <div>
                       <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block">Total Return</span>
                       <span className={`font-extrabold tnum ${isGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                        {isBalancesHidden ? '••••••' : <>{isGain ? '+' : ''}{formatPercent(p.totalPnLPercent, 1)}</>}
+                        {isBalancesHidden ? '••••••' : formatPercent(p.totalPnLPercent, 1)}
                       </span>
                     </div>
                     <div className="text-right">

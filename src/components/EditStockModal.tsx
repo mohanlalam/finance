@@ -134,7 +134,7 @@ export default function EditStockModal({
               <p className="text-[10px] text-slate-400 font-semibold uppercase">Estimated P&amp;L</p>
               <p className={`text-sm font-extrabold tnum mt-0.5 flex items-center justify-center gap-0.5 ${isGain ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {isGain ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                {isGain ? '+' : ''}{formatPercent(newPnLPct, 1)}
+                {formatPercent(newPnLPct, 1)}
               </p>
             </div>
           </div>
