@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Holding } from '../types/portfolio';
-import { formatINR, formatPercent } from '../utils/formatters';
+import { formatINR } from '../utils/formatters';
+import { usePrivacy } from '../contexts/PrivacyContext';
 
 interface AssetSlice {
   label: string;
@@ -24,6 +25,7 @@ const COLORS = [
 
 function PieChart({ holdings, slices: customSlices, title = 'Asset allocation' }: PieChartProps) {
   const [hovered, setHovered] = useState<number | null>(null);
+  const { isBalancesHidden } = usePrivacy();
 
   let total: number;
   let slices: Array<{ label: string; fullName: string; value: number; pct: number; color: string }>;
@@ -118,7 +120,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation' }
               height={240}
               viewBox="0 0 240 240"
               role="img"
-              aria-label={`${title} donut chart showing ${slices.length} segments totalling ${formatINR(total)}`}
+              aria-label={`${title} donut chart showing ${slices.length} segments totalling ${isBalancesHidden ? 'hidden' : formatINR(total)}`}
             >
               <title>{title}</title>
               {paths.map(({ d, color, i }) => (
@@ -143,7 +145,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation' }
                     {hoverSlice.pct.toFixed(1)}%
                   </text>
                   <text x={cx} y={cy + 22} textAnchor="middle" className="fill-slate-400 dark:fill-slate-500 tnum" fontSize={9}>
-                    {formatINR(hoverSlice.value)}
+                    {isBalancesHidden ? '••••••' : formatINR(hoverSlice.value)}
                   </text>
                 </>
               ) : (
@@ -152,7 +154,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation' }
                     TOTAL VALUE
                   </text>
                   <text x={cx} y={cy + 12} textAnchor="middle" className="fill-slate-800 dark:fill-slate-100 tnum" fontSize={12} fontWeight={700}>
-                    {formatINR(total)}
+                    {isBalancesHidden ? '••••••' : formatINR(total)}
                   </text>
                 </>
               )}
@@ -162,13 +164,24 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation' }
             {slices.map((slice, i) => (
               <div
                 key={i}
-                className={`flex items-center gap-2 px-2 py-1 rounded-lg cursor-pointer transition-colors ${hovered === i ? 'bg-slate-50 dark:bg-zinc-800' : 'hover:bg-slate-50/50 dark:hover:bg-zinc-800/40'}`}
+                className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors ${hovered === i ? 'bg-slate-100 dark:bg-zinc-800' : 'hover:bg-slate-50 dark:hover:bg-zinc-800/50'}`}
                 onMouseEnter={() => setHovered(i)}
                 onMouseLeave={() => setHovered(null)}
               >
-                <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: slice.color }} />
-                <span className="text-xs text-slate-600 dark:text-slate-350 flex-1 truncate" title={slice.fullName}>{slice.fullName}</span>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-250 shrink-0 tnum">{formatPercent(slice.pct, 1)}</span>
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: slice.color }} />
+                  <span className="text-xs text-slate-600 dark:text-slate-300 font-medium truncate" title={slice.fullName}>
+                    {slice.fullName}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 tnum">
+                    {isBalancesHidden ? '••••••' : formatINR(slice.value)}
+                  </span>
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 tnum w-11 text-right">
+                    {slice.pct.toFixed(1)}%
+                  </span>
+                </div>
               </div>
             ))}
           </div>
