@@ -91,7 +91,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                   onChangeAsset(tab.id);
                   setIsDrawerOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 min-h-[44px] py-2 rounded-lg transition-colors text-left outline-none ${
+                className={`w-full flex items-center justify-between px-3 min-h-[44px] py-2 rounded-lg ios-press transition-colors text-left outline-none ${
                   isActive
                     ? 'bg-blue-50/80 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold'
                     : 'text-[var(--text-primary)] hover:bg-slate-100/70 dark:hover:bg-slate-800/60'
@@ -115,9 +115,9 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
       {/* Persistent Bottom Bar - Quiet Top Line Active Indicator */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-900 border-t border-[var(--border-subtle)] h-14 md:hidden pb-safe shadow-md"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--surface)] border-t border-[var(--border-subtle)] min-h-[56px] md:hidden pb-safe shadow-md"
       >
-        <div className="flex items-center justify-around h-full max-w-lg mx-auto px-2">
+        <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-2">
           {mainTabs.map((tab) => {
             const isActive = activeAsset === tab.id;
             return (
@@ -128,7 +128,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                   setIsDrawerOpen(false);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`relative flex-1 flex flex-col items-center justify-center h-full min-h-[44px] transition-colors outline-none ${
+                className={`relative flex-1 flex flex-col items-center justify-center h-full min-h-[44px] ios-press transition-colors outline-none ${
                   isActive
                     ? 'text-blue-600 dark:text-blue-400 font-bold border-t-2 border-blue-600 dark:border-blue-500'
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 border-t-2 border-transparent'
@@ -153,7 +153,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
           <button
             onClick={() => setIsDrawerOpen(!isDrawerOpen)}
             aria-expanded={isDrawerOpen}
-            className={`relative flex-1 flex flex-col items-center justify-center h-full min-h-[44px] transition-colors outline-none ${
+            className={`relative flex-1 flex flex-col items-center justify-center h-full min-h-[44px] ios-press transition-colors outline-none ${
               isMoreActive || isDrawerOpen
                 ? 'text-blue-600 dark:text-blue-400 font-bold border-t-2 border-blue-600 dark:border-blue-500'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 border-t-2 border-transparent'

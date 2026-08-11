@@ -252,8 +252,8 @@ export default function EditStockModal({
             type="submit"
             variant="primary"
             disabled={saving}
-            icon={saving ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
           >
+            {saving ? <Loader2 size={15} className="animate-spin mr-1.5 inline" /> : <Check size={15} className="mr-1.5 inline" />}
             {saving ? 'Updating...' : 'Save Changes'}
           </Button>
         </div>

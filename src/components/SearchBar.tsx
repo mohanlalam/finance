@@ -190,13 +190,13 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
 
     return (
       <div className="fixed inset-0 bg-slate-900/80 dark:bg-slate-950/90 z-50 flex flex-col md:hidden animate-fade-in">
-        <div className="flex-1 bg-white dark:bg-slate-900 flex flex-col overflow-hidden pb-safe">
+        <div className="flex-1 bg-white dark:bg-slate-900 flex flex-col overflow-hidden pb-safe pt-safe">
           {/* Mobile Search Header */}
           <div className="px-4 py-3 border-b border-[var(--border-subtle)] flex items-center gap-3">
             <button
               onClick={handleMobileClose}
               aria-label="Back to dashboard"
-              className="p-1 rounded-lg text-slate-400 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 ios-press transition-colors shrink-0"
             >
               <ArrowLeft size={20} />
             </button>
@@ -214,7 +214,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                 <button
                   onClick={() => setQuery('')}
                   aria-label="Clear query"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
                 >
                   <X size={16} />
                 </button>

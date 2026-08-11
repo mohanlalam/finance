@@ -19,17 +19,17 @@ export function SegmentedControl<T extends string>({
   className = '',
 }: SegmentedControlProps<T>) {
   return (
-    <div className={`inline-flex p-1 bg-[#f2f2f7] dark:bg-zinc-800 rounded-[14px] gap-0.5 border border-slate-200/40 dark:border-zinc-700/30 ${className}`}>
+    <div className={`inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl gap-0.5 border border-slate-200/50 dark:border-slate-700/50 ${className}`}>
       {options.map((opt) => {
         const isActive = opt.id === value;
         return (
           <button
             key={opt.id}
             onClick={() => onChange(opt.id)}
-            className={`px-3 py-1 rounded-[10px] text-xs font-semibold transition-all duration-200 outline-none ${
+            className={`px-3 py-1 rounded-[10px] text-xs font-semibold ios-press transition-all duration-200 outline-none ${
               isActive
-                ? 'bg-white text-[#1d1d1f] shadow-sm dark:bg-zinc-700 dark:text-[#f5f5f7]'
-                : 'text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#98989d] dark:hover:text-[#f5f5f7]'
+                ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-slate-100'
+                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             {opt.label}

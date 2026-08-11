@@ -128,20 +128,20 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation' }
                   key={i}
                   d={d}
                   fill={color}
-                  stroke="white"
+                  stroke="var(--surface)"
                   strokeWidth={1.5}
-                  className="cursor-pointer transition-all duration-150 dark:stroke-zinc-900"
+                  className="cursor-pointer transition-all duration-150"
                   onMouseEnter={() => setHovered(i)}
                   onMouseLeave={() => setHovered(null)}
                 />
               ))}
-              <circle cx={cx} cy={cy} r={innerR - 2} className="fill-white dark:fill-zinc-900" />
+              <circle cx={cx} cy={cy} r={innerR - 2} className="fill-[var(--surface)]" />
               {hoverSlice ? (
                 <>
                   <text x={cx} y={cy - 10} textAnchor="middle" className="text-xs fill-slate-700 dark:fill-slate-200" fontSize={11} fontWeight={600}>
                     {hoverSlice.label}
                   </text>
-                  <text x={cx} y={cy + 6} textAnchor="middle" className="fill-[#007aff] dark:fill-[#60a5fa]" fontSize={13} fontWeight={700}>
+                  <text x={cx} y={cy + 6} textAnchor="middle" className="fill-[var(--accent-blue)]" fontSize={13} fontWeight={700}>
                     {hoverSlice.pct.toFixed(1)}%
                   </text>
                   <text x={cx} y={cy + 22} textAnchor="middle" className="fill-slate-400 dark:fill-slate-500 tnum" fontSize={9}>
@@ -164,7 +164,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation' }
             {slices.map((slice, i) => (
               <div
                 key={i}
-                className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors ${hovered === i ? 'bg-slate-100 dark:bg-zinc-800' : 'hover:bg-slate-50 dark:hover:bg-zinc-800/50'}`}
+                className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors ${hovered === i ? 'bg-slate-100 dark:bg-slate-800' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
                 onMouseEnter={() => setHovered(i)}
                 onMouseLeave={() => setHovered(null)}
               >

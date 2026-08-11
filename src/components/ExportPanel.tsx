@@ -488,7 +488,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             <select
               value={importTarget}
               onChange={(e) => setImportTarget(e.target.value)}
-              className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3.5 py-2.5 text-sm font-semibold text-[var(--text-primary)] focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none"
+              className="w-full bg-slate-100 dark:bg-slate-800 border border-transparent rounded-[14px] px-3.5 py-2.5 text-sm font-semibold text-[var(--text-primary)] focus:bg-white dark:focus:bg-slate-700/80 focus:ring-2 focus:ring-blue-500/30 transition-all duration-150 outline-none"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label} Portfolio</option>
@@ -506,7 +506,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
               type="file"
               accept=".csv"
               onChange={handleFileSelect}
-              className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none file:mr-3 file:border-0 file:bg-violet-100 dark:file:bg-violet-950/50 file:text-violet-700 dark:file:text-violet-300 file:text-xs file:font-bold file:rounded-[10px] file:px-3 file:py-1 cursor-pointer"
+              className="w-full bg-slate-100 dark:bg-slate-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] focus:bg-white dark:focus:bg-slate-700/80 focus:ring-2 focus:ring-blue-500/30 transition-all duration-150 outline-none file:mr-3 file:border-0 file:bg-violet-100 dark:file:bg-violet-950/50 file:text-violet-700 dark:file:text-violet-300 file:text-xs file:font-bold file:rounded-[10px] file:px-3 file:py-1 cursor-pointer"
             />
           </div>
 
@@ -518,20 +518,20 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
           )}
 
           {importErrors.length > 0 && (
-            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-250 dark:border-amber-900/50 rounded-[14px] px-3 py-2 text-xs text-amber-700 dark:text-amber-400 max-h-24 overflow-y-auto">
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-[14px] px-3 py-2 text-xs text-amber-700 dark:text-amber-400 max-h-24 overflow-y-auto">
               {importErrors.map((e, i) => <p key={i}>{e}</p>)}
             </div>
           )}
 
           {importRows.length > 0 && (
-            <div className="bg-slate-50 dark:bg-zinc-800/10 border border-[var(--border-subtle)] rounded-[14px] overflow-hidden">
-              <div className="px-3 py-2 bg-slate-100 dark:bg-zinc-850 flex items-center justify-between text-[10px] font-bold text-slate-550 dark:text-slate-400 uppercase tracking-wider">
+            <div className="bg-slate-50 dark:bg-slate-800/10 border border-[var(--border-subtle)] rounded-[14px] overflow-hidden">
+              <div className="px-3 py-2 bg-slate-100 dark:bg-slate-800 flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 <span>Holdings Preview ({importRows.length} stocks)</span>
                 <span className="text-blue-600 dark:text-blue-400 font-extrabold">Total: ₹{importRows.reduce((sum, r) => sum + (r.qty * r.avg_price), 0).toLocaleString('en-IN')}</span>
               </div>
               <div className="max-h-48 overflow-y-auto divide-y divide-[var(--border-subtle)]">
                 {importRows.slice(0, 20).map((r, i) => (
-                  <div key={i} className="px-3 py-2 flex items-center justify-between text-xs dark:text-slate-350">
+                  <div key={i} className="px-3 py-2 flex items-center justify-between text-xs dark:text-slate-300">
                     <div className="min-w-0 flex-1 pr-2">
                       <span className="font-bold text-slate-700 dark:text-slate-200 mr-2">{r.ticker}</span>
                       <span className="text-slate-500 dark:text-slate-400 text-[11px] truncate">{r.stock_name}</span>
@@ -552,13 +552,13 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
           )}
 
           {importDone && (
-            <div className="flex items-center gap-2 text-xs font-bold text-emerald-650 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 rounded-[14px] px-3.5 py-2.5">
+            <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 rounded-[14px] px-3.5 py-2.5">
               <CheckCircle size={15} /> Successfully imported {importRows.length} holdings into {portfolioOptions.find(p => p.name === importTarget)?.label || importTarget}!
             </div>
           )}
 
           {importError && (
-            <div className="flex items-center gap-2 text-xs text-red-650 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-[14px] px-3 py-2">
+            <div className="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-[14px] px-3 py-2">
               <AlertCircle size={14} /> {importError}
             </div>
           )}

@@ -265,7 +265,7 @@ export default function WhatIfCalculator() {
           <div className="space-y-2.5">
             <div className="flex justify-between items-center text-xs gap-2">
               <span className="font-bold text-slate-600 dark:text-slate-400">Expected Annual Return</span>
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-xl px-2.5 py-1 focus-within:ring-2 focus-within:ring-emerald-500/30 transition-all">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-xl px-2.5 py-1 focus-within:ring-2 focus-within:ring-blue-500/30 transition-all">
                 <input
                   type="number"
                   min="0.1"
@@ -273,10 +273,10 @@ export default function WhatIfCalculator() {
                   step="0.5"
                   value={rate || ''}
                   onChange={(e) => setRate(Math.min(100, Math.max(0, Number(e.target.value))))}
-                  className="w-12 text-right text-xs sm:text-sm font-extrabold text-emerald-600 dark:text-emerald-400 bg-transparent focus:outline-none tnum"
+                  className="w-12 text-right text-xs sm:text-sm font-extrabold text-blue-600 dark:text-blue-400 bg-transparent focus:outline-none tnum"
                   aria-label="Enter Expected Return Percentage"
                 />
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">% p.a.</span>
+                <span className="text-xs font-bold text-blue-600 dark:text-blue-400">% p.a.</span>
               </div>
             </div>
             <input
@@ -286,7 +286,7 @@ export default function WhatIfCalculator() {
               step="0.5"
               value={rate}
               onChange={(e) => setRate(Number(e.target.value))}
-              className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-600 dark:accent-emerald-400"
+              className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-400"
               aria-label="Expected Annual Return"
             />
             <div className="flex justify-between text-[10px] text-slate-400 font-bold">
@@ -299,7 +299,7 @@ export default function WhatIfCalculator() {
           <div className="space-y-2.5">
             <div className="flex justify-between items-center text-xs gap-2">
               <span className="font-bold text-slate-600 dark:text-slate-400">Duration Period</span>
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-xl px-2.5 py-1 focus-within:ring-2 focus-within:ring-indigo-500/30 transition-all">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-xl px-2.5 py-1 focus-within:ring-2 focus-within:ring-blue-500/30 transition-all">
                 <input
                   type="number"
                   min="1"
@@ -307,10 +307,10 @@ export default function WhatIfCalculator() {
                   step="1"
                   value={duration || ''}
                   onChange={(e) => setDuration(Math.min(50, Math.max(1, Number(e.target.value))))}
-                  className="w-10 text-right text-xs sm:text-sm font-extrabold text-indigo-600 dark:text-indigo-400 bg-transparent focus:outline-none tnum"
+                  className="w-10 text-right text-xs sm:text-sm font-extrabold text-blue-600 dark:text-blue-400 bg-transparent focus:outline-none tnum"
                   aria-label="Enter Duration Period in Years"
                 />
-                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">Yrs</span>
+                <span className="text-xs font-bold text-blue-600 dark:text-blue-400">Yrs</span>
               </div>
             </div>
             <input
@@ -320,7 +320,7 @@ export default function WhatIfCalculator() {
               step="1"
               value={duration}
               onChange={(e) => setDuration(Number(e.target.value))}
-              className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 dark:accent-indigo-400"
+              className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-400"
               aria-label="Duration Period"
             />
             <div className="flex justify-between text-[10px] text-slate-400 font-bold">
@@ -335,7 +335,7 @@ export default function WhatIfCalculator() {
           {/* Summary Metric Cards */}
           <div className="grid grid-cols-3 gap-3">
             {/* Total Invested */}
-            <div className="bg-white dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl p-3 shadow-md">
+            <div className="bg-white dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-xl p-3 shadow-md">
               <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
                 Total Invested
               </span>
@@ -345,7 +345,7 @@ export default function WhatIfCalculator() {
             </div>
 
             {/* Wealth Gain */}
-            <div className="bg-white dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl p-3 shadow-md">
+            <div className="bg-white dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-xl p-3 shadow-md">
               <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
                 Wealth Gain
               </span>
@@ -355,7 +355,7 @@ export default function WhatIfCalculator() {
             </div>
 
             {/* Future Value */}
-            <div className="bg-blue-600/5 dark:bg-blue-500/5 border border-blue-500/20 rounded-2xl p-3 shadow-md">
+            <div className="bg-blue-600/5 dark:bg-blue-500/5 border border-blue-500/20 rounded-xl p-3 shadow-md">
               <span className="text-[10px] font-extrabold text-blue-600/80 dark:text-blue-400/80 uppercase tracking-wider block">
                 Future Value
               </span>

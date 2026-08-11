@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, X } from './icons/AppIcons';
 
 interface FloatingAddMenuProps {
@@ -78,14 +78,14 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
       )}
 
       {/* Floating Menu Container with Safe Area Spacing */}
-      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-[calc(1rem+env(safe-area-inset-right,0px))] z-50 flex flex-col items-end gap-3 pointer-events-none">
+      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-0 sm:right-[calc(1rem+env(safe-area-inset-right,0px))] left-0 sm:left-auto z-50 flex flex-col items-center sm:items-end gap-3 pointer-events-none px-3 sm:px-0">
         {/* Categorized Quick-Add Card */}
         {isOpen && (
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Quick Add Asset Menu"
-            className="pointer-events-auto w-72 max-h-[65vh] overflow-y-auto bg-white dark:bg-slate-900 border border-[var(--border-subtle)] rounded-xl shadow-xl p-3 mb-2 space-y-3"
+            className="pointer-events-auto w-full sm:w-80 max-h-[75vh] overflow-y-auto bg-[var(--surface)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl shadow-2xl p-4 mb-2 space-y-3 pb-safe sm:pb-4"
           >
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
               <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
@@ -96,10 +96,10 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
                   setIsOpen(false);
                   fabButtonRef.current?.focus();
                 }}
-                className="w-8 h-8 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 ios-press transition-colors"
                 aria-label="Close add menu"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 

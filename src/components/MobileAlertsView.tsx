@@ -90,7 +90,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
       aria-label="Active Portfolio Alerts"
       className="fixed inset-0 bg-black/50 z-50 flex flex-col md:hidden"
     >
-      <div className="flex-1 mt-12 bg-white dark:bg-slate-900 rounded-t-xl flex flex-col shadow-xl overflow-hidden pb-safe">
+      <div className="flex-1 mt-12 bg-[var(--surface)] rounded-t-2xl flex flex-col shadow-xl overflow-hidden">
         {/* Header */}
         <div className="px-4 py-3.5 border-b border-[var(--border-subtle)] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -104,8 +104,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
           </div>
           <button
             onClick={onClose}
-            className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
-            aria-label="Close Alerts"
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 ios-press transition-colors"
           >
             <X size={16} />
           </button>
@@ -210,16 +209,16 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
 
         {/* Footer actions */}
         {alerts.length > 0 && (
-          <div className="p-3.5 border-t border-[var(--border-subtle)] bg-[var(--surface)] flex gap-3">
+          <div className="p-3.5 pb-safe border-t border-[var(--border-subtle)] bg-[var(--surface)] flex gap-3">
             <button
               onClick={onDismissAll}
-              className="flex-1 py-2.5 text-xs font-bold text-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-all"
+              className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-[10px] ios-press transition-all"
             >
               Clear All ({alerts.length})
             </button>
             <button
               onClick={onClose}
-              className="flex-1 py-2.5 text-xs font-bold text-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow-xs"
+              className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] ios-press transition-all shadow-xs"
             >
               Back to Dashboard
             </button>

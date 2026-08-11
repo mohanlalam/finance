@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Calculator, IndianRupee } from './icons/AppIcons';
+import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { Alert } from '../hooks/useAlerts';
@@ -48,9 +48,6 @@ function MobileHomeSummary({
   todayPnLPercent,
   breakdown,
   alertCount,
-  alerts,
-  lastUpdated,
-  priceStatus,
   onRefresh,
   isLoadingPrices,
   onNavigateAsset,
@@ -91,13 +88,13 @@ function MobileHomeSummary({
   }, [activePortfolio, portfolios]);
 
   const rdCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.recurringDeposits?.length || 0;
-    return portfolios.reduce((sum, p) => sum + (p.recurringDeposits?.length || 0), 0);
+    if (activePortfolio) return activePortfolio.rdAccounts?.length || 0;
+    return portfolios.reduce((sum, p) => sum + (p.rdAccounts?.length || 0), 0);
   }, [activePortfolio, portfolios]);
 
   const sipCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.sips?.length || 0;
-    return portfolios.reduce((sum, p) => sum + (p.sips?.length || 0), 0);
+    if (activePortfolio) return activePortfolio.sipAccounts?.length || 0;
+    return portfolios.reduce((sum, p) => sum + (p.sipAccounts?.length || 0), 0);
   }, [activePortfolio, portfolios]);
 
   const goldCount = useMemo(() => {
@@ -106,13 +103,13 @@ function MobileHomeSummary({
   }, [activePortfolio, portfolios]);
 
   const propertyCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.realEstateProperties?.length || 0;
-    return portfolios.reduce((sum, p) => sum + (p.realEstateProperties?.length || 0), 0);
+    if (activePortfolio) return activePortfolio.realEstate?.length || 0;
+    return portfolios.reduce((sum, p) => sum + (p.realEstate?.length || 0), 0);
   }, [activePortfolio, portfolios]);
 
   const insuranceCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.insurancePolicies?.length || 0;
-    return portfolios.reduce((sum, p) => sum + (p.insurancePolicies?.length || 0), 0);
+    if (activePortfolio) return activePortfolio.insurances?.length || 0;
+    return portfolios.reduce((sum, p) => sum + (p.insurances?.length || 0), 0);
   }, [activePortfolio, portfolios]);
 
   const docCount = useMemo(() => {
@@ -217,20 +214,20 @@ function MobileHomeSummary({
           <button
             onClick={onRefresh}
             disabled={isLoadingPrices}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold transition-all active:scale-95 border border-slate-200/60 dark:border-slate-700/60"
+            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold transition-all ios-press border border-slate-200/60 dark:border-slate-700/60"
           >
-            <RefreshCw size={12} className={isLoadingPrices ? 'animate-spin text-blue-600' : ''} />
+            <RefreshCw size={13} className={isLoadingPrices ? 'animate-spin text-blue-600' : ''} />
             <span>{isLoadingPrices ? 'Syncing' : 'Sync'}</span>
           </button>
         </div>
 
         {/* Hero Valuation */}
-        <div className="flex items-end justify-between">
-          <div>
-            <h2 className="text-[26px] font-extrabold text-[var(--text-primary)] tnum leading-tight tracking-tight">
+        <div className="flex items-end justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-[26px] font-extrabold text-[var(--text-primary)] tnum leading-tight tracking-tight truncate">
               {renderValue(summaryData.totalCurrentValue)}
             </h2>
-            <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
+            <p className="text-xs text-[var(--text-tertiary)] mt-0.5 truncate">
               Invested: <span className="font-extrabold text-[var(--text-secondary)] tnum">{renderValue(summaryData.totalInvested)}</span>
             </p>
           </div>
@@ -244,22 +241,22 @@ function MobileHomeSummary({
         {/* Total & Today Returns Row */}
         <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[var(--border-subtle)]">
           {/* Total Return */}
-          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40">
-            <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5">Total Return</span>
-            <div className={`flex items-center gap-1 text-xs font-extrabold tnum ${isTotalGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-              {isTotalGain ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
-              <span>{isBalancesHidden ? '••••••' : <>{isTotalGain ? '+' : ''}{formatINR(summaryData.totalPnL)}</>}</span>
-              <span className="text-[10px] font-extrabold ml-auto">({formatPercent(summaryData.totalPnLPercent, 1)})</span>
+          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40 min-w-0">
+            <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Total Return</span>
+            <div className={`flex items-center gap-1 text-xs font-extrabold tnum min-w-0 ${isTotalGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+              {isTotalGain ? <TrendingUp size={13} className="shrink-0" /> : <TrendingDown size={13} className="shrink-0" />}
+              <span className="truncate">{isBalancesHidden ? '••••••' : <>{isTotalGain ? '+' : ''}{formatINR(summaryData.totalPnL)}</>}</span>
+              <span className="text-[10px] font-extrabold ml-auto shrink-0">({formatPercent(summaryData.totalPnLPercent, 1)})</span>
             </div>
           </div>
 
           {/* Today's Return */}
-          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40">
-            <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5">Today's Return</span>
-            <div className={`flex items-center gap-1 text-xs font-extrabold tnum ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-              {isTodayGain ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
-              <span>{isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}{formatINR(todayPnL)}</>}</span>
-              <span className="text-[10px] font-extrabold ml-auto">({formatPercent(todayPnLPercent, 1)})</span>
+          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40 min-w-0">
+            <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Today's Return</span>
+            <div className={`flex items-center gap-1 text-xs font-extrabold tnum min-w-0 ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+              {isTodayGain ? <TrendingUp size={13} className="shrink-0" /> : <TrendingDown size={13} className="shrink-0" />}
+              <span className="truncate">{isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}{formatINR(todayPnL)}</>}</span>
+              <span className="text-[10px] font-extrabold ml-auto shrink-0">({formatPercent(todayPnLPercent, 1)})</span>
             </div>
           </div>
         </div>
@@ -278,25 +275,25 @@ function MobileHomeSummary({
               const isTodayGain = pTodayPnL >= 0;
               return (
                 <div key={p.id} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/40 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[var(--text-primary)]">{p.label} Portfolio</span>
-                    <span className="text-xs font-extrabold text-[var(--text-primary)] tnum">{renderValue(p.totalCurrentValue)}</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-[var(--text-primary)] truncate">{p.label} Portfolio</span>
+                    <span className="text-xs font-extrabold text-[var(--text-primary)] tnum shrink-0">{renderValue(p.totalCurrentValue)}</span>
                   </div>
 
                   <div className="grid grid-cols-3 gap-1 pt-2 border-t border-slate-200/60 dark:border-slate-700/40 text-xs">
-                    <div>
-                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block">Invested</span>
-                      <span className="font-extrabold tnum text-[var(--text-secondary)]">{renderValue(p.totalInvested)}</span>
+                    <div className="min-w-0">
+                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block truncate">Invested</span>
+                      <span className="font-extrabold tnum text-[var(--text-secondary)] block truncate">{renderValue(p.totalInvested)}</span>
                     </div>
-                    <div>
-                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block">Total Return</span>
-                      <span className={`font-extrabold tnum ${isGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                    <div className="min-w-0">
+                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block truncate">Total Return</span>
+                      <span className={`font-extrabold tnum block truncate ${isGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                         {isBalancesHidden ? '••••••' : formatPercent(p.totalPnLPercent, 1)}
                       </span>
                     </div>
-                    <div className="text-right">
-                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block">Today's P&amp;L</span>
-                      <span className={`font-extrabold tnum ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                    <div className="text-right min-w-0">
+                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block truncate">Today's P&amp;L</span>
+                      <span className={`font-extrabold tnum block truncate ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                         {isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}{formatINR(pTodayPnL)}</>}
                       </span>
                     </div>

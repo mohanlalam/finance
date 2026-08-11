@@ -140,6 +140,13 @@ export default function Modal({
       isDragging.current = false;
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
+
+      // Mobile swipe-down dismiss threshold (if pulled down > 120px)
+      if (dragOffset.y > 120 && !preventClose) {
+        onClose();
+      } else {
+        setDragOffset({ x: 0, y: 0 });
+      }
     }
 
     window.addEventListener('pointermove', handlePointerMove);
@@ -152,7 +159,7 @@ export default function Modal({
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
     };
-  }, [isRendered]);
+  }, [isRendered, dragOffset.y, preventClose, onClose]);
 
   // Focus trap
   const handleKeyDown = useCallback(
@@ -190,7 +197,7 @@ export default function Modal({
   const modalContentNode = (
     <div
       ref={overlayRef}
-      className={`fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 overflow-y-auto ${isExiting ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop'}`}
+      className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-6 overflow-y-auto ${isExiting ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop'}`}
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
@@ -203,10 +210,10 @@ export default function Modal({
         aria-hidden="true"
       />
 
-      {/* Content wrapper: centered on screen, draggable, top z-index */}
+      {/* Content wrapper: mobile bottom sheet, centered on sm desktop */}
       <div
         ref={contentRef}
-        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-2xl shadow-2xl w-full ${maxWidth} max-h-[85vh] sm:max-h-[80vh] my-auto flex flex-col min-h-0 overflow-hidden ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
+        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-t-2xl sm:rounded-2xl rounded-b-none sm:rounded-b-2xl shadow-2xl w-full ${maxWidth} max-h-[85vh] sm:max-h-[80vh] mb-0 sm:my-auto pb-safe sm:pb-0 flex flex-col min-h-0 overflow-hidden ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
         style={hasDragOffset ? { transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)` } : undefined}
         onPointerDown={handlePointerDown}
       >

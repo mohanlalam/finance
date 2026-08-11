@@ -276,7 +276,7 @@ export default function AppShell() {
     const portfolioAssistant = (
       <SectionErrorBoundary sectionName="AI Portfolio Assistant">
         <LazyViewport placeholderHeight={370}>
-          <Suspense fallback={<div className="h-[370px] bg-slate-900 border border-slate-700/60 rounded-xl animate-pulse" />}>
+          <Suspense fallback={<div className="h-[370px] apple-card rounded-xl animate-pulse" />}>
             <PortfolioAssistant portfolios={portfolios} />
           </Suspense>
         </LazyViewport>
@@ -427,7 +427,7 @@ export default function AppShell() {
             >
               <RefreshCw 
                 size={18} 
-                className={`text-[#007aff] dark:text-[#60a5fa] ${ptr.isRefreshing ? 'animate-spin' : ''}`}
+                className={`text-[var(--accent-blue)] ${ptr.isRefreshing ? 'animate-spin' : ''}`}
               />
             </div>
           </div>

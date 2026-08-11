@@ -370,17 +370,13 @@ export default React.memo(function InsightsPanel({
   const hasHealthCards = showStocks || showDrift || showRisk;
   const hasUpcomingCards = showFDs || showInsurance;
 
-  const totalInvested = activePortfolio ? activePortfolio.totalInvested : portfolios.reduce((s, p) => s + p.totalInvested, 0);
-  const totalValue = activePortfolio ? activePortfolio.totalCurrentValue : portfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
-  const portfolioReturnPercent = totalInvested > 0 ? ((totalValue - totalInvested) / totalInvested) * 100 : 0;
-
   return (
     <div role="region" aria-label="Portfolio Insights" className="space-y-6">
       
       {/* Header and Filter pills */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-[#007aff] flex items-center justify-center">
+          <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-[var(--accent-blue)] flex items-center justify-center">
             <BarChart3 size={13} />
           </div>
           <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider">Portfolio Insights</h3>
@@ -396,7 +392,7 @@ export default React.memo(function InsightsPanel({
                 onClick={() => setActiveFilter(filter.id)}
                 className={`shrink-0 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all duration-150 outline-none ${
                   isActive
-                    ? 'bg-[#007aff] text-white shadow-sm'
+                    ? 'bg-[var(--accent-blue)] text-white shadow-sm'
                     : 'bg-white dark:bg-zinc-800 text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:text-[var(--text-primary)] hover:border-slate-350'
                 }`}
               >
@@ -415,7 +411,7 @@ export default React.memo(function InsightsPanel({
             <Card title="Today's Movers" icon={<Activity size={13} className="text-[#ff9500]" />}>
               <BiggestMovers movers={insights.biggestMovers} />
             </Card>
-            <Card title="Top Holdings by Value" icon={<Crown size={13} className="text-[#007aff]" />}>
+            <Card title="Top Holdings by Value" icon={<Crown size={13} className="text-[var(--accent-blue)]" />}>
               <TopHoldings items={insights.topByValue} />
             </Card>
             <Card title="Best / Worst performers" icon={<Target size={13} className="text-purple-500" />}>
@@ -461,7 +457,7 @@ export default React.memo(function InsightsPanel({
                   </svg>
                   <div className="absolute text-center">
                     <span className="text-xs font-extrabold text-[var(--text-primary)]">{healthReport.score}</span>
-                    <span className="text-[6.5px] text-[var(--text-secondary)] block -mt-1">/100</span>
+                    <span className="text-[9px] text-[var(--text-secondary)] block -mt-1">/100</span>
                   </div>
                 </div>
                 <div className="flex-1 space-y-1 overflow-y-auto max-h-[85px] pr-1 scrollbar-none">

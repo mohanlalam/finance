@@ -207,7 +207,7 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
         
         <div className="flex items-center gap-2">
           {history.length < 2 && (
-            <span className="text-[9px] font-bold bg-[#eaf3ff] text-[#007aff] px-2 py-0.5 rounded-full uppercase tracking-wider">
+            <span className="text-[9px] font-bold bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
               Simulated
             </span>
           )}
@@ -241,8 +241,8 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
           {/* Gradients */}
           <defs>
             <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#007aff" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#007aff" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#2563eb" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
@@ -254,7 +254,7 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
                 y1={tick.y}
                 x2={width - paddingRight}
                 y2={tick.y}
-                className="stroke-slate-100 dark:stroke-zinc-800/50"
+                className="stroke-slate-100 dark:stroke-slate-800/50"
                 strokeWidth={1}
                 strokeDasharray="4 4"
               />
@@ -298,7 +298,7 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
           <path
             d={linePath}
             fill="none"
-            stroke="#007aff"
+            stroke="#2563eb"
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -313,8 +313,8 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
               r={hoveredIdx === idx ? 5 : 3.5}
               className={`cursor-pointer transition-all ${
                 hoveredIdx === idx
-                  ? 'fill-[#007aff] stroke-white dark:stroke-zinc-900'
-                  : 'fill-transparent hover:fill-[#007aff]/20'
+                  ? 'fill-blue-600 stroke-white dark:stroke-slate-900'
+                  : 'fill-transparent hover:fill-blue-600/20'
               }`}
               strokeWidth={hoveredIdx === idx ? 2 : 0}
               onMouseEnter={() => setHoveredIdx(idx)}
@@ -326,7 +326,7 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
         {/* Floating Tooltip details */}
         {hoverPoint && (
           <div
-            className="absolute bg-slate-900/95 dark:bg-zinc-900/95 text-white p-2.5 rounded-xl border border-slate-700/60 shadow-floating z-50 text-[10px] pointer-events-none transform -translate-x-1/2 -translate-y-full"
+            className="absolute bg-slate-900/95 dark:bg-slate-900/95 text-white p-2.5 rounded-xl border border-slate-700/60 shadow-floating z-50 text-[10px] pointer-events-none transform -translate-x-1/2 -translate-y-full"
             style={{
               left: `${(hoverPoint.x / width) * 100}%`,
               top: `${(hoverPoint.y / height) * 100 - 5}%`,
@@ -335,7 +335,7 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
               {new Date(hoverPoint.date).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}
             </p>
-            <p className="text-xs font-extrabold text-[#60a5fa] mt-0.5 tnum">
+            <p className="text-xs font-extrabold text-blue-400 mt-0.5 tnum">
               {formatINR(hoverPoint.value)}
             </p>
           </div>

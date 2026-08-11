@@ -61,7 +61,7 @@ const Th = React.memo(({
       <span className="flex items-center gap-1">
         {label}
         {!hideArrow && (
-          <span className={`text-[10px] ${sortKey === k ? 'text-[#007aff] dark:text-[#60a5fa] font-bold' : 'text-slate-300 dark:text-zinc-600'}`}>
+          <span className={`text-[10px] ${sortKey === k ? 'text-[var(--accent-blue)] font-bold' : 'text-slate-300 dark:text-zinc-600'}`}>
             {sortKey === k ? (sortAsc ? '▲' : '▼') : '⇅'}
           </span>
         )}
@@ -355,7 +355,7 @@ export default React.memo(function PortfolioTable({
                       <div className="mt-2 space-y-2 border border-blue-200 dark:border-blue-900/50 bg-blue-50/20 dark:bg-blue-950/20 rounded-lg p-2">
                         <div className="flex gap-2">
                           <div>
-                            <label className="block text-[8px] font-semibold text-slate-400 uppercase">Qty</label>
+                            <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Qty</label>
                             <input
                               ref={editInputRef}
                               type="number"
@@ -364,11 +364,11 @@ export default React.memo(function PortfolioTable({
                               value={editQty}
                               onChange={(e) => setEditQty(e.target.value)}
                               disabled={updatingId === h.id}
-                              className="w-full border border-blue-300 dark:border-blue-800 rounded px-1.5 py-0.5 text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none"
+                              className="w-full border border-blue-300 dark:border-blue-800 rounded px-1.5 py-1 text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none"
                             />
                           </div>
                           <div>
-                            <label className="block text-[8px] font-semibold text-slate-400 uppercase">Avg Price (₹)</label>
+                            <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Avg Price (₹)</label>
                             <input
                               type="number"
                               min="0"
@@ -376,11 +376,11 @@ export default React.memo(function PortfolioTable({
                               value={editAvgPrice}
                               onChange={(e) => setEditAvgPrice(e.target.value)}
                               disabled={updatingId === h.id}
-                              className="w-full border border-blue-300 dark:border-blue-800 rounded px-1.5 py-0.5 text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none"
+                              className="w-full border border-blue-300 dark:border-blue-800 rounded px-1.5 py-1 text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none"
                             />
                           </div>
                         </div>
-                        {editError && <p className="text-[9px] text-red-500">{editError}</p>}
+                        {editError && <p className="text-[10px] text-rose-500">{editError}</p>}
                         <div className="flex gap-2 justify-end">
                           {updatingId === h.id ? (
                             <Loader2 size={12} className="animate-spin text-blue-500" />
@@ -388,13 +388,13 @@ export default React.memo(function PortfolioTable({
                             <>
                               <button
                                 onClick={() => saveEdit(h)}
-                                className="px-2 py-0.5 bg-emerald-600 text-white rounded text-[10px] font-semibold hover:bg-emerald-700"
+                                className="px-2.5 py-1 bg-emerald-600 text-white rounded-[6px] text-xs font-semibold hover:bg-emerald-700 ios-press"
                               >
                                 Save
                               </button>
                               <button
                                 onClick={cancelEdit}
-                                className="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-[10px] font-semibold hover:bg-slate-300"
+                                className="px-2.5 py-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-[6px] text-xs font-semibold hover:bg-slate-300 ios-press"
                               >
                                 Cancel
                               </button>
@@ -403,7 +403,7 @@ export default React.memo(function PortfolioTable({
                         </div>
                       </div>
                     ) : (
-                      <p className="text-[10px] text-slate-400 dark:text-slate-550 mt-0.5">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                         {isBalancesHidden ? '••••••' : <>{formatNumber(h.qty, 0)} shares @ ₹{formatNumber(h.avgPrice)}</>} (LTP: ₹{formatNumber(h.ltp)})
                       </p>
                     )}
@@ -417,47 +417,47 @@ export default React.memo(function PortfolioTable({
                       <span className={`text-[10px] font-bold whitespace-nowrap ${pnlColor(h.unrealizedPnL)}`}>
                         {isBalancesHidden ? '••••••' : <>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</>}
                       </span>
-                      <span className={`inline-flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.2 rounded-full whitespace-nowrap ${h.pnlPercent >= 0 ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400'}`}>
+                      <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap ${h.pnlPercent >= 0 ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400'}`}>
                         {isBalancesHidden ? '••••••' : formatPercent(h.pnlPercent)}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-550 pt-1 border-t border-slate-50 dark:border-slate-700/30">
+                <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-400 pt-1 border-t border-slate-50 dark:border-slate-700/30">
                   <div className="flex gap-2">
                     <span>Alloc: <span className="font-semibold text-slate-600 dark:text-slate-400">{h._allocation.toFixed(1)}%</span></span>
                     <span>Today: <span className={`font-semibold ${pnlColor(h.todayPnLPercent)}`}>{formatPercent(h.todayPnLPercent)}</span></span>
                   </div>
 
                   {!isEditing && (
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => shareHolding(h, addToast)}
-                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all bg-emerald-50/80 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200/50 dark:border-emerald-800/50 shadow-sm"
+                        className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-lg flex items-center justify-center transition-all bg-emerald-50/80 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200/50 dark:border-emerald-800/50 shadow-xs ios-press"
                         title="Share holding"
                         aria-label="Share holding summary"
                       >
-                        <Share2 size={13} />
+                        <Share2 size={14} />
                       </button>
                       {onUpdate && (
                         <button
                           onClick={() => startEdit(h)}
-                          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all bg-blue-50/80 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200/50 dark:border-blue-800/50 shadow-sm"
+                          className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-lg flex items-center justify-center transition-all bg-blue-50/80 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200/50 dark:border-blue-800/50 shadow-xs ios-press"
                           aria-label="Edit holding quantity and price"
                           title="Edit holding"
                         >
-                          <Pencil size={13} />
+                          <Pencil size={14} />
                         </button>
                       )}
                       {onDelete && (
                         <button
                           onClick={() => handleDelete(h)}
-                          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all bg-red-50/80 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 border border-red-200/50 dark:border-red-800/50 shadow-sm"
+                          className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-lg flex items-center justify-center transition-all bg-red-50/80 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 border border-red-200/50 dark:border-red-800/50 shadow-xs ios-press"
                           aria-label="Delete holding"
                           title="Delete holding"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         </button>
                       )}
                     </div>

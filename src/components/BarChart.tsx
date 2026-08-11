@@ -44,7 +44,7 @@ function BarChart({ portfolios }: BarChartProps) {
             const y = paddingTop + chartHeight - (val / maxVal) * chartHeight;
             return (
               <g key={i}>
-                <line x1={paddingLeft - 8} y1={y} x2={paddingLeft + totalWidth - paddingLeft - 20} y2={y} stroke="" strokeWidth={1} className="stroke-slate-100 dark:stroke-zinc-800/50" />
+                <line x1={paddingLeft - 8} y1={y} x2={paddingLeft + totalWidth - paddingLeft - 20} y2={y} stroke="" strokeWidth={1} className="stroke-slate-100 dark:stroke-slate-800/50" />
                 <text x={paddingLeft - 12} y={y + 4} textAnchor="end" className="fill-slate-400 dark:fill-slate-500 font-medium" fontSize={9}>
                   {val >= 10000000 ? `₹${(val / 10000000).toFixed(0)}Cr` : val >= 100000 ? `₹${(val / 100000).toFixed(0)}L` : val >= 1000 ? `₹${(val / 1000).toFixed(0)}K` : `₹${val.toFixed(0)}`}
                 </text>
@@ -52,8 +52,8 @@ function BarChart({ portfolios }: BarChartProps) {
             );
           })}
 
-          <line x1={paddingLeft} y1={paddingTop} x2={paddingLeft} y2={paddingTop + chartHeight} className="stroke-slate-250 dark:stroke-zinc-800" strokeWidth={1} />
-          <line x1={paddingLeft} y1={paddingTop + chartHeight} x2={totalWidth - 10} y2={paddingTop + chartHeight} className="stroke-slate-250 dark:stroke-zinc-800" strokeWidth={1} />
+          <line x1={paddingLeft} y1={paddingTop} x2={paddingLeft} y2={paddingTop + chartHeight} className="stroke-slate-200 dark:stroke-slate-700/60" strokeWidth={1} />
+          <line x1={paddingLeft} y1={paddingTop + chartHeight} x2={totalWidth - 10} y2={paddingTop + chartHeight} className="stroke-slate-200 dark:stroke-slate-700/60" strokeWidth={1} />
 
           {portfolios.map((p, pi) => {
             const groupX = paddingLeft + pi * (2 * barWidth + gap + groupGap);

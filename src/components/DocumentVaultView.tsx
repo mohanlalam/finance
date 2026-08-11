@@ -352,10 +352,10 @@ export default React.memo(function DocumentVaultView({
                       <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate" title={doc.name}>{doc.name}</p>
                       <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         {doc.file_type && (
-                          <span className="text-[10px] text-slate-400 dark:text-slate-550 font-mono">{doc.file_type}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{doc.file_type}</span>
                         )}
                         {linkedLabel && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-955/20 text-blue-700 dark:text-blue-400 flex items-center gap-1">
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 flex items-center gap-1">
                             <Paperclip size={9} />
                             {linkedLabel}
                           </span>

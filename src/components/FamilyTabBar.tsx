@@ -148,7 +148,7 @@ export default React.memo(function FamilyTabBar({
       {/* Add family control */}
       <button
         onClick={onAddFamilyClick}
-        className="flex items-center gap-1.5 px-3.5 h-9 rounded-xl text-xs font-bold border border-slate-200 hover:border-[#007aff] hover:text-[#007aff] dark:border-zinc-700 dark:text-zinc-300 dark:hover:text-[#60a5fa] dark:hover:border-[#60a5fa] transition-colors shrink-0"
+        className="flex items-center gap-1.5 px-3.5 h-9 rounded-xl text-xs font-bold border border-slate-200 hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] dark:border-slate-700 dark:text-slate-300 dark:hover:text-blue-400 dark:hover:border-blue-400 ios-press transition-colors shrink-0"
         aria-label="Add family member"
       >
         <UserPlus size={15} />

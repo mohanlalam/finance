@@ -21,7 +21,7 @@ export default function DesktopSidebar({
   onOpenRename
 }: DesktopSidebarProps) {
   const getNavItemClass = (isActive: boolean) =>
-    `flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-md text-xs font-bold transition-all outline-none ${
+    `flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-md text-xs font-bold ios-press transition-all outline-none ${
       isActive
         ? 'bg-blue-50/80 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border-l-2 border-blue-600 dark:border-blue-500 shadow-xs'
         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-200 border-l-2 border-transparent'

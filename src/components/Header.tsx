@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Check, Sun, Moon, LockKeyhole, Eye, EyeOff } from './icons/AppIcons';
+import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { FetchStatus } from '../hooks/useMarketData';
 import { Portfolio } from '../types/portfolio';
