@@ -2,7 +2,7 @@ import React from 'react';
 // Inline SVG icons — keeps lucide-react out of the critical bundle
 import { Wifi, WifiOff, Plus } from './icons/AppIcons';
 import { Portfolio, AssetPayload } from '../types/portfolio';
-import { FetchStatus } from '../hooks/useMarketData';
+import { FetchStatus } from '../types/portfolio';
 import AssetCardSkeleton from './AssetCardSkeleton';
 import EmptyState from './EmptyState';
 // Eagerly loaded (lightweight, always visible on stocks tab)

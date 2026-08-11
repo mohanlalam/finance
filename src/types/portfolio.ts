@@ -1,3 +1,9 @@
+export type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
+
+export interface LivePrices {
+  [yahooSymbol: string]: { ltp: number; todayPct: number };
+}
+
 export type PortfolioName = string;
 
 export interface Holding {

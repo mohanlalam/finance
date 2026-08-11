@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
-import { FetchStatus } from '../hooks/useMarketData';
+import { FetchStatus } from '../types/portfolio';
 import { Portfolio } from '../types/portfolio';
 import type { ImportRow } from './ExportPanel';
 import { Alert } from '../hooks/useAlerts';
