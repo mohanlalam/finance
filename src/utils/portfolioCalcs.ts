@@ -48,7 +48,7 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
 
 /** Estimate today's P&L from intraday movement */
 export function estimateTodayPnL(portfolio: Portfolio | null, all: Portfolio[]): number {
-  const holdings = portfolio ? portfolio.holdings : all.flatMap((p) => p.holdings);
+  const holdings = portfolio ? (portfolio.holdings || []) : all.flatMap((p) => p.holdings || []);
   return holdings.reduce((sum, h) => {
     // Derive yesterday's closing value, then compute today's absolute change
     const factor = 1 + h.todayPnLPercent / 100;

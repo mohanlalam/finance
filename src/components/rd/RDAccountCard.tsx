@@ -6,6 +6,7 @@ import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote, Share2 } from 
 import RDInstallmentSchedule from './RDInstallmentSchedule';
 import { useLongPress } from '../../hooks/useLongPress';
 import { ContextMenu } from '../ui/ContextMenu';
+import { useToastActions } from '../../contexts/ToastContext';
 
 interface RDAccountCardProps {
   account: RDAccount;
@@ -22,6 +23,7 @@ export function RDAccountCard({
   onConfirmDelete,
   onUpdate,
 }: RDAccountCardProps) {
+  const { addToast } = useToastActions();
   const [contextMenu, setContextMenu] = React.useState<{ isOpen: boolean; x: number; y: number }>({
     isOpen: false,
     x: 0,
@@ -173,7 +175,7 @@ export function RDAccountCard({
                 navigator.share({ title: `RD Summary`, text: summary }).catch(console.error);
               } else {
                 navigator.clipboard.writeText(summary);
-                alert('Summary copied to clipboard!');
+                addToast('Summary copied to clipboard!', 'success');
               }
             },
           },

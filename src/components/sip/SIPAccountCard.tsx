@@ -5,6 +5,7 @@ import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../utils/sipUtils
 import { FileText, Edit2, Trash2, StickyNote, Wifi, Share2 } from '../icons/AppIcons';
 import { useLongPress } from '../../hooks/useLongPress';
 import { ContextMenu } from '../ui/ContextMenu';
+import { useToastActions } from '../../contexts/ToastContext';
 
 interface SIPAccountCardProps {
   account: SIPAccount;
@@ -19,6 +20,7 @@ export function SIPAccountCard({
   onOpenEdit,
   onConfirmDelete,
 }: SIPAccountCardProps) {
+  const { addToast } = useToastActions();
   const [contextMenu, setContextMenu] = React.useState<{ isOpen: boolean; x: number; y: number }>({
     isOpen: false,
     x: 0,
@@ -180,7 +182,7 @@ export function SIPAccountCard({
                 navigator.share({ title: `SIP Summary`, text: summary }).catch(console.error);
               } else {
                 navigator.clipboard.writeText(summary);
-                alert('Summary copied to clipboard!');
+                addToast('Summary copied to clipboard!', 'success');
               }
             },
           },

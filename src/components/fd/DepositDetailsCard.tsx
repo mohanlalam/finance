@@ -3,6 +3,7 @@ import { FixedDeposit, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../../utils/formatters';
 import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote, Share2 } from '../icons/AppIcons';
 import { useLongPress } from '../../hooks/useLongPress';
+import { useToastActions } from '../../contexts/ToastContext';
 import { ContextMenu } from '../ui/ContextMenu';
 
 interface ModeConfig {
@@ -30,6 +31,7 @@ export function DepositDetailsCard({
   onOpenEdit,
   onConfirmDelete,
 }: DepositDetailsCardProps) {
+  const { addToast } = useToastActions();
   const IconComponent = cfg.iconClass;
   const [contextMenu, setContextMenu] = React.useState<{ isOpen: boolean; x: number; y: number }>({
     isOpen: false,
@@ -186,7 +188,7 @@ export function DepositDetailsCard({
                 navigator.share({ title: `${cfg.title} Summary`, text: summary }).catch(console.error);
               } else {
                 navigator.clipboard.writeText(summary);
-                alert('Summary copied to clipboard!');
+                addToast('Summary copied to clipboard!', 'success');
               }
             },
           },
