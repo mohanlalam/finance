@@ -241,10 +241,10 @@ All four core visualization widgets are constrained to an **equalized height of 
    * Empty state preview: Renders a muted reference curve with a glassmorphic badge overlay when insufficient data exists.
 2. **Portfolio Assistant (AI Chat)** (`PortfolioAssistant.tsx`):
    * Conversational NLP panel formatted to 370px height matching neighboring charts.
-   * Features quick suggestion prompt pills, typing indicator, markdown formatting, and copy button.
+   * Features quick suggestion prompt pills, typing indicator, markdown formatting, `Bot` SVG icon integration, and copy button.
 3. **Asset Allocation Chart** (`PieChart.tsx`):
    * Donut chart representing portfolio breakdown across asset classes (Stocks & ETFs, Fixed Deposits, Recurring Deposits, Mutual Fund SIPs, Gold Holdings, Real Estate).
-   * **Dual Legend Breakdown (Monetary Amount & Percentage Share)**: Each legend row clearly displays both the formatted monetary valuation (e.g. `₹47.12L`) and the composition weight percentage (e.g., `47.5%`, `52.5%`) without signed `+`/`-` prefixes.
+   * **Dual Legend Breakdown**: Each legend row clearly displays both the formatted monetary valuation (`formatINR`) and the composition weight percentage (`%`) without signed `+`/`-` prefixes.
    * **Privacy / Stealth Mode Integration**: Fully respects `PrivacyContext` (`isBalancesHidden`), replacing monetary figures in the donut center, hover tooltips, and legend rows with masked bullet strings (`••••••`).
    * **Interactive Donut Hover**: Hovering over any slice shifts the arc outward (`scale(1.04)`) and updates the center label to display the slice name, weight percentage, and formatted monetary value (`formatINR`).
 4. **Performance Bar Chart** (`BarChart.tsx`):
@@ -255,7 +255,7 @@ All four core visualization widgets are constrained to an **equalized height of 
 * Component: `InsightsPanel.tsx`
 * Metrics Evaluated:
   * **Portfolio Health Score**: Weighted 0-100 metric calculated based on asset diversification, concentration risk, and liquidity.
-  * **Top 3 Daily Movers**: Identifies assets with the largest positive or negative price shifts today.
+  * **Top 5 Today's Movers**: Displays the **top 5 daily movers** ranked by absolute percentage movement with compact spacing (`space-y-2`) and scaled badge icons (`w-7 h-7`).
   * **Allocation Drift Alerts**: Highlights asset classes exceeding target allocation thresholds.
   * **Upcoming FD Maturities (30 Days)** & **Insurance Renewals (60 Days)**: Urgency notification cards with direct action buttons.
 
@@ -330,6 +330,7 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 
 * Component: `FloatingAddMenu.tsx`
 * Layout: Triggered via the central bottom nav FAB button. Pops up a glassmorphic bottom action sheet presenting all asset entry types (Stock, Fixed Deposit, RD, Mutual Fund SIP, Gold, Real Estate, Insurance Policy, Document).
+* State Visibility: Automatically hidden when `isAnyModalOpen` is true (managed via [`useModalState.ts`](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useModalState.ts)).
 
 ### Mobile Alerts Drawer & Page
 
@@ -361,7 +362,7 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
     8. **Today's Change**: 24-hour P&L fluctuation with system green/red color indicator and `%` badge.
     9. **Total Return (P&L)**: Overall unrealized profit/loss in monetary value (`₹`) and return percentage (`%`).
     10. **Share Action**: Instant button trigger (`shareHolding`) to export holding performance summary snippet.
-    11. **Management Actions**: Quick inline action icons for editing holding (`EditStockModal`) and deleting holding (`ConfirmModal`).
+    11. **Management Actions**: Dedicated action column pencil button opening `EditStockModal` and delete button triggering `ConfirmModal`. (Inline pen icons removed from QTY and Avg Price cells to prevent visual noise).
 * **Quick Filter Pills**:
   * **All**: Displays complete stock & ETF portfolio with total asset count badge.
   * **Gainers**: Filters holdings with positive total P&L (`unrealizedPnL > 0`).
@@ -384,6 +385,7 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   * Interest Rate Pill (`% p.a.`) and Tenor Duration.
   * Progress Bar: Visual bar showing elapsed tenure percentage toward maturity.
   * Maturity Alert: Highlights in amber when within 30 days of maturity.
+  * Share Action: Copies summary snippet to clipboard triggering dark-mode aware `useToast` notification (`Summary copied to clipboard!`).
 
 ### Recurring Deposits (RD) View & Installments
 
@@ -392,6 +394,7 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   * Monthly Commitment Indicator: Shows monthly deposit requirement and execution date.
   * Accumulated Balance Tracker.
   * Installment Schedule Matrix: Interactive calendar list checking off paid monthly installments vs pending future deposits.
+  * Share Action: Uses `useToast` for copy-to-clipboard feedback.
 
 ### Mutual Fund SIP View & NAV Tracker
 
@@ -401,6 +404,7 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   * Displays Scheme Category (Equity, Debt, Hybrid, Index), Monthly SIP Date, and Total Amount Invested.
   * XIRR Returns Badge: Calculated annualized internal rate of return.
   * Active / Paused status pill toggle.
+  * Share Action: Uses `useToast` for copy-to-clipboard feedback.
 
 ### Physical & Digital Gold View
 
@@ -458,12 +462,13 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   * Chat Log: Message history with user speech bubbles right-aligned and AI response bubbles left-aligned.
   * Markdown Support: Formatted bullet points, bold key figures, and tabular financial summaries.
   * Dynamic Prompt Suggestion Pills: One-tap prompt pills ("Analyze my asset allocation", "Show top risk factors", "Calculate my tax exposure").
+  * Inline Icons: Integrated `Bot` and `User` SVG icons from `AppIcons.tsx`.
 
 ---
 
 ## 6. 🪟 Modal System & Overlay Architecture
 
-All modal dialogs across the application share a single, unified draggable modal component (`Modal.tsx`) managed through `ModalManager.tsx`.
+All modal dialogs across the application share a single, unified draggable modal component (`Modal.tsx`) managed through `useModalState.ts`.
 
 ```
 +-----------------------------------------------------------------------+
@@ -517,7 +522,7 @@ All modal dialogs across the application share a single, unified draggable modal
 * Component: `Toast.tsx` & `ToastContext.tsx`
 * Position: Top-right on desktop (`top-4 right-4`), top-center on mobile (`top-3`).
 * Variants: Success (Green checkmark), Error (Red alert icon), Info (Blue indicator), Warning (Amber alert).
-* Auto-Dismiss: Slide-out animation after 4,000ms with progress bar countdown.
+* Auto-Dismiss: Slide-out animation after 4,000ms with progress bar countdown. Completely replaces raw browser `alert()` popups across the entire application.
 
 ---
 
