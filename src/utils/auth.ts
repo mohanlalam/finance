@@ -1,3 +1,5 @@
+import { clearApiSessionCache } from './apiClient';
+
 const APP_PIN = (import.meta.env.VITE_APP_PIN as string | undefined) ?? '';
 const SESSION_KEY = 'finance_pin_verified';
 const HASH_KEY = 'finance_hashed_pin';
@@ -28,6 +30,7 @@ export function markSessionVerified(hashedPin?: string): void {
 export function clearSessionVerification(): void {
   sessionStorage.removeItem(SESSION_KEY);
   sessionStorage.removeItem(HASH_KEY);
+  clearApiSessionCache();
 }
 
 export function getHashedPin(): string {

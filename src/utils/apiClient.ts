@@ -37,6 +37,10 @@ export function getEnvironmentIssue(): string {
 // SubtleCrypto.digest() call on every API request (price ticks, etc.)
 let _cachedPinHash: string | null = null;
 
+export function clearApiSessionCache(): void {
+  _cachedPinHash = null;
+}
+
 async function buildHeaders(): Promise<Record<string, string>> {
   if (!_cachedPinHash) {
     _cachedPinHash = await ensureHashedPin();

@@ -40,8 +40,8 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
   const sip = target.reduce((s, p) => s + p.sipValue, 0);
   const gold = target.reduce((s, p) => s + p.goldValue, 0);
   const realEstate = target.reduce((s, p) => s + p.realEstateValue, 0);
-  const insuranceCover = target.reduce((s, p) => s + p.insurances.reduce((a, i) => a + Number(i.sum_assured), 0), 0);
-  const insurancePremium = target.reduce((s, p) => s + p.insurances.reduce((a, i) => a + Number(i.premium_amount), 0), 0);
+  const insuranceCover = target.reduce((s, p) => s + (p.insurances || []).reduce((a, i) => a + Number(i.sum_assured || 0), 0), 0);
+  const insurancePremium = target.reduce((s, p) => s + (p.insurances || []).reduce((a, i) => a + Number(i.premium_amount || 0), 0), 0);
   
   return { stocks, fd, rd, sip, gold, realEstate, insuranceCover, insurancePremium };
 }
