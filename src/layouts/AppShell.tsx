@@ -24,6 +24,7 @@ import { AddHoldingPayload } from '../components/AddHoldingModal';
 
 import DashboardWidgets from '../components/DashboardWidgets';
 import PWAInstallBanner from '../components/PWAInstallBanner';
+import { useModalState } from '../hooks/useModalState';
 
 const PieChart = React.lazy(() => import('../components/PieChart'));
 const BarChart = React.lazy(() => import('../components/BarChart'));
@@ -168,14 +169,17 @@ export default function AppShell() {
   const setActiveAsset = useCallback((newAsset: AssetTab) => {
     navigate(`/${family || 'all'}/${newAsset}`);
   }, [navigate, family]);
-  const [quickAddTarget, setQuickAddTarget] = useState<'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showAddFamily, setShowAddFamily] = useState(false);
-  const [renameTarget, setRenameTarget] = useState<{ id: string; name: string; label: string } | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string; label: string } | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showMobileAlerts, setShowMobileAlerts] = useState(false);
-  const [showChangePinModal, setShowChangePinModal] = useState(false);
+  const {
+    quickAddTarget, setQuickAddTarget, clearQuickAddTarget,
+    showAddModal, openAddModal, closeAddModal,
+    showAddFamily, openAddFamily, closeAddFamily,
+    renameTarget, openRenameModal, closeRenameModal,
+    deleteTarget, openDeleteModal, closeDeleteModal,
+    isDeleting, setIsDeleting,
+    showMobileAlerts, openMobileAlerts, closeMobileAlerts,
+    showChangePinModal, openChangePinModal, closeChangePinModal,
+    isAnyModalOpen,
+  } = useModalState();
 
   // Persist active asset tab
   useEffect(() => {
@@ -364,15 +368,9 @@ export default function AppShell() {
     setActiveTab(tab);
   }, [setActiveTab]);
 
-  const handleAddFamilyClick = useCallback(() => setShowAddFamily(true), []);
-
-  const handleRenameClick = useCallback((target: { id: string; name: string; label: string }) => {
-    setRenameTarget(target);
-  }, []);
-
-  const handleDeletePortfolio = useCallback((target: { id: string; name: string; label: string }) => {
-    setDeleteTarget(target);
-  }, []);
+  const handleAddFamilyClick = openAddFamily;
+  const handleRenameClick = openRenameModal;
+  const handleDeletePortfolio = openDeleteModal;
 
   const handleConfirmDeletePortfolio = useCallback(async () => {
     if (!deleteTarget) return;
@@ -383,13 +381,13 @@ export default function AppShell() {
         setActiveTab('all');
       }
       addToast('Family member deleted successfully', 'success');
-      setDeleteTarget(null);
+      closeDeleteModal();
     } catch (err) {
       addToast(err instanceof Error ? err.message : 'Failed to delete family member', 'error');
     } finally {
       setIsDeleting(false);
     }
-  }, [deletePortfolio, deleteTarget, activeTab, setActiveTab, addToast]);
+  }, [deletePortfolio, deleteTarget, activeTab, setActiveTab, addToast, closeDeleteModal, setIsDeleting]);
 
   const handleAddHolding = useCallback(async (data: AddHoldingPayload) => {
     const { portfolioName, ...payload } = data;
@@ -465,7 +463,7 @@ export default function AppShell() {
         activePortfolioLabel={summaryData.label}
         isPriceStale={isPriceStale}
         isUsingCachedData={isUsingCachedData}
-        onChangePinClick={() => setShowChangePinModal(true)}
+        onChangePinClick={openChangePinModal}
       />
 
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -537,7 +535,7 @@ export default function AppShell() {
                   onRefresh={refreshPrices}
                   isLoadingPrices={isLoadingPrices}
                   onNavigateAsset={setActiveAsset}
-                  onOpenAlerts={() => setShowMobileAlerts(true)}
+                  onOpenAlerts={openMobileAlerts}
                   portfolios={portfolios}
                   activePortfolio={portfolio}
                   netWorthHistory={netWorthHistory}
@@ -583,14 +581,14 @@ export default function AppShell() {
                     visiblePortfolio={visiblePortfolio}
                     portfolios={portfolios}
                     priceStatus={priceStatus}
-                    onAddHoldingClick={() => setShowAddModal(true)}
+                    onAddHoldingClick={openAddModal}
                     onDeleteStock={tableDeleteHandler}
                     onUpdateStock={tableUpdateHandler}
                     onAddAsset={addAsset}
                     onUpdateAsset={updateAsset}
                     onDeleteAsset={deleteAsset}
                     quickAddTarget={quickAddTarget}
-                    onQuickAddComplete={() => setQuickAddTarget(null)}
+                    onQuickAddComplete={clearQuickAddTarget}
                     portfolioOptions={portfolioOptionsForModal}
                   />
                 </SectionErrorBoundary>
@@ -607,8 +605,8 @@ export default function AppShell() {
                 portfolios={portfolios}
                 selectedPortfolioId={activeTab}
                 onSelectPortfolio={setActiveTab}
-                onOpenAddFamily={() => setShowAddFamily(true)}
-                onOpenRename={(target: { id: string; name: string; label: string }) => setRenameTarget(target)}
+                onOpenAddFamily={openAddFamily}
+                onOpenRename={openRenameModal}
               />
 
               {/* Main content area */}
@@ -722,14 +720,14 @@ export default function AppShell() {
                     visiblePortfolio={visiblePortfolio}
                     portfolios={portfolios}
                     priceStatus={priceStatus}
-                    onAddHoldingClick={() => setShowAddModal(true)}
+                    onAddHoldingClick={openAddModal}
                     onDeleteStock={tableDeleteHandler}
                     onUpdateStock={tableUpdateHandler}
                     onAddAsset={addAsset}
                     onUpdateAsset={updateAsset}
                     onDeleteAsset={deleteAsset}
                     quickAddTarget={quickAddTarget}
-                    onQuickAddComplete={() => setQuickAddTarget(null)}
+                    onQuickAddComplete={clearQuickAddTarget}
                     portfolioOptions={portfolioOptionsForModal}
                   />
                 </SectionErrorBoundary>
@@ -765,8 +763,8 @@ export default function AppShell() {
 
       {/* Floating Add Menu (FAB) */}
       <FloatingAddMenu
-        isHidden={showAddModal || showAddFamily || !!renameTarget || !!deleteTarget || showChangePinModal || !!quickAddTarget || showMobileAlerts}
-        onAddStock={() => setShowAddModal(true)}
+        isHidden={isAnyModalOpen}
+        onAddStock={openAddModal}
         onAddAsset={(type) => {
           setActiveAsset(type);
           setQuickAddTarget(type);
@@ -776,7 +774,7 @@ export default function AppShell() {
       {/* Add Holding Modal */}
       {showAddModal && (
         <AddHoldingModal
-          onClose={() => setShowAddModal(false)}
+          onClose={closeAddModal}
           onAdd={handleAddHolding}
           portfolioOptions={portfolioOptionsForModal}
           defaultPortfolio={activeTab === 'all' ? portfolioOptionsForModal[0]?.name : activeTab}
@@ -786,7 +784,7 @@ export default function AppShell() {
       {/* Add Family Member Modal */}
       <AddFamilyModal
         isOpen={showAddFamily}
-        onClose={() => setShowAddFamily(false)}
+        onClose={closeAddFamily}
         onSubmit={handleAddFamilySubmit}
       />
 
@@ -794,14 +792,14 @@ export default function AppShell() {
       <RenamePortfolioModal
         isOpen={!!renameTarget}
         target={renameTarget}
-        onClose={() => setRenameTarget(null)}
+        onClose={closeRenameModal}
         onSubmit={handleRenameSubmit}
       />
 
       {/* Delete Portfolio Confirmation Modal */}
       <ConfirmModal
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        onClose={closeDeleteModal}
         onConfirm={handleConfirmDeletePortfolio}
         title="Delete Family Member"
         message={`Are you sure you want to delete ${deleteTarget?.label} and all of their holdings, fixed deposits, and other assets? This action cannot be undone.`}
@@ -814,9 +812,9 @@ export default function AppShell() {
       {/* Change PIN Modal */}
       {showChangePinModal && (
         <ChangePinModal
-          onClose={() => setShowChangePinModal(false)}
+          onClose={closeChangePinModal}
           onSuccess={() => {
-            setShowChangePinModal(false);
+            closeChangePinModal();
             addToast('PIN changed successfully', 'success');
           }}
         />
@@ -829,7 +827,7 @@ export default function AppShell() {
       {showMobileAlerts && (
         <MobileAlertsView
           alerts={visibleAlerts}
-          onClose={() => setShowMobileAlerts(false)}
+          onClose={closeMobileAlerts}
           onDismissAlert={handleDismissAlert}
           onDismissAll={handleDismissAll}
         />
