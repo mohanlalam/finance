@@ -47,8 +47,9 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
   const [isExiting, setIsExiting] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const timerRef = useRef<NodeJS.Timeout>();
+  const initialDuration = toast.type === 'error' ? 8000 : 4000;
   const startTimeRef = useRef<number>(Date.now());
-  const remainingTimeRef = useRef<number>(3000);
+  const remainingTimeRef = useRef<number>(initialDuration);
 
   const handleClose = useCallback(() => {
     setIsExiting(true);

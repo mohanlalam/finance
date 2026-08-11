@@ -567,4 +567,12 @@ h3, .text-card-title {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  .ios-press:active,
+  .interactive-btn:active,
+  .mobile-asset-card:active {
+    transform: none !important;
+  }
+  .animate-sparkline-draw {
+    stroke-dashoffset: 0 !important;
+  }
 }

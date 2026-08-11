@@ -52,6 +52,7 @@ This document provides a comprehensive, exhaustive overview of the **User Interf
    - [Error Boundaries & Offline Fallbacks](#error-boundaries--offline-fallbacks)
 8. [Print & PDF Export UI Styling](#8-print--pdf-export-ui-styling)
 9. [Responsive Breakpoint Matrix & Summary](#9-responsive-breakpoint-matrix--summary)
+10. [Accessibility & Motion Preferences](#10-accessibility--motion-preferences) 🆕
 
 ---
 
@@ -117,7 +118,7 @@ body {
 #### Tabular Number Rules
 * **`.tnum` / `.text-financial`**: Enforces `font-variant-numeric: tabular-nums` and `font-feature-settings: "tnum" 1, "cv05" 1`. Prevents layout jitter when financial values change dynamically.
 * **`.ios-currency`**: Renders currency symbols (₹, $) with reduced opacity (`0.85`) and lighter weight (`300`) for subtle visual hierarchy.
-* **`AnimatedNumber`**: Count-up interpolation over 500ms using `requestAnimationFrame` with cubic ease-out transitions.
+* **`AnimatedNumber`**: Count-up interpolation over 500ms using `requestAnimationFrame` with cubic ease-out transitions. Skips animation when `prefers-reduced-motion` is enabled.
 
 ### Corner Radii & Elevation Shadows
 
@@ -200,6 +201,7 @@ The web view is designed for wide screens (`md: 768px` up to `2xl: 1720px`), emp
   * **Alerts Notification Bell**: Displays active alert counter badge; triggers dropdown list of 52-week highs/lows, maturity warnings, and portfolio swing alerts.
   * **Theme Switcher**: Sun / Moon icon button to toggle Light/Dark mode.
   * **PIN Lock Button**: Instantly locks the session and returns to `PinLockScreen`.
+  * **Tap Area Standards**: All desktop header utility buttons enforce a minimum 44px × 44px tap boundary (`min-w-[44px] min-h-[44px] flex items-center justify-center`).
 
 ### Sticky Desktop Sidebar
 
@@ -240,7 +242,7 @@ All four core visualization widgets are constrained to an **equalized height of 
    * Displays interactive crosshair tooltip on hover with exact date and valuation.
    * Empty state preview: Renders a muted reference curve with a glassmorphic badge overlay when insufficient data exists.
 2. **Portfolio Assistant (AI Chat)** (`PortfolioAssistant.tsx`):
-   * Conversational NLP panel formatted to 370px height matching neighboring charts.
+   * Conversational NLP panel formatted to 370px height matching neighboring charts with internal scroll body (`flex-1 min-h-0 overflow-y-auto`).
    * Features quick suggestion prompt pills, typing indicator, markdown formatting, `Bot` SVG icon integration, and copy button.
 3. **Asset Allocation Chart** (`PieChart.tsx`):
    * Donut chart representing portfolio breakdown across asset classes (Stocks & ETFs, Fixed Deposits, Recurring Deposits, Mutual Fund SIPs, Gold Holdings, Real Estate).
@@ -501,6 +503,7 @@ All modal dialogs across the application share a single, unified draggable modal
   * Pinned Drag Header (Non-scrolling).
   * Scrollable Body (`flex-1 min-h-0 overflow-y-auto`): Form fields scroll cleanly inside the middle section.
   * Pinned Footer (Non-scrolling): Action buttons remain visible at all times.
+* **Accessibility**: Listens to `Escape` keypress to close active modal dialog. Sets `role="dialog"` and `aria-modal="true"`.
 
 ### Form Modals Specification
 
@@ -521,8 +524,10 @@ All modal dialogs across the application share a single, unified draggable modal
 
 * Component: `Toast.tsx` & `ToastContext.tsx`
 * Position: Top-right on desktop (`top-4 right-4`), top-center on mobile (`top-3`).
-* Variants: Success (Green checkmark), Error (Red alert icon), Info (Blue indicator), Warning (Amber alert).
-* Auto-Dismiss: Slide-out animation after 4,000ms with progress bar countdown. Completely replaces raw browser `alert()` popups across the entire application.
+* Variants & Durations:
+  * Success / Info / Warning: `4,000ms` auto-dismiss with progress countdown.
+  * Error: `8,000ms` extended duration (or manual dismissal) ensuring users have ample time to read error trace diagnostics.
+* Auto-Dismiss: Slide-out animation. Completely replaces raw browser `alert()` popups across the entire application.
 
 ---
 
@@ -544,6 +549,7 @@ All modal dialogs across the application share a single, unified draggable modal
 * Managed via `PrivacyContext.tsx`.
 * When activated via the top header eye icon:
   * Replaces all monetary values (Net Worth, Invested, P&L, Asset Values) with blurred or masked bullet strings (`••••••`).
+  * Exposes `aria-label="Amount hidden"` on masked bullet elements for screen reader clarity.
   * Preserves percentage badges and asset count numbers so users can review allocation percentages in public settings without revealing net worth figures.
 
 ### Error Boundaries & Offline Fallbacks
@@ -594,6 +600,31 @@ The application includes dedicated `@media print` CSS overrides optimized for cl
 | **Desktop Small (`lg`)** | `768px – 1023px` | Pinned desktop sidebar appears (`w-64`), bottom nav hidden, 2x2 equalized widget grid (370px height), desktop header active. |
 | **Desktop Standard (`xl`)** | `1024px – 1279px` | 4-column summary cards, expanded stock holdings table (11 columns visible without horizontal scrollbar), live price badges. |
 | **Widescreen Desktop (`2xl`)** | `≥ 1280px` | Maximum container width capped at `1720px`, centered with full-density metrics panels, insights breakdown, and chart crosshairs. |
+
+---
+
+## 10. ♿ Accessibility & Motion Preferences 🆕
+
+The application enforces accessibility standards to ensure high legibility, color independence, assistive tech compatibility, and motion reduction:
+
+### 1. Color Independence & Financial Signals
+* **Redundant Cues**: Financial indicators utilizing `--positive` (green) or `--negative` (red) always pair color with a `+` / `-` sign prefix or directional arrow icon (▲ / ▼).
+* Applies across Summary Cards, Stock Table (*Today's Change*, *Total Return*), and Insights Movers list.
+
+### 2. Reduced Motion Overrides (`prefers-reduced-motion`)
+* **CSS Overrides** (`src/index.css`):
+  * Disables spring scale-in on `.animate-modal-content` in favor of an instant opacity fade.
+  * Sets `.animate-sparkline-draw` `stroke-dashoffset: 0` immediately on mount.
+  * Disables `.ios-press` tactile button scaling.
+* **Animated Numbers (`useAnimatedCounter.ts`)**: Skips `requestAnimationFrame` count-up interpolation and instantly displays target numeric values.
+
+### 3. Screen Reader & Assistive Tech Accessibility
+* **Stealth Mode Masking**: Masked monetary values (`••••••`) expose `aria-label="Amount hidden"` to prevent screen readers from reading bullet glyphs.
+* **Polite Live Regions**: Primary Net Worth valuation updates use `aria-live="polite"`.
+* **Modal Dialog Focus & Keyboard Traps**: Unified `Modal.tsx` sets `role="dialog"`, `aria-modal="true"`, and handles `Escape` keypress to close active modals.
+
+### 4. Interactive Touch Targets
+* All desktop and mobile icon buttons (Theme Toggle, Privacy Eye, Alerts Bell, Lock) enforce a minimum 44px × 44px interactive tap area (`min-w-[44px] min-h-[44px]`).
 
 ---
 

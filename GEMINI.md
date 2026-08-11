@@ -183,3 +183,9 @@ Every deposit registry maps to its own separate database table. This guarantees 
 * **[formatters.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/formatters.ts)**: Implements Indian currency formats (`₹` INR) and standard FD compounding (compounded semi-annually). Uses system positive green (`#34C759`) for positive return indicators.
 * **[rdUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/rdUtils.ts)**: Computes elapsed month contributions using `Math.max(0, elapsed)` and quarterly compounding leveraging the shared engine.
 * **[sipUtils.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/sipUtils.ts)**: Calculates monthly contributions elapsed using `Math.max(0, elapsed)` and retrieves live NAV evaluations, automatically respecting `account.liveNav` parameters.
+
+### 5. Accessibility & Motion Preferences
+* **`prefers-reduced-motion` Overrides**: Configured in `src/index.css` to suppress spring scale animations, disable tactile active scaling (`.ios-press:active`), and render sparkline SVG paths immediately without draw-in delays. Handled in `useAnimatedCounter.ts` to skip count-up interpolation and return target numeric values instantly.
+* **Extended Error Toast Duration**: Error toasts in `Toast.tsx` auto-dismiss after **8,000ms** (instead of 4,000ms) to ensure users have adequate time to read error notifications.
+* **Stealth Mode Accessibility**: Privacy masked values (`••••••`) across `SummaryCards.tsx` and `MobileHomeSummary.tsx` expose `aria-label="Amount hidden"` to provide clear screen-reader announcements.
+
