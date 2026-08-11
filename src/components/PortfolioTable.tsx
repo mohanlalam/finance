@@ -548,15 +548,8 @@ export default React.memo(function PortfolioTable({
                         )}
                       </div>
                     ) : (
-                      <span
-                        className={`inline-flex items-center gap-1 ${onUpdate ? 'cursor-pointer hover:text-blue-600' : ''}`}
-                        onClick={() => startEdit(h)}
-                        title={onUpdate ? 'Click to edit quantity' : undefined}
-                      >
+                      <span>
                         {renderValue(h.qty, (v) => formatNumber(v, 0))}
-                        {onUpdate && (
-                          <Pencil size={11} className="text-blue-500/70 dark:text-blue-400/70 hover:text-blue-600 transition-colors" />
-                        )}
                       </span>
                     )}
                     {editError && editingId === getHoldingId(h) && (
@@ -581,15 +574,8 @@ export default React.memo(function PortfolioTable({
                         />
                       </div>
                     ) : (
-                      <span
-                        className={`inline-flex items-center gap-1 ${onUpdate ? 'cursor-pointer hover:text-blue-600' : ''}`}
-                        onClick={() => startEdit(h)}
-                        title={onUpdate ? 'Click to edit average price' : undefined}
-                      >
+                      <span>
                         {isBalancesHidden ? '••••••' : <>₹{formatNumber(h.avgPrice)}</>}
-                        {onUpdate && (
-                          <Pencil size={11} className="text-blue-500/70 dark:text-blue-400/70 hover:text-blue-600 transition-colors" />
-                        )}
                       </span>
                     )}
                   </td>
