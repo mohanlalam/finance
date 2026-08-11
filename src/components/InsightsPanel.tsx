@@ -96,14 +96,14 @@ const GainersList = React.memo(function GainersList({ items, type }: { items: Ho
 const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: HoldingInsight[] }) {
   if (movers.length === 0) return <p className="text-xs text-slate-400 dark:text-slate-500">No data</p>;
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {movers.map((mover, idx) => {
         const h = mover.holding;
         const isUp = h.todayPnLPercent >= 0;
         return (
           <div key={`${h.ticker}-${idx}`} className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isUp ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400'}`}>
-              {isUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isUp ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400'}`}>
+              {isUp ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">

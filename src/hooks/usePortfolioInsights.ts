@@ -201,9 +201,9 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
       .sort((a, b) => a.holding.pnlPercent - b.holding.pnlPercent)
       .slice(0, 5);
 
-    // ── Today's biggest mover ──
+    // ── Today's biggest movers (Top 5) ──
     const biggestMovers = all.length > 0
-      ? [...all].sort((a, b) => Math.abs(b.holding.todayPnLPercent) - Math.abs(a.holding.todayPnLPercent)).slice(0, 3)
+      ? [...all].sort((a, b) => Math.abs(b.holding.todayPnLPercent) - Math.abs(a.holding.todayPnLPercent)).slice(0, 5)
       : [];
     const biggestMover = biggestMovers[0] || null;
 
