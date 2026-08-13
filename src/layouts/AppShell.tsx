@@ -164,11 +164,18 @@ export default function AppShell() {
   const assetTabSectionRef = useRef<HTMLDivElement>(null);
 
   const scrollToAssetSection = useCallback(() => {
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       if (assetTabSectionRef.current) {
-        assetTabSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const headerOffset = 84; // 64px sticky header + 20px padding
+        const elementPosition = assetTabSectionRef.current.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+        window.scrollTo({
+          top: Math.max(0, offsetPosition),
+          behavior: 'smooth'
+        });
       }
-    });
+    }, 40);
   }, []);
 
   const setActiveAsset = useCallback((newAsset: AssetTab) => {
@@ -736,7 +743,7 @@ export default function AppShell() {
                 {activeTab === 'all' && renderDashboardWidgets(false)}
 
                 {/* Stock holdings & Asset Registries — always at the bottom */}
-                <div ref={assetTabSectionRef} id="asset-tab-content" className="scroll-mt-6">
+                <div ref={assetTabSectionRef} id="asset-tab-content" className="scroll-mt-24">
                   <SectionErrorBoundary sectionName="Asset Tab Content">
                     <AssetTabContent
                       activeAsset={effectiveAsset}
