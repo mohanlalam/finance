@@ -20,22 +20,22 @@ export default function NetWorthTimelineChart({ history, currentNetWorth }: NetW
 
   useEffect(() => {
     if (!containerRef.current) return;
-    let timeoutId: number | null = null;
+    let animationFrameId: number | null = null;
     const resizeObserver = new ResizeObserver((entries) => {
       if (!entries || entries.length === 0) return;
       const { width } = entries[0].contentRect;
-      if (timeoutId) window.clearTimeout(timeoutId);
-      timeoutId = window.setTimeout(() => {
+      if (animationFrameId) window.cancelAnimationFrame(animationFrameId);
+      animationFrameId = window.requestAnimationFrame(() => {
         setDimensions((prev) => ({
           width: width > 100 ? width : prev.width,
           height: 240, // fix height to 240px
         }));
-      }, 100);
+      });
     });
     resizeObserver.observe(containerRef.current);
     return () => {
       resizeObserver.disconnect();
-      if (timeoutId) window.clearTimeout(timeoutId);
+      if (animationFrameId) window.cancelAnimationFrame(animationFrameId);
     };
   }, []);
 

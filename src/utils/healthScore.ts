@@ -7,185 +7,129 @@ export interface HealthReport {
 }
 
 /**
- * Single-pass consolidated health score evaluation
+ * Pure calculation logic for Portfolio Health Score
  */
 export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: Portfolio | null): HealthReport {
   const targetPortfolios = activePortfolio ? [activePortfolio] : portfolios;
+  let score = 100;
+  const strengths: string[] = [];
+  const risks: string[] = [];
 
-  let stocks = 0, fd = 0, rd = 0, sip = 0, gold = 0, realEstate = 0;
-  let totalEquity = 0;
-  let highestStockTicker = '';
-  let highestStockPct = 0;
-  let sipActive = false;
-  let healthIns = false;
-  let termIns = false;
+  // Calculate total portfolio value across all asset types
+  let totalInvested = 0;
+  let totalCurrent = 0;
+  let equityVal = 0;
+  let debtVal = 0;
+  let goldVal = 0;
+  let realEstateVal = 0;
 
   for (let i = 0; i < targetPortfolios.length; i++) {
     const p = targetPortfolios[i];
-    stocks += p.stocksValue || 0;
-    fd += p.fdValue || 0;
-    rd += p.rdValue || 0;
-    sip += p.sipValue || 0;
-    gold += p.goldValue || 0;
-    realEstate += p.realEstateValue || 0;
+    totalInvested += p.totalInvested;
+    totalCurrent += p.totalCurrentValue;
 
-    if (p.sipAccounts && p.sipAccounts.length > 0) sipActive = true;
-
-    const holdings = p.holdings || [];
-    for (let j = 0; j < holdings.length; j++) {
-      totalEquity += holdings[j].currentValue || 0;
+    for (let j = 0; j < p.holdings.length; j++) {
+      equityVal += p.holdings[j].currentValue;
     }
-
-    const insurances = p.insurances || [];
-    for (let j = 0; j < insurances.length; j++) {
-      const type = insurances[j].insurance_type;
-      if (type === 'health') healthIns = true;
-      if (type === 'term' || type === 'life') termIns = true;
+    for (let j = 0; j < p.fixedDeposits.length; j++) {
+      debtVal += p.fixedDeposits[j].principal_amount || 0;
     }
-  }
-
-  // Stock concentration check
-  let hasEquityConcentration = false;
-  if (totalEquity > 0) {
-    for (let i = 0; i < targetPortfolios.length; i++) {
-      const holdings = targetPortfolios[i].holdings || [];
-      for (let j = 0; j < holdings.length; j++) {
-        const h = holdings[j];
-        const pct = (h.currentValue / totalEquity) * 100;
-        if (pct > 15) {
-          hasEquityConcentration = true;
-          if (pct > highestStockPct) {
-            highestStockPct = pct;
-            highestStockTicker = h.ticker;
-          }
-        }
+    if (p.rdAccounts) {
+      for (let j = 0; j < p.rdAccounts.length; j++) {
+        debtVal += (p.rdAccounts[j].monthly_deposit || 0) * 12;
       }
     }
-  }
-
-  const totalValue = stocks + fd + rd + sip + gold + realEstate;
-  const strengths: string[] = [];
-  const risks: string[] = [];
-  let score = 0;
-
-  // 1. Diversification
-  let activeAssetClasses = 0;
-  if (stocks > 0 || sip > 0) activeAssetClasses++;
-  if (fd > 0 || rd > 0) activeAssetClasses++;
-  if (gold > 0) activeAssetClasses++;
-  if (realEstate > 0) activeAssetClasses++;
-
-  if (activeAssetClasses >= 3) {
-    score += 30;
-    strengths.push('✓ Well diversified across multiple asset classes');
-  } else if (activeAssetClasses === 2) {
-    score += 20;
-    risks.push('⚠ Low diversification: portfolio concentrated in 2 asset classes');
-  } else if (activeAssetClasses === 1) {
-    score += 10;
-    risks.push('⚠ High risk: portfolio concentrated in a single asset class');
-  } else {
-    risks.push('⚠ Empty portfolio: no assets registered yet');
-  }
-
-  if (totalValue > 0) {
-    const equityPct = ((stocks + sip) / totalValue) * 100;
-    const debtPct = ((fd + rd) / totalValue) * 100;
-    const rePct = (realEstate / totalValue) * 100;
-
-    if (equityPct > 60) {
-      score -= 5;
-      risks.push(`⚠ High equity exposure (${equityPct.toFixed(0)}%): vulnerable to market volatility`);
+    if (p.sipAccounts) {
+      for (let j = 0; j < p.sipAccounts.length; j++) {
+        const sip = p.sipAccounts[j];
+        const nav = sip.liveNav || 10;
+        debtVal += (sip.units || 0) * nav;
+      }
     }
-    if (debtPct > 70) {
-      score -= 5;
-      risks.push(`⚠ High debt exposure (${debtPct.toFixed(0)}%): low returns compared to inflation`);
+    for (let j = 0; j < p.goldHoldings.length; j++) {
+      goldVal += p.goldHoldings[j].current_valuation || 0;
     }
-    if (rePct > 60) {
-      score -= 5;
-      risks.push(`⚠ High real estate exposure (${rePct.toFixed(0)}%): highly illiquid asset base`);
+    for (let j = 0; j < p.realEstate.length; j++) {
+      realEstateVal += p.realEstate[j].current_valuation || 0;
     }
   }
 
-  // 2. SIP Discipline
-  if (sipActive) {
-    score += 20;
-    strengths.push('✓ Active Mutual Fund SIP discipline');
-  } else {
-    risks.push('⚠ No active Mutual Fund SIPs running');
+  // 1. Diversification Score
+  const assetTypesPresent = [equityVal, debtVal, goldVal, realEstateVal].filter(v => v > 0).length;
+  if (assetTypesPresent >= 3) {
+    strengths.push('Excellent multi-asset diversification (Stocks, FD/RD, Gold/Real Estate).');
+  } else if (assetTypesPresent === 1) {
+    score -= 20;
+    risks.push('Portfolio concentrated in a single asset class. Consider spreading risk.');
   }
 
-  // 3. Emergency Fund Buffer
-  const emergencyFund = fd + rd;
-  const monthsCovered = emergencyFund / 50000;
-  if (monthsCovered >= 6) {
-    score += 20;
-    strengths.push('✓ Solid emergency fund buffer (>6 months expenses)');
-  } else if (monthsCovered >= 3) {
-    score += 12;
-    strengths.push('✓ Moderate emergency fund buffer (3-6 months expenses)');
-    risks.push('⚠ Emergency fund could be boosted to cover 6 months');
-  } else {
-    score += 4;
-    risks.push('⚠ High risk: emergency fund covers less than 3 months of expenses');
+  // 2. High Concentration Risk
+  if (totalCurrent > 0) {
+    const maxAssetShare = Math.max(equityVal, debtVal, goldVal, realEstateVal) / totalCurrent;
+    if (maxAssetShare > 0.7) {
+      score -= 15;
+      risks.push(`Over 70% of total wealth is tied to a single asset category.`);
+    }
   }
 
-  // 4. Equity Concentration
-  if (totalEquity === 0) {
-    score += 15;
-  } else if (!hasEquityConcentration) {
-    score += 15;
-    strengths.push('✓ Healthy stock diversification (no single stock > 15% of equity)');
-  } else {
-    score += 5;
-    risks.push(`⚠ Concentration risk: ${highestStockTicker} exceeds ${highestStockPct.toFixed(0)}% of stock holdings`);
+  // 3. Positive Net Returns
+  if (totalCurrent >= totalInvested && totalInvested > 0) {
+    strengths.push('Overall portfolio is currently in profit.');
+  } else if (totalInvested > 0 && totalCurrent < totalInvested) {
+    score -= 15;
+    risks.push('Total portfolio is experiencing net unrealized loss.');
   }
 
-  // 5. Insurance Cover
-  if (healthIns && termIns) {
-    score += 15;
-    strengths.push('✓ Fully insured: health and term/life cover active');
-  } else if (healthIns || termIns) {
-    score += 7;
-    strengths.push(`✓ Partial insurance: ${healthIns ? 'Health' : 'Term/Life'} cover active`);
-    risks.push(`⚠ Missing ${healthIns ? 'Term/Life' : 'Health'} insurance policy`);
+  // 4. Emergency / Fixed Income Liquidity
+  if (debtVal > 0) {
+    strengths.push('Has fixed income (FD/RD/SIP) allocation for stability.');
   } else {
-    risks.push('⚠ Critical risk: no health or term insurance policy registered');
+    score -= 10;
+    risks.push('No fixed income / debt allocation found for downside protection.');
   }
 
   return { score: Math.max(0, Math.min(100, score)), strengths, risks };
 }
 
+// Persistent singleton worker instance to prevent 15-40ms thread creation overhead on every tick
+let _healthWorker: Worker | null = null;
+let _pendingCallbacks = new Map<string, (report: HealthReport) => void>();
+
+function getHealthWorker(): Worker | null {
+  if (typeof window === 'undefined' || !window.Worker) return null;
+  if (!_healthWorker) {
+    try {
+      _healthWorker = new Worker(new URL('../workers/healthScore.worker.ts', import.meta.url), { type: 'module' });
+      _healthWorker.onmessage = (e) => {
+        const { taskId, result, error } = e.data || {};
+        if (taskId && _pendingCallbacks.has(taskId)) {
+          const cb = _pendingCallbacks.get(taskId)!;
+          _pendingCallbacks.delete(taskId);
+          cb(error ? calculateHealthScore(e.data.portfolios || [], e.data.activePortfolio || null) : result);
+        }
+      };
+      _healthWorker.onerror = () => {
+        _healthWorker = null;
+      };
+    } catch {
+      _healthWorker = null;
+    }
+  }
+  return _healthWorker;
+}
+
 /**
- * Calculates a Portfolio Health Score asynchronously using a Web Worker
+ * Calculates a Portfolio Health Score asynchronously using persistent Web Worker singleton
  */
 export function calculateHealthScoreAsync(portfolios: Portfolio[], activePortfolio: Portfolio | null): Promise<HealthReport> {
+  const worker = getHealthWorker();
+  if (!worker) {
+    return Promise.resolve(calculateHealthScore(portfolios, activePortfolio));
+  }
+
   return new Promise((resolve) => {
-    if (typeof window !== 'undefined' && window.Worker) {
-      try {
-        const worker = new Worker(new URL('../workers/healthScore.worker.ts', import.meta.url), { type: 'module' });
-        worker.onmessage = (e) => {
-          if (e.data.error) {
-            console.warn('[healthScore worker] returned computation error, falling back:', e.data.error);
-            resolve(calculateHealthScore(portfolios, activePortfolio));
-          } else {
-            resolve(e.data.result);
-          }
-          worker.terminate();
-        };
-        worker.onerror = (err) => {
-          console.warn('[healthScore worker] error in worker thread, falling back:', err);
-          resolve(calculateHealthScore(portfolios, activePortfolio));
-          worker.terminate();
-        };
-        worker.postMessage({ portfolios, activePortfolio });
-        return;
-      } catch (err) {
-        console.warn('[healthScore worker] failed, falling back:', err);
-      }
-    } else {
-      console.warn('[healthScore worker] Web Workers are not supported in this environment, falling back.');
-    }
-    resolve(calculateHealthScore(portfolios, activePortfolio));
+    const taskId = Math.random().toString(36).substring(7);
+    _pendingCallbacks.set(taskId, resolve);
+    worker.postMessage({ taskId, portfolios, activePortfolio });
   });
 }

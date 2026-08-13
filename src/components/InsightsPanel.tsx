@@ -203,12 +203,12 @@ const AllocationDrift = React.memo(function AllocationDrift({
         </p>
         <div className="grid grid-cols-2 gap-2 text-[10.5px]">
           {rebalancingAdvice.map((advice) => {
-            const isAligned = advice.recommendation === 'Aligned';
+            const isHold = advice.action === 'HOLD';
             return (
               <div key={advice.assetClass} className="flex justify-between items-center bg-[#f2f2f7] dark:bg-zinc-800/60 px-2.5 py-1.5 rounded-xl">
                 <span className="font-semibold text-slate-500 dark:text-slate-400">{advice.assetClass}</span>
-                <span className={`font-bold ${isAligned ? 'text-slate-400 dark:text-slate-500' : advice.diffAmount > 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                  {advice.recommendation}
+                <span className={`font-bold ${isHold ? 'text-slate-400 dark:text-slate-500' : advice.action === 'BUY' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                  {advice.action === 'HOLD' ? 'HOLD' : `${advice.action} (${advice.formattedAmount})`}
                 </span>
               </div>
             );

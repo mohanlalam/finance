@@ -8,6 +8,7 @@ import { useToastActions } from '../contexts/ToastContext';
 import ConfirmModal from './ConfirmModal';
 import EmptyState from './EmptyState';
 import EditStockModal from './EditStockModal';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 type SortPreset = 'value' | 'pnl' | 'pnlPct' | 'todayPct' | 'allocation';
 
@@ -97,6 +98,7 @@ export default React.memo(function PortfolioTable({
 
   const { isBalancesHidden } = usePrivacy();
   const { addToast } = useToastActions();
+  const isMobile = useIsMobile();
 
   const renderValue = (val: number, formatter = formatINR) => {
     if (isBalancesHidden) return '••••••';
@@ -299,40 +301,40 @@ export default React.memo(function PortfolioTable({
         ))}
       </div>
 
-      {/* Mobile Card View */}
-      <div className="md:hidden">
-        {sorted.length > 0 && (
-          <div className="px-4 py-3 bg-slate-50/50 dark:bg-slate-900/30 border-b border-slate-100 dark:border-slate-700/50 grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase tracking-wider">Total Value</p>
-              <p className="text-base font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 whitespace-nowrap">{renderValue(totalCurrentValue)}</p>
-              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 whitespace-nowrap">Invested: {renderValue(totalInvested)}</p>
-            </div>
-            <div>
-              <p className="text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase tracking-wider">Total P&amp;L</p>
-              <div className="flex flex-wrap items-baseline gap-x-1 mt-0.5">
-                <span className={`text-base font-extrabold whitespace-nowrap ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                  {isBalancesHidden ? '••••••' : <>{totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}</>}
-                </span>
-                <span className={`text-xs font-semibold whitespace-nowrap opacity-90 ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                  ({isBalancesHidden ? '••••••' : formatPercent(totalPnLPercent)})
-                </span>
+      {/* Single-pass responsive layout selection */}
+      {isMobile ? (
+        <div className="block">
+          {sorted.length > 0 && (
+            <div className="px-4 py-3 bg-slate-50/50 dark:bg-slate-900/30 border-b border-slate-100 dark:border-slate-700/50 grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase tracking-wider">Total Value</p>
+                <p className="text-base font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 whitespace-nowrap">{renderValue(totalCurrentValue)}</p>
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 whitespace-nowrap">Invested: {renderValue(totalInvested)}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase tracking-wider">Total P&amp;L</p>
+                <div className="flex flex-wrap items-baseline gap-x-1 mt-0.5">
+                  <span className={`text-base font-extrabold whitespace-nowrap ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                    {isBalancesHidden ? '••••••' : <>{totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}</>}
+                  </span>
+                  <span className={`text-xs font-semibold whitespace-nowrap opacity-90 ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                    ({isBalancesHidden ? '••••••' : formatPercent(totalPnLPercent)})
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-
-        <div className="divide-y divide-slate-100 dark:divide-slate-700/50 p-3 space-y-3">
-          {sorted.length === 0 ? (
-            <div className="py-4">
-              <EmptyState 
-                type="stocks" 
-                title="No stock holdings yet" 
-                description="Add your first stock or ETF to start tracking" 
-              />
-            </div>
-          ) : (
-            sorted.map((h) => {
+          )}
+          <div className="divide-y divide-slate-100 dark:divide-slate-700/50 p-3 space-y-3">
+            {sorted.length === 0 ? (
+              <div className="py-4">
+                <EmptyState 
+                  type="stocks" 
+                  title="No stock holdings yet" 
+                  description="Add your first stock or ETF to start tracking" 
+                />
+              </div>
+            ) : (
+              sorted.map((h) => {
             const isDeleting = deletingId === h.id;
             const isEditing = editingId === h.id;
 
@@ -469,10 +471,9 @@ export default React.memo(function PortfolioTable({
           )}
         </div>
       </div>
-
-      {/* Desktop Table View */}
-      <div className="hidden md:block">
-        <table role="table" className="w-full">
+      ) : (
+        <div className="block">
+          <table role="table" className="w-full">
           <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700">
             <tr role="row">
               <Th label="Ticker Symbol" k="ticker" sortKey={sortKey} sortAsc={sortAsc} handleSort={handleSort} />
@@ -655,6 +656,7 @@ export default React.memo(function PortfolioTable({
           </tfoot>
         </table>
       </div>
+      )}
 
       <ConfirmModal
         isOpen={!!confirmDelete}

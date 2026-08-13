@@ -225,30 +225,42 @@ export function getBenchmarkReturns(years: number = 1): { nifty50: number; nifty
   return { nifty50: 14.2, nifty500: 14.9, sp500: 11.8 };
 }
 
-export function runXIRRAsync(cashflows: CashFlow[]): Promise<number> {
-  return new Promise((resolve) => {
-    if (typeof window !== 'undefined' && window.Worker) {
-      try {
-        const worker = new Worker(new URL('../workers/xirr.worker.ts', import.meta.url), { type: 'module' });
-        worker.onmessage = (e) => {
-          if (e.data.error) {
-            resolve(calculateXIRR(cashflows));
-          } else {
-            resolve(e.data.result);
-          }
-          worker.terminate();
-        };
-        worker.onerror = () => {
-          resolve(calculateXIRR(cashflows));
-          worker.terminate();
-        };
-        worker.postMessage({ cashflows });
-        return;
-      } catch (err) {
-        // Fallback below
-      }
+let _xirrWorker: Worker | null = null;
+let _pendingXirrCallbacks = new Map<string, (rate: number) => void>();
+
+function getXirrWorker(): Worker | null {
+  if (typeof window === 'undefined' || !window.Worker) return null;
+  if (!_xirrWorker) {
+    try {
+      _xirrWorker = new Worker(new URL('../workers/xirr.worker.ts', import.meta.url), { type: 'module' });
+      _xirrWorker.onmessage = (e) => {
+        const { taskId, rate, error } = e.data || {};
+        if (taskId && _pendingXirrCallbacks.has(taskId)) {
+          const cb = _pendingXirrCallbacks.get(taskId)!;
+          _pendingXirrCallbacks.delete(taskId);
+          cb(error ? calculateXIRR(e.data.cashflows || []) : (rate ?? 0));
+        }
+      };
+      _xirrWorker.onerror = () => {
+        _xirrWorker = null;
+      };
+    } catch {
+      _xirrWorker = null;
     }
-    resolve(calculateXIRR(cashflows));
+  }
+  return _xirrWorker;
+}
+
+export function runXIRRAsync(cashflows: CashFlow[]): Promise<number> {
+  const worker = getXirrWorker();
+  if (!worker) {
+    return Promise.resolve(calculateXIRR(cashflows));
+  }
+
+  return new Promise((resolve) => {
+    const taskId = Math.random().toString(36).substring(7);
+    _pendingXirrCallbacks.set(taskId, resolve);
+    worker.postMessage({ taskId, cashflows });
   });
 }
 

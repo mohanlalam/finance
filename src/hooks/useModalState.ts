@@ -8,57 +8,58 @@ export interface PortfolioTarget {
   label: string;
 }
 
+export type ActiveModal =
+  | { type: 'add_holding' }
+  | { type: 'add_family' }
+  | { type: 'rename_portfolio'; target: PortfolioTarget }
+  | { type: 'delete_portfolio'; target: PortfolioTarget }
+  | { type: 'change_pin' }
+  | { type: 'mobile_alerts' }
+  | null;
+
 export function useModalState() {
+  const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [quickAddTarget, setQuickAddTarget] = useState<QuickAddType | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showAddFamily, setShowAddFamily] = useState(false);
-  const [renameTarget, setRenameTarget] = useState<PortfolioTarget | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<PortfolioTarget | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showMobileAlerts, setShowMobileAlerts] = useState(false);
-  const [showChangePinModal, setShowChangePinModal] = useState(false);
 
-  const openAddModal = useCallback(() => setShowAddModal(true), []);
-  const closeAddModal = useCallback(() => setShowAddModal(false), []);
+  const openModal = useCallback((modal: ActiveModal) => setActiveModal(modal), []);
+  const closeModal = useCallback(() => setActiveModal(null), []);
 
-  const openAddFamily = useCallback(() => setShowAddFamily(true), []);
-  const closeAddFamily = useCallback(() => setShowAddFamily(false), []);
+  // Backwards-compatible convenience getters & setters for AppShell
+  const showAddModal = activeModal?.type === 'add_holding';
+  const openAddModal = useCallback(() => setActiveModal({ type: 'add_holding' }), []);
+  const closeAddModal = useCallback(() => setActiveModal(null), []);
 
-  const openRenameModal = useCallback((target: PortfolioTarget) => setRenameTarget(target), []);
-  const closeRenameModal = useCallback(() => setRenameTarget(null), []);
+  const showAddFamily = activeModal?.type === 'add_family';
+  const openAddFamily = useCallback(() => setActiveModal({ type: 'add_family' }), []);
+  const closeAddFamily = useCallback(() => setActiveModal(null), []);
 
-  const openDeleteModal = useCallback((target: PortfolioTarget) => setDeleteTarget(target), []);
-  const closeDeleteModal = useCallback(() => setDeleteTarget(null), []);
+  const renameTarget = activeModal?.type === 'rename_portfolio' ? activeModal.target : null;
+  const openRenameModal = useCallback((target: PortfolioTarget) => setActiveModal({ type: 'rename_portfolio', target }), []);
+  const closeRenameModal = useCallback(() => setActiveModal(null), []);
 
-  const openMobileAlerts = useCallback(() => setShowMobileAlerts(true), []);
-  const closeMobileAlerts = useCallback(() => setShowMobileAlerts(false), []);
+  const deleteTarget = activeModal?.type === 'delete_portfolio' ? activeModal.target : null;
+  const openDeleteModal = useCallback((target: PortfolioTarget) => setActiveModal({ type: 'delete_portfolio', target }), []);
+  const closeDeleteModal = useCallback(() => setActiveModal(null), []);
 
-  const openChangePinModal = useCallback(() => setShowChangePinModal(true), []);
-  const closeChangePinModal = useCallback(() => setShowChangePinModal(false), []);
+  const showMobileAlerts = activeModal?.type === 'mobile_alerts';
+  const openMobileAlerts = useCallback(() => setActiveModal({ type: 'mobile_alerts' }), []);
+  const closeMobileAlerts = useCallback(() => setActiveModal(null), []);
+
+  const showChangePinModal = activeModal?.type === 'change_pin';
+  const openChangePinModal = useCallback(() => setActiveModal({ type: 'change_pin' }), []);
+  const closeChangePinModal = useCallback(() => setActiveModal(null), []);
 
   const clearQuickAddTarget = useCallback(() => setQuickAddTarget(null), []);
 
   const isAnyModalOpen = useMemo(() => {
-    return (
-      showAddModal ||
-      showAddFamily ||
-      !!renameTarget ||
-      !!deleteTarget ||
-      showChangePinModal ||
-      !!quickAddTarget ||
-      showMobileAlerts
-    );
-  }, [
-    showAddModal,
-    showAddFamily,
-    renameTarget,
-    deleteTarget,
-    showChangePinModal,
-    quickAddTarget,
-    showMobileAlerts,
-  ]);
+    return activeModal !== null || quickAddTarget !== null;
+  }, [activeModal, quickAddTarget]);
 
   return {
+    activeModal,
+    openModal,
+    closeModal,
     quickAddTarget,
     setQuickAddTarget,
     clearQuickAddTarget,

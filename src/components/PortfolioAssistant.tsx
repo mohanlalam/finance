@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Portfolio } from '../types/portfolio';
 import { askAssistant, AssistantResponse } from '../utils/assistant';
 import { Send, Sparkles, Trash2, Copy, Check, Bot, User } from './icons/AppIcons';
@@ -203,6 +203,51 @@ function getDynamicSuggestions(portfolios: Portfolio[]): { label: string }[] {
   return suggestions.slice(0, 3);
 }
 
+const ChatMessageItem = React.memo(function ChatMessageItem({ msg }: { msg: ChatMessage }) {
+  return (
+    <div className="w-full">
+      {msg.role === 'user' ? (
+        <div className="flex justify-end items-end gap-2 w-full">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 border border-blue-500/30 text-white rounded-2xl rounded-tr-sm px-3.5 py-2 text-[10.5px] max-w-[80%] font-medium shadow-md shadow-blue-600/10">
+            {msg.text}
+          </div>
+          <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center text-[9px] font-extrabold text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900 shrink-0">
+            <User size={11} />
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2 items-start w-full">
+          <div className="flex gap-2.5 items-start w-full">
+            <div className="w-5.5 h-5.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 mt-0.5 shadow-sm">
+              <Bot size={11} />
+            </div>
+            <div className="flex-1 space-y-1 bg-slate-100 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40 text-slate-800 dark:text-slate-100 rounded-2xl rounded-tl-sm px-3.5 py-2.5 shadow-sm relative group">
+              {renderMarkdown(msg.text)}
+              {msg.id !== 'welcome' && <CopyButton text={msg.text} />}
+            </div>
+          </div>
+          {msg.response && msg.response.matchedAssets && msg.response.matchedAssets.length > 0 && (
+            <div className="pl-8 w-full space-y-1.5">
+              <p className="text-[8.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Matching Asset Classes:</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                {msg.response.matchedAssets.map((asset, idx) => (
+                  <div key={idx} className="bg-slate-100/50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/20 rounded-lg p-2 flex flex-col gap-0.5 text-left">
+                    <div className="flex justify-between items-center text-[9px] font-bold">
+                      <span className="text-slate-700 dark:text-slate-200 truncate pr-2">{asset.name}</span>
+                      <span className="text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-700 px-1 py-0.5 rounded text-[7.5px] uppercase shrink-0">{asset.type}</span>
+                    </div>
+                    <span className="text-[8.5px] text-slate-500 dark:text-slate-400 font-semibold truncate">{asset.details}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+});
+
 export default function PortfolioAssistant({ portfolios }: PortfolioAssistantProps) {
   const welcomeMessage = useMemo<ChatMessage>(() => ({
     id: 'welcome',
@@ -313,46 +358,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
 
       <div className="flex-1 overflow-y-auto pr-1 space-y-4 mb-4 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 scrollbar-track-transparent min-h-0">
         {messages.map((msg) => (
-          <div key={msg.id} className="w-full">
-            {msg.role === 'user' ? (
-              <div className="flex justify-end items-end gap-2 w-full">
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 border border-blue-500/30 text-white rounded-2xl rounded-tr-sm px-3.5 py-2 text-[10.5px] max-w-[80%] font-medium shadow-md shadow-blue-600/10">
-                  {msg.text}
-                </div>
-                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center text-[9px] font-extrabold text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900 shrink-0">
-                  <User size={11} />
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2 items-start w-full">
-                <div className="flex gap-2.5 items-start w-full">
-                  <div className="w-5.5 h-5.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 mt-0.5 shadow-sm">
-                    <Bot size={11} />
-                  </div>
-                  <div className="flex-1 space-y-1 bg-slate-100 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40 text-slate-800 dark:text-slate-100 rounded-2xl rounded-tl-sm px-3.5 py-2.5 shadow-sm relative group">
-                    {renderMarkdown(msg.text)}
-                    {msg.id !== 'welcome' && <CopyButton text={msg.text} />}
-                  </div>
-                </div>
-                {msg.response && msg.response.matchedAssets && msg.response.matchedAssets.length > 0 && (
-                  <div className="pl-8 w-full space-y-1.5">
-                    <p className="text-[8.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Matching Asset Classes:</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                      {msg.response.matchedAssets.map((asset, idx) => (
-                        <div key={idx} className="bg-slate-100/50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/20 rounded-lg p-2 flex flex-col gap-0.5 text-left">
-                          <div className="flex justify-between items-center text-[9px] font-bold">
-                            <span className="text-slate-700 dark:text-slate-200 truncate pr-2">{asset.name}</span>
-                            <span className="text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-700 px-1 py-0.5 rounded text-[7.5px] uppercase shrink-0">{asset.type}</span>
-                          </div>
-                          <span className="text-[8.5px] text-slate-500 dark:text-slate-400 font-semibold truncate">{asset.details}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          <ChatMessageItem key={msg.id} msg={msg} />
         ))}
         {isLoading && (
           <div className="flex gap-2.5 items-start w-full animate-pulse">

@@ -15,22 +15,25 @@ interface ModeConfig {
 }
 
 interface DepositDetailsCardProps {
-  fd: FixedDeposit;
-  cfg: ModeConfig;
+  fd?: FixedDeposit;
+  deposit?: FixedDeposit;
+  cfg?: ModeConfig;
   documents: DocumentMetadata[];
   onOpenEdit: (fd: FixedDeposit) => void;
   onConfirmDelete: (fd: FixedDeposit) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onUpdate?: (assetType: string, id: string, payload: any) => Promise<void>;
 }
 
 export function DepositDetailsCard({
-  fd,
-  cfg,
+  fd: itemFd,
+  deposit: itemDeposit,
+  cfg = { title: 'Fixed Deposit', principalLabel: 'Principal', themeColor: 'text-amber-600', iconBg: 'bg-amber-500/10 text-amber-600', iconClass: CheckCircle },
   documents,
   onOpenEdit,
   onConfirmDelete,
 }: DepositDetailsCardProps) {
+  const fd = itemFd || itemDeposit!;
   const { addToast } = useToastActions();
   const IconComponent = cfg.iconClass;
   const [contextMenu, setContextMenu] = React.useState<{ isOpen: boolean; x: number; y: number }>({
@@ -206,13 +209,19 @@ export function DepositDetailsCard({
 
 export default React.memo(
   DepositDetailsCard,
-  (prev, next) =>
-    prev.fd.id === next.fd.id &&
-    prev.fd.status === next.fd.status &&
-    prev.fd.principal_amount === next.fd.principal_amount &&
-    prev.fd.interest_rate === next.fd.interest_rate &&
-    prev.fd.start_date === next.fd.start_date &&
-    prev.fd.maturity_date === next.fd.maturity_date &&
-    prev.fd.notes === next.fd.notes &&
-    prev.documents.length === next.documents.length
+  (prev, next) => {
+    const pf = prev.fd || prev.deposit;
+    const nf = next.fd || next.deposit;
+    if (!pf || !nf) return false;
+    return (
+      pf.id === nf.id &&
+      pf.status === nf.status &&
+      pf.principal_amount === nf.principal_amount &&
+      pf.interest_rate === nf.interest_rate &&
+      pf.start_date === nf.start_date &&
+      pf.maturity_date === nf.maturity_date &&
+      pf.notes === nf.notes &&
+      prev.documents?.length === next.documents?.length
+    );
+  }
 );

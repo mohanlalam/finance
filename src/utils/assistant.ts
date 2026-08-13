@@ -986,16 +986,16 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     const matched: AssistantResponse['matchedAssets'] = [];
     
     advice.forEach(ad => {
-      const drift = ad.actualPct - ad.targetPct;
+      const drift = ad.currentPct - ad.targetPct;
       const driftSign = drift >= 0 ? '+' : '';
       
-      answer += `| **${ad.assetClass}** | ${ad.targetPct}% | ${ad.actualPct.toFixed(1)}% | ${driftSign}${drift.toFixed(1)}% | **${ad.recommendation}** |\n`;
+      answer += `| **${ad.assetClass}** | ${ad.targetPct}% | ${ad.currentPct.toFixed(1)}% | ${driftSign}${drift.toFixed(1)}% | **${ad.action}** |\n`;
       
-      if (ad.recommendation !== 'Aligned') {
+      if (ad.action !== 'HOLD') {
         matched.push({
           name: ad.assetClass,
           type: 'Rebalancing Trade',
-          details: `Drift: ${driftSign}${drift.toFixed(1)}%, Recommendation: ${ad.recommendation}`
+          details: `Drift: ${driftSign}${drift.toFixed(1)}%, Recommendation: ${ad.action}`
         });
       }
     });

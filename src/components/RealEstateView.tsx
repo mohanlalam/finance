@@ -1,13 +1,13 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { RealEstate, DocumentMetadata, PortfolioName } from '../types/portfolio';
-import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../utils/formatters';
-import { Plus, Trash2, Edit2, Home, MapPin, TrendingUp, Building2, FileText, X, StickyNote } from './icons/AppIcons';
-import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
+import RealEstateCard from './realestate/RealEstateCard';
+import RealEstateFormModal from './realestate/RealEstateFormModal';
+import AssetRegistryContainer from './ui/AssetRegistryContainer';
 import { usePortfolioState } from '../contexts/PortfolioContext';
 import { useToastActions } from '../contexts/ToastContext';
-import AssetCardSkeleton from './AssetCardSkeleton';
-import EmptyState from './EmptyState';
+import { useAssetModal } from '../hooks/useAssetModal';
+import { FixedSizeList as List } from 'react-window';
 
 interface PortfolioOption {
   name: string;
@@ -19,17 +19,13 @@ interface RealEstateViewProps {
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }
 
-const TYPE_OPTIONS: Array<RealEstate['property_type']> = ['apartment', 'house', 'plot', 'commercial'];
-
-export default React.memo(function RealEstateView({
+export function RealEstateView({
   realEstate,
   documents,
   portfolioName,
@@ -41,441 +37,100 @@ export default React.memo(function RealEstateView({
 }: RealEstateViewProps) {
   const { isMutating } = usePortfolioState();
   const { addToast } = useToastActions();
-  const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState<RealEstate | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const {
+    showModal,
+    editingItem,
+    confirmDeleteItem,
+    openAdd,
+    openEdit,
+    closeModal,
+    setConfirmDeleteItem,
+  } = useAssetModal<RealEstate>(autoOpenAddModal);
 
-  const [formPortfolio, setFormPortfolio] = useState(() => portfolioName);
-  const [propertyName, setPropertyName] = useState('');
-  const [propertyType, setPropertyType] = useState<RealEstate['property_type']>('apartment');
-  const [location, setLocation] = useState('');
-  const [purchasePrice, setPurchasePrice] = useState('');
-  const [currentValuation, setCurrentValuation] = useState('');
-  const [purchaseDate, setPurchaseDate] = useState('');
-  const [monthlyRent, setMonthlyRent] = useState('');
-  const [notes, setNotes] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
-  // Confirm-delete state
-  const [confirmDelete, setConfirmDelete] = useState<RealEstate | null>(null);
-
-  const { totalCurrent, totalMonthlyRent, annualRent, totalGain, yieldPct } = useMemo(() => {
-    const purchase = realEstate.reduce((s, r) => s + Number(r.purchase_price), 0);
-    const current = realEstate.reduce((s, r) => s + Number(r.current_valuation), 0);
-    const monthlyRent = realEstate.reduce((s, r) => s + Number(r.monthly_rent), 0);
-    const annual = monthlyRent * 12;
-    const gain = current - purchase;
-    const yieldPercentage = current > 0 ? (annual / current) * 100 : 0;
-    return {
-      totalCurrent: current,
-      totalMonthlyRent: monthlyRent,
-      annualRent: annual,
-      totalGain: gain,
-      yieldPct: yieldPercentage
-    };
-  }, [realEstate]);
-
-  const handleOpenAdd = useCallback(() => {
-    setEditing(null);
-    setFormPortfolio(portfolioName);
-    setPropertyName('');
-    setPropertyType('apartment');
-    setLocation('');
-    setPurchasePrice('');
-    setCurrentValuation('');
-    setPurchaseDate('');
-    setMonthlyRent('');
-    setNotes('');
-    setError('');
-    setShowModal(true);
-  }, [portfolioName]);
-
-  React.useEffect(() => {
-    if (autoOpenAddModal) {
-      handleOpenAdd();
-    }
-  }, [autoOpenAddModal, handleOpenAdd]);
-
-  function handleOpenEdit(r: RealEstate) {
-    setEditing(r);
-    setFormPortfolio(portfolioName);
-    setPropertyName(r.property_name);
-    setPropertyType(r.property_type);
-    setLocation(r.location ?? '');
-    setPurchasePrice(String(r.purchase_price));
-    setCurrentValuation(String(r.current_valuation));
-    setPurchaseDate(r.purchase_date ?? '');
-    setMonthlyRent(String(r.monthly_rent));
-    setNotes(r.notes ?? '');
-    setError('');
-    setShowModal(true);
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!propertyName || !purchasePrice || !currentValuation) {
-      setError('Property name, purchase price, and current valuation are required.');
-      return;
-    }
-    setLoading(true);
-    setError('');
-    const payload = {
-      propertyName,
-      propertyType,
-      location: location || null,
-      purchasePrice: parseFloat(purchasePrice),
-      currentValuation: parseFloat(currentValuation),
-      purchaseDate: purchaseDate || null,
-      monthlyRent: monthlyRent ? parseFloat(monthlyRent) : 0,
-      notes: notes || null,
-    };
-    try {
-      if (editing) {
-        await onUpdate('real_estate', editing.id, payload);
-        addToast('Property updated successfully', 'success');
-      } else {
-        await onAdd('real_estate', formPortfolio, payload);
-        addToast('Property created successfully', 'success');
-      }
-      setShowModal(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Operation failed');
-      addToast(err instanceof Error ? err.message : 'Operation failed', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleDelete(id: string) {
+  const handleDelete = useCallback(async (id: string) => {
+    setDeleting(true);
     try {
       await onDelete('real_estate', id);
       addToast('Property deleted successfully', 'success');
+      setConfirmDeleteItem(null);
     } catch (err) {
-      addToast(err instanceof Error ? err.message : 'Delete failed', 'error');
+      addToast(err instanceof Error ? err.message : 'Failed to delete property', 'error');
     } finally {
-      setConfirmDelete(null);
+      setDeleting(false);
     }
-  }
+  }, [onDelete, addToast, setConfirmDeleteItem]);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-tr from-emerald-600 to-teal-600 rounded-2xl p-4 text-white shadow-md flex items-center justify-between">
-          <div>
-            <p className="text-xs text-emerald-100 font-semibold uppercase tracking-wider">Portfolio Value</p>
-            <p className="text-2xl font-bold mt-1">{formatINR(totalCurrent)}</p>
-            <p className="text-xs text-emerald-200 mt-2">{realEstate.length} properties</p>
-          </div>
-          <Building2 size={40} className="opacity-20 shrink-0" />
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Capital Appreciation</p>
-            <p className={`text-2xl font-bold mt-1 ${pnlColor(totalGain)}`}>{formatINR(totalGain)}</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">vs cost basis</p>
-          </div>
-          <TrendingUp size={40} className="text-emerald-500/20 shrink-0" />
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Monthly Rent</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(totalMonthlyRent)}</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">{formatINR(annualRent)}/yr</p>
-          </div>
-          <Home size={40} className="text-blue-500/20 shrink-0" />
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Rental Yield</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{yieldPct.toFixed(2)}%</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Annual / current value</p>
-          </div>
-          <MapPin size={40} className="text-amber-500/20 shrink-0" />
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Properties</h3>
-          <button
-            onClick={handleOpenAdd}
-            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-[10px] transition-colors shadow-sm"
+    <div>
+      <AssetRegistryContainer
+        title="Real Estate Properties"
+        createBtnLabel="Add Property"
+        themeColor="bg-emerald-600 hover:bg-emerald-700"
+        emptyType="real_estate"
+        emptyTitle="No Real Estate Added"
+        emptyDescription="Monitor land plots, residential apartments, houses, and commercial property valuations."
+        isLoading={isMutating}
+        itemCount={realEstate.length}
+        onOpenAdd={openAdd}
+      >
+        {realEstate.length > 8 ? (
+          <List
+            height={500}
+            itemCount={realEstate.length}
+            itemSize={130}
+            width="100%"
           >
-            <Plus size={13} />
-            Add Property
-          </button>
-        </div>
-
-        {isMutating ? (
-          <div className="p-4">
-            <AssetCardSkeleton count={Math.max(1, realEstate.length || 3)} />
-          </div>
-        ) : realEstate.length === 0 ? (
-          <EmptyState
-            type="real_estate"
-            title="No Properties Yet"
-            description="Add your first property to track value, capital appreciation, and rental yield."
-            actionButton={
-              <button
-                onClick={handleOpenAdd}
-                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2.5 rounded-[14px] transition-colors shadow-sm shadow-emerald-500/20"
-              >
-                <Plus size={15} />
-                Add Your First Property
-              </button>
-            }
-          />
-        ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
-            {realEstate.map((r) => {
-              const gain = Number(r.current_valuation) - Number(r.purchase_price);
-              const gainPct = Number(r.purchase_price) > 0 ? (gain / Number(r.purchase_price)) * 100 : 0;
-              const propertyYield = Number(r.current_valuation) > 0 ? ((Number(r.monthly_rent) * 12) / Number(r.current_valuation)) * 100 : 0;
-              const docs = documents.filter((d) => d.asset_type === 'real_estate' && d.asset_id === r.id);
+            {({ index, style }) => {
+              const property = realEstate[index];
               return (
-                <div key={r.id} className="p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-[14px] bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-500 flex items-center justify-center shrink-0">
-                        <Home size={20} />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">{r.property_name}</h4>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 capitalize">
-                            {r.property_type}
-                          </span>
-                        </div>
-                        {r.location && (
-                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-1">
-                            <MapPin size={11} /> {r.location}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:text-right">
-                      <div>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">Purchase</p>
-                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{formatINR(Number(r.purchase_price))}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">Current</p>
-                        <p className={`text-sm font-bold ${pnlColor(gain)}`}>{formatINR(Number(r.current_valuation))}</p>
-                        <p className={`text-[10px] ${pnlColor(gain)}`}>{formatPercent(gainPct)}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">Rent/mo</p>
-                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{formatINR(Number(r.monthly_rent))}</p>
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500">{propertyYield.toFixed(2)}% yield</p>
-                      </div>
-                      <div className="col-span-2 sm:col-span-1 flex items-center justify-start md:justify-end gap-2">
-                        {docs.map((doc) => (
-                          <a
-                            key={doc.id}
-                            href={getDocumentUrl(doc.file_path)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-200 dark:hover:border-emerald-800 transition-colors"
-                            title={doc.name}
-                          >
-                            <FileText size={14} />
-                          </a>
-                        ))}
-                        <button
-                          onClick={() => handleOpenEdit(r)}
-                          className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
-                          title="Edit"
-                        >
-                          <Edit2 size={14} />
-                        </button>
-                        <button
-                          onClick={() => setConfirmDelete(r)}
-                          className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  {r.notes && (
-                    <p className="mt-2 text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5">
-                      <StickyNote size={11} className="shrink-0 mt-0.5" />
-                      <span className="italic">{r.notes}</span>
-                    </p>
-                  )}
+                <div style={style} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                  <RealEstateCard
+                    property={property}
+                    documents={documents}
+                    onOpenEdit={openEdit}
+                    onConfirmDelete={setConfirmDeleteItem}
+                  />
                 </div>
               );
-            })}
-          </div>
+            }}
+          </List>
+        ) : (
+          realEstate.map((property) => (
+            <RealEstateCard
+              key={property.id}
+              property={property}
+              documents={documents}
+              onOpenEdit={openEdit}
+              onConfirmDelete={setConfirmDeleteItem}
+            />
+          ))
         )}
-      </div>
+      </AssetRegistryContainer>
 
-      <Modal
+      <RealEstateFormModal
         isOpen={showModal}
-        onClose={() => !loading && setShowModal(false)}
-        ariaLabel={editing ? 'Edit Property' : 'Add Property'}
-        preventClose={loading}
-      >
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
-          <div>
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">
-              {editing ? 'Edit Property' : 'Add Property'}
-            </h3>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Track property value, rent, and yield</p>
-          </div>
-          <button
-            onClick={() => !loading && setShowModal(false)}
-            className="w-8 h-8 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
-            aria-label="Close dialog"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        onClose={closeModal}
+        editingProperty={editingItem}
+        portfolioName={portfolioName}
+        portfolioOptions={portfolioOptions}
+        onAdd={onAdd}
+        onUpdate={onUpdate}
+      />
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 overflow-y-auto min-h-0 flex-1">
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
-            <select
-              value={formPortfolio}
-              onChange={(e) => setFormPortfolio(e.target.value)}
-              disabled={!!editing}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors disabled:opacity-50"
-            >
-              {portfolioOptions.map((o) => (
-                <option key={o.name} value={o.name}>{o.label}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Property Name</label>
-            <input
-              type="text"
-              placeholder="e.g. 2BHK Apartment (Whitefield)"
-              value={propertyName}
-              onChange={(e) => setPropertyName(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Type</label>
-              <select
-                value={propertyType}
-                onChange={(e) => setPropertyType(e.target.value as RealEstate['property_type'])}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors capitalize"
-              >
-                {TYPE_OPTIONS.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Location</label>
-              <input
-                type="text"
-                placeholder="City, State"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Purchase Price (₹)</label>
-              <input
-                type="number"
-                placeholder="0"
-                value={purchasePrice}
-                onChange={(e) => setPurchasePrice(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Current Valuation (₹)</label>
-              <input
-                type="number"
-                placeholder="0"
-                value={currentValuation}
-                onChange={(e) => setCurrentValuation(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Purchase Date</label>
-              <input
-                type="date"
-                value={purchaseDate}
-                onChange={(e) => setPurchaseDate(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Monthly Rent (₹)</label>
-              <input
-                type="number"
-                placeholder="0"
-                value={monthlyRent}
-                onChange={(e) => setMonthlyRent(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Notes <span className="font-normal text-slate-400">(optional)</span></label>
-            <textarea
-              rows={2}
-              placeholder="e.g. Disputed title, under renovation, used as collateral"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors resize-none"
-            />
-          </div>
-
-          {error && (
-            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2" role="alert">{error}</p>
-          )}
-
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-emerald-600 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-emerald-700 transition-colors disabled:opacity-50"
-            >
-              {loading ? 'Saving...' : editing ? 'Save Changes' : 'Add Property'}
-            </button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Confirm delete dialog */}
       <ConfirmModal
-        isOpen={!!confirmDelete}
-        onClose={() => setConfirmDelete(null)}
-        onConfirm={() => { if (confirmDelete) void handleDelete(confirmDelete.id); }}
+        isOpen={!!confirmDeleteItem}
+        onClose={() => setConfirmDeleteItem(null)}
+        onConfirm={() => { if (confirmDeleteItem) void handleDelete(confirmDeleteItem.id); }}
         title="Delete Property"
-        message={confirmDelete ? `Are you sure you want to delete "${confirmDelete.property_name}"? This cannot be undone.` : ''}
+        message={confirmDeleteItem ? `Are you sure you want to delete "${confirmDeleteItem.property_name}"? This cannot be undone.` : ''}
         confirmLabel="Delete"
+        variant="danger"
+        isLoading={deleting}
       />
     </div>
   );
-});
+}
+
+export default React.memo(RealEstateView);

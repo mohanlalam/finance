@@ -5,20 +5,23 @@ import { WifiOff, AlertCircle, RefreshCw } from '../components/icons/AppIcons';
 
 import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
-import AddHoldingModal from '../components/AddHoldingModal';
 import MobileBottomNav from '../components/MobileBottomNav';
 import FamilyTabBar from '../components/FamilyTabBar';
 import AssetTabContent from '../components/AssetTabContent';
 import SectionErrorBoundary from '../components/SectionErrorBoundary';
 
-import AddFamilyModal from '../components/AddFamilyModal';
-import RenamePortfolioModal from '../components/RenamePortfolioModal';
 import ConfirmModal from '../components/ConfirmModal';
-import ChangePinModal from '../components/ChangePinModal';
 import FloatingAddMenu from '../components/FloatingAddMenu';
 import MobileHomeSummary from '../components/MobileHomeSummary';
 import MobileAlertsView from '../components/MobileAlertsView';
 import DesktopSidebar from './DesktopSidebar';
+import { useIsMobile } from '../hooks/useIsMobile';
+
+// Lazy loaded modals to keep initial bundle lightweight
+const AddHoldingModal = React.lazy(() => import('../components/AddHoldingModal'));
+const AddFamilyModal = React.lazy(() => import('../components/AddFamilyModal'));
+const RenamePortfolioModal = React.lazy(() => import('../components/RenamePortfolioModal'));
+const ChangePinModal = React.lazy(() => import('../components/ChangePinModal'));
 import type { ImportRow } from '../components/ExportPanel'; // type-only: erased at build time
 import { AddHoldingPayload } from '../components/AddHoldingModal';
 
@@ -155,14 +158,7 @@ export default function AppShell() {
 
   // Declared early so it can be used in activeAsset derivation below without
   // reading window.innerWidth (which forces a layout reflow) on every render
-  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
-
-  useEffect(() => {
-    const mql = window.matchMedia('(max-width: 767px)');
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
-  }, []);
+  const isMobile = useIsMobile();
 
   const activeAsset = (asset as AssetTab) || (isMobile ? 'home' : 'stocks');
 
@@ -776,30 +772,48 @@ export default function AppShell() {
         }}
       />
 
-      {/* Add Holding Modal */}
-      {showAddModal && (
-        <AddHoldingModal
-          onClose={closeAddModal}
-          onAdd={handleAddHolding}
-          portfolioOptions={portfolioOptionsForModal}
-          defaultPortfolio={activeTab === 'all' ? portfolioOptionsForModal[0]?.name : activeTab}
-        />
-      )}
+      {/* Lazy loaded Modals wrapped in Suspense */}
+      <Suspense fallback={null}>
+        {/* Add Holding Modal */}
+        {showAddModal && (
+          <AddHoldingModal
+            onClose={closeAddModal}
+            onAdd={handleAddHolding}
+            portfolioOptions={portfolioOptionsForModal}
+            defaultPortfolio={activeTab === 'all' ? portfolioOptionsForModal[0]?.name : activeTab}
+          />
+        )}
 
-      {/* Add Family Member Modal */}
-      <AddFamilyModal
-        isOpen={showAddFamily}
-        onClose={closeAddFamily}
-        onSubmit={handleAddFamilySubmit}
-      />
+        {/* Add Family Member Modal */}
+        {showAddFamily && (
+          <AddFamilyModal
+            isOpen={showAddFamily}
+            onClose={closeAddFamily}
+            onSubmit={handleAddFamilySubmit}
+          />
+        )}
 
-      {/* Rename Portfolio Modal */}
-      <RenamePortfolioModal
-        isOpen={!!renameTarget}
-        target={renameTarget}
-        onClose={closeRenameModal}
-        onSubmit={handleRenameSubmit}
-      />
+        {/* Rename Portfolio Modal */}
+        {renameTarget && (
+          <RenamePortfolioModal
+            isOpen={!!renameTarget}
+            target={renameTarget}
+            onClose={closeRenameModal}
+            onSubmit={handleRenameSubmit}
+          />
+        )}
+
+        {/* Change PIN Modal */}
+        {showChangePinModal && (
+          <ChangePinModal
+            onClose={closeChangePinModal}
+            onSuccess={() => {
+              closeChangePinModal();
+              addToast('PIN changed successfully', 'success');
+            }}
+          />
+        )}
+      </Suspense>
 
       {/* Delete Portfolio Confirmation Modal */}
       <ConfirmModal
@@ -813,17 +827,6 @@ export default function AppShell() {
         variant="danger"
         isLoading={isDeleting}
       />
-
-      {/* Change PIN Modal */}
-      {showChangePinModal && (
-        <ChangePinModal
-          onClose={closeChangePinModal}
-          onSuccess={() => {
-            closeChangePinModal();
-            addToast('PIN changed successfully', 'success');
-          }}
-        />
-      )}
 
       {/* PWA Install Banner */}
       <PWAInstallBanner />

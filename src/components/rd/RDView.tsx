@@ -1,17 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { DocumentMetadata, RDAccount } from '../../types/portfolio';
-import { formatINR } from '../../utils/formatters';
-import { getRDInvestedAmount, getRDEffectiveValue } from '../../utils/rdUtils';
-import { Plus, TrendingUp, Calendar, Clock } from '../icons/AppIcons';
 import ConfirmModal from '../ConfirmModal';
-import EmptyState from '../EmptyState';
 import RDAccountCard from './RDAccountCard';
 import { RDFormModal } from './RDFormModal';
 import { useRDData } from '../../hooks/useRDData';
 import { usePortfolioState } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
-import AssetCardSkeleton from '../AssetCardSkeleton';
-import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import AssetRegistryContainer from '../ui/AssetRegistryContainer';
+import { useAssetModal } from '../../hooks/useAssetModal';
+import { FixedSizeList as List } from 'react-window';
 
 interface PortfolioOption {
   name: string;
@@ -41,9 +38,17 @@ export function RDView({
     deleteRDAccount,
   } = useRDData();
 
-  const [showModal, setShowModal] = useState(false);
-  const [editingAccount, setEditingAccount] = useState<RDAccount | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<RDAccount | null>(null);
+  const {
+    showModal,
+    editingItem,
+    confirmDeleteItem,
+    openAdd,
+    openEdit,
+    closeModal,
+    setConfirmDeleteItem,
+  } = useAssetModal<RDAccount>(autoOpenAddModal);
+
+  const [deleting, setDeleting] = useState(false);
 
   const activePortfolio = useMemo(() => {
     if (portfolioName === 'all') return null;
@@ -56,187 +61,90 @@ export function RDView({
     return rdAccounts.filter((r) => r.portfolio_id === activePortfolio.id);
   }, [rdAccounts, portfolioName, activePortfolio]);
 
-  const totalPrincipal = useMemo(() => {
-    return filteredAccounts.reduce((s, acc) => s + getRDInvestedAmount(acc), 0);
-  }, [filteredAccounts]);
-
-  const totalValue = useMemo(() => {
-    return filteredAccounts.reduce((s, acc) => s + getRDEffectiveValue(acc), 0);
-  }, [filteredAccounts]);
-
-  const avgRate = useMemo(() => {
-    if (filteredAccounts.length === 0) return 0;
-    const totalPrincipalForWeight = filteredAccounts.reduce((s, acc) => s + getRDInvestedAmount(acc), 0);
-    if (totalPrincipalForWeight > 0) {
-      return (
-        filteredAccounts.reduce((s, acc) => s + Number(acc.interest_rate) * getRDInvestedAmount(acc), 0) /
-        totalPrincipalForWeight
-      );
-    }
-    return (
-      filteredAccounts.reduce((s, acc) => s + Number(acc.interest_rate), 0) / filteredAccounts.length
-    );
-  }, [filteredAccounts]);
-
-  const handleOpenAdd = useCallback(() => {
-    setEditingAccount(null);
-    setShowModal(true);
-  }, []);
-
-  useEffect(() => {
-    if (autoOpenAddModal) {
-      handleOpenAdd();
-    }
-  }, [autoOpenAddModal, handleOpenAdd]);
-
-  const handleOpenEdit = useCallback((account: RDAccount) => {
-    setEditingAccount(account);
-    setShowModal(true);
-  }, []);
-
   const handleDelete = useCallback(
     async (id: string) => {
+      setDeleting(true);
       try {
         await deleteRDAccount(id);
-        addToast('Recurring deposit account deleted successfully', 'success');
+        addToast('Recurring Deposit deleted', 'success');
+        setConfirmDeleteItem(null);
       } catch (err) {
-        addToast(err instanceof Error ? err.message : 'Deletion failed', 'error');
+        addToast(err instanceof Error ? err.message : 'Failed to delete RD', 'error');
       } finally {
-        setConfirmDelete(null);
+        setDeleting(false);
       }
     },
-    [deleteRDAccount, addToast]
+    [deleteRDAccount, addToast, setConfirmDeleteItem]
   );
 
   return (
-    <div className="space-y-6">
-      {/* Metrics Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="region" aria-label="RD summary metrics">
-        <div className="bg-gradient-to-tr from-pink-600 to-rose-600 rounded-2xl p-5 text-white shadow-md flex items-center justify-between">
-          <div>
-            <p className="text-xs text-white/80 font-semibold uppercase tracking-wider">Total RD Invested</p>
-            <p className="text-2xl font-bold mt-1">{formatINR(totalPrincipal)}</p>
-            <p className="text-xs text-white/70 mt-2">Active Capital Invested</p>
-          </div>
-          <Clock size={40} className="opacity-20 shrink-0" aria-hidden="true" />
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Current Valuation</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{formatINR(totalValue)}</p>
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-2">
-              {totalValue - totalPrincipal >= 0 ? '+' : ''}{formatINR(totalValue - totalPrincipal)} Interest Accrued
-            </p>
-          </div>
-          <TrendingUp size={40} className="text-emerald-500/25 shrink-0" aria-hidden="true" />
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Weighted Interest Rate</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{avgRate.toFixed(2)}%</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Across all RD accounts</p>
-          </div>
-          <Calendar size={40} className="text-pink-500/20 shrink-0" aria-hidden="true" />
-        </div>
-      </div>
-
-      {/* Grid/List */}
-      <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">RD Registry</h3>
-          <button
-            onClick={handleOpenAdd}
-            aria-label="Create RD Account"
-            className="flex items-center gap-1.5 bg-pink-600 hover:bg-pink-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+    <div>
+      <AssetRegistryContainer
+        title="Recurring Deposits"
+        createBtnLabel="Add RD"
+        themeColor="bg-blue-600 hover:bg-blue-700"
+        emptyType="rd"
+        emptyTitle="No Recurring Deposits"
+        emptyDescription="Track monthly systematic deposits across banks."
+        isLoading={loading || isMutating}
+        itemCount={filteredAccounts.length}
+        onOpenAdd={openAdd}
+      >
+        {filteredAccounts.length > 8 ? (
+          <List
+            height={500}
+            itemCount={filteredAccounts.length}
+            itemSize={135}
+            width="100%"
           >
-            <Plus size={13} aria-hidden="true" />
-            Create RD Account
-          </button>
-        </div>
-
-        {loading || isMutating ? (
-          <div className="p-6">
-            <AssetCardSkeleton count={Math.max(1, filteredAccounts.length || 3)} />
-          </div>
-        ) : filteredAccounts.length === 0 ? (
-          <div className="p-8">
-            <EmptyState
-              type="rd"
-              title="No Recurring Deposits Yet"
-              description="Start tracking your RDs to monitor recurring timelines and interest accrual."
-              actionButton={
-                <button
-                  onClick={handleOpenAdd}
-                  className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-pink-500/20"
-                >
-                  <Plus size={15} aria-hidden="true" />
-                  Create Your First RD
-                </button>
-              }
-            />
-          </div>
+            {({ index, style }) => {
+              const account = filteredAccounts[index];
+              return (
+                <div style={style} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                  <RDAccountCard
+                    account={account}
+                    documents={documents}
+                    onOpenEdit={openEdit}
+                    onConfirmDelete={setConfirmDeleteItem}
+                    onUpdate={updateRDAccount}
+                  />
+                </div>
+              );
+            }}
+          </List>
         ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-700" role="list" aria-label="Recurring Deposits list">
-            {filteredAccounts.length > 8 ? (
-              <List
-                height={500}
-                itemCount={filteredAccounts.length}
-                itemSize={240}
-                width="100%"
-                itemKey={(index) => filteredAccounts[index].id}
-              >
-                {({ index, style }: ListChildComponentProps) => {
-                  const account = filteredAccounts[index];
-                  return (
-                    <div style={style} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
-                      <RDAccountCard
-                        account={account}
-                        documents={documents}
-                        onOpenEdit={handleOpenEdit}
-                        onConfirmDelete={setConfirmDelete}
-                        onUpdate={updateRDAccount}
-                      />
-                    </div>
-                  );
-                }}
-              </List>
-            ) : (
-              filteredAccounts.map((account) => (
-                <RDAccountCard
-                  key={account.id}
-                  account={account}
-                  documents={documents}
-                  onOpenEdit={handleOpenEdit}
-                  onConfirmDelete={setConfirmDelete}
-                  onUpdate={updateRDAccount}
-                />
-              ))
-            )}
-          </div>
+          filteredAccounts.map((account) => (
+            <RDAccountCard
+              key={account.id}
+              account={account}
+              documents={documents}
+              onOpenEdit={openEdit}
+              onConfirmDelete={setConfirmDeleteItem}
+              onUpdate={updateRDAccount}
+            />
+          ))
         )}
-      </div>
+      </AssetRegistryContainer>
 
-      {/* Modal Form */}
       <RDFormModal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        editingAccount={editingAccount}
+        onClose={closeModal}
+        editingAccount={editingItem}
         portfolioName={portfolioName}
         portfolioOptions={portfolioOptions}
         onAdd={addRDAccount}
         onUpdate={updateRDAccount}
       />
 
-      {/* Confirm delete dialog */}
       <ConfirmModal
-        isOpen={!!confirmDelete}
-        onClose={() => setConfirmDelete(null)}
-        onConfirm={() => { if (confirmDelete) void handleDelete(confirmDelete.id); }}
+        isOpen={!!confirmDeleteItem}
+        onClose={() => setConfirmDeleteItem(null)}
+        onConfirm={() => { if (confirmDeleteItem) void handleDelete(confirmDeleteItem.id); }}
         title="Delete Recurring Deposit"
-        message={confirmDelete ? `Are you sure you want to delete the Recurring Deposit at "${confirmDelete.bank_name}"? This cannot be undone.` : ''}
+        message={confirmDeleteItem ? `Are you sure you want to delete the Recurring Deposit at "${confirmDeleteItem.bank_name}"? This cannot be undone.` : ''}
         confirmLabel="Delete"
+        variant="danger"
+        isLoading={deleting}
       />
     </div>
   );
