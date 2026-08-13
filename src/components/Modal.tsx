@@ -34,17 +34,18 @@ export default function Modal({
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const pointerDownTarget = useRef<EventTarget | null>(null);
+
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isExiting, setIsExiting] = useState(false);
 
-  // Drag state
+  // Drag state refs to avoid effect re-binding churn
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const isDragging = useRef(false);
   const dragStart = useRef<{ mouseX: number; mouseY: number; offsetX: number; offsetY: number }>({
     mouseX: 0, mouseY: 0, offsetX: 0, offsetY: 0,
   });
 
-  // Reset drag position when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       setIsRendered(true);
@@ -60,24 +61,30 @@ export default function Modal({
     }
   }, [isOpen, isRendered]);
 
-  // Lock body scroll & store previous focus
+  // Lock body scroll & focus management
   useEffect(() => {
     if (isRendered && !isExiting) {
-      previouslyFocused.current = document.activeElement as HTMLElement;
+      if (document.activeElement instanceof HTMLElement) {
+        previouslyFocused.current = document.activeElement;
+      }
       document.body.style.overflow = 'hidden';
 
-      // Focus first focusable element inside modal
-      requestAnimationFrame(() => {
+      const rafId = requestAnimationFrame(() => {
         const focusable = contentRef.current?.querySelectorAll<HTMLElement>(
-          'input, button, select, textarea, [tabindex]:not([tabindex="-1"])',
+          'input:not([disabled]), button:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])',
         );
         if (focusable && focusable.length > 0) {
           focusable[0].focus();
+        } else {
+          contentRef.current?.focus();
         }
       });
+      return () => cancelAnimationFrame(rafId);
     } else if (!isRendered) {
       document.body.style.overflow = '';
-      previouslyFocused.current?.focus();
+      if (previouslyFocused.current && document.body.contains(previouslyFocused.current)) {
+        previouslyFocused.current.focus();
+      }
     }
 
     return () => {
@@ -85,11 +92,11 @@ export default function Modal({
     };
   }, [isRendered, isExiting]);
 
-  // Escape key handler
+  // Escape key handler checking defaultPrevented
   useEffect(() => {
     if (!isOpen) return;
     function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape' && !preventClose) {
+      if (e.key === 'Escape' && !preventClose && !e.defaultPrevented) {
         onClose();
       }
     }
@@ -97,13 +104,11 @@ export default function Modal({
     return () => window.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose, preventClose]);
 
-  // Drag-to-move pointer handlers (supports mouse + touch + stylus)
+  // Pointer drag handlers - attached dynamically without dependencies churn
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    // Don't drag if clicking interactive form controls
     const target = e.target as HTMLElement;
     if (target.closest('button, input, select, textarea, a, label, [role="button"]')) return;
 
-    // Check if click is on header, drag handle, or top section of modal
     const isHeaderTarget =
       Boolean(target.closest('[data-drag-handle], .modal-drag-handle, header, div[class*="border-b"]')) ||
       (contentRef.current ? (e.clientY - contentRef.current.getBoundingClientRect().top <= 75) : false);
@@ -120,6 +125,10 @@ export default function Modal({
 
     document.body.style.userSelect = 'none';
     document.body.style.cursor = 'grabbing';
+
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch { /* Fallback for browsers without pointer capture support */ }
   }, [dragOffset]);
 
   useEffect(() => {
@@ -141,12 +150,13 @@ export default function Modal({
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
 
-      // Mobile swipe-down dismiss threshold (if pulled down > 120px)
-      if (dragOffset.y > 120 && !preventClose) {
-        onClose();
-      } else {
-        setDragOffset({ x: 0, y: 0 });
-      }
+      setDragOffset((prev) => {
+        if (prev.y > 120 && !preventClose) {
+          onClose();
+          return { x: 0, y: 0 };
+        }
+        return { x: 0, y: 0 };
+      });
     }
 
     window.addEventListener('pointermove', handlePointerMove);
@@ -159,36 +169,59 @@ export default function Modal({
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
     };
-  }, [isRendered, dragOffset.y, preventClose, onClose]);
+  }, [isRendered, preventClose, onClose]);
 
-  // Focus trap
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
+  // Robust Focus Trap
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key !== 'Tab') return;
 
-      const focusable = contentRef.current?.querySelectorAll<HTMLElement>(
-        'input:not([disabled]), button:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])',
-      );
+    const focusable = contentRef.current?.querySelectorAll<HTMLElement>(
+      'input:not([disabled]), button:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])',
+    );
 
-      if (!focusable || focusable.length === 0) return;
+    if (!focusable || focusable.length === 0) {
+      e.preventDefault();
+      return;
+    }
 
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
 
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
+    if (!contentRef.current?.contains(active)) {
+      e.preventDefault();
+      first.focus();
+      return;
+    }
+
+    if (e.shiftKey) {
+      if (active === first) {
+        e.preventDefault();
+        last.focus();
       }
-    },
-    [],
-  );
+    } else {
+      if (active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }, []);
+
+  const handleBackdropPointerDown = useCallback((e: React.PointerEvent) => {
+    pointerDownTarget.current = e.target;
+  }, []);
+
+  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
+    // Only close if BOTH pointerdown AND click happened directly on the backdrop overlay
+    if (
+      pointerDownTarget.current === e.currentTarget &&
+      e.target === e.currentTarget &&
+      !preventClose
+    ) {
+      onClose();
+    }
+    pointerDownTarget.current = null;
+  }, [preventClose, onClose]);
 
   if (!isRendered) return null;
 
@@ -203,21 +236,22 @@ export default function Modal({
       aria-label={ariaLabel}
       onKeyDown={handleKeyDown}
     >
-      {/* Backdrop (high blur frosted panel) */}
+      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-[#000000]/60 dark:bg-[#000000]/80 backdrop-blur-md"
-        onClick={() => !preventClose && onClose()}
+        onPointerDown={handleBackdropPointerDown}
+        onClick={handleBackdropClick}
         aria-hidden="true"
       />
 
-      {/* Content wrapper: mobile bottom sheet, centered on sm desktop */}
+      {/* Content wrapper */}
       <div
         ref={contentRef}
-        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-t-2xl sm:rounded-2xl rounded-b-none sm:rounded-b-2xl shadow-2xl w-full ${maxWidth} max-h-[85vh] sm:max-h-[80vh] mb-0 sm:my-auto pb-safe sm:pb-0 flex flex-col min-h-0 overflow-hidden ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
+        tabIndex={-1}
+        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-t-2xl sm:rounded-2xl rounded-b-none sm:rounded-b-2xl shadow-2xl w-full ${maxWidth} max-h-[85vh] sm:max-h-[80vh] mb-0 sm:my-auto pb-safe sm:pb-0 flex flex-col min-h-0 overflow-hidden outline-none ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
         style={hasDragOffset ? { transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)` } : undefined}
         onPointerDown={handlePointerDown}
       >
-        {/* iOS bottom sheet drag handle indicator pill */}
         <div className="w-full flex justify-center pt-2 pb-0.5 sm:hidden cursor-grab active:cursor-grabbing modal-drag-handle" data-drag-handle="true" aria-hidden="true">
           <div className="w-10 h-1 rounded-full bg-[#e5e5ea] dark:bg-[#38383a] opacity-80" />
         </div>

@@ -684,6 +684,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       setNetWorthHistory(dbNetWorthHistory);
       setIsUsingCachedData(false);
       setCacheUpdatedAt(new Date());
+      setIsAuthRequired(false); // Reset auth lock on successful DB state hydration
       setLoadStatus('success');
 
       // Write cache to IndexedDB
@@ -773,13 +774,26 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     }
   }, []);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (): Promise<void> => {
     if (portfolios.length === 0) {
       setLoadStatus('loading');
     }
     setLoadError('');
-    await mutateAssets();
-  }, [mutateAssets, portfolios.length]);
+    try {
+      await mutateAssets();
+      setIsAuthRequired(false);
+    } catch (err) {
+      console.error('[portfolio] load error:', err);
+      if (err instanceof AppApiError && err.code === 'auth') {
+        handleAuthExpired();
+      } else {
+        setLoadError(getFriendlyMessage(err));
+        if (portfolios.length === 0) {
+          setLoadStatus('error');
+        }
+      }
+    }
+  }, [mutateAssets, portfolios.length, handleAuthExpired]);
 
   // document visibilitychange listener to refresh SWR hook data on focus/resume
   useEffect(() => {
@@ -788,8 +802,8 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         const now = Date.now();
         if (now - lastRefreshRef.current < SWR_DEDUPING_INTERVAL) return;
         lastRefreshRef.current = now;
-        void load();
-        void refreshPrices();
+        load().catch((err) => console.warn('[portfolio] Visibility load failed:', err));
+        refreshPrices().catch((err) => console.warn('[portfolio] Visibility price refresh failed:', err));
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -813,6 +827,8 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       refreshTimeoutRef.current = setTimeout(async () => {
         try {
           await load();
+        } catch {
+          // Guard against unhandled promise rejection in timer callback
         } finally {
           const resolvers = refreshResolversRef.current;
           refreshResolversRef.current = [];

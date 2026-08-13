@@ -1,21 +1,23 @@
 import { SIPAccount } from '../types/portfolio';
 import { fetchAMFIScheme } from './amfiClient';
 import * as idb from 'idb-keyval';
+import { getElapsedMonthsStandard } from './rdUtils';
 
 /**
  * Returns the estimated total amount invested in the SIP.
  * Calculated as: monthly_sip * months elapsed since start_date.
  */
 export function getSIPInvestedAmount(account: SIPAccount): number {
+  if (!account) return 0;
+  const monthly = Number(account.monthly_sip);
+  if (isNaN(monthly) || monthly <= 0) return 0;
+
   const start = new Date(account.start_date);
-  if (isNaN(start.getTime())) return Number(account.monthly_sip);
-  
+  if (isNaN(start.getTime())) return monthly;
+
   const end = new Date();
-  const rawMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
-  const dayOfMonth = start.getDate();
-  const currentDayOfMonth = end.getDate();
-  const elapsed = rawMonths + (currentDayOfMonth >= dayOfMonth ? 1 : 0);
-  return Number(account.monthly_sip) * Math.max(0, elapsed);
+  const elapsed = getElapsedMonthsStandard(start, end);
+  return monthly * Math.max(0, elapsed);
 }
 
 const navCache = new Map<string, { value: number; name: string; fetchedAt: number }>();
@@ -29,7 +31,9 @@ export async function initNAVCache(): Promise<void> {
     if (saved) {
       const entries: [string, { value: number; name: string; fetchedAt: number }][] = JSON.parse(saved);
       for (const [k, v] of entries) {
-        navCache.set(k, v);
+        if (v && !isNaN(v.value)) {
+          navCache.set(k, v);
+        }
       }
     }
   } catch (err) {
@@ -38,25 +42,27 @@ export async function initNAVCache(): Promise<void> {
 }
 
 /**
- * Returns the current valuation of a SIP Mutual Fund.
- * Uses live NAV * units (or units_held) if available, falling back to fallback_valuation.
+ * Returns the current valuation of a SIP Mutual Fund safely.
  */
 export function getSIPEffectiveValue(account: SIPAccount, liveNav?: number): number {
+  if (!account) return 0;
   const units = Number(account.units || (account as { units_held?: number }).units_held || 0);
-  
-  const nav = liveNav !== undefined ? liveNav : account.liveNav;
-  if (nav && nav > 0) {
+  if (isNaN(units) || units <= 0) return 0;
+
+  const nav = liveNav !== undefined ? Number(liveNav) : Number(account.liveNav);
+  if (!isNaN(nav) && nav > 0) {
     return nav * units;
   }
-  
+
   if (account.mf_scheme_code) {
     const cached = navCache.get(account.mf_scheme_code);
-    if (cached && cached.value > 0) {
+    if (cached && !isNaN(cached.value) && cached.value > 0) {
       return cached.value * units;
     }
   }
-  
-  return Number(account.fallback_valuation) || 0;
+
+  const fallback = Number(account.fallback_valuation);
+  return !isNaN(fallback) && fallback > 0 ? fallback : 0;
 }
 
 export async function saveNAVCacheToIDB(): Promise<void> {

@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
 
 type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'what_if' | 'tax';
 
@@ -10,8 +10,14 @@ interface UseSwipeNavigationProps {
 export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavigationProps) {
   const touchStart = useRef({ x: 0, y: 0, time: 0 });
   const touchEnd = useRef({ x: 0, y: 0 });
+  const isMultiTouch = useRef(false);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length > 1) {
+      isMultiTouch.current = true;
+      return;
+    }
+    isMultiTouch.current = false;
     touchStart.current = {
       x: e.targetTouches[0].clientX,
       y: e.targetTouches[0].clientY,
@@ -24,6 +30,10 @@ export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavi
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length > 1) {
+      isMultiTouch.current = true;
+      return;
+    }
     touchEnd.current = {
       x: e.targetTouches[0].clientX,
       y: e.targetTouches[0].clientY,
@@ -31,35 +41,26 @@ export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavi
   }, []);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (isMultiTouch.current) return;
+
+    // Ignore swipe if user is actively selecting text on screen
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim().length > 0) {
+      return;
+    }
+
     const globalWin = window as unknown as { __lastShortcutTime?: number };
     const lastShortcut = globalWin.__lastShortcutTime || 0;
     if (Date.now() - lastShortcut < 300) {
       return;
     }
 
-    let target = e.target as HTMLElement | null;
-    let levels = 0;
-    while (target && levels < 6) {
-      const style = window.getComputedStyle(target);
-      const tagName = target.tagName.toLowerCase();
-      if (
-        style.overflowX === 'scroll' ||
-        style.overflowX === 'auto' ||
-        target.classList.contains('overflow-x-auto') ||
-        target.classList.contains('scroll-fade-right') ||
-        target.classList.contains('no-swipe') ||
-        tagName === 'table' ||
-        tagName === 'input' ||
-        tagName === 'button' ||
-        tagName === 'svg' ||
-        tagName === 'canvas' ||
-        target.closest('[role="dialog"]') ||
-        target.closest('[role="slider"]')
-      ) {
-        return; // Ignore swipe inside scrollable, interactive, slider, or dialog containers
-      }
-      target = target.parentElement;
-      levels++;
+    const target = e.target as HTMLElement | null;
+    if (target) {
+      const interactiveContainer = target.closest(
+        'input, select, textarea, button, table, canvas, svg, [role="dialog"], [role="slider"], .no-swipe, [data-no-swipe], .overflow-x-auto, .scroll-fade-right'
+      );
+      if (interactiveContainer) return;
     }
 
     const diffX = touchStart.current.x - touchEnd.current.x;
@@ -69,11 +70,11 @@ export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavi
     const absY = Math.abs(diffY);
     const velocity = durationMs > 0 ? absX / durationMs : 0;
 
-    // Strict intentional swipe criteria to prevent accidental tab switches:
-    // 1. Min horizontal distance: 130px (calibrated up from 90px)
+    // Intentional swipe criteria:
+    // 1. Min horizontal distance: 130px
     // 2. Max vertical drift: 45px
-    // 3. Dominant horizontal ratio: X movement must be at least 2.5x Y movement
-    // 4. Min swipe velocity: 0.4 px/ms
+    // 3. Dominant horizontal ratio: X movement >= 2.5x Y movement
+    // 4. Min velocity: 0.4 px/ms
     if (absX > 130 && absY < 45 && absX > absY * 2.5 && velocity > 0.4) {
       const tabOrder: AssetTab[] = ['home', 'stocks', 'fd', 'rd', 'sip', 'gold', 'real_estate', 'insurance', 'documents', 'what_if'];
       const currentIndex = tabOrder.indexOf(activeAsset);
@@ -90,10 +91,11 @@ export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavi
     }
   }, [activeAsset, setActiveAsset]);
 
-  return {
+  return useMemo(() => ({
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
-  };
+  }), [handleTouchStart, handleTouchMove, handleTouchEnd]);
 }
+
 export default useSwipeNavigation;

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 
 interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void> | void;
@@ -10,9 +10,18 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
   const [isRefreshing, setIsRefreshing] = useState(false);
   const touchStartY = useRef(0);
   const isPulling = useRef(false);
+  const rafId = useRef<number | null>(null);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (disabled || isRefreshing || window.scrollY > 0) return;
+
+    // Prevent PTR if user is scrolling inside an internal sub-container with scrollTop > 0
+    let target = e.target as HTMLElement | null;
+    while (target && target !== document.body) {
+      if (target.scrollTop > 0) return;
+      target = target.parentElement;
+    }
+
     touchStartY.current = e.targetTouches[0].clientY;
     isPulling.current = true;
   }, [disabled, isRefreshing]);
@@ -24,13 +33,22 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
     const diffY = currentY - touchStartY.current;
     
     if (diffY > 0) {
-      // Resistance formula: Math.min(100, Math.pow(pullDistance, 0.85) * 2.5)
       const rawDistance = Math.min(100, Math.pow(diffY, 0.85) * 2.5);
-      setPullDistance(rawDistance);
+      if (rafId.current === null) {
+        rafId.current = requestAnimationFrame(() => {
+          setPullDistance(rawDistance);
+          rafId.current = null;
+        });
+      }
     }
   }, [disabled, isRefreshing]);
 
   const handleTouchEnd = useCallback(async () => {
+    if (rafId.current !== null) {
+      cancelAnimationFrame(rafId.current);
+      rafId.current = null;
+    }
+
     if (!isPulling.current) return;
     isPulling.current = false;
     
@@ -47,11 +65,21 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
     }
   }, [pullDistance, isRefreshing, disabled, onRefresh]);
 
-  return {
+  const handleTouchCancel = useCallback(() => {
+    if (rafId.current !== null) {
+      cancelAnimationFrame(rafId.current);
+      rafId.current = null;
+    }
+    isPulling.current = false;
+    setPullDistance(0);
+  }, []);
+
+  return useMemo(() => ({
     isRefreshing,
     pullDistance,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
-  };
+    handleTouchCancel,
+  }), [isRefreshing, pullDistance, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel]);
 }

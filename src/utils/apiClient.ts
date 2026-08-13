@@ -39,6 +39,7 @@ let _cachedPinHash: string | null = null;
 
 export function clearApiSessionCache(): void {
   _cachedPinHash = null;
+  inflightRequests.clear();
 }
 
 async function buildHeaders(): Promise<Record<string, string>> {
@@ -63,10 +64,18 @@ async function buildHeaders(): Promise<Record<string, string>> {
 }
 
 function friendlyError(status: number, fallback: string): AppApiError {
-  if (status === 401) {
+  if (status === 401 || status === 403) {
     clearSessionVerification();
-    _cachedPinHash = null; // force re-derivation on next request after re-login
+    _cachedPinHash = null;
+    inflightRequests.clear();
     return new AppApiError('Session expired. Please enter your PIN again.', 'auth', {
+      status,
+      rawMessage: fallback,
+    });
+  }
+
+  if (status === 429) {
+    return new AppApiError('Too many requests. Please wait a moment and try again.', 'server', {
       status,
       rawMessage: fallback,
     });
@@ -134,8 +143,16 @@ export async function invokeFunction<T>(pathAndQuery: string, options: FunctionR
         throw friendlyError(res.status, message);
       }
 
-      if (!text) return null as T;
-      return JSON.parse(text) as T;
+      if (!text || !text.trim()) return null as T;
+      
+      try {
+        return JSON.parse(text) as T;
+      } catch {
+        throw new AppApiError('Invalid JSON response received from server.', 'server', {
+          status: res.status,
+          rawMessage: text,
+        });
+      }
     } catch (err) {
       if (err instanceof AppApiError) throw err;
       if (err instanceof DOMException && err.name === 'AbortError') {

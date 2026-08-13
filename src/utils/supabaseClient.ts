@@ -15,8 +15,12 @@ let supabaseInstance: SupabaseClient | null = null;
 export async function getSupabase(): Promise<SupabaseClient> {
   if (supabaseInstance) return supabaseInstance;
 
-  const { createClient } = await import('@supabase/supabase-js');
-
-  supabaseInstance = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  return supabaseInstance;
+  try {
+    const { createClient } = await import('@supabase/supabase-js');
+    supabaseInstance = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return supabaseInstance;
+  } catch (err) {
+    console.error('[SupabaseClient] Failed to initialize Supabase JS client:', err);
+    throw new Error('Failed to load Supabase client library. Please check network connection.');
+  }
 }

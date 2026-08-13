@@ -214,6 +214,10 @@ export default function AppShell() {
     ptr.handleTouchEnd();
   }, [swipeNav, ptr]);
 
+  const handleCombinedTouchCancel = useCallback(() => {
+    ptr.handleTouchCancel();
+  }, [ptr]);
+
   const portfolio = activePortfolio;
   const todayPnL = useMemo(() => estimateTodayPnL(portfolio, portfolios), [portfolio, portfolios]);
   const todayPnLPercent = useMemo(() => {
@@ -405,6 +409,7 @@ export default function AppShell() {
       onTouchStart={handleCombinedTouchStart}
       onTouchMove={handleCombinedTouchMove}
       onTouchEnd={handleCombinedTouchEnd}
+      onTouchCancel={handleCombinedTouchCancel}
       className="min-h-screen bg-[var(--app-background)] pb-safe-content md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden"
     >
       {/* Pull to refresh indicator */}

@@ -72,5 +72,6 @@ export async function setCustomPin(newPin: string): Promise<void> {
   const hash = await hashPin(newPin);
   localStorage.setItem(CUSTOM_HASH_KEY, hash);
   localStorage.setItem(CUSTOM_LENGTH_KEY, newPin.length.toString());
+  clearApiSessionCache(); // Flush cached PIN hash & inflight requests immediately
   markSessionVerified(hash);
 }
