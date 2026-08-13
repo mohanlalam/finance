@@ -161,10 +161,24 @@ export default function AppShell() {
   const isMobile = useIsMobile();
 
   const activeAsset = (asset as AssetTab) || (isMobile ? 'home' : 'stocks');
+  const assetTabSectionRef = useRef<HTMLDivElement>(null);
+
+  const scrollToAssetSection = useCallback(() => {
+    requestAnimationFrame(() => {
+      if (assetTabSectionRef.current) {
+        assetTabSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }, []);
 
   const setActiveAsset = useCallback((newAsset: AssetTab) => {
     navigate(`/${family || 'all'}/${newAsset}`);
-  }, [navigate, family]);
+    if (isMobile) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      scrollToAssetSection();
+    }
+  }, [navigate, family, isMobile, scrollToAssetSection]);
   const {
     quickAddTarget, setQuickAddTarget, clearQuickAddTarget,
     showAddModal, openAddModal, closeAddModal,
@@ -676,25 +690,32 @@ export default function AppShell() {
                 {activeTab === 'all' && (
                   <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
                     {[
-                      { label: 'Stocks', value: breakdown.stocks },
-                      { label: 'FDs', value: breakdown.fd },
-                      { label: 'RDs', value: breakdown.rd },
-                      { label: 'SIPs', value: breakdown.sip },
-                      { label: 'Gold', value: breakdown.gold },
-                      { label: 'Real Estate', value: breakdown.realEstate },
+                      { label: 'Stocks', value: breakdown.stocks, id: 'stocks' },
+                      { label: 'FDs', value: breakdown.fd, id: 'fd' },
+                      { label: 'RDs', value: breakdown.rd, id: 'rd' },
+                      { label: 'SIPs', value: breakdown.sip, id: 'sip' },
+                      { label: 'Gold', value: breakdown.gold, id: 'gold' },
+                      { label: 'Real Estate', value: breakdown.realEstate, id: 'real_estate' },
                     ].map((item) => (
-                      <div key={item.label} className="apple-card p-3 flex flex-col justify-between">
+                      <button
+                        key={item.label}
+                        onClick={() => setActiveAsset(item.id as AssetTab)}
+                        className="apple-card p-3 flex flex-col justify-between text-left hover:shadow-md transition-all duration-200 cursor-pointer focus:ring-2 focus:ring-[#007aff]"
+                      >
                         <span className="text-[10px] font-semibold text-[var(--text-secondary)]">{item.label}</span>
                         <p className="text-sm font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(item.value)}</p>
-                      </div>
+                      </button>
                     ))}
-                    <div className="apple-card p-3 flex flex-col justify-between">
+                    <button
+                      onClick={() => setActiveAsset('insurance')}
+                      className="apple-card p-3 flex flex-col justify-between text-left hover:shadow-md transition-all duration-200 cursor-pointer focus:ring-2 focus:ring-[#007aff]"
+                    >
                       <span className="text-[10px] font-semibold text-[var(--text-secondary)]">Insurance</span>
                       <div>
                         <p className="text-sm font-bold text-[var(--text-primary)] mt-1 tnum">{formatINR(breakdown.insuranceCover)}</p>
                         <p className="text-[9px] text-[var(--text-tertiary)] mt-0.5 tnum">{formatINR(breakdown.insurancePremium)}/yr premium</p>
                       </div>
-                    </div>
+                    </button>
                   </div>
                 )}
 
@@ -714,24 +735,26 @@ export default function AppShell() {
                 {/* Dashboard charts — only on family overview */}
                 {activeTab === 'all' && renderDashboardWidgets(false)}
 
-                {/* Stock holdings — always at the bottom */}
-                <SectionErrorBoundary sectionName="Asset Tab Content">
-                  <AssetTabContent
-                    activeAsset={effectiveAsset}
-                    visiblePortfolio={visiblePortfolio}
-                    portfolios={portfolios}
-                    priceStatus={priceStatus}
-                    onAddHoldingClick={openAddModal}
-                    onDeleteStock={tableDeleteHandler}
-                    onUpdateStock={tableUpdateHandler}
-                    onAddAsset={addAsset}
-                    onUpdateAsset={updateAsset}
-                    onDeleteAsset={deleteAsset}
-                    quickAddTarget={quickAddTarget}
-                    onQuickAddComplete={clearQuickAddTarget}
-                    portfolioOptions={portfolioOptionsForModal}
-                  />
-                </SectionErrorBoundary>
+                {/* Stock holdings & Asset Registries — always at the bottom */}
+                <div ref={assetTabSectionRef} id="asset-tab-content" className="scroll-mt-6">
+                  <SectionErrorBoundary sectionName="Asset Tab Content">
+                    <AssetTabContent
+                      activeAsset={effectiveAsset}
+                      visiblePortfolio={visiblePortfolio}
+                      portfolios={portfolios}
+                      priceStatus={priceStatus}
+                      onAddHoldingClick={openAddModal}
+                      onDeleteStock={tableDeleteHandler}
+                      onUpdateStock={tableUpdateHandler}
+                      onAddAsset={addAsset}
+                      onUpdateAsset={updateAsset}
+                      onDeleteAsset={deleteAsset}
+                      quickAddTarget={quickAddTarget}
+                      onQuickAddComplete={clearQuickAddTarget}
+                      portfolioOptions={portfolioOptionsForModal}
+                    />
+                  </SectionErrorBoundary>
+                </div>
               </div>
             </div>
           </>
