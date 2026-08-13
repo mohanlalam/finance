@@ -73,49 +73,55 @@ function MobileHomeSummary({
     return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? '#16a34a' : '#dc2626';
   }, [sparklineData]);
 
+  // Precalculate family member summaries to avoid un-memoized estimateTodayPnL in render loop
+  const memberSummaries = useMemo(() => {
+    if (!portfolios || portfolios.length === 0) return [];
+    return portfolios.map((p) => ({
+      ...p,
+      pTodayPnL: estimateTodayPnL(p, [p]),
+    }));
+  }, [portfolios]);
+
   const isTotalGain = summaryData.totalPnL >= 0;
   const isTodayGain = todayPnL >= 0;
 
   // Counts for each asset type
-  const stockCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.holdings?.length || 0;
-    return portfolios.reduce((sum, p) => sum + (p.holdings?.length || 0), 0);
+  const assetCounts = useMemo(() => {
+    if (activePortfolio) {
+      return {
+        stocks: activePortfolio.holdings?.length || 0,
+        fd: activePortfolio.fixedDeposits?.length || 0,
+        rd: activePortfolio.rdAccounts?.length || 0,
+        sip: activePortfolio.sipAccounts?.length || 0,
+        gold: activePortfolio.goldHoldings?.length || 0,
+        realEstate: activePortfolio.realEstate?.length || 0,
+        insurance: activePortfolio.insurances?.length || 0,
+        doc: activePortfolio.documents?.length || 0,
+      };
+    }
+    let stocks = 0, fd = 0, rd = 0, sip = 0, gold = 0, realEstate = 0, insurance = 0, doc = 0;
+    for (let i = 0; i < portfolios.length; i++) {
+      const p = portfolios[i];
+      stocks += p.holdings?.length || 0;
+      fd += p.fixedDeposits?.length || 0;
+      rd += p.rdAccounts?.length || 0;
+      sip += p.sipAccounts?.length || 0;
+      gold += p.goldHoldings?.length || 0;
+      realEstate += p.realEstate?.length || 0;
+      insurance += p.insurances?.length || 0;
+      doc += p.documents?.length || 0;
+    }
+    return { stocks, fd, rd, sip, gold, realEstate, insurance, doc };
   }, [activePortfolio, portfolios]);
 
-  const fdCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.fixedDeposits?.length || 0;
-    return portfolios.reduce((sum, p) => sum + (p.fixedDeposits?.length || 0), 0);
-  }, [activePortfolio, portfolios]);
-
-  const rdCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.rdAccounts?.length || 0;
-    return portfolios.reduce((sum, p) => sum + (p.rdAccounts?.length || 0), 0);
-  }, [activePortfolio, portfolios]);
-
-  const sipCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.sipAccounts?.length || 0;
-    return portfolios.reduce((sum, p) => sum + (p.sipAccounts?.length || 0), 0);
-  }, [activePortfolio, portfolios]);
-
-  const goldCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.goldHoldings?.length || 0;
-    return portfolios.reduce((sum, p) => sum + (p.goldHoldings?.length || 0), 0);
-  }, [activePortfolio, portfolios]);
-
-  const propertyCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.realEstate?.length || 0;
-    return portfolios.reduce((sum, p) => sum + (p.realEstate?.length || 0), 0);
-  }, [activePortfolio, portfolios]);
-
-  const insuranceCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.insurances?.length || 0;
-    return portfolios.reduce((sum, p) => sum + (p.insurances?.length || 0), 0);
-  }, [activePortfolio, portfolios]);
-
-  const docCount = useMemo(() => {
-    if (activePortfolio) return activePortfolio.documents?.length || 0;
-    return portfolios.reduce((sum, p) => sum + (p.documents?.length || 0), 0);
-  }, [activePortfolio, portfolios]);
+  const stockCount = assetCounts.stocks;
+  const fdCount = assetCounts.fd;
+  const rdCount = assetCounts.rd;
+  const sipCount = assetCounts.sip;
+  const goldCount = assetCounts.gold;
+  const propertyCount = assetCounts.realEstate;
+  const insuranceCount = assetCounts.insurance;
+  const docCount = assetCounts.doc;
 
   const totalAllocated = useMemo(() => {
     return breakdown.stocks + breakdown.fd + breakdown.rd + breakdown.sip + breakdown.gold + breakdown.realEstate;
@@ -238,14 +244,40 @@ function MobileHomeSummary({
           )}
         </div>
 
-        {/* Total & Today Returns Row */}
-        <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[var(--border-subtle)]">
+        {/* Net Worth Big Number */}
+        <div className="flex items-baseline justify-between gap-2 pt-0.5">
+          <div className="flex items-baseline gap-1 text-2xl font-extrabold text-[var(--text-primary)] tnum tracking-tight">
+            <span className="text-slate-400 dark:text-slate-500 font-medium text-lg">₹</span>
+            {isBalancesHidden ? (
+              <span aria-label="Amount hidden">••••••</span>
+            ) : (
+              <AnimatedNumber value={summaryData.totalCurrentValue} formatter={formatINR} />
+            )}
+          </div>
+          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold tnum shrink-0 ${
+            isTodayGain ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400'
+          }`}>
+            {isTodayGain ? <TrendingUp size={13} className="shrink-0" /> : <TrendingDown size={13} className="shrink-0" />}
+            <span>{isTodayGain ? '+' : ''}{formatPercent(todayPnLPercent, 1)} Today</span>
+          </div>
+        </div>
+
+        {/* Metric Grid: Invested | Total Return | Today's Return */}
+        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[var(--border-subtle)]">
+          {/* Invested */}
+          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40 min-w-0">
+            <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Invested</span>
+            <span className="text-xs font-extrabold text-[var(--text-primary)] tnum block truncate">
+              {isBalancesHidden ? <span aria-label="Amount hidden">••••••</span> : formatINR(summaryData.totalInvested)}
+            </span>
+          </div>
+
           {/* Total Return */}
           <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40 min-w-0">
             <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Total Return</span>
             <div className={`flex items-center gap-1 text-xs font-extrabold tnum min-w-0 ${isTotalGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
               {isTotalGain ? <TrendingUp size={13} className="shrink-0" /> : <TrendingDown size={13} className="shrink-0" />}
-              <span className="truncate">{isBalancesHidden ? '••••••' : <>{isTotalGain ? '+' : ''}{formatINR(summaryData.totalPnL)}</>}</span>
+              <span className="truncate">{isBalancesHidden ? <span aria-label="Amount hidden">••••••</span> : <>{isTotalGain ? '+' : ''}{formatINR(summaryData.totalPnL)}</>}</span>
               <span className="text-[10px] font-extrabold ml-auto shrink-0">({formatPercent(summaryData.totalPnLPercent, 1)})</span>
             </div>
           </div>
@@ -255,7 +287,7 @@ function MobileHomeSummary({
             <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Today's Return</span>
             <div className={`flex items-center gap-1 text-xs font-extrabold tnum min-w-0 ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
               {isTodayGain ? <TrendingUp size={13} className="shrink-0" /> : <TrendingDown size={13} className="shrink-0" />}
-              <span className="truncate">{isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}{formatINR(todayPnL)}</>}</span>
+              <span className="truncate">{isBalancesHidden ? <span aria-label="Amount hidden">••••••</span> : <>{isTodayGain ? '+' : ''}{formatINR(todayPnL)}</>}</span>
               <span className="text-[10px] font-extrabold ml-auto shrink-0">({formatPercent(todayPnLPercent, 1)})</span>
             </div>
           </div>
@@ -263,14 +295,14 @@ function MobileHomeSummary({
       </div>
 
       {/* ── Portfolio Member Breakdown ── */}
-      {activePortfolio === null && portfolios && portfolios.length > 0 && (
+      {activePortfolio === null && memberSummaries.length > 0 && (
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] p-3.5 shadow-xs space-y-2.5">
           <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block">
             Family Breakdown
           </span>
           <div className="space-y-2">
-            {portfolios.map((p) => {
-              const pTodayPnL = estimateTodayPnL(p, [p]);
+            {memberSummaries.map((p) => {
+              const pTodayPnL = p.pTodayPnL;
               const isGain = p.totalPnL >= 0;
               const isTodayGain = pTodayPnL >= 0;
               return (

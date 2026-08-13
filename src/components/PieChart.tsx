@@ -27,81 +27,97 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation' }
   const [hovered, setHovered] = useState<number | null>(null);
   const { isBalancesHidden } = usePrivacy();
 
-  let total: number;
-  let slices: Array<{ label: string; fullName: string; value: number; pct: number; color: string }>;
+  // 1. Memoize Slices Computation & Single-pass Sorting
+  const { total, slices } = React.useMemo(() => {
+    if (customSlices && customSlices.length > 0) {
+      const sum = customSlices.reduce((s, x) => s + x.value, 0);
+      const filtered = customSlices
+        .filter((s) => s.value > 0)
+        .map((s) => ({
+          label: s.label,
+          fullName: s.fullName,
+          value: s.value,
+          pct: sum > 0 ? (s.value / sum) * 100 : 0,
+          color: s.color,
+        }));
+      return { total: sum, slices: filtered };
+    }
 
-  if (customSlices && customSlices.length > 0) {
-    total = customSlices.reduce((s, x) => s + x.value, 0);
-    slices = customSlices
-      .filter((s) => s.value > 0)
-      .map((s) => ({
-        label: s.label,
-        fullName: s.fullName,
-        value: s.value,
-        pct: total > 0 ? (s.value / total) * 100 : 0,
-        color: s.color,
-      }));
-  } else {
     const holdingsList = holdings ?? [];
-    total = holdingsList.reduce((s, h) => s + h.currentValue, 0);
-    const top10 = [...holdingsList].sort((a, b) => b.currentValue - a.currentValue).slice(0, 10);
-    const otherValue = [...holdingsList]
-      .sort((a, b) => b.currentValue - a.currentValue)
-      .slice(10)
-      .reduce((s, h) => s + h.currentValue, 0);
+    const sum = holdingsList.reduce((s, h) => s + h.currentValue, 0);
 
-    slices = top10.map((h, i) => ({
+    // Single-pass sort
+    const sorted = [...holdingsList].sort((a, b) => b.currentValue - a.currentValue);
+    const top10 = sorted.slice(0, 10);
+    const otherValue = sorted.slice(10).reduce((s, h) => s + h.currentValue, 0);
+
+    const resultSlices = top10.map((h, i) => ({
       label: h.ticker,
       fullName: h.stockName,
       value: h.currentValue,
-      pct: total > 0 ? (h.currentValue / total) * 100 : 0,
+      pct: sum > 0 ? (h.currentValue / sum) * 100 : 0,
       color: COLORS[i % COLORS.length],
     }));
 
     if (otherValue > 0) {
-      slices.push({
+      resultSlices.push({
         label: 'Others',
         fullName: 'Other Holdings',
         value: otherValue,
-        pct: total > 0 ? (otherValue / total) * 100 : 0,
+        pct: sum > 0 ? (otherValue / sum) * 100 : 0,
         color: '#8e8e93',
       });
     }
-  }
 
+    return { total: sum, slices: resultSlices };
+  }, [holdings, customSlices]);
+
+  // 2. Memoize Trigonometric SVG Path Geometry
   const cx = 120;
   const cy = 120;
   const r = 100;
   const innerR = 58;
 
-  let cumAngle = -Math.PI / 2;
+  const paths = React.useMemo(() => {
+    let cumAngle = -Math.PI / 2;
+    return slices.map((slice, i) => {
+      const angle = (slice.pct / 100) * 2 * Math.PI;
+      const startAngle = cumAngle;
+      const endAngle = cumAngle + angle;
+      cumAngle = endAngle;
 
-  const paths = slices.map((slice, i) => {
-    const angle = (slice.pct / 100) * 2 * Math.PI;
-    const startAngle = cumAngle;
-    const endAngle = cumAngle + angle;
-    cumAngle = endAngle;
+      const x1 = cx + r * Math.cos(startAngle);
+      const y1 = cy + r * Math.sin(startAngle);
+      const x2 = cx + r * Math.cos(endAngle);
+      const y2 = cy + r * Math.sin(endAngle);
+      const ix1 = cx + innerR * Math.cos(startAngle);
+      const iy1 = cy + innerR * Math.sin(startAngle);
+      const ix2 = cx + innerR * Math.cos(endAngle);
+      const iy2 = cy + innerR * Math.sin(endAngle);
 
-    const x1 = cx + r * Math.cos(startAngle);
-    const y1 = cy + r * Math.sin(startAngle);
-    const x2 = cx + r * Math.cos(endAngle);
-    const y2 = cy + r * Math.sin(endAngle);
-    const ix1 = cx + innerR * Math.cos(startAngle);
-    const iy1 = cy + innerR * Math.sin(startAngle);
-    const ix2 = cx + innerR * Math.cos(endAngle);
-    const iy2 = cy + innerR * Math.sin(endAngle);
+      const largeArc = angle > Math.PI ? 1 : 0;
+      const midAngle = startAngle + angle / 2;
 
-    const largeArc = angle > Math.PI ? 1 : 0;
-    const isHovered = hovered === i;
-    const scale = isHovered ? 1.04 : 1;
-    const midAngle = startAngle + angle / 2;
-    const offsetX = isHovered ? Math.cos(midAngle) * 4 : 0;
-    const offsetY = isHovered ? Math.sin(midAngle) * 4 : 0;
+      return {
+        baseProps: { cx, cy, r, innerR, x1, y1, x2, y2, ix1, iy1, ix2, iy2, largeArc, midAngle },
+        color: slice.color,
+        i,
+      };
+    });
+  }, [slices]);
 
-    const d = `M ${ix1 + offsetX} ${iy1 + offsetY} L ${x1 + offsetX} ${y1 + offsetY} A ${r * scale} ${r * scale} 0 ${largeArc} 1 ${x2 + offsetX} ${y2 + offsetY} L ${ix2 + offsetX} ${iy2 + offsetY} A ${innerR} ${innerR} 0 ${largeArc} 0 ${ix1 + offsetX} ${iy1 + offsetY} Z`;
+  const computedPaths = React.useMemo(() => {
+    return paths.map(({ baseProps, color, i }) => {
+      const isHovered = hovered === i;
+      const scale = isHovered ? 1.04 : 1;
+      const offsetX = isHovered ? Math.cos(baseProps.midAngle) * 4 : 0;
+      const offsetY = isHovered ? Math.sin(baseProps.midAngle) * 4 : 0;
 
-    return { d, color: slice.color, i };
-  });
+      const d = `M ${baseProps.ix1 + offsetX} ${baseProps.iy1 + offsetY} L ${baseProps.x1 + offsetX} ${baseProps.y1 + offsetY} A ${baseProps.r * scale} ${baseProps.r * scale} 0 ${baseProps.largeArc} 1 ${baseProps.x2 + offsetX} ${baseProps.y2 + offsetY} L ${baseProps.ix2 + offsetX} ${baseProps.iy2 + offsetY} A ${baseProps.innerR} ${baseProps.innerR} 0 ${baseProps.largeArc} 0 ${baseProps.ix1 + offsetX} ${baseProps.iy1 + offsetY} Z`;
+
+      return { d, color, i };
+    });
+  }, [paths, hovered]);
 
   const hoverSlice = hovered !== null ? slices[hovered] : null;
 
@@ -123,7 +139,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation' }
               aria-label={`${title} donut chart showing ${slices.length} segments totalling ${isBalancesHidden ? 'hidden' : formatINR(total)}`}
             >
               <title>{title}</title>
-              {paths.map(({ d, color, i }) => (
+              {computedPaths.map(({ d, color, i }) => (
                 <path
                   key={i}
                   d={d}

@@ -16,87 +16,87 @@ export function calculateCAGR(invested: number, current: number, years: number):
 }
 
 /**
- * Helper to solve XIRR using Newton-Raphson with Bisection fallback
+ * Optimized XIRR solver: Precomputes timestamp offsets to eliminate
+ * Date parsing completely from Newton-Raphson & Bisection loops.
  */
 export function calculateXIRR(cashflows: CashFlow[]): number {
   if (cashflows.length < 2) return 0;
 
-  // Guard against same-sign cashflows
   let hasPositive = false;
   let hasNegative = false;
-  for (const flow of cashflows) {
-    if (flow.amount > 0) hasPositive = true;
-    if (flow.amount < 0) hasNegative = true;
+  for (let i = 0; i < cashflows.length; i++) {
+    if (cashflows[i].amount > 0) hasPositive = true;
+    if (cashflows[i].amount < 0) hasNegative = true;
   }
-  if (!hasPositive || !hasNegative) {
-    return 0;
+  if (!hasPositive || !hasNegative) return 0;
+
+  // Pre-parse timestamps ONCE
+  const parsed = new Array<{ time: number; amount: number }>(cashflows.length);
+  for (let i = 0; i < cashflows.length; i++) {
+    parsed[i] = { time: new Date(cashflows[i].date).getTime(), amount: cashflows[i].amount };
   }
 
-  // Sort cashflows chronologically
-  const flows = [...cashflows].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
+  // Sort by date
+  parsed.sort((a, b) => a.time - b.time);
 
-  const d1 = new Date(flows[0].date).getTime();
+  const t0 = parsed[0].time;
+  const count = parsed.length;
+  const amounts = new Float64Array(count);
+  const years = new Float64Array(count);
 
-  // Helper functions for equation and its derivative
+  const MS_PER_YEAR = 365 * 24 * 3600 * 1000;
+  for (let i = 0; i < count; i++) {
+    amounts[i] = parsed[i].amount;
+    years[i] = (parsed[i].time - t0) / MS_PER_YEAR;
+  }
+
+  // Pre-allocated equations operating on raw Float64Arrays
   const f = (r: number): number => {
     let sum = 0;
-    for (const flow of flows) {
-      const di = new Date(flow.date).getTime();
-      const years = (di - d1) / (365 * 24 * 3600 * 1000);
-      sum += flow.amount / Math.pow(1 + r, years);
+    const base = 1 + r;
+    for (let i = 0; i < count; i++) {
+      sum += amounts[i] / Math.pow(base, years[i]);
     }
     return sum;
   };
 
   const df = (r: number): number => {
     let sum = 0;
-    for (const flow of flows) {
-      const di = new Date(flow.date).getTime();
-      const years = (di - d1) / (365 * 24 * 3600 * 1000);
-      sum -= years * flow.amount / Math.pow(1 + r, years + 1);
+    const base = 1 + r;
+    for (let i = 0; i < count; i++) {
+      sum -= (years[i] * amounts[i]) / Math.pow(base, years[i] + 1);
     }
     return sum;
   };
 
-  // Try Newton-Raphson method
-  let r = 0.1; // initial guess (10% return)
+  let r = 0.1;
   const epsilon = 1e-6;
   const maxIterations = 100;
 
   for (let i = 0; i < maxIterations; i++) {
     const y = f(r);
     const dy = df(r);
-    if (Math.abs(dy) < 1e-12) break; // Division by zero check
-    
+    if (Math.abs(dy) < 1e-12) break;
+
     const rNext = r - y / dy;
     if (Math.abs(rNext - r) < epsilon) {
-      // Validate result is within sane boundaries
-      if (rNext > -0.999 && rNext < 10.0) {
-        return rNext;
-      }
-      break; // Exit loop on out-of-bounds convergence to allow bisection solver to run
+      if (rNext > -0.999 && rNext < 10.0) return rNext;
+      break;
     }
     r = rNext;
   }
 
-  // Fallback to Bisection method if Newton-Raphson didn't converge
+  // Bisection fallback operating cleanly without Date creation
   let low = -0.99;
   let high = 10.0;
   let yLow = f(low);
   let yHigh = f(high);
-  
+
   if (yLow * yHigh < 0) {
     for (let i = 0; i < 100; i++) {
       const mid = (low + high) / 2;
       const yMid = f(mid);
-      
-      if (Math.abs(yMid) < epsilon) {
-        return mid;
-      }
-      
-      // Check signs to narrow interval
+      if (Math.abs(yMid) < epsilon) return mid;
       if (yMid * yLow < 0) {
         high = mid;
         yHigh = yMid;
@@ -107,26 +107,26 @@ export function calculateXIRR(cashflows: CashFlow[]): number {
     }
   }
 
-  return 0; // bisection could not bracket or converge, return 0
+  return 0;
 }
 
-/**
- * Calculates weighted average age in years for all investments in a portfolio
- */
+/** Optimized weighted age calculation with single Date.now() reference */
 export function calculateWeightedAge(portfolio: Portfolio): number {
   let weightedTimeSum = 0;
   let totalInvested = 0;
-  const now = new Date().getTime();
+  const now = Date.now();
+  const MS_PER_YEAR = 365 * 24 * 3600 * 1000;
 
   const processDate = (startDateStr?: string): number | null => {
     if (!startDateStr) return null;
     const start = new Date(startDateStr).getTime();
     if (isNaN(start)) return null;
-    return Math.max(0, (now - start) / (365 * 24 * 3600 * 1000));
+    return Math.max(0, (now - start) / MS_PER_YEAR);
   };
 
-  // Process FDs
-  for (const fd of portfolio.fixedDeposits) {
+  const fds = portfolio.fixedDeposits || [];
+  for (let i = 0; i < fds.length; i++) {
+    const fd = fds[i];
     const age = processDate(fd.start_date) ?? 0;
     weightedTimeSum += fd.principal_amount * age;
     totalInvested += fd.principal_amount;

@@ -5,13 +5,17 @@ import { compoundValue } from './mathUtils';
  * Returns the total amount actually invested in a Recurring Deposit.
  */
 export function getRDInvestedAmount(account: RDAccount): number {
-  if (account.contributions) {
-    return account.contributions.reduce((sum, c) => sum + Number(c.amount), 0);
+  if (account.contributions && account.contributions.length > 0) {
+    let sum = 0;
+    for (let i = 0; i < account.contributions.length; i++) {
+      sum += Number(account.contributions[i].amount) || 0;
+    }
+    return sum;
   }
   const startDate = new Date(account.start_date);
   const now = new Date();
   const elapsedMonths = Math.max(0, (now.getFullYear() - startDate.getFullYear()) * 12 + now.getMonth() - startDate.getMonth());
-  return elapsedMonths * Number(account.monthly_deposit);
+  return elapsedMonths * Number(account.monthly_deposit || 0);
 }
 
 /**
@@ -40,11 +44,12 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
     // If contributions exist, compound each contribution from its payment date
     if (account.contributions && account.contributions.length > 0) {
       let total = 0;
-      for (const c of account.contributions) {
-        const cDate = new Date(c.date);
-        if (isNaN(cDate.getTime())) continue;
-        const diff = end.getTime() - cDate.getTime();
-        const remYears = diff / (1000 * 3600 * 24 * 365.25);
+      const endTime = end.getTime();
+      for (let i = 0; i < account.contributions.length; i++) {
+        const c = account.contributions[i];
+        const cTime = new Date(c.date).getTime();
+        if (isNaN(cTime)) continue;
+        const remYears = (endTime - cTime) / (1000 * 3600 * 24 * 365.25);
         if (remYears >= 0) {
           total += compoundValue(Number(c.amount), r, 4, remYears);
         } else {
@@ -53,11 +58,13 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
       }
       return total;
     } else {
-      // Default behavior: assume standard monthly deposits
+      // Precompute compounding step factor (1 + r/400)^(1/3) per month to eliminate Math.pow in loop
+      const monthlyRateFactor = Math.pow(1 + r / 400, 1 / 3);
       let total = 0;
+      let factor = monthlyRateFactor;
       for (let m = 0; m < totalMonths; m++) {
-        const remainingYears = (totalMonths - m) / 12;
-        total += compoundValue(p, r, 4, remainingYears);
+        total += p * factor;
+        factor *= monthlyRateFactor;
       }
       return total > 0 ? total : p;
     }

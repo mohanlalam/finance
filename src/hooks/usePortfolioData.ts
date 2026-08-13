@@ -397,7 +397,12 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         }
       });
     });
-    mutationQueue.current = nextPromise.catch(() => {});
+
+    mutationQueue.current = nextPromise.catch(() => {}).finally(() => {
+      if (mutationQueue.current === nextPromise) {
+        mutationQueue.current = Promise.resolve();
+      }
+    });
     return nextPromise;
   }, []);
 

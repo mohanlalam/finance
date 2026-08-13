@@ -39,6 +39,15 @@ function SummaryCards({
   const isGain = totalPnL >= 0;
   const isTodayGain = todayPnL !== undefined ? todayPnL >= 0 : true;
 
+  const memberBreakdowns = React.useMemo(() => {
+    if (!portfolios || portfolios.length === 0) return [];
+    return portfolios.map((p) => ({
+      id: p.id,
+      label: p.label,
+      todayPnL: estimateTodayPnL(p, [p]),
+    }));
+  }, [portfolios]);
+
   const sparklineData = React.useMemo(() => {
     if (!netWorthHistory || netWorthHistory.length === 0) return [];
     return netWorthHistory.slice(-7).map((snap) => snap.total_value);
@@ -203,16 +212,15 @@ function SummaryCards({
 
             {activePortfolio === null && portfolios && portfolios.length > 0 && (
               <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-[10px] font-medium text-[var(--text-secondary)]">
-                {portfolios.map((p, idx) => {
-                  const pnl = estimateTodayPnL(p, [p]);
-                  const localTodayGain = pnl >= 0;
+                {memberBreakdowns.map((p, idx) => {
+                  const localTodayGain = p.todayPnL >= 0;
                   return (
                     <span key={p.id} className="flex items-center gap-0.5">
                       <span>{p.label}:</span>
                       <span className={`font-bold tnum ${localTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                        {isBalancesHidden ? '••••••' : <>{localTodayGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
+                        {isBalancesHidden ? '••••••' : <>{localTodayGain ? '+' : ''}<AnimatedNumber value={p.todayPnL} formatter={formatINR} /></>}
                       </span>
-                      {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
+                      {idx < memberBreakdowns.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
                     </span>
                   );
                 })}

@@ -22,45 +22,84 @@ export function calcPnLPercent(holdings: Holding[]): number {
   return inv > 0 ? (pnl / inv) * 100 : 0;
 }
 
-/** Compute the portfolio-level stock totals from holdings */
+/** Compute the portfolio-level stock totals from holdings in a single pass */
 export function holdingsTotals(holdings: Holding[]) {
-  const totalInvested = calcTotalInvested(holdings);
-  const totalCurrentValue = calcTotalCurrentValue(holdings);
+  let totalInvested = 0;
+  let totalCurrentValue = 0;
+  for (let i = 0; i < holdings.length; i++) {
+    totalInvested += holdings[i].amountInvested || 0;
+    totalCurrentValue += holdings[i].currentValue || 0;
+  }
   const totalPnL = totalCurrentValue - totalInvested;
   const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
   return { totalInvested, totalCurrentValue, totalPnL, totalPnLPercent };
 }
 
-/** Compute asset class breakdown across portfolios */
+/** Compute asset class breakdown across portfolios in a SINGLE PASS */
 export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null) {
+  let stocks = 0;
+  let fd = 0;
+  let rd = 0;
+  let sip = 0;
+  let gold = 0;
+  let realEstate = 0;
+  let insuranceCover = 0;
+  let insurancePremium = 0;
+
   const target = scope ? [scope] : portfolios;
-  const stocks = target.reduce((s, p) => s + p.stocksValue, 0);
-  const fd = target.reduce((s, p) => s + p.fdValue, 0);
-  const rd = target.reduce((s, p) => s + p.rdValue, 0);
-  const sip = target.reduce((s, p) => s + p.sipValue, 0);
-  const gold = target.reduce((s, p) => s + p.goldValue, 0);
-  const realEstate = target.reduce((s, p) => s + p.realEstateValue, 0);
-  const insuranceCover = target.reduce((s, p) => s + (p.insurances || []).reduce((a, i) => a + Number(i.sum_assured || 0), 0), 0);
-  const insurancePremium = target.reduce((s, p) => s + (p.insurances || []).reduce((a, i) => a + Number(i.premium_amount || 0), 0), 0);
-  
+  for (let i = 0; i < target.length; i++) {
+    const p = target[i];
+    stocks += p.stocksValue || 0;
+    fd += p.fdValue || 0;
+    rd += p.rdValue || 0;
+    sip += p.sipValue || 0;
+    gold += p.goldValue || 0;
+    realEstate += p.realEstateValue || 0;
+
+    const ins = p.insurances;
+    if (ins) {
+      for (let j = 0; j < ins.length; j++) {
+        insuranceCover += Number(ins[j].sum_assured || 0);
+        insurancePremium += Number(ins[j].premium_amount || 0);
+      }
+    }
+  }
+
   return { stocks, fd, rd, sip, gold, realEstate, insuranceCover, insurancePremium };
 }
 
-/** Estimate today's P&L from intraday movement */
+/** Estimate today's P&L from intraday movement without array allocations */
 export function estimateTodayPnL(portfolio: Portfolio | null, all: Portfolio[]): number {
-  const holdings = portfolio ? (portfolio.holdings || []) : all.flatMap((p) => p.holdings || []);
-  return holdings.reduce((sum, h) => {
-    // Derive yesterday's closing value, then compute today's absolute change
-    const factor = 1 + h.todayPnLPercent / 100;
-    const yesterdayValue = factor !== 0 ? h.currentValue / factor : h.currentValue;
-    return sum + (h.currentValue - yesterdayValue);
-  }, 0);
+  let sum = 0;
+  if (portfolio) {
+    const holdings = portfolio.holdings || [];
+    for (let i = 0; i < holdings.length; i++) {
+      const h = holdings[i];
+      const factor = 1 + h.todayPnLPercent / 100;
+      const yesterdayValue = factor !== 0 ? h.currentValue / factor : h.currentValue;
+      sum += h.currentValue - yesterdayValue;
+    }
+  } else {
+    for (let i = 0; i < all.length; i++) {
+      const holdings = all[i].holdings || [];
+      for (let j = 0; j < holdings.length; j++) {
+        const h = holdings[j];
+        const factor = 1 + h.todayPnLPercent / 100;
+        const yesterdayValue = factor !== 0 ? h.currentValue / factor : h.currentValue;
+        sum += h.currentValue - yesterdayValue;
+      }
+    }
+  }
+  return sum;
 }
 
 /** Get a specific portfolio by name */
 export function getPortfolioByName(portfolios: Portfolio[], name: string): Portfolio | null {
   if (name === 'all') return null;
-  return portfolios.find((p) => p.name === name) ?? null;
+  for (let i = 0; i < portfolios.length; i++) {
+    if (portfolios[i].name === name) return portfolios[i];
+  }
+  return null;
 }
 
 
