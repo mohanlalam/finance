@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, X } from './icons/AppIcons';
 
+type FabPosition = 'right' | 'center' | 'left';
+
 interface FloatingAddMenuProps {
   onAddStock: () => void;
   onAddAsset: (type: 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
@@ -9,7 +11,21 @@ interface FloatingAddMenuProps {
 
 export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = false }: FloatingAddMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState<FabPosition>(() => {
+    try {
+      const saved = localStorage.getItem('finance_fab_position');
+      if (saved === 'left' || saved === 'center' || saved === 'right') return saved;
+    } catch { /* ignore */ }
+    return 'right'; // Default to right side to avoid blocking center text
+  });
   const fabButtonRef = useRef<HTMLButtonElement>(null);
+
+  const changePosition = (newPos: FabPosition) => {
+    setPosition(newPos);
+    try {
+      localStorage.setItem('finance_fab_position', newPos);
+    } catch { /* ignore */ }
+  };
 
   // Close & restore focus on Escape key
   useEffect(() => {
@@ -63,6 +79,18 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
     },
   ];
 
+  const getPositionClasses = () => {
+    switch (position) {
+      case 'left':
+        return 'left-2 right-auto items-start';
+      case 'center':
+        return 'left-0 right-0 items-center';
+      case 'right':
+      default:
+        return 'right-2 left-auto items-end';
+    }
+  };
+
   return (
     <div className="md:hidden">
       {/* Backdrop */}
@@ -78,7 +106,7 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
       )}
 
       {/* Floating Menu Container with Safe Area Spacing */}
-      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-0 sm:right-[calc(1rem+env(safe-area-inset-right,0px))] left-0 sm:left-auto z-50 flex flex-col items-center sm:items-end gap-3 pointer-events-none px-3 sm:px-0">
+      <div className={`fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] z-50 flex flex-col gap-3 pointer-events-none px-3 ${getPositionClasses()}`}>
         {/* Categorized Quick-Add Card */}
         {isOpen && (
           <div
@@ -87,16 +115,45 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
             aria-label="Quick Add Asset Menu"
             className="pointer-events-auto w-full sm:w-80 max-h-[75vh] overflow-y-auto bg-[var(--surface)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl shadow-2xl p-4 mb-2 space-y-3 pb-safe sm:pb-4"
           >
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)] gap-2">
+              <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 Quick Add Asset
               </span>
+
+              {/* Position Switcher Controls */}
+              <div className="flex items-center gap-1 bg-[var(--surface-secondary)] p-0.5 rounded-lg text-[10px]">
+                <button
+                  onClick={() => changePosition('left')}
+                  className={`px-1.5 py-0.5 rounded font-bold transition-colors ${position === 'left' ? 'bg-blue-600 text-white' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                  title="Move button to Left"
+                  aria-label="Position button on left"
+                >
+                  Left ↙
+                </button>
+                <button
+                  onClick={() => changePosition('center')}
+                  className={`px-1.5 py-0.5 rounded font-bold transition-colors ${position === 'center' ? 'bg-blue-600 text-white' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                  title="Move button to Center"
+                  aria-label="Position button in center"
+                >
+                  Center ⬇
+                </button>
+                <button
+                  onClick={() => changePosition('right')}
+                  className={`px-1.5 py-0.5 rounded font-bold transition-colors ${position === 'right' ? 'bg-blue-600 text-white' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                  title="Move button to Right"
+                  aria-label="Position button on right"
+                >
+                  Right ↘
+                </button>
+              </div>
+
               <button
                 onClick={() => {
                   setIsOpen(false);
                   fabButtonRef.current?.focus();
                 }}
-                className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 ios-press transition-colors"
+                className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 ios-press transition-colors shrink-0"
                 aria-label="Close add menu"
               >
                 <X size={18} />

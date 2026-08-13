@@ -331,8 +331,9 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 ### Mobile Floating Add Menu (FAB & Action Sheet)
 
 * Component: `FloatingAddMenu.tsx`
-* Layout: Triggered via the central bottom nav FAB button. Pops up a glassmorphic bottom action sheet presenting all asset entry types (Stock, Fixed Deposit, RD, Mutual Fund SIP, Gold, Real Estate, Insurance Policy, Document).
-* State Visibility: Automatically hidden when `isAnyModalOpen` is true (managed via [`useModalState.ts`](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useModalState.ts)).
+* Layout: Triggered via the mobile FAB button. Pops up a glassmorphic action sheet presenting all asset entry types (Stock, Fixed Deposit, RD, Mutual Fund SIP, Gold, Real Estate, Insurance Policy, Document).
+* Position Customization: Features customizable button positioning (`'right'` | `'center'` | `'left'`) with persistent `localStorage` storage (`finance_fab_position`). Defaulted to **Right side** (`right-2 items-end`) to prevent blocking center card titles and values. Includes an interactive position switcher pill (`[ Left ↙ | Center ⬇ | Right ↘ ]`) inside the menu header bar for instant toggling.
+* State Visibility: Automatically hidden when `isAnyModalOpen` is true (managed via [`useModalState.ts`](src/hooks/useModalState.ts)).
 
 ### Mobile Alerts Drawer & Page
 
