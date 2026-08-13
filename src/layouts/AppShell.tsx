@@ -16,6 +16,7 @@ import MobileHomeSummary from '../components/MobileHomeSummary';
 import MobileAlertsView from '../components/MobileAlertsView';
 import DesktopSidebar from './DesktopSidebar';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { QuickAccessShortcuts } from '../components/ui/QuickAccessShortcuts';
 
 // Lazy loaded modals to keep initial bundle lightweight
 const AddHoldingModal = React.lazy(() => import('../components/AddHoldingModal'));
@@ -576,6 +577,11 @@ export default function AppShell() {
                 )}
 
                 {renderDashboardWidgets(true)}
+
+                <QuickAccessShortcuts
+                  activeAsset={activeAsset}
+                  onSelectAsset={setActiveAsset}
+                />
               </div>
             ) : (
               <div className="space-y-4">
@@ -741,6 +747,12 @@ export default function AppShell() {
 
                 {/* Dashboard charts — only on family overview */}
                 {activeTab === 'all' && renderDashboardWidgets(false)}
+
+                {/* 10-Asset Quick Access Shortcut Bar */}
+                <QuickAccessShortcuts
+                  activeAsset={effectiveAsset}
+                  onSelectAsset={setActiveAsset}
+                />
 
                 {/* Stock holdings & Asset Registries — always at the bottom */}
                 <div ref={assetTabSectionRef} id="asset-tab-content" className="scroll-mt-24">
