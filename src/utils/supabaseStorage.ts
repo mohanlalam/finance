@@ -1,15 +1,17 @@
-const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? '';
-const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? '';
+function sanitizeEnv(val: string | undefined): string {
+  if (!val) return '';
+  return val.trim().replace(/^["']|["']$/g, '').trim();
+}
+
+const SUPABASE_URL = sanitizeEnv(import.meta.env.VITE_SUPABASE_URL as string | undefined).replace(/\/+$/, '');
+const SUPABASE_ANON_KEY = sanitizeEnv(import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined);
 
 function getAuthHeaders(contentType?: string): Record<string, string> {
   const headers: Record<string, string> = {
     apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    'x-upsert': 'true',
   };
-  // Supabase Storage strictly validates Authorization Bearer as a compact JWS (JWT).
-  // Only include Authorization header if the key is a valid 3-part JWT (e.g. eyJ...).
-  if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.startsWith('eyJ') && SUPABASE_ANON_KEY.split('.').length === 3) {
-    headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
-  }
   if (contentType) {
     headers['Content-Type'] = contentType;
   }

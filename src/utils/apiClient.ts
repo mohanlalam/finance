@@ -1,7 +1,12 @@
 import { clearSessionVerification, ensureHashedPin } from './auth';
 
-const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? '';
-const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? '';
+function sanitizeEnv(val: string | undefined): string {
+  if (!val) return '';
+  return val.trim().replace(/^["']|["']$/g, '').trim();
+}
+
+const SUPABASE_URL = sanitizeEnv(import.meta.env.VITE_SUPABASE_URL as string | undefined).replace(/\/+$/, '');
+const SUPABASE_ANON_KEY = sanitizeEnv(import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined);
 const REQUEST_TIMEOUT_MS = 15000;
 
 export class AppApiError extends Error {
@@ -56,7 +61,7 @@ async function buildHeaders(): Promise<Record<string, string>> {
     headers['X-App-Pin'] = hashedPin;
   }
 
-  if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.startsWith('eyJ') && SUPABASE_ANON_KEY.split('.').length === 3) {
+  if (SUPABASE_ANON_KEY) {
     headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
   }
 
