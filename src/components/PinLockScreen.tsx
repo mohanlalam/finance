@@ -79,6 +79,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
 
   const handleClear = useCallback(() => {
     if (success || isVerifyingRef.current) return;
+    try { navigator.vibrate?.(8); } catch { /* ignore */ }
     pinRef.current = '';
     setPin('');
     setError('');
@@ -86,6 +87,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
 
   const handleForgotPin = useCallback(() => {
     if (success) return;
+    try { navigator.vibrate?.(15); } catch { /* ignore */ }
     clearCustomPin();
     pinRef.current = '';
     setPin('');
@@ -94,6 +96,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
 
   const handleBackspace = useCallback(() => {
     if (success || isVerifyingRef.current) return;
+    try { navigator.vibrate?.(8); } catch { /* ignore */ }
     const nextPin = pinRef.current.slice(0, -1);
     pinRef.current = nextPin;
     setPin(nextPin);
@@ -106,6 +109,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     const currentPin = pinRef.current;
     if (currentPin.length >= pinLength) return;
 
+    try { navigator.vibrate?.(10); } catch { /* ignore */ }
     const nextPin = currentPin + num;
     pinRef.current = nextPin;
     setPin(nextPin);

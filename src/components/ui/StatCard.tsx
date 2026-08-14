@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Card } from './Card';
 import { Skeleton } from './Skeleton';
 import { Tooltip } from './Tooltip';
@@ -57,15 +57,15 @@ export function StatCard({
     return (
       <Card padding="md" className={`flex flex-col justify-between min-h-[140px] ${className}`}>
         <div className="flex items-center justify-between">
-          <Skeleton width="45%" height="16px" rounded="4px" />
-          <Skeleton width="32px" height="32px" rounded="8px" />
+          <Skeleton width="45%" height="16px" className="rounded-md" />
+          <Skeleton width="32px" height="32px" className="rounded-md" />
         </div>
         <div className="my-2">
-          <Skeleton width="70%" height="28px" rounded="6px" />
+          <Skeleton width="70%" height="28px" className="rounded-md" />
         </div>
         <div className="flex items-center gap-2">
-          <Skeleton width="30%" height="18px" rounded="12px" />
-          <Skeleton width="40%" height="14px" rounded="4px" />
+          <Skeleton width="30%" height="18px" className="rounded-md" />
+          <Skeleton width="40%" height="14px" className="rounded-md" />
         </div>
       </Card>
     );

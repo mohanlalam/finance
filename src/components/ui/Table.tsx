@@ -1,10 +1,4 @@
-import React, {
-  TableHTMLAttributes,
-  HTMLAttributes,
-  ThHTMLAttributes,
-  TdHTMLAttributes,
-  ReactNode,
-} from 'react';
+import { HTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, ReactNode } from 'react';
 import { Skeleton } from './Skeleton';
 
 export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
@@ -44,7 +38,7 @@ export function Table({
   return tableElement;
 }
 
-export interface TableHeaderProps extends HTMLAttributes<HTMLTableSectionElement> {}
+export type TableHeaderProps = HTMLAttributes<HTMLTableSectionElement>;
 
 export function TableHeader({ className = '', children, ...props }: TableHeaderProps) {
   return (
@@ -57,7 +51,7 @@ export function TableHeader({ className = '', children, ...props }: TableHeaderP
   );
 }
 
-export interface TableBodyProps extends HTMLAttributes<HTMLTableSectionElement> {}
+export type TableBodyProps = HTMLAttributes<HTMLTableSectionElement>;
 
 export function TableBody({ className = '', children, ...props }: TableBodyProps) {
   return (
@@ -70,7 +64,7 @@ export function TableBody({ className = '', children, ...props }: TableBodyProps
   );
 }
 
-export interface TableFooterProps extends HTMLAttributes<HTMLTableSectionElement> {}
+export type TableFooterProps = HTMLAttributes<HTMLTableSectionElement>;
 
 export function TableFooter({ className = '', children, ...props }: TableFooterProps) {
   return (
@@ -254,7 +248,7 @@ export function TableLoadingState({ colSpan, rows = 5 }: TableLoadingStateProps)
         <TableRow key={`loading-row-${rIdx}`} hoverable={false}>
           {Array.from({ length: colSpan }).map((_, cIdx) => (
             <TableCell key={`loading-cell-${rIdx}-${cIdx}`}>
-              <Skeleton height="18px" width={cIdx === 0 ? '70%' : '50%'} rounded="4px" />
+              <Skeleton height="18px" width={cIdx === 0 ? '70%' : '50%'} className="rounded-sm" />
             </TableCell>
           ))}
         </TableRow>

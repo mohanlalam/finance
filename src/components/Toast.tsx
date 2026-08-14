@@ -46,7 +46,7 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
   const { removeToast } = useToast();
   const [isExiting, setIsExiting] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
   const initialDuration = toast.type === 'error' ? 8000 : 4000;
   const startTimeRef = useRef<number>(Date.now());
   const remainingTimeRef = useRef<number>(initialDuration);

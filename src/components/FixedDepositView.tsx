@@ -7,6 +7,7 @@ import AssetRegistryContainer from './ui/AssetRegistryContainer';
 import { usePortfolioState } from '../contexts/PortfolioContext';
 import { useToastActions } from '../contexts/ToastContext';
 import { useAssetModal } from '../hooks/useAssetModal';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
 
 interface PortfolioOption {
@@ -19,7 +20,9 @@ interface FixedDepositViewProps {
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
@@ -35,6 +38,7 @@ export function FixedDepositView({
   onDelete,
   autoOpenAddModal,
 }: FixedDepositViewProps) {
+  const isMobile = useIsMobile();
   const { isMutating } = usePortfolioState();
   const { addToast } = useToastActions();
   const {

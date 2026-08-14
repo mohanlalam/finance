@@ -586,8 +586,10 @@ h3, .text-card-title {
 
 
 
-/* -- Mobile Asset Card Press Feedback -- */
+/* -- Mobile Asset Card Press Feedback & Render Containment -- */
 .mobile-asset-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 160px;
   transition:
     transform 0.12s cubic-bezier(0.32, 1.2, 0.64, 1),
     box-shadow 0.15s ease,

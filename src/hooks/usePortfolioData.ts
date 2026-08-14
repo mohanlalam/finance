@@ -7,6 +7,7 @@ import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiCl
 import useSWR from 'swr';
 import * as idb from 'idb-keyval';
 import { SWR_DEDUPING_INTERVAL, SWR_ERROR_RETRY_COUNT, STOCK_PRICE_CACHE_TTL } from '../utils/constants';
+import { logActivity, ActivityAssetType } from '../utils/activityLogger';
 
 function isValidCachedData(data: unknown): data is { portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[]; cachedAt: string } {
   return data != null && typeof data === 'object' && Array.isArray((data as Record<string, unknown>).portfolios);
@@ -157,23 +158,53 @@ function recalcPortfolioTotals(
   gold: GoldHolding[],
   realEstate: RealEstate[]
 ) {
-  const stockInvested = holdings.reduce((sum, h) => sum + h.amountInvested, 0);
-  const stockCurrent = holdings.reduce((sum, h) => sum + h.currentValue, 0);
+  let stockInvested = 0;
+  let stockCurrent = 0;
+  for (let i = 0; i < holdings.length; i++) {
+    const h = holdings[i];
+    stockInvested += h.amountInvested;
+    stockCurrent += h.currentValue;
+  }
 
-  const fdInvested = fds.reduce((sum, f) => sum + getFDInvestedAmount(f), 0);
-  const fdCurrent = fds.reduce((sum, f) => sum + getFDEffectiveValue(f), 0);
+  let fdInvested = 0;
+  let fdCurrent = 0;
+  for (let i = 0; i < fds.length; i++) {
+    const f = fds[i];
+    fdInvested += getFDInvestedAmount(f);
+    fdCurrent += getFDEffectiveValue(f);
+  }
 
-  const rdInvested = rdAccounts.reduce((sum, r) => sum + getRDInvestedAmount(r), 0);
-  const rdCurrent = rdAccounts.reduce((sum, r) => sum + getRDEffectiveValue(r), 0);
+  let rdInvested = 0;
+  let rdCurrent = 0;
+  for (let i = 0; i < rdAccounts.length; i++) {
+    const r = rdAccounts[i];
+    rdInvested += getRDInvestedAmount(r);
+    rdCurrent += getRDEffectiveValue(r);
+  }
 
-  const sipInvested = sipAccounts.reduce((sum, s) => sum + getSIPInvestedAmount(s), 0);
-  const sipCurrent = sipAccounts.reduce((sum, s) => sum + getSIPEffectiveValue(s), 0);
+  let sipInvested = 0;
+  let sipCurrent = 0;
+  for (let i = 0; i < sipAccounts.length; i++) {
+    const s = sipAccounts[i];
+    sipInvested += getSIPInvestedAmount(s);
+    sipCurrent += getSIPEffectiveValue(s);
+  }
 
-  const goldInvested = gold.reduce((sum, g) => sum + Number(g.purchase_price), 0);
-  const goldCurrent = gold.reduce((sum, g) => sum + Number(g.current_valuation), 0);
+  let goldInvested = 0;
+  let goldCurrent = 0;
+  for (let i = 0; i < gold.length; i++) {
+    const g = gold[i];
+    goldInvested += Number(g.purchase_price) || 0;
+    goldCurrent += Number(g.current_valuation) || 0;
+  }
 
-  const reInvested = realEstate.reduce((sum, r) => sum + Number(r.purchase_price), 0);
-  const reCurrent = realEstate.reduce((sum, r) => sum + Number(r.current_valuation), 0);
+  let reInvested = 0;
+  let reCurrent = 0;
+  for (let i = 0; i < realEstate.length; i++) {
+    const r = realEstate[i];
+    reInvested += Number(r.purchase_price) || 0;
+    reCurrent += Number(r.current_valuation) || 0;
+  }
 
   const totalInvested = stockInvested + fdInvested + rdInvested + sipInvested + goldInvested + reInvested;
   const totalCurrentValue = stockCurrent + fdCurrent + rdCurrent + sipCurrent + goldCurrent + reCurrent;
@@ -206,7 +237,7 @@ function buildPortfolio(
   docs: DocumentMetadata[]
 ): Portfolio {
   const fdsWithTs = fds.map((f) => {
-    const ts = f.maturity_date ? new Date(f.maturity_date).getTime() : NaN;
+    const ts = f.maturityDateTs ?? (f.maturity_date ? new Date(f.maturity_date).getTime() : NaN);
     return {
       ...f,
       maturityDateTs: isNaN(ts) ? undefined : ts,
@@ -214,7 +245,7 @@ function buildPortfolio(
   });
 
   const insurancesWithTs = insurances.map((i) => {
-    const ts = i.renewal_date ? new Date(i.renewal_date).getTime() : NaN;
+    const ts = i.renewalDateTs ?? (i.renewal_date ? new Date(i.renewal_date).getTime() : NaN);
     return {
       ...i,
       renewalDateTs: isNaN(ts) ? undefined : ts,
@@ -222,7 +253,7 @@ function buildPortfolio(
   });
 
   const docsWithTs = docs.map((d) => {
-    const ts = d.expiry_date ? new Date(d.expiry_date).getTime() : NaN;
+    const ts = d.expiryDateTs ?? (d.expiry_date ? new Date(d.expiry_date).getTime() : NaN);
     return {
       ...d,
       expiryDateTs: isNaN(ts) ? undefined : ts,
@@ -883,6 +914,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           body: { name: trimmedName, label: trimmedLabel },
         });
         await invalidateIDBCache();
+        await logActivity('add', 'family', `Added family member: ${trimmedLabel}`);
         await load();
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
@@ -911,6 +943,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           },
         });
         await invalidateIDBCache();
+        await logActivity('update', 'family', `Renamed family member to: ${trimmedLabel}`);
         setPortfolios((prev) =>
           prev.map((p) => (p.id === portfolioId ? { ...p, label: trimmedLabel } : p))
         );
@@ -945,6 +978,8 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           },
         });
         await invalidateIDBCache();
+        const assetTitle = (finalPayload.ticker as string) || (finalPayload.bank_name as string) || (finalPayload.fund_name as string) || (finalPayload.item_name as string) || (finalPayload.property_name as string) || (finalPayload.policy_name as string) || (finalPayload.name as string) || assetType;
+        await logActivity('add', assetType as ActivityAssetType, `Added ${assetTitle}`, portfolioName);
         if (options.reload !== false) {
           await load();
         }
@@ -971,6 +1006,8 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           },
         });
         await invalidateIDBCache();
+        const assetTitle = (finalPayload.ticker as string) || (finalPayload.bank_name as string) || (finalPayload.fund_name as string) || (finalPayload.item_name as string) || (finalPayload.property_name as string) || (finalPayload.policy_name as string) || (finalPayload.name as string) || assetType;
+        await logActivity('update', assetType as ActivityAssetType, `Updated ${assetTitle}`);
         await load();
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
@@ -992,6 +1029,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           },
         });
         await invalidateIDBCache();
+        await logActivity('delete', assetType as ActivityAssetType, `Deleted ${assetType} item`);
         await load();
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
@@ -1011,6 +1049,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           },
         });
         await invalidateIDBCache();
+        await logActivity('delete', 'family', 'Deleted family member');
         await load();
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();

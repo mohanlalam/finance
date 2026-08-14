@@ -3,6 +3,7 @@ import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { SegmentedControl } from './ui/SegmentedControl';
 import { TrendingUp, TrendingDown, Layers, Landmark } from './icons/AppIcons';
+import { AreaChartSkeleton } from './ui/ChartSkeleton';
 
 interface NetWorthTimelineChartProps {
   history: NetWorthSnapshot[];
@@ -347,6 +348,10 @@ export default function NetWorthTimelineChart({
   function formatDateLabel(isoString: string): string {
     const d = new Date(isoString);
     return d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+  }
+
+  if (chartData.length === 0) {
+    return <AreaChartSkeleton />;
   }
 
   const activeHoverItem = hoveredIdx !== null ? chartData[hoveredIdx] : null;

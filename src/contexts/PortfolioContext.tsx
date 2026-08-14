@@ -4,9 +4,15 @@ import { Portfolio, PortfolioName, AssetPayload, RDPayload, SIPPayload } from '.
 import { NetWorthSnapshot, usePortfolioData, LoadStatus } from '../hooks/usePortfolioData';
 
 
-export interface PortfolioDataContextValue {
+export interface PortfolioEntitiesContextValue {
   portfolios: Portfolio[];
   netWorthHistory: NetWorthSnapshot[];
+  activeTab: PortfolioName;
+  activePortfolio: Portfolio | null;
+  portfolioOptionsForModal: { name: string; label: string }[];
+}
+
+export interface PortfolioStatusContextValue {
   loadStatus: LoadStatus;
   loadError: string;
   priceStatus: LoadStatus;
@@ -15,13 +21,12 @@ export interface PortfolioDataContextValue {
   isUsingCachedData: boolean;
   cacheUpdatedAt: Date | null;
   isAuthRequired: boolean;
-  activeTab: PortfolioName;
-  activePortfolio: Portfolio | null;
-  portfolioOptionsForModal: { name: string; label: string }[];
   isMutating: boolean;
   lastPriceFetch: Date | null;
   isPriceStale: boolean;
 }
+
+export interface PortfolioDataContextValue extends PortfolioEntitiesContextValue, PortfolioStatusContextValue {}
 
 export interface PortfolioActionContextValue {
   setActiveTab: (tab: PortfolioName) => void;
@@ -43,13 +48,27 @@ export interface PortfolioActionContextValue {
   deleteSIPAccount: (id: string) => Promise<void>;
 }
 
-const PortfolioDataContext = createContext<PortfolioDataContextValue | null>(null);
+const PortfolioEntitiesContext = createContext<PortfolioEntitiesContextValue | null>(null);
+const PortfolioStatusContext = createContext<PortfolioStatusContextValue | null>(null);
 const PortfolioActionContext = createContext<PortfolioActionContextValue | null>(null);
 
-export function usePortfolioState(): PortfolioDataContextValue {
-  const ctx = useContext(PortfolioDataContext);
-  if (!ctx) throw new Error('usePortfolioState must be used within PortfolioProvider');
+export function usePortfolioEntities(): PortfolioEntitiesContextValue {
+  const ctx = useContext(PortfolioEntitiesContext);
+  if (!ctx) throw new Error('usePortfolioEntities must be used within PortfolioProvider');
   return ctx;
+}
+
+export function usePortfolioStatus(): PortfolioStatusContextValue {
+  const ctx = useContext(PortfolioStatusContext);
+  if (!ctx) throw new Error('usePortfolioStatus must be used within PortfolioProvider');
+  return ctx;
+}
+
+export function usePortfolioState(): PortfolioDataContextValue {
+  const entities = useContext(PortfolioEntitiesContext);
+  const status = useContext(PortfolioStatusContext);
+  if (!entities || !status) throw new Error('usePortfolioState must be used within PortfolioProvider');
+  return { ...entities, ...status };
 }
 
 export function usePortfolioActions(): PortfolioActionContextValue {
@@ -202,9 +221,21 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
 
 
 
-  const dataValue = useMemo<PortfolioDataContextValue>(() => ({
+  const entitiesValue = useMemo<PortfolioEntitiesContextValue>(() => ({
     portfolios,
     netWorthHistory,
+    activeTab,
+    activePortfolio,
+    portfolioOptionsForModal,
+  }), [
+    portfolios,
+    netWorthHistory,
+    activeTab,
+    activePortfolio,
+    portfolioOptionsForModal,
+  ]);
+
+  const statusValue = useMemo<PortfolioStatusContextValue>(() => ({
     loadStatus,
     loadError,
     priceStatus,
@@ -213,15 +244,10 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     isUsingCachedData,
     cacheUpdatedAt,
     isAuthRequired,
-    activeTab,
-    activePortfolio,
-    portfolioOptionsForModal,
     isMutating,
     lastPriceFetch,
     isPriceStale,
   }), [
-    portfolios,
-    netWorthHistory,
     loadStatus,
     loadError,
     priceStatus,
@@ -230,9 +256,6 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     isUsingCachedData,
     cacheUpdatedAt,
     isAuthRequired,
-    activeTab,
-    activePortfolio,
-    portfolioOptionsForModal,
     isMutating,
     lastPriceFetch,
     isPriceStale,
@@ -277,10 +300,12 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
   ]);
 
   return (
-    <PortfolioDataContext.Provider value={dataValue}>
-      <PortfolioActionContext.Provider value={actionValue}>
-        {children}
-      </PortfolioActionContext.Provider>
-    </PortfolioDataContext.Provider>
+    <PortfolioEntitiesContext.Provider value={entitiesValue}>
+      <PortfolioStatusContext.Provider value={statusValue}>
+        <PortfolioActionContext.Provider value={actionValue}>
+          {children}
+        </PortfolioActionContext.Provider>
+      </PortfolioStatusContext.Provider>
+    </PortfolioEntitiesContext.Provider>
   );
 }

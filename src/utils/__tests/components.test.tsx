@@ -100,7 +100,7 @@ describe('Toast System', () => {
     fireEvent.click(triggerBtn);
 
     // Toast should now be visible
-    const alert = screen.getByRole('alert');
+    const alert = screen.getByRole('status');
     expect(alert).toBeDefined();
     expect(screen.getByText('Test Message')).toBeDefined();
 

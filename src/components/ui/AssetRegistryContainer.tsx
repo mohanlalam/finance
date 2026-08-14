@@ -7,7 +7,7 @@ interface AssetRegistryContainerProps {
   title: string;
   createBtnLabel: string;
   themeColor?: string; // e.g. 'bg-amber-600 hover:bg-amber-700'
-  emptyType: any;
+  emptyType: 'fd' | 'rd' | 'sip' | 'stocks' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'default';
   emptyTitle: string;
   emptyDescription: string;
   isLoading: boolean;

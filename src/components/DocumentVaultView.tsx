@@ -9,7 +9,7 @@ import {
   Insurance,
   Holding,
 } from '../types/portfolio';
-import { getSupabase } from '../utils/supabaseClient';
+import { uploadDocumentFile, removeDocumentFiles } from '../utils/supabaseStorage';
 import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X } from './icons/AppIcons';
 import { getDocumentUrl } from '../utils/formatters';
 import Modal from './Modal';
@@ -180,14 +180,7 @@ export default React.memo(function DocumentVaultView({
       const safeName = pendingFile.name.replace(/[^\w.-]/g, '_');
       const storagePath = `${formPortfolio}/${activeFolder}/${ts}_${safeName}`;
 
-      const supabase = await getSupabase();
-      const { error: uploadErr } = await supabase.storage
-        .from('investment-documents')
-        .upload(storagePath, pendingFile);
-
-      if (uploadErr) {
-        throw uploadErr;
-      }
+      await uploadDocumentFile('investment-documents', storagePath, pendingFile);
 
       await onAdd('document', formPortfolio, {
         name: documentName || pendingFile.name,
@@ -221,13 +214,7 @@ export default React.memo(function DocumentVaultView({
     setIsDeleting(true);
     try {
       if (!deleteTarget.file_path.startsWith('http')) {
-        const supabase = await getSupabase();
-        const { error: deleteErr } = await supabase.storage
-          .from('investment-documents')
-          .remove([deleteTarget.file_path]);
-        if (deleteErr) {
-          console.error('Failed to delete storage object:', deleteErr);
-        }
+        await removeDocumentFiles('investment-documents', [deleteTarget.file_path]);
       }
       await onDelete('document', deleteTarget.id);
       addToast('Document deleted successfully', 'success');

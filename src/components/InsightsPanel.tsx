@@ -10,6 +10,7 @@ import {
 } from '../hooks/usePortfolioInsights';
 
 import { Portfolio } from '../types/portfolio';
+import { InsightsSkeleton } from './ui/ChartSkeleton';
 
 interface InsightsPanelProps {
   insights: PortfolioInsights;
@@ -205,6 +206,7 @@ const FILTERS: { id: InsightFilter; label: string }[] = [
 
 export default React.memo(function InsightsPanel({
   insights,
+  portfolios = [],
 }: InsightsPanelProps) {
   const [activeFilter, setActiveFilter] = useState<InsightFilter>('all');
   const handleFilterClick = useCallback((id: InsightFilter) => {
@@ -218,6 +220,10 @@ export default React.memo(function InsightsPanel({
 
   const hasPerformanceCards = showStocks;
   const hasUpcomingCards = showFDs || showInsurance;
+
+  if (portfolios.length === 0) {
+    return <InsightsSkeleton />;
+  }
 
   return (
     <div role="region" aria-label="Portfolio Insights" className="space-y-6">

@@ -14,7 +14,9 @@ interface FDFormModalProps {
   editingFd: FixedDeposit | null;
   portfolioName: string;
   portfolioOptions: PortfolioOption[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
 }
 

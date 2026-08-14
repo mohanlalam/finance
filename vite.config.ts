@@ -1,11 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { compression } from 'vite-plugin-compression2';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
   plugins: [
     react(),
+    command === 'build' && compression({ algorithm: 'brotliCompress', exclude: [/\.(br)$/, /\.(gz)$/] }),
+    command === 'build' && compression({ algorithm: 'gzip', exclude: [/\.(br)$/, /\.(gz)$/] }),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
@@ -55,7 +58,7 @@ export default defineConfig(({ command }) => ({
         ]
       }
     })
-  ],
+  ].filter(Boolean),
   base: command === 'serve' ? '/' : '/finance/',
   esbuild: command === 'serve' ? {} : {
     pure: ['console.log', 'console.info', 'console.debug', 'console.trace'],
@@ -69,20 +72,11 @@ export default defineConfig(({ command }) => ({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('@supabase')) {
-              return 'supabase';
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom') || id.includes('@remix-run/router')) {
+              return 'vendor-react';
             }
-            if (id.includes('swr')) {
-              return 'swr';
-            }
-            if (id.includes('idb-keyval')) {
-              return 'idb';
-            }
-            if (id.includes('react-window')) {
-              return 'react-window';
-            }
-            if (id.includes('react-router-dom') || id.includes('@remix-run/router')) {
-              return 'router';
+            if (id.includes('swr') || id.includes('idb-keyval') || id.includes('react-window')) {
+              return 'vendor-utils';
             }
           }
         }

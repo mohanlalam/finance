@@ -5,24 +5,28 @@ import { WifiOff, AlertCircle, RefreshCw } from '../components/icons/AppIcons';
 
 import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
-import MobileBottomNav from '../components/MobileBottomNav';
 import FamilyTabBar from '../components/FamilyTabBar';
 import AssetTabContent from '../components/AssetTabContent';
 import SectionErrorBoundary from '../components/SectionErrorBoundary';
 
 import ConfirmModal from '../components/ConfirmModal';
 import FloatingAddMenu from '../components/FloatingAddMenu';
-import MobileHomeSummary from '../components/MobileHomeSummary';
-import MobileAlertsView from '../components/MobileAlertsView';
-import DesktopSidebar from './DesktopSidebar';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { QuickAccessShortcuts } from '../components/ui/QuickAccessShortcuts';
+
+// Viewport-specific lazy loaded layouts
+const DesktopSidebar = React.lazy(() => import('./DesktopSidebar'));
+const MobileHomeSummary = React.lazy(() => import('../components/MobileHomeSummary'));
+const MobileBottomNav = React.lazy(() => import('../components/MobileBottomNav'));
+const MobileAlertsView = React.lazy(() => import('../components/MobileAlertsView'));
 
 // Lazy loaded modals to keep initial bundle lightweight
 const AddHoldingModal = React.lazy(() => import('../components/AddHoldingModal'));
 const AddFamilyModal = React.lazy(() => import('../components/AddFamilyModal'));
 const RenamePortfolioModal = React.lazy(() => import('../components/RenamePortfolioModal'));
 const ChangePinModal = React.lazy(() => import('../components/ChangePinModal'));
+const FamilyComparisonModal = React.lazy(() => import('../components/FamilyComparisonModal'));
+const ActivityLogDrawer = React.lazy(() => import('../components/ActivityLogDrawer'));
 import type { ImportRow } from '../components/ExportPanel'; // type-only: erased at build time
 import { AddHoldingPayload } from '../components/AddHoldingModal';
 
@@ -199,6 +203,9 @@ export default function AppShell() {
     isAnyModalOpen,
   } = useModalState();
 
+  const [showFamilyComparison, setShowFamilyComparison] = useState(false);
+  const [showActivityLog, setShowActivityLog] = useState(false);
+
   // Persist active asset tab
   useEffect(() => {
     try { localStorage.setItem('finance_last_asset_tab', activeAsset); } catch { /* ignore */ }
@@ -247,18 +254,31 @@ export default function AppShell() {
   }, [portfolio, portfolios, todayPnL]);
 
   const effectiveAsset = activeAsset === 'home' && !isMobile ? 'stocks' : activeAsset;
+
   const handleSidebarTabChange = useCallback((tabId: string) => {
     setActiveAsset(tabId as AssetTab);
-  }, []);
+  }, [setActiveAsset]);
 
   const handleFloatingAddAsset = useCallback((type: AssetTab) => {
     setActiveAsset(type);
-    setQuickAddTarget(type);
-  }, [setQuickAddTarget]);
+    if (type !== 'home') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setQuickAddTarget(type as any);
+    }
+  }, [setQuickAddTarget, setActiveAsset]);
 
   const insights = usePortfolioInsights(portfolios);
 
   const { visibleAlerts, handleDismissAlert, handleDismissAll } = useDismissibleAlerts(portfolios);
+
+  // Proactive background notification check for upcoming maturities & renewals
+  useEffect(() => {
+    if (portfolios.length > 0) {
+      import('../utils/notifications').then(({ checkAndNotifyMaturities }) => {
+        checkAndNotifyMaturities(portfolios);
+      });
+    }
+  }, [portfolios]);
 
   const isLoadingPrices = priceStatus === 'loading';
   const isLoading = isLoadingPrices; // alias for SummaryCards prop
@@ -313,7 +333,7 @@ export default function AppShell() {
     if (target) {
       setActiveAsset(target);
     }
-  }, []);
+  }, [setActiveAsset]);
 
   // ─── Handlers ───
   const renderDashboardWidgets = (isMobileLayout: boolean) => {
@@ -525,6 +545,8 @@ export default function AppShell() {
         isPriceStale={isPriceStale}
         isUsingCachedData={isUsingCachedData}
         onChangePinClick={openChangePinModal}
+        onOpenFamilyComparison={() => setShowFamilyComparison(true)}
+        onOpenActivityLog={() => setShowActivityLog(true)}
       />
 
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -584,23 +606,25 @@ export default function AppShell() {
 
             {activeAsset === 'home' ? (
               <div className="space-y-4">
-                <MobileHomeSummary
-                  summaryData={summaryData}
-                  todayPnL={todayPnL}
-                  todayPnLPercent={todayPnLPercent}
-                  breakdown={breakdown}
-                  alertCount={visibleAlerts.length}
-                  alerts={visibleAlerts}
-                  lastUpdated={lastUpdated}
-                  priceStatus={priceStatus}
-                  onRefresh={refreshPrices}
-                  isLoadingPrices={isLoadingPrices}
-                  onNavigateAsset={setActiveAsset}
-                  onOpenAlerts={openMobileAlerts}
-                  portfolios={portfolios}
-                  activePortfolio={portfolio}
-                  netWorthHistory={netWorthHistory}
-                />
+                <Suspense fallback={null}>
+                  <MobileHomeSummary
+                    summaryData={summaryData}
+                    todayPnL={todayPnL}
+                    todayPnLPercent={todayPnLPercent}
+                    breakdown={breakdown}
+                    alertCount={visibleAlerts.length}
+                    alerts={visibleAlerts}
+                    lastUpdated={lastUpdated}
+                    priceStatus={priceStatus}
+                    onRefresh={refreshPrices}
+                    isLoadingPrices={isLoadingPrices}
+                    onNavigateAsset={setActiveAsset}
+                    onOpenAlerts={openMobileAlerts}
+                    portfolios={portfolios}
+                    activePortfolio={portfolio}
+                    netWorthHistory={netWorthHistory}
+                  />
+                </Suspense>
 
                 {activeTab === 'all' && (
                   <SectionErrorBoundary sectionName="Portfolio Insights">
@@ -665,15 +689,17 @@ export default function AppShell() {
           <>
             {/* Desktop layout: sidebar + main content area */}
             <div role="tabpanel" className="flex gap-0">
-              <DesktopSidebar
-                activeTab={effectiveAsset}
-                onTabChange={handleSidebarTabChange}
-                portfolios={portfolios}
-                selectedPortfolioId={activeTab}
-                onSelectPortfolio={setActiveTab}
-                onOpenAddFamily={openAddFamily}
-                onOpenRename={openRenameModal}
-              />
+              <Suspense fallback={null}>
+                <DesktopSidebar
+                  activeTab={effectiveAsset}
+                  onTabChange={handleSidebarTabChange}
+                  portfolios={portfolios}
+                  selectedPortfolioId={activeTab}
+                  onSelectPortfolio={setActiveTab}
+                  onOpenAddFamily={openAddFamily}
+                  onOpenRename={openRenameModal}
+                />
+              </Suspense>
 
               {/* Main content area */}
               <div className="flex-1 min-w-0 space-y-6">
@@ -840,7 +866,9 @@ export default function AppShell() {
       </footer>
 
       {/* Mobile Bottom Navigation */}
-      <MobileBottomNav activeAsset={activeAsset} onChangeAsset={setActiveAsset} alertCount={visibleAlerts.length} />
+      <Suspense fallback={null}>
+        <MobileBottomNav activeAsset={activeAsset} onChangeAsset={setActiveAsset} alertCount={visibleAlerts.length} />
+      </Suspense>
 
       {/* Floating Add Menu (FAB) */}
       <FloatingAddMenu
@@ -890,6 +918,34 @@ export default function AppShell() {
             }}
           />
         )}
+
+        {/* Mobile Alerts Full-Screen View */}
+        {showMobileAlerts && (
+          <MobileAlertsView
+            alerts={visibleAlerts}
+            onClose={closeMobileAlerts}
+            onDismissAlert={handleDismissAlert}
+            onDismissAll={handleDismissAll}
+          />
+        )}
+
+        {/* Family Members Comparison Modal */}
+        {showFamilyComparison && (
+          <FamilyComparisonModal
+            isOpen={showFamilyComparison}
+            onClose={() => setShowFamilyComparison(false)}
+            portfolios={portfolios}
+            onSelectPortfolio={setActiveTab}
+          />
+        )}
+
+        {/* Activity & Audit History Drawer */}
+        {showActivityLog && (
+          <ActivityLogDrawer
+            isOpen={showActivityLog}
+            onClose={() => setShowActivityLog(false)}
+          />
+        )}
       </Suspense>
 
       {/* Delete Portfolio Confirmation Modal */}
@@ -907,16 +963,6 @@ export default function AppShell() {
 
       {/* PWA Install Banner */}
       <PWAInstallBanner />
-
-      {/* Mobile Alerts Full-Screen View */}
-      {showMobileAlerts && (
-        <MobileAlertsView
-          alerts={visibleAlerts}
-          onClose={closeMobileAlerts}
-          onDismissAlert={handleDismissAlert}
-          onDismissAll={handleDismissAll}
-        />
-      )}
     </div>
   );
 }

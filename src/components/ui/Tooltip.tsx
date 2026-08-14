@@ -34,7 +34,7 @@ export function Tooltip({
   className = '',
 }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tooltipId = useId();
 
   const show = useCallback(() => {
@@ -80,24 +80,26 @@ export function Tooltip({
 
   // Enhance child with handlers and ARIA attributes
   const childElement = isValidElement(children) ? (
-    cloneElement(children as React.ReactElement<any>, {
-      onMouseEnter: (e: React.MouseEvent) => {
-        (children as any).props?.onMouseEnter?.(e);
+    cloneElement(children as React.ReactElement<React.HTMLAttributes<Element>>, {
+      onMouseEnter: (e: React.MouseEvent<Element>) => {
+        (children.props as React.HTMLAttributes<Element>)?.onMouseEnter?.(e);
         show();
       },
-      onMouseLeave: (e: React.MouseEvent) => {
-        (children as any).props?.onMouseLeave?.(e);
+      onMouseLeave: (e: React.MouseEvent<Element>) => {
+        (children.props as React.HTMLAttributes<Element>)?.onMouseLeave?.(e);
         hide();
       },
-      onFocus: (e: React.FocusEvent) => {
-        (children as any).props?.onFocus?.(e);
+      onFocus: (e: React.FocusEvent<Element>) => {
+        (children.props as React.HTMLAttributes<Element>)?.onFocus?.(e);
         show();
       },
-      onBlur: (e: React.FocusEvent) => {
-        (children as any).props?.onBlur?.(e);
+      onBlur: (e: React.FocusEvent<Element>) => {
+        (children.props as React.HTMLAttributes<Element>)?.onBlur?.(e);
         hide();
       },
-      'aria-describedby': isVisible ? tooltipId : (children as any).props?.['aria-describedby'],
+      'aria-describedby': isVisible ? tooltipId : (children.props as Record<string, string | undefined>)?.[
+        'aria-describedby'
+      ],
     })
   ) : (
     <span

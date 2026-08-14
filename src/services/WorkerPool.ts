@@ -5,7 +5,7 @@
  * Eliminates 15-40ms thread creation overhead per calculation tick.
  */
 
-type WorkerTaskCallback = (data: any) => void;
+type WorkerTaskCallback = (data: number | null) => void;
 
 class FinancialWorkerPool {
   private xirrWorker: Worker | null = null;
@@ -16,12 +16,12 @@ class FinancialWorkerPool {
     if (!this.xirrWorker) {
       try {
         this.xirrWorker = new Worker(new URL('../workers/xirr.worker.ts', import.meta.url), { type: 'module' });
-        this.xirrWorker.onmessage = (e) => {
+        this.xirrWorker.onmessage = (e: MessageEvent<{ taskId?: string; rate?: number | null }>) => {
           const { taskId, rate } = e.data || {};
           if (taskId && this.xirrCallbacks.has(taskId)) {
             const cb = this.xirrCallbacks.get(taskId)!;
             this.xirrCallbacks.delete(taskId);
-            cb(rate);
+            cb(rate ?? null);
           }
         };
         this.xirrWorker.onerror = (err) => {
@@ -35,7 +35,7 @@ class FinancialWorkerPool {
     return this.xirrWorker;
   }
 
-  public runXirrAsync(payload: any): Promise<number | null> | null {
+  public runXirrAsync(payload: Record<string, unknown>): Promise<number | null> | null {
     const worker = this.getXirrWorker();
     if (!worker) return null;
 

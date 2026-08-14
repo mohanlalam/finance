@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Portfolio } from '../types/portfolio';
 import { formatINR } from '../utils/formatters';
 import { usePrivacy } from '../contexts/PrivacyContext';
@@ -109,16 +109,15 @@ function BarChart({ portfolios }: BarChartProps) {
         <div className="shrink-0">
           <SegmentedControl
             options={[
-              { value: 'grouped', label: 'Amount' },
-              { value: 'returns', label: '% Return' },
-              { value: 'breakdown', label: 'List' },
+              { id: 'grouped', label: 'Amount' },
+              { id: 'returns', label: '% Return' },
+              { id: 'breakdown', label: 'List' },
             ]}
             value={mode}
             onChange={(val) => {
               setMode(val as ViewMode);
               setHoveredIdx(null);
             }}
-            size="sm"
           />
         </div>
       </div>

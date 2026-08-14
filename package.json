@@ -15,7 +15,6 @@
     "mobile:run": "npm run build && cd ../android/mobile && npx cap sync android && npx cap run android --target=emulator-5554"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.4",
     "idb-keyval": "^6.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -41,6 +40,7 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
     "vite": "^8.0.16",
+    "vite-plugin-compression2": "^2.5.3",
     "vite-plugin-pwa": "^1.3.0",
     "vitest": "^4.1.8"
   },

@@ -51,8 +51,16 @@ const SEVERITY_BADGE: Record<string, string> = {
   info: 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]',
 };
 
+import { getNotificationPermission, requestNotificationPermission } from '../utils/notifications';
+
 function AlertsBanner({ alerts }: AlertsBannerProps) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [notifPerm, setNotifPerm] = useState(getNotificationPermission());
+
+  const handleRequestPermission = useCallback(async () => {
+    const granted = await requestNotificationPermission();
+    setNotifPerm(granted ? 'granted' : 'denied');
+  }, []);
 
   const dismiss = useCallback((id: string) => {
     setDismissed((prev) => new Set(prev).add(id));
@@ -75,14 +83,24 @@ function AlertsBanner({ alerts }: AlertsBannerProps) {
             {visible.length} Alert{visible.length > 1 ? 's' : ''}
           </span>
         </div>
-        {visible.length > 1 && (
-          <button
-            onClick={dismissAll}
-            className="text-xs font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press px-2 py-1 rounded-[var(--radius-small)]"
-          >
-            Dismiss all
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {notifPerm === 'default' && (
+            <button
+              onClick={handleRequestPermission}
+              className="text-xs font-semibold text-[var(--accent-blue)] hover:underline ios-press px-2 py-1"
+            >
+              Enable push alerts
+            </button>
+          )}
+          {visible.length > 1 && (
+            <button
+              onClick={dismissAll}
+              className="text-xs font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press px-2 py-1 rounded-[var(--radius-small)]"
+            >
+              Dismiss all
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2">

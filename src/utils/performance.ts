@@ -41,8 +41,8 @@ export function calculateCAGR(invested: number, current: number, years: number):
   const curr = Number(current);
   const y = Number(years);
 
-  if (isNaN(inv) || isNaN(curr) || isNaN(y) || inv <= 0 || y <= 0) return 0;
-  if (curr <= 0) return -1.0; // 100% loss
+  if (isNaN(inv) || isNaN(curr) || isNaN(y) || inv <= 0 || y <= 0 || curr < 0) return 0;
+  if (curr === 0) return -1.0; // 100% loss
 
   return Math.pow(curr / inv, 1 / y) - 1;
 }
@@ -226,7 +226,7 @@ export function getBenchmarkReturns(years: number = 1): { nifty50: number; nifty
 }
 
 let _xirrWorker: Worker | null = null;
-let _pendingXirrCallbacks = new Map<string, (rate: number) => void>();
+const _pendingXirrCallbacks = new Map<string, (rate: number) => void>();
 
 function getXirrWorker(): Worker | null {
   if (typeof window === 'undefined' || !window.Worker) return null;

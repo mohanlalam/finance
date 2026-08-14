@@ -156,11 +156,9 @@ describe('calculateWeightedAge', () => {
       realEstateValue: 0,
     };
 
-    // The SIP is 2 years old.
-    // getSIPInvestedAmount(sip) will return 5000 * 24 = 120000.
-    // The weighted age should be exactly 2.0.
+    // The SIP is 2 years old, with monthly linear contributions -> dollar-weighted age is age / 2 = 1.0.
     const weightedAge = calculateWeightedAge(portfolio);
-    expect(weightedAge).toBeCloseTo(2.0, 1);
+    expect(weightedAge).toBeCloseTo(1.0, 1);
   });
 });
 
