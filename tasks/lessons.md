@@ -6,6 +6,14 @@ After **any correction** from the user, append a new entry here with the pattern
 
 ---
 
+### 2026-08-14 — Supabase Storage: "Unauthorized" on Client-Side File Uploads
+**Mistake**: Implemented direct client-side uploads to Supabase Storage using the `anon` API key, which failed with `"Unauthorized"` because Storage RLS policies blocked anonymous writes.  
+**Root Cause**: Supabase Storage enforces Row Level Security independently of the database. The `anon` key has no write permissions on custom buckets by default — even if database RLS allows the user.  
+**Fix**: Routed all `uploadDocumentFile` and `removeDocumentFiles` calls through the existing `holdings-crud` Edge Function, which runs with the `SERVICE_ROLE_KEY` and has full admin storage access. The Edge Function validates the request via the `X-App-Pin` header for security.  
+**Rule**: **Never upload files to Supabase Storage directly from the browser client using the anon key.** Always route file operations through a server-side Edge Function using the service_role key. If direct uploads are needed, first configure explicit Storage RLS policies for the bucket.
+
+---
+
 ## Lesson Format
 
 ```
