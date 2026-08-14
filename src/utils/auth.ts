@@ -45,15 +45,13 @@ export async function hashPin(pin: string): Promise<string> {
 }
 
 export async function ensureHashedPin(): Promise<string> {
-  if (!isSessionVerified()) return '';
-
   const sessionHash = sessionStorage.getItem(HASH_KEY);
   if (sessionHash) return sessionHash;
 
   const customHash = localStorage.getItem(CUSTOM_HASH_KEY);
   const hash = customHash || (APP_PIN ? await hashPin(APP_PIN) : '');
   
-  if (hash) {
+  if (hash && isSessionVerified()) {
     sessionStorage.setItem(HASH_KEY, hash);
   }
   return hash;
