@@ -70,28 +70,41 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     return () => clearInterval(timer);
   }, []);
 
+  const pinRef = useRef(pin);
+  useEffect(() => {
+    pinRef.current = pin;
+  }, [pin]);
+
+  const isVerifyingRef = useRef(false);
+
   const handleClear = useCallback(() => {
-    if (success) return;
+    if (success || isVerifyingRef.current) return;
+    pinRef.current = '';
     setPin('');
     setError('');
   }, [success]);
 
   const handleBackspace = useCallback(() => {
-    if (success) return;
-    setPin((prev) => prev.slice(0, -1));
+    if (success || isVerifyingRef.current) return;
+    const nextPin = pinRef.current.slice(0, -1);
+    pinRef.current = nextPin;
+    setPin(nextPin);
     setError('');
   }, [success]);
 
   const handlePressKey = useCallback((num: string) => {
-    if (success) return;
+    if (success || isVerifyingRef.current) return;
     const pinLength = getPinLength();
-    if (pin.length >= pinLength) return;
+    const currentPin = pinRef.current;
+    if (currentPin.length >= pinLength) return;
 
-    const nextPin = pin + num;
+    const nextPin = currentPin + num;
+    pinRef.current = nextPin;
     setPin(nextPin);
     setError('');
 
     if (nextPin.length === pinLength) {
+      isVerifyingRef.current = true;
       verifyPin(nextPin).then((isValid) => {
         if (isValid) {
           setSuccess(true);
@@ -100,12 +113,23 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
           setError('Incorrect PIN');
           setTimeout(() => {
             setShake(false);
+            pinRef.current = '';
             setPin('');
+            isVerifyingRef.current = false;
           }, 600);
         }
+      }).catch(() => {
+        setShake(true);
+        setError('Verification failed');
+        setTimeout(() => {
+          setShake(false);
+          pinRef.current = '';
+          setPin('');
+          isVerifyingRef.current = false;
+        }, 600);
       });
     }
-  }, [success, pin]);
+  }, [success]);
 
   useEffect(() => {
     if (success && pin.length === getPinLength()) {

@@ -64,8 +64,13 @@ export async function verifyPin(pin: string): Promise<boolean> {
   if (customHash) {
     return customHash === inputHash;
   }
+
+  if (APP_PIN) {
+    const expectedHash = await hashPin(APP_PIN);
+    return inputHash === expectedHash || pin === APP_PIN;
+  }
   
-  // Verify with backend Edge Function when custom local hash is not set
+  // Verify with backend Edge Function when neither local PIN nor custom hash is set
   try {
     const { invokeFunction } = await import('./apiClient');
     const result = await invokeFunction<{ verified: boolean }>('verify-pin', {
