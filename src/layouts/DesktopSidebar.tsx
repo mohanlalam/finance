@@ -21,17 +21,17 @@ export default function DesktopSidebar({
   onOpenRename
 }: DesktopSidebarProps) {
   const getNavItemClass = (isActive: boolean) =>
-    `flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-md text-xs font-bold ios-press transition-all outline-none ${
+    `flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-[var(--radius-small)] text-xs font-semibold ios-press transition-all outline-none ${
       isActive
-        ? 'bg-blue-50/80 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border-l-2 border-blue-600 dark:border-blue-500 shadow-xs'
-        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-200 border-l-2 border-transparent'
+        ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border-l-2 border-[var(--accent-blue)] shadow-[var(--shadow-card)]'
+        : 'text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] border-l-2 border-transparent'
     }`;
 
   return (
-    <div role="tablist" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-60 self-start sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto">
+    <div role="tablist" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-60 self-start sticky top-20 max-h-[calc(100vh-5.5rem)] overflow-y-auto">
       {/* Portfolios Section */}
       <div className="mb-5">
-        <h3 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-3">
+        <h3 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-3">
           Family Members
         </h3>
         <div className="space-y-0.5">
@@ -51,7 +51,7 @@ export default function DesktopSidebar({
               </button>
               <button
                 onClick={() => onOpenRename({ id: p.id, name: p.name, label: p.label })}
-                className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-opacity"
+                className="opacity-0 group-hover:opacity-100 p-1.5 text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] transition-opacity"
                 title={`Rename ${p.label}`}
                 aria-label={`Rename ${p.label}`}
               >
@@ -61,7 +61,7 @@ export default function DesktopSidebar({
           ))}
           <button
             onClick={onOpenAddFamily}
-            className="flex items-center gap-1.5 w-full text-left px-3 py-1.5 rounded-md text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors mt-1"
+            className="flex items-center gap-1.5 w-full text-left px-3 py-1.5 rounded-[var(--radius-small)] text-xs font-semibold text-[var(--accent-blue)] hover:bg-[var(--accent-blue-soft)] transition-colors mt-1"
           >
             <Plus size={13} />
             <span>Add Member</span>
@@ -71,7 +71,7 @@ export default function DesktopSidebar({
 
       {/* Assets Section */}
       <div className="mb-5">
-        <h3 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-3">
+        <h3 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-3">
           Assets &amp; Holdings
         </h3>
         <div className="space-y-0.5">
@@ -103,7 +103,7 @@ export default function DesktopSidebar({
 
       {/* Tools Section */}
       <div>
-        <h3 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-3">
+        <h3 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-3">
           Tools &amp; Vault
         </h3>
         <div className="space-y-0.5">

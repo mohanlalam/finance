@@ -32,7 +32,7 @@ const Card = React.memo(function Card({ title, icon, children, action }: {
   action?: React.ReactNode;
 }) {
   return (
-    <div className="apple-card p-4 flex flex-col h-full min-w-0 transition-shadow hover:shadow-md">
+    <div className="apple-card p-4 flex flex-col h-full min-w-0 transition-shadow hover:shadow-[var(--shadow-card)]">
       <div className="flex items-center gap-2 mb-3">
         {icon}
         <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider flex-1">{title}</h4>
@@ -56,17 +56,17 @@ const TopHoldings = React.memo(function TopHoldings({ items }: { items: HoldingI
         const alloc = totalVal > 0 ? (item.holding.currentValue / totalVal) * 100 : 0;
         return (
           <div key={`${item.holding.ticker}-${idx}`} className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center text-[10px] font-bold shrink-0">
+            <span className="w-5 h-5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center text-label-micro font-bold shrink-0">
               {idx + 1}
             </span>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-bold text-[var(--text-primary)] truncate">{item.holding.ticker}</span>
-                <span className="text-[10px] text-[var(--text-tertiary)] truncate hidden sm:inline">{item.portfolioLabel}</span>
+                <span className="text-label-micro text-[var(--text-tertiary)] truncate hidden sm:inline">{item.portfolioLabel}</span>
               </div>
             </div>
             <span className="text-xs font-bold text-[var(--text-primary)] shrink-0 tnum">{formatINR(item.holding.currentValue)}</span>
-            <span className="text-[10px] text-[var(--text-tertiary)] shrink-0 w-10 text-right tnum">{alloc.toFixed(1)}%</span>
+            <span className="text-label-micro text-[var(--text-tertiary)] shrink-0 w-10 text-right tnum">{alloc.toFixed(1)}%</span>
           </div>
         );
       })}

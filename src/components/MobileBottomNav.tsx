@@ -50,7 +50,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
     <>
       {/* Backdrop for More Drawer */}
       <div
-        className={`fixed inset-0 z-30 transition-opacity duration-200 md:hidden bg-[var(--backdrop-overlay)] ${
+        className={`fixed inset-0 z-[var(--z-overlay)] transition-opacity duration-200 md:hidden bg-[var(--backdrop-overlay)] ${
           isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsDrawerOpen(false)}
@@ -62,7 +62,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
         role="dialog"
         aria-modal="true"
         aria-label="More Asset Classes"
-        className={`fixed bottom-14 left-0 right-0 z-30 bg-[var(--surface)] border-t border-[var(--border-subtle)] rounded-t-[var(--radius-large)] shadow-xl p-4 md:hidden pb-safe transition-transform duration-250 ease-out apple-card ${
+        className={`fixed bottom-14 left-0 right-0 z-[var(--z-modal)] bg-[var(--surface)] border-t border-[var(--border-subtle)] rounded-t-[var(--radius-large)] shadow-[var(--shadow-floating)] p-4 md:hidden pb-safe transition-transform duration-250 ease-out ${
           isDrawerOpen ? 'translate-y-0' : 'translate-y-full pointer-events-none'
         }`}
       >
@@ -115,7 +115,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
       {/* Persistent Bottom Bar - Quiet Top Line Active Indicator */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--surface)] border-t border-[var(--border-subtle)] min-h-[56px] md:hidden pb-safe shadow-md"
+        className="fixed bottom-0 left-0 right-0 z-[var(--z-sticky)] bg-[var(--surface)] border-t border-[var(--border-subtle)] min-h-[56px] md:hidden pb-safe shadow-[var(--shadow-card)]"
       >
         <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-2">
           {mainTabs.map((tab) => {
@@ -138,7 +138,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                   {tab.icon}
                   {tab.id === 'home' && alertCount > 0 && (
                     <span 
-                      className="absolute -top-1 -right-1.5 min-w-[14px] h-[14px] rounded-[var(--radius-pill)] bg-[var(--negative)] text-[var(--surface)] text-[9px] font-bold flex items-center justify-center px-0.5 leading-none"
+                      className="absolute -top-1 -right-1.5 min-w-[14px] h-[14px] rounded-[var(--radius-pill)] bg-[var(--negative)] text-[var(--surface)] text-label-micro font-bold flex items-center justify-center px-0.5 leading-none"
                       aria-label={`${alertCount} notifications`}
                     >
                       {alertCount > 9 ? '9+' : alertCount}

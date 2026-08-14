@@ -54,8 +54,8 @@ function SummaryCards({
   }, [netWorthHistory]);
 
   const sparklineColor = React.useMemo(() => {
-    if (sparklineData.length < 2) return '#10b981';
-    return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? '#10b981' : '#ef4444';
+    if (sparklineData.length < 2) return '#00b074';
+    return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? '#00b074' : '#df514c';
   }, [sparklineData]);
 
   const { isBalancesHidden } = usePrivacy();
@@ -76,13 +76,13 @@ function SummaryCards({
           <div className="flex items-center gap-2">
             <button
               onClick={() => sharePortfolioSummary({ name: label, totalValue: totalCurrentValue, totalPnL, totalPnLPercent }, addToast)}
-              className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors"
+              className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center hover:opacity-80 transition-opacity"
               title="Share Summary"
               aria-label="Share Portfolio Summary"
             >
               <Share2 size={13} />
             </button>
-            <span className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
+            <span className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center">
               <IndianRupee size={13} className="text-[var(--text-secondary)]" />
             </span>
           </div>
@@ -104,7 +104,7 @@ function SummaryCards({
         </div>
 
         {activePortfolio === null && portfolios && portfolios.length > 0 && (
-          <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-[10px] font-medium text-[var(--text-secondary)]">
+          <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
             {portfolios.map((p, idx) => {
               const val = p.totalCurrentValue;
               return (
@@ -113,7 +113,7 @@ function SummaryCards({
                   <span className="text-[var(--text-primary)] font-bold tnum">
                     {renderValue(val)}
                   </span>
-                  {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
+                  {idx < portfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1.5">|</span>}
                 </span>
               );
             })}
@@ -123,15 +123,15 @@ function SummaryCards({
 
       {/* Remaining Cards: Horizontal scroll on mobile, normal grid columns on desktop */}
       <div className="relative block lg:contents">
-        <div className="absolute -left-4 top-0 bottom-2 w-8 bg-gradient-to-r from-[#f8fafc] dark:from-[#090d16] to-transparent pointer-events-none sm:hidden z-10" />
-        <div className="absolute -right-4 top-0 bottom-2 w-12 bg-gradient-to-l from-[#f8fafc] dark:from-[#090d16] to-transparent pointer-events-none sm:hidden z-10" />
+        <div className="absolute -left-4 top-0 bottom-2 w-8 bg-gradient-to-r from-[var(--app-background)] to-transparent pointer-events-none sm:hidden z-10" />
+        <div className="absolute -right-4 top-0 bottom-2 w-12 bg-gradient-to-l from-[var(--app-background)] to-transparent pointer-events-none sm:hidden z-10" />
         <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none lg:contents">
         
         {/* 2. Invested Card (Neutral) */}
-        <Card padding="md" className="shrink-0 w-[240px] sm:w-auto sm:shrink flex flex-col gap-1">
+        <Card padding="md" className="shrink-0 w-[min(240px,75vw)] sm:w-auto sm:shrink flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <span className="text-label-small">Invested</span>
-            <span className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
+            <span className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center">
               <BarChart2 size={13} className="text-[var(--text-secondary)]" />
             </span>
           </div>
@@ -139,7 +139,7 @@ function SummaryCards({
           <p className="text-supporting">Total capital deployed</p>
 
           {activePortfolio === null && portfolios && portfolios.length > 0 && (
-            <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-[10px] font-medium text-[var(--text-secondary)]">
+            <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
               {portfolios.map((p, idx) => {
                 const val = p.totalInvested;
                 return (
@@ -148,7 +148,7 @@ function SummaryCards({
                     <span className="text-[var(--text-primary)] font-bold tnum">
                       {renderValue(val)}
                     </span>
-                    {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
+                    {idx < portfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1.5">|</span>}
                   </span>
                 );
               })}
@@ -157,16 +157,16 @@ function SummaryCards({
         </Card>
 
         {/* 3. Total P&L Card (Soft colored feedback) */}
-        <Card padding="md" className="shrink-0 w-[240px] sm:w-auto sm:shrink flex flex-col gap-1">
+        <Card padding="md" className="shrink-0 w-[min(240px,75vw)] sm:w-auto sm:shrink flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <span className="text-label-small">Total Return</span>
-            <span className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-              isGain ? 'bg-emerald-500/10' : 'bg-rose-500/10'
+            <span className={`w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center ${
+              isGain ? 'bg-[var(--positive-soft)]' : 'bg-[var(--negative-soft)]'
             }`}>
-              {isGain ? <TrendingUp size={13} className="text-emerald-600 dark:text-emerald-400" /> : <TrendingDown size={13} className="text-rose-600 dark:text-rose-400" />}
+              {isGain ? <TrendingUp size={13} className="text-[var(--positive)]" /> : <TrendingDown size={13} className="text-[var(--negative)]" />}
             </span>
           </div>
-          <p className={`text-financial tnum ${isGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+          <p className={`text-financial tnum ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
             {isBalancesHidden ? '••••••' : <>{isGain ? '+' : ''}<AnimatedNumber value={totalPnL} formatter={formatINR} /></>}
           </p>
           <p className="text-supporting">
@@ -174,17 +174,17 @@ function SummaryCards({
           </p>
 
           {activePortfolio === null && portfolios && portfolios.length > 0 && (
-            <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-[10px] font-medium text-[var(--text-secondary)]">
+            <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
               {portfolios.map((p, idx) => {
                 const pnl = p.totalPnL;
                 const localGain = pnl >= 0;
                 return (
                   <span key={p.id} className="flex items-center gap-0.5">
                     <span>{p.label}:</span>
-                    <span className={`font-bold tnum ${localGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                    <span className={`font-bold tnum ${localGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                       {isBalancesHidden ? '••••••' : <>{localGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
                     </span>
-                    {idx < portfolios.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
+                    {idx < portfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1.5">|</span>}
                   </span>
                 );
               })}
@@ -194,16 +194,16 @@ function SummaryCards({
 
         {/* 4. Today's P&L Card (Soft colored daily changes) */}
         {todayPnL !== undefined ? (
-          <Card padding="md" className="shrink-0 w-[240px] sm:w-auto sm:shrink flex flex-col gap-1">
+          <Card padding="md" className="shrink-0 w-[min(240px,75vw)] sm:w-auto sm:shrink flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <span className="text-label-small">Today's Return</span>
-              <span className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-                isTodayGain ? 'bg-emerald-500/10' : 'bg-rose-500/10'
+              <span className={`w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center ${
+                isTodayGain ? 'bg-[var(--positive-soft)]' : 'bg-[var(--negative-soft)]'
               }`}>
-                {isTodayGain ? <TrendingUp size={13} className="text-emerald-600 dark:text-emerald-400" /> : <TrendingDown size={13} className="text-rose-600 dark:text-rose-400" />}
+                {isTodayGain ? <TrendingUp size={13} className="text-[var(--positive)]" /> : <TrendingDown size={13} className="text-[var(--negative)]" />}
               </span>
             </div>
-            <p className={`text-financial tnum ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+            <p className={`text-financial tnum ${isTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
               {isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
             </p>
             <p className="text-supporting">
@@ -211,16 +211,16 @@ function SummaryCards({
             </p>
 
             {activePortfolio === null && portfolios && portfolios.length > 0 && (
-              <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-[10px] font-medium text-[var(--text-secondary)]">
+              <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
                 {memberBreakdowns.map((p, idx) => {
                   const localTodayGain = p.todayPnL >= 0;
                   return (
                     <span key={p.id} className="flex items-center gap-0.5">
                       <span>{p.label}:</span>
-                      <span className={`font-bold tnum ${localTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                      <span className={`font-bold tnum ${localTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                         {isBalancesHidden ? '••••••' : <>{localTodayGain ? '+' : ''}<AnimatedNumber value={p.todayPnL} formatter={formatINR} /></>}
                       </span>
-                      {idx < memberBreakdowns.length - 1 && <span className="text-slate-300 dark:text-slate-700 ml-1.5">|</span>}
+                      {idx < memberBreakdowns.length - 1 && <span className="text-[var(--border-subtle)] ml-1.5">|</span>}
                     </span>
                   );
                 })}
@@ -228,10 +228,10 @@ function SummaryCards({
             )}
           </Card>
         ) : (
-          <Card padding="md" className="shrink-0 w-[240px] sm:w-auto sm:shrink flex flex-col gap-1">
+          <Card padding="md" className="shrink-0 w-[min(240px,75vw)] sm:w-auto sm:shrink flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <span className="text-label-small">Today</span>
-              <span className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
+              <span className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center">
                 <Activity size={13} className="text-[var(--text-secondary)]" />
               </span>
             </div>

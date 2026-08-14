@@ -16,7 +16,7 @@ export default function WhatIfCalculator() {
 
   // Resize tracking for SVG
   const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 600, height: 260 });
+  const [dimensions, setDimensions] = useState({ width: 0, height: 260 });
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   useEffect(() => {
@@ -27,10 +27,9 @@ export default function WhatIfCalculator() {
       const { width } = entries[0].contentRect;
       if (frameId) cancelAnimationFrame(frameId);
       frameId = requestAnimationFrame(() => {
-        setDimensions((prev) => ({
-          width: width > 100 ? width : prev.width,
-          height: 260,
-        }));
+        if (width > 50) {
+          setDimensions({ width, height: 260 });
+        }
       });
     });
     resizeObserver.observe(containerRef.current);
@@ -191,26 +190,26 @@ export default function WhatIfCalculator() {
         </div>
 
         {/* Mode Toggles */}
-        <div className="flex bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50 self-start md:self-auto shadow-inner">
+        <div className="flex bg-[var(--surface-secondary)] p-1 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] self-start md:self-auto">
           <button
             onClick={() => {
               setCalcMode('sip');
               if (investment > 500000) setInvestment(50000); // clamp for SIP mode
             }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-[var(--radius-small)] text-xs font-bold ios-press transition-all ${
               calcMode === 'sip'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                ? 'bg-[var(--accent-blue)] text-white shadow-sm'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             Monthly SIP
           </button>
           <button
             onClick={() => setCalcMode('lumpsum')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-[var(--radius-small)] text-xs font-bold ios-press transition-all ${
               calcMode === 'lumpsum'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                ? 'bg-[var(--accent-blue)] text-white shadow-sm'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             One-time Lumpsum
@@ -220,8 +219,8 @@ export default function WhatIfCalculator() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Sliders Form Column */}
-        <div className="lg:col-span-5 bg-white dark:bg-slate-900/40 backdrop-blur-md border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 md:p-6 shadow-xl space-y-6">
-          <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+        <div className="lg:col-span-5 apple-card p-5 md:p-6 space-y-6">
+          <h3 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
             Investment Parameters
           </h3>
 
@@ -368,10 +367,10 @@ export default function WhatIfCalculator() {
           {/* SVG Chart Container */}
           <div
             ref={containerRef}
-            className="bg-white dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-xl relative overflow-hidden"
+            className="apple-card p-5 relative overflow-hidden"
           >
             <div className="flex justify-between items-center mb-4">
-              <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              <h4 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
                 Growth Projection Curve
               </h4>
               {/* Legend */}

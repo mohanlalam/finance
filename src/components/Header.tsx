@@ -106,20 +106,20 @@ function Header({
   const visibleAlerts = alerts;
 
   return (
-    <header className="sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-[var(--border-subtle)] text-[var(--text-primary)] transition-colors">
+    <header className="sticky top-0 z-[var(--z-sticky)] bg-[var(--surface)] border-b border-[var(--border-subtle)] text-[var(--text-primary)] transition-colors">
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           
           {/* Left: App Logo & Selected Context */}
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0">
+            <div className="w-8 h-8 rounded-[var(--radius-medium)] bg-[var(--accent-blue)] flex items-center justify-center text-white shrink-0 shadow-sm">
               <TrendingUp size={16} />
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-extrabold tracking-tight text-[var(--text-primary)] truncate">
                 Family Wealth
               </span>
-              <span className="text-[10px] font-semibold text-[var(--text-tertiary)] leading-none truncate">
+              <span className="text-label-micro font-semibold text-[var(--text-tertiary)] leading-none truncate">
                 {activePortfolioLabel || 'Portfolio Tracker'}
               </span>
             </div>
@@ -134,11 +134,11 @@ function Header({
                 <span className="text-xs font-extrabold tnum leading-tight text-[var(--text-primary)]">
                   {formatINR(totalCurrentValue)}
                 </span>
-                <span className="text-[10px] text-[var(--text-tertiary)] font-semibold leading-none mt-0.5">
+                <span className="text-label-micro text-[var(--text-tertiary)] font-semibold leading-none mt-0.5">
                   Net Worth
                 </span>
               </div>
-              <Badge variant={isGain ? 'positive' : 'negative'} className="text-[10.5px] font-extrabold px-2 py-0.5">
+              <Badge variant={isGain ? 'positive' : 'negative'} className="text-label-micro font-bold px-2 py-0.5">
                 {formatPercent(totalPnLPercent, 1)}
               </Badge>
             </div>
@@ -161,25 +161,25 @@ function Header({
                     ? 'Prices may be outdated (>15m). Click to refresh.'
                     : `Prices live & up to date.${lastUpdated ? ` Last synced at ${lastUpdated.toLocaleTimeString()}` : ''}`
                 }
-                className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
+                className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-micro font-bold border transition-all ${
                   !isOnline || isUsingCachedData
-                    ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/40'
+                    ? 'bg-[var(--negative-soft)] text-[var(--negative)] border-[var(--negative)]/30'
                     : isLoading
-                    ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/40'
+                    ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border-[var(--accent-blue)]/30'
                     : isPriceStale || status === 'error'
-                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/40'
-                    : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40'
+                    ? 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/30'
+                    : 'bg-[var(--positive-soft)] text-[var(--positive)] border-[var(--positive)]/30'
                 }`}
               >
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${
                     !isOnline || isUsingCachedData
-                      ? 'bg-rose-500'
+                      ? 'bg-[var(--negative)]'
                       : isLoading
-                      ? 'bg-blue-500 animate-pulse'
+                      ? 'bg-[var(--accent-blue)] animate-pulse'
                       : isPriceStale || status === 'error'
-                      ? 'bg-amber-500'
-                      : 'bg-emerald-500'
+                      ? 'bg-[var(--warning)]'
+                      : 'bg-[var(--positive)]'
                   }`}
                 />
                 <span>
@@ -205,7 +205,7 @@ function Header({
 
               {/* Export Panel (Desktop) */}
               <div className="hidden sm:block">
-                <Suspense fallback={<div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />}>
+                <Suspense fallback={<div className="w-8 h-8 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] animate-pulse" />}>
                   <ExportPanel
                     portfolios={portfolios}
                     onImportCSV={onImportCSV}
@@ -245,33 +245,33 @@ function Header({
                   icon={<Bell size={14} />}
                   title={`Notifications (${visibleAlerts.length})`}
                   onClick={() => setOpenAlerts(!openAlerts)}
-                  className={openAlerts ? 'bg-slate-100 dark:bg-slate-800' : ''}
+                  className={openAlerts ? 'bg-[var(--surface-secondary)]' : ''}
                 />
                 {visibleAlerts.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-rose-600 rounded-full" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--negative)] rounded-full ring-2 ring-[var(--surface)]" />
                 )}
 
                 {openAlerts && (
                   <>
                     {/* Backdrop to dismiss alerts panel */}
                     <div
-                      className="fixed inset-0 z-40"
+                      className="fixed inset-0 z-[var(--z-overlay)]"
                       onClick={() => setOpenAlerts(false)}
                       aria-hidden="true"
                     />
                     <div
                       role="region"
                       aria-label="Notifications panel"
-                      className="fixed left-4 right-4 top-16 bg-white dark:bg-slate-900 border border-[var(--border-subtle)] rounded-xl shadow-xl z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80"
+                      className="fixed left-4 right-4 top-16 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-floating)] z-[var(--z-modal)] overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80"
                     >
-                      <div className="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/60 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                      <div className="px-3.5 py-2.5 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex items-center justify-between">
                         <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
                           Alerts ({visibleAlerts.length})
                         </span>
                         {visibleAlerts.length > 1 && (
                           <button
                             onClick={onDismissAll}
-                            className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                            className="text-label-micro font-bold text-[var(--accent-blue)] hover:underline"
                           >
                             Clear All
                           </button>
@@ -287,25 +287,25 @@ function Header({
                           visibleAlerts.map((alert) => {
                             const cfg = ALERTS_TYPE_CONFIG[alert.type] ?? {
                               icon: <Bell size={13} />,
-                              color: 'text-slate-600',
-                              bg: 'bg-slate-50 dark:bg-slate-800',
-                              border: 'border-slate-100 dark:border-slate-700',
+                              color: 'text-[var(--text-secondary)]',
+                              bg: 'bg-[var(--surface-secondary)]',
+                              border: 'border-[var(--border-subtle)]',
                             };
                             return (
                               <div
                                 key={alert.id}
-                                className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex items-start gap-2.5"
+                                className="p-3 hover:bg-[var(--surface-secondary)] transition-colors flex items-start gap-2.5"
                               >
-                                <div className={`p-1 rounded ${cfg.bg} ${cfg.color} shrink-0 mt-0.5`}>
+                                <div className={`p-1 rounded-[var(--radius-small)] ${cfg.bg} ${cfg.color} shrink-0 mt-0.5`}>
                                   {cfg.icon}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-xs font-bold text-[var(--text-primary)] truncate">{alert.title}</p>
-                                  <p className="text-[11px] text-[var(--text-tertiary)] line-clamp-2 mt-0.5">{alert.message}</p>
+                                  <p className="text-label-micro text-[var(--text-tertiary)] line-clamp-2 mt-0.5">{alert.message}</p>
                                 </div>
                                 <button
                                   onClick={() => onDismissAlert(alert.id)}
-                                  className="w-6 h-6 flex items-center justify-center rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                  className="w-6 h-6 flex items-center justify-center rounded-[var(--radius-small)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
                                   aria-label="Dismiss alert"
                                 >
                                   <X size={12} />
