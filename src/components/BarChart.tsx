@@ -1,9 +1,9 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Portfolio } from '../types/portfolio';
 import { formatINR } from '../utils/formatters';
 import { usePrivacy } from '../contexts/PrivacyContext';
 import { SegmentedControl } from './ui/SegmentedControl';
-import { BarChart3, TrendingUp, TrendingDown, Layers } from './icons/AppIcons';
+import { BarChart3, Layers } from './icons/AppIcons';
 
 interface BarChartProps {
   portfolios: Portfolio[];
@@ -36,7 +36,7 @@ function BarChart({ portfolios }: BarChartProps) {
     const highest = Math.max(
       ...validPortfolios.map((p) => Math.max(p.totalInvested, p.totalCurrentValue, 1))
     );
-    // Add 15% headroom so bars and values don't touch the top edge
+    // 15% headroom so bars and values don't touch the top gridline
     return highest * 1.15;
   }, [validPortfolios]);
 
@@ -49,7 +49,7 @@ function BarChart({ portfolios }: BarChartProps) {
 
   if (!validPortfolios || validPortfolios.length === 0) {
     return (
-      <div className="apple-card p-5 flex flex-col h-[370px] justify-between">
+      <div className="apple-card p-4 sm:p-5 flex flex-col h-[370px] justify-between">
         <div className="flex justify-between items-start">
           <div>
             <h3 className="text-card-title font-bold text-[var(--text-primary)]">Invested vs Current Value</h3>
@@ -68,20 +68,22 @@ function BarChart({ portfolios }: BarChartProps) {
     );
   }
 
-  const chartHeight = 180;
-  const paddingTop = 22;
-  const paddingBottom = 48;
-  const paddingLeft = 52;
-  const paddingRight = 20;
+  // Precise geometry giving ample bottom breathing room
+  const chartHeight = 135;
+  const paddingTop = 16;
+  const paddingBottom = 42;
+  const paddingLeft = 48;
+  const paddingRight = 16;
   const svgWidth = 440;
+  const totalSvgHeight = chartHeight + paddingTop + paddingBottom; // 193
   const innerWidth = svgWidth - paddingLeft - paddingRight;
 
   const yTicks = 4;
 
   return (
-    <div className="apple-card p-5 flex flex-col h-[370px] justify-between select-none">
+    <div className="apple-card p-4 sm:p-5 flex flex-col h-[370px] justify-between select-none">
       {/* Header with Title & Mode Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5 shrink-0">
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-card-title font-bold text-[var(--text-primary)]">
@@ -122,11 +124,11 @@ function BarChart({ portfolios }: BarChartProps) {
       </div>
 
       {/* Main Chart / List Area */}
-      <div className="flex-1 relative flex items-center justify-center min-h-0 w-full overflow-hidden">
+      <div className="flex-1 relative flex flex-col justify-center min-h-0 w-full py-1">
         {mode === 'grouped' && (
-          <div className="w-full h-full flex flex-col justify-center">
+          <div className="w-full h-full flex flex-col justify-between">
             {/* Legend & Summary Subhead */}
-            <div className="flex items-center justify-between px-1 mb-1 text-[11px]">
+            <div className="flex items-center justify-between px-1 mb-1 text-[11px] shrink-0">
               <div className="flex items-center gap-3.5">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-sm bg-[var(--surface-tertiary)] border border-[var(--border-subtle)]" />
@@ -160,10 +162,11 @@ function BarChart({ portfolios }: BarChartProps) {
             </div>
 
             {/* Responsive SVG Grouped Bar Chart */}
-            <div className="w-full flex-1">
+            <div className="w-full flex-1 flex items-center justify-center">
               <svg
-                viewBox={`0 0 ${svgWidth} ${chartHeight + paddingTop + paddingBottom}`}
-                className="w-full h-full overflow-visible"
+                viewBox={`0 0 ${svgWidth} ${totalSvgHeight}`}
+                className="w-full h-full"
+                preserveAspectRatio="xMidYMid meet"
                 role="img"
                 aria-label="Invested vs Current Value bar chart"
               >
@@ -184,10 +187,10 @@ function BarChart({ portfolios }: BarChartProps) {
                         strokeWidth={1}
                       />
                       <text
-                        x={paddingLeft - 8}
+                        x={paddingLeft - 6}
                         y={y + 3.5}
                         textAnchor="end"
-                        className="fill-[var(--text-tertiary)] font-medium text-[9.5px] tnum"
+                        className="fill-[var(--text-tertiary)] font-medium text-[9px] tnum"
                       >
                         {isBalancesHidden
                           ? '••'
@@ -207,12 +210,12 @@ function BarChart({ portfolios }: BarChartProps) {
                 {validPortfolios.map((p, pi) => {
                   const numGroups = validPortfolios.length;
                   const slotWidth = innerWidth / numGroups;
-                  const barWidth = Math.min(Math.max(slotWidth * 0.28, 18), 34);
+                  const barWidth = Math.min(Math.max(slotWidth * 0.28, 16), 32);
                   const barGap = 4;
                   const groupCenterX = paddingLeft + pi * slotWidth + slotWidth / 2;
 
-                  const investedH = Math.max((p.totalInvested / maxVal) * chartHeight, 2);
-                  const currentH = Math.max((p.totalCurrentValue / maxVal) * chartHeight, 2);
+                  const investedH = Math.max((p.totalInvested / maxVal) * chartHeight, 4);
+                  const currentH = Math.max((p.totalCurrentValue / maxVal) * chartHeight, 4);
                   const isGain = p.totalCurrentValue >= p.totalInvested;
                   const isHovered = hoveredIdx === pi;
 
@@ -227,7 +230,7 @@ function BarChart({ portfolios }: BarChartProps) {
                   return (
                     <g
                       key={p.id || pi}
-                      className="cursor-pointer transition-transform duration-200"
+                      className="cursor-pointer"
                       onMouseEnter={() => setHoveredIdx(pi)}
                       onMouseLeave={() => setHoveredIdx(null)}
                     >
@@ -238,7 +241,7 @@ function BarChart({ portfolios }: BarChartProps) {
                           y={paddingTop}
                           width={slotWidth * 0.9}
                           height={chartHeight}
-                          rx={8}
+                          rx={6}
                           className="fill-[var(--surface-secondary)] opacity-60"
                         />
                       )}
@@ -249,8 +252,8 @@ function BarChart({ portfolios }: BarChartProps) {
                         y={paddingTop + chartHeight - investedH}
                         width={barWidth}
                         height={investedH}
-                        rx={5}
-                        className={`transition-all duration-200 fill-[var(--surface-tertiary)] stroke-[var(--border-subtle)] ${
+                        rx={4}
+                        className={`transition-all duration-150 fill-[var(--surface-tertiary)] stroke-[var(--border-subtle)] ${
                           isHovered ? 'opacity-100 filter brightness-110' : 'opacity-85'
                         }`}
                         strokeWidth={0.5}
@@ -262,51 +265,28 @@ function BarChart({ portfolios }: BarChartProps) {
                         y={paddingTop + chartHeight - currentH}
                         width={barWidth}
                         height={currentH}
-                        rx={5}
-                        className={`transition-all duration-200 ${
+                        rx={4}
+                        className={`transition-all duration-150 ${
                           isGain ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
-                        } ${isHovered ? 'opacity-100 filter drop-shadow(0 2px 6px rgba(0,0,0,0.15))' : 'opacity-90'}`}
+                        } ${isHovered ? 'opacity-100 filter drop-shadow(0 2px 4px rgba(0,0,0,0.15))' : 'opacity-90'}`}
                       />
-
-                      {/* Floating Value on Top of Current Bar if Hovered */}
-                      {isHovered && (
-                        <g className="animate-fade-in">
-                          <rect
-                            x={currentX + barWidth / 2 - 28}
-                            y={Math.max(paddingTop + chartHeight - Math.max(currentH, investedH) - 22, 2)}
-                            width={56}
-                            height={18}
-                            rx={4}
-                            className="fill-[var(--surface-elevated)] stroke-[var(--border-subtle)]"
-                            strokeWidth={1}
-                          />
-                          <text
-                            x={currentX + barWidth / 2}
-                            y={Math.max(paddingTop + chartHeight - Math.max(currentH, investedH) - 10, 14)}
-                            textAnchor="middle"
-                            className="fill-[var(--text-primary)] font-extrabold text-[9.5px] tnum"
-                          >
-                            {isBalancesHidden ? '••••' : formatINR(p.totalCurrentValue)}
-                          </text>
-                        </g>
-                      )}
 
                       {/* Member Name Label */}
                       <text
                         x={groupCenterX}
-                        y={paddingTop + chartHeight + 16}
+                        y={paddingTop + chartHeight + 15}
                         textAnchor="middle"
-                        className={`text-[11px] font-bold transition-colors ${
+                        className={`text-[10.5px] font-bold transition-colors ${
                           isHovered ? 'fill-[var(--accent-blue)]' : 'fill-[var(--text-primary)]'
                         }`}
                       >
                         {shortName}
                       </text>
 
-                      {/* Performance % Pill */}
+                      {/* Performance % Pill / Text */}
                       <text
                         x={groupCenterX}
-                        y={paddingTop + chartHeight + 30}
+                        y={paddingTop + chartHeight + 28}
                         textAnchor="middle"
                         className={`text-[10px] font-extrabold tnum ${
                           p.totalPnLPercent >= 0 ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
@@ -323,17 +303,18 @@ function BarChart({ portfolios }: BarChartProps) {
         )}
 
         {mode === 'returns' && (
-          <div className="w-full h-full flex flex-col justify-between py-1">
-            <div className="flex items-center justify-between text-xs text-[var(--text-secondary)] px-1 mb-1">
-              <span className="font-semibold">Performance Return (%)</span>
+          <div className="w-full h-full flex flex-col justify-between py-0.5">
+            <div className="flex items-center justify-between text-xs text-[var(--text-secondary)] px-1 mb-1 shrink-0">
+              <span className="font-semibold text-[11px]">Normalized Returns Comparison</span>
               <span className="text-[10px] text-[var(--text-tertiary)]">Baseline 0.0%</span>
             </div>
 
             {/* Zero-Centered Returns Bar Chart */}
-            <div className="w-full flex-1">
+            <div className="w-full flex-1 flex items-center justify-center">
               <svg
-                viewBox={`0 0 ${svgWidth} ${chartHeight + paddingTop + paddingBottom}`}
-                className="w-full h-full overflow-visible"
+                viewBox={`0 0 ${svgWidth} ${totalSvgHeight}`}
+                className="w-full h-full"
+                preserveAspectRatio="xMidYMid meet"
               >
                 {/* 0% Central Baseline */}
                 <line
@@ -343,51 +324,51 @@ function BarChart({ portfolios }: BarChartProps) {
                   y2={paddingTop + chartHeight / 2}
                   stroke="var(--text-tertiary)"
                   strokeWidth={1.5}
-                  strokeOpacity={0.7}
+                  strokeOpacity={0.6}
                 />
 
                 {/* +Max and -Max helper gridlines */}
                 <line
                   x1={paddingLeft}
-                  y1={paddingTop + 10}
+                  y1={paddingTop + 6}
                   x2={svgWidth - paddingRight}
-                  y2={paddingTop + 10}
+                  y2={paddingTop + 6}
                   stroke="var(--border-subtle)"
                   strokeDasharray="3 3"
-                  strokeOpacity={0.5}
+                  strokeOpacity={0.4}
                 />
                 <text
-                  x={paddingLeft - 8}
-                  y={paddingTop + 14}
+                  x={paddingLeft - 6}
+                  y={paddingTop + 9}
                   textAnchor="end"
-                  className="fill-[var(--positive)] font-bold text-[9.5px] tnum"
+                  className="fill-[var(--positive)] font-bold text-[9px] tnum"
                 >
                   +{maxAbsReturn}%
                 </text>
 
                 <text
-                  x={paddingLeft - 8}
-                  y={paddingTop + chartHeight / 2 + 3.5}
+                  x={paddingLeft - 6}
+                  y={paddingTop + chartHeight / 2 + 3}
                   textAnchor="end"
-                  className="fill-[var(--text-tertiary)] font-bold text-[9.5px] tnum"
+                  className="fill-[var(--text-tertiary)] font-bold text-[9px] tnum"
                 >
                   0%
                 </text>
 
                 <line
                   x1={paddingLeft}
-                  y1={paddingTop + chartHeight - 10}
+                  y1={paddingTop + chartHeight - 6}
                   x2={svgWidth - paddingRight}
-                  y2={paddingTop + chartHeight - 10}
+                  y2={paddingTop + chartHeight - 6}
                   stroke="var(--border-subtle)"
                   strokeDasharray="3 3"
-                  strokeOpacity={0.5}
+                  strokeOpacity={0.4}
                 />
                 <text
-                  x={paddingLeft - 8}
-                  y={paddingTop + chartHeight - 6}
+                  x={paddingLeft - 6}
+                  y={paddingTop + chartHeight - 3}
                   textAnchor="end"
-                  className="fill-[var(--negative)] font-bold text-[9.5px] tnum"
+                  className="fill-[var(--negative)] font-bold text-[9px] tnum"
                 >
                   -{maxAbsReturn}%
                 </text>
@@ -396,12 +377,12 @@ function BarChart({ portfolios }: BarChartProps) {
                 {validPortfolios.map((p, pi) => {
                   const numGroups = validPortfolios.length;
                   const slotWidth = innerWidth / numGroups;
-                  const barWidth = Math.min(Math.max(slotWidth * 0.45, 24), 48);
+                  const barWidth = Math.min(Math.max(slotWidth * 0.42, 22), 44);
                   const groupCenterX = paddingLeft + pi * slotWidth + slotWidth / 2;
                   const barX = groupCenterX - barWidth / 2;
 
                   const centerY = paddingTop + chartHeight / 2;
-                  const halfH = (chartHeight / 2) - 10;
+                  const halfH = (chartHeight / 2) - 8;
                   const isGain = p.totalPnLPercent >= 0;
                   const barHeight = Math.max(
                     (Math.min(Math.abs(p.totalPnLPercent), maxAbsReturn) / maxAbsReturn) * halfH,
@@ -422,7 +403,7 @@ function BarChart({ portfolios }: BarChartProps) {
                         y={barY}
                         width={barWidth}
                         height={barHeight}
-                        rx={5}
+                        rx={4}
                         className={`transition-all duration-300 ${
                           isGain ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
                         } opacity-90 hover:opacity-100`}
@@ -431,9 +412,9 @@ function BarChart({ portfolios }: BarChartProps) {
                       {/* Exact % on top/bottom of bar */}
                       <text
                         x={groupCenterX}
-                        y={isGain ? barY - 5 : barY + barHeight + 12}
+                        y={isGain ? barY - 4 : barY + barHeight + 10}
                         textAnchor="middle"
-                        className={`font-black text-[10px] tnum ${
+                        className={`font-black text-[9.5px] tnum ${
                           isGain ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
                         }`}
                       >
@@ -443,9 +424,9 @@ function BarChart({ portfolios }: BarChartProps) {
                       {/* Member Name */}
                       <text
                         x={groupCenterX}
-                        y={paddingTop + chartHeight + 20}
+                        y={paddingTop + chartHeight + 16}
                         textAnchor="middle"
-                        className="fill-[var(--text-primary)] font-bold text-[11px]"
+                        className="fill-[var(--text-primary)] font-bold text-[10.5px]"
                       >
                         {shortName}
                       </text>
@@ -458,7 +439,7 @@ function BarChart({ portfolios }: BarChartProps) {
         )}
 
         {mode === 'breakdown' && (
-          <div className="w-full h-full overflow-y-auto space-y-2 pr-1 py-1">
+          <div className="w-full h-full overflow-y-auto space-y-2 pr-1 py-0.5">
             {validPortfolios.map((p) => {
               const isGain = p.totalPnL >= 0;
               const maxMemberVal = Math.max(p.totalInvested, p.totalCurrentValue, 1);
