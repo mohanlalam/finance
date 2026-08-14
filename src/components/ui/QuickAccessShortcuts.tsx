@@ -1,9 +1,9 @@
 import React from 'react';
 import { 
   TrendingUp, Landmark, Clock, Coins, Home, 
-  Shield, FolderOpen, Calculator, TrendingDown 
+  Shield, FolderOpen, TrendingDown 
 } from '../icons/AppIcons';
-export type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'what_if' | 'tax';
+export type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
 
 interface QuickAccessShortcutsProps {
   activeAsset: AssetTab;
@@ -26,7 +26,6 @@ const SHORTCUTS: {
   { id: 'real_estate', label: 'Real Estate', shortLabel: 'Real Estate', icon: Home, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-500/10 dark:bg-purple-400/10' },
   { id: 'insurance', label: 'Insurance Cover', shortLabel: 'Insurance', icon: Shield, color: 'text-[var(--negative)]', bg: 'bg-[var(--negative-soft)]' },
   { id: 'documents', label: 'Document Vault', shortLabel: 'Vault', icon: FolderOpen, color: 'text-[var(--text-secondary)]', bg: 'bg-[var(--surface-secondary)]' },
-  { id: 'what_if', label: 'What-If Calculator', shortLabel: 'Calculator', icon: Calculator, color: 'text-sky-600 dark:text-sky-400', bg: 'bg-sky-500/10 dark:bg-sky-400/10' },
   { id: 'tax', label: 'Tax Harvesting', shortLabel: 'Tax', icon: TrendingDown, color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-500/10 dark:bg-teal-400/10' },
 ];
 
@@ -44,7 +43,7 @@ export function QuickAccessShortcuts({ activeAsset, onSelectAsset }: QuickAccess
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-2.5">
         {SHORTCUTS.map((item) => {
           const Icon = item.icon;
           const isActive = activeAsset === item.id;

@@ -1,4 +1,4 @@
-import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, Calculator, TrendingDown, Pencil, Plus } from '../components/icons/AppIcons';
+import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, TrendingDown, Pencil, Plus } from '../components/icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
 
 export interface DesktopSidebarProps {
@@ -109,7 +109,6 @@ export default function DesktopSidebar({
         <div className="space-y-0.5">
           {([
             { id: 'documents', label: 'Document Vault', icon: <FolderOpen size={14} /> },
-            { id: 'what_if', label: 'What-If Calculator', icon: <Calculator size={14} /> },
             { id: 'tax', label: 'Tax Harvesting', icon: <TrendingDown size={14} /> },
           ] as const).map((tab) => {
             const isActive = activeTab === tab.id;

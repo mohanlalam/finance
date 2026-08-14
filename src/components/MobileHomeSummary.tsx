@@ -35,7 +35,7 @@ interface MobileHomeSummaryProps {
   priceStatus: string;
   onRefresh: () => void;
   isLoadingPrices: boolean;
-  onNavigateAsset: (asset: 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'what_if') => void;
+  onNavigateAsset: (asset: 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
   onOpenAlerts: () => void;
   portfolios: Portfolio[];
   activePortfolio: Portfolio | null;

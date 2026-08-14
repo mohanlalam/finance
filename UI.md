@@ -450,14 +450,6 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   * ₹1.25 Lakh Annual LTCG Exemption Progress Bar.
   * Harvesting Opportunity List: Recommends specific stock/ETF holdings to sell and repurchase to offset taxable capital gains.
 
-### What-If Compound Wealth Calculator
-
-* Component: `WhatIfCalculator.tsx`
-* Interactive Elements:
-  * Custom Range Sliders: Monthly Contribution (₹1K – ₹500K), Horizon Years (1–30 Yrs), Expected Rate of Return (4% – 30%).
-  * Wealth Projection Area Chart: Dual SVG filled curve comparing Capital Invested vs Total Growth Wealth.
-  * Metrics Panel: Instant recalculation of Estimated Returns, Future Value, and Inflation-adjusted wealth.
-
 ### Portfolio Assistant (AI Conversational UI)
 
 * Component: `PortfolioAssistant.tsx`
