@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { RealEstate } from '../../types/portfolio';
+import { RealEstate, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
+import { DocumentAttachmentField } from '../ui/DocumentAttachmentField';
+import { uploadDocumentFile } from '../../utils/supabaseStorage';
 
 interface PortfolioOption {
   name: string;
@@ -13,10 +15,12 @@ interface RealEstateFormModalProps {
   editingProperty: RealEstate | null;
   portfolioName: string;
   portfolioOptions: PortfolioOption[];
+  documents?: DocumentMetadata[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onDeleteDoc?: (assetType: string, id: string) => Promise<void>;
 }
 
 const TYPE_OPTIONS: Array<RealEstate['property_type']> = ['apartment', 'house', 'plot', 'commercial'];
@@ -27,8 +31,10 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
   editingProperty,
   portfolioName,
   portfolioOptions,
+  documents = [],
   onAdd,
   onUpdate,
+  onDeleteDoc,
 }: RealEstateFormModalProps) {
   const [propertyName, setPropertyName] = useState('');
   const [propertyType, setPropertyType] = useState<RealEstate['property_type']>('apartment');
@@ -38,8 +44,15 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
   const [purchaseDate, setPurchaseDate] = useState('');
   const [notes, setNotes] = useState('');
   const [targetPortfolio, setTargetPortfolio] = useState(portfolioName);
+  const [supportingFile, setSupportingFile] = useState<File | null>(null);
+  const [docName, setDocName] = useState('');
+  const [docExpiry, setDocExpiry] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const existingDocs = editingProperty
+    ? documents.filter((d) => d.asset_type === 'real_estate' && d.asset_id === editingProperty.id)
+    : [];
 
   useEffect(() => {
     if (editingProperty) {
@@ -61,6 +74,9 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
       setNotes('');
       setTargetPortfolio(portfolioName);
     }
+    setSupportingFile(null);
+    setDocName('');
+    setDocExpiry('');
     setError(null);
   }, [editingProperty, portfolioName, isOpen]);
 
@@ -84,11 +100,31 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
         notes: notes.trim() || undefined,
       };
 
+      let assetId = editingProperty?.id;
+
       if (editingProperty) {
         await onUpdate('real_estate', editingProperty.id, payload);
       } else {
-        await onAdd('real_estate', targetPortfolio, payload);
+        const res = await onAdd('real_estate', targetPortfolio, payload);
+        assetId = res?.id || res?.data?.id;
       }
+
+      // Upload and link supporting document if selected
+      if (supportingFile) {
+        const ts = Date.now();
+        const safeName = supportingFile.name.replace(/[^\w.-]/g, '_');
+        const storagePath = `${targetPortfolio}/real_estate/${ts}_${safeName}`;
+        await uploadDocumentFile('investment-documents', storagePath, supportingFile);
+        await onAdd('document', targetPortfolio, {
+          name: docName || supportingFile.name,
+          filePath: storagePath,
+          fileType: supportingFile.type,
+          linkedAssetType: 'real_estate',
+          linkedAssetId: assetId || null,
+          expiryDate: docExpiry || null,
+        });
+      }
+
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save property');
@@ -218,6 +254,22 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
             className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 resize-none"
           />
         </div>
+
+        {/* Supporting Document Attachment */}
+        <DocumentAttachmentField
+          file={supportingFile}
+          onFileChange={setSupportingFile}
+          documentName={docName}
+          onDocumentNameChange={setDocName}
+          expiryDate={docExpiry}
+          onExpiryDateChange={setDocExpiry}
+          showExpiryDate={true}
+          expiryDateLabel="Agreement / Lease Expiry Date (optional)"
+          existingDocuments={existingDocs}
+          onDeleteExistingDoc={onDeleteDoc ? (docId) => onDeleteDoc('document', docId) : undefined}
+          assetTypeLabel="property"
+          hintText="Upload title deed, sale agreement, registry copy, or tax receipt"
+        />
 
         {error && (
           <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2" role="alert">

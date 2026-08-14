@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../../utils/formatters';
-import { Edit2, Trash2, Scale, Coins, FileText, StickyNote } from '../icons/AppIcons';
+import { Edit2, Trash2, Scale, Coins, FileText, StickyNote, Paperclip } from '../icons/AppIcons';
 
 interface GoldHoldingCardProps {
   holding: GoldHolding;
@@ -58,7 +58,7 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
               type="button"
               onClick={() => onOpenEdit(holding)}
               className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-              title="Edit holding"
+              title="Edit holding & documents"
             >
               <Edit2 size={13} />
             </button>
@@ -74,32 +74,42 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
         </div>
       </div>
 
-      {(docs.length > 0 || holding.notes) && (
-        <div className="flex items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-700/60 text-xs">
-          {docs.map((doc) => (
-            <a
-              key={doc.id}
-              href={getDocumentUrl(doc.file_path)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 hover:underline font-medium"
-            >
-              <FileText size={12} />
-              {doc.name}
-            </a>
-          ))}
-          {holding.notes && (
-            <button
-              type="button"
-              onClick={() => setShowNotes(!showNotes)}
-              className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs font-medium ml-auto"
-            >
-              <StickyNote size={12} />
-              {showNotes ? 'Hide Notes' : 'View Notes'}
-            </button>
-          )}
-        </div>
-      )}
+      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60 text-xs">
+        {docs.map((doc) => (
+          <a
+            key={doc.id}
+            href={getDocumentUrl(doc.file_path)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200/50 dark:border-amber-800/40 text-amber-700 dark:text-amber-300 hover:underline font-medium text-[11px] max-w-[220px] truncate"
+            title={`View ${doc.name}`}
+          >
+            <FileText size={11} className="shrink-0" />
+            <span className="truncate">{doc.name}</span>
+          </a>
+        ))}
+        {docs.length === 0 && (
+          <button
+            type="button"
+            onClick={() => onOpenEdit(holding)}
+            className="inline-flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+            title="Attach supporting document"
+          >
+            <Paperclip size={11} />
+            <span>+ Attach Doc</span>
+          </button>
+        )}
+        {holding.notes && (
+          <button
+            type="button"
+            onClick={() => setShowNotes(!showNotes)}
+            className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs font-medium ml-auto"
+          >
+            <StickyNote size={12} />
+            {showNotes ? 'Hide Notes' : 'View Notes'}
+          </button>
+        )}
+      </div>
 
       {showNotes && holding.notes && (
         <p className="mt-2 p-2.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl text-xs text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700/50">

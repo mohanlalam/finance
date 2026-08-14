@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Insurance } from '../../types/portfolio';
+import { Insurance, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
+import { DocumentAttachmentField } from '../ui/DocumentAttachmentField';
+import { uploadDocumentFile } from '../../utils/supabaseStorage';
 
 interface PortfolioOption {
   name: string;
@@ -13,10 +15,12 @@ interface InsuranceFormModalProps {
   editingPolicy: Insurance | null;
   portfolioName: string;
   portfolioOptions: PortfolioOption[];
+  documents?: DocumentMetadata[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onDeleteDoc?: (assetType: string, id: string) => Promise<void>;
 }
 
 const TYPE_OPTIONS: Array<Insurance['insurance_type']> = ['health', 'term', 'life', 'motor', 'other'];
@@ -27,8 +31,10 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
   editingPolicy,
   portfolioName,
   portfolioOptions,
+  documents = [],
   onAdd,
   onUpdate,
+  onDeleteDoc,
 }: InsuranceFormModalProps) {
   const [policyName, setPolicyName] = useState('');
   const [insuranceType, setInsuranceType] = useState<Insurance['insurance_type']>('health');
@@ -36,12 +42,18 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
   const [policyNumber, setPolicyNumber] = useState('');
   const [sumAssured, setSumAssured] = useState('');
   const [premiumAmount, setPremiumAmount] = useState('');
-  const [startDate, setStartDate] = useState('');
   const [renewalDate, setRenewalDate] = useState('');
   const [notes, setNotes] = useState('');
   const [targetPortfolio, setTargetPortfolio] = useState(portfolioName);
+  const [supportingFile, setSupportingFile] = useState<File | null>(null);
+  const [docName, setDocName] = useState('');
+  const [docExpiry, setDocExpiry] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const existingDocs = editingPolicy
+    ? documents.filter((d) => d.asset_type === 'insurance' && d.asset_id === editingPolicy.id)
+    : [];
 
   useEffect(() => {
     if (editingPolicy) {
@@ -65,6 +77,9 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
       setNotes('');
       setTargetPortfolio(portfolioName);
     }
+    setSupportingFile(null);
+    setDocName('');
+    setDocExpiry('');
     setError(null);
   }, [editingPolicy, portfolioName, isOpen]);
 
@@ -94,11 +109,31 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
         notes: notes.trim() || undefined,
       };
 
+      let assetId = editingPolicy?.id;
+
       if (editingPolicy) {
         await onUpdate('insurance', editingPolicy.id, payload);
       } else {
-        await onAdd('insurance', targetPortfolio, payload);
+        const res = await onAdd('insurance', targetPortfolio, payload);
+        assetId = res?.id || res?.data?.id;
       }
+
+      // Upload and link supporting document if selected
+      if (supportingFile) {
+        const ts = Date.now();
+        const safeName = supportingFile.name.replace(/[^\w.-]/g, '_');
+        const storagePath = `${targetPortfolio}/insurance/${ts}_${safeName}`;
+        await uploadDocumentFile('investment-documents', storagePath, supportingFile);
+        await onAdd('document', targetPortfolio, {
+          name: docName || supportingFile.name,
+          filePath: storagePath,
+          fileType: supportingFile.type,
+          linkedAssetType: 'insurance',
+          linkedAssetId: assetId || null,
+          expiryDate: docExpiry || renewalDate || null,
+        });
+      }
+
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save policy');
@@ -258,6 +293,22 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
             className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 resize-none"
           />
         </div>
+
+        {/* Supporting Document Attachment */}
+        <DocumentAttachmentField
+          file={supportingFile}
+          onFileChange={setSupportingFile}
+          documentName={docName}
+          onDocumentNameChange={setDocName}
+          expiryDate={docExpiry}
+          onExpiryDateChange={setDocExpiry}
+          showExpiryDate={true}
+          expiryDateLabel="Policy Expiry / Renewal Date (optional)"
+          existingDocuments={existingDocs}
+          onDeleteExistingDoc={onDeleteDoc ? (docId) => onDeleteDoc('document', docId) : undefined}
+          assetTypeLabel="policy"
+          hintText="Upload policy bond, health e-card, premium receipt, or terms copy"
+        />
 
         {error && (
           <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2" role="alert">

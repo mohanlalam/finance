@@ -5,6 +5,7 @@ import EmptyState from '../../components/EmptyState';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { ToastProvider, useToastActions } from '../../contexts/ToastContext';
 import ToastContainer from '../../components/Toast';
+import { DocumentAttachmentField } from '../../components/ui/DocumentAttachmentField';
 
 afterEach(() => {
   cleanup();
@@ -134,5 +135,46 @@ describe('Toast System', () => {
 
     // Toast should be removed instantly
     expect(screen.queryByRole('alert')).toBeNull();
+  });
+});
+
+describe('DocumentAttachmentField Component', () => {
+  it('renders upload button when no file is selected and triggers file picker', () => {
+    const handleFileChange = vi.fn();
+    render(
+      <DocumentAttachmentField
+        file={null}
+        onFileChange={handleFileChange}
+        assetTypeLabel="gold holding"
+      />
+    );
+
+    expect(screen.getByText('Supporting Document')).toBeDefined();
+    expect(screen.getByText('Choose or drag document to attach')).toBeDefined();
+  });
+
+  it('renders selected file chip with remove button and name override', () => {
+    const handleFileChange = vi.fn();
+    const handleNameChange = vi.fn();
+    const testFile = new File(['dummy content'], 'invoice.pdf', { type: 'application/pdf' });
+
+    render(
+      <DocumentAttachmentField
+        file={testFile}
+        onFileChange={handleFileChange}
+        documentName="Gold Hallmark Invoice"
+        onDocumentNameChange={handleNameChange}
+        showExpiryDate={true}
+        assetTypeLabel="gold holding"
+      />
+    );
+
+    expect(screen.getByText('invoice.pdf')).toBeDefined();
+    const nameInput = screen.getByDisplayValue('Gold Hallmark Invoice');
+    expect(nameInput).toBeDefined();
+
+    const removeBtn = screen.getByTitle('Remove file');
+    fireEvent.click(removeBtn);
+    expect(handleFileChange).toHaveBeenCalledWith(null);
   });
 });

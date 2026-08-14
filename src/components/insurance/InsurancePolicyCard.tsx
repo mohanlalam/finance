@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Insurance, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, getDocumentUrl } from '../../utils/formatters';
-import { Edit2, Trash2, Shield, ShieldAlert, Calendar, FileText, StickyNote } from '../icons/AppIcons';
+import { Edit2, Trash2, Shield, ShieldAlert, Calendar, FileText, StickyNote, Paperclip } from '../icons/AppIcons';
 
 interface InsurancePolicyCardProps {
   policy: Insurance;
@@ -72,7 +72,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
               type="button"
               onClick={() => onOpenEdit(policy)}
               className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
-              title="Edit policy"
+              title="Edit policy & documents"
             >
               <Edit2 size={13} />
             </button>
@@ -89,9 +89,9 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60 text-xs">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {policy.renewal_date && (
-            <span className={`inline-flex items-center gap-1 font-medium ${isExpiringSoon ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-slate-500 dark:text-slate-400'}`}>
+            <span className={`inline-flex items-center gap-1 font-medium mr-1 ${isExpiringSoon ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-slate-500 dark:text-slate-400'}`}>
               <Calendar size={12} />
               Renewal: {new Date(policy.renewal_date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
               {daysRemaining !== null && daysRemaining <= 60 && (
@@ -107,12 +107,24 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
               href={getDocumentUrl(doc.file_path)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 hover:underline font-medium"
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 border border-rose-200/50 dark:border-rose-800/40 text-rose-700 dark:text-rose-300 hover:underline font-medium text-[11px] max-w-[220px] truncate"
+              title={`View ${doc.name}`}
             >
-              <FileText size={12} />
-              {doc.name}
+              <FileText size={11} className="shrink-0" />
+              <span className="truncate">{doc.name}</span>
             </a>
           ))}
+          {docs.length === 0 && (
+            <button
+              type="button"
+              onClick={() => onOpenEdit(policy)}
+              className="inline-flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+              title="Attach policy document"
+            >
+              <Paperclip size={11} />
+              <span>+ Attach Doc</span>
+            </button>
+          )}
         </div>
 
         {policy.notes && (

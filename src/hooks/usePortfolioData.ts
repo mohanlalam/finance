@@ -969,7 +969,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     return runMutation(async () => {
       try {
         const finalPayload = { ...payload } as Record<string, unknown>;
-        await invokeFunction<unknown>('holdings-crud?action=add', {
+        const res = await invokeFunction<{ data?: { id?: string } }>('holdings-crud?action=add', {
           method: 'POST',
           body: {
             asset_type: assetType,
@@ -983,6 +983,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         if (options.reload !== false) {
           await load();
         }
+        return res?.data;
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
         throw err;

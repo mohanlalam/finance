@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { GoldHolding } from '../../types/portfolio';
+import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
+import { DocumentAttachmentField } from '../ui/DocumentAttachmentField';
+import { uploadDocumentFile } from '../../utils/supabaseStorage';
 
 interface PortfolioOption {
   name: string;
@@ -13,10 +15,12 @@ interface GoldFormModalProps {
   editingHolding: GoldHolding | null;
   portfolioName: string;
   portfolioOptions: PortfolioOption[];
+  documents?: DocumentMetadata[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onDeleteDoc?: (assetType: string, id: string) => Promise<void>;
 }
 
 const PURITY_OPTIONS = ['24K', '22K', '20K', '18K', '14K'];
@@ -27,8 +31,10 @@ export const GoldFormModal = React.memo(function GoldFormModal({
   editingHolding,
   portfolioName,
   portfolioOptions,
+  documents = [],
   onAdd,
   onUpdate,
+  onDeleteDoc,
 }: GoldFormModalProps) {
   const [itemName, setItemName] = useState('');
   const [purity, setPurity] = useState('24K');
@@ -38,8 +44,15 @@ export const GoldFormModal = React.memo(function GoldFormModal({
   const [purchaseDate, setPurchaseDate] = useState('');
   const [notes, setNotes] = useState('');
   const [targetPortfolio, setTargetPortfolio] = useState(portfolioName);
+  const [supportingFile, setSupportingFile] = useState<File | null>(null);
+  const [docName, setDocName] = useState('');
+  const [docExpiry, setDocExpiry] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const existingDocs = editingHolding
+    ? documents.filter((d) => d.asset_type === 'gold' && d.asset_id === editingHolding.id)
+    : [];
 
   useEffect(() => {
     if (editingHolding) {
@@ -61,6 +74,9 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       setNotes('');
       setTargetPortfolio(portfolioName);
     }
+    setSupportingFile(null);
+    setDocName('');
+    setDocExpiry('');
     setError(null);
   }, [editingHolding, portfolioName, isOpen]);
 
@@ -89,11 +105,31 @@ export const GoldFormModal = React.memo(function GoldFormModal({
         notes: notes.trim() || undefined,
       };
 
+      let assetId = editingHolding?.id;
+
       if (editingHolding) {
         await onUpdate('gold', editingHolding.id, payload);
       } else {
-        await onAdd('gold', targetPortfolio, payload);
+        const res = await onAdd('gold', targetPortfolio, payload);
+        assetId = res?.id || res?.data?.id;
       }
+
+      // Upload and link supporting document if selected
+      if (supportingFile) {
+        const ts = Date.now();
+        const safeName = supportingFile.name.replace(/[^\w.-]/g, '_');
+        const storagePath = `${targetPortfolio}/gold/${ts}_${safeName}`;
+        await uploadDocumentFile('investment-documents', storagePath, supportingFile);
+        await onAdd('document', targetPortfolio, {
+          name: docName || supportingFile.name,
+          filePath: storagePath,
+          fileType: supportingFile.type,
+          linkedAssetType: 'gold',
+          linkedAssetId: assetId || null,
+          expiryDate: docExpiry || null,
+        });
+      }
+
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save gold holding');
@@ -225,6 +261,21 @@ export const GoldFormModal = React.memo(function GoldFormModal({
             className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 resize-none"
           />
         </div>
+
+        {/* Supporting Document Attachment */}
+        <DocumentAttachmentField
+          file={supportingFile}
+          onFileChange={setSupportingFile}
+          documentName={docName}
+          onDocumentNameChange={setDocName}
+          expiryDate={docExpiry}
+          onExpiryDateChange={setDocExpiry}
+          showExpiryDate={false}
+          existingDocuments={existingDocs}
+          onDeleteExistingDoc={onDeleteDoc ? (docId) => onDeleteDoc('document', docId) : undefined}
+          assetTypeLabel="gold holding"
+          hintText="Upload purchase receipt, invoice, or hallmark certificate"
+        />
 
         {error && (
           <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2" role="alert">

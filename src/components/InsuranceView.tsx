@@ -119,8 +119,10 @@ export function InsuranceView({
         editingPolicy={editingItem}
         portfolioName={portfolioName}
         portfolioOptions={portfolioOptions}
+        documents={documents}
         onAdd={onAdd}
         onUpdate={onUpdate}
+        onDeleteDoc={onDelete}
       />
 
       <ConfirmModal
