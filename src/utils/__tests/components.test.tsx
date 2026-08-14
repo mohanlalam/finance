@@ -150,7 +150,7 @@ describe('DocumentAttachmentField Component', () => {
     );
 
     expect(screen.getByText('Supporting Document')).toBeDefined();
-    expect(screen.getByText('Choose or drag document to attach')).toBeDefined();
+    expect(screen.getByText(/Click to upload/i)).toBeDefined();
   });
 
   it('renders selected file chip with remove button and name override', () => {

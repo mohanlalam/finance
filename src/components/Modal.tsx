@@ -250,7 +250,7 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title || ariaLabel}
-        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-large)] rounded-b-none sm:rounded-b-[var(--radius-large)] shadow-2xl w-full ${maxWidth} max-h-[85vh] sm:max-h-[80vh] mb-0 sm:my-auto pb-safe sm:pb-0 flex flex-col min-h-0 overflow-hidden outline-none ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
+        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-large)] rounded-b-none sm:rounded-b-[var(--radius-large)] shadow-2xl w-full ${maxWidth} max-h-[92vh] sm:max-h-[88vh] mb-0 sm:my-auto pb-safe sm:pb-0 flex flex-col min-h-0 overflow-hidden outline-none ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
         style={hasDragOffset ? { transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)` } : undefined}
         onPointerDown={handlePointerDown}
       >
@@ -273,7 +273,9 @@ export default function Modal({
             )}
           </header>
         )}
-        {children}
+        <div className="overflow-y-auto flex-1 min-h-0 overscroll-contain">
+          {children}
+        </div>
       </div>
     </div>
   );
