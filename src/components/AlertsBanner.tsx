@@ -4,6 +4,8 @@ import { Alert, AlertType } from '../hooks/useAlerts';
 
 interface AlertsBannerProps {
   alerts: Alert[];
+  onDismissAlert?: (id: string) => void;
+  onDismissAll?: () => void;
 }
 
 const TYPE_CONFIG: Record<AlertType, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
@@ -53,8 +55,8 @@ const SEVERITY_BADGE: Record<string, string> = {
 
 import { getNotificationPermission, requestNotificationPermission } from '../utils/notifications';
 
-function AlertsBanner({ alerts }: AlertsBannerProps) {
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+function AlertsBanner({ alerts, onDismissAlert, onDismissAll }: AlertsBannerProps) {
+  const [localDismissed, setLocalDismissed] = useState<Set<string>>(new Set());
   const [notifPerm, setNotifPerm] = useState(getNotificationPermission());
 
   const handleRequestPermission = useCallback(async () => {
@@ -63,14 +65,24 @@ function AlertsBanner({ alerts }: AlertsBannerProps) {
   }, []);
 
   const dismiss = useCallback((id: string) => {
-    setDismissed((prev) => new Set(prev).add(id));
-  }, []);
+    if (onDismissAlert) {
+      onDismissAlert(id);
+    } else {
+      setLocalDismissed((prev) => new Set(prev).add(id));
+    }
+  }, [onDismissAlert]);
 
   const dismissAll = useCallback(() => {
-    setDismissed(new Set(alerts.map((a) => a.id)));
-  }, [alerts]);
+    if (onDismissAll) {
+      onDismissAll();
+    } else {
+      setLocalDismissed(new Set(alerts.map((a) => a.id)));
+    }
+  }, [alerts, onDismissAll]);
 
-  const visible = alerts.filter((a) => !dismissed.has(a.id));
+  const visible = onDismissAlert
+    ? alerts
+    : alerts.filter((a) => !localDismissed.has(a.id));
 
   if (visible.length === 0) return null;
 

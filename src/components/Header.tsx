@@ -294,10 +294,14 @@ function Header({
                         <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
                           Alerts ({visibleAlerts.length})
                         </span>
-                        {visibleAlerts.length > 1 && (
+                        {visibleAlerts.length > 0 && (
                           <button
-                            onClick={onDismissAll}
-                            className="text-label-micro font-bold text-[var(--accent-blue)] hover:underline"
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDismissAll();
+                            }}
+                            className="text-label-micro font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
                           >
                             Clear All
                           </button>
@@ -306,8 +310,9 @@ function Header({
 
                       <div className="max-h-72 overflow-y-auto divide-y divide-[var(--border-subtle)]">
                         {visibleAlerts.length === 0 ? (
-                          <div className="p-4 text-center text-xs text-[var(--text-tertiary)]">
-                            No active notifications
+                          <div className="p-5 text-center text-xs text-[var(--text-tertiary)] flex flex-col items-center justify-center gap-1.5">
+                            <span className="font-semibold text-[var(--text-secondary)]">All Clear!</span>
+                            <span>No active notifications. You're completely up to date.</span>
                           </div>
                         ) : (
                           visibleAlerts.map((alert) => {
@@ -330,9 +335,14 @@ function Header({
                                   <p className="text-label-micro text-[var(--text-tertiary)] line-clamp-2 mt-0.5">{alert.message}</p>
                                 </div>
                                 <button
-                                  onClick={() => onDismissAlert(alert.id)}
-                                  className="w-6 h-6 flex items-center justify-center rounded-[var(--radius-small)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDismissAlert(alert.id);
+                                  }}
+                                  className="w-6 h-6 flex items-center justify-center rounded-[var(--radius-small)] text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--surface)] transition-colors cursor-pointer"
                                   aria-label="Dismiss alert"
+                                  title="Dismiss alert"
                                 >
                                   <X size={12} />
                                 </button>

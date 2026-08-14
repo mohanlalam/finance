@@ -193,9 +193,13 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
                         {alert.severity}
                       </span>
                       <button
-                        onClick={() => onDismissAlert(alert.id)}
-                        aria-label="Dismiss Alert"
-                        className="w-8 h-8 rounded-lg bg-white/60 dark:bg-slate-900/40 flex items-center justify-center hover:bg-white dark:hover:bg-slate-900 text-slate-400 hover:text-slate-700 transition-colors"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDismissAlert(alert.id);
+                        }}
+                        aria-label={`Dismiss ${alert.title}`}
+                        className="w-8 h-8 rounded-lg bg-white/60 dark:bg-slate-900/40 flex items-center justify-center hover:bg-white dark:hover:bg-slate-900 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer active:scale-95"
                       >
                         <X size={14} />
                       </button>
@@ -208,22 +212,27 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
         </div>
 
         {/* Footer actions */}
-        {alerts.length > 0 && (
-          <div className="p-3.5 pb-safe border-t border-[var(--border-subtle)] bg-[var(--surface)] flex gap-3">
+        <div className="p-3.5 pb-safe border-t border-[var(--border-subtle)] bg-[var(--surface)] flex gap-3">
+          {alerts.length > 0 && (
             <button
-              onClick={onDismissAll}
-              className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-[10px] ios-press transition-all"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDismissAll();
+              }}
+              className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-[10px] ios-press transition-all cursor-pointer"
             >
               Clear All ({alerts.length})
             </button>
-            <button
-              onClick={onClose}
-              className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] ios-press transition-all shadow-xs"
-            >
-              Back to Dashboard
-            </button>
-          </div>
-        )}
+          )}
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] ios-press transition-all shadow-xs cursor-pointer"
+          >
+            Back to Dashboard
+          </button>
+        </div>
       </div>
     </div>
   );

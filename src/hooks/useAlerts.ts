@@ -315,7 +315,7 @@ export function useDismissibleAlerts(portfolios: Portfolio[]) {
     setDismissedAlertsMap((prev) => {
       const next = { ...prev };
       const now = Date.now();
-      alerts.forEach((a) => {
+      alertsRef.current.forEach((a) => {
         next[a.id] = now;
       });
       try {
@@ -323,7 +323,7 @@ export function useDismissibleAlerts(portfolios: Portfolio[]) {
       } catch { /* ignore */ }
       return next;
     });
-  }, [alerts]);
+  }, []);
 
   const visibleAlerts = useMemo(() => {
     return alerts.filter((a) => !Object.prototype.hasOwnProperty.call(dismissedAlertsMap, a.id));
