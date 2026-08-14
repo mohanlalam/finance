@@ -60,23 +60,29 @@ export async function ensureHashedPin(): Promise<string> {
 }
 
 export async function verifyPin(pin: string): Promise<boolean> {
+  // 1. Direct plain-text match against master APP_PIN (fastest, no async hashing needed)
+  //    This works for the env-var PIN regardless of any stale localStorage state.
+  if (APP_PIN && pin === APP_PIN) {
+    return true;
+  }
+
   const inputHash = await hashPin(pin);
+
+  // 2. Custom PIN hash match (user changed PIN via settings)
   const customHash = localStorage.getItem(CUSTOM_HASH_KEY);
-  
-  // 1. Custom PIN match
   if (customHash && customHash === inputHash) {
     return true;
   }
 
-  // 2. Master APP_PIN match
+  // 3. Master APP_PIN hash match (secondary hash comparison)
   if (APP_PIN) {
     const expectedHash = await hashPin(APP_PIN);
-    if (inputHash === expectedHash || pin === APP_PIN) {
+    if (inputHash === expectedHash) {
       return true;
     }
   }
-  
-  // 3. Fallback to backend Edge Function
+
+  // 4. Fallback to backend Edge Function
   try {
     const { invokeFunction } = await import('./apiClient');
     const result = await invokeFunction<{ verified: boolean }>('verify-pin', {
@@ -87,10 +93,17 @@ export async function verifyPin(pin: string): Promise<boolean> {
       return true;
     }
   } catch {
-    // Ignore network / server errors
+    // Ignore network / server errors — don't block login
   }
 
   return false;
+}
+
+/** Reset any user-defined custom PIN, reverting to the master APP_PIN */
+export function clearCustomPin(): void {
+  localStorage.removeItem(CUSTOM_HASH_KEY);
+  localStorage.removeItem(CUSTOM_LENGTH_KEY);
+  clearApiSessionCache();
 }
 
 export async function setCustomPin(newPin: string): Promise<void> {

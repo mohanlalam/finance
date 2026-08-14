@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { markSessionVerified, hashPin, getPinLength, verifyPin } from '../utils/auth';
+import { markSessionVerified, hashPin, getPinLength, verifyPin, clearCustomPin } from '../utils/auth';
 
 function IconDelete({ size = 22 }: { size?: number }) {
   return (
@@ -82,6 +82,14 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     pinRef.current = '';
     setPin('');
     setError('');
+  }, [success]);
+
+  const handleForgotPin = useCallback(() => {
+    if (success) return;
+    clearCustomPin();
+    pinRef.current = '';
+    setPin('');
+    setError('Custom PIN cleared. Use master PIN.');
   }, [success]);
 
   const handleBackspace = useCallback(() => {
@@ -262,10 +270,20 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
       </main>
 
       {/* iOS Lock Screen Footer Badge */}
-      <footer className="relative z-10 text-center">
+      <footer className="relative z-10 text-center flex flex-col items-center gap-3">
         <p className="text-[11px] font-medium text-white/50 tracking-wider uppercase">
           Family Wealth Office • Encrypted Storage
         </p>
+        {!success && (
+          <button
+            type="button"
+            onClick={handleForgotPin}
+            className="text-[10px] text-white/30 hover:text-white/60 tracking-wide transition-colors duration-200 underline underline-offset-2"
+            aria-label="Reset custom PIN to master PIN"
+          >
+            Reset to master PIN
+          </button>
+        )}
       </footer>
 
       <style>{`
