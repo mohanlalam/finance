@@ -5,7 +5,9 @@ function getAuthHeaders(contentType?: string): Record<string, string> {
   const headers: Record<string, string> = {
     apikey: SUPABASE_ANON_KEY,
   };
-  if (SUPABASE_ANON_KEY) {
+  // Supabase Storage strictly validates Authorization Bearer as a compact JWS (JWT).
+  // Only include Authorization header if the key is a valid 3-part JWT (e.g. eyJ...).
+  if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.startsWith('eyJ') && SUPABASE_ANON_KEY.split('.').length === 3) {
     headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
   }
   if (contentType) {
