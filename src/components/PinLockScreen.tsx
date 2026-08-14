@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { markSessionVerified, hashPin, getPinLength, verifyPin } from '../utils/auth';
 
 function IconDelete({ size = 22 }: { size?: number }) {
@@ -108,6 +108,12 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
       verifyPin(nextPin).then((isValid) => {
         if (isValid) {
           setSuccess(true);
+          hashPin(nextPin).then((hash) => {
+            markSessionVerified(hash);
+            setTimeout(() => {
+              onUnlock();
+            }, 300);
+          });
         } else {
           setShake(true);
           setError('Incorrect PIN');
@@ -129,19 +135,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
         }, 600);
       });
     }
-  }, [success]);
-
-  useEffect(() => {
-    if (success && pin.length === getPinLength()) {
-      hashPin(pin).then((hash) => {
-        markSessionVerified(hash);
-        // Small delay to let user see filled dots & unlocked icon before opening vault
-        setTimeout(() => {
-          onUnlock();
-        }, 350);
-      });
-    }
-  }, [success, pin, onUnlock]);
+  }, [success, onUnlock]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

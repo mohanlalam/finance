@@ -45,42 +45,52 @@ export async function hashPin(pin: string): Promise<string> {
 }
 
 export async function ensureHashedPin(): Promise<string> {
-  if (!isPinConfigured()) return '';
   if (!isSessionVerified()) return '';
 
+  const sessionHash = sessionStorage.getItem(HASH_KEY);
+  if (sessionHash) return sessionHash;
+
   const customHash = localStorage.getItem(CUSTOM_HASH_KEY);
-  const hash = customHash || await hashPin(APP_PIN);
+  const hash = customHash || (APP_PIN ? await hashPin(APP_PIN) : '');
   
-  if (sessionStorage.getItem(HASH_KEY) !== hash) {
+  if (hash) {
     sessionStorage.setItem(HASH_KEY, hash);
   }
   return hash;
 }
 
 export async function verifyPin(pin: string): Promise<boolean> {
-  const customHash = localStorage.getItem(CUSTOM_HASH_KEY);
   const inputHash = await hashPin(pin);
+  const customHash = localStorage.getItem(CUSTOM_HASH_KEY);
   
-  if (customHash) {
-    return customHash === inputHash;
+  // 1. Custom PIN match
+  if (customHash && customHash === inputHash) {
+    return true;
   }
 
+  // 2. Master APP_PIN match
   if (APP_PIN) {
     const expectedHash = await hashPin(APP_PIN);
-    return inputHash === expectedHash || pin === APP_PIN;
+    if (inputHash === expectedHash || pin === APP_PIN) {
+      return true;
+    }
   }
   
-  // Verify with backend Edge Function when neither local PIN nor custom hash is set
+  // 3. Fallback to backend Edge Function
   try {
     const { invokeFunction } = await import('./apiClient');
     const result = await invokeFunction<{ verified: boolean }>('verify-pin', {
       method: 'POST',
       body: { pin_hash: inputHash },
     });
-    return result?.verified === true;
+    if (result?.verified === true) {
+      return true;
+    }
   } catch {
-    return false;
+    // Ignore network / server errors
   }
+
+  return false;
 }
 
 export async function setCustomPin(newPin: string): Promise<void> {
