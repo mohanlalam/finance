@@ -127,3 +127,75 @@ Every deposit registry maps to its own separate database table:
 * **[performance.ts](src/utils/performance.ts)**: Newton-Raphson XIRR solver with `Float64Array` year offsets and persistent Web Worker singleton.
 * **[assistant.ts](src/utils/assistant.ts)**: Intent-based NLP query classification system.
 * **[formatters.ts](src/utils/formatters.ts)**: Indian currency formatters (`formatINR`) and date helpers.
+
+---
+
+## 🤖 Workflow Orchestration Rules
+
+These rules govern how AI coding agents (Antigravity, Claude, etc.) must behave when working on this project. They apply to every session automatically.
+
+---
+
+### 1. Plan Node Default
+- Enter **plan mode** for ANY non-trivial task (3+ steps or architectural decisions).
+- If something goes sideways, **STOP and re-plan immediately** — don't keep pushing.
+- Use plan mode for **verification steps**, not just building.
+- Write detailed specs upfront to reduce ambiguity.
+
+### 2. Subagent Strategy
+- Use subagents **liberally** to keep the main context window clean.
+- **Offload** research, exploration, and parallel analysis to subagents.
+- For complex problems, throw more compute at it via subagents.
+- One task per subagent for focused execution.
+
+### 3. Self-Improvement Loop
+- After **ANY correction** from the user: update `tasks/lessons.md` with the pattern.
+- Write rules that **prevent the same mistake** from recurring.
+- Ruthlessly iterate on these lessons until the mistake rate drops.
+- **Review `tasks/lessons.md` at the start of every session** for relevant context.
+
+### 4. Verification Before Done
+- **Never mark a task complete** without proving it works.
+- Diff behavior between `main` and your changes when relevant.
+- Ask yourself: *"Would a staff engineer approve this?"*
+- Run `npx tsc --noEmit` and `npm run build`, check logs, **demonstrate correctness**.
+
+### 5. Demand Elegance (Balanced)
+- For non-trivial changes: pause and ask *"is there a more elegant way?"*
+- If a fix feels hacky: *"Knowing everything I know now, implement the elegant solution."*
+- Skip this for simple, obvious fixes — **don't over-engineer**.
+- Challenge your own work before presenting it.
+
+### 6. Autonomous Bug Fixing
+- When given a bug report: **just fix it**. Don't ask for hand-holding.
+- Point at logs, errors, failing tests — then resolve them.
+- **Zero context switching** required from the user.
+- Go fix failing CI tests without being told how.
+
+---
+
+## 📋 Task Management Protocol
+
+Every non-trivial task must follow this workflow:
+
+1. **Plan First** — Write plan to `tasks/todo.md` with checkable items.
+2. **Verify Plan** — Check in before starting implementation.
+3. **Track Progress** — Mark items complete as you go (`[ ]` → `[/]` → `[x]`).
+4. **Explain Changes** — High-level summary at each step.
+5. **Document Results** — Add review section to `tasks/todo.md`.
+6. **Capture Lessons** — Update `tasks/lessons.md` after any corrections.
+
+### Checklist Notation
+```
+- [ ]  Uncompleted task
+- [/]  In-progress task
+- [x]  Completed task
+```
+
+---
+
+## ⚙️ Core Principles
+
+- **Simplicity First** — Make every change as simple as possible. Impact minimal code.
+- **No Laziness** — Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact** — Changes should only touch what's necessary. Avoid introducing bugs.
