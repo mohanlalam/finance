@@ -482,6 +482,37 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    if (req.method === "POST" && action === "upload_file") {
+      const formData = await req.formData();
+      const file = formData.get("file") as File;
+      const bucket = (formData.get("bucket") as string) || "investment-documents";
+      const path = formData.get("path") as string;
+      if (!file || !path) {
+        throw new Error("File and path are required");
+      }
+      const arrayBuffer = await file.arrayBuffer();
+      const { data, error } = await supabase.storage.from(bucket).upload(path, arrayBuffer, {
+        contentType: file.type || "application/octet-stream",
+        upsert: true,
+      });
+      if (error) throw error;
+      return new Response(JSON.stringify({ data, path }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (req.method === "POST" && action === "delete_file") {
+      const { bucket = "investment-documents", paths } = await req.json();
+      if (!paths || !Array.isArray(paths)) {
+        throw new Error("paths array is required");
+      }
+      const { data, error } = await supabase.storage.from(bucket).remove(paths);
+      if (error) throw error;
+      return new Response(JSON.stringify({ data, success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

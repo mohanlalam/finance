@@ -47,15 +47,18 @@ export function clearApiSessionCache(): void {
   inflightRequests.clear();
 }
 
-async function buildHeaders(): Promise<Record<string, string>> {
+export async function getApiAuthHeaders(contentType?: string): Promise<Record<string, string>> {
   if (!_cachedPinHash) {
     _cachedPinHash = await ensureHashedPin();
   }
   const hashedPin = _cachedPinHash;
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     apikey: SUPABASE_ANON_KEY,
   };
+
+  if (contentType) {
+    headers['Content-Type'] = contentType;
+  }
 
   if (hashedPin) {
     headers['X-App-Pin'] = hashedPin;
@@ -66,6 +69,10 @@ async function buildHeaders(): Promise<Record<string, string>> {
   }
 
   return headers;
+}
+
+async function buildHeaders(): Promise<Record<string, string>> {
+  return getApiAuthHeaders('application/json');
 }
 
 function friendlyError(status: number, fallback: string): AppApiError {

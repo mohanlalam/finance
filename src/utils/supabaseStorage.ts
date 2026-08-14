@@ -1,3 +1,5 @@
+import { getApiAuthHeaders } from './apiClient';
+
 function sanitizeEnv(val: string | undefined): string {
   if (!val) return '';
   return val.trim().replace(/^["']|["']$/g, '').trim();
@@ -6,24 +8,14 @@ function sanitizeEnv(val: string | undefined): string {
 const SUPABASE_URL = sanitizeEnv(import.meta.env.VITE_SUPABASE_URL as string | undefined).replace(/\/+$/, '');
 const SUPABASE_ANON_KEY = sanitizeEnv(import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined);
 
-function getAuthHeaders(contentType?: string): Record<string, string> {
-  const headers: Record<string, string> = {
-    apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    'x-upsert': 'true',
-  };
-  if (contentType) {
-    headers['Content-Type'] = contentType;
-  }
-  return headers;
-}
-
 export interface StorageUploadResult {
   path: string;
 }
 
 /**
- * Uploads a file directly to Supabase Storage via native REST API.
+ * Uploads a file to Supabase Storage.
+ * Uses Edge Function with service role (admin) as primary route to bypass Storage RLS,
+ * and falls back to direct Storage REST API.
  */
 export async function uploadDocumentFile(
   bucket: string,
@@ -34,10 +26,38 @@ export async function uploadDocumentFile(
     throw new Error('Supabase configuration missing');
   }
 
+  // 1. Primary: Upload via Edge Function (admin service role bypasses Storage RLS)
+  try {
+    const formData = new FormData();
+    formData.append('bucket', bucket);
+    formData.append('path', storagePath);
+    formData.append('file', file);
+
+    const headers = await getApiAuthHeaders();
+    delete headers['Content-Type']; // Let browser set multipart boundary
+
+    const edgeUrl = `${SUPABASE_URL}/functions/v1/holdings-crud?action=upload_file`;
+    const res = await fetch(edgeUrl, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (res.ok) {
+      return { path: storagePath };
+    }
+  } catch (edgeErr) {
+    console.warn('[storage] Edge function upload attempt failed, falling back to direct REST', edgeErr);
+  }
+
+  // 2. Fallback: Direct Storage REST API
   const url = `${SUPABASE_URL}/storage/v1/object/${encodeURIComponent(bucket)}/${storagePath}`;
+  const directHeaders = await getApiAuthHeaders(file.type || 'application/octet-stream');
+  directHeaders['x-upsert'] = 'true';
+
   const res = await fetch(url, {
     method: 'POST',
-    headers: getAuthHeaders(file.type || 'application/octet-stream'),
+    headers: directHeaders,
     body: file,
   });
 
@@ -56,7 +76,7 @@ export async function uploadDocumentFile(
 }
 
 /**
- * Deletes one or more files from Supabase Storage via native REST API.
+ * Deletes one or more files from Supabase Storage.
  */
 export async function removeDocumentFiles(
   bucket: string,
@@ -64,10 +84,26 @@ export async function removeDocumentFiles(
 ): Promise<void> {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || paths.length === 0) return;
 
+  // 1. Primary: Edge Function delete
+  try {
+    const headers = await getApiAuthHeaders('application/json');
+    const edgeUrl = `${SUPABASE_URL}/functions/v1/holdings-crud?action=delete_file`;
+    const res = await fetch(edgeUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ bucket, paths }),
+    });
+    if (res.ok) return;
+  } catch (edgeErr) {
+    console.warn('[storage] Edge function delete failed, trying direct REST', edgeErr);
+  }
+
+  // 2. Fallback: Direct REST API
   const url = `${SUPABASE_URL}/storage/v1/object/${encodeURIComponent(bucket)}`;
+  const directHeaders = await getApiAuthHeaders('application/json');
   const res = await fetch(url, {
     method: 'DELETE',
-    headers: getAuthHeaders('application/json'),
+    headers: directHeaders,
     body: JSON.stringify({ prefixes: paths }),
   });
 
