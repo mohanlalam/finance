@@ -38,8 +38,15 @@ export default class SectionErrorBoundary extends Component<SectionErrorBoundary
       error.message.includes('loading chunk') ||
       error.message.includes('Importing a module script failed') ||
       error.message.includes('module script failed');
+
+    // Stale PWA cache: a ReferenceError with 'is not defined' on a known variable
+    // usually means the service worker served an old chunk that references a variable
+    // that no longer exists after a code change. Force reload to clear the cache.
+    const isStaleCache =
+      error instanceof ReferenceError &&
+      error.message.includes('is not defined');
       
-    if (isChunkError) {
+    if (isChunkError || isStaleCache) {
       const chunkErrorKey = 'finance_chunk_error_reload';
       const lastReload = sessionStorage.getItem(chunkErrorKey);
       const now = Date.now();
@@ -59,8 +66,10 @@ export default class SectionErrorBoundary extends Component<SectionErrorBoundary
       this.state.message.includes('loading chunk') ||
       this.state.message.includes('Importing a module script failed') ||
       this.state.message.includes('module script failed');
+
+    const isStaleCache = this.state.message.includes('is not defined');
       
-    if (isChunkError) {
+    if (isChunkError || isStaleCache) {
       window.location.reload();
     } else {
       this.setState({ hasError: false, message: '' });
