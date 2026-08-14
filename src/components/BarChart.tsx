@@ -1,226 +1,538 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { Portfolio } from '../types/portfolio';
 import { formatINR } from '../utils/formatters';
+import { usePrivacy } from '../contexts/PrivacyContext';
+import { SegmentedControl } from './ui/SegmentedControl';
+import { BarChart3, TrendingUp, TrendingDown, Layers } from './icons/AppIcons';
 
 interface BarChartProps {
   portfolios: Portfolio[];
 }
 
-function BarChart({ portfolios }: BarChartProps) {
-  const [hovered, setHovered] = useState<{ portfolioIdx: number; type: 'invested' | 'current' } | null>(null);
+type ViewMode = 'grouped' | 'returns' | 'breakdown';
 
-  if (!portfolios || portfolios.length === 0) {
+function BarChart({ portfolios }: BarChartProps) {
+  const [mode, setMode] = useState<ViewMode>('grouped');
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const { isBalancesHidden } = usePrivacy();
+
+  // Filter out any empty portfolios
+  const validPortfolios = useMemo(() => {
+    return (portfolios || []).filter((p) => p.totalInvested > 0 || p.totalCurrentValue > 0);
+  }, [portfolios]);
+
+  // Overall family aggregated metrics
+  const aggregate = useMemo(() => {
+    const totalInv = validPortfolios.reduce((s, p) => s + p.totalInvested, 0);
+    const totalVal = validPortfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
+    const diff = totalVal - totalInv;
+    const pct = totalInv > 0 ? (diff / totalInv) * 100 : 0;
+    return { totalInv, totalVal, diff, pct };
+  }, [validPortfolios]);
+
+  // Max value for absolute scaling
+  const maxVal = useMemo(() => {
+    if (validPortfolios.length === 0) return 1;
+    const highest = Math.max(
+      ...validPortfolios.map((p) => Math.max(p.totalInvested, p.totalCurrentValue, 1))
+    );
+    // Add 15% headroom so bars and values don't touch the top edge
+    return highest * 1.15;
+  }, [validPortfolios]);
+
+  // Max absolute return % for returns mode
+  const maxAbsReturn = useMemo(() => {
+    if (validPortfolios.length === 0) return 10;
+    const highest = Math.max(...validPortfolios.map((p) => Math.abs(p.totalPnLPercent)), 5);
+    return Math.ceil(highest * 1.2);
+  }, [validPortfolios]);
+
+  if (!validPortfolios || validPortfolios.length === 0) {
     return (
-      <div className="apple-card p-4 flex flex-col h-[370px] justify-between">
-        <div>
-          <h3 className="text-card-title font-bold text-[var(--text-primary)]">Invested vs Current Value</h3>
-          <p className="text-supporting mt-0.5">Portfolio comparison</p>
+      <div className="apple-card p-5 flex flex-col h-[370px] justify-between">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-card-title font-bold text-[var(--text-primary)]">Invested vs Current Value</h3>
+            <p className="text-supporting text-xs mt-0.5">Portfolio comparison</p>
+          </div>
+          <div className="w-7 h-7 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)]">
+            <BarChart3 size={14} aria-hidden="true" />
+          </div>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-tertiary)] text-xs">
-          No portfolio data available
+          <Layers size={24} className="mb-2 opacity-40" />
+          <span>No portfolio data available</span>
+          <span className="text-[10px] text-[var(--text-tertiary)] mt-1">Add holdings to see comparative metrics</span>
         </div>
       </div>
     );
   }
 
-  const maxVal = Math.max(
-    ...portfolios.map((p) => Math.max(p.totalInvested, p.totalCurrentValue, 1))
-  );
+  const chartHeight = 180;
+  const paddingTop = 22;
+  const paddingBottom = 48;
+  const paddingLeft = 52;
+  const paddingRight = 20;
+  const svgWidth = 440;
+  const innerWidth = svgWidth - paddingLeft - paddingRight;
 
-  const chartHeight = 200;
-  const barWidth = 32;
-  const gap = 16;
-  const groupGap = 40;
-  const paddingLeft = 55;
-  const paddingBottom = 50;
-  const paddingTop = 20;
-
-  const totalWidth = paddingLeft + portfolios.length * (2 * barWidth + gap + groupGap) + 20;
-  const yTicks = 5;
+  const yTicks = 4;
 
   return (
-    <div className="apple-card p-4 flex flex-col h-[370px] justify-between">
-      <div>
-        <h3 className="text-card-title font-bold text-[var(--text-primary)]">Invested vs Current Value</h3>
-        <p className="text-supporting mt-0.5 mb-2">Portfolio comparison</p>
+    <div className="apple-card p-5 flex flex-col h-[370px] justify-between select-none">
+      {/* Header with Title & Mode Switcher */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2">
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="text-card-title font-bold text-[var(--text-primary)]">
+              Invested vs Current
+            </h3>
+            <span
+              className={`text-[10.5px] font-extrabold px-1.5 py-0.5 rounded-[var(--radius-small)] tnum inline-flex items-center gap-0.5 ${
+                aggregate.pct >= 0
+                  ? 'bg-[var(--positive-soft)] text-[var(--positive)]'
+                  : 'bg-[var(--negative-soft)] text-[var(--negative)]'
+              }`}
+            >
+              {aggregate.pct >= 0 ? '+' : ''}{aggregate.pct.toFixed(1)}%
+            </span>
+          </div>
+          <p className="text-supporting text-xs mt-0.5">
+            {validPortfolios.length === 1
+              ? 'Single portfolio metrics'
+              : `Comparison across ${validPortfolios.length} portfolios`}
+          </p>
+        </div>
+
+        <div className="shrink-0">
+          <SegmentedControl
+            options={[
+              { value: 'grouped', label: 'Amount' },
+              { value: 'returns', label: '% Return' },
+              { value: 'breakdown', label: 'List' },
+            ]}
+            value={mode}
+            onChange={(val) => {
+              setMode(val as ViewMode);
+              setHoveredIdx(null);
+            }}
+            size="sm"
+          />
+        </div>
       </div>
 
-      <div className="overflow-x-auto scrollbar-none flex-1 flex items-center">
-        <svg
-          width={Math.max(totalWidth, 340)}
-          height={chartHeight + paddingBottom + paddingTop}
-          className="overflow-visible"
-          role="img"
-          aria-label={`Bar chart comparing invested vs current value across ${portfolios.length} portfolios`}
-        >
-          <title>Invested vs Current Value</title>
-          {Array.from({ length: yTicks + 1 }).map((_, i) => {
-            const val = (maxVal / yTicks) * i;
-            const y = paddingTop + chartHeight - (val / maxVal) * chartHeight;
-            return (
-              <g key={i}>
+      {/* Main Chart / List Area */}
+      <div className="flex-1 relative flex items-center justify-center min-h-0 w-full overflow-hidden">
+        {mode === 'grouped' && (
+          <div className="w-full h-full flex flex-col justify-center">
+            {/* Legend & Summary Subhead */}
+            <div className="flex items-center justify-between px-1 mb-1 text-[11px]">
+              <div className="flex items-center gap-3.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[var(--surface-tertiary)] border border-[var(--border-subtle)]" />
+                  <span className="text-[var(--text-secondary)] font-medium">Invested</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[var(--positive)]" />
+                  <span className="text-[var(--text-secondary)] font-medium">Current</span>
+                </div>
+              </div>
+
+              {hoveredIdx !== null && validPortfolios[hoveredIdx] && (
+                <div className="hidden sm:flex items-center gap-2 tnum font-bold text-xs animate-fade-in">
+                  <span className="text-[var(--text-primary)]">
+                    {validPortfolios[hoveredIdx].label.replace("'s Portfolio", '').replace(' Portfolio', '')}:
+                  </span>
+                  <span
+                    className={
+                      validPortfolios[hoveredIdx].totalPnL >= 0
+                        ? 'text-[var(--positive)]'
+                        : 'text-[var(--negative)]'
+                    }
+                  >
+                    {validPortfolios[hoveredIdx].totalPnL >= 0 ? '+' : ''}
+                    {isBalancesHidden ? '••••••' : formatINR(validPortfolios[hoveredIdx].totalPnL)} (
+                    {validPortfolios[hoveredIdx].totalPnLPercent >= 0 ? '+' : ''}
+                    {validPortfolios[hoveredIdx].totalPnLPercent.toFixed(1)}%)
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Responsive SVG Grouped Bar Chart */}
+            <div className="w-full flex-1">
+              <svg
+                viewBox={`0 0 ${svgWidth} ${chartHeight + paddingTop + paddingBottom}`}
+                className="w-full h-full overflow-visible"
+                role="img"
+                aria-label="Invested vs Current Value bar chart"
+              >
+                {/* Horizontal Grid lines and Y-axis labels */}
+                {Array.from({ length: yTicks + 1 }).map((_, i) => {
+                  const val = (maxVal / yTicks) * i;
+                  const y = paddingTop + chartHeight - (val / maxVal) * chartHeight;
+                  return (
+                    <g key={i}>
+                      <line
+                        x1={paddingLeft}
+                        y1={y}
+                        x2={svgWidth - paddingRight}
+                        y2={y}
+                        stroke="var(--border-subtle)"
+                        strokeDasharray={i === 0 ? undefined : '3 3'}
+                        strokeOpacity={i === 0 ? 0.8 : 0.4}
+                        strokeWidth={1}
+                      />
+                      <text
+                        x={paddingLeft - 8}
+                        y={y + 3.5}
+                        textAnchor="end"
+                        className="fill-[var(--text-tertiary)] font-medium text-[9.5px] tnum"
+                      >
+                        {isBalancesHidden
+                          ? '••'
+                          : val >= 10000000
+                          ? `₹${(val / 10000000).toFixed(1)}Cr`
+                          : val >= 100000
+                          ? `₹${(val / 100000).toFixed(0)}L`
+                          : val >= 1000
+                          ? `₹${(val / 1000).toFixed(0)}K`
+                          : `₹${val.toFixed(0)}`}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* Bars per Portfolio */}
+                {validPortfolios.map((p, pi) => {
+                  const numGroups = validPortfolios.length;
+                  const slotWidth = innerWidth / numGroups;
+                  const barWidth = Math.min(Math.max(slotWidth * 0.28, 18), 34);
+                  const barGap = 4;
+                  const groupCenterX = paddingLeft + pi * slotWidth + slotWidth / 2;
+
+                  const investedH = Math.max((p.totalInvested / maxVal) * chartHeight, 2);
+                  const currentH = Math.max((p.totalCurrentValue / maxVal) * chartHeight, 2);
+                  const isGain = p.totalCurrentValue >= p.totalInvested;
+                  const isHovered = hoveredIdx === pi;
+
+                  const investedX = groupCenterX - barWidth - barGap / 2;
+                  const currentX = groupCenterX + barGap / 2;
+
+                  const shortName = p.label
+                    .replace("'s Portfolio", '')
+                    .replace(' Portfolio', '')
+                    .slice(0, 10);
+
+                  return (
+                    <g
+                      key={p.id || pi}
+                      className="cursor-pointer transition-transform duration-200"
+                      onMouseEnter={() => setHoveredIdx(pi)}
+                      onMouseLeave={() => setHoveredIdx(null)}
+                    >
+                      {/* Hover Highlight Column Background */}
+                      {isHovered && (
+                        <rect
+                          x={groupCenterX - slotWidth * 0.45}
+                          y={paddingTop}
+                          width={slotWidth * 0.9}
+                          height={chartHeight}
+                          rx={8}
+                          className="fill-[var(--surface-secondary)] opacity-60"
+                        />
+                      )}
+
+                      {/* Invested Bar */}
+                      <rect
+                        x={investedX}
+                        y={paddingTop + chartHeight - investedH}
+                        width={barWidth}
+                        height={investedH}
+                        rx={5}
+                        className={`transition-all duration-200 fill-[var(--surface-tertiary)] stroke-[var(--border-subtle)] ${
+                          isHovered ? 'opacity-100 filter brightness-110' : 'opacity-85'
+                        }`}
+                        strokeWidth={0.5}
+                      />
+
+                      {/* Current Value Bar */}
+                      <rect
+                        x={currentX}
+                        y={paddingTop + chartHeight - currentH}
+                        width={barWidth}
+                        height={currentH}
+                        rx={5}
+                        className={`transition-all duration-200 ${
+                          isGain ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
+                        } ${isHovered ? 'opacity-100 filter drop-shadow(0 2px 6px rgba(0,0,0,0.15))' : 'opacity-90'}`}
+                      />
+
+                      {/* Floating Value on Top of Current Bar if Hovered */}
+                      {isHovered && (
+                        <g className="animate-fade-in">
+                          <rect
+                            x={currentX + barWidth / 2 - 28}
+                            y={Math.max(paddingTop + chartHeight - Math.max(currentH, investedH) - 22, 2)}
+                            width={56}
+                            height={18}
+                            rx={4}
+                            className="fill-[var(--surface-elevated)] stroke-[var(--border-subtle)]"
+                            strokeWidth={1}
+                          />
+                          <text
+                            x={currentX + barWidth / 2}
+                            y={Math.max(paddingTop + chartHeight - Math.max(currentH, investedH) - 10, 14)}
+                            textAnchor="middle"
+                            className="fill-[var(--text-primary)] font-extrabold text-[9.5px] tnum"
+                          >
+                            {isBalancesHidden ? '••••' : formatINR(p.totalCurrentValue)}
+                          </text>
+                        </g>
+                      )}
+
+                      {/* Member Name Label */}
+                      <text
+                        x={groupCenterX}
+                        y={paddingTop + chartHeight + 16}
+                        textAnchor="middle"
+                        className={`text-[11px] font-bold transition-colors ${
+                          isHovered ? 'fill-[var(--accent-blue)]' : 'fill-[var(--text-primary)]'
+                        }`}
+                      >
+                        {shortName}
+                      </text>
+
+                      {/* Performance % Pill */}
+                      <text
+                        x={groupCenterX}
+                        y={paddingTop + chartHeight + 30}
+                        textAnchor="middle"
+                        className={`text-[10px] font-extrabold tnum ${
+                          p.totalPnLPercent >= 0 ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
+                        }`}
+                      >
+                        {p.totalPnLPercent >= 0 ? '+' : ''}{p.totalPnLPercent.toFixed(1)}%
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          </div>
+        )}
+
+        {mode === 'returns' && (
+          <div className="w-full h-full flex flex-col justify-between py-1">
+            <div className="flex items-center justify-between text-xs text-[var(--text-secondary)] px-1 mb-1">
+              <span className="font-semibold">Performance Return (%)</span>
+              <span className="text-[10px] text-[var(--text-tertiary)]">Baseline 0.0%</span>
+            </div>
+
+            {/* Zero-Centered Returns Bar Chart */}
+            <div className="w-full flex-1">
+              <svg
+                viewBox={`0 0 ${svgWidth} ${chartHeight + paddingTop + paddingBottom}`}
+                className="w-full h-full overflow-visible"
+              >
+                {/* 0% Central Baseline */}
                 <line
-                  x1={paddingLeft - 8}
-                  y1={y}
-                  x2={paddingLeft + totalWidth - paddingLeft - 20}
-                  y2={y}
-                  strokeWidth={1}
-                  className="stroke-[var(--border-subtle)] opacity-40"
+                  x1={paddingLeft}
+                  y1={paddingTop + chartHeight / 2}
+                  x2={svgWidth - paddingRight}
+                  y2={paddingTop + chartHeight / 2}
+                  stroke="var(--text-tertiary)"
+                  strokeWidth={1.5}
+                  strokeOpacity={0.7}
+                />
+
+                {/* +Max and -Max helper gridlines */}
+                <line
+                  x1={paddingLeft}
+                  y1={paddingTop + 10}
+                  x2={svgWidth - paddingRight}
+                  y2={paddingTop + 10}
+                  stroke="var(--border-subtle)"
+                  strokeDasharray="3 3"
+                  strokeOpacity={0.5}
                 />
                 <text
-                  x={paddingLeft - 12}
-                  y={y + 4}
+                  x={paddingLeft - 8}
+                  y={paddingTop + 14}
                   textAnchor="end"
-                  className="fill-[var(--text-tertiary)] font-medium"
-                  fontSize={10}
+                  className="fill-[var(--positive)] font-bold text-[9.5px] tnum"
                 >
-                  {val >= 10000000 ? `₹${(val / 10000000).toFixed(0)}Cr` : val >= 100000 ? `₹${(val / 100000).toFixed(0)}L` : val >= 1000 ? `₹${(val / 1000).toFixed(0)}K` : `₹${val.toFixed(0)}`}
+                  +{maxAbsReturn}%
                 </text>
-              </g>
-            );
-          })}
 
-          <line
-            x1={paddingLeft}
-            y1={paddingTop}
-            x2={paddingLeft}
-            y2={paddingTop + chartHeight}
-            className="stroke-[var(--border-subtle)]"
-            strokeWidth={1}
-          />
-          <line
-            x1={paddingLeft}
-            y1={paddingTop + chartHeight}
-            x2={totalWidth - 10}
-            y2={paddingTop + chartHeight}
-            className="stroke-[var(--border-subtle)]"
-            strokeWidth={1}
-          />
-
-          {portfolios.map((p, pi) => {
-            const groupX = paddingLeft + pi * (2 * barWidth + gap + groupGap);
-            const investedH = (p.totalInvested / maxVal) * chartHeight;
-            const currentH = (p.totalCurrentValue / maxVal) * chartHeight;
-            const isGain = p.totalCurrentValue >= p.totalInvested;
-
-            const iInvested = hovered?.portfolioIdx === pi && hovered.type === 'invested';
-            const iCurrent = hovered?.portfolioIdx === pi && hovered.type === 'current';
-
-            return (
-              <g key={pi}>
-                {/* Invested Bar (Surface tertiary neutral) */}
-                <rect
-                  x={groupX}
-                  y={paddingTop + chartHeight - investedH - (iInvested ? 1 : 0)}
-                  width={barWidth}
-                  height={investedH + (iInvested ? 1 : 0)}
-                  rx={6}
-                  className={`cursor-pointer transition-all duration-150 fill-[var(--surface-tertiary)] ${
-                    iInvested ? 'opacity-100' : 'opacity-80 hover:opacity-100'
-                  }`}
-                  onMouseEnter={() => setHovered({ portfolioIdx: pi, type: 'invested' })}
-                  onMouseLeave={() => setHovered(null)}
-                />
-                {iInvested && (
-                  <text
-                    x={groupX + barWidth / 2}
-                    y={paddingTop + chartHeight - investedH - 6}
-                    textAnchor="middle"
-                    className="fill-[var(--text-primary)] font-bold tnum animate-fade-in"
-                    fontSize={10}
-                  >
-                    {formatINR(p.totalInvested)}
-                  </text>
-                )}
-
-                {/* Current Value Bar (Positive / Negative token colors) */}
-                <rect
-                  x={groupX + barWidth + gap}
-                  y={paddingTop + chartHeight - currentH - (iCurrent ? 1 : 0)}
-                  width={barWidth}
-                  height={currentH + (iCurrent ? 1 : 0)}
-                  rx={6}
-                  className={`cursor-pointer transition-all duration-150 ${
-                    isGain ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
-                  } ${iCurrent ? 'opacity-100' : 'opacity-90 hover:opacity-100'}`}
-                  onMouseEnter={() => setHovered({ portfolioIdx: pi, type: 'current' })}
-                  onMouseLeave={() => setHovered(null)}
-                />
-                {iCurrent && (
-                  <text
-                    x={groupX + barWidth + gap + barWidth / 2}
-                    y={paddingTop + chartHeight - currentH - 6}
-                    textAnchor="middle"
-                    className={`font-bold tnum animate-fade-in ${
-                      isGain ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
-                    }`}
-                    fontSize={10}
-                  >
-                    {formatINR(p.totalCurrentValue)}
-                  </text>
-                )}
-
-                {/* Label X-axis */}
                 <text
-                  x={groupX + barWidth + gap / 2}
-                  y={paddingTop + chartHeight + 16}
-                  textAnchor="middle"
-                  className="fill-[var(--text-primary)] font-semibold"
-                  fontSize={11}
+                  x={paddingLeft - 8}
+                  y={paddingTop + chartHeight / 2 + 3.5}
+                  textAnchor="end"
+                  className="fill-[var(--text-tertiary)] font-bold text-[9.5px] tnum"
                 >
-                  {p.label.replace("'s Portfolio", '').replace(' Portfolio', '')}
+                  0%
                 </text>
-                <text
-                  x={groupX + barWidth + gap / 2}
-                  y={paddingTop + chartHeight + 30}
-                  textAnchor="middle"
-                  className={`font-bold tnum ${
-                    isGain ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
-                  }`}
-                  fontSize={10}
-                >
-                  {p.totalPnLPercent >= 0 ? '+' : ''}{p.totalPnLPercent.toFixed(1)}%
-                </text>
-              </g>
-            );
-          })}
 
-          {/* Legend */}
-          <g>
-            <rect
-              x={paddingLeft + 4}
-              y={paddingTop - 18}
-              width={10}
-              height={10}
-              rx={3}
-              className="fill-[var(--surface-tertiary)]"
-            />
-            <text
-              x={paddingLeft + 18}
-              y={paddingTop - 9}
-              className="fill-[var(--text-secondary)] font-medium"
-              fontSize={11}
-            >
-              Invested
-            </text>
-            <rect
-              x={paddingLeft + 76}
-              y={paddingTop - 18}
-              width={10}
-              height={10}
-              rx={3}
-              className="fill-[var(--positive)]"
-            />
-            <text
-              x={paddingLeft + 90}
-              y={paddingTop - 9}
-              className="fill-[var(--text-secondary)] font-medium"
-              fontSize={11}
-            >
-              Current Value
-            </text>
-          </g>
-        </svg>
+                <line
+                  x1={paddingLeft}
+                  y1={paddingTop + chartHeight - 10}
+                  x2={svgWidth - paddingRight}
+                  y2={paddingTop + chartHeight - 10}
+                  stroke="var(--border-subtle)"
+                  strokeDasharray="3 3"
+                  strokeOpacity={0.5}
+                />
+                <text
+                  x={paddingLeft - 8}
+                  y={paddingTop + chartHeight - 6}
+                  textAnchor="end"
+                  className="fill-[var(--negative)] font-bold text-[9.5px] tnum"
+                >
+                  -{maxAbsReturn}%
+                </text>
+
+                {/* Diverging Bars */}
+                {validPortfolios.map((p, pi) => {
+                  const numGroups = validPortfolios.length;
+                  const slotWidth = innerWidth / numGroups;
+                  const barWidth = Math.min(Math.max(slotWidth * 0.45, 24), 48);
+                  const groupCenterX = paddingLeft + pi * slotWidth + slotWidth / 2;
+                  const barX = groupCenterX - barWidth / 2;
+
+                  const centerY = paddingTop + chartHeight / 2;
+                  const halfH = (chartHeight / 2) - 10;
+                  const isGain = p.totalPnLPercent >= 0;
+                  const barHeight = Math.max(
+                    (Math.min(Math.abs(p.totalPnLPercent), maxAbsReturn) / maxAbsReturn) * halfH,
+                    4
+                  );
+
+                  const barY = isGain ? centerY - barHeight : centerY;
+
+                  const shortName = p.label
+                    .replace("'s Portfolio", '')
+                    .replace(' Portfolio', '')
+                    .slice(0, 10);
+
+                  return (
+                    <g key={p.id || pi} className="cursor-pointer">
+                      <rect
+                        x={barX}
+                        y={barY}
+                        width={barWidth}
+                        height={barHeight}
+                        rx={5}
+                        className={`transition-all duration-300 ${
+                          isGain ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
+                        } opacity-90 hover:opacity-100`}
+                      />
+
+                      {/* Exact % on top/bottom of bar */}
+                      <text
+                        x={groupCenterX}
+                        y={isGain ? barY - 5 : barY + barHeight + 12}
+                        textAnchor="middle"
+                        className={`font-black text-[10px] tnum ${
+                          isGain ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
+                        }`}
+                      >
+                        {p.totalPnLPercent >= 0 ? '+' : ''}{p.totalPnLPercent.toFixed(1)}%
+                      </text>
+
+                      {/* Member Name */}
+                      <text
+                        x={groupCenterX}
+                        y={paddingTop + chartHeight + 20}
+                        textAnchor="middle"
+                        className="fill-[var(--text-primary)] font-bold text-[11px]"
+                      >
+                        {shortName}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          </div>
+        )}
+
+        {mode === 'breakdown' && (
+          <div className="w-full h-full overflow-y-auto space-y-2 pr-1 py-1">
+            {validPortfolios.map((p) => {
+              const isGain = p.totalPnL >= 0;
+              const maxMemberVal = Math.max(p.totalInvested, p.totalCurrentValue, 1);
+              const invPct = (p.totalInvested / maxMemberVal) * 100;
+              const curPct = (p.totalCurrentValue / maxMemberVal) * 100;
+
+              return (
+                <div
+                  key={p.id || p.name}
+                  className="p-2.5 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] hover:border-[var(--accent-blue)]/40 transition-all"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-bold text-xs text-[var(--text-primary)] truncate">
+                        {p.label.replace("'s Portfolio", '').replace(' Portfolio', '')}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span
+                        className={`text-xs font-black tnum ${
+                          isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'
+                        }`}
+                      >
+                        {isGain ? '+' : ''}
+                        {isBalancesHidden ? '••••••' : formatINR(p.totalPnL)}
+                      </span>
+                      <span
+                        className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-[var(--radius-small)] tnum ${
+                          isGain
+                            ? 'bg-[var(--positive-soft)] text-[var(--positive)]'
+                            : 'bg-[var(--negative-soft)] text-[var(--negative)]'
+                        }`}
+                      >
+                        {p.totalPnLPercent >= 0 ? '+' : ''}{p.totalPnLPercent.toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Dual Horizontal Progress Bars */}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-[10px]">
+                      <span className="text-[var(--text-tertiary)] w-14 shrink-0">Invested:</span>
+                      <div className="flex-1 h-1.5 bg-[var(--surface-tertiary)] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[var(--text-tertiary)] rounded-full"
+                          style={{ width: `${invPct}%` }}
+                        />
+                      </div>
+                      <span className="font-semibold text-[var(--text-secondary)] tnum w-16 text-right shrink-0">
+                        {isBalancesHidden ? '••••' : formatINR(p.totalInvested)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-[10px]">
+                      <span className="text-[var(--text-tertiary)] w-14 shrink-0">Current:</span>
+                      <div className="flex-1 h-1.5 bg-[var(--surface-tertiary)] rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            isGain ? 'bg-[var(--positive)]' : 'bg-[var(--negative)]'
+                          }`}
+                          style={{ width: `${curPct}%` }}
+                        />
+                      </div>
+                      <span className="font-bold text-[var(--text-primary)] tnum w-16 text-right shrink-0">
+                        {isBalancesHidden ? '••••' : formatINR(p.totalCurrentValue)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
