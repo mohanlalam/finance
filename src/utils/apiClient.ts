@@ -56,7 +56,7 @@ async function buildHeaders(): Promise<Record<string, string>> {
     headers['X-App-Pin'] = hashedPin;
   }
 
-  if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.startsWith('eyJ')) {
+  if (SUPABASE_ANON_KEY) {
     headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
   }
 
