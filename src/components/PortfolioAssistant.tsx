@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Portfolio } from '../types/portfolio';
 import { askAssistant, AssistantResponse } from '../utils/assistant';
-import { Send, Sparkles, Trash2, Copy, Check, Bot, User } from './icons/AppIcons';
+import { Send, Sparkles, Trash2, Copy, Check, Bot, User, Search } from './icons/AppIcons';
 import ConfirmModal from './ConfirmModal';
 
 interface PortfolioAssistantProps {
@@ -18,7 +18,7 @@ interface ChatMessage {
 // Clipboard copy component for assistant messages
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
@@ -26,15 +26,17 @@ function CopyButton({ text }: { text: string }) {
     } catch (err) {
       console.error('Failed to copy text: ', err);
     }
-  };
+  }, [text]);
+
   return (
     <button
       type="button"
       onClick={handleCopy}
-      className="absolute top-2 right-2 p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-white/90 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm opacity-60 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 hover:opacity-100 transition-opacity duration-200 z-20"
-      title="Copy answer"
+      className="absolute top-2.5 right-2.5 p-1.5 rounded-[6px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-white/90 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs opacity-70 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 hover:opacity-100 transition-all duration-150 z-20"
+      title="Copy answer to clipboard"
+      aria-label="Copy answer"
     >
-      {copied ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
+      {copied ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
     </button>
   );
 }
@@ -44,13 +46,17 @@ const parseBoldAndCode = (text: string) => {
   const parts = text.split('**');
   return parts.map((part, i) => {
     if (i % 2 === 1) {
-      return <strong key={i} className="font-bold text-slate-900 dark:text-white">{part}</strong>;
+      return <strong key={i} className="font-semibold text-slate-900 dark:text-white">{part}</strong>;
     }
     const codeParts = part.split('`');
     if (codeParts.length > 1) {
       return codeParts.map((cp, j) => {
         if (j % 2 === 1) {
-          return <code key={`${i}-${j}`} className="bg-slate-200 dark:bg-slate-800/80 px-1.5 py-0.5 rounded text-blue-600 dark:text-blue-400 font-mono text-[9.5px]">{cp}</code>;
+          return (
+            <code key={`${i}-${j}`} className="bg-slate-200/80 dark:bg-slate-800 px-1.5 py-0.5 rounded text-blue-600 dark:text-blue-400 font-mono text-[10px]">
+              {cp}
+            </code>
+          );
         }
         return cp;
       });
@@ -78,22 +84,22 @@ const renderMarkdown = (text: string) => {
     const bodyRows = rows.slice(2) || []; // skip divider
 
     blocks.push(
-      <div key={`table-${key}`} className="overflow-x-auto my-2.5 rounded-xl border border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/40 shadow-sm max-w-full">
-        <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700/60 text-[10px] sm:text-[10.5px]">
-          <thead className="bg-slate-100/70 dark:bg-slate-800/50">
+      <div key={`table-${key}`} className="overflow-x-auto my-2 rounded-[10px] border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900/60 shadow-xs max-w-full">
+        <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700/60 text-xs">
+          <thead className="bg-slate-50 dark:bg-slate-800/60">
             <tr>
               {headers.map((h, i) => (
-                <th key={i} className="px-3 py-2 text-left font-bold text-slate-600 dark:text-slate-200 uppercase tracking-wider">
+                <th key={i} className="px-3 py-2 text-left font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider text-[10px]">
                   {parseBoldAndCode(h)}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40 text-slate-600 dark:text-slate-300">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40 text-slate-700 dark:text-slate-300">
             {bodyRows.map((row, rowIndex) => (
-              <tr key={rowIndex} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+              <tr key={rowIndex} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                 {row.map((cell, cellIndex) => (
-                  <td key={cellIndex} className="px-3 py-1.5 whitespace-nowrap font-medium">
+                  <td key={cellIndex} className="px-3 py-1.5 whitespace-nowrap font-medium text-[11px] text-financial">
                     {parseBoldAndCode(cell)}
                   </td>
                 ))}
@@ -118,41 +124,41 @@ const renderMarkdown = (text: string) => {
 
     if (line.startsWith('### ')) {
       blocks.push(
-        <h4 key={i} className="text-[10px] font-bold text-slate-700 dark:text-slate-200 mt-2.5 mb-1 tracking-wider uppercase">
+        <h4 key={i} className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-2.5 mb-1 tracking-tight">
           {parseBoldAndCode(line.slice(4))}
         </h4>
       );
     } else if (line.startsWith('## ')) {
       blocks.push(
-        <h3 key={i} className="text-[11px] font-bold text-slate-800 dark:text-slate-100 mt-3 mb-1.5 tracking-wider uppercase">
+        <h3 key={i} className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 mt-3 mb-1.5 tracking-tight">
           {parseBoldAndCode(line.slice(3))}
         </h3>
       );
     } else if (line.startsWith('# ')) {
       blocks.push(
-        <h2 key={i} className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-3.5 mb-2 tracking-widest uppercase">
+        <h2 key={i} className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-3.5 mb-2 tracking-tight">
           {parseBoldAndCode(line.slice(2))}
         </h2>
       );
     } else if (line.startsWith('- ') || line.startsWith('* ')) {
       blocks.push(
-        <ul key={i} className="list-disc pl-4 my-0.5 text-[10.5px] text-slate-650 dark:text-slate-350">
-          <li className="py-0.5">{parseBoldAndCode(line.slice(2))}</li>
+        <ul key={i} className="list-disc pl-4 my-0.5 text-xs text-slate-650 dark:text-slate-350">
+          <li className="py-0.5 leading-relaxed">{parseBoldAndCode(line.slice(2))}</li>
         </ul>
       );
     } else {
       const olMatch = line.match(/^(\d+)\.\s(.*)/);
       if (olMatch) {
         blocks.push(
-          <ol key={i} className="list-decimal pl-4 my-0.5 text-[10.5px] text-slate-600 dark:text-slate-300">
-            <li className="py-0.5" value={parseInt(olMatch[1])}>{parseBoldAndCode(olMatch[2])}</li>
+          <ol key={i} className="list-decimal pl-4 my-0.5 text-xs text-slate-650 dark:text-slate-350">
+            <li className="py-0.5 leading-relaxed" value={parseInt(olMatch[1])}>{parseBoldAndCode(olMatch[2])}</li>
           </ol>
         );
       } else if (line.trim() === '') {
         blocks.push(<div key={i} className="h-1.5" />);
       } else {
         blocks.push(
-          <p key={i} className="text-[10.5px] text-slate-600 dark:text-slate-300 leading-relaxed my-0.5">
+          <p key={i} className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed my-0.5">
             {parseBoldAndCode(line)}
           </p>
         );
@@ -167,12 +173,17 @@ const renderMarkdown = (text: string) => {
   return blocks;
 };
 
-function getDynamicSuggestions(portfolios: Portfolio[]): { label: string }[] {
-  const suggestions: { label: string }[] = [];
+interface SuggestionItem {
+  icon: string;
+  label: string;
+}
+
+function getDynamicSuggestions(portfolios: Portfolio[]): SuggestionItem[] {
+  const suggestions: SuggestionItem[] = [];
   const today = new Date();
 
   const hasUpcomingFD = portfolios.some(p =>
-    p.fixedDeposits.some(fd => {
+    p.fixedDeposits && p.fixedDeposits.some(fd => {
       if (!fd.maturity_date) return false;
       const mDate = new Date(fd.maturity_date);
       const days = (mDate.getTime() - today.getTime()) / 86400000;
@@ -180,11 +191,11 @@ function getDynamicSuggestions(portfolios: Portfolio[]): { label: string }[] {
     })
   );
   if (hasUpcomingFD) {
-    suggestions.push({ label: 'Show FDs maturing soon' });
+    suggestions.push({ icon: '⏳', label: 'Show FDs maturing soon' });
   }
 
   const hasUpcomingInsurance = portfolios.some(p =>
-    p.insurances.some(ins => {
+    p.insurances && p.insurances.some(ins => {
       if (!ins.renewal_date) return false;
       const rDate = new Date(ins.renewal_date);
       const days = (rDate.getTime() - today.getTime()) / 86400000;
@@ -192,12 +203,12 @@ function getDynamicSuggestions(portfolios: Portfolio[]): { label: string }[] {
     })
   );
   if (hasUpcomingInsurance) {
-    suggestions.push({ label: 'Show upcoming insurance renewals' });
+    suggestions.push({ icon: '🛡️', label: 'Upcoming insurance renewals' });
   }
 
-  suggestions.push({ label: 'What is my total asset allocation split?' });
-  suggestions.push({ label: 'Which asset gave the highest return?' });
-  suggestions.push({ label: 'Show me my emergency fund coverage' });
+  suggestions.push({ icon: '📊', label: 'What is my total asset allocation split?' });
+  suggestions.push({ icon: '🏆', label: 'Which asset gave the highest return?' });
+  suggestions.push({ icon: '💼', label: 'Show me my emergency fund coverage' });
 
   return suggestions.slice(0, 3);
 }
@@ -209,35 +220,35 @@ const ChatMessageItem = React.memo(function ChatMessageItem({ msg }: { msg: Chat
     <div className="w-full">
       {msg.role === 'user' ? (
         <div className="flex justify-end items-end gap-2 w-full">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 border border-blue-500/30 text-white rounded-2xl rounded-tr-sm px-3.5 py-2 text-[10.5px] max-w-[80%] font-medium shadow-md shadow-blue-600/10">
+          <div className="bg-blue-600 text-white rounded-[14px] rounded-br-[4px] px-4 py-2.5 text-xs max-w-[85%] sm:max-w-[75%] font-medium shadow-xs leading-relaxed">
             {msg.text}
           </div>
-          <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center text-[9px] font-extrabold text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900 shrink-0">
-            <User size={11} />
+          <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/60 flex items-center justify-center text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0">
+            <User size={12} />
           </div>
         </div>
       ) : (
         <div className="flex flex-col gap-2 items-start w-full">
           <div className="flex gap-2.5 items-start w-full">
-            <div className="w-5.5 h-5.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 mt-0.5 shadow-sm">
-              <Bot size={11} />
+            <div className="w-6 h-6 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200/70 dark:border-blue-800/60 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 mt-0.5 shadow-xs">
+              <Bot size={13} />
             </div>
-            <div className="flex-1 space-y-1 bg-slate-100 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40 text-slate-800 dark:text-slate-100 rounded-2xl rounded-tl-sm px-3.5 py-2.5 shadow-sm relative group">
+            <div className="flex-1 space-y-1 bg-slate-100/90 dark:bg-slate-850/80 border border-slate-200/80 dark:border-slate-750 text-slate-800 dark:text-slate-100 rounded-[14px] rounded-tl-[4px] px-4 py-3 shadow-xs relative group">
               {renderedContent}
               {msg.id !== 'welcome' && <CopyButton text={msg.text} />}
             </div>
           </div>
           {msg.response && msg.response.matchedAssets && msg.response.matchedAssets.length > 0 && (
             <div className="pl-8 w-full space-y-1.5">
-              <p className="text-[8.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Matching Asset Classes:</p>
+              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Matching Asset Details:</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                 {msg.response.matchedAssets.map((asset, idx) => (
-                  <div key={idx} className="bg-slate-100/50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/20 rounded-lg p-2 flex flex-col gap-0.5 text-left">
-                    <div className="flex justify-between items-center text-[9px] font-bold">
-                      <span className="text-slate-700 dark:text-slate-200 truncate pr-2">{asset.name}</span>
-                      <span className="text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-700 px-1 py-0.5 rounded text-[7.5px] uppercase shrink-0">{asset.type}</span>
+                  <div key={idx} className="bg-white/80 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 rounded-[8px] p-2 flex flex-col gap-0.5 text-left shadow-xs">
+                    <div className="flex justify-between items-center text-[10px] font-semibold">
+                      <span className="text-slate-800 dark:text-slate-200 truncate pr-2">{asset.name}</span>
+                      <span className="text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider shrink-0 font-bold">{asset.type}</span>
                     </div>
-                    <span className="text-[8.5px] text-slate-500 dark:text-slate-400 font-semibold truncate">{asset.details}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate text-financial">{asset.details}</span>
                   </div>
                 ))}
               </div>
@@ -259,6 +270,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showConfirmClear, setShowConfirmClear] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -284,7 +296,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const triggerAssistant = async (userQuery: string) => {
+  const triggerAssistant = useCallback(async (userQuery: string) => {
     if (!userQuery.trim() || isLoading) return;
 
     const userMsg: ChatMessage = {
@@ -297,7 +309,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
     setQuery('');
     setIsLoading(true);
 
-    await new Promise(r => setTimeout(r, 450));
+    await new Promise(r => setTimeout(r, 350));
 
     try {
       const res = askAssistant(userQuery, portfolios);
@@ -319,14 +331,12 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isLoading, portfolios]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     triggerAssistant(query);
   };
-
-  const [showConfirmClear, setShowConfirmClear] = useState(false);
 
   const confirmClearChat = () => {
     setMessages([welcomeMessage]);
@@ -334,85 +344,114 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
   };
 
   return (
-    <div className="apple-card p-4 sm:p-5 text-slate-800 dark:text-slate-100 relative overflow-hidden flex flex-col h-[370px]">
-      <div className="absolute top-[-50px] right-[-50px] w-[150px] h-[150px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[40px] pointer-events-none" />
+    <div className="apple-card p-4 sm:p-5 text-slate-800 dark:text-slate-100 relative overflow-hidden flex flex-col h-[370px] justify-between">
+      {/* Background ambient lighting */}
+      <div className="absolute top-[-40px] right-[-40px] w-[140px] h-[140px] bg-blue-500/8 dark:bg-blue-500/15 rounded-full blur-[35px] pointer-events-none" />
 
-      <div className="flex justify-between items-center mb-3.5 shrink-0 z-10">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-3 shrink-0 z-10">
         <div className="flex items-center gap-2">
-          <Sparkles size={16} className="text-blue-500 dark:text-blue-400" />
-          <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-            AI Portfolio Assistant
-          </h3>
+          <div className="w-7 h-7 rounded-[8px] bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-800/60 flex items-center justify-center text-blue-600 dark:text-blue-400">
+            <Sparkles size={14} />
+          </div>
+          <div>
+            <h3 className="text-card-title font-semibold text-slate-900 dark:text-slate-100">
+              AI Portfolio Assistant
+            </h3>
+          </div>
         </div>
-        {messages.length > 1 && (
-          <button
-            type="button"
-            onClick={() => setShowConfirmClear(true)}
-            className="flex items-center gap-1.5 text-[9px] font-bold text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors bg-slate-200/50 dark:bg-slate-800/40 hover:bg-slate-200 dark:hover:bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-200/30 dark:border-slate-700/25 active:scale-[0.97]"
-            title="Reset conversation"
-          >
-            <Trash2 size={11} />
-            <span>Clear</span>
-          </button>
-        )}
+
+        <div className="flex items-center gap-2">
+          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60 text-[10px] font-semibold select-none">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Active
+          </span>
+
+          {messages.length > 1 && (
+            <button
+              type="button"
+              onClick={() => setShowConfirmClear(true)}
+              className="flex items-center gap-1 text-[10px] font-semibold text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 px-2 py-1 rounded-[6px] border border-slate-200/80 dark:border-slate-700 transition-colors ios-press"
+              title="Reset conversation"
+            >
+              <Trash2 size={11} />
+              <span>Clear</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-1 space-y-4 mb-4 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 scrollbar-track-transparent min-h-0">
+      {/* Chat Messages Log */}
+      <div className="flex-1 overflow-y-auto pr-1 space-y-3.5 mb-2.5 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 scrollbar-track-transparent min-h-0">
         {messages.map((msg) => (
           <ChatMessageItem key={msg.id} msg={msg} />
         ))}
         {isLoading && (
           <div className="flex gap-2.5 items-start w-full animate-pulse">
-            <div className="w-5.5 h-5.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 mt-0.5 shadow-sm">
-              <Bot size={11} />
+            <div className="w-6 h-6 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 mt-0.5 shadow-xs">
+              <Bot size={13} />
             </div>
-            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/40 px-3.5 py-2 rounded-xl border border-slate-200/30 dark:border-slate-700/10">
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/60 px-3.5 py-2.5 rounded-[12px] border border-slate-200/60 dark:border-slate-700/60">
+              <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {suggestions.length > 0 && (
-        <div className="flex flex-col gap-1.5 mb-3 shrink-0">
-          <p className="text-[8.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Suggested Queries:</p>
+      {/* Suggested Queries Chips */}
+      {suggestions.length > 0 && messages.length <= 2 && (
+        <div className="flex flex-col gap-1.5 mb-2.5 shrink-0">
+          <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Suggested Queries:</p>
           <div className="flex flex-wrap gap-1.5">
             {suggestions.map((s, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => triggerAssistant(s.label)}
-                className="text-left text-[9.5px] text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold bg-slate-100/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/35 px-2.5 py-1.5 rounded-xl transition-all active:scale-[0.97]"
+                className="inline-flex items-center gap-1 text-left text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium bg-blue-50/50 hover:bg-blue-50 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-blue-100 hover:border-blue-300 dark:border-slate-700/80 dark:hover:border-slate-600 px-2.5 py-1.5 rounded-[8px] transition-all ios-press"
               >
-                {s.label}
+                <span className="text-[11px] select-none">{s.icon}</span>
+                <span>{s.label}</span>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSearch} className="flex gap-2 shrink-0 z-10">
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask a question..."
-          className="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-500 rounded-xl px-3.5 py-2 text-[11px] text-slate-800 dark:text-slate-200 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 transition-colors shadow-sm"
-        />
+      {/* Query Input Dock */}
+      <form onSubmit={handleSearch} className="relative flex items-center gap-2 shrink-0 z-10">
+        <div className="relative flex-1 flex items-center">
+          <span className="absolute left-3 text-slate-400 pointer-events-none">
+            <Search size={14} />
+          </span>
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Ask a question about your portfolio..."
+            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 focus:border-blue-600 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-600/20 rounded-[10px] pl-9 pr-12 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none transition-all shadow-xs"
+          />
+          {!query && (
+            <kbd className="hidden sm:inline-block absolute right-3 px-1.5 py-0.5 text-[9px] font-semibold text-slate-400 bg-slate-200/80 dark:bg-slate-800 border border-slate-300/80 dark:border-slate-700 rounded-[4px] select-none pointer-events-none">
+              /
+            </kbd>
+          )}
+        </div>
         <button
           type="submit"
           disabled={!query.trim() || isLoading}
-          className="w-9 h-9 rounded-xl bg-blue-600 hover:bg-blue-500 flex items-center justify-center text-white transition-all active:scale-[0.97] shadow-lg shadow-blue-500/15 disabled:opacity-40 disabled:hover:bg-blue-600 disabled:active:scale-100"
+          className="h-[36px] px-3.5 rounded-[10px] bg-blue-600 hover:bg-blue-700 active:bg-blue-800 flex items-center justify-center text-white transition-all ios-press shadow-xs disabled:opacity-40 disabled:hover:bg-blue-600 disabled:cursor-not-allowed"
           aria-label="Send query"
         >
           <Send size={13} />
         </button>
       </form>
 
+      {/* Confirmation Modal */}
       <ConfirmModal
         isOpen={showConfirmClear}
         onClose={() => setShowConfirmClear(false)}
