@@ -79,11 +79,10 @@ npm run build
 ### 3. Date Arithmetic & Calculations
 - **Month Rollover Clamping**: When generating monthly cash-flow dates, always clamp the day of the month to the last valid day of the target month (`new Date(year, month + 1, 0).getDate()`) to prevent JavaScript date-rollover bugs (e.g., Jan 31 rolling into March 3).
 - **Linear Investment Weighted Age**: Use `(age / 2)` when calculating weighted capital age for Recurring Deposits and SIPs, as monthly deposits average half the total elapsed duration.
-- **Equity Concentration Checks**: Combine both direct stock holdings and Mutual Fund SIP values (`stocks + sip`) when evaluating equity concentration percentages.
 
 ### 4. Code Splitting & Performance
 - **Lazy Loading**: Registry view components (`FixedDepositView`, `SIPView`, `RDView`, etc.) and SVG charts must be dynamically imported with `React.lazy` and wrapped in `<Suspense>`. Use shimmer skeleton placeholders (not `null`) as fallbacks to prevent Cumulative Layout Shift.
-- **Web Worker Offloading**: Offload CPU-heavy calculations (XIRR solvers, health scores, allocation rebalancing) to Web Workers in `src/workers/` with main-thread synchronous fallbacks.
+- **Web Worker Offloading**: Offload CPU-heavy calculations (XIRR solvers) to Web Workers in `src/workers/` with main-thread synchronous fallbacks.
 - **Asset Truncation**: Use `truncate` on user-provided strings (stock names, bank names, labels) within fixed-size grid or flex containers.
 - **Tab Transitions**: Apply the `.tab-transition` CSS class to active tab panels in `AssetTabContent.tsx` with a unique `key` prop to trigger smooth fade-in animations on tab switch.
 

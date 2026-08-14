@@ -2,9 +2,6 @@ import { Portfolio } from '../types/portfolio';
 import { formatINR, formatINRCompact, getFDInvestedAmount, getFDEffectiveValue } from './formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from './rdUtils';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from './sipUtils';
-import { calculateHealthScore } from './healthScore';
-import { calculateRebalancing } from './rebalancing';
-import { getAllocationTargets } from '../hooks/usePortfolioInsights';
 
 export interface AssistantResponse {
   answer: string;
@@ -27,8 +24,6 @@ export enum Intent {
   NET_WORTH = 'NET_WORTH',
   FAMILY_BREAKDOWN = 'FAMILY_BREAKDOWN',
   NEXT_SIP_DATE = 'NEXT_SIP_DATE',
-  PORTFOLIO_HEALTH = 'PORTFOLIO_HEALTH',
-  REBALANCING_ADVICE = 'REBALANCING_ADVICE',
   EMERGENCY_FUND = 'EMERGENCY_FUND',
   RENTAL_YIELD = 'RENTAL_YIELD',
   EXPIRED_DOCUMENTS = 'EXPIRED_DOCUMENTS',
@@ -153,16 +148,6 @@ export function detectIntent(query: string, portfolios?: Portfolio[]): Intent {
     (q.includes('this year') || q.includes(String(currentYear)) || q.includes('current year'))
   ) {
     return Intent.MUTUAL_FUND_YEAR_INVESTMENTS;
-  }
-
-  // Health Score Audit
-  if (q.includes('health')) {
-    return Intent.PORTFOLIO_HEALTH;
-  }
-
-  // Rebalancing advice
-  if (q.includes('rebalance')) {
-    return Intent.REBALANCING_ADVICE;
   }
 
   // Emergency Fund
@@ -935,80 +920,7 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     };
   }
 
-  // 1. Portfolio Health Audit
-  if (intent === Intent.PORTFOLIO_HEALTH) {
-    const report = calculateHealthScore(portfolios, null);
-    let answer = `### 🩺 Portfolio Health Audit\n`;
-    answer += `Your overall portfolio health score is **${report.score}/100**.\n\n`;
-    
-    answer += `| Category | Description | Status |\n`;
-    answer += `| :--- | :--- | :--- |\n`;
-    
-    // Strengths
-    report.strengths.forEach(str => {
-      answer += `| Strength | ${str.slice(2)} | ✅ Pass |\n`;
-    });
-    
-    // Risks
-    report.risks.forEach(risk => {
-      answer += `| Risk | ${risk.slice(2)} | ⚠️ Warning |\n`;
-    });
-
-    if (report.risks.length === 0) {
-      answer += `\n🌟 **Excellent job!** No major risks or allocation gaps detected. Keep maintaining your SIP discipline!`;
-    } else {
-      answer += `\n💡 **Action items**: Address the warnings above (like boosting emergency funds or adding insurance policies) to increase your health score.`;
-    }
-
-    return {
-      answer,
-      matchedAssets: [],
-    };
-  }
-
-  // 2. Rebalancing Advice
-  if (intent === Intent.REBALANCING_ADVICE) {
-    const targets = getAllocationTargets();
-    const targetPcts = {
-      equity: targets.stocks,
-      debt: targets.fd,
-      gold: targets.gold,
-      realEstate: targets.realEstate
-    };
-    const advice = calculateRebalancing(portfolios, null, targetPcts);
-    
-    let answer = `### ⚖️ Asset Rebalancing Advice\n`;
-    answer += `Based on your configured target allocation targets, here is the drift analysis and trade recommendations:\n\n`;
-    
-    answer += `| Asset Class | Target % | Actual % | Drift | Action Recommendation |\n`;
-    answer += `| :--- | :---: | :---: | :---: | :--- |\n`;
-    
-    const matched: AssistantResponse['matchedAssets'] = [];
-    
-    advice.forEach(ad => {
-      const drift = ad.currentPct - ad.targetPct;
-      const driftSign = drift >= 0 ? '+' : '';
-      
-      answer += `| **${ad.assetClass}** | ${ad.targetPct}% | ${ad.currentPct.toFixed(1)}% | ${driftSign}${drift.toFixed(1)}% | **${ad.action}** |\n`;
-      
-      if (ad.action !== 'HOLD') {
-        matched.push({
-          name: ad.assetClass,
-          type: 'Rebalancing Trade',
-          details: `Drift: ${driftSign}${drift.toFixed(1)}%, Recommendation: ${ad.action}`
-        });
-      }
-    });
-
-    answer += `\n*(Note: Rebalancing orders are recommended only when the trade amount exceeds the minimum action threshold of ${formatINR(5000)})*`;
-    
-    return {
-      answer,
-      matchedAssets: matched,
-    };
-  }
-
-  // 3. Emergency Fund
+  // Emergency Fund
   if (intent === Intent.EMERGENCY_FUND) {
     let totalFDVal = 0;
     let totalRDVal = 0;

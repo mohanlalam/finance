@@ -195,10 +195,9 @@ function getDynamicSuggestions(portfolios: Portfolio[]): { label: string }[] {
     suggestions.push({ label: 'Show upcoming insurance renewals' });
   }
 
-  suggestions.push({ label: 'Diagnose my portfolio health' });
-  suggestions.push({ label: 'Give me asset rebalancing advice' });
   suggestions.push({ label: 'What is my total asset allocation split?' });
   suggestions.push({ label: 'Which asset gave the highest return?' });
+  suggestions.push({ label: 'Show me my emergency fund coverage' });
 
   return suggestions.slice(0, 3);
 }
@@ -254,7 +253,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
   const welcomeMessage = useMemo<ChatMessage>(() => ({
     id: 'welcome',
     role: 'assistant',
-    text: "Hello! I am your **AI Portfolio Assistant**. You can ask me questions about your family portfolio's performance, health diagnostics, rebalancing trade triggers, upcoming maturities, insurance premium renewals, and asset allocation split.\n\nTry clicking one of the suggested queries below or type your question!"
+    text: "Hello! I am your **AI Portfolio Assistant**. You can ask me questions about your family portfolio's performance, upcoming deposit maturities, insurance premium renewals, and asset allocation split.\n\nTry clicking one of the suggested queries below or type your question!"
   }), []);
 
   const [query, setQuery] = useState('');

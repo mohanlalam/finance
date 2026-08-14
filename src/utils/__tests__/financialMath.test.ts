@@ -3,8 +3,6 @@ import assert from 'node:assert/strict';
 
 // Test targets
 import { calculateXIRR, calculateCAGR } from '../performance';
-import { calculateHealthScore } from '../healthScore';
-import { calculateRebalancing } from '../rebalancing';
 import { compoundValue } from '../mathUtils';
 import { Portfolio } from '../../types/portfolio';
 
@@ -60,58 +58,6 @@ describe('Financial Math Unit Tests', () => {
       ];
       const xirr = calculateXIRR(cashflows);
       assert.equal(xirr, 0);
-    });
-  });
-
-  describe('Portfolio Health Score Solver', () => {
-    test('evaluates portfolio health score within valid 0-100 range', () => {
-      const mockPortfolio = {
-        id: 'p1',
-        name: 'Personal',
-        label: 'Personal',
-        totalInvested: 500000,
-        totalCurrentValue: 600000,
-        unrealizedPnL: 100000,
-        unrealizedPnLPercent: 20,
-        holdings: [],
-        fixedDeposits: [],
-        rdAccounts: [],
-        sipAccounts: [],
-        goldHoldings: [],
-        realEstateAssets: [],
-        insurances: [],
-        documents: [],
-        created_at: new Date().toISOString(),
-      } as unknown as Portfolio;
-      const scoreResult = calculateHealthScore([mockPortfolio], mockPortfolio);
-      assert.ok(typeof scoreResult.score === 'number');
-      assert.ok(scoreResult.score >= 0 && scoreResult.score <= 100);
-    });
-  });
-
-  describe('Rebalancing Engine', () => {
-    test('generates valid rebalancing actions for target drift', () => {
-      const mockPortfolio = {
-        id: 'p1',
-        name: 'Personal',
-        label: 'Personal',
-        totalInvested: 1000000,
-        totalCurrentValue: 1000000,
-        unrealizedPnL: 0,
-        unrealizedPnLPercent: 0,
-        holdings: [{ id: 'h1', ticker: 'RELIANCE', current_value: 800000, quantity: 100, avg_buy_price: 8000, created_at: '' }],
-        fixedDeposits: [{ id: 'f1', bank_name: 'HDFC', principal_amount: 200000, status: 'active', created_at: '' }],
-        rdAccounts: [],
-        sipAccounts: [],
-        goldHoldings: [],
-        realEstateAssets: [],
-        insurances: [],
-        documents: [],
-        created_at: new Date().toISOString(),
-      } as unknown as Portfolio;
-      const targets = { equity: 50, debt: 50, gold: 0, realEstate: 0 };
-      const actions = calculateRebalancing([mockPortfolio], mockPortfolio, targets);
-      assert.ok(Array.isArray(actions));
     });
   });
 });

@@ -1,26 +1,20 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { TrendingUp, TrendingDown, AlertTriangle, Landmark, Shield, Activity, Crown, Target, BarChart3, Filter } from './icons/AppIcons';
+import React, { useState, useMemo, useCallback } from 'react';
+import { TrendingUp, TrendingDown, Landmark, Shield, Activity, Crown, Target, BarChart3, Filter } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import {
   PortfolioInsights,
   HoldingInsight,
-  AllocationSlice,
-  ConcentrationWarning,
   FDMaturityAlert,
   InsuranceRenewalAlert,
   PortfolioBestWorst,
 } from '../hooks/usePortfolioInsights';
-import AllocationTargetsSettings from './AllocationTargetsSettings';
 
 import { Portfolio } from '../types/portfolio';
-import { calculateHealthScore, calculateHealthScoreAsync, HealthReport } from '../utils/healthScore';
-import { calculateRebalancing, calculateRebalancingAsync, RebalancingAdvice } from '../utils/rebalancing';
 
 interface InsightsPanelProps {
   insights: PortfolioInsights;
   portfolios: Portfolio[];
   activePortfolio: Portfolio | null;
-  onTargetsChanged?: () => void;
 }
 
 /* ── Clean Apple-style card wrapper ── */
@@ -28,7 +22,6 @@ const Card = React.memo(function Card({ title, icon, children, action }: {
   title: string;
   icon: React.ReactNode;
   children: React.ReactNode;
-  accent?: string;
   action?: React.ReactNode;
 }) {
   return (
@@ -124,219 +117,6 @@ const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: Ho
   );
 });
 
-const ASSET_COLORS: Record<string, string> = {
-  'Stocks': '#387ed1',
-  'Fixed Deposits': '#f59e0b',
-  'Gold': '#eab308',
-  'Real Estate': '#a855f7',
-};
-
-const DualRingDonut = React.memo(function DualRingDonut({ slices }: { slices: AllocationSlice[] }) {
-  const outerR = 30;
-  const innerR = 21;
-  const outerCircum = 2 * Math.PI * outerR;
-  const innerCircum = 2 * Math.PI * innerR;
-
-  let outerOffset = 0;
-  let innerOffset = 0;
-
-  return (
-    <div className="flex items-center gap-3 py-1 bg-[var(--surface-secondary)]/50 p-2.5 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] mb-2">
-      <div className="relative w-16 h-16 shrink-0">
-        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
-          {/* Background tracks */}
-          <circle cx="40" cy="40" r={outerR} stroke="var(--border-subtle)" strokeWidth="5" fill="none" opacity="0.3" />
-          <circle cx="40" cy="40" r={innerR} stroke="var(--border-subtle)" strokeWidth="4" fill="none" opacity="0.3" />
-
-          {/* Inner Ring: Target Slices */}
-          {slices.map((s) => {
-            const dash = Math.max((s.target / 100) * innerCircum - 1, 0);
-            const currentOffset = innerOffset;
-            innerOffset += s.target;
-            const color = ASSET_COLORS[s.label] || '#64748b';
-            return (
-              <circle
-                key={`target-${s.label}`}
-                cx="40"
-                cy="40"
-                r={innerR}
-                stroke={color}
-                strokeWidth="4"
-                strokeDasharray={`${dash} ${innerCircum}`}
-                strokeDashoffset={-(currentOffset / 100) * innerCircum}
-                fill="none"
-                opacity="0.45"
-              />
-            );
-          })}
-
-          {/* Outer Ring: Actual Slices */}
-          {slices.map((s) => {
-            const dash = Math.max((s.actual / 100) * outerCircum - 1, 0);
-            const currentOffset = outerOffset;
-            outerOffset += s.actual;
-            const color = ASSET_COLORS[s.label] || '#64748b';
-            return (
-              <circle
-                key={`actual-${s.label}`}
-                cx="40"
-                cy="40"
-                r={outerR}
-                stroke={color}
-                strokeWidth="5"
-                strokeDasharray={`${dash} ${outerCircum}`}
-                strokeDashoffset={-(currentOffset / 100) * outerCircum}
-                fill="none"
-              />
-            );
-          })}
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-[9px] font-black text-[var(--text-tertiary)] uppercase">Drift</span>
-        </div>
-      </div>
-
-      <div className="flex-1 space-y-1">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-[var(--text-secondary)]">
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[var(--accent-blue)] shrink-0" />
-            <span className="font-bold">Outer: Live</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[var(--accent-blue)] opacity-40 shrink-0" />
-            <span className="font-bold">Inner: Target</span>
-          </div>
-        </div>
-        <p className="text-[9.5px] text-[var(--text-tertiary)] leading-tight">
-          Visual multi-asset drift comparison against portfolio target allocation
-        </p>
-      </div>
-    </div>
-  );
-});
-
-const AllocationDrift = React.memo(function AllocationDrift({
-  slices,
-  portfolios,
-  activePortfolio,
-}: {
-  slices: AllocationSlice[];
-  portfolios: Portfolio[];
-  activePortfolio: Portfolio | null;
-}) {
-  const targetPcts = useMemo(() => ({
-    equity: slices.find((s) => s.label === 'Stocks')?.target ?? 60,
-    debt: slices.find((s) => s.label === 'Fixed Deposits')?.target ?? 20,
-    gold: slices.find((s) => s.label === 'Gold')?.target ?? 10,
-    realEstate: slices.find((s) => s.label === 'Real Estate')?.target ?? 10,
-  }), [slices]);
-
-  const [rebalancingAdvice, setRebalancingAdvice] = useState<RebalancingAdvice[]>(() =>
-    calculateRebalancing(portfolios, activePortfolio, targetPcts)
-  );
-
-  const isFirstMountRebalance = useRef(true);
-
-  useEffect(() => {
-    if (isFirstMountRebalance.current) {
-      isFirstMountRebalance.current = false;
-      return;
-    }
-    let active = true;
-    calculateRebalancingAsync(portfolios, activePortfolio, targetPcts).then((advice) => {
-      if (active) setRebalancingAdvice(advice);
-    });
-    return () => {
-      active = false;
-    };
-  }, [portfolios, activePortfolio, targetPcts]);
-
-  const hasAssets = useMemo(() => slices.some((s) => s.value > 0), [slices]);
-  if (!hasAssets) return <p className="text-xs text-[var(--text-tertiary)]">No assets yet</p>;
-  return (
-    <div className="space-y-2.5">
-      {/* Dual-Ring Visual Rebalancing Donut */}
-      <DualRingDonut slices={slices} />
-
-      {slices.map((s) => {
-        const driftAbs = Math.abs(s.drift);
-        const isOver = s.drift > 0;
-        const severityColor = driftAbs > 20 ? 'text-[var(--negative)]' : driftAbs > 10 ? 'text-[var(--warning)]' : 'text-[var(--positive)]';
-        const barColor = driftAbs > 20 ? 'var(--negative)' : driftAbs > 10 ? 'var(--warning)' : 'var(--positive)';
-        
-        return (
-          <div key={s.label}>
-            <div className="flex items-center justify-between mb-0.5">
-              <span className="text-xs font-semibold text-[var(--text-secondary)]">{s.label}</span>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-[var(--text-tertiary)]">{s.target.toFixed(0)}% target</span>
-                <span className={`text-xs font-bold tnum ${severityColor}`}>
-                  {s.actual.toFixed(1)}% {isOver ? '↑' : '↓'}
-                </span>
-              </div>
-            </div>
-            <div className="h-1.5 bg-[var(--surface-secondary)] rounded-[var(--radius-pill)] overflow-hidden relative border border-[var(--border-subtle)]">
-              <div
-                className="h-full rounded-[var(--radius-pill)] transition-all duration-500"
-                style={{
-                  width: `${Math.min(s.actual, 100)}%`,
-                  backgroundColor: barColor,
-                }}
-              />
-              <div
-                className="absolute top-0 h-full w-0.5 bg-[var(--text-secondary)]"
-                style={{ left: `${s.target}%` }}
-              />
-            </div>
-          </div>
-        );
-      })}
-
-      <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] space-y-2">
-        <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
-          Rebalancing Advice
-        </p>
-        <div className="grid grid-cols-2 gap-2 text-[10.5px]">
-          {rebalancingAdvice.map((advice) => {
-            const isHold = advice.action === 'HOLD';
-            return (
-              <div key={advice.assetClass} className="flex justify-between items-center bg-[var(--surface-secondary)] border border-[var(--border-subtle)] px-2.5 py-1.5 rounded-[var(--radius-medium)]">
-                <span className="font-semibold text-[var(--text-secondary)]">{advice.assetClass}</span>
-                <span className={`font-bold ${isHold ? 'text-[var(--text-tertiary)]' : advice.action === 'BUY' ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-                  {advice.action === 'HOLD' ? 'HOLD' : `${advice.action} (${advice.formattedAmount})`}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-});
-
-const ConcentrationRisk = React.memo(function ConcentrationRisk({ warnings }: { warnings: ConcentrationWarning[] }) {
-  if (warnings.length === 0) {
-    return (
-      <div className="flex items-center gap-2 text-[var(--positive)]">
-        <span className="w-5 h-5 rounded-[var(--radius-pill)] bg-[var(--positive-soft)] flex items-center justify-center text-xs font-bold" aria-hidden="true">✓</span>
-        <span className="text-xs font-medium">Safe concentration limits</span>
-      </div>
-    );
-  }
-  return (
-    <div className="space-y-2">
-      {warnings.slice(0, 5).map((w, i) => (
-        <div key={`${w.ticker}-${i}`} className="flex items-center gap-2">
-          <AlertTriangle size={12} className="text-[var(--warning)] shrink-0" aria-hidden="true" />
-          <span className="text-xs text-[var(--text-secondary)] flex-1 truncate">
-            <span className="font-bold">{w.ticker}</span> is <span className="tnum">{w.pct.toFixed(1)}%</span> of {w.portfolioLabel}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-});
-
 const FDReminders = React.memo(function FDReminders({ alerts }: { alerts: FDMaturityAlert[] }) {
   if (alerts.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No upcoming maturities</p>;
   return (
@@ -411,61 +191,32 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
   );
 });
 
-
 /* ── Main Component ── */
 
-type InsightFilter = 'all' | 'stocks' | 'fds' | 'insurance' | 'high_risk' | 'due_soon';
+type InsightFilter = 'all' | 'stocks' | 'fds' | 'insurance' | 'due_soon';
 
 const FILTERS: { id: InsightFilter; label: string }[] = [
   { id: 'all', label: 'All Insights' },
   { id: 'stocks', label: 'Stocks' },
   { id: 'fds', label: 'Deposits' },
   { id: 'insurance', label: 'Insurance' },
-  { id: 'high_risk', label: 'Risk & Drift' },
   { id: 'due_soon', label: 'Upcoming' },
 ];
 
 export default React.memo(function InsightsPanel({
   insights,
-  portfolios,
-  activePortfolio,
-  onTargetsChanged,
 }: InsightsPanelProps) {
   const [activeFilter, setActiveFilter] = useState<InsightFilter>('all');
   const handleFilterClick = useCallback((id: InsightFilter) => {
     setActiveFilter(id);
   }, []);
 
-  const [healthReport, setHealthReport] = useState<HealthReport>(() =>
-    calculateHealthScore(portfolios, activePortfolio)
-  );
-
-  const isFirstMountHealth = useRef(true);
-
-  useEffect(() => {
-    if (isFirstMountHealth.current) {
-      isFirstMountHealth.current = false;
-      return;
-    }
-    let active = true;
-    calculateHealthScoreAsync(portfolios, activePortfolio).then((report) => {
-      if (active) setHealthReport(report);
-    });
-    return () => {
-      active = false;
-    };
-  }, [portfolios, activePortfolio]);
-
   const f = activeFilter;
-  const showStocks = f === 'all' || f === 'stocks' || f === 'high_risk';
+  const showStocks = f === 'all' || f === 'stocks';
   const showFDs = f === 'all' || f === 'fds' || f === 'due_soon';
   const showInsurance = f === 'all' || f === 'insurance' || f === 'due_soon';
-  const showRisk = f === 'all' || f === 'high_risk';
-  const showDrift = f === 'all' || f === 'high_risk' || f === 'fds';
 
-  // Section visibility checks
   const hasPerformanceCards = showStocks;
-  const hasHealthCards = showStocks || showDrift || showRisk;
   const hasUpcomingCards = showFDs || showInsurance;
 
   return (
@@ -522,78 +273,7 @@ export default React.memo(function InsightsPanel({
         </div>
       )}
 
-      {/* 2. Portfolio Health Section */}
-      {hasHealthCards && (
-        <div className="space-y-3">
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">Portfolio Health &amp; Risk</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            
-            <Card title="Health Score" icon={<Activity size={13} className="text-[var(--positive)]" aria-hidden="true" />}>
-              <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="15.915"
-                      className="text-[var(--surface-secondary)]"
-                      strokeWidth="3.5"
-                      stroke="currentColor"
-                      fill="none"
-                    />
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="15.915"
-                      className="text-[var(--positive)] transition-all duration-500"
-                      strokeDasharray={`${healthReport.score} 100`}
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                      stroke="currentColor"
-                      fill="none"
-                    />
-                  </svg>
-                  <div className="absolute text-center">
-                    <span className="text-xs font-extrabold text-[var(--text-primary)]">{healthReport.score}</span>
-                    <span className="text-[9px] text-[var(--text-secondary)] block -mt-1">/100</span>
-                  </div>
-                </div>
-                <div className="flex-1 space-y-1 overflow-y-auto max-h-[85px] pr-1 scrollbar-none">
-                  {healthReport.strengths.slice(0, 2).map((s, idx) => (
-                    <p key={`str-${idx}`} className="text-[9px] font-semibold text-[var(--positive)] truncate">{s}</p>
-                  ))}
-                  {healthReport.risks.slice(0, 2).map((r, idx) => (
-                    <p key={`risk-${idx}`} className="text-[9px] font-semibold text-[var(--warning)] truncate">{r}</p>
-                  ))}
-                </div>
-              </div>
-            </Card>
-
-            {showDrift && (
-              <Card
-                title="Asset Allocation Drift"
-                icon={<Target size={13} className="text-[var(--text-secondary)]" aria-hidden="true" />}
-                action={<AllocationTargetsSettings onSaved={onTargetsChanged} />}
-              >
-                <AllocationDrift
-                  slices={insights.allocationSlices}
-                  portfolios={portfolios}
-                  activePortfolio={activePortfolio}
-                />
-              </Card>
-            )}
-
-            {showRisk && (
-              <Card title="Concentration Risk" icon={<AlertTriangle size={13} className="text-[var(--warning)]" aria-hidden="true" />}>
-                <ConcentrationRisk warnings={insights.concentrationWarnings} />
-              </Card>
-            )}
-
-          </div>
-        </div>
-      )}
-
-      {/* 3. Upcoming Actions Section */}
+      {/* 2. Upcoming Actions Section */}
       {hasUpcomingCards && (
         <div className="space-y-3">
           <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">Upcoming Actions</h4>

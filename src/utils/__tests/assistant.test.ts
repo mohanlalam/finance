@@ -220,17 +220,6 @@ describe('askAssistant query parser', () => {
     expect(res2.answer).toContain('SBI FD');
   });
 
-  it('handles portfolio health queries correctly', () => {
-    const res = askAssistant('how healthy is my portfolio?', mockPortfolios);
-    expect(res.answer).toContain('Portfolio Health Audit');
-    expect(res.answer).toContain('health score is');
-  });
-
-  it('handles rebalancing advice queries', () => {
-    const res = askAssistant('give me asset rebalancing advice', mockPortfolios);
-    expect(res.answer).toContain('Asset Rebalancing Advice');
-    expect(res.answer).toContain('Drift');
-  });
 
   it('handles emergency fund status queries', () => {
     const res = askAssistant('check emergency fund status', mockPortfolios);

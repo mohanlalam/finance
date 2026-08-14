@@ -73,7 +73,7 @@ This document provides a high-level overview of the folder structure, data flow,
   * **Standardized 2x2 Widget Cards Grid**: Core dashboard cards (`NetWorthTimelineChart.tsx`, `PortfolioAssistant.tsx`, `PieChart.tsx`, `BarChart.tsx`) use a uniform height (`370px`) inside a `grid-cols-1 lg:grid-cols-2 gap-5` grid.
   * **[NetWorthTimelineChart.tsx](src/components/NetWorthTimelineChart.tsx)**: Responsive SVG area chart with date-range filtering (1M, 3M, 6M, 1Y, ALL). Uses `requestAnimationFrame` inside `ResizeObserver` for instant, jank-free chart reflow.
   * **[PortfolioAssistant.tsx](src/components/PortfolioAssistant.tsx)**: Conversational NLP assistant with memoized `ChatMessageItem` component to stop user query typing from re-parsing markdown across chat transcript history.
-  * **[InsightsPanel.tsx](src/components/InsightsPanel.tsx)**: Displays portfolio health score, top 5 movers, top holdings list, best/worst performance indicators, asset allocation drift, and alert notifications.
+  * **[InsightsPanel.tsx](src/components/InsightsPanel.tsx)**: Displays top 5 movers, top holdings by value, best/worst performance indicators, top gainers/losers, and upcoming deposit maturities & insurance renewal notifications.
 
 ---
 
@@ -84,8 +84,6 @@ The application implements a series of high-performance strategies to guarantee 
 ### 1. Persistent Web Worker Singletons
 * CPU-heavy financial calculations are offloaded to Vite-compatible background Web Workers using persistent lazy singletons. Eliminates 15–40ms thread instantiation overhead per calculation tick:
   * **[xirr.worker.ts](src/workers/xirr.worker.ts)**: Handles Newton-Raphson cash flow solvers (`runXIRRAsync` in [`performance.ts`](src/utils/performance.ts)).
-  * **[healthScore.worker.ts](src/workers/healthScore.worker.ts)**: Performs portfolio health evaluations (`calculateHealthScoreAsync` in [`healthScore.ts`](src/utils/healthScore.ts)).
-  * **[rebalancing.worker.ts](src/workers/rebalancing.worker.ts)**: Generates buy/sell allocation drift advice (`calculateRebalancingAsync` in [`rebalancing.ts`](src/utils/rebalancing.ts)).
 
 ### 2. Render Memoization & Virtualization
 * **List Virtualization**: Registry views (`FixedDepositView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`) utilize `react-window` to virtualize accounts when lists grow, binding rows to unique asset IDs to optimize DOM recycling.
@@ -127,7 +125,5 @@ Every deposit registry maps to its own separate database table:
 ## 🧮 Calculations & Formatters
 * **[portfolioCalcs.ts](src/utils/portfolioCalcs.ts)**: Single-pass `for` loop portfolio totals aggregator.
 * **[performance.ts](src/utils/performance.ts)**: Newton-Raphson XIRR solver with `Float64Array` year offsets and persistent Web Worker singleton.
-* **[healthScore.ts](src/utils/healthScore.ts)**: Evaluates 0-100 health score with persistent Web Worker singleton.
-* **[rebalancing.ts](src/utils/rebalancing.ts)**: Asset allocation drift and rebalancing engine with persistent Web Worker singleton.
 * **[assistant.ts](src/utils/assistant.ts)**: Intent-based NLP query classification system.
 * **[formatters.ts](src/utils/formatters.ts)**: Indian currency formatters (`formatINR`) and date helpers.
