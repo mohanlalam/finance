@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Holding, Portfolio, FixedDeposit, RDAccount, SIPAccount, GoldHolding, RealEstate, Insurance, DocumentMetadata, AssetPayload } from '../types/portfolio';
 import { getFDInvestedAmount, getFDEffectiveValue } from '../utils/formatters';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../utils/rdUtils';
