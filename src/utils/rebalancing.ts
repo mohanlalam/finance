@@ -1,5 +1,8 @@
 import { Portfolio } from '../types/portfolio';
 import { formatINR } from './formatters';
+import { getFDEffectiveValue } from './formatters';
+import { getRDEffectiveValue } from './rdUtils';
+import { getSIPEffectiveValue } from './sipUtils';
 
 export interface RebalancingAdvice {
   assetClass: 'Equity' | 'Debt' | 'Gold' | 'Real Estate';
@@ -11,17 +14,12 @@ export interface RebalancingAdvice {
   formattedAmount: string;
 }
 
-/**
- * Pure calculation logic for asset allocation rebalancing orders
- */
 export function calculateRebalancing(
   portfolios: Portfolio[],
   activePortfolio: Portfolio | null,
   targetPcts: { equity: number; debt: number; gold: number; realEstate: number }
 ): RebalancingAdvice[] {
   const targetPortfolios = activePortfolio ? [activePortfolio] : portfolios;
-
-  let totalVal = 0;
   let equityVal = 0;
   let debtVal = 0;
   let goldVal = 0;
@@ -29,34 +27,29 @@ export function calculateRebalancing(
 
   for (let i = 0; i < targetPortfolios.length; i++) {
     const p = targetPortfolios[i];
-    totalVal += p.totalCurrentValue;
+    if (!p) continue;
 
-    for (let j = 0; j < p.holdings.length; j++) {
-      equityVal += p.holdings[j].currentValue;
+    for (const h of p.holdings || []) {
+      equityVal += Number(h?.currentValue) || 0;
     }
-    for (let j = 0; j < p.fixedDeposits.length; j++) {
-      debtVal += p.fixedDeposits[j].principal_amount || 0;
+    for (const sip of p.sipAccounts || []) {
+      equityVal += getSIPEffectiveValue(sip);
     }
-    if (p.rdAccounts) {
-      for (let j = 0; j < p.rdAccounts.length; j++) {
-        debtVal += (p.rdAccounts[j].monthly_deposit || 0) * 12;
-      }
+    for (const fd of p.fixedDeposits || []) {
+      debtVal += getFDEffectiveValue(fd);
     }
-    if (p.sipAccounts) {
-      for (let j = 0; j < p.sipAccounts.length; j++) {
-        const sip = p.sipAccounts[j];
-        const nav = sip.liveNav || 10;
-        debtVal += (sip.units || 0) * nav;
-      }
+    for (const rd of p.rdAccounts || []) {
+      debtVal += getRDEffectiveValue(rd);
     }
-    for (let j = 0; j < p.goldHoldings.length; j++) {
-      goldVal += p.goldHoldings[j].current_valuation || 0;
+    for (const g of p.goldHoldings || []) {
+      goldVal += Number(g?.current_valuation) || 0;
     }
-    for (let j = 0; j < p.realEstate.length; j++) {
-      realEstateVal += p.realEstate[j].current_valuation || 0;
+    for (const re of p.realEstate || []) {
+      realEstateVal += Number(re?.current_valuation) || 0;
     }
   }
 
+  const totalVal = equityVal + debtVal + goldVal + realEstateVal;
   if (totalVal <= 0) return [];
 
   const currentPcts = {
@@ -66,40 +59,40 @@ export function calculateRebalancing(
     'Real Estate': (realEstateVal / totalVal) * 100,
   };
 
-  const currentVals = {
-    Equity: equityVal,
-    Debt: debtVal,
-    Gold: goldVal,
-    'Real Estate': realEstateVal,
-  };
+  const assetClasses: ('Equity' | 'Debt' | 'Gold' | 'Real Estate')[] = [
+    'Equity',
+    'Debt',
+    'Gold',
+    'Real Estate',
+  ];
 
-  const targets = {
+  const targets: Record<'Equity' | 'Debt' | 'Gold' | 'Real Estate', number> = {
     Equity: targetPcts.equity,
     Debt: targetPcts.debt,
     Gold: targetPcts.gold,
     'Real Estate': targetPcts.realEstate,
   };
 
-  const classes: Array<'Equity' | 'Debt' | 'Gold' | 'Real Estate'> = ['Equity', 'Debt', 'Gold', 'Real Estate'];
-
-  return classes.map((cls) => {
-    const curPct = currentPcts[cls];
-    const tgtPct = targets[cls];
-    const driftPct = curPct - tgtPct;
-    const targetVal = (tgtPct / 100) * totalVal;
-    const diffVal = targetVal - currentVals[cls];
+  return assetClasses.map((ac) => {
+    const cur = currentPcts[ac];
+    const tgt = targets[ac];
+    const drift = cur - tgt;
+    const diffVal = (Math.abs(drift) / 100) * totalVal;
 
     let action: 'BUY' | 'SELL' | 'HOLD' = 'HOLD';
-    if (Math.abs(driftPct) >= 2) {
-      action = diffVal > 0 ? 'BUY' : 'SELL';
+    let amt = 0;
+
+    // Trigger rebalance action only if drift > 2%
+    if (Math.abs(drift) >= 2) {
+      action = drift > 0 ? 'SELL' : 'BUY';
+      amt = Math.round(diffVal);
     }
 
-    const amt = Math.abs(diffVal);
     return {
-      assetClass: cls,
-      currentPct: curPct,
-      targetPct: tgtPct,
-      driftPct,
+      assetClass: ac,
+      currentPct: cur,
+      targetPct: tgt,
+      driftPct: drift,
       action,
       amount: amt,
       formattedAmount: formatINR(amt),
@@ -117,15 +110,23 @@ function getRebalanceWorker(): Worker | null {
     try {
       _rebalanceWorker = new Worker(new URL('../workers/rebalancing.worker.ts', import.meta.url), { type: 'module' });
       _rebalanceWorker.onmessage = (e) => {
-        const { taskId, result, error } = e.data || {};
+        const { taskId, result, error, portfolios, activePortfolio, targetPcts } = e.data || {};
         if (taskId && _pendingRebalanceCallbacks.has(taskId)) {
           const cb = _pendingRebalanceCallbacks.get(taskId)!;
           _pendingRebalanceCallbacks.delete(taskId);
-          cb(error ? calculateRebalancing(e.data.portfolios || [], e.data.activePortfolio || null, e.data.targetPcts) : result);
+          cb(
+            error
+              ? calculateRebalancing(portfolios || [], activePortfolio || null, targetPcts)
+              : result
+          );
         }
       };
       _rebalanceWorker.onerror = () => {
         _rebalanceWorker = null;
+        for (const [, cb] of _pendingRebalanceCallbacks.entries()) {
+          cb([]);
+        }
+        _pendingRebalanceCallbacks.clear();
       };
     } catch {
       _rebalanceWorker = null;

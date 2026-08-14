@@ -59,10 +59,10 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
     : upToDate;
 
   const timeDiff = end.getTime() - s.getTime();
-  const years = timeDiff / (1000 * 3600 * 24 * 365.25);
+  const years = timeDiff / (1000 * 3600 * 24 * 365.0);
 
   if (years > 0 && !isNaN(r) && r >= 0 && !isNaN(s.getTime()) && p > 0) {
-    const totalMonths = Math.max(1, Math.round(years * 12));
+    const totalMonths = Math.max(1, getElapsedMonthsStandard(s, end));
 
     if (account.contributions && account.contributions.length > 0) {
       let total = 0;
@@ -75,7 +75,7 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
           total += cAmt;
           continue;
         }
-        const remYears = (endTime - cTime) / (1000 * 3600 * 24 * 365.25);
+        const remYears = (endTime - cTime) / (1000 * 3600 * 24 * 365.0);
         if (remYears >= 0) {
           total += compoundValue(cAmt, r, 4, remYears);
         } else {

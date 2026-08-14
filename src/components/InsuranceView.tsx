@@ -75,17 +75,17 @@ export function InsuranceView({
         itemCount={insurances.length}
         onOpenAdd={openAdd}
       >
-        {insurances.length > 8 ? (
+        {insurances.length > 10 ? (
           <List
-            height={500}
+            height={Math.min(insurances.length * (isMobile ? 165 : 135), isMobile ? 420 : 540)}
             itemCount={insurances.length}
-            itemSize={135}
+            itemSize={isMobile ? 165 : 135}
             width="100%"
           >
             {({ index, style }) => {
               const policy = insurances[index];
               return (
-                <div style={style} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
                   <InsurancePolicyCard
                     policy={policy}
                     documents={documents}

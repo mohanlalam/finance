@@ -47,7 +47,12 @@ export async function initNAVCache(): Promise<void> {
 export function getSIPEffectiveValue(account: SIPAccount, liveNav?: number): number {
   if (!account) return 0;
   const units = Number(account.units || (account as { units_held?: number }).units_held || 0);
-  if (isNaN(units) || units <= 0) return 0;
+  const fallback = Number(account.fallback_valuation);
+  const validFallback = !isNaN(fallback) && fallback > 0 ? fallback : 0;
+
+  if (isNaN(units) || units <= 0) {
+    return validFallback;
+  }
 
   const nav = liveNav !== undefined ? Number(liveNav) : Number(account.liveNav);
   if (!isNaN(nav) && nav > 0) {
@@ -61,8 +66,7 @@ export function getSIPEffectiveValue(account: SIPAccount, liveNav?: number): num
     }
   }
 
-  const fallback = Number(account.fallback_valuation);
-  return !isNaN(fallback) && fallback > 0 ? fallback : 0;
+  return validFallback;
 }
 
 export async function saveNAVCacheToIDB(): Promise<void> {

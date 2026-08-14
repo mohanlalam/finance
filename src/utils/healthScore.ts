@@ -1,4 +1,7 @@
 import { Portfolio } from '../types/portfolio';
+import { getFDEffectiveValue } from './formatters';
+import { getRDEffectiveValue } from './rdUtils';
+import { getSIPEffectiveValue } from './sipUtils';
 
 export interface HealthReport {
   score: number;
@@ -17,7 +20,6 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
 
   // Calculate total portfolio value across all asset types
   let totalInvested = 0;
-  let totalCurrent = 0;
   let equityVal = 0;
   let debtVal = 0;
   let goldVal = 0;
@@ -25,37 +27,33 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
 
   for (let i = 0; i < targetPortfolios.length; i++) {
     const p = targetPortfolios[i];
-    totalInvested += p.totalInvested;
-    totalCurrent += p.totalCurrentValue;
+    if (!p) continue;
+    totalInvested += Number(p.totalInvested) || 0;
 
-    for (let j = 0; j < p.holdings.length; j++) {
-      equityVal += p.holdings[j].currentValue;
+    for (const h of p.holdings || []) {
+      equityVal += Number(h?.currentValue) || 0;
     }
-    for (let j = 0; j < p.fixedDeposits.length; j++) {
-      debtVal += p.fixedDeposits[j].principal_amount || 0;
+    for (const sip of p.sipAccounts || []) {
+      equityVal += getSIPEffectiveValue(sip);
     }
-    if (p.rdAccounts) {
-      for (let j = 0; j < p.rdAccounts.length; j++) {
-        debtVal += (p.rdAccounts[j].monthly_deposit || 0) * 12;
-      }
+    for (const fd of p.fixedDeposits || []) {
+      debtVal += getFDEffectiveValue(fd);
     }
-    if (p.sipAccounts) {
-      for (let j = 0; j < p.sipAccounts.length; j++) {
-        const sip = p.sipAccounts[j];
-        const nav = sip.liveNav || 10;
-        debtVal += (sip.units || 0) * nav;
-      }
+    for (const rd of p.rdAccounts || []) {
+      debtVal += getRDEffectiveValue(rd);
     }
-    for (let j = 0; j < p.goldHoldings.length; j++) {
-      goldVal += p.goldHoldings[j].current_valuation || 0;
+    for (const g of p.goldHoldings || []) {
+      goldVal += Number(g?.current_valuation) || 0;
     }
-    for (let j = 0; j < p.realEstate.length; j++) {
-      realEstateVal += p.realEstate[j].current_valuation || 0;
+    for (const re of p.realEstate || []) {
+      realEstateVal += Number(re?.current_valuation) || 0;
     }
   }
 
+  const totalCurrent = equityVal + debtVal + goldVal + realEstateVal;
+
   // 1. Diversification Score
-  const assetTypesPresent = [equityVal, debtVal, goldVal, realEstateVal].filter(v => v > 0).length;
+  const assetTypesPresent = [equityVal, debtVal, goldVal, realEstateVal].filter((v) => v > 0).length;
   if (assetTypesPresent >= 3) {
     strengths.push('Excellent multi-asset diversification (Stocks, FD/RD, Gold/Real Estate).');
   } else if (assetTypesPresent === 1) {
@@ -68,7 +66,7 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
     const maxAssetShare = Math.max(equityVal, debtVal, goldVal, realEstateVal) / totalCurrent;
     if (maxAssetShare > 0.7) {
       score -= 15;
-      risks.push(`Over 70% of total wealth is tied to a single asset category.`);
+      risks.push('Over 70% of total wealth is tied to a single asset category.');
     }
   }
 
@@ -82,7 +80,7 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
 
   // 4. Emergency / Fixed Income Liquidity
   if (debtVal > 0) {
-    strengths.push('Has fixed income (FD/RD/SIP) allocation for stability.');
+    strengths.push('Has fixed income (FD/RD) allocation for downside stability.');
   } else {
     score -= 10;
     risks.push('No fixed income / debt allocation found for downside protection.');
@@ -91,7 +89,7 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
   return { score: Math.max(0, Math.min(100, score)), strengths, risks };
 }
 
-// Persistent singleton worker instance to prevent 15-40ms thread creation overhead on every tick
+// Persistent singleton worker instance to prevent thread creation overhead on every tick
 let _healthWorker: Worker | null = null;
 let _pendingCallbacks = new Map<string, (report: HealthReport) => void>();
 
@@ -101,15 +99,19 @@ function getHealthWorker(): Worker | null {
     try {
       _healthWorker = new Worker(new URL('../workers/healthScore.worker.ts', import.meta.url), { type: 'module' });
       _healthWorker.onmessage = (e) => {
-        const { taskId, result, error } = e.data || {};
+        const { taskId, result, error, portfolios, activePortfolio } = e.data || {};
         if (taskId && _pendingCallbacks.has(taskId)) {
           const cb = _pendingCallbacks.get(taskId)!;
           _pendingCallbacks.delete(taskId);
-          cb(error ? calculateHealthScore(e.data.portfolios || [], e.data.activePortfolio || null) : result);
+          cb(error ? calculateHealthScore(portfolios || [], activePortfolio || null) : result);
         }
       };
       _healthWorker.onerror = () => {
         _healthWorker = null;
+        for (const [, cb] of _pendingCallbacks.entries()) {
+          cb({ score: 100, strengths: [], risks: [] });
+        }
+        _pendingCallbacks.clear();
       };
     } catch {
       _healthWorker = null;
@@ -121,7 +123,10 @@ function getHealthWorker(): Worker | null {
 /**
  * Calculates a Portfolio Health Score asynchronously using persistent Web Worker singleton
  */
-export function calculateHealthScoreAsync(portfolios: Portfolio[], activePortfolio: Portfolio | null): Promise<HealthReport> {
+export function calculateHealthScoreAsync(
+  portfolios: Portfolio[],
+  activePortfolio: Portfolio | null
+): Promise<HealthReport> {
   const worker = getHealthWorker();
   if (!worker) {
     return Promise.resolve(calculateHealthScore(portfolios, activePortfolio));

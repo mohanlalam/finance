@@ -1,11 +1,11 @@
 import { calculateXIRR, CashFlow } from '../utils/performance';
 
-self.onmessage = (e: MessageEvent<{ cashflows: CashFlow[] }>) => {
-  const { cashflows } = e.data;
+self.onmessage = (e: MessageEvent<{ taskId?: string; cashflows: CashFlow[] }>) => {
+  const { taskId, cashflows } = e.data || {};
   try {
-    const result = calculateXIRR(cashflows);
-    self.postMessage({ result });
+    const rate = calculateXIRR(cashflows || []);
+    self.postMessage({ taskId, rate, cashflows });
   } catch (err) {
-    self.postMessage({ error: err instanceof Error ? err.message : String(err) });
+    self.postMessage({ taskId, error: err instanceof Error ? err.message : String(err), cashflows });
   }
 };

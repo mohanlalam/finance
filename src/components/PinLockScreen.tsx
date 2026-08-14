@@ -84,30 +84,28 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
 
   const handlePressKey = useCallback((num: string) => {
     if (success) return;
-    
-    setPin((prev) => {
-      const pinLength = getPinLength();
-      if (prev.length >= pinLength) return prev;
-      const nextPin = prev + num;
-      setError('');
+    const pinLength = getPinLength();
+    if (pin.length >= pinLength) return;
 
-      if (nextPin.length === pinLength) {
-        verifyPin(nextPin).then((isValid) => {
-          if (isValid) {
-            setSuccess(true);
-          } else {
-            setShake(true);
-            setError('Incorrect PIN');
-            setTimeout(() => {
-              setShake(false);
-              setPin('');
-            }, 600);
-          }
-        });
-      }
-      return nextPin;
-    });
-  }, [success]);
+    const nextPin = pin + num;
+    setPin(nextPin);
+    setError('');
+
+    if (nextPin.length === pinLength) {
+      verifyPin(nextPin).then((isValid) => {
+        if (isValid) {
+          setSuccess(true);
+        } else {
+          setShake(true);
+          setError('Incorrect PIN');
+          setTimeout(() => {
+            setShake(false);
+            setPin('');
+          }, 600);
+        }
+      });
+    }
+  }, [success, pin]);
 
   useEffect(() => {
     if (success && pin.length === getPinLength()) {

@@ -75,17 +75,17 @@ export function FixedDepositView({
         itemCount={fixedDeposits.length}
         onOpenAdd={openAdd}
       >
-        {fixedDeposits.length > 8 ? (
+        {fixedDeposits.length > 10 ? (
           <List
-            height={500}
+            height={Math.min(fixedDeposits.length * (isMobile ? 165 : 135), isMobile ? 420 : 540)}
             itemCount={fixedDeposits.length}
-            itemSize={140}
+            itemSize={isMobile ? 165 : 135}
             width="100%"
           >
             {({ index, style }) => {
               const deposit = fixedDeposits[index];
               return (
-                <div style={style} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
                   <DepositDetailsCard
                     deposit={deposit}
                     documents={documents}

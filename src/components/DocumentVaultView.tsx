@@ -413,11 +413,12 @@ export default React.memo(function DocumentVaultView({
 
             <form onSubmit={handleUpload} className="px-6 py-5 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
+                <label htmlFor="doc-vault-portfolio" className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Portfolio</label>
                 <select
+                  id="doc-vault-portfolio"
                   value={formPortfolio}
                   onChange={(e) => setFormPortfolio(e.target.value)}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+                  className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] transition-colors"
                 >
                   {portfolioOptions.map((o) => (
                     <option key={o.name} value={o.name}>{o.label}</option>
@@ -426,32 +427,35 @@ export default React.memo(function DocumentVaultView({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Document Name</label>
+                <label htmlFor="doc-vault-name" className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Document Name</label>
                 <input
+                  id="doc-vault-name"
                   type="text"
                   value={documentName}
                   onChange={(e) => setDocumentName(e.target.value)}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+                  className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Expiry / Renewal Date (optional)</label>
+                <label htmlFor="doc-vault-expiry" className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Expiry / Renewal Date (optional)</label>
                 <input
+                  id="doc-vault-expiry"
                   type="date"
                   value={expiryDate}
                   onChange={(e) => setExpiryDate(e.target.value)}
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors bg-white dark:bg-slate-900"
+                  className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] transition-colors bg-[var(--surface)]"
                 />
               </div>
 
               {activeFolder !== 'general' && assetOptions.length > 0 && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Link to Asset (optional)</label>
+                  <label htmlFor="doc-vault-link" className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Link to Asset (optional)</label>
                   <select
+                    id="doc-vault-link"
                     value={linkedAssetId}
                     onChange={(e) => setLinkedAssetId(e.target.value)}
-                    className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
+                    className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] transition-colors"
                   >
                     <option value="">— Not linked —</option>
                     {assetOptions.map((opt) => (

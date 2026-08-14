@@ -109,9 +109,14 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     return pathParts[1] || 'stocks';
   }, [pathParts]);
 
+  const activeAssetRef = useRef(activeAsset);
+  useEffect(() => {
+    activeAssetRef.current = activeAsset;
+  }, [activeAsset]);
+
   const setActiveTab = useCallback((tab: PortfolioName) => {
-    navigate(`/${tab}/${activeAsset}`);
-  }, [navigate, activeAsset]);
+    navigate(`/${tab}/${activeAssetRef.current}`);
+  }, [navigate]);
 
   // Persist active family tab when it changes from the URL
   useEffect(() => {
@@ -127,27 +132,19 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     return portfolios.find((p: Portfolio) => p.name === activeTab) ?? null;
   }, [portfolios, activeTab]);
 
+  const portfolioKeys = useMemo(
+    () => portfolios.map((p: Portfolio) => `${p.id}:${p.name}:${p.label}`).join('|'),
+    [portfolios]
+  );
+
   const portfolioOptionsForModal = useMemo(() => {
     return portfolios.map((p: Portfolio) => ({ name: p.name, label: p.label }));
-  }, [portfolios]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [portfolioKeys]);
 
-  // Keep a stable ref for polling
-  const refreshPricesRef = useRef(refreshPrices);
-  useEffect(() => {
-    refreshPricesRef.current = refreshPrices;
-  }, [refreshPrices]);
-
-  // Auto-load + background polling (visibility refresh is handled by usePortfolioData)
+  // Auto-load on mount (SWR handles background polling and visibility refresh)
   useEffect(() => {
     load();
-
-    const interval = setInterval(() => {
-      refreshPricesRef.current();
-    }, 15 * 60 * 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
   }, [load]);
 
   // Daily net worth snapshot trigger
@@ -172,52 +169,28 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
   }, [loadStatus, load]);
 
   const addRDAccount = useCallback(async (portfolioName: string, payload: RDPayload) => {
-    if (isMutatingRef.current) {
-      throw new Error('An update is already in progress. Please try again in a moment.');
-    }
     await addAsset('rd_account', portfolioName, payload);
-    await refreshSnapshot();
-  }, [addAsset, isMutatingRef, refreshSnapshot]);
+  }, [addAsset]);
 
   const updateRDAccount = useCallback(async (id: string, payload: Partial<RDPayload>) => {
-    if (isMutatingRef.current) {
-      throw new Error('An update is already in progress. Please try again in a moment.');
-    }
     await updateAsset('rd_account', id, payload);
-    await refreshSnapshot();
-  }, [updateAsset, isMutatingRef, refreshSnapshot]);
+  }, [updateAsset]);
 
   const deleteRDAccount = useCallback(async (id: string) => {
-    if (isMutatingRef.current) {
-      throw new Error('An update is already in progress. Please try again in a moment.');
-    }
     await deleteAsset('rd_account', id);
-    await refreshSnapshot();
-  }, [deleteAsset, isMutatingRef, refreshSnapshot]);
+  }, [deleteAsset]);
 
   const addSIPAccount = useCallback(async (portfolioName: string, payload: SIPPayload) => {
-    if (isMutatingRef.current) {
-      throw new Error('An update is already in progress. Please try again in a moment.');
-    }
     await addAsset('sip_account', portfolioName, payload);
-    await refreshSnapshot();
-  }, [addAsset, isMutatingRef, refreshSnapshot]);
+  }, [addAsset]);
 
   const updateSIPAccount = useCallback(async (id: string, payload: Partial<SIPPayload>) => {
-    if (isMutatingRef.current) {
-      throw new Error('An update is already in progress. Please try again in a moment.');
-    }
     await updateAsset('sip_account', id, payload);
-    await refreshSnapshot();
-  }, [updateAsset, isMutatingRef, refreshSnapshot]);
+  }, [updateAsset]);
 
   const deleteSIPAccount = useCallback(async (id: string) => {
-    if (isMutatingRef.current) {
-      throw new Error('An update is already in progress. Please try again in a moment.');
-    }
     await deleteAsset('sip_account', id);
-    await refreshSnapshot();
-  }, [deleteAsset, isMutatingRef, refreshSnapshot]);
+  }, [deleteAsset]);
 
 
 

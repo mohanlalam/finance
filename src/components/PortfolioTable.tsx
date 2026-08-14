@@ -57,11 +57,22 @@ const Th = React.memo(({
     <th
       role="columnheader"
       aria-sort={getSortAria(k)}
-      className="px-2 py-3 text-left text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider cursor-pointer select-none hover:text-[var(--text-primary)] transition-colors whitespace-nowrap"
-      onClick={() => !hideArrow && handleSort(k)}
+      className="px-2 py-3 text-left text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider select-none whitespace-nowrap"
     >
-      <span className="flex items-center gap-1">
-        {label}
+      <button
+        type="button"
+        disabled={hideArrow}
+        onClick={() => !hideArrow && handleSort(k)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (!hideArrow) handleSort(k);
+          }
+        }}
+        className="flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)] rounded px-1 -ml-1"
+        aria-label={`Sort by ${label}`}
+      >
+        <span>{label}</span>
         {!hideArrow && (
           <span 
             className={`text-xs inline-block transition-transform duration-150 ${sortKey === k ? 'text-[var(--accent-blue)] font-extrabold' : 'text-[var(--text-tertiary)]'}`}
@@ -70,7 +81,7 @@ const Th = React.memo(({
             {sortKey === k ? (sortAsc ? '▲' : '▼') : '⇅'}
           </span>
         )}
-      </span>
+      </button>
     </th>
   );
 });
@@ -666,11 +677,11 @@ export default React.memo(function PortfolioTable({
 
                     {(onDelete || onUpdate) && (
                       <td role="cell" className="px-2 py-2 text-center">
-                        {/* Hover Action Dock (Zerodha Style) */}
-                        <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                        {/* Hover Action Dock (Zerodha Style - Accessible on Hover & Keyboard Focus) */}
+                        <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150">
                           <button
                             onClick={() => shareHolding(h, addToast)}
-                            className="w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:bg-[var(--accent-blue-soft)] border border-[var(--border-subtle)] shadow-xs ios-press"
+                            className="w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:bg-[var(--accent-blue-soft)] border border-[var(--border-subtle)] shadow-xs ios-press focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
                             title="Share holding"
                             aria-label="Share holding summary"
                           >
@@ -679,7 +690,7 @@ export default React.memo(function PortfolioTable({
                           {onUpdate && (
                             <button
                               onClick={() => startEdit(h)}
-                              className="w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:bg-[var(--accent-blue-soft)] border border-[var(--border-subtle)] shadow-xs ios-press"
+                              className="w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:bg-[var(--accent-blue-soft)] border border-[var(--border-subtle)] shadow-xs ios-press focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
                               title="Edit holding"
                               aria-label="Edit holding quantity and price"
                             >
@@ -690,7 +701,7 @@ export default React.memo(function PortfolioTable({
                             <button
                               onClick={() => handleDelete(h)}
                               disabled={isDeleting}
-                              className="w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] border border-[var(--border-subtle)] shadow-xs ios-press"
+                              className="w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] border border-[var(--border-subtle)] shadow-xs ios-press focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[var(--negative)]"
                               title="Delete holding"
                               aria-label="Delete holding"
                             >

@@ -263,6 +263,25 @@ export default function NetWorthTimelineChart({
   const stocksPaths = useMemo(() => buildSmoothPath(pointsMap.stocksPoints, seriesMode === 'stocks'), [pointsMap.stocksPoints, seriesMode, paddingTop, chartHeight]);
   const fdPaths = useMemo(() => buildSmoothPath(pointsMap.fdPoints, seriesMode === 'fd'), [pointsMap.fdPoints, seriesMode, paddingTop, chartHeight]);
 
+  const handlePointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    if (!pointsMap.totalPoints.length) return;
+    const svgRect = e.currentTarget.getBoundingClientRect();
+    const clientX = e.clientX - svgRect.left;
+    const scaleX = width / (svgRect.width || 1);
+    const svgX = clientX * scaleX;
+
+    let closestIdx = 0;
+    let minDist = Infinity;
+    for (let i = 0; i < pointsMap.totalPoints.length; i++) {
+      const dist = Math.abs(pointsMap.totalPoints[i].x - svgX);
+      if (dist < minDist) {
+        minDist = dist;
+        closestIdx = i;
+      }
+    }
+    setHoveredIdx(closestIdx);
+  }, [pointsMap.totalPoints, width]);
+
   // Y-axis tick values
   const yAxisTicks = useMemo(() => {
     const rangeVal = maxVal - minVal;
@@ -448,7 +467,13 @@ export default function NetWorthTimelineChart({
           </div>
         )}
 
-        <svg viewBox={`0 0 ${width} ${height}`} className={`w-full h-full ${history.length < 2 ? 'opacity-40' : ''}`}>
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          onPointerDown={handlePointerMove}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={() => setHoveredIdx(null)}
+          className={`w-full h-full touch-none select-none ${history.length < 2 ? 'opacity-40' : ''}`}
+        >
           {/* Gradients */}
           <defs>
             <linearGradient id="totalAreaGrad" x1="0" y1="0" x2="0" y2="1">

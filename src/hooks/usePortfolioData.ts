@@ -708,11 +708,24 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           setPriceStatus('error');
         });
       };
+      
+      let idleId: number | null = null;
+      let timerId: ReturnType<typeof setTimeout> | null = null;
+
       if ('requestIdleCallback' in window) {
-        (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => void }).requestIdleCallback(scheduleRefresh, { timeout: 2000 });
+        idleId = (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(scheduleRefresh, { timeout: 2000 });
       } else {
-        setTimeout(scheduleRefresh, 50);
+        timerId = setTimeout(scheduleRefresh, 50);
       }
+
+      return () => {
+        if (idleId !== null && 'cancelIdleCallback' in window) {
+          (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
+        }
+        if (timerId !== null) {
+          clearTimeout(timerId);
+        }
+      };
 
     } catch (err) {
       console.error('[portfolio] Database parsing error:', err);
@@ -762,9 +775,9 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         };
       }
     }
-  }, [swrError, handleAuthExpired, portfolios.length]);
+  }, [swrError, portfolios.length, handleAuthExpired]);
 
-  const invalidateIDBCache = useCallback(async () => {
+  const invalidateIDBCache = useCallback(async (): Promise<void> => {
     try {
       await idb.del('portfolio_data_cache');
       setIsUsingCachedData(false);
@@ -774,8 +787,13 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     }
   }, []);
 
+  const portfoliosRef = useRef(portfolios);
+  useEffect(() => {
+    portfoliosRef.current = portfolios;
+  }, [portfolios]);
+
   const load = useCallback(async (): Promise<void> => {
-    if (portfolios.length === 0) {
+    if (portfoliosRef.current.length === 0) {
       setLoadStatus('loading');
     }
     setLoadError('');
@@ -788,12 +806,12 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         handleAuthExpired();
       } else {
         setLoadError(getFriendlyMessage(err));
-        if (portfolios.length === 0) {
+        if (portfoliosRef.current.length === 0) {
           setLoadStatus('error');
         }
       }
     }
-  }, [mutateAssets, portfolios.length, handleAuthExpired]);
+  }, [mutateAssets, handleAuthExpired]);
 
   // document visibilitychange listener to refresh SWR hook data on focus/resume
   useEffect(() => {
@@ -815,6 +833,16 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   // 5. Debounced refreshSnapshot (Phase 2.3)
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const refreshResolversRef = useRef<(() => void)[]>([]);
+
+  useEffect(() => {
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+        refreshResolversRef.current.forEach((res) => res());
+        refreshResolversRef.current = [];
+      }
+    };
+  }, []);
 
   const refreshSnapshot = useCallback(() => {
     return new Promise<void>((resolve) => {

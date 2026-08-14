@@ -22,14 +22,48 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
   onShare,
 }) => {
   const { isBalancesHidden } = usePrivacy();
+  const drawerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = React.useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
+    triggerRef.current = document.activeElement as HTMLElement;
+    document.body.style.overflow = 'hidden';
+
+    // Auto-focus first interactive element
+    const rafId = requestAnimationFrame(() => {
+      const focusable = drawerRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable && focusable.length > 0) focusable[0].focus();
+    });
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+      } else if (e.key === 'Tab' && drawerRef.current) {
+        const focusable = drawerRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      cancelAnimationFrame(rafId);
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+      triggerRef.current?.focus();
+    };
   }, [isOpen, onClose]);
 
   if (!isOpen || !holding) return null;
@@ -60,6 +94,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
 
       {/* Slide-Over Drawer Container (Desktop) & Bottom Sheet (Mobile) */}
       <div 
+        ref={drawerRef}
         className="relative z-10 w-full sm:max-w-md bg-[var(--surface)] border-l border-[var(--border-subtle)] shadow-2xl flex flex-col h-full overflow-hidden transition-transform duration-300 animate-slide-in"
       >
         {/* Drawer Header */}
@@ -121,7 +156,14 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
             </div>
             
             {/* Range Bar */}
-            <div className="relative h-2 bg-[var(--surface-secondary)] rounded-[var(--radius-pill)] overflow-hidden border border-[var(--border-subtle)]">
+            <div 
+              role="progressbar"
+              aria-label="52-Week Price Range Position"
+              aria-valuenow={Math.round(currentPosPct)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              className="relative h-2 bg-[var(--surface-secondary)] rounded-[var(--radius-pill)] overflow-hidden border border-[var(--border-subtle)]"
+            >
               <div
                 className="absolute top-0 bottom-0 bg-[var(--accent-blue)] rounded-[var(--radius-pill)] opacity-80"
                 style={{ width: `${currentPosPct}%` }}

@@ -1,12 +1,12 @@
 import { calculateHealthScore } from '../utils/healthScore';
 import { Portfolio } from '../types/portfolio';
 
-self.onmessage = (e: MessageEvent<{ portfolios: Portfolio[]; activePortfolio: Portfolio | null }>) => {
-  const { portfolios, activePortfolio } = e.data;
+self.onmessage = (e: MessageEvent<{ taskId?: string; portfolios: Portfolio[]; activePortfolio: Portfolio | null }>) => {
+  const { taskId, portfolios, activePortfolio } = e.data || {};
   try {
-    const result = calculateHealthScore(portfolios, activePortfolio);
-    self.postMessage({ result });
+    const result = calculateHealthScore(portfolios || [], activePortfolio || null);
+    self.postMessage({ taskId, result, portfolios, activePortfolio });
   } catch (err) {
-    self.postMessage({ error: err instanceof Error ? err.message : String(err) });
+    self.postMessage({ taskId, error: err instanceof Error ? err.message : String(err), portfolios, activePortfolio });
   }
 };

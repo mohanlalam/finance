@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 
 export type SortField = 'name' | 'value' | 'date';
 export type SortOrder = 'asc' | 'desc';
@@ -15,34 +15,42 @@ export function useAssetFilterSort<T>(items: T[], config: FilterSortConfig<T> = 
   const [sortBy, setSortBy] = useState<SortField>('value');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
+  const configRef = useRef(config);
+  useEffect(() => {
+    configRef.current = config;
+  });
+
   const filteredAndSortedItems = useMemo(() => {
     let result = [...items];
+    const { searchFields, getValue, getDate, getName } = configRef.current;
 
     // 1. Search filter
-    if (searchQuery.trim() && config.searchFields) {
+    if (searchQuery.trim() && searchFields) {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter((item) =>
-        config.searchFields!(item).some((field) => field?.toLowerCase().includes(q))
+        searchFields(item).some((field) => field?.toLowerCase().includes(q))
       );
     }
 
     // 2. Sorting
     result.sort((a, b) => {
       let comparison = 0;
-      if (sortBy === 'value' && config.getValue) {
-        comparison = config.getValue(a) - config.getValue(b);
-      } else if (sortBy === 'date' && config.getDate) {
-        const dA = config.getDate(a) ? new Date(config.getDate(a)!).getTime() : 0;
-        const dB = config.getDate(b) ? new Date(config.getDate(b)!).getTime() : 0;
-        comparison = dA - dB;
-      } else if (sortBy === 'name' && config.getName) {
-        comparison = config.getName(a).localeCompare(config.getName(b));
+      if (sortBy === 'value' && getValue) {
+        comparison = (getValue(a) || 0) - (getValue(b) || 0);
+      } else if (sortBy === 'date' && getDate) {
+        const dA = getDate(a) || '';
+        const dB = getDate(b) || '';
+        comparison = dA.localeCompare(dB);
+      } else if (sortBy === 'name' && getName) {
+        const nA = getName(a) || '';
+        const nB = getName(b) || '';
+        comparison = nA.localeCompare(nB);
       }
       return sortOrder === 'desc' ? -comparison : comparison;
     });
 
     return result;
-  }, [items, searchQuery, sortBy, sortOrder, config]);
+  }, [items, searchQuery, sortBy, sortOrder]);
 
   return {
     searchQuery,

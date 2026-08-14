@@ -76,7 +76,7 @@ export function calculateXIRR(cashflows: CashFlow[]): number {
   const amounts = new Float64Array(count);
   const years = new Float64Array(count);
 
-  const MS_PER_YEAR = 365.25 * 24 * 3600 * 1000;
+  const MS_PER_YEAR = 365.0 * 24 * 3600 * 1000;
   for (let i = 0; i < count; i++) {
     amounts[i] = valid[i].amount;
     years[i] = (valid[i].time - t0) / MS_PER_YEAR;
@@ -234,15 +234,20 @@ function getXirrWorker(): Worker | null {
     try {
       _xirrWorker = new Worker(new URL('../workers/xirr.worker.ts', import.meta.url), { type: 'module' });
       _xirrWorker.onmessage = (e) => {
-        const { taskId, rate, error } = e.data || {};
+        const { taskId, rate, error, cashflows } = e.data || {};
         if (taskId && _pendingXirrCallbacks.has(taskId)) {
           const cb = _pendingXirrCallbacks.get(taskId)!;
           _pendingXirrCallbacks.delete(taskId);
-          cb(error ? calculateXIRR(e.data.cashflows || []) : (rate ?? 0));
+          cb(error ? calculateXIRR(cashflows || []) : (rate ?? 0));
         }
       };
       _xirrWorker.onerror = () => {
         _xirrWorker = null;
+        // Drain pending callbacks with fallback
+        for (const [, cb] of _pendingXirrCallbacks.entries()) {
+          cb(0);
+        }
+        _pendingXirrCallbacks.clear();
       };
     } catch {
       _xirrWorker = null;
@@ -371,7 +376,7 @@ export function calculatePortfolioXIRR(portfolio: Portfolio): number | null {
   cashflows.push({ date: nowStr, amount: currentVal });
 
   const result = calculateXIRR(cashflows);
-  return result === 0 ? null : result;
+  return typeof result === 'number' && !isNaN(result) ? result : null;
 }
 
 export function calculateMultiplePortfoliosXIRR(portfolios: Portfolio[]): number | null {
@@ -393,7 +398,7 @@ export function calculateMultiplePortfoliosXIRR(portfolios: Portfolio[]): number
   cashflows.push({ date: nowStr, amount: totalCurrentValue });
 
   const result = calculateXIRR(cashflows);
-  return result === 0 ? null : result;
+  return typeof result === 'number' && !isNaN(result) ? result : null;
 }
 
 export function getPortfolioAnnualizedReturn(portfolio: Portfolio): number {

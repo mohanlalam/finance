@@ -75,17 +75,17 @@ export function GoldHoldingView({
         itemCount={goldHoldings.length}
         onOpenAdd={openAdd}
       >
-        {goldHoldings.length > 8 ? (
+        {goldHoldings.length > 10 ? (
           <List
-            height={500}
+            height={Math.min(goldHoldings.length * (isMobile ? 165 : 130), isMobile ? 420 : 540)}
             itemCount={goldHoldings.length}
-            itemSize={130}
+            itemSize={isMobile ? 165 : 130}
             width="100%"
           >
             {({ index, style }) => {
               const holding = goldHoldings[index];
               return (
-                <div style={style} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
                   <GoldHoldingCard
                     holding={holding}
                     documents={documents}
