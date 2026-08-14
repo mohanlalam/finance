@@ -14,6 +14,34 @@ interface NetWorthTimelineChartProps {
 type DateRange = '1M' | '3M' | '6M' | '1Y' | 'ALL';
 type SeriesMode = 'total' | 'both' | 'stocks' | 'fd';
 
+// Smooth Bezier Curve Path Builder
+function buildSmoothPath(pts: { x: number; y: number }[], baseY: number, hasArea = true) {
+  if (pts.length === 0) return { linePath: '', areaPath: '' };
+  if (pts.length === 1) {
+    return {
+      linePath: `M ${pts[0].x} ${pts[0].y}`,
+      areaPath: `M ${pts[0].x} ${pts[0].y} L ${pts[0].x} ${baseY} Z`,
+    };
+  }
+
+  let linePath = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const curr = pts[i];
+    const next = pts[i + 1];
+    const cpX1 = curr.x + (next.x - curr.x) / 3;
+    const cpY1 = curr.y;
+    const cpX2 = curr.x + (2 * (next.x - curr.x)) / 3;
+    const cpY2 = next.y;
+    linePath += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${next.x} ${next.y}`;
+  }
+
+  const areaPath = hasArea
+    ? `${linePath} L ${pts[pts.length - 1].x} ${baseY} L ${pts[0].x} ${baseY} Z`
+    : '';
+
+  return { linePath, areaPath };
+}
+
 export default function NetWorthTimelineChart({
   history,
   currentNetWorth,
@@ -231,37 +259,10 @@ export default function NetWorthTimelineChart({
     return { totalPoints, stocksPoints, fdPoints };
   }, [chartData, maxVal, minVal, chartWidth, chartHeight]);
 
-  // Smooth Bezier Curve Path Builder
-  const buildSmoothPath = (pts: { x: number; y: number }[], hasArea = true) => {
-    if (pts.length === 0) return { linePath: '', areaPath: '' };
-    if (pts.length === 1) {
-      return {
-        linePath: `M ${pts[0].x} ${pts[0].y}`,
-        areaPath: `M ${pts[0].x} ${pts[0].y} L ${pts[0].x} ${paddingTop + chartHeight} Z`,
-      };
-    }
-
-    let linePath = `M ${pts[0].x} ${pts[0].y}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const curr = pts[i];
-      const next = pts[i + 1];
-      const cpX1 = curr.x + (next.x - curr.x) / 3;
-      const cpY1 = curr.y;
-      const cpX2 = curr.x + (2 * (next.x - curr.x)) / 3;
-      const cpY2 = next.y;
-      linePath += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${next.x} ${next.y}`;
-    }
-
-    const areaPath = hasArea
-      ? `${linePath} L ${pts[pts.length - 1].x} ${paddingTop + chartHeight} L ${pts[0].x} ${paddingTop + chartHeight} Z`
-      : '';
-
-    return { linePath, areaPath };
-  };
-
-  const totalPaths = useMemo(() => buildSmoothPath(pointsMap.totalPoints, true), [pointsMap.totalPoints, paddingTop, chartHeight]);
-  const stocksPaths = useMemo(() => buildSmoothPath(pointsMap.stocksPoints, seriesMode === 'stocks'), [pointsMap.stocksPoints, seriesMode, paddingTop, chartHeight]);
-  const fdPaths = useMemo(() => buildSmoothPath(pointsMap.fdPoints, seriesMode === 'fd'), [pointsMap.fdPoints, seriesMode, paddingTop, chartHeight]);
+  const baseY = paddingTop + chartHeight;
+  const totalPaths = useMemo(() => buildSmoothPath(pointsMap.totalPoints, baseY, true), [pointsMap.totalPoints, baseY]);
+  const stocksPaths = useMemo(() => buildSmoothPath(pointsMap.stocksPoints, baseY, seriesMode === 'stocks'), [pointsMap.stocksPoints, seriesMode, baseY]);
+  const fdPaths = useMemo(() => buildSmoothPath(pointsMap.fdPoints, baseY, seriesMode === 'fd'), [pointsMap.fdPoints, seriesMode, baseY]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
     if (!pointsMap.totalPoints.length) return;

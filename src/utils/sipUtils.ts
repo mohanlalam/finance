@@ -7,7 +7,7 @@ import { getElapsedMonthsStandard } from './rdUtils';
  * Returns the estimated total amount invested in the SIP.
  * Calculated as: monthly_sip * months elapsed since start_date.
  */
-export function getSIPInvestedAmount(account: SIPAccount): number {
+export function getSIPInvestedAmount(account: SIPAccount, now: Date = new Date()): number {
   if (!account) return 0;
   const monthly = Number(account.monthly_sip);
   if (isNaN(monthly) || monthly <= 0) return 0;
@@ -15,8 +15,7 @@ export function getSIPInvestedAmount(account: SIPAccount): number {
   const start = new Date(account.start_date);
   if (isNaN(start.getTime())) return monthly;
 
-  const end = new Date();
-  const elapsed = getElapsedMonthsStandard(start, end);
+  const elapsed = getElapsedMonthsStandard(start, now);
   return monthly * Math.max(0, elapsed);
 }
 
@@ -71,7 +70,7 @@ export function getSIPEffectiveValue(account: SIPAccount, liveNav?: number): num
 
 export async function saveNAVCacheToIDB(): Promise<void> {
   try {
-    await idb.set('nav_cache', JSON.stringify([...navCache.entries()]));
+    await idb.set('nav_cache', JSON.stringify(Array.from(navCache.entries())));
   } catch (err) {
     console.warn('[sipUtils] Failed to save NAV cache to IDB:', err);
   }

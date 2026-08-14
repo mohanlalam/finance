@@ -269,10 +269,33 @@ export function runXIRRAsync(cashflows: CashFlow[]): Promise<number> {
   });
 }
 
-export function getPortfolioCashFlows(portfolio: Portfolio): CashFlow[] {
-  if (!portfolio) return [];
-  const cashflows: CashFlow[] = [];
+const DAYS_IN_MONTH_ARRAY = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+function isLeap(y: number): boolean {
+  return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+}
+function getDaysInMonthNum(y: number, m: number): number {
+  return m === 1 && isLeap(y) ? 29 : (DAYS_IN_MONTH_ARRAY[m] ?? 30);
+}
+
+// ─── Fast XIRR Cache ───
+const xirrResultCache = new Map<string, number | null>();
+const MAX_XIRR_CACHE_SIZE = 50;
+
+function getPortfolioCacheKey(p: Portfolio): string {
+  const holdingsCount = p.holdings?.length ?? 0;
+  const fdsCount = p.fixedDeposits?.length ?? 0;
+  const rdsCount = p.rdAccounts?.length ?? 0;
+  const sipsCount = p.sipAccounts?.length ?? 0;
+  const goldCount = p.goldHoldings?.length ?? 0;
+  const reCount = p.realEstate?.length ?? 0;
+  return `${p.id || p.name}:${p.totalInvested.toFixed(2)}:${p.totalCurrentValue.toFixed(2)}:${holdingsCount}:${fdsCount}:${rdsCount}:${sipsCount}:${goldCount}:${reCount}`;
+}
+
+export function getPortfolioCashFlows(portfolio: Portfolio, target: CashFlow[] = []): CashFlow[] {
+  if (!portfolio) return target;
+  const cashflows = target;
   const now = new Date();
+  const nowMs = now.getTime();
   const nowStr = formatLocalDate(now.getFullYear(), now.getMonth(), now.getDate());
 
   const addFlow = (dateStr: string | undefined, amount: number) => {
@@ -283,34 +306,44 @@ export function getPortfolioCashFlows(portfolio: Portfolio): CashFlow[] {
     cashflows.push({ date, amount: -amt });
   };
 
-  const fds = portfolio.fixedDeposits || [];
-  for (const fd of fds) {
-    addFlow(fd.start_date, fd.principal_amount);
+  if (portfolio.fixedDeposits) {
+    const fds = portfolio.fixedDeposits;
+    const fdsLen = fds.length;
+    for (let i = 0; i < fdsLen; i++) {
+      addFlow(fds[i].start_date, fds[i].principal_amount);
+    }
   }
 
   if (portfolio.rdAccounts) {
-    for (const rd of portfolio.rdAccounts) {
+    const rds = portfolio.rdAccounts;
+    const rdsLen = rds.length;
+    for (let i = 0; i < rdsLen; i++) {
+      const rd = rds[i];
       if (rd.contributions && rd.contributions.length > 0) {
-        for (const c of rd.contributions) {
-          addFlow(c.date, Number(c.amount));
+        const cLen = rd.contributions.length;
+        for (let j = 0; j < cLen; j++) {
+          addFlow(rd.contributions[j].date, Number(rd.contributions[j].amount));
         }
       } else {
         const startTime = parseLocalDate(rd.start_date);
         if (isNaN(startTime)) {
-          addFlow(rd.start_date, getRDInvestedAmount(rd));
+          addFlow(rd.start_date, getRDInvestedAmount(rd, now));
           continue;
         }
         const start = new Date(startTime);
         const elapsed = getElapsedMonthsStandard(start, now);
         const monthlyAmount = Number(rd.monthly_deposit);
+        const startYear = start.getFullYear();
+        const startMonth = start.getMonth();
+        const startDay = start.getDate();
 
         for (let m = 0; m < elapsed; m++) {
-          const targetYear = start.getFullYear() + Math.floor((start.getMonth() + m) / 12);
-          const targetMonth = (start.getMonth() + m) % 12;
-          const lastDay = new Date(targetYear, targetMonth + 1, 0).getDate();
-          const clampedDay = Math.min(start.getDate(), lastDay);
+          const targetYear = startYear + Math.floor((startMonth + m) / 12);
+          const targetMonth = (startMonth + m) % 12;
+          const lastDay = getDaysInMonthNum(targetYear, targetMonth);
+          const clampedDay = Math.min(startDay, lastDay);
           const flowDate = new Date(targetYear, targetMonth, clampedDay);
-          if (flowDate.getTime() <= now.getTime()) {
+          if (flowDate.getTime() <= nowMs) {
             addFlow(formatLocalDate(targetYear, targetMonth, clampedDay), monthlyAmount);
           }
         }
@@ -319,47 +352,63 @@ export function getPortfolioCashFlows(portfolio: Portfolio): CashFlow[] {
   }
 
   if (portfolio.sipAccounts) {
-    for (const sip of portfolio.sipAccounts) {
+    const sips = portfolio.sipAccounts;
+    const sipsLen = sips.length;
+    for (let i = 0; i < sipsLen; i++) {
+      const sip = sips[i];
       const startTime = parseLocalDate(sip.start_date);
       if (isNaN(startTime)) {
-        addFlow(sip.start_date, getSIPInvestedAmount(sip));
+        addFlow(sip.start_date, getSIPInvestedAmount(sip, now));
         continue;
       }
       const start = new Date(startTime);
       const elapsed = getElapsedMonthsStandard(start, now);
       const monthlyAmount = Number(sip.monthly_sip);
+      const startYear = start.getFullYear();
+      const startMonth = start.getMonth();
+      const startDay = start.getDate();
 
       for (let m = 0; m < elapsed; m++) {
-        const targetYear = start.getFullYear() + Math.floor((start.getMonth() + m) / 12);
-        const targetMonth = (start.getMonth() + m) % 12;
-        const lastDay = new Date(targetYear, targetMonth + 1, 0).getDate();
-        const clampedDay = Math.min(start.getDate(), lastDay);
+        const targetYear = startYear + Math.floor((startMonth + m) / 12);
+        const targetMonth = (startMonth + m) % 12;
+        const lastDay = getDaysInMonthNum(targetYear, targetMonth);
+        const clampedDay = Math.min(startDay, lastDay);
         const flowDate = new Date(targetYear, targetMonth, clampedDay);
-        if (flowDate.getTime() <= now.getTime()) {
+        if (flowDate.getTime() <= nowMs) {
           addFlow(formatLocalDate(targetYear, targetMonth, clampedDay), monthlyAmount);
         }
       }
     }
   }
 
-  const holdings = portfolio.holdings || [];
-  for (const stock of holdings) {
-    const date = (stock as { created_at?: string }).created_at ||
-                 (stock as { createdAt?: string }).createdAt ||
-                 (portfolio as { created_at?: string }).created_at ||
-                 (portfolio as { createdAt?: string }).createdAt ||
-                 nowStr;
-    addFlow(date, stock.amountInvested);
+  if (portfolio.holdings) {
+    const holdings = portfolio.holdings;
+    const hLen = holdings.length;
+    for (let i = 0; i < hLen; i++) {
+      const stock = holdings[i];
+      const date = (stock as { created_at?: string }).created_at ||
+                   (stock as { createdAt?: string }).createdAt ||
+                   (portfolio as { created_at?: string }).created_at ||
+                   (portfolio as { createdAt?: string }).createdAt ||
+                   nowStr;
+      addFlow(date, stock.amountInvested);
+    }
   }
 
-  const goldHoldings = portfolio.goldHoldings || [];
-  for (const gold of goldHoldings) {
-    addFlow(gold.purchase_date, gold.purchase_price);
+  if (portfolio.goldHoldings) {
+    const goldHoldings = portfolio.goldHoldings;
+    const gLen = goldHoldings.length;
+    for (let i = 0; i < gLen; i++) {
+      addFlow(goldHoldings[i].purchase_date, goldHoldings[i].purchase_price);
+    }
   }
 
-  const realEstate = portfolio.realEstate || [];
-  for (const re of realEstate) {
-    addFlow(re.purchase_date, re.purchase_price);
+  if (portfolio.realEstate) {
+    const realEstate = portfolio.realEstate;
+    const reLen = realEstate.length;
+    for (let i = 0; i < reLen; i++) {
+      addFlow(realEstate[i].purchase_date, realEstate[i].purchase_price);
+    }
   }
 
   return cashflows;
@@ -367,38 +416,73 @@ export function getPortfolioCashFlows(portfolio: Portfolio): CashFlow[] {
 
 export function calculatePortfolioXIRR(portfolio: Portfolio): number | null {
   if (!portfolio) return null;
+
+  const cacheKey = getPortfolioCacheKey(portfolio);
+  if (xirrResultCache.has(cacheKey)) {
+    return xirrResultCache.get(cacheKey) ?? null;
+  }
+
   const cashflows = getPortfolioCashFlows(portfolio);
   const currentVal = Number(portfolio.totalCurrentValue);
-  if (cashflows.length === 0 || isNaN(currentVal) || currentVal <= 0) return null;
+  if (cashflows.length === 0 || isNaN(currentVal) || currentVal <= 0) {
+    xirrResultCache.set(cacheKey, null);
+    return null;
+  }
 
   const now = new Date();
   const nowStr = formatLocalDate(now.getFullYear(), now.getMonth(), now.getDate());
   cashflows.push({ date: nowStr, amount: currentVal });
 
   const result = calculateXIRR(cashflows);
-  return typeof result === 'number' && !isNaN(result) ? result : null;
+  const finalVal = typeof result === 'number' && !isNaN(result) ? result : null;
+
+  if (xirrResultCache.size >= MAX_XIRR_CACHE_SIZE) {
+    const firstKey = xirrResultCache.keys().next().value;
+    if (firstKey) xirrResultCache.delete(firstKey);
+  }
+  xirrResultCache.set(cacheKey, finalVal);
+
+  return finalVal;
 }
 
 export function calculateMultiplePortfoliosXIRR(portfolios: Portfolio[]): number | null {
   if (!portfolios || portfolios.length === 0) return null;
+
+  const multiKey = portfolios.map(getPortfolioCacheKey).join('::');
+  if (xirrResultCache.has(multiKey)) {
+    return xirrResultCache.get(multiKey) ?? null;
+  }
+
   const cashflows: CashFlow[] = [];
   let totalCurrentValue = 0;
 
-  for (const p of portfolios) {
+  for (let i = 0; i < portfolios.length; i++) {
+    const p = portfolios[i];
     if (!p) continue;
-    cashflows.push(...getPortfolioCashFlows(p));
+    getPortfolioCashFlows(p, cashflows);
     const val = Number(p.totalCurrentValue);
     if (!isNaN(val) && val > 0) totalCurrentValue += val;
   }
 
-  if (cashflows.length === 0 || totalCurrentValue <= 0) return null;
+  if (cashflows.length === 0 || totalCurrentValue <= 0) {
+    xirrResultCache.set(multiKey, null);
+    return null;
+  }
 
   const now = new Date();
   const nowStr = formatLocalDate(now.getFullYear(), now.getMonth(), now.getDate());
   cashflows.push({ date: nowStr, amount: totalCurrentValue });
 
   const result = calculateXIRR(cashflows);
-  return typeof result === 'number' && !isNaN(result) ? result : null;
+  const finalVal = typeof result === 'number' && !isNaN(result) ? result : null;
+
+  if (xirrResultCache.size >= MAX_XIRR_CACHE_SIZE) {
+    const firstKey = xirrResultCache.keys().next().value;
+    if (firstKey) xirrResultCache.delete(firstKey);
+  }
+  xirrResultCache.set(multiKey, finalVal);
+
+  return finalVal;
 }
 
 export function getPortfolioAnnualizedReturn(portfolio: Portfolio): number {
@@ -420,7 +504,8 @@ export function getMultiplePortfoliosAnnualizedReturn(portfolios: Portfolio[]): 
   let totalInvested = 0;
   let totalCurrentValue = 0;
 
-  for (const p of portfolios) {
+  for (let i = 0; i < portfolios.length; i++) {
+    const p = portfolios[i];
     if (!p) continue;
     const inv = Math.max(0, Number(p.totalInvested) || 0);
     const curr = Math.max(0, Number(p.totalCurrentValue) || 0);

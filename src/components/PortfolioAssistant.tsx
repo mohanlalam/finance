@@ -204,6 +204,8 @@ function getDynamicSuggestions(portfolios: Portfolio[]): { label: string }[] {
 }
 
 const ChatMessageItem = React.memo(function ChatMessageItem({ msg }: { msg: ChatMessage }) {
+  const renderedContent = useMemo(() => renderMarkdown(msg.text), [msg.text]);
+
   return (
     <div className="w-full">
       {msg.role === 'user' ? (
@@ -222,7 +224,7 @@ const ChatMessageItem = React.memo(function ChatMessageItem({ msg }: { msg: Chat
               <Bot size={11} />
             </div>
             <div className="flex-1 space-y-1 bg-slate-100 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40 text-slate-800 dark:text-slate-100 rounded-2xl rounded-tl-sm px-3.5 py-2.5 shadow-sm relative group">
-              {renderMarkdown(msg.text)}
+              {renderedContent}
               {msg.id !== 'welcome' && <CopyButton text={msg.text} />}
             </div>
           </div>

@@ -42,6 +42,8 @@ interface MobileHomeSummaryProps {
   netWorthHistory?: NetWorthSnapshot[];
 }
 
+const EMPTY_HISTORY: NetWorthSnapshot[] = [];
+
 function MobileHomeSummary({
   summaryData,
   todayPnL,
@@ -54,14 +56,14 @@ function MobileHomeSummary({
   onOpenAlerts,
   portfolios,
   activePortfolio,
-  netWorthHistory = [],
+  netWorthHistory = EMPTY_HISTORY,
 }: MobileHomeSummaryProps) {
   const { isBalancesHidden } = usePrivacy();
 
-  const renderValue = (val: number, formatter = formatINR) => {
+  const renderValue = useCallback((val: number, formatter = formatINR) => {
     if (isBalancesHidden) return <span aria-label="Amount hidden">••••••</span>;
     return <AnimatedNumber value={val} formatter={formatter} />;
-  };
+  }, [isBalancesHidden]);
 
   const sparklineData = useMemo(() => {
     if (!netWorthHistory || netWorthHistory.length === 0) return [];

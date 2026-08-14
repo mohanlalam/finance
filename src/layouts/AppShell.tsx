@@ -247,6 +247,15 @@ export default function AppShell() {
   }, [portfolio, portfolios, todayPnL]);
 
   const effectiveAsset = activeAsset === 'home' && !isMobile ? 'stocks' : activeAsset;
+  const handleSidebarTabChange = useCallback((tabId: string) => {
+    setActiveAsset(tabId as AssetTab);
+  }, []);
+
+  const handleFloatingAddAsset = useCallback((type: AssetTab) => {
+    setActiveAsset(type);
+    setQuickAddTarget(type);
+  }, [setQuickAddTarget]);
+
   const insights = usePortfolioInsights(portfolios);
 
   const { visibleAlerts, handleDismissAlert, handleDismissAll } = useDismissibleAlerts(portfolios);
@@ -286,6 +295,26 @@ export default function AppShell() {
   const breakdown = useMemo(() => classBreakdown(portfolios, portfolio), [portfolios, portfolio]);
   const breakdownSlices = useMemo(() => getBreakdownSlices(breakdown), [breakdown]);
 
+  const barChartPortfolios = useMemo(
+    () => (activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])),
+    [activeTab, portfolios, visiblePortfolio]
+  );
+
+  const handleSliceClick = useCallback((label: string) => {
+    const map: Record<string, AssetTab> = {
+      'Stocks': 'stocks',
+      'FD': 'fd',
+      'RD': 'rd',
+      'SIP': 'sip',
+      'Gold': 'gold',
+      'Realty': 'real_estate',
+    };
+    const target = map[label];
+    if (target) {
+      setActiveAsset(target);
+    }
+  }, []);
+
   // ─── Handlers ───
   const renderDashboardWidgets = (isMobileLayout: boolean) => {
     const netWorthChart = (
@@ -314,21 +343,6 @@ export default function AppShell() {
       </SectionErrorBoundary>
     );
 
-    const handleSliceClick = (label: string) => {
-      const map: Record<string, AssetTab> = {
-        'Stocks': 'stocks',
-        'FD': 'fd',
-        'RD': 'rd',
-        'SIP': 'sip',
-        'Gold': 'gold',
-        'Realty': 'real_estate',
-      };
-      const target = map[label];
-      if (target) {
-        setActiveAsset(target);
-      }
-    };
-
     const pieChart = (
       <SectionErrorBoundary sectionName="Asset Class Pie Chart">
         <LazyViewport placeholderHeight={370}>
@@ -347,7 +361,7 @@ export default function AppShell() {
       <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
         <LazyViewport placeholderHeight={370}>
           <Suspense fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
-            <BarChart portfolios={activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])} />
+            <BarChart portfolios={barChartPortfolios} />
           </Suspense>
         </LazyViewport>
       </SectionErrorBoundary>
@@ -653,7 +667,7 @@ export default function AppShell() {
             <div role="tabpanel" className="flex gap-0">
               <DesktopSidebar
                 activeTab={effectiveAsset}
-                onTabChange={(tabId: string) => setActiveAsset(tabId as AssetTab)}
+                onTabChange={handleSidebarTabChange}
                 portfolios={portfolios}
                 selectedPortfolioId={activeTab}
                 onSelectPortfolio={setActiveTab}
@@ -832,10 +846,7 @@ export default function AppShell() {
       <FloatingAddMenu
         isHidden={isAnyModalOpen}
         onAddStock={openAddModal}
-        onAddAsset={(type) => {
-          setActiveAsset(type);
-          setQuickAddTarget(type);
-        }}
+        onAddAsset={handleFloatingAddAsset}
       />
 
       {/* Lazy loaded Modals wrapped in Suspense */}

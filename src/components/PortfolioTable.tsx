@@ -116,10 +116,10 @@ export default React.memo(function PortfolioTable({
   const { addToast } = useToastActions();
   const isMobile = useIsMobile();
 
-  const renderValue = (val: number, formatter = formatINR) => {
+  const renderValue = useCallback((val: number, formatter = formatINR) => {
     if (isBalancesHidden) return '••••••';
     return formatter(val);
-  };
+  }, [isBalancesHidden]);
 
   const holdingsWithAlloc = useMemo(() => {
     return holdings.map((h) => ({

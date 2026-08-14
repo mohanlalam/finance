@@ -24,6 +24,9 @@ interface SummaryCardsProps {
   netWorthHistory?: NetWorthSnapshot[];
 }
 
+const EMPTY_PORTFOLIOS: Portfolio[] = [];
+const EMPTY_HISTORY: NetWorthSnapshot[] = [];
+
 function SummaryCards({
   totalInvested,
   totalCurrentValue,
@@ -32,9 +35,9 @@ function SummaryCards({
   todayPnL,
   label = 'Family',
   isLoading = false,
-  portfolios = [],
+  portfolios = EMPTY_PORTFOLIOS,
   activePortfolio = null,
-  netWorthHistory = [],
+  netWorthHistory = EMPTY_HISTORY,
 }: SummaryCardsProps) {
   const isGain = totalPnL >= 0;
   const isTodayGain = todayPnL !== undefined ? todayPnL >= 0 : true;
