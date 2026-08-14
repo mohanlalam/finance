@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
-import { DocumentAttachmentField } from '../ui/DocumentAttachmentField';
+import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
 import { uploadDocumentFile } from '../../utils/supabaseStorage';
 
 interface PortfolioOption {
@@ -23,7 +23,7 @@ interface GoldFormModalProps {
   onDeleteDoc?: (assetType: string, id: string) => Promise<void>;
 }
 
-const PURITY_OPTIONS = ['24K', '22K', '20K', '18K', '14K'];
+const PURITY_OPTIONS: Array<GoldHolding['purity']> = ['24K', '22K', '18K', '14K', 'other'];
 
 export const GoldFormModal = React.memo(function GoldFormModal({
   isOpen,
@@ -37,16 +37,14 @@ export const GoldFormModal = React.memo(function GoldFormModal({
   onDeleteDoc,
 }: GoldFormModalProps) {
   const [itemName, setItemName] = useState('');
-  const [purity, setPurity] = useState('24K');
+  const [purity, setPurity] = useState<GoldHolding['purity']>('24K');
   const [weightGrams, setWeightGrams] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [currentValuation, setCurrentValuation] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
   const [notes, setNotes] = useState('');
   const [targetPortfolio, setTargetPortfolio] = useState(portfolioName);
-  const [supportingFile, setSupportingFile] = useState<File | null>(null);
-  const [docName, setDocName] = useState('');
-  const [docExpiry, setDocExpiry] = useState('');
+  const [pendingFiles, setPendingFiles] = useState<PendingDocument[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -74,9 +72,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       setNotes('');
       setTargetPortfolio(portfolioName);
     }
-    setSupportingFile(null);
-    setDocName('');
-    setDocExpiry('');
+    setPendingFiles([]);
     setError(null);
   }, [editingHolding, portfolioName, isOpen]);
 
@@ -114,20 +110,22 @@ export const GoldFormModal = React.memo(function GoldFormModal({
         assetId = res?.id || res?.data?.id;
       }
 
-      // Upload and link supporting document if selected
-      if (supportingFile) {
-        const ts = Date.now();
-        const safeName = supportingFile.name.replace(/[^\w.-]/g, '_');
-        const storagePath = `${targetPortfolio}/gold/${ts}_${safeName}`;
-        await uploadDocumentFile('investment-documents', storagePath, supportingFile);
-        await onAdd('document', targetPortfolio, {
-          name: docName || supportingFile.name,
-          filePath: storagePath,
-          fileType: supportingFile.type,
-          linkedAssetType: 'gold',
-          linkedAssetId: assetId || null,
-          expiryDate: docExpiry || null,
-        });
+      // Upload and link all supporting documents
+      if (pendingFiles.length > 0) {
+        for (const doc of pendingFiles) {
+          const ts = Date.now();
+          const safeName = doc.file.name.replace(/[^\w.-]/g, '_');
+          const storagePath = `${targetPortfolio}/gold/${ts}_${safeName}`;
+          await uploadDocumentFile('investment-documents', storagePath, doc.file);
+          await onAdd('document', targetPortfolio, {
+            name: doc.name.trim() || doc.file.name,
+            filePath: storagePath,
+            fileType: doc.file.type,
+            linkedAssetType: 'gold',
+            linkedAssetId: assetId || null,
+            expiryDate: doc.expiryDate || null,
+          });
+        }
       }
 
       onClose();
@@ -264,17 +262,13 @@ export const GoldFormModal = React.memo(function GoldFormModal({
 
         {/* Supporting Document Attachment */}
         <DocumentAttachmentField
-          file={supportingFile}
-          onFileChange={setSupportingFile}
-          documentName={docName}
-          onDocumentNameChange={setDocName}
-          expiryDate={docExpiry}
-          onExpiryDateChange={setDocExpiry}
+          files={pendingFiles}
+          onFilesChange={setPendingFiles}
           showExpiryDate={false}
           existingDocuments={existingDocs}
           onDeleteExistingDoc={onDeleteDoc ? (docId) => onDeleteDoc('document', docId) : undefined}
           assetTypeLabel="gold holding"
-          hintText="Upload purchase receipt, invoice, or hallmark certificate"
+          hintText="Upload purchase receipts, invoices, or hallmark certificates"
         />
 
         {error && (

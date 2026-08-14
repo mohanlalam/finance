@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RealEstate, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
-import { DocumentAttachmentField } from '../ui/DocumentAttachmentField';
+import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
 import { uploadDocumentFile } from '../../utils/supabaseStorage';
 
 interface PortfolioOption {
@@ -44,9 +44,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
   const [purchaseDate, setPurchaseDate] = useState('');
   const [notes, setNotes] = useState('');
   const [targetPortfolio, setTargetPortfolio] = useState(portfolioName);
-  const [supportingFile, setSupportingFile] = useState<File | null>(null);
-  const [docName, setDocName] = useState('');
-  const [docExpiry, setDocExpiry] = useState('');
+  const [pendingFiles, setPendingFiles] = useState<PendingDocument[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -74,9 +72,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
       setNotes('');
       setTargetPortfolio(portfolioName);
     }
-    setSupportingFile(null);
-    setDocName('');
-    setDocExpiry('');
+    setPendingFiles([]);
     setError(null);
   }, [editingProperty, portfolioName, isOpen]);
 
@@ -109,20 +105,22 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
         assetId = res?.id || res?.data?.id;
       }
 
-      // Upload and link supporting document if selected
-      if (supportingFile) {
-        const ts = Date.now();
-        const safeName = supportingFile.name.replace(/[^\w.-]/g, '_');
-        const storagePath = `${targetPortfolio}/real_estate/${ts}_${safeName}`;
-        await uploadDocumentFile('investment-documents', storagePath, supportingFile);
-        await onAdd('document', targetPortfolio, {
-          name: docName || supportingFile.name,
-          filePath: storagePath,
-          fileType: supportingFile.type,
-          linkedAssetType: 'real_estate',
-          linkedAssetId: assetId || null,
-          expiryDate: docExpiry || null,
-        });
+      // Upload and link all supporting documents
+      if (pendingFiles.length > 0) {
+        for (const doc of pendingFiles) {
+          const ts = Date.now();
+          const safeName = doc.file.name.replace(/[^\w.-]/g, '_');
+          const storagePath = `${targetPortfolio}/real_estate/${ts}_${safeName}`;
+          await uploadDocumentFile('investment-documents', storagePath, doc.file);
+          await onAdd('document', targetPortfolio, {
+            name: doc.name.trim() || doc.file.name,
+            filePath: storagePath,
+            fileType: doc.file.type,
+            linkedAssetType: 'real_estate',
+            linkedAssetId: assetId || null,
+            expiryDate: doc.expiryDate || null,
+          });
+        }
       }
 
       onClose();
@@ -257,18 +255,14 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
 
         {/* Supporting Document Attachment */}
         <DocumentAttachmentField
-          file={supportingFile}
-          onFileChange={setSupportingFile}
-          documentName={docName}
-          onDocumentNameChange={setDocName}
-          expiryDate={docExpiry}
-          onExpiryDateChange={setDocExpiry}
+          files={pendingFiles}
+          onFilesChange={setPendingFiles}
           showExpiryDate={true}
           expiryDateLabel="Agreement / Lease Expiry Date (optional)"
           existingDocuments={existingDocs}
           onDeleteExistingDoc={onDeleteDoc ? (docId) => onDeleteDoc('document', docId) : undefined}
           assetTypeLabel="property"
-          hintText="Upload title deed, sale agreement, registry copy, or tax receipt"
+          hintText="Upload title deeds, sale agreements, registry copies, or tax receipts"
         />
 
         {error && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Insurance, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
-import { DocumentAttachmentField } from '../ui/DocumentAttachmentField';
+import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
 import { uploadDocumentFile } from '../../utils/supabaseStorage';
 
 interface PortfolioOption {
@@ -45,9 +45,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
   const [renewalDate, setRenewalDate] = useState('');
   const [notes, setNotes] = useState('');
   const [targetPortfolio, setTargetPortfolio] = useState(portfolioName);
-  const [supportingFile, setSupportingFile] = useState<File | null>(null);
-  const [docName, setDocName] = useState('');
-  const [docExpiry, setDocExpiry] = useState('');
+  const [pendingFiles, setPendingFiles] = useState<PendingDocument[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -77,9 +75,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
       setNotes('');
       setTargetPortfolio(portfolioName);
     }
-    setSupportingFile(null);
-    setDocName('');
-    setDocExpiry('');
+    setPendingFiles([]);
     setError(null);
   }, [editingPolicy, portfolioName, isOpen]);
 
@@ -118,20 +114,22 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
         assetId = res?.id || res?.data?.id;
       }
 
-      // Upload and link supporting document if selected
-      if (supportingFile) {
-        const ts = Date.now();
-        const safeName = supportingFile.name.replace(/[^\w.-]/g, '_');
-        const storagePath = `${targetPortfolio}/insurance/${ts}_${safeName}`;
-        await uploadDocumentFile('investment-documents', storagePath, supportingFile);
-        await onAdd('document', targetPortfolio, {
-          name: docName || supportingFile.name,
-          filePath: storagePath,
-          fileType: supportingFile.type,
-          linkedAssetType: 'insurance',
-          linkedAssetId: assetId || null,
-          expiryDate: docExpiry || renewalDate || null,
-        });
+      // Upload and link all supporting documents
+      if (pendingFiles.length > 0) {
+        for (const doc of pendingFiles) {
+          const ts = Date.now();
+          const safeName = doc.file.name.replace(/[^\w.-]/g, '_');
+          const storagePath = `${targetPortfolio}/insurance/${ts}_${safeName}`;
+          await uploadDocumentFile('investment-documents', storagePath, doc.file);
+          await onAdd('document', targetPortfolio, {
+            name: doc.name.trim() || doc.file.name,
+            filePath: storagePath,
+            fileType: doc.file.type,
+            linkedAssetType: 'insurance',
+            linkedAssetId: assetId || null,
+            expiryDate: doc.expiryDate || renewalDate || null,
+          });
+        }
       }
 
       onClose();
@@ -281,18 +279,14 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
 
         {/* Supporting Document Attachment */}
         <DocumentAttachmentField
-          file={supportingFile}
-          onFileChange={setSupportingFile}
-          documentName={docName}
-          onDocumentNameChange={setDocName}
-          expiryDate={docExpiry}
-          onExpiryDateChange={setDocExpiry}
+          files={pendingFiles}
+          onFilesChange={setPendingFiles}
           showExpiryDate={true}
           expiryDateLabel="Policy Expiry / Renewal Date (optional)"
           existingDocuments={existingDocs}
           onDeleteExistingDoc={onDeleteDoc ? (docId) => onDeleteDoc('document', docId) : undefined}
           assetTypeLabel="policy"
-          hintText="Upload policy bond, health e-card, premium receipt, or terms copy"
+          hintText="Upload policy bonds, health e-cards, premium receipts, or terms copies"
         />
 
         {error && (

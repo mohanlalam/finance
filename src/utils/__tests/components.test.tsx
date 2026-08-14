@@ -139,42 +139,47 @@ describe('Toast System', () => {
 });
 
 describe('DocumentAttachmentField Component', () => {
-  it('renders upload button when no file is selected and triggers file picker', () => {
-    const handleFileChange = vi.fn();
+  it('renders upload button when no files are selected', () => {
+    const handleFilesChange = vi.fn();
     render(
       <DocumentAttachmentField
-        file={null}
-        onFileChange={handleFileChange}
+        files={[]}
+        onFilesChange={handleFilesChange}
         assetTypeLabel="gold holding"
       />
     );
 
-    expect(screen.getByText('Supporting Document')).toBeDefined();
+    expect(screen.getByText('Supporting Documents')).toBeDefined();
     expect(screen.getByText(/Click to upload/i)).toBeDefined();
   });
 
-  it('renders selected file chip with remove button and name override', () => {
-    const handleFileChange = vi.fn();
-    const handleNameChange = vi.fn();
-    const testFile = new File(['dummy content'], 'invoice.pdf', { type: 'application/pdf' });
+  it('renders multiple selected files with remove buttons and editable labels', () => {
+    const handleFilesChange = vi.fn();
+    const testFile1 = new File(['content 1'], 'invoice.pdf', { type: 'application/pdf' });
+    const testFile2 = new File(['content 2'], 'hallmark.jpg', { type: 'image/jpeg' });
+
+    const pendingDocs = [
+      { id: '1', file: testFile1, name: 'Gold Hallmark Invoice', expiryDate: '' },
+      { id: '2', file: testFile2, name: 'Jeweller Certificate', expiryDate: '' },
+    ];
 
     render(
       <DocumentAttachmentField
-        file={testFile}
-        onFileChange={handleFileChange}
-        documentName="Gold Hallmark Invoice"
-        onDocumentNameChange={handleNameChange}
+        files={pendingDocs}
+        onFilesChange={handleFilesChange}
         showExpiryDate={true}
         assetTypeLabel="gold holding"
       />
     );
 
     expect(screen.getByText('invoice.pdf')).toBeDefined();
-    const nameInput = screen.getByDisplayValue('Gold Hallmark Invoice');
-    expect(nameInput).toBeDefined();
+    expect(screen.getByText('hallmark.jpg')).toBeDefined();
+    expect(screen.getByDisplayValue('Gold Hallmark Invoice')).toBeDefined();
+    expect(screen.getByDisplayValue('Jeweller Certificate')).toBeDefined();
 
-    const removeBtn = screen.getByTitle('Remove file');
-    fireEvent.click(removeBtn);
-    expect(handleFileChange).toHaveBeenCalledWith(null);
+    const removeBtns = screen.getAllByTitle('Remove this file');
+    expect(removeBtns.length).toBe(2);
+    fireEvent.click(removeBtns[0]);
+    expect(handleFilesChange).toHaveBeenCalledWith([pendingDocs[1]]);
   });
 });

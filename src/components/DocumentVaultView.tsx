@@ -291,18 +291,20 @@ export default React.memo(function DocumentVaultView({
           </div>
           <div>
             <input
+              id="vault-file-upload-input"
               ref={fileInputRef}
               type="file"
-              className="hidden"
+              className="sr-only"
               onChange={handleFilePick}
+              accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.xlsx,.csv"
             />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-[10px] transition-colors shadow-sm"
+            <label
+              htmlFor="vault-file-upload-input"
+              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-[10px] transition-colors shadow-sm cursor-pointer select-none active:scale-[0.98]"
             >
               <Upload size={13} />
-              Upload to {FOLDERS.find((f) => f.key === activeFolder)?.label}
-            </button>
+              <span>Upload to {FOLDERS.find((f) => f.key === activeFolder)?.label}</span>
+            </label>
           </div>
         </div>
 
@@ -316,13 +318,13 @@ export default React.memo(function DocumentVaultView({
             title="No Documents in This Folder"
             description="Upload PDFs, receipts, or policy documents to keep a secure digital record of your assets."
             actionButton={
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-600 dark:hover:bg-slate-500 text-white text-xs font-bold px-5 py-2.5 rounded-[14px] transition-colors shadow-sm"
+              <label
+                htmlFor="vault-file-upload-input"
+                className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-600 dark:hover:bg-slate-500 text-white text-xs font-bold px-5 py-2.5 rounded-[14px] transition-colors shadow-sm cursor-pointer select-none active:scale-[0.98]"
               >
                 <Upload size={15} />
-                Upload Your First Document
-              </button>
+                <span>Upload Your First Document</span>
+              </label>
             }
           />
         ) : (
