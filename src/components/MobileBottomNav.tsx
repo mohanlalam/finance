@@ -128,9 +128,9 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
       {/* Persistent Bottom Bar */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--surface)]/98 backdrop-blur-md border-t border-[var(--border-subtle)] md:hidden shadow-[0_-2px_12px_rgba(0,0,0,0.06)] select-none"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--surface)] border-t border-[var(--border-subtle)] md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.08)] select-none will-change-transform transform-gpu"
         style={{
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 0px)',
         }}
       >
         <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-1">

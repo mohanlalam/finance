@@ -14,10 +14,11 @@ import FloatingAddMenu from '../components/FloatingAddMenu';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { QuickAccessShortcuts } from '../components/ui/QuickAccessShortcuts';
 
+import MobileBottomNav from '../components/MobileBottomNav';
+
 // Viewport-specific lazy loaded layouts
 const DesktopSidebar = React.lazy(() => import('./DesktopSidebar'));
 const MobileHomeSummary = React.lazy(() => import('../components/MobileHomeSummary'));
-const MobileBottomNav = React.lazy(() => import('../components/MobileBottomNav'));
 const MobileAlertsView = React.lazy(() => import('../components/MobileAlertsView'));
 
 // Lazy loaded modals to keep initial bundle lightweight
@@ -844,7 +845,7 @@ export default function AppShell() {
         )}
       </div>
 
-      <footer className="mt-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+      <footer className="mt-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hidden md:block">
         <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <p className="text-xs text-slate-400 dark:text-slate-500">
             Family Wealth Tracker
@@ -866,9 +867,7 @@ export default function AppShell() {
       </footer>
 
       {/* Mobile Bottom Navigation */}
-      <Suspense fallback={null}>
-        <MobileBottomNav activeAsset={activeAsset} onChangeAsset={setActiveAsset} alertCount={visibleAlerts.length} />
-      </Suspense>
+      <MobileBottomNav activeAsset={activeAsset} onChangeAsset={setActiveAsset} alertCount={visibleAlerts.length} />
 
       {/* Floating Add Menu (FAB) */}
       <FloatingAddMenu
