@@ -296,8 +296,8 @@ export default function AppShell() {
   const breakdownSlices = useMemo(() => getBreakdownSlices(breakdown), [breakdown]);
 
   const barChartPortfolios = useMemo(
-    () => (activeTab === 'all' ? portfolios : (visiblePortfolio ? [visiblePortfolio] : [])),
-    [activeTab, portfolios, visiblePortfolio]
+    () => (activeTab === 'all' ? portfolios : (portfolio ? [portfolio] : [])),
+    [activeTab, portfolios, portfolio]
   );
 
   const handleSliceClick = useCallback((label: string) => {
