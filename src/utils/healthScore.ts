@@ -13,7 +13,6 @@ export interface HealthReport {
  * Pure calculation logic for Portfolio Health Score
  */
 export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: Portfolio | null): HealthReport {
-  const targetPortfolios = activePortfolio ? [activePortfolio] : portfolios;
   let score = 100;
   const strengths: string[] = [];
   const risks: string[] = [];
@@ -25,35 +24,49 @@ export function calculateHealthScore(portfolios: Portfolio[], activePortfolio: P
   let goldVal = 0;
   let realEstateVal = 0;
 
-  for (let i = 0; i < targetPortfolios.length; i++) {
-    const p = targetPortfolios[i];
+  const count = activePortfolio ? 1 : (portfolios ? portfolios.length : 0);
+
+  for (let i = 0; i < count; i++) {
+    const p = activePortfolio ? activePortfolio : portfolios[i];
     if (!p) continue;
     totalInvested += Number(p.totalInvested) || 0;
 
-    for (const h of p.holdings || []) {
-      equityVal += Number(h?.currentValue) || 0;
+    if (p.holdings) {
+      for (let j = 0; j < p.holdings.length; j++) {
+        equityVal += Number(p.holdings[j]?.currentValue) || 0;
+      }
     }
-    for (const sip of p.sipAccounts || []) {
-      equityVal += getSIPEffectiveValue(sip);
+    if (p.sipAccounts) {
+      for (let j = 0; j < p.sipAccounts.length; j++) {
+        equityVal += getSIPEffectiveValue(p.sipAccounts[j]);
+      }
     }
-    for (const fd of p.fixedDeposits || []) {
-      debtVal += getFDEffectiveValue(fd);
+    if (p.fixedDeposits) {
+      for (let j = 0; j < p.fixedDeposits.length; j++) {
+        debtVal += getFDEffectiveValue(p.fixedDeposits[j]);
+      }
     }
-    for (const rd of p.rdAccounts || []) {
-      debtVal += getRDEffectiveValue(rd);
+    if (p.rdAccounts) {
+      for (let j = 0; j < p.rdAccounts.length; j++) {
+        debtVal += getRDEffectiveValue(p.rdAccounts[j]);
+      }
     }
-    for (const g of p.goldHoldings || []) {
-      goldVal += Number(g?.current_valuation) || 0;
+    if (p.goldHoldings) {
+      for (let j = 0; j < p.goldHoldings.length; j++) {
+        goldVal += Number(p.goldHoldings[j]?.current_valuation) || 0;
+      }
     }
-    for (const re of p.realEstate || []) {
-      realEstateVal += Number(re?.current_valuation) || 0;
+    if (p.realEstate) {
+      for (let j = 0; j < p.realEstate.length; j++) {
+        realEstateVal += Number(p.realEstate[j]?.current_valuation) || 0;
+      }
     }
   }
 
   const totalCurrent = equityVal + debtVal + goldVal + realEstateVal;
 
-  // 1. Diversification Score
-  const assetTypesPresent = [equityVal, debtVal, goldVal, realEstateVal].filter((v) => v > 0).length;
+  // 1. Diversification Score (O(1) integer arithmetic without array allocation)
+  const assetTypesPresent = (equityVal > 0 ? 1 : 0) + (debtVal > 0 ? 1 : 0) + (goldVal > 0 ? 1 : 0) + (realEstateVal > 0 ? 1 : 0);
   if (assetTypesPresent >= 3) {
     strengths.push('Excellent multi-asset diversification (Stocks, FD/RD, Gold/Real Estate).');
   } else if (assetTypesPresent === 1) {

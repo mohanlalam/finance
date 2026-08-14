@@ -159,10 +159,15 @@ export default function NetWorthTimelineChart({
     cutoff.setDate(now.getDate() - days);
 
     const filtered = baseData.filter((d) => new Date(d.snapshot_date) >= cutoff);
-    if (filtered.length < 2) {
-      return baseData.slice(-2);
-    }
-    return filtered;
+    const result = filtered.length < 2 ? baseData.slice(-2) : filtered;
+    return result.map((d) => ({
+      ...d,
+      formattedDate: new Date(d.snapshot_date).toLocaleDateString('en-IN', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    }));
   }, [baseData, range]);
 
   // Period performance metrics
@@ -596,19 +601,6 @@ export default function NetWorthTimelineChart({
 
             return (
               <g key={idx}>
-                {/* Invisible broad touch target for easy scrubbing */}
-                <rect
-                  x={p.x - 14}
-                  y={paddingTop}
-                  width={28}
-                  height={chartHeight}
-                  fill="transparent"
-                  className="cursor-pointer"
-                  onMouseEnter={() => setHoveredIdx(idx)}
-                  onTouchStart={() => setHoveredIdx(idx)}
-                  onMouseLeave={() => setHoveredIdx(null)}
-                />
-
                 {/* Visible Dots based on series mode */}
                 {seriesMode === 'total' && (
                   <circle
@@ -668,11 +660,7 @@ export default function NetWorthTimelineChart({
             {/* Tooltip Header */}
             <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-1">
               <span className="text-[10px] text-[var(--text-tertiary)] font-extrabold uppercase tracking-wider">
-                {new Date(activeHoverItem.snapshot_date).toLocaleDateString('en-IN', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
+                {(activeHoverItem as { formattedDate?: string }).formattedDate || activeHoverItem.snapshot_date}
               </span>
               <span className="text-[9.5px] font-bold text-[var(--text-secondary)]">Historical Pointer</span>
             </div>

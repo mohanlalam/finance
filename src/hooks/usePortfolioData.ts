@@ -726,7 +726,6 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           clearTimeout(timerId);
         }
       };
-
     } catch (err) {
       console.error('[portfolio] Database parsing error:', err);
       setLoadStatus('error');
@@ -736,6 +735,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
   // 4. Handle SWR Errors
   useEffect(() => {
+    let isMounted = true;
     if (swrError) {
       console.error('[portfolio] SWR fetch error:', swrError);
       if (swrError instanceof AppApiError && swrError.code === 'auth') {
@@ -744,7 +744,6 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       }
       // Try local cache fallback if not already loaded
       if (portfolios.length === 0) {
-        let isMounted = true;
         idb.get('portfolio_data_cache').then((cached) => {
           if (!isMounted) return;
           if (cached) {
@@ -766,15 +765,16 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
             setLoadStatus('error');
           }
         }).catch((err) => {
+          if (!isMounted) return;
           console.warn('[portfolio] IndexedDB read error during error fallback:', err);
           setLoadError(getFriendlyMessage(swrError));
           setLoadStatus('error');
         });
-        return () => {
-          isMounted = false;
-        };
       }
     }
+    return () => {
+      isMounted = false;
+    };
   }, [swrError, portfolios.length, handleAuthExpired]);
 
   const invalidateIDBCache = useCallback(async (): Promise<void> => {
@@ -1019,7 +1019,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     });
   }, [runMutation, load, handleAuthExpired, invalidateIDBCache]);
 
-  return {
+  return useMemo(() => ({
     portfolios,
     netWorthHistory,
     loadStatus,
@@ -1043,5 +1043,29 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     addAsset,
     updateAsset,
     deleteAsset,
-  };
+  }), [
+    portfolios,
+    netWorthHistory,
+    loadStatus,
+    loadError,
+    priceStatus,
+    lastUpdated,
+    failedSymbols,
+    isUsingCachedData,
+    cacheUpdatedAt,
+    isAuthRequired,
+    isMutating,
+    isMutatingRef,
+    lastPriceFetch,
+    isPriceStale,
+    load,
+    refreshSnapshot,
+    refreshPrices,
+    addPortfolio,
+    renamePortfolio,
+    deletePortfolio,
+    addAsset,
+    updateAsset,
+    deleteAsset,
+  ]);
 }

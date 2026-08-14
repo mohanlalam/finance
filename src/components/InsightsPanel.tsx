@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { TrendingUp, TrendingDown, AlertTriangle, Landmark, Shield, Activity, Crown, Target, BarChart3, Filter } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import {
@@ -48,8 +48,8 @@ const Card = React.memo(function Card({ title, icon, children, action }: {
 /* ── Sub-sections ── */
 
 const TopHoldings = React.memo(function TopHoldings({ items }: { items: HoldingInsight[] }) {
+  const totalVal = useMemo(() => items.reduce((s, i) => s + i.holding.currentValue, 0), [items]);
   if (items.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No holdings yet</p>;
-  const totalVal = items.reduce((s, i) => s + i.holding.currentValue, 0);
   return (
     <div className="space-y-2">
       {items.map((item, idx) => {
@@ -251,7 +251,8 @@ const AllocationDrift = React.memo(function AllocationDrift({
     };
   }, [portfolios, activePortfolio, targetPcts]);
 
-  if (slices.every((s) => s.value === 0)) return <p className="text-xs text-[var(--text-tertiary)]">No assets yet</p>;
+  const hasAssets = useMemo(() => slices.some((s) => s.value > 0), [slices]);
+  if (!hasAssets) return <p className="text-xs text-[var(--text-tertiary)]">No assets yet</p>;
   return (
     <div className="space-y-2.5">
       {/* Dual-Ring Visual Rebalancing Donut */}
@@ -381,7 +382,7 @@ const InsuranceReminders = React.memo(function InsuranceReminders({ alerts }: { 
 });
 
 const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: { items: PortfolioBestWorst[] }) {
-  const valid = items.filter((i) => i.best || i.worst);
+  const valid = useMemo(() => items.filter((i) => i.best || i.worst), [items]);
   if (valid.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No holdings data</p>;
   return (
     <div className="space-y-3">
@@ -431,6 +432,9 @@ export default React.memo(function InsightsPanel({
   onTargetsChanged,
 }: InsightsPanelProps) {
   const [activeFilter, setActiveFilter] = useState<InsightFilter>('all');
+  const handleFilterClick = useCallback((id: InsightFilter) => {
+    setActiveFilter(id);
+  }, []);
 
   const [healthReport, setHealthReport] = useState<HealthReport>(() =>
     calculateHealthScore(portfolios, activePortfolio)
@@ -483,7 +487,7 @@ export default React.memo(function InsightsPanel({
             return (
               <button
                 key={filter.id}
-                onClick={() => setActiveFilter(filter.id)}
+                onClick={() => handleFilterClick(filter.id)}
                 className={`shrink-0 px-2.5 py-1 rounded-[var(--radius-medium)] text-[10px] font-bold transition-all duration-150 outline-none ios-press ${
                   isActive
                     ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-sm'

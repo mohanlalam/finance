@@ -68,6 +68,8 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     onAuthExpired();
   }, [onAuthExpired]);
 
+  const portfolioOptions = useMemo(() => ({ onAuthExpired: handleAuthExpired }), [handleAuthExpired]);
+
   const {
     portfolios,
     netWorthHistory,
@@ -92,7 +94,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     addAsset,
     updateAsset,
     deleteAsset,
-  } = usePortfolioData({ onAuthExpired: handleAuthExpired });
+  } = usePortfolioData(portfolioOptions);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -149,13 +151,16 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
 
   // Daily net worth snapshot trigger
   useEffect(() => {
+    let isMounted = true;
     if (loadStatus !== 'success' || portfolios.length === 0) return;
     const todayStr = new Date().toISOString().split('T')[0];
     const lastSnapshot = localStorage.getItem('finance_last_snapshot_date');
     if (lastSnapshot !== todayStr) {
       import('../utils/apiClient').then(({ invokeFunction }) => {
+        if (!isMounted) return;
         invokeFunction('snapshot-net-worth', { method: 'POST' })
           .then(() => {
+            if (!isMounted) return;
             localStorage.setItem('finance_last_snapshot_date', todayStr);
             load();
           })
@@ -164,6 +169,9 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
           });
       });
     }
+    return () => {
+      isMounted = false;
+    };
     // Intentionally omitting portfolios from deps — only trigger on loadStatus transition
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadStatus, load]);

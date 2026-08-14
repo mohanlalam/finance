@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Portfolio, Holding, FixedDeposit, Insurance } from '../types/portfolio';
 import { FD_MATURITY_WARNING_DAYS, INSURANCE_RENEWAL_WARNING_DAYS } from '../utils/constants';
 
@@ -20,21 +20,29 @@ export const DEFAULT_ALLOCATION_TARGETS: AllocationTargets = {
 
 export const ALLOCATION_TARGETS_KEY = 'finance_allocation_targets';
 
+let _cachedTargets: AllocationTargets | null = null;
+
 export function getAllocationTargets(): AllocationTargets {
+  if (_cachedTargets) return _cachedTargets;
   try {
-    const stored = localStorage.getItem(ALLOCATION_TARGETS_KEY);
+    const stored = typeof localStorage !== 'undefined' ? localStorage.getItem(ALLOCATION_TARGETS_KEY) : null;
     if (stored) {
       const parsed = JSON.parse(stored) as Partial<AllocationTargets>;
-      const t: AllocationTargets = {
+      _cachedTargets = {
         stocks: typeof parsed.stocks === 'number' ? parsed.stocks : DEFAULT_ALLOCATION_TARGETS.stocks,
         fd: typeof parsed.fd === 'number' ? parsed.fd : DEFAULT_ALLOCATION_TARGETS.fd,
         gold: typeof parsed.gold === 'number' ? parsed.gold : DEFAULT_ALLOCATION_TARGETS.gold,
         realEstate: typeof parsed.realEstate === 'number' ? parsed.realEstate : DEFAULT_ALLOCATION_TARGETS.realEstate,
       };
-      return t;
+      return _cachedTargets;
     }
   } catch { /* ignore */ }
-  return { ...DEFAULT_ALLOCATION_TARGETS };
+  _cachedTargets = { ...DEFAULT_ALLOCATION_TARGETS };
+  return _cachedTargets;
+}
+
+export function invalidateAllocationTargetsCache(): void {
+  _cachedTargets = null;
 }
 
 /* ── Alert / Insight types ── */
@@ -102,36 +110,44 @@ export interface PortfolioInsights {
 
 /* ── Helpers ── */
 
-function daysUntil(dateStr: string | null | undefined): number | null {
+function daysUntil(dateStr: string | null | undefined, nowMs: number): number | null {
   if (!dateStr) return null;
-  const t = new Date(dateStr).getTime();
+  const t = Date.parse(dateStr);
   if (isNaN(t)) return null;
-  return Math.ceil((t - Date.now()) / (1000 * 3600 * 24));
+  return Math.ceil((t - nowMs) / (1000 * 3600 * 24));
 }
 
 function allHoldingsWithMeta(portfolios: Portfolio[]): HoldingInsight[] {
-  return portfolios.flatMap((p) =>
-    p.holdings.map((h) => ({ holding: h, portfolioLabel: p.label, portfolioName: p.name }))
-  );
+  const result: HoldingInsight[] = [];
+  for (let i = 0; i < portfolios.length; i++) {
+    const p = portfolios[i];
+    if (!p || !p.holdings) continue;
+    for (let j = 0; j < p.holdings.length; j++) {
+      result.push({ holding: p.holdings[j], portfolioLabel: p.label, portfolioName: p.name });
+    }
+  }
+  return result;
 }
-
 
 /* ── Score calculators ── */
 
-function calcDiversification(allHoldings: Holding[]): number {
-  const n = allHoldings.length;
-  if (n === 0) return 0;
-  if (n >= 15) return 25;
-  if (n >= 10) return 22;
-  if (n >= 5) return 18;
-  if (n >= 3) return 12;
+function calcDiversification(allHoldingsCount: number): number {
+  if (allHoldingsCount === 0) return 0;
+  if (allHoldingsCount >= 15) return 25;
+  if (allHoldingsCount >= 10) return 22;
+  if (allHoldingsCount >= 5) return 18;
+  if (allHoldingsCount >= 3) return 12;
   return 5;
 }
 
 function calcAssetBalance(slices: AllocationSlice[]): number {
-  if (slices.every((s) => s.value === 0)) return 0;
-  const totalDrift = slices.reduce((s, sl) => s + Math.abs(sl.drift), 0);
-  // totalDrift can be 0–200 (sum of abs drifts). Lower is better.
+  let hasValue = false;
+  let totalDrift = 0;
+  for (let i = 0; i < slices.length; i++) {
+    if (slices[i].value > 0) hasValue = true;
+    totalDrift += Math.abs(slices[i].drift);
+  }
+  if (!hasValue) return 0;
   if (totalDrift <= 20) return 25;
   if (totalDrift <= 40) return 20;
   if (totalDrift <= 60) return 15;
@@ -140,13 +156,22 @@ function calcAssetBalance(slices: AllocationSlice[]): number {
 }
 
 function calcConcentration(allHoldings: Holding[]): number {
-  if (allHoldings.length === 0) return 0;
-  const totalEquity = allHoldings.reduce((s, h) => s + h.currentValue, 0);
+  const n = allHoldings.length;
+  if (n === 0) return 0;
+  let totalEquity = 0;
+  for (let i = 0; i < n; i++) {
+    totalEquity += Number(allHoldings[i]?.currentValue) || 0;
+  }
   if (totalEquity === 0) return 25;
 
   const sorted = [...allHoldings].sort((a, b) => b.currentValue - a.currentValue);
   const topPct = (sorted[0].currentValue / totalEquity) * 100;
-  const top3Pct = sorted.slice(0, 3).reduce((s, h) => s + h.currentValue, 0) / totalEquity * 100;
+  let top3Sum = 0;
+  const top3Count = Math.min(3, sorted.length);
+  for (let i = 0; i < top3Count; i++) {
+    top3Sum += sorted[i].currentValue;
+  }
+  const top3Pct = (top3Sum / totalEquity) * 100;
 
   let score = 25;
   if (topPct > 30) score -= 12;
@@ -160,14 +185,23 @@ function calcConcentration(allHoldings: Holding[]): number {
 }
 
 function calcInsuranceCoverage(portfolios: Portfolio[]): number {
-  const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
-  const totalCoverage = portfolios.reduce(
-    (s, p) => s + p.insurances.reduce((a, i) => a + Number(i.sum_assured), 0),
-    0
-  );
+  let totalInvested = 0;
+  let totalCoverage = 0;
+  let hasInsurances = false;
 
-  if (totalInvested === 0) return 0;
-  if (portfolios.every((p) => p.insurances.length === 0)) return 0;
+  for (let i = 0; i < portfolios.length; i++) {
+    const p = portfolios[i];
+    if (!p) continue;
+    totalInvested += Number(p.totalInvested) || 0;
+    if (p.insurances && p.insurances.length > 0) {
+      hasInsurances = true;
+      for (let j = 0; j < p.insurances.length; j++) {
+        totalCoverage += Number(p.insurances[j]?.sum_assured) || 0;
+      }
+    }
+  }
+
+  if (totalInvested === 0 || !hasInsurances) return 0;
 
   const ratio = totalCoverage / totalInvested;
   if (ratio >= 5) return 25;
@@ -183,7 +217,13 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
   return useMemo(() => {
     const TARGET_ALLOCATION = getAllocationTargets();
     const all = allHoldingsWithMeta(portfolios);
-    const allHoldings = portfolios.flatMap((p) => p.holdings);
+    const nowMs = Date.now();
+
+    // Flatten holdings efficiently
+    const allHoldings: Holding[] = [];
+    for (let i = 0; i < all.length; i++) {
+      allHoldings.push(all[i].holding);
+    }
 
     // ── Top by value ──
     const topByValue = [...all]
@@ -191,12 +231,12 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
       .slice(0, 5);
 
     // ── Top gainers / losers ──
-    const topGainers = [...all]
+    const topGainers = all
       .filter((a) => a.holding.pnlPercent > 0)
       .sort((a, b) => b.holding.pnlPercent - a.holding.pnlPercent)
       .slice(0, 5);
 
-    const topLosers = [...all]
+    const topLosers = all
       .filter((a) => a.holding.pnlPercent < 0)
       .sort((a, b) => a.holding.pnlPercent - b.holding.pnlPercent)
       .slice(0, 5);
@@ -207,11 +247,20 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
       : [];
     const biggestMover = biggestMovers[0] || null;
 
-    // ── Asset allocation ──
-    const totalStocksVal = portfolios.reduce((s, p) => s + (p.stocksValue || 0) + (p.sipValue || 0), 0);
-    const totalFdVal = portfolios.reduce((s, p) => s + (p.fdValue || 0) + (p.rdValue || 0), 0);
-    const goldVal = portfolios.reduce((s, p) => s + (p.goldValue || 0), 0);
-    const realEstateVal = portfolios.reduce((s, p) => s + (p.realEstateValue || 0), 0);
+    // ── Asset allocation (Single pass aggregation) ──
+    let totalStocksVal = 0;
+    let totalFdVal = 0;
+    let goldVal = 0;
+    let realEstateVal = 0;
+
+    for (let i = 0; i < portfolios.length; i++) {
+      const p = portfolios[i];
+      if (!p) continue;
+      totalStocksVal += (Number(p.stocksValue) || 0) + (Number(p.sipValue) || 0);
+      totalFdVal += (Number(p.fdValue) || 0) + (Number(p.rdValue) || 0);
+      goldVal += Number(p.goldValue) || 0;
+      realEstateVal += Number(p.realEstateValue) || 0;
+    }
     const totalVal = totalStocksVal + totalFdVal + goldVal + realEstateVal;
 
     const pct = (v: number) => (totalVal > 0 ? (v / totalVal) * 100 : 0);
@@ -225,10 +274,16 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
 
     // ── Concentration warnings ──
     const concentrationWarnings: ConcentrationWarning[] = [];
-    for (const p of portfolios) {
-      const eqTotal = p.holdings.reduce((s, h) => s + h.currentValue, 0);
+    for (let i = 0; i < portfolios.length; i++) {
+      const p = portfolios[i];
+      if (!p || !p.holdings || p.holdings.length === 0) continue;
+      let eqTotal = 0;
+      for (let j = 0; j < p.holdings.length; j++) {
+        eqTotal += Number(p.holdings[j]?.currentValue) || 0;
+      }
       if (eqTotal === 0) continue;
-      for (const h of p.holdings) {
+      for (let j = 0; j < p.holdings.length; j++) {
+        const h = p.holdings[j];
         const holdingPct = (h.currentValue / eqTotal) * 100;
         if (holdingPct > 15) {
           concentrationWarnings.push({
@@ -244,10 +299,13 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
 
     // ── FD maturity alerts (30 days) ──
     const fdMaturityAlerts: FDMaturityAlert[] = [];
-    for (const p of portfolios) {
-      for (const fd of p.fixedDeposits) {
+    for (let i = 0; i < portfolios.length; i++) {
+      const p = portfolios[i];
+      if (!p || !p.fixedDeposits) continue;
+      for (let j = 0; j < p.fixedDeposits.length; j++) {
+        const fd = p.fixedDeposits[j];
         if (fd.status === 'matured') continue;
-        const days = daysUntil(fd.maturity_date);
+        const days = daysUntil(fd.maturity_date, nowMs);
         if (days !== null && days >= 0 && days <= FD_MATURITY_WARNING_DAYS) {
           fdMaturityAlerts.push({ fd, daysLeft: days, portfolioLabel: p.label });
         }
@@ -257,9 +315,12 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
 
     // ── Insurance renewal alerts (60 days) ──
     const insuranceRenewalAlerts: InsuranceRenewalAlert[] = [];
-    for (const p of portfolios) {
-      for (const ins of p.insurances) {
-        const days = daysUntil(ins.renewal_date);
+    for (let i = 0; i < portfolios.length; i++) {
+      const p = portfolios[i];
+      if (!p || !p.insurances) continue;
+      for (let j = 0; j < p.insurances.length; j++) {
+        const ins = p.insurances[j];
+        const days = daysUntil(ins.renewal_date, nowMs);
         if (days !== null && days >= 0 && days <= INSURANCE_RENEWAL_WARNING_DAYS) {
           insuranceRenewalAlerts.push({ insurance: ins, daysLeft: days, portfolioLabel: p.label });
         }
@@ -268,18 +329,29 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
     insuranceRenewalAlerts.sort((a, b) => a.daysLeft - b.daysLeft);
 
     // ── Portfolio best / worst ──
-    const portfolioBestWorst: PortfolioBestWorst[] = portfolios.map((p) => {
-      if (p.holdings.length === 0) return { portfolioLabel: p.label, best: null, worst: null };
-      const sorted = [...p.holdings].sort((a, b) => b.pnlPercent - a.pnlPercent);
-      return {
+    const portfolioBestWorst: PortfolioBestWorst[] = [];
+    for (let i = 0; i < portfolios.length; i++) {
+      const p = portfolios[i];
+      if (!p || !p.holdings || p.holdings.length === 0) {
+        portfolioBestWorst.push({ portfolioLabel: p?.label ?? '', best: null, worst: null });
+        continue;
+      }
+      let bestH: Holding = p.holdings[0];
+      let worstH: Holding = p.holdings[0];
+      for (let j = 1; j < p.holdings.length; j++) {
+        const h = p.holdings[j];
+        if (h.pnlPercent > bestH.pnlPercent) bestH = h;
+        if (h.pnlPercent < worstH.pnlPercent) worstH = h;
+      }
+      portfolioBestWorst.push({
         portfolioLabel: p.label,
-        best: sorted[0],
-        worst: sorted[sorted.length - 1],
-      };
-    });
+        best: bestH,
+        worst: worstH,
+      });
+    }
 
     // ── Health score ──
-    const diversification = calcDiversification(allHoldings);
+    const diversification = calcDiversification(allHoldings.length);
     const assetBalance = calcAssetBalance(allocationSlices);
     const concentration = calcConcentration(allHoldings);
     const insuranceCoverage = calcInsuranceCoverage(portfolios);

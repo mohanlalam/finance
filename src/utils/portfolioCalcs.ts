@@ -3,26 +3,38 @@ import { Holding, Portfolio } from '../types/portfolio';
 /** Sum invested amounts across holdings safely */
 export function calcTotalInvested(holdings: Holding[]): number {
   if (!holdings || holdings.length === 0) return 0;
-  return holdings.reduce((s, h) => s + (Number(h?.amountInvested) || 0), 0);
+  let sum = 0;
+  for (let i = 0; i < holdings.length; i++) {
+    sum += Number(holdings[i]?.amountInvested) || 0;
+  }
+  return sum;
 }
 
 /** Sum current values across holdings safely */
 export function calcTotalCurrentValue(holdings: Holding[]): number {
   if (!holdings || holdings.length === 0) return 0;
-  return holdings.reduce((s, h) => s + (Number(h?.currentValue) || 0), 0);
+  let sum = 0;
+  for (let i = 0; i < holdings.length; i++) {
+    sum += Number(holdings[i]?.currentValue) || 0;
+  }
+  return sum;
 }
 
 /** Sum unrealized P&L across holdings safely */
 export function calcTotalPnL(holdings: Holding[]): number {
   if (!holdings || holdings.length === 0) return 0;
-  return holdings.reduce((s, h) => s + (Number(h?.unrealizedPnL) || 0), 0);
+  let sum = 0;
+  for (let i = 0; i < holdings.length; i++) {
+    sum += Number(holdings[i]?.unrealizedPnL) || 0;
+  }
+  return sum;
 }
 
-/** Calculate P&L percentage from holdings safely */
+/** Calculate P&L percentage from holdings safely in a single pass */
 export function calcPnLPercent(holdings: Holding[]): number {
-  const inv = calcTotalInvested(holdings);
-  const pnl = calcTotalPnL(holdings);
-  return inv > 0 && !isNaN(inv) && !isNaN(pnl) ? (pnl / inv) * 100 : 0;
+  if (!holdings || holdings.length === 0) return 0;
+  const totals = holdingsTotals(holdings);
+  return totals.totalPnLPercent;
 }
 
 /** Compute the portfolio-level stock totals from holdings in a single pass */
@@ -41,7 +53,7 @@ export function holdingsTotals(holdings: Holding[]) {
   return { totalInvested, totalCurrentValue, totalPnL, totalPnLPercent };
 }
 
-/** Compute asset class breakdown across portfolios in a SINGLE PASS */
+/** Compute asset class breakdown across portfolios in a SINGLE PASS without array allocations */
 export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null) {
   let stocks = 0;
   let fd = 0;
@@ -52,9 +64,9 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
   let insuranceCover = 0;
   let insurancePremium = 0;
 
-  const target = scope ? [scope] : (portfolios || []);
-  for (let i = 0; i < target.length; i++) {
-    const p = target[i];
+  const count = scope ? 1 : (portfolios ? portfolios.length : 0);
+  for (let i = 0; i < count; i++) {
+    const p = scope ? scope : portfolios[i];
     if (!p) continue;
     stocks += Number(p.stocksValue) || 0;
     fd += Number(p.fdValue) || 0;
@@ -63,11 +75,10 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
     gold += Number(p.goldValue) || 0;
     realEstate += Number(p.realEstateValue) || 0;
 
-    const ins = p.insurances;
-    if (ins) {
-      for (let j = 0; j < ins.length; j++) {
-        insuranceCover += Number(ins[j]?.sum_assured) || 0;
-        insurancePremium += Number(ins[j]?.premium_amount) || 0;
+    if (p.insurances) {
+      for (let j = 0; j < p.insurances.length; j++) {
+        insuranceCover += Number(p.insurances[j]?.sum_assured) || 0;
+        insurancePremium += Number(p.insurances[j]?.premium_amount) || 0;
       }
     }
   }
@@ -99,16 +110,17 @@ export function estimateTodayPnL(portfolio: Portfolio | null, all: Portfolio[]):
     }
   };
 
-  if (portfolio) {
-    const holdings = portfolio.holdings || [];
-    for (let i = 0; i < holdings.length; i++) {
-      processHolding(holdings[i]);
+  if (portfolio && portfolio.holdings) {
+    for (let i = 0; i < portfolio.holdings.length; i++) {
+      processHolding(portfolio.holdings[i]);
     }
   } else if (all && all.length > 0) {
     for (let i = 0; i < all.length; i++) {
-      const holdings = all[i]?.holdings || [];
-      for (let j = 0; j < holdings.length; j++) {
-        processHolding(holdings[j]);
+      const holdings = all[i]?.holdings;
+      if (holdings) {
+        for (let j = 0; j < holdings.length; j++) {
+          processHolding(holdings[j]);
+        }
       }
     }
   }
@@ -124,5 +136,3 @@ export function getPortfolioByName(portfolios: Portfolio[], name: string): Portf
   }
   return null;
 }
-
-
