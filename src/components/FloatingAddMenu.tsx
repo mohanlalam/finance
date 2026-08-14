@@ -47,34 +47,34 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
     {
       category: 'Market',
       items: [
-        { label: 'Stock / ETF', icon: <TrendingUp size={16} />, onClick: () => { onAddStock(); setIsOpen(false); }, color: 'bg-blue-600 text-white' },
-        { label: 'SIP Mutual Fund', icon: <TrendingUp size={16} />, onClick: () => { onAddAsset('sip'); setIsOpen(false); }, color: 'bg-sky-600 text-white' },
-        { label: 'Gold Holding', icon: <Coins size={16} />, onClick: () => { onAddAsset('gold'); setIsOpen(false); }, color: 'bg-amber-600 text-white' },
+        { label: 'Stock / ETF', icon: <TrendingUp size={16} aria-hidden="true" />, onClick: () => { onAddStock(); setIsOpen(false); }, color: 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]' },
+        { label: 'SIP Mutual Fund', icon: <TrendingUp size={16} aria-hidden="true" />, onClick: () => { onAddAsset('sip'); setIsOpen(false); }, color: 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]' },
+        { label: 'Gold Holding', icon: <Coins size={16} aria-hidden="true" />, onClick: () => { onAddAsset('gold'); setIsOpen(false); }, color: 'bg-[var(--warning-soft)] text-[var(--warning)]' },
       ],
     },
     {
       category: 'Deposits',
       items: [
-        { label: 'Fixed Deposit', icon: <Landmark size={16} />, onClick: () => { onAddAsset('fd'); setIsOpen(false); }, color: 'bg-indigo-600 text-white' },
-        { label: 'Recurring Deposit', icon: <Clock size={16} />, onClick: () => { onAddAsset('rd'); setIsOpen(false); }, color: 'bg-pink-600 text-white' },
+        { label: 'Fixed Deposit', icon: <Landmark size={16} aria-hidden="true" />, onClick: () => { onAddAsset('fd'); setIsOpen(false); }, color: 'bg-[var(--surface-secondary)] text-[var(--text-primary)]' },
+        { label: 'Recurring Deposit', icon: <Clock size={16} aria-hidden="true" />, onClick: () => { onAddAsset('rd'); setIsOpen(false); }, color: 'bg-[var(--surface-secondary)] text-[var(--text-secondary)]' },
       ],
     },
     {
       category: 'Property',
       items: [
-        { label: 'Real Estate Property', icon: <Building2 size={16} />, onClick: () => { onAddAsset('real_estate'); setIsOpen(false); }, color: 'bg-emerald-600 text-white' },
+        { label: 'Real Estate Property', icon: <Building2 size={16} aria-hidden="true" />, onClick: () => { onAddAsset('real_estate'); setIsOpen(false); }, color: 'bg-[var(--positive-soft)] text-[var(--positive)]' },
       ],
     },
     {
       category: 'Protection',
       items: [
-        { label: 'Insurance Policy', icon: <Shield size={16} />, onClick: () => { onAddAsset('insurance'); setIsOpen(false); }, color: 'bg-rose-600 text-white' },
+        { label: 'Insurance Policy', icon: <Shield size={16} aria-hidden="true" />, onClick: () => { onAddAsset('insurance'); setIsOpen(false); }, color: 'bg-[var(--negative-soft)] text-[var(--negative)]' },
       ],
     },
     {
       category: 'Documents',
       items: [
-        { label: 'Upload Document', icon: <FolderOpen size={16} />, onClick: () => { onAddAsset('documents'); setIsOpen(false); }, color: 'bg-slate-600 text-white' },
+        { label: 'Upload Document', icon: <FolderOpen size={16} aria-hidden="true" />, onClick: () => { onAddAsset('documents'); setIsOpen(false); }, color: 'bg-[var(--surface-secondary)] text-[var(--text-tertiary)]' },
       ],
     },
   ];
@@ -100,7 +100,7 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
             setIsOpen(false);
             fabButtonRef.current?.focus();
           }}
-          className="fixed inset-0 bg-black/40 z-40 transition-opacity duration-200"
+          className="fixed inset-0 bg-[var(--backdrop-overlay)] z-40 transition-opacity duration-200"
           aria-hidden="true"
         />
       )}
@@ -113,7 +113,7 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
             role="dialog"
             aria-modal="true"
             aria-label="Quick Add Asset Menu"
-            className="pointer-events-auto w-full sm:w-80 max-h-[75vh] overflow-y-auto bg-[var(--surface)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl shadow-2xl p-4 mb-2 space-y-3 pb-safe sm:pb-4"
+            className="pointer-events-auto w-full sm:w-80 max-h-[75vh] overflow-y-auto bg-[var(--surface)] border border-[var(--border-subtle)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-large)] shadow-2xl p-4 mb-2 space-y-3 pb-safe sm:pb-4 apple-card animate-slide-up"
           >
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)] gap-2">
               <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
@@ -121,28 +121,31 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
               </span>
 
               {/* Position Switcher Controls */}
-              <div className="flex items-center gap-1 bg-[var(--surface-secondary)] p-0.5 rounded-lg text-[10px]">
+              <div className="flex items-center gap-1 bg-[var(--surface-secondary)] p-0.5 rounded-[var(--radius-small)] text-[10px]" role="radiogroup" aria-label="Button alignment">
                 <button
                   onClick={() => changePosition('left')}
-                  className={`px-1.5 py-0.5 rounded font-bold transition-colors ${position === 'left' ? 'bg-blue-600 text-white' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                  className={`px-1.5 py-0.5 rounded-[var(--radius-small)] font-bold transition-colors ios-press ${position === 'left' ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
                   title="Move button to Left"
-                  aria-label="Position button on left"
+                  aria-checked={position === 'left'}
+                  role="radio"
                 >
                   Left ↙
                 </button>
                 <button
                   onClick={() => changePosition('center')}
-                  className={`px-1.5 py-0.5 rounded font-bold transition-colors ${position === 'center' ? 'bg-blue-600 text-white' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                  className={`px-1.5 py-0.5 rounded-[var(--radius-small)] font-bold transition-colors ios-press ${position === 'center' ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
                   title="Move button to Center"
-                  aria-label="Position button in center"
+                  aria-checked={position === 'center'}
+                  role="radio"
                 >
                   Center ⬇
                 </button>
                 <button
                   onClick={() => changePosition('right')}
-                  className={`px-1.5 py-0.5 rounded font-bold transition-colors ${position === 'right' ? 'bg-blue-600 text-white' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                  className={`px-1.5 py-0.5 rounded-[var(--radius-small)] font-bold transition-colors ios-press ${position === 'right' ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
                   title="Move button to Right"
-                  aria-label="Position button on right"
+                  aria-checked={position === 'right'}
+                  role="radio"
                 >
                   Right ↘
                 </button>
@@ -153,10 +156,10 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
                   setIsOpen(false);
                   fabButtonRef.current?.focus();
                 }}
-                className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 ios-press transition-colors shrink-0"
+                className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-[var(--radius-medium)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] ios-press transition-colors shrink-0"
                 aria-label="Close add menu"
               >
-                <X size={18} />
+                <X size={18} aria-hidden="true" />
               </button>
             </div>
 
@@ -172,9 +175,9 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
                       item.onClick();
                       fabButtonRef.current?.focus();
                     }}
-                    className="w-full flex items-center gap-3 px-2.5 py-2 min-h-[44px] rounded-lg text-xs font-bold text-[var(--text-primary)] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left outline-none"
+                    className="w-full flex items-center gap-3 px-2.5 py-2 min-h-[44px] rounded-[var(--radius-medium)] text-xs font-bold text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] transition-colors text-left outline-none ios-press"
                   >
-                    <div className={`w-7 h-7 rounded-md ${item.color} flex items-center justify-center shrink-0`}>
+                    <div className={`w-7 h-7 rounded-[var(--radius-small)] ${item.color} flex items-center justify-center shrink-0`}>
                       {item.icon}
                     </div>
                     <span>{item.label}</span>
@@ -191,11 +194,12 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? 'Close quick add menu' : 'Open quick add menu'}
           aria-expanded={isOpen}
-          className="pointer-events-auto min-w-[48px] min-h-[48px] w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-lg active:scale-95 transition-all outline-none"
+          className="pointer-events-auto min-w-[48px] min-h-[48px] w-12 h-12 rounded-[var(--radius-pill)] bg-[var(--accent-blue)] text-[var(--surface)] flex items-center justify-center shadow-lg ios-press transition-all outline-none"
         >
           <Plus
             size={22}
-            className={`transition-transform duration-200 ${isOpen ? 'rotate-135' : ''}`}
+            className={`transition-transform duration-200 ${isOpen ? 'rotate-[135deg]' : ''}`}
+            aria-hidden="true"
           />
         </button>
       </div>

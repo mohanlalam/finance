@@ -763,3 +763,22 @@ export function ArrowRightLeft({ size = 24, className = '' }: IconProps) {
     </svg>
   );
 }
+
+export function Layers({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
+    </svg>
+  );
+}
+
+export function PieChart({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+      <path d="M22 12A10 10 0 0 0 12 2v10z" />
+    </svg>
+  );
+}

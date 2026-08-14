@@ -1,0 +1,254 @@
+import React, { useEffect } from 'react';
+import { X, TrendingUp, TrendingDown, Pencil, Trash2, Share2, ExternalLink } from './icons/AppIcons';
+import { Holding } from '../types/portfolio';
+import { formatINR, formatNumber, formatPercent } from '../utils/formatters';
+import { usePrivacy } from '../contexts/PrivacyContext';
+
+interface HoldingDetailDrawerProps {
+  holding: Holding | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onEdit?: (holding: Holding) => void;
+  onDelete?: (holding: Holding) => void;
+  onShare?: (holding: Holding) => void;
+}
+
+export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
+  holding,
+  isOpen,
+  onClose,
+  onEdit,
+  onDelete,
+  onShare,
+}) => {
+  const { isBalancesHidden } = usePrivacy();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !holding) return null;
+
+  const renderVal = (val: number, formatter = formatINR) => {
+    if (isBalancesHidden) return '••••••';
+    return formatter(val);
+  };
+
+  const isUp = holding.todayPnLPercent >= 0;
+  const isOverallProfit = holding.unrealizedPnL >= 0;
+  const todayPnLAmount = (holding.currentValue * (holding.todayPnLPercent || 0)) / 100;
+
+  // 52-Week Range calculation
+  const weekLow = holding.weekLow52 || holding.avgPrice * 0.8;
+  const weekHigh = holding.weekHigh52 || holding.avgPrice * 1.3;
+  const rangeSpan = Math.max(weekHigh - weekLow, 1);
+  const currentPosPct = Math.min(Math.max(((holding.ltp - weekLow) / rangeSpan) * 100, 0), 100);
+
+  return (
+    <div className="fixed inset-0 z-[300] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-[var(--backdrop-overlay)] backdrop-blur-xs transition-opacity duration-300 animate-fade-in"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Slide-Over Drawer Container (Desktop) & Bottom Sheet (Mobile) */}
+      <div 
+        className="relative z-10 w-full sm:max-w-md bg-[var(--surface)] border-l border-[var(--border-subtle)] shadow-2xl flex flex-col h-full overflow-hidden transition-transform duration-300 animate-slide-in"
+      >
+        {/* Drawer Header */}
+        <div className="px-5 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--surface-secondary)]/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-extrabold text-sm flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
+              {holding.ticker.slice(0, 2)}
+            </div>
+            <div>
+              <h2 id="drawer-title" className="text-base font-extrabold text-[var(--text-primary)] tracking-tight">
+                {holding.ticker}
+              </h2>
+              <p className="text-xs text-[var(--text-tertiary)] truncate max-w-[220px]">
+                {holding.stockName}
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-[var(--radius-small)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] transition-colors ios-press"
+            aria-label="Close holding details drawer"
+          >
+            <X size={18} aria-hidden="true" />
+          </button>
+        </div>
+
+        {/* Drawer Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+          {/* Real-time Price & Day Movement */}
+          <div className="apple-card p-4">
+            <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-1">
+              Live Market Price (LTP)
+            </span>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-2xl font-black text-[var(--text-primary)] tnum">
+                ₹{formatNumber(holding.ltp)}
+              </span>
+              <div className={`inline-flex items-center gap-1 text-xs font-extrabold px-2.5 py-1 rounded-[var(--radius-pill)] tnum ${
+                isUp ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'
+              }`}>
+                {isUp ? <TrendingUp size={12} aria-hidden="true" /> : <TrendingDown size={12} aria-hidden="true" />}
+                <span>
+                  {isUp ? '+' : ''}{formatINR(todayPnLAmount)} ({formatPercent(holding.todayPnLPercent)})
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 52-Week High / Low Gauge */}
+          <div className="apple-card p-4 space-y-2">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
+                52-Week Range
+              </span>
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tnum">
+                Current: ₹{formatNumber(holding.ltp)}
+              </span>
+            </div>
+            
+            {/* Range Bar */}
+            <div className="relative h-2 bg-[var(--surface-secondary)] rounded-[var(--radius-pill)] overflow-hidden border border-[var(--border-subtle)]">
+              <div
+                className="absolute top-0 bottom-0 bg-[var(--accent-blue)] rounded-[var(--radius-pill)] opacity-80"
+                style={{ width: `${currentPosPct}%` }}
+              />
+            </div>
+
+            <div className="flex justify-between items-center text-[11px] text-[var(--text-tertiary)] font-bold tnum">
+              <span>L: ₹{formatNumber(weekLow)}</span>
+              <span>H: ₹{formatNumber(weekHigh)}</span>
+            </div>
+          </div>
+
+          {/* Holdings Valuation Grid */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
+              Your Position
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="apple-card p-3">
+                <span className="text-[10.5px] text-[var(--text-tertiary)] font-semibold block">Quantity</span>
+                <span className="text-sm font-extrabold text-[var(--text-primary)] tnum mt-0.5 block">
+                  {renderVal(holding.qty, (v) => formatNumber(v, 0))} shares
+                </span>
+              </div>
+
+              <div className="apple-card p-3">
+                <span className="text-[10.5px] text-[var(--text-tertiary)] font-semibold block">Average Price</span>
+                <span className="text-sm font-extrabold text-[var(--text-primary)] tnum mt-0.5 block">
+                  {isBalancesHidden ? '••••••' : `₹${formatNumber(holding.avgPrice)}`}
+                </span>
+              </div>
+
+              <div className="apple-card p-3">
+                <span className="text-[10.5px] text-[var(--text-tertiary)] font-semibold block">Total Invested</span>
+                <span className="text-sm font-extrabold text-[var(--text-primary)] tnum mt-0.5 block">
+                  {renderVal(holding.amountInvested)}
+                </span>
+              </div>
+
+              <div className="apple-card p-3">
+                <span className="text-[10.5px] text-[var(--text-tertiary)] font-semibold block">Current Value</span>
+                <span className="text-sm font-extrabold text-[var(--text-primary)] tnum mt-0.5 block">
+                  {renderVal(holding.currentValue)}
+                </span>
+              </div>
+            </div>
+
+            {/* Overall P&L Banner */}
+            <div className={`apple-card p-3.5 flex items-center justify-between border ${
+              isOverallProfit ? 'border-[var(--positive)]/20 bg-[var(--positive-soft)]' : 'border-[var(--negative)]/20 bg-[var(--negative-soft)]'
+            }`}>
+              <div>
+                <span className="text-[10.5px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">
+                  Total Profit &amp; Loss
+                </span>
+                <span className={`text-base font-black tnum ${isOverallProfit ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                  {isBalancesHidden ? '••••••' : <>{isOverallProfit ? '+' : ''}{formatINR(holding.unrealizedPnL)}</>}
+                </span>
+              </div>
+
+              <span className={`text-xs font-black px-2 py-1 rounded-[var(--radius-small)] tnum ${
+                isOverallProfit ? 'bg-[var(--positive)] text-white' : 'bg-[var(--negative)] text-white'
+              }`}>
+                {isBalancesHidden ? '••••••' : formatPercent(holding.pnlPercent)}
+              </span>
+            </div>
+          </div>
+
+          {/* Yahoo Finance External Link */}
+          {holding.yahooSymbol && (
+            <a
+              href={`https://finance.yahoo.com/quote/${encodeURIComponent(holding.yahooSymbol)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-3 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors ios-press"
+            >
+              <span className="flex items-center gap-2">
+                <ExternalLink size={14} aria-hidden="true" />
+                View Detailed Chart on Yahoo Finance
+              </span>
+              <span className="text-[10px] text-[var(--text-tertiary)] font-bold">{holding.yahooSymbol}</span>
+            </a>
+          )}
+        </div>
+
+        {/* Drawer Action Footer */}
+        <div className="p-4 border-t border-[var(--border-subtle)] bg-[var(--surface)] flex items-center gap-2.5">
+          {onShare && (
+            <button
+              onClick={() => onShare(holding)}
+              className="flex-1 py-2.5 px-3 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-xs font-bold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors ios-press"
+            >
+              <Share2 size={14} aria-hidden="true" />
+              Share
+            </button>
+          )}
+
+          {onEdit && (
+            <button
+              onClick={() => {
+                onClose();
+                onEdit(holding);
+              }}
+              className="flex-1 py-2.5 px-3 rounded-[var(--radius-medium)] bg-[var(--accent-blue)] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-opacity hover:opacity-90 ios-press"
+            >
+              <Pencil size={14} aria-hidden="true" />
+              Edit Holding
+            </button>
+          )}
+
+          {onDelete && (
+            <button
+              onClick={() => {
+                onClose();
+                onDelete(holding);
+              }}
+              className="py-2.5 px-3 rounded-[var(--radius-medium)] border border-[var(--negative)]/30 text-[var(--negative)] hover:bg-[var(--negative-soft)] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ios-press"
+              title="Delete holding"
+              aria-label="Delete holding"
+            >
+              <Trash2 size={14} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default React.memo(HoldingDetailDrawer);

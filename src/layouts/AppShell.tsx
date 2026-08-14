@@ -294,7 +294,12 @@ export default function AppShell() {
           importFunc={() => import('../components/NetWorthTimelineChart')}
           placeholderHeight={370}
           fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
-          props={{ history: netWorthHistory, currentNetWorth: summaryData.totalCurrentValue }}
+          props={{ 
+            history: netWorthHistory, 
+            currentNetWorth: summaryData.totalCurrentValue,
+            currentStocks: breakdown.stocks,
+            currentFD: breakdown.fd,
+          }}
         />
       </SectionErrorBoundary>
     );
@@ -309,11 +314,30 @@ export default function AppShell() {
       </SectionErrorBoundary>
     );
 
+    const handleSliceClick = (label: string) => {
+      const map: Record<string, AssetTab> = {
+        'Stocks': 'stocks',
+        'FD': 'fd',
+        'RD': 'rd',
+        'SIP': 'sip',
+        'Gold': 'gold',
+        'Realty': 'real_estate',
+      };
+      const target = map[label];
+      if (target) {
+        setActiveAsset(target);
+      }
+    };
+
     const pieChart = (
       <SectionErrorBoundary sectionName="Asset Class Pie Chart">
         <LazyViewport placeholderHeight={370}>
           <Suspense fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
-            <PieChart slices={breakdownSlices} title={`Asset Class Breakdown — ${summaryData.label}`} />
+            <PieChart 
+              slices={breakdownSlices} 
+              title={`Asset Class Breakdown — ${summaryData.label}`}
+              onSelectSlice={handleSliceClick}
+            />
           </Suspense>
         </LazyViewport>
       </SectionErrorBoundary>

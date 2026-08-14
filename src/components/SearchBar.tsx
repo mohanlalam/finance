@@ -189,51 +189,53 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
     ];
 
     return (
-      <div className="fixed inset-0 bg-slate-900/80 dark:bg-slate-950/90 z-50 flex flex-col md:hidden animate-fade-in">
-        <div className="flex-1 bg-white dark:bg-slate-900 flex flex-col overflow-hidden pb-safe pt-safe">
+      <div className="fixed inset-0 bg-[var(--backdrop-overlay)] z-50 flex flex-col md:hidden animate-fade-in">
+        <div className="flex-1 bg-[var(--surface)] flex flex-col overflow-hidden pb-safe pt-safe">
           {/* Mobile Search Header */}
-          <div className="px-4 py-3 border-b border-[var(--border-subtle)] flex items-center gap-3">
+          <div className="px-4 py-3 border-b border-[var(--border-subtle)] flex items-center gap-3 bg-[var(--surface)]">
             <button
               onClick={handleMobileClose}
               aria-label="Back to dashboard"
-              className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 ios-press transition-colors shrink-0"
+              className="w-10 h-10 flex items-center justify-center rounded-[var(--radius-medium)] text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] ios-press transition-colors shrink-0"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={20} aria-hidden="true" />
             </button>
             <div className="flex-1 relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" aria-hidden="true" />
               <input
                 ref={mobileInputRef}
                 type="text"
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setSelectedIdx(-1); }}
                 placeholder="Search holdings, policies, files..."
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-[var(--border-subtle)] rounded-lg pl-9 pr-9 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] pl-9 pr-9 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30"
               />
               {query && (
                 <button
                   onClick={() => setQuery('')}
                   aria-label="Clear query"
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] rounded-[var(--radius-pill)] hover:bg-[var(--surface-secondary)] ios-press"
                 >
-                  <X size={16} />
+                  <X size={16} aria-hidden="true" />
                 </button>
               )}
             </div>
           </div>
 
           {/* Quick-Jump Category Filters Scroll Row */}
-          <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/30 border-b border-[var(--border-subtle)] flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
+          <div className="px-4 py-2 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex gap-1.5 overflow-x-auto scrollbar-none shrink-0" role="tablist" aria-label="Filters">
             {filterTabs.map((tab) => {
               const isActive = activeFilter === tab.key;
               return (
                 <button
                   key={tab.key}
                   onClick={() => { setActiveFilter(tab.key); setSelectedIdx(-1); }}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
+                  role="tab"
+                  aria-selected={isActive}
+                  className={`px-3 py-1.5 rounded-[var(--radius-pill)] text-xs font-bold transition-all shrink-0 ios-press ${
                     isActive
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                      ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs'
+                      : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]'
                   }`}
                 >
                   {tab.label}
@@ -253,14 +255,14 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                     <button
                       key={type}
                       onClick={() => setActiveFilter(type as SearchFilter)}
-                      className="flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-[var(--border-subtle)] rounded-xl text-left transition-all active:scale-[0.97]"
+                      className="flex items-center gap-3 p-3 bg-[var(--surface)] hover:bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] text-left transition-all ios-press apple-card"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900 shadow-xs flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] shadow-xs flex items-center justify-center shrink-0">
                         {TYPE_ICONS[type]}
                       </div>
                       <div>
                         <p className="text-xs font-bold text-[var(--text-primary)]">{TYPE_LABELS[type]}</p>
-                        <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
+                        <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">
                           {allResults.filter((r) => r.type === type).length} item(s)
                         </p>
                       </div>
@@ -271,7 +273,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
             )}
 
             {filtered.length > 0 ? (
-              <div className="space-y-3 pb-8">
+              <div className="space-y-3 pb-8" role="listbox" aria-label="Search results">
                 {Array.from(grouped.entries()).map(([type, items]) => (
                   <div key={type} className="space-y-2">
                     <div className="text-xs font-extrabold text-[var(--text-tertiary)] uppercase tracking-wider flex items-center gap-1.5 pt-1">
@@ -283,13 +285,15 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                         <button
                           key={`${type}-${idx}`}
                           onClick={() => handleSelect(item)}
-                          className="w-full text-left p-3.5 bg-[var(--surface)] hover:bg-blue-50/50 dark:hover:bg-blue-950/20 border border-[var(--border-subtle)] rounded-xl flex items-center justify-between gap-3 transition-colors active:scale-[0.99]"
+                          role="option"
+                          aria-selected={false}
+                          className="w-full text-left p-3.5 bg-[var(--surface)] hover:bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] flex items-center justify-between gap-3 transition-colors ios-press apple-card"
                         >
                           <div className="min-w-0">
                             <p className="text-xs font-extrabold text-[var(--text-primary)] truncate">{item.label}</p>
                             <p className="text-[11px] font-medium text-[var(--text-tertiary)] truncate mt-0.5">{item.sublabel}</p>
                           </div>
-                          <span className="text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md shrink-0">
+                          <span className="text-[10px] font-bold uppercase bg-[var(--surface-secondary)] text-[var(--text-secondary)] px-2 py-0.5 rounded-[var(--radius-small)] border border-[var(--border-subtle)] shrink-0">
                             {item.portfolioLabel}
                           </span>
                         </button>
@@ -302,8 +306,8 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
               // Empty search state
               (query.trim() || activeFilter !== 'all') && (
                 <div className="py-16 text-center">
-                  <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto mb-3">
-                    <Search size={20} />
+                  <div className="w-12 h-12 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] flex items-center justify-center mx-auto mb-3 border border-[var(--border-subtle)]">
+                    <Search size={20} aria-hidden="true" />
                   </div>
                   <h4 className="text-xs font-bold text-[var(--text-secondary)]">No results found</h4>
                   <p className="text-[11px] text-[var(--text-tertiary)] max-w-[220px] mx-auto mt-1">
@@ -324,7 +328,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
   return (
     <div ref={containerRef} className="relative w-full">
       <div className="relative">
-        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" aria-hidden="true" />
         <input
           ref={inputRef}
           type="text"
@@ -344,15 +348,15 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
           }}
           onKeyDown={handleKeyDown}
           placeholder='Search stocks, FDs, insurance, documents...  Press "/" to focus'
-          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[14px] pl-9 pr-9 py-2.5 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
+          className="w-full bg-[var(--surface)] dark:bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] pl-9 pr-9 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-all apple-card"
         />
         {query && (
           <button
             onClick={() => { setQuery(''); setOpen(false); }}
             aria-label="Clear search"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors p-0.5 rounded-[var(--radius-pill)] hover:bg-[var(--surface-secondary)] ios-press"
           >
-            <X size={14} />
+            <X size={14} aria-hidden="true" />
           </button>
         )}
       </div>
@@ -361,11 +365,11 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
         <div
           id="search-results"
           role="listbox"
-          className="absolute top-full mt-1 left-0 right-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto"
+          className="absolute top-full mt-1 left-0 right-0 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] shadow-xl z-50 max-h-80 overflow-y-auto apple-card"
         >
           {Array.from(grouped.entries()).map(([type, items]) => (
             <div key={type}>
-              <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5 sticky top-0">
+              <div className="px-3 py-1.5 bg-[var(--surface-secondary)] text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest flex items-center gap-1.5 sticky top-0 border-b border-[var(--border-subtle)]">
                 {TYPE_ICONS[type]}
                 {TYPE_LABELS[type]}
               </div>
@@ -378,15 +382,15 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                     role="option"
                     aria-selected={flatIdx === selectedIdx}
                     onClick={() => handleSelect(r)}
-                    className={`w-full text-left px-3 py-2 flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors ${
-                      flatIdx === selectedIdx ? 'bg-blue-50 dark:bg-blue-900/30' : ''
+                    className={`w-full text-left px-3 py-2 flex items-center gap-2 hover:bg-[var(--surface-secondary)] transition-colors ${
+                      flatIdx === selectedIdx ? 'bg-[var(--accent-blue-soft)] font-semibold' : ''
                     }`}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{r.label}</p>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">{r.sublabel}</p>
+                      <p className="text-xs font-semibold text-[var(--text-primary)] truncate">{r.label}</p>
+                      <p className="text-xs text-[var(--text-tertiary)] truncate">{r.sublabel}</p>
                     </div>
-                    <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-md font-medium shrink-0">
+                    <span className="text-[10px] bg-[var(--surface-secondary)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded-[var(--radius-small)] border border-[var(--border-subtle)] font-medium shrink-0">
                       {r.portfolioLabel}
                     </span>
                   </button>
@@ -398,8 +402,8 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
       )}
 
       {open && query.trim() && filtered.length === 0 && !isMobile && (
-        <div className="absolute top-full mt-1 left-0 right-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 p-4 text-center">
-          <p className="text-xs text-slate-400 dark:text-slate-500">No results for "{query}"</p>
+        <div className="absolute top-full mt-1 left-0 right-0 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] shadow-xl z-50 p-4 text-center apple-card animate-fade-in">
+          <p className="text-xs text-[var(--text-tertiary)]">No results for "{query}"</p>
         </div>
       )}
     </div>

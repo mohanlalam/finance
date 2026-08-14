@@ -4,7 +4,7 @@ import { useToast, ToastMessage } from '../contexts/ToastContext';
 // Inline SVGs for Toast Icons to prevent bundle-size bloat
 function IconCheck() {
   return (
-    <svg className="w-5 h-5 text-emerald-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <svg className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   );
@@ -12,7 +12,7 @@ function IconCheck() {
 
 function IconError() {
   return (
-    <svg className="w-5 h-5 text-red-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <svg className="w-5 h-5 text-red-500 dark:text-red-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
     </svg>
   );
@@ -20,7 +20,7 @@ function IconError() {
 
 function IconWarning() {
   return (
-    <svg className="w-5 h-5 text-amber-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <svg className="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
     </svg>
   );
@@ -28,7 +28,7 @@ function IconWarning() {
 
 function IconInfo() {
   return (
-    <svg className="w-5 h-5 text-blue-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <svg className="w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   );
@@ -36,7 +36,7 @@ function IconInfo() {
 
 function IconClose() {
   return (
-    <svg className="w-4 h-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <svg className="w-4 h-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
   );
@@ -55,7 +55,7 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
     setIsExiting(true);
     setTimeout(() => {
       removeToast(toast.id);
-    }, 250);
+    }, 200);
   }, [removeToast, toast.id]);
 
   useEffect(() => {
@@ -75,23 +75,23 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
     switch (toast.type) {
       case 'success':
         return {
-          bg: 'bg-[#0f172a]/90 text-white border-emerald-500/40 dark:bg-[#1e293b]/95',
+          bg: 'bg-[var(--surface)] text-[var(--text-primary)] border-[var(--border-subtle)] shadow-[0_8px_24px_rgba(22,163,74,0.15)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]',
           icon: <IconCheck />,
         };
       case 'error':
         return {
-          bg: 'bg-[#0f172a]/90 text-white border-red-500/40 dark:bg-[#1e293b]/95',
+          bg: 'bg-[var(--surface)] text-[var(--text-primary)] border-[var(--border-subtle)] shadow-[0_8px_24px_rgba(220,38,38,0.15)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]',
           icon: <IconError />,
         };
       case 'warning':
         return {
-          bg: 'bg-[#0f172a]/90 text-white border-amber-500/40 dark:bg-[#1e293b]/95',
+          bg: 'bg-[var(--surface)] text-[var(--text-primary)] border-[var(--border-subtle)] shadow-[0_8px_24px_rgba(217,119,6,0.15)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]',
           icon: <IconWarning />,
         };
       case 'info':
       default:
         return {
-          bg: 'bg-[#0f172a]/90 text-white border-blue-500/40 dark:bg-[#1e293b]/95',
+          bg: 'bg-[var(--surface)] text-[var(--text-primary)] border-[var(--border-subtle)] shadow-[0_8px_24px_rgba(37,99,235,0.15)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]',
           icon: <IconInfo />,
         };
     }
@@ -101,16 +101,16 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
 
   return (
     <div
-      role="alert"
+      role="status"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-700/50 shadow-xl pointer-events-auto max-w-sm w-auto transition-all duration-200 ${styles.bg} ${isExiting ? 'animate-slide-out scale-95 opacity-0' : 'animate-slide-in scale-100 opacity-100'}`}
+      className={`flex items-center gap-3 px-4 py-3 rounded-[var(--radius-medium)] border pointer-events-auto max-w-sm w-auto transition-all duration-200 apple-card ${styles.bg} ${isExiting ? 'animate-slide-out scale-95 opacity-0' : 'animate-slide-in scale-100 opacity-100'}`}
     >
       {styles.icon}
-      <p className="text-xs font-semibold tracking-tight text-white flex-1">{toast.message}</p>
+      <p className="text-xs font-semibold tracking-tight text-[var(--text-primary)] flex-1">{toast.message}</p>
       <button
         onClick={handleClose}
-        className="text-white/60 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
+        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors p-1 rounded-[var(--radius-pill)] hover:bg-[var(--surface-secondary)] ios-press"
         aria-label="Close notification"
       >
         <IconClose />

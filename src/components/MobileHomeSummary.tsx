@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight } from './icons/AppIcons';
+import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { Alert } from '../hooks/useAlerts';
@@ -69,8 +69,8 @@ function MobileHomeSummary({
   }, [netWorthHistory]);
 
   const sparklineColor = useMemo(() => {
-    if (sparklineData.length < 2) return '#16a34a';
-    return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? '#16a34a' : '#dc2626';
+    if (sparklineData.length < 2) return 'var(--positive)';
+    return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? 'var(--positive)' : 'var(--negative)';
   }, [sparklineData]);
 
   // Precalculate family member summaries to avoid un-memoized estimateTodayPnL in render loop
@@ -139,8 +139,8 @@ function MobileHomeSummary({
       value: breakdown.stocks,
       subtext: `${stockCount} Tickers`,
       returnBadge: breakdown.stocks > 0 ? `${getPercent(breakdown.stocks).toFixed(0)}% Share` : null,
-      icon: <TrendingUp size={16} />,
-      accentColor: 'bg-blue-600',
+      icon: <TrendingUp size={16} aria-hidden="true" />,
+      accentColor: 'bg-[var(--accent-blue)]',
     },
     {
       id: 'fd' as const,
@@ -148,8 +148,8 @@ function MobileHomeSummary({
       value: breakdown.fd,
       subtext: `${fdCount} FDs`,
       returnBadge: breakdown.fd > 0 ? `${getPercent(breakdown.fd).toFixed(0)}% Share` : null,
-      icon: <Landmark size={16} />,
-      accentColor: 'bg-indigo-600',
+      icon: <Landmark size={16} aria-hidden="true" />,
+      accentColor: 'bg-[var(--warning)]',
     },
     {
       id: 'rd' as const,
@@ -157,8 +157,8 @@ function MobileHomeSummary({
       value: breakdown.rd,
       subtext: `${rdCount} Accounts`,
       returnBadge: breakdown.rd > 0 ? `${getPercent(breakdown.rd).toFixed(0)}% Share` : null,
-      icon: <Landmark size={16} />,
-      accentColor: 'bg-pink-600',
+      icon: <Clock size={16} aria-hidden="true" />,
+      accentColor: 'bg-indigo-500 dark:bg-indigo-400',
     },
     {
       id: 'sip' as const,
@@ -166,8 +166,8 @@ function MobileHomeSummary({
       value: breakdown.sip,
       subtext: `${sipCount} Active SIPs`,
       returnBadge: breakdown.sip > 0 ? `${getPercent(breakdown.sip).toFixed(0)}% Share` : null,
-      icon: <TrendingUp size={16} />,
-      accentColor: 'bg-sky-600',
+      icon: <TrendingUp size={16} aria-hidden="true" />,
+      accentColor: 'bg-emerald-500 dark:bg-emerald-400',
     },
     {
       id: 'gold' as const,
@@ -175,8 +175,8 @@ function MobileHomeSummary({
       value: breakdown.gold,
       subtext: `${goldCount} Items`,
       returnBadge: breakdown.gold > 0 ? `${getPercent(breakdown.gold).toFixed(0)}% Share` : null,
-      icon: <Coins size={16} />,
-      accentColor: 'bg-amber-600',
+      icon: <Coins size={16} aria-hidden="true" />,
+      accentColor: 'bg-yellow-500 dark:bg-yellow-400',
     },
     {
       id: 'real_estate' as const,
@@ -184,8 +184,8 @@ function MobileHomeSummary({
       value: breakdown.realEstate,
       subtext: `${propertyCount} Properties`,
       returnBadge: breakdown.realEstate > 0 ? `${getPercent(breakdown.realEstate).toFixed(0)}% Share` : null,
-      icon: <Building2 size={16} />,
-      accentColor: 'bg-emerald-600',
+      icon: <Building2 size={16} aria-hidden="true" />,
+      accentColor: 'bg-purple-500 dark:bg-purple-400',
     },
     {
       id: 'insurance' as const,
@@ -193,8 +193,8 @@ function MobileHomeSummary({
       value: breakdown.insuranceCover,
       subtext: `${insuranceCount} Policies`,
       returnBadge: null,
-      icon: <Shield size={16} />,
-      accentColor: 'bg-rose-600',
+      icon: <Shield size={16} aria-hidden="true" />,
+      accentColor: 'bg-[var(--negative)]',
     },
     {
       id: 'documents' as const,
@@ -202,8 +202,8 @@ function MobileHomeSummary({
       value: null,
       subtext: `${docCount} Documents`,
       returnBadge: null,
-      icon: <FolderOpen size={16} />,
-      accentColor: 'bg-slate-600',
+      icon: <FolderOpen size={16} aria-hidden="true" />,
+      accentColor: 'bg-[var(--text-tertiary)]',
     },
   ];
 
@@ -211,7 +211,7 @@ function MobileHomeSummary({
     <div className="space-y-3.5 md:hidden">
 
       {/* ── Flat Hero Summary Card ── */}
-      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-xs space-y-4">
+      <div className="rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-xs space-y-4 apple-card">
         {/* Header row */}
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
@@ -220,9 +220,9 @@ function MobileHomeSummary({
           <button
             onClick={onRefresh}
             disabled={isLoadingPrices}
-            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold transition-all ios-press border border-slate-200/60 dark:border-slate-700/60"
+            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] text-xs font-bold transition-all ios-press border border-[var(--border-subtle)]"
           >
-            <RefreshCw size={13} className={isLoadingPrices ? 'animate-spin text-blue-600' : ''} />
+            <RefreshCw size={13} className={isLoadingPrices ? 'animate-spin text-[var(--accent-blue)]' : ''} aria-hidden="true" />
             <span>{isLoadingPrices ? 'Syncing' : 'Sync'}</span>
           </button>
         </div>
@@ -230,7 +230,7 @@ function MobileHomeSummary({
         {/* Hero Valuation */}
         <div className="flex items-end justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <h2 className="text-[26px] font-extrabold text-[var(--text-primary)] tnum leading-tight tracking-tight truncate">
+            <h2 className="text-2xl font-extrabold text-[var(--text-primary)] tnum leading-tight tracking-tight truncate">
               {renderValue(summaryData.totalCurrentValue)}
             </h2>
             <p className="text-xs text-[var(--text-tertiary)] mt-0.5 truncate">
@@ -247,17 +247,17 @@ function MobileHomeSummary({
         {/* Net Worth Big Number */}
         <div className="flex items-baseline justify-between gap-2 pt-0.5">
           <div className="flex items-baseline gap-1 text-2xl font-extrabold text-[var(--text-primary)] tnum tracking-tight">
-            <span className="text-slate-400 dark:text-slate-500 font-medium text-lg">₹</span>
+            <span className="text-[var(--text-tertiary)] font-medium text-lg">₹</span>
             {isBalancesHidden ? (
               <span aria-label="Amount hidden">••••••</span>
             ) : (
               <AnimatedNumber value={summaryData.totalCurrentValue} formatter={formatINR} />
             )}
           </div>
-          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold tnum shrink-0 ${
-            isTodayGain ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400'
+          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-[var(--radius-pill)] text-xs font-bold tnum shrink-0 ${
+            isTodayGain ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'
           }`}>
-            {isTodayGain ? <TrendingUp size={13} className="shrink-0" /> : <TrendingDown size={13} className="shrink-0" />}
+            {isTodayGain ? <TrendingUp size={13} className="shrink-0" aria-hidden="true" /> : <TrendingDown size={13} className="shrink-0" aria-hidden="true" />}
             <span>{isTodayGain ? '+' : ''}{formatPercent(todayPnLPercent, 1)} Today</span>
           </div>
         </div>
@@ -265,30 +265,30 @@ function MobileHomeSummary({
         {/* Metric Grid: Invested | Total Return | Today's Return */}
         <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[var(--border-subtle)]">
           {/* Invested */}
-          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40 min-w-0">
-            <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Invested</span>
+          <div className="p-2.5 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] min-w-0">
+            <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Invested</span>
             <span className="text-xs font-extrabold text-[var(--text-primary)] tnum block truncate">
               {isBalancesHidden ? <span aria-label="Amount hidden">••••••</span> : formatINR(summaryData.totalInvested)}
             </span>
           </div>
 
           {/* Total Return */}
-          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40 min-w-0">
-            <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Total Return</span>
-            <div className={`flex items-center gap-1 text-xs font-extrabold tnum min-w-0 ${isTotalGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-              {isTotalGain ? <TrendingUp size={13} className="shrink-0" /> : <TrendingDown size={13} className="shrink-0" />}
+          <div className="p-2.5 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] min-w-0">
+            <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Total Return</span>
+            <div className={`flex items-center gap-1 text-xs font-extrabold tnum min-w-0 ${isTotalGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+              {isTotalGain ? <TrendingUp size={13} className="shrink-0" aria-hidden="true" /> : <TrendingDown size={13} className="shrink-0" aria-hidden="true" />}
               <span className="truncate">{isBalancesHidden ? <span aria-label="Amount hidden">••••••</span> : <>{isTotalGain ? '+' : ''}{formatINR(summaryData.totalPnL)}</>}</span>
-              <span className="text-[10px] font-extrabold ml-auto shrink-0">({formatPercent(summaryData.totalPnLPercent, 1)})</span>
+              <span className="text-xs font-extrabold ml-auto shrink-0">({formatPercent(summaryData.totalPnLPercent, 1)})</span>
             </div>
           </div>
 
           {/* Today's Return */}
-          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40 min-w-0">
-            <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Today's Return</span>
-            <div className={`flex items-center gap-1 text-xs font-extrabold tnum min-w-0 ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-              {isTodayGain ? <TrendingUp size={13} className="shrink-0" /> : <TrendingDown size={13} className="shrink-0" />}
+          <div className="p-2.5 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] min-w-0">
+            <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Today's Return</span>
+            <div className={`flex items-center gap-1 text-xs font-extrabold tnum min-w-0 ${isTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+              {isTodayGain ? <TrendingUp size={13} className="shrink-0" aria-hidden="true" /> : <TrendingDown size={13} className="shrink-0" aria-hidden="true" />}
               <span className="truncate">{isBalancesHidden ? <span aria-label="Amount hidden">••••••</span> : <>{isTodayGain ? '+' : ''}{formatINR(todayPnL)}</>}</span>
-              <span className="text-[10px] font-extrabold ml-auto shrink-0">({formatPercent(todayPnLPercent, 1)})</span>
+              <span className="text-xs font-extrabold ml-auto shrink-0">({formatPercent(todayPnLPercent, 1)})</span>
             </div>
           </div>
         </div>
@@ -296,7 +296,7 @@ function MobileHomeSummary({
 
       {/* ── Portfolio Member Breakdown ── */}
       {activePortfolio === null && memberSummaries.length > 0 && (
-        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] p-3.5 shadow-xs space-y-2.5">
+        <div className="rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] p-3.5 shadow-xs space-y-2.5 apple-card">
           <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block">
             Family Breakdown
           </span>
@@ -306,26 +306,26 @@ function MobileHomeSummary({
               const isGain = p.totalPnL >= 0;
               const isTodayGain = pTodayPnL >= 0;
               return (
-                <div key={p.id} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/40 space-y-2">
+                <div key={p.id} className="p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-bold text-[var(--text-primary)] truncate">{p.label} Portfolio</span>
                     <span className="text-xs font-extrabold text-[var(--text-primary)] tnum shrink-0">{renderValue(p.totalCurrentValue)}</span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-1 pt-2 border-t border-slate-200/60 dark:border-slate-700/40 text-xs">
+                  <div className="grid grid-cols-3 gap-1 pt-2 border-t border-[var(--border-subtle)] text-xs">
                     <div className="min-w-0">
-                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block truncate">Invested</span>
+                      <span className="text-xs text-[var(--text-tertiary)] uppercase font-semibold block truncate">Invested</span>
                       <span className="font-extrabold tnum text-[var(--text-secondary)] block truncate">{renderValue(p.totalInvested)}</span>
                     </div>
                     <div className="min-w-0">
-                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block truncate">Total Return</span>
-                      <span className={`font-extrabold tnum block truncate ${isGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                      <span className="text-xs text-[var(--text-tertiary)] uppercase font-semibold block truncate">Total Return</span>
+                      <span className={`font-extrabold tnum block truncate ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                         {isBalancesHidden ? '••••••' : formatPercent(p.totalPnLPercent, 1)}
                       </span>
                     </div>
                     <div className="text-right min-w-0">
-                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block truncate">Today's P&amp;L</span>
-                      <span className={`font-extrabold tnum block truncate ${isTodayGain ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                      <span className="text-xs text-[var(--text-tertiary)] uppercase font-semibold block truncate">Today's P&amp;L</span>
+                      <span className={`font-extrabold tnum block truncate ${isTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                         {isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}{formatINR(pTodayPnL)}</>}
                       </span>
                     </div>
@@ -341,18 +341,18 @@ function MobileHomeSummary({
       {alertCount > 0 && (
         <button
           onClick={onOpenAlerts}
-          className="w-full flex items-center justify-between p-3.5 rounded-xl text-left border bg-rose-50/90 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/40 active:scale-[0.98] transition-all"
+          className="w-full flex items-center justify-between p-3.5 rounded-[var(--radius-large)] text-left border bg-[var(--negative-soft)] border-[var(--border-subtle)] text-[var(--negative)] ios-press transition-all apple-card"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-rose-600 text-white flex items-center justify-center shrink-0">
-              <AlertCircle size={16} />
+            <div className="w-8 h-8 rounded-[var(--radius-medium)] bg-[var(--negative)] text-[var(--surface)] flex items-center justify-center shrink-0">
+              <AlertCircle size={16} aria-hidden="true" />
             </div>
             <div>
-              <h4 className="text-xs font-extrabold text-rose-900 dark:text-rose-200">{alertCount} Portfolio Alerts</h4>
-              <p className="text-[11px] text-rose-700 dark:text-rose-300">Tap to review warnings</p>
+              <h4 className="text-xs font-extrabold text-[var(--text-primary)]">{alertCount} Portfolio Alerts</h4>
+              <p className="text-xs font-semibold text-[var(--text-secondary)] opacity-85">Tap to review warnings</p>
             </div>
           </div>
-          <ChevronRight size={16} className="text-rose-500 shrink-0" />
+          <ChevronRight size={16} className="text-[var(--negative)] shrink-0" aria-hidden="true" />
         </button>
       )}
 
@@ -367,14 +367,14 @@ function MobileHomeSummary({
           <button
             key={item.id}
             onClick={() => onNavigateAsset(item.id)}
-            className="w-full flex items-center justify-between p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-left active:scale-[0.98]"
+            className="w-full flex items-center justify-between p-3.5 rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] transition-all text-left ios-press apple-card"
           >
             <div className="flex items-center gap-3 min-w-0">
               {/* Left Accent Indicator Pill */}
               <div className={`w-1.5 h-7 rounded-full ${item.accentColor} shrink-0`} />
               <div className="min-w-0">
                 <h4 className="text-xs font-bold text-[var(--text-primary)] truncate">{item.label}</h4>
-                <p className="text-[11px] font-medium text-[var(--text-tertiary)] mt-0.5 truncate">{item.subtext}</p>
+                <p className="text-xs font-medium text-[var(--text-tertiary)] mt-0.5 truncate">{item.subtext}</p>
               </div>
             </div>
 
@@ -386,12 +386,12 @@ function MobileHomeSummary({
                   <p className="text-xs font-extrabold text-[var(--text-tertiary)]">--</p>
                 )}
                 {item.returnBadge && (
-                  <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 block mt-0.5">
+                  <span className="text-xs font-bold text-[var(--accent-blue)] block mt-0.5">
                     {item.returnBadge}
                   </span>
                 )}
               </div>
-              <ChevronRight size={14} className="text-slate-400 dark:text-slate-600" />
+              <ChevronRight size={14} className="text-[var(--text-tertiary)]" aria-hidden="true" />
             </div>
           </button>
         ))}

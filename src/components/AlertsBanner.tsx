@@ -8,47 +8,47 @@ interface AlertsBannerProps {
 
 const TYPE_CONFIG: Record<AlertType, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
   '52w_high': {
-    icon: <TrendingUp size={14} />,
-    color: 'text-blue-700 dark:text-blue-400',
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
-    border: 'border-blue-200 dark:border-blue-800',
+    icon: <TrendingUp size={14} aria-hidden="true" />,
+    color: 'text-[var(--accent-blue)]',
+    bg: 'bg-[var(--accent-blue-soft)]',
+    border: 'border-[var(--border-subtle)]',
   },
   '52w_low': {
-    icon: <TrendingDown size={14} />,
-    color: 'text-amber-700 dark:text-amber-400',
-    bg: 'bg-amber-50 dark:bg-amber-900/20',
-    border: 'border-amber-200 dark:border-amber-800',
+    icon: <TrendingDown size={14} aria-hidden="true" />,
+    color: 'text-[var(--warning)]',
+    bg: 'bg-[var(--warning-soft)]',
+    border: 'border-[var(--border-subtle)]',
   },
   fd_maturity: {
-    icon: <Landmark size={14} />,
-    color: 'text-indigo-700 dark:text-indigo-400',
-    bg: 'bg-indigo-50 dark:bg-indigo-900/20',
-    border: 'border-indigo-200 dark:border-indigo-800',
+    icon: <Landmark size={14} aria-hidden="true" />,
+    color: 'text-[var(--text-primary)]',
+    bg: 'bg-[var(--surface-secondary)]',
+    border: 'border-[var(--border-subtle)]',
   },
   insurance_renewal: {
-    icon: <Shield size={14} />,
-    color: 'text-rose-700 dark:text-rose-400',
-    bg: 'bg-rose-50 dark:bg-rose-900/20',
-    border: 'border-rose-200 dark:border-rose-800',
+    icon: <Shield size={14} aria-hidden="true" />,
+    color: 'text-[var(--negative)]',
+    bg: 'bg-[var(--negative-soft)]',
+    border: 'border-[var(--border-subtle)]',
   },
   portfolio_swing: {
-    icon: <Activity size={14} />,
-    color: 'text-violet-700 dark:text-violet-400',
-    bg: 'bg-violet-50 dark:bg-violet-900/20',
-    border: 'border-violet-200 dark:border-violet-800',
+    icon: <Activity size={14} aria-hidden="true" />,
+    color: 'text-[var(--accent-blue)]',
+    bg: 'bg-[var(--accent-blue-soft)]',
+    border: 'border-[var(--border-subtle)]',
   },
   document_expiry: {
-    icon: <FileText size={14} />,
-    color: 'text-slate-700 dark:text-slate-300',
-    bg: 'bg-slate-50 dark:bg-slate-800/40',
-    border: 'border-slate-200 dark:border-slate-700',
+    icon: <FileText size={14} aria-hidden="true" />,
+    color: 'text-[var(--text-secondary)]',
+    bg: 'bg-[var(--surface-secondary)]',
+    border: 'border-[var(--border-subtle)]',
   },
 };
 
 const SEVERITY_BADGE: Record<string, string> = {
-  critical: 'bg-red-500 text-white',
-  warning: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
-  info: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+  critical: 'bg-[var(--negative)] text-[var(--surface)]',
+  warning: 'bg-[var(--warning-soft)] text-[var(--warning)]',
+  info: 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]',
 };
 
 function AlertsBanner({ alerts }: AlertsBannerProps) {
@@ -67,18 +67,18 @@ function AlertsBanner({ alerts }: AlertsBannerProps) {
   if (visible.length === 0) return null;
 
   return (
-    <div role="alert" aria-live="polite" className="space-y-2">
+    <div aria-live="polite" className="space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <AlertTriangle size={14} className="text-amber-500" />
-          <span className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+          <AlertTriangle size={14} className="text-[var(--warning)]" aria-hidden="true" />
+          <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
             {visible.length} Alert{visible.length > 1 ? 's' : ''}
           </span>
         </div>
         {visible.length > 1 && (
           <button
             onClick={dismissAll}
-            className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className="text-xs font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press px-2 py-1 rounded-[var(--radius-small)]"
           >
             Dismiss all
           </button>
@@ -91,31 +91,31 @@ function AlertsBanner({ alerts }: AlertsBannerProps) {
           return (
             <div
               key={alert.id}
-              className={`flex items-center gap-2 rounded-[10px] border px-3 py-2 text-xs ${config.bg} ${config.border} ${config.color} transition-all duration-200 animate-in fade-in`}
+              className={`flex items-center gap-2 rounded-[var(--radius-medium)] border px-3 py-2 text-xs ${config.bg} ${config.border} ${config.color} transition-all duration-200 apple-card`}
             >
               <span className="shrink-0">{config.icon}</span>
               <div className="min-w-0">
                 <span className="font-bold">{alert.title}</span>
-                <span className="text-[10px] opacity-70 ml-1.5">{alert.message}</span>
+                <span className="text-[11px] opacity-75 ml-1.5">{alert.message}</span>
                 {alert.portfolioLabel && (
-                  <span className="text-[10px] opacity-50 ml-1">· {alert.portfolioLabel}</span>
+                  <span className="text-[11px] opacity-60 ml-1">· {alert.portfolioLabel}</span>
                 )}
               </div>
-              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${SEVERITY_BADGE[alert.severity]}`}>
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-[var(--radius-pill)] shrink-0 ${SEVERITY_BADGE[alert.severity]}`}>
                 {alert.severity}
               </span>
               <button
                 onClick={() => dismiss(alert.id)}
                 aria-label={`Dismiss alert: ${alert.title}`}
-                className="shrink-0 opacity-50 hover:opacity-100 transition-opacity"
+                className="shrink-0 opacity-60 hover:opacity-100 transition-opacity p-0.5 rounded-[var(--radius-pill)] hover:bg-[var(--surface-secondary)] ios-press"
               >
-                <X size={12} />
+                <X size={12} aria-hidden="true" />
               </button>
             </div>
           );
         })}
         {visible.length > 8 && (
-          <span className="flex items-center text-[10px] font-semibold text-slate-400 dark:text-slate-500 px-2">
+          <span className="flex items-center text-xs font-semibold text-[var(--text-tertiary)] px-2">
             +{visible.length - 8} more
           </span>
         )}

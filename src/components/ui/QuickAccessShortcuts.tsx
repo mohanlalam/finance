@@ -3,11 +3,11 @@ import {
   TrendingUp, Landmark, Clock, Coins, Home, 
   Shield, FolderOpen, Calculator, TrendingDown 
 } from '../icons/AppIcons';
-export type AssetTab = string;
+export type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'what_if' | 'tax';
 
 interface QuickAccessShortcutsProps {
   activeAsset: AssetTab;
-  onSelectAsset: (asset: any) => void;
+  onSelectAsset: (asset: AssetTab) => void;
 }
 
 const SHORTCUTS: {
@@ -16,19 +16,18 @@ const SHORTCUTS: {
   shortLabel: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   color: string;
-  bgLight: string;
-  bgDark: string;
+  bg: string;
 }[] = [
-  { id: 'stocks', label: 'Stocks & ETFs', shortLabel: 'Stocks', icon: TrendingUp, color: 'text-blue-600 dark:text-blue-400', bgLight: 'bg-blue-500/10', bgDark: 'dark:bg-blue-400/10' },
-  { id: 'fd', label: 'Fixed Deposits', shortLabel: 'FDs', icon: Landmark, color: 'text-amber-600 dark:text-amber-400', bgLight: 'bg-amber-500/10', bgDark: 'dark:bg-amber-400/10' },
-  { id: 'rd', label: 'Recurring Deposits', shortLabel: 'RDs', icon: Clock, color: 'text-indigo-600 dark:text-indigo-400', bgLight: 'bg-indigo-500/10', bgDark: 'dark:bg-indigo-400/10' },
-  { id: 'sip', label: 'SIP Mutual Funds', shortLabel: 'SIPs', icon: TrendingUp, color: 'text-emerald-600 dark:text-emerald-400', bgLight: 'bg-emerald-500/10', bgDark: 'dark:bg-emerald-400/10' },
-  { id: 'gold', label: 'Gold Holdings', shortLabel: 'Gold', icon: Coins, color: 'text-yellow-600 dark:text-yellow-400', bgLight: 'bg-yellow-500/10', bgDark: 'dark:bg-yellow-400/10' },
-  { id: 'real_estate', label: 'Real Estate', shortLabel: 'Real Estate', icon: Home, color: 'text-purple-600 dark:text-purple-400', bgLight: 'bg-purple-500/10', bgDark: 'dark:bg-purple-400/10' },
-  { id: 'insurance', label: 'Insurance Cover', shortLabel: 'Insurance', icon: Shield, color: 'text-rose-600 dark:text-rose-400', bgLight: 'bg-rose-500/10', bgDark: 'dark:bg-rose-400/10' },
-  { id: 'documents', label: 'Document Vault', shortLabel: 'Vault', icon: FolderOpen, color: 'text-cyan-600 dark:text-cyan-400', bgLight: 'bg-cyan-500/10', bgDark: 'dark:bg-cyan-400/10' },
-  { id: 'what_if', label: 'What-If Calculator', shortLabel: 'Calculator', icon: Calculator, color: 'text-sky-600 dark:text-sky-400', bgLight: 'bg-sky-500/10', bgDark: 'dark:bg-sky-400/10' },
-  { id: 'tax', label: 'Tax Harvesting', shortLabel: 'Tax', icon: TrendingDown, color: 'text-teal-600 dark:text-teal-400', bgLight: 'bg-teal-500/10', bgDark: 'dark:bg-teal-400/10' },
+  { id: 'stocks', label: 'Stocks & ETFs', shortLabel: 'Stocks', icon: TrendingUp, color: 'text-[var(--accent-blue)]', bg: 'bg-[var(--accent-blue-soft)]' },
+  { id: 'fd', label: 'Fixed Deposits', shortLabel: 'FDs', icon: Landmark, color: 'text-[var(--warning)]', bg: 'bg-[var(--warning-soft)]' },
+  { id: 'rd', label: 'Recurring Deposits', shortLabel: 'RDs', icon: Clock, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-500/10 dark:bg-indigo-400/10' },
+  { id: 'sip', label: 'SIP Mutual Funds', shortLabel: 'SIPs', icon: TrendingUp, color: 'text-[var(--positive)]', bg: 'bg-[var(--positive-soft)]' },
+  { id: 'gold', label: 'Gold Holdings', shortLabel: 'Gold', icon: Coins, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-500/10 dark:bg-yellow-400/10' },
+  { id: 'real_estate', label: 'Real Estate', shortLabel: 'Real Estate', icon: Home, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-500/10 dark:bg-purple-400/10' },
+  { id: 'insurance', label: 'Insurance Cover', shortLabel: 'Insurance', icon: Shield, color: 'text-[var(--negative)]', bg: 'bg-[var(--negative-soft)]' },
+  { id: 'documents', label: 'Document Vault', shortLabel: 'Vault', icon: FolderOpen, color: 'text-[var(--text-secondary)]', bg: 'bg-[var(--surface-secondary)]' },
+  { id: 'what_if', label: 'What-If Calculator', shortLabel: 'Calculator', icon: Calculator, color: 'text-sky-600 dark:text-sky-400', bg: 'bg-sky-500/10 dark:bg-sky-400/10' },
+  { id: 'tax', label: 'Tax Harvesting', shortLabel: 'Tax', icon: TrendingDown, color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-500/10 dark:bg-teal-400/10' },
 ];
 
 export function QuickAccessShortcuts({ activeAsset, onSelectAsset }: QuickAccessShortcutsProps) {
@@ -39,7 +38,7 @@ export function QuickAccessShortcuts({ activeAsset, onSelectAsset }: QuickAccess
           <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">
             Quick Asset Navigation
           </h3>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
             Click any icon to jump directly to its detailed registry &amp; holdings
           </p>
         </div>
@@ -53,18 +52,18 @@ export function QuickAccessShortcuts({ activeAsset, onSelectAsset }: QuickAccess
             <button
               key={item.id}
               onClick={() => onSelectAsset(item.id)}
-              className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all duration-200 ios-press group text-center ${
+              className={`flex flex-col items-center justify-center p-2.5 rounded-[var(--radius-medium)] border transition-all duration-200 ios-press group text-center ${
                 isActive
-                  ? 'border-blue-500 bg-blue-50/90 dark:bg-blue-950/60 ring-2 ring-blue-500/20 shadow-xs'
-                  : 'border-slate-200/60 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs'
+                  ? 'border-[var(--accent-blue)] bg-[var(--accent-blue-soft)] ring-2 ring-[var(--accent-blue)]/20 shadow-xs animate-fade-in'
+                  : 'border-[var(--border-subtle)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] hover:border-[var(--text-tertiary)] hover:shadow-xs'
               }`}
               title={item.label}
               aria-label={`Jump to ${item.label}`}
             >
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110 mb-1.5 ${item.bgLight} ${item.bgDark} ${item.color}`}>
-                <Icon size={18} />
+              <div className={`w-9 h-9 rounded-[var(--radius-small)] flex items-center justify-center transition-transform group-hover:scale-110 mb-1.5 ${item.bg} ${item.color}`}>
+                <Icon size={18} aria-hidden="true" />
               </div>
-              <span className={`text-[11px] font-bold tracking-tight line-clamp-1 ${isActive ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'}`}>
+              <span className={`text-[11px] font-bold tracking-tight line-clamp-1 ${isActive ? 'text-[var(--accent-blue)] font-extrabold' : 'text-[var(--text-primary)]'}`}>
                 {item.shortLabel}
               </span>
             </button>

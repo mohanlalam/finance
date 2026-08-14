@@ -50,8 +50,8 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
     <>
       {/* Backdrop for More Drawer */}
       <div
-        className={`fixed inset-0 z-30 transition-opacity duration-200 md:hidden ${
-          isDrawerOpen ? 'bg-black/40 opacity-100' : 'opacity-0 pointer-events-none'
+        className={`fixed inset-0 z-30 transition-opacity duration-200 md:hidden bg-[var(--backdrop-overlay)] ${
+          isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsDrawerOpen(false)}
         aria-hidden="true"
@@ -62,7 +62,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
         role="dialog"
         aria-modal="true"
         aria-label="More Asset Classes"
-        className={`fixed bottom-14 left-0 right-0 z-30 bg-white dark:bg-slate-900 border-t border-[var(--border-subtle)] rounded-t-xl shadow-xl p-4 md:hidden pb-safe transition-transform duration-200 ease-out ${
+        className={`fixed bottom-14 left-0 right-0 z-30 bg-[var(--surface)] border-t border-[var(--border-subtle)] rounded-t-[var(--radius-large)] shadow-xl p-4 md:hidden pb-safe transition-transform duration-250 ease-out apple-card ${
           isDrawerOpen ? 'translate-y-0' : 'translate-y-full pointer-events-none'
         }`}
       >
@@ -73,10 +73,10 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
           </h4>
           <button
             onClick={() => setIsDrawerOpen(false)}
-            className="w-11 h-11 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg transition-colors outline-none"
+            className="w-10 h-10 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] rounded-[var(--radius-medium)] hover:bg-[var(--surface-secondary)] transition-colors outline-none ios-press"
             aria-label="Close menu"
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
@@ -91,21 +91,21 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                   onChangeAsset(tab.id);
                   setIsDrawerOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 min-h-[44px] py-2 rounded-lg ios-press transition-colors text-left outline-none ${
+                className={`w-full flex items-center justify-between px-3 min-h-[44px] py-2 rounded-[var(--radius-medium)] ios-press transition-colors text-left outline-none ${
                   isActive
-                    ? 'bg-blue-50/80 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold'
-                    : 'text-[var(--text-primary)] hover:bg-slate-100/70 dark:hover:bg-slate-800/60'
+                    ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-bold'
+                    : 'text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-7 h-7 rounded-md flex items-center justify-center ${
-                    isActive ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                  <div className={`w-7 h-7 rounded-[var(--radius-small)] flex items-center justify-center ${
+                    isActive ? 'bg-[var(--accent-blue)] text-[var(--surface)]' : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)]'
                   }`}>
                     {tab.icon}
                   </div>
                   <span className="text-xs font-bold">{tab.label}</span>
                 </div>
-                <ChevronRight size={15} className="text-slate-400" />
+                <ChevronRight size={15} className="text-[var(--text-tertiary)]" aria-hidden="true" />
               </button>
             );
           })}
@@ -130,19 +130,22 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                 aria-current={isActive ? 'page' : undefined}
                 className={`relative flex-1 flex flex-col items-center justify-center h-full min-h-[44px] ios-press transition-colors outline-none ${
                   isActive
-                    ? 'text-blue-600 dark:text-blue-400 font-bold border-t-2 border-blue-600 dark:border-blue-500'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 border-t-2 border-transparent'
+                    ? 'text-[var(--accent-blue)] font-bold border-t-2 border-[var(--accent-blue)]'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-t-2 border-transparent'
                 }`}
               >
                 <div className="relative">
                   {tab.icon}
                   {tab.id === 'home' && alertCount > 0 && (
-                    <span className="absolute -top-1 -right-1.5 min-w-[14px] h-[14px] rounded-full bg-rose-600 text-white text-[9px] font-bold flex items-center justify-center px-0.5 leading-none">
+                    <span 
+                      className="absolute -top-1 -right-1.5 min-w-[14px] h-[14px] rounded-[var(--radius-pill)] bg-[var(--negative)] text-[var(--surface)] text-[9px] font-bold flex items-center justify-center px-0.5 leading-none"
+                      aria-label={`${alertCount} notifications`}
+                    >
                       {alertCount > 9 ? '9+' : alertCount}
                     </span>
                   )}
                 </div>
-                <span className="text-[11px] font-bold tracking-wide mt-0.5">
+                <span className="text-xs font-bold tracking-wide mt-0.5">
                   {tab.label}
                 </span>
               </button>
@@ -155,12 +158,12 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
             aria-expanded={isDrawerOpen}
             className={`relative flex-1 flex flex-col items-center justify-center h-full min-h-[44px] ios-press transition-colors outline-none ${
               isMoreActive || isDrawerOpen
-                ? 'text-blue-600 dark:text-blue-400 font-bold border-t-2 border-blue-600 dark:border-blue-500'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 border-t-2 border-transparent'
+                ? 'text-[var(--accent-blue)] font-bold border-t-2 border-[var(--accent-blue)]'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-t-2 border-transparent'
             }`}
           >
-            <ChevronUp size={18} />
-            <span className="text-[11px] font-bold tracking-wide mt-0.5">
+            <ChevronUp size={18} className={`transition-transform duration-250 ${isDrawerOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+            <span className="text-xs font-bold tracking-wide mt-0.5">
               More
             </span>
           </button>

@@ -14,12 +14,12 @@ export function getBreakdownSlices(breakdown: {
   realEstate: number;
 }): ChartSlice[] {
   return [
-    { label: 'Stocks', fullName: 'Stocks & ETFs', value: breakdown.stocks, color: '#3b82f6' },
-    { label: 'FD', fullName: 'Fixed Deposits', value: breakdown.fd, color: '#6366f1' },
-    { label: 'RD', fullName: 'Recurring Deposits', value: breakdown.rd, color: '#ec4899' },
-    { label: 'SIP', fullName: 'SIP Mutual Funds', value: breakdown.sip, color: '#0ea5e9' },
-    { label: 'Gold', fullName: 'Gold Holdings', value: breakdown.gold, color: '#f59e0b' },
-    { label: 'Realty', fullName: 'Real Estate', value: breakdown.realEstate, color: '#10b981' },
+    { label: 'Stocks', fullName: 'Stocks & ETFs', value: breakdown.stocks, color: '#387ed1' },
+    { label: 'FD', fullName: 'Fixed Deposits', value: breakdown.fd, color: '#f59e0b' },
+    { label: 'SIP', fullName: 'SIP Mutual Funds', value: breakdown.sip, color: '#00b074' },
+    { label: 'Gold', fullName: 'Gold Holdings', value: breakdown.gold, color: '#eab308' },
+    { label: 'RD', fullName: 'Recurring Deposits', value: breakdown.rd, color: '#f43f5e' },
+    { label: 'Realty', fullName: 'Real Estate', value: breakdown.realEstate, color: '#8b5cf6' },
   ];
 }
 export default getBreakdownSlices;

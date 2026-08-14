@@ -27,6 +27,7 @@ interface ModalProps {
 export default function Modal({
   isOpen,
   onClose,
+  title,
   children,
   maxWidth = 'max-w-md',
   ariaLabel = 'Dialog',
@@ -57,7 +58,7 @@ export default function Modal({
       const timer = setTimeout(() => {
         setIsRendered(false);
         setIsExiting(false);
-      }, 250);
+      }, 200);
       return () => clearTimeout(timer);
     }
   }, [isOpen, isRendered]);
@@ -232,14 +233,11 @@ export default function Modal({
     <div
       ref={overlayRef}
       className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-6 overflow-y-auto ${isExiting ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop'}`}
-      role="dialog"
-      aria-modal="true"
-      aria-label={ariaLabel}
       onKeyDown={handleKeyDown}
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-[#000000]/60 dark:bg-[#000000]/80 backdrop-blur-md"
+        className="fixed inset-0 bg-[var(--backdrop-overlay)] backdrop-blur-md"
         onPointerDown={handleBackdropPointerDown}
         onClick={handleBackdropClick}
         aria-hidden="true"
@@ -249,13 +247,32 @@ export default function Modal({
       <div
         ref={contentRef}
         tabIndex={-1}
-        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-t-2xl sm:rounded-2xl rounded-b-none sm:rounded-b-2xl shadow-2xl w-full ${maxWidth} max-h-[85vh] sm:max-h-[80vh] mb-0 sm:my-auto pb-safe sm:pb-0 flex flex-col min-h-0 overflow-hidden outline-none ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title || ariaLabel}
+        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-large)] rounded-b-none sm:rounded-b-[var(--radius-large)] shadow-2xl w-full ${maxWidth} max-h-[85vh] sm:max-h-[80vh] mb-0 sm:my-auto pb-safe sm:pb-0 flex flex-col min-h-0 overflow-hidden outline-none ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
         style={hasDragOffset ? { transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)` } : undefined}
         onPointerDown={handlePointerDown}
       >
-        <div className="w-full flex justify-center pt-2 pb-0.5 sm:hidden cursor-grab active:cursor-grabbing modal-drag-handle" data-drag-handle="true" aria-hidden="true">
-          <div className="w-10 h-1 rounded-full bg-[#e5e5ea] dark:bg-[#38383a] opacity-80" />
+        <div className="w-full flex justify-center pt-2 pb-0.5 sm:hidden cursor-grab active:cursor-grabbing modal-drag-handle animate-fade-in" data-drag-handle="true" aria-hidden="true">
+          <div className="w-10 h-1 rounded-[var(--radius-pill)] bg-[var(--surface-tertiary)] opacity-85" />
         </div>
+        {title && (
+          <header className="px-5 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--surface)]">
+            <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">{title}</h3>
+            {!preventClose && (
+              <button 
+                onClick={onClose} 
+                className="p-1.5 rounded-[var(--radius-pill)] text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] ios-press"
+                aria-label="Close dialog"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </header>
+        )}
         {children}
       </div>
     </div>

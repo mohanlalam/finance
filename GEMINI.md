@@ -67,6 +67,8 @@ This document provides a high-level overview of the folder structure, data flow,
 ### 4. UI Dashboard & Widget Performance
 * **Single-Pass Responsive Table**:
   * **[PortfolioTable.tsx](src/components/PortfolioTable.tsx)**: Replaced parallel dual-layout DOM rendering (`md:hidden` vs `hidden md:block`) with single-pass conditional view rendering (`isMobile ? ... : ...`) using `useIsMobile()`, cutting mounted DOM node count by 50%.
+* **Quick Access Navigation Bar**:
+  * **[QuickAccessShortcuts.tsx](src/components/ui/QuickAccessShortcuts.tsx)**: Inline navigation panel containing quick jump shortcuts for all 10 asset categories and calculators, directly linked to offset-controlled anchor scrolling.
 * **Visual Dashboard Grid**:
   * **Standardized 2x2 Widget Cards Grid**: Core dashboard cards (`NetWorthTimelineChart.tsx`, `PortfolioAssistant.tsx`, `PieChart.tsx`, `BarChart.tsx`) use a uniform height (`370px`) inside a `grid-cols-1 lg:grid-cols-2 gap-5` grid.
   * **[NetWorthTimelineChart.tsx](src/components/NetWorthTimelineChart.tsx)**: Responsive SVG area chart with date-range filtering (1M, 3M, 6M, 1Y, ALL). Uses `requestAnimationFrame` inside `ResizeObserver` for instant, jank-free chart reflow.
@@ -92,10 +94,15 @@ The application implements a series of high-performance strategies to guarantee 
 
 ---
 
-## 🎨 Clean Data-First Design System Architecture
+## 🎨 Clean Data-First Design System Architecture (Zerodha Kite & Apple Hybrid)
 
 * **Flat Neutral Canvas**: Standardized `#f8fafc` light / `#090d16` dark background system.
+* **Zerodha Kite Signature Palette**: Non-glaring, professional financial tokens: Kite Blue (`#387ed1`), clean profit green (`#00b074`), and clean loss red (`#df514c`).
+* **High-Density Holdings Ribbon**: Horizontal overview strip (*Holdings count, Total inv., Current val., Overall P&L, Day's P&L*) above asset tables.
+* **Hover-Activated Action Dock**: Row action buttons quietly hidden at rest and revealed on desktop hover (`group-hover:opacity-100`) for zero visual distraction.
 * **Single Card Surface (`.apple-card`)**: Solid surface (`var(--surface)`), 1px crisp border (`var(--border-subtle)`), and quiet static shadows (`var(--shadow-card)`).
+* **Tactile Spring Feedback**: Unified `.ios-press` tactile transition scaling triggers (`active:scale(0.97)`).
+* **Color System Extension**: Soft-tint variable tokens (`--positive-soft`, `--negative-soft`, `--warning-soft`, `--accent-blue-soft`, and `--backdrop-overlay` backdrop filters) mapped dynamically for dark mode.
 * **Tightened Border Radius Tokens**: `--radius-small` (`6px`), `--radius-medium` (`10px`), `--radius-large` (`12px`).
 * **Compact Financial Typography**: `.text-financial` with tabular font features (`.tnum`).
 
