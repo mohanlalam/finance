@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, X } from './icons/AppIcons';
+import { Plus, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, X, Sparkles } from './icons/AppIcons';
 
 type FabPosition = 'right' | 'center' | 'left';
 

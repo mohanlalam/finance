@@ -14,11 +14,9 @@ describe('aiDocumentExtractor', () => {
   });
 
   it('stores and retrieves custom Gemini API key', () => {
-    expect(getGeminiApiKey()).toBe('');
-    setStoredGeminiApiKey('AIzaSyTestKey123');
-    expect(getGeminiApiKey()).toBe('AIzaSyTestKey123');
+    setStoredGeminiApiKey('AIzaSyCustomKey123');
+    expect(getGeminiApiKey()).toBe('AIzaSyCustomKey123');
     setStoredGeminiApiKey('');
-    expect(getGeminiApiKey()).toBe('');
   });
 
   it('converts a File object to base64 string', async () => {

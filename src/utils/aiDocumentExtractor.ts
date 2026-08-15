@@ -55,13 +55,14 @@ export interface ExtractedAssetResult {
 const GEMINI_STORAGE_KEY = 'finance_gemini_api_key';
 
 export function getGeminiApiKey(): string {
-  const envKey = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined) ?? '';
-  if (envKey.trim()) return envKey.trim();
   try {
-    return localStorage.getItem(GEMINI_STORAGE_KEY)?.trim() || '';
+    const stored = localStorage.getItem(GEMINI_STORAGE_KEY)?.trim();
+    if (stored) return stored;
   } catch {
-    return '';
+    // Ignore storage quota or security errors
   }
+  const envKey = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined) ?? '';
+  return envKey.trim();
 }
 
 export function setStoredGeminiApiKey(key: string): void {
@@ -127,7 +128,7 @@ export async function extractAssetFromDocument(
   file: File,
   apiKeyOverride?: string
 ): Promise<ExtractedAssetResult> {
-  const apiKey = apiKeyOverride?.trim() || getGeminiApiKey();
+  const apiKey = apiKeyOverride !== undefined ? apiKeyOverride.trim() : getGeminiApiKey();
 
   if (!apiKey) {
     throw new Error(
