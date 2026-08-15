@@ -34,7 +34,7 @@ function formatLocalDate(year: number, month: number, day: number): string {
 }
 
 /**
- * Calculates CAGR (Compound Annual Growth Rate)
+ * Calculates CAGR (Compound Annual Growth Rate) safely with period bounds
  */
 export function calculateCAGR(invested: number, current: number, years: number): number {
   const inv = Number(invested);
@@ -44,7 +44,13 @@ export function calculateCAGR(invested: number, current: number, years: number):
   if (isNaN(inv) || isNaN(curr) || isNaN(y) || inv <= 0 || y <= 0 || curr < 0) return 0;
   if (curr === 0) return -1.0; // 100% loss
 
-  return Math.pow(curr / inv, 1 / y) - 1;
+  // For ultra-short holding periods (< 7 days), use simple percentage return to prevent 1/y exponent blowup
+  if (y < 7 / 365.25) {
+    return (curr - inv) / inv;
+  }
+
+  const result = Math.pow(curr / inv, 1 / y) - 1;
+  return isFinite(result) ? result : 0;
 }
 
 /**
@@ -233,12 +239,12 @@ function getXirrWorker(): Worker | null {
   if (!_xirrWorker) {
     try {
       _xirrWorker = new Worker(new URL('../workers/xirr.worker.ts', import.meta.url), { type: 'module' });
-      _xirrWorker.onmessage = (e) => {
-        const { taskId, rate, error, cashflows } = e.data || {};
-        if (taskId && _pendingXirrCallbacks.has(taskId)) {
-          const cb = _pendingXirrCallbacks.get(taskId)!;
+      _xirrWorker.onmessage = (e: MessageEvent<{ taskId: string; rate?: number; error?: string }>) => {
+        const { taskId, rate, error } = e.data;
+        const cb = _pendingXirrCallbacks.get(taskId);
+        if (cb) {
           _pendingXirrCallbacks.delete(taskId);
-          cb(error ? calculateXIRR(cashflows || []) : (rate ?? 0));
+          cb(error ? 0 : (rate ?? 0));
         }
       };
       _xirrWorker.onerror = () => {
@@ -337,13 +343,18 @@ export function getPortfolioCashFlows(portfolio: Portfolio, target: CashFlow[] =
         const startMonth = start.getMonth();
         const startDay = start.getDate();
 
+        const nowYear = now.getFullYear();
+        const nowMonth = now.getMonth();
+        const nowDay = now.getDate();
+
         for (let m = 0; m < elapsed; m++) {
           const targetYear = startYear + Math.floor((startMonth + m) / 12);
           const targetMonth = (startMonth + m) % 12;
           const lastDay = getDaysInMonthNum(targetYear, targetMonth);
           const clampedDay = Math.min(startDay, lastDay);
-          const flowDate = new Date(targetYear, targetMonth, clampedDay);
-          if (flowDate.getTime() <= nowMs) {
+          const isBeforeNow = targetYear < nowYear || 
+            (targetYear === nowYear && (targetMonth < nowMonth || (targetMonth === nowMonth && clampedDay <= nowDay)));
+          if (isBeforeNow) {
             addFlow(formatLocalDate(targetYear, targetMonth, clampedDay), monthlyAmount);
           }
         }
@@ -354,6 +365,10 @@ export function getPortfolioCashFlows(portfolio: Portfolio, target: CashFlow[] =
   if (portfolio.sipAccounts) {
     const sips = portfolio.sipAccounts;
     const sipsLen = sips.length;
+    const nowYear = now.getFullYear();
+    const nowMonth = now.getMonth();
+    const nowDay = now.getDate();
+
     for (let i = 0; i < sipsLen; i++) {
       const sip = sips[i];
       const startTime = parseLocalDate(sip.start_date);
@@ -373,8 +388,9 @@ export function getPortfolioCashFlows(portfolio: Portfolio, target: CashFlow[] =
         const targetMonth = (startMonth + m) % 12;
         const lastDay = getDaysInMonthNum(targetYear, targetMonth);
         const clampedDay = Math.min(startDay, lastDay);
-        const flowDate = new Date(targetYear, targetMonth, clampedDay);
-        if (flowDate.getTime() <= nowMs) {
+        const isBeforeNow = targetYear < nowYear || 
+          (targetYear === nowYear && (targetMonth < nowMonth || (targetMonth === nowMonth && clampedDay <= nowDay)));
+        if (isBeforeNow) {
           addFlow(formatLocalDate(targetYear, targetMonth, clampedDay), monthlyAmount);
         }
       }

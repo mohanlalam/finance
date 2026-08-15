@@ -26,11 +26,17 @@ export async function uploadDocumentFile(
     throw new Error('Supabase configuration missing');
   }
 
+  // Clean path segments
+  const cleanPath = storagePath
+    .split('/')
+    .map((seg) => seg.trim().replace(/[^\w.-]/g, '_'))
+    .join('/');
+
   // 1. Primary: Upload via Edge Function (admin service role bypasses Storage RLS)
   try {
     const formData = new FormData();
     formData.append('bucket', bucket);
-    formData.append('path', storagePath);
+    formData.append('path', cleanPath);
     formData.append('file', file);
 
     const headers = await getApiAuthHeaders();
@@ -44,14 +50,17 @@ export async function uploadDocumentFile(
     });
 
     if (res.ok) {
-      return { path: storagePath };
+      return { path: cleanPath };
     }
+    const errText = await res.text().catch(() => '');
+    console.warn('[storage] Edge function upload returned non-OK status:', res.status, errText);
   } catch (edgeErr) {
     console.warn('[storage] Edge function upload attempt failed, falling back to direct REST', edgeErr);
   }
 
   // 2. Fallback: Direct Storage REST API
-  const url = `${SUPABASE_URL}/storage/v1/object/${encodeURIComponent(bucket)}/${storagePath}`;
+  const encodedPath = cleanPath.split('/').map(encodeURIComponent).join('/');
+  const url = `${SUPABASE_URL}/storage/v1/object/${encodeURIComponent(bucket)}/${encodedPath}`;
   const directHeaders = await getApiAuthHeaders(file.type || 'application/octet-stream');
   directHeaders['x-upsert'] = 'true';
 
@@ -72,7 +81,7 @@ export async function uploadDocumentFile(
     throw new Error(errorMsg);
   }
 
-  return { path: storagePath };
+  return { path: cleanPath };
 }
 
 /**

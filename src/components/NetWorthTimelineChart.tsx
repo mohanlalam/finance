@@ -270,17 +270,28 @@ export default function NetWorthTimelineChart({
   const stocksPaths = useMemo(() => buildSmoothPath(pointsMap.stocksPoints, baseY, seriesMode === 'stocks'), [pointsMap.stocksPoints, seriesMode, baseY]);
   const fdPaths = useMemo(() => buildSmoothPath(pointsMap.fdPoints, baseY, seriesMode === 'fd'), [pointsMap.fdPoints, seriesMode, baseY]);
 
+  const svgRectRef = useRef<DOMRect | null>(null);
+
+  const updateSvgRect = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    svgRectRef.current = e.currentTarget.getBoundingClientRect();
+  }, []);
+
   const handlePointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
     if (!pointsMap.totalPoints.length) return;
-    const svgRect = e.currentTarget.getBoundingClientRect();
+    if (!svgRectRef.current) {
+      svgRectRef.current = e.currentTarget.getBoundingClientRect();
+    }
+    const svgRect = svgRectRef.current;
     const clientX = e.clientX - svgRect.left;
     const scaleX = width / (svgRect.width || 1);
     const svgX = clientX * scaleX;
 
     let closestIdx = 0;
     let minDist = Infinity;
-    for (let i = 0; i < pointsMap.totalPoints.length; i++) {
-      const dist = Math.abs(pointsMap.totalPoints[i].x - svgX);
+    const pts = pointsMap.totalPoints;
+    const len = pts.length;
+    for (let i = 0; i < len; i++) {
+      const dist = Math.abs(pts[i].x - svgX);
       if (dist < minDist) {
         minDist = dist;
         closestIdx = i;
@@ -480,9 +491,10 @@ export default function NetWorthTimelineChart({
 
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          onPointerDown={handlePointerMove}
+          onPointerEnter={updateSvgRect}
+          onPointerDown={(e) => { updateSvgRect(e); handlePointerMove(e); }}
           onPointerMove={handlePointerMove}
-          onPointerLeave={() => setHoveredIdx(null)}
+          onPointerLeave={() => { setHoveredIdx(null); svgRectRef.current = null; }}
           className={`w-full h-full touch-none select-none ${history.length < 2 ? 'opacity-40' : ''}`}
         >
           {/* Gradients */}

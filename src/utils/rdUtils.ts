@@ -35,6 +35,19 @@ export function getElapsedMonthsStandard(startDate: Date, endDate: Date = new Da
 }
 
 /**
+ * Safely parse date strings into local date objects avoiding UTC midnight timezone shifts
+ */
+export function parseLocalDate(dateStr: string | undefined | null): Date | null {
+  if (!dateStr) return null;
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
+  if (match) {
+    return new Date(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10));
+  }
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/**
  * Returns the total amount actually invested in a Recurring Deposit safely.
  */
 export function getRDInvestedAmount(account: RDAccount, now: Date = new Date()): number {
@@ -42,14 +55,20 @@ export function getRDInvestedAmount(account: RDAccount, now: Date = new Date()):
   if (Array.isArray(account.contributions)) {
     let sum = 0;
     const len = account.contributions.length;
+    const nowMs = now.getTime();
     for (let i = 0; i < len; i++) {
-      sum += Math.max(0, Number(account.contributions[i]?.amount) || 0);
+      const c = account.contributions[i];
+      const cDate = parseLocalDate(c?.date);
+      // Only include contributions that have occurred on or before now
+      if (!cDate || cDate.getTime() <= nowMs) {
+        sum += Math.max(0, Number(c?.amount) || 0);
+      }
     }
     return sum;
   }
-  const startDate = new Date(account.start_date);
+  const startDate = parseLocalDate(account.start_date);
   const monthly = Math.max(0, Number(account.monthly_deposit) || 0);
-  if (isNaN(startDate.getTime())) return monthly;
+  if (!startDate || isNaN(startDate.getTime())) return 0;
 
   const elapsedMonths = getElapsedMonthsStandard(startDate, now);
   return elapsedMonths * monthly;
@@ -62,7 +81,8 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
   if (!account) return 0;
   const p = Math.max(0, Number(account.monthly_deposit) || 0);
   const r = Number(account.interest_rate);
-  const s = new Date(account.start_date);
+  const s = parseLocalDate(account.start_date);
+  if (!s || isNaN(s.getTime())) return 0;
   const sMs = s.getTime();
 
   if (account.status === 'matured') {
@@ -70,35 +90,36 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
     return !isNaN(matAmt) && matAmt > 0 ? matAmt : p;
   }
 
-  const matMs = account.maturity_date ? Date.parse(account.maturity_date) : NaN;
+  const matDate = parseLocalDate(account.maturity_date);
+  const matMs = matDate ? matDate.getTime() : NaN;
   const endMs = !isNaN(matMs) && matMs < upToDate.getTime() ? matMs : upToDate.getTime();
   const end = new Date(endMs);
 
-  const timeDiff = endMs - sMs;
-  const years = timeDiff / (1000 * 3600 * 24 * 365.0);
+  if (sMs > endMs) return 0; // Future RD not yet started
 
-  if (years > 0 && !isNaN(r) && r >= 0 && !isNaN(sMs) && p > 0) {
-    const totalMonths = Math.max(1, getElapsedMonthsStandard(s, end));
+  const totalMonths = getElapsedMonthsStandard(s, end);
+  if (totalMonths <= 0) return 0;
 
+  if (!isNaN(r) && r >= 0 && p > 0) {
     if (account.contributions && account.contributions.length > 0) {
       let total = 0;
       const len = account.contributions.length;
       for (let i = 0; i < len; i++) {
         const c = account.contributions[i];
         const cAmt = Math.max(0, Number(c?.amount) || 0);
-        const cTime = c?.date ? Date.parse(c.date) : NaN;
+        const cDate = parseLocalDate(c?.date);
+        const cTime = cDate ? cDate.getTime() : NaN;
         if (isNaN(cTime)) {
           total += cAmt;
           continue;
         }
         const remYears = (endMs - cTime) / (1000 * 3600 * 24 * 365.0);
+        // Only accumulate compounding value for contributions that occurred on/before endMs
         if (remYears >= 0) {
           total += compoundValue(cAmt, r, 4, remYears);
-        } else {
-          total += cAmt;
         }
       }
-      return !isNaN(total) && total > 0 ? total : p;
+      return !isNaN(total) && total > 0 ? total : 0;
     } else {
       if (r === 0) {
         return p * totalMonths;
@@ -109,10 +130,10 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
         return p * totalMonths;
       }
       const total = p * k * (Math.pow(k, totalMonths) - 1) / (k - 1);
-      return !isNaN(total) && total > 0 ? total : p;
+      return !isNaN(total) && total > 0 ? total : 0;
     }
   }
-  return p;
+  return 0;
 }
 
 /**
@@ -123,6 +144,6 @@ export function getRDMaturityValue(account: RDAccount): number {
   const matAmt = Number(account.maturity_amount);
   if (!isNaN(matAmt) && matAmt > 0) return matAmt;
   if (!account.maturity_date) return 0;
-  const matMs = Date.parse(account.maturity_date);
-  return isNaN(matMs) ? 0 : getRDEffectiveValue(account, new Date(matMs));
+  const matDate = parseLocalDate(account.maturity_date);
+  return !matDate || isNaN(matDate.getTime()) ? 0 : getRDEffectiveValue(account, matDate);
 }

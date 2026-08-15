@@ -8,6 +8,11 @@ describe('calculateCAGR', () => {
     expect(calculateCAGR(100, 121, 2)).toBeCloseTo(0.10, 4);
   });
 
+  it('returns absolute return for ultra-short holding periods (< 7 days) without blowup', () => {
+    // 100 to 105 in 1 day (1/365.25 years) -> should return 0.05 rather than Infinity
+    expect(calculateCAGR(100, 105, 1 / 365.25)).toBeCloseTo(0.05, 4);
+  });
+
   it('returns 0 for invalid values', () => {
     expect(calculateCAGR(-100, 121, 2)).toBe(0);
     expect(calculateCAGR(100, -121, 2)).toBe(0);

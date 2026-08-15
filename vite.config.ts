@@ -72,10 +72,16 @@ export default defineConfig(({ command }) => ({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom') || id.includes('@remix-run/router')) {
+            if (id.includes('react') && !id.includes('react-router') && !id.includes('react-window')) {
               return 'vendor-react';
             }
-            if (id.includes('swr') || id.includes('idb-keyval') || id.includes('react-window')) {
+            if (id.includes('react-router') || id.includes('@remix-run/router')) {
+              return 'vendor-router';
+            }
+            if (id.includes('react-window')) {
+              return 'vendor-virtualize';
+            }
+            if (id.includes('swr') || id.includes('idb-keyval')) {
               return 'vendor-utils';
             }
           }

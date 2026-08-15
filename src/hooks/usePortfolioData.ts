@@ -535,7 +535,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
     const uniqueSchemeCodes = Array.from(new Set(sipAccounts.map((s) => s.mf_scheme_code!)));
 
-    const BATCH_SIZE = 10;
+    const BATCH_SIZE = 25;
     for (let i = 0; i < uniqueSchemeCodes.length; i += BATCH_SIZE) {
       const batch = uniqueSchemeCodes.slice(i, i + BATCH_SIZE);
       await Promise.allSettled(
@@ -727,36 +727,9 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         console.warn('[portfolio] IndexedDB write error:', err);
       });
 
-      // Let SWR key handle live price / NAV fetching.
-      // Deferred to after React paints the dashboard to avoid CPU contention.
-      setPriceStatus('loading');
-      const scheduleRefresh = () => {
-        refreshPricesSWR().catch((priceErr) => {
-          console.error('[portfolio] initial SWR price fetch failed:', priceErr);
-          if (priceErr instanceof AppApiError && priceErr.code === 'auth') {
-            handleAuthExpired();
-          }
-          setPriceStatus('error');
-        });
-      };
-      
-      let idleId: number | null = null;
-      let timerId: ReturnType<typeof setTimeout> | null = null;
-
-      if ('requestIdleCallback' in window) {
-        idleId = (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(scheduleRefresh, { timeout: 2000 });
-      } else {
-        timerId = setTimeout(scheduleRefresh, 50);
-      }
-
-      return () => {
-        if (idleId !== null && 'cancelIdleCallback' in window) {
-          (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
-        }
-        if (timerId !== null) {
-          clearTimeout(timerId);
-        }
-      };
+      // SWR's live-prices key automatically handles pricing and NAV updates when portfolios are populated.
+      // SWR deduping prevents redundant network bursts.
+      return () => {};
     } catch (err) {
       console.error('[portfolio] Database parsing error:', err);
       setLoadStatus('error');

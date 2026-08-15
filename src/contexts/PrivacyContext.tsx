@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 
 interface PrivacyContextType {
   isBalancesHidden: boolean;
@@ -25,8 +25,14 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
     return isBalancesHidden ? '••••••' : valueStr;
   }, [isBalancesHidden]);
 
+  const value = useMemo(() => ({
+    isBalancesHidden,
+    toggleHideBalances,
+    formatPrivacyValue,
+  }), [isBalancesHidden, toggleHideBalances, formatPrivacyValue]);
+
   return (
-    <PrivacyContext.Provider value={{ isBalancesHidden, toggleHideBalances, formatPrivacyValue }}>
+    <PrivacyContext.Provider value={value}>
       {children}
     </PrivacyContext.Provider>
   );

@@ -80,8 +80,26 @@ export function checkAndNotifyMaturities(portfolios: Portfolio[]): number {
 
   const now = Date.now();
   const ONE_DAY_MS = 86_400_000;
-  const todayStr = new Date().toISOString().split('T')[0];
+  const nowDate = new Date();
+  const todayStr = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, '0')}-${String(nowDate.getDate()).padStart(2, '0')}`;
   let dispatchedCount = 0;
+
+  // Periodic cleanup: prune notification lock keys older than 7 days
+  try {
+    const keys = Object.keys(localStorage);
+    const sevenDaysAgoStr = new Date(Date.now() - 7 * ONE_DAY_MS).toISOString().split('T')[0];
+    keys.forEach((key) => {
+      if (key.startsWith(NOTIFICATION_LOCK_PREFIX)) {
+        const parts = key.split('_');
+        const datePart = parts[parts.length - 1];
+        if (datePart && datePart < sevenDaysAgoStr) {
+          localStorage.removeItem(key);
+        }
+      }
+    });
+  } catch {
+    // ignore
+  }
 
   portfolios.forEach((portfolio) => {
     // 1. Fixed Deposits maturing within 7 days

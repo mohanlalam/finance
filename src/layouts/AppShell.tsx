@@ -247,12 +247,13 @@ export default function AppShell() {
   const portfolio = activePortfolio;
   const todayPnL = useMemo(() => estimateTodayPnL(portfolio, portfolios), [portfolio, portfolios]);
   const todayPnLPercent = useMemo(() => {
-    const totalCurrentStocks = portfolio
-      ? portfolio.holdings.reduce((sum, h) => sum + h.currentValue, 0)
-      : portfolios.reduce((sum, p) => sum + p.holdings.reduce((s, h) => s + h.currentValue, 0), 0);
+    const totalCurrentStocks = portfolio ? (portfolio.stocksValue || 0) : breakdown.stocks;
     const prevCurrentStocks = totalCurrentStocks - todayPnL;
     return prevCurrentStocks > 0 ? (todayPnL / prevCurrentStocks) * 100 : 0;
-  }, [portfolio, portfolios, todayPnL]);
+  }, [portfolio, breakdown.stocks, todayPnL]);
+
+  const handleOpenFamilyComparison = useCallback(() => setShowFamilyComparison(true), []);
+  const handleOpenActivityLog = useCallback(() => setShowActivityLog(true), []);
 
   const effectiveAsset = activeAsset === 'home' && !isMobile ? 'stocks' : activeAsset;
 
@@ -546,8 +547,8 @@ export default function AppShell() {
         isPriceStale={isPriceStale}
         isUsingCachedData={isUsingCachedData}
         onChangePinClick={openChangePinModal}
-        onOpenFamilyComparison={() => setShowFamilyComparison(true)}
-        onOpenActivityLog={() => setShowActivityLog(true)}
+        onOpenFamilyComparison={handleOpenFamilyComparison}
+        onOpenActivityLog={handleOpenActivityLog}
       />
 
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">

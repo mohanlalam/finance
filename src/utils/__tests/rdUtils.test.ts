@@ -43,4 +43,25 @@ describe('rdUtils', () => {
   it('calculates maturity value correctly', () => {
     expect(getRDMaturityValue(mockRD)).toBe(124500);
   });
+
+  it('returns 0 effective value for future RD that has not yet started', () => {
+    const futureRD: RDAccount = {
+      ...mockRD,
+      start_date: '2028-01-01',
+      maturity_date: '2029-01-01',
+      contributions: undefined,
+    };
+    expect(getRDEffectiveValue(futureRD, new Date('2026-06-01'))).toBe(0);
+  });
+
+  it('excludes future contributions from current invested amount and effective value', () => {
+    const rdWithFuture: RDAccount = {
+      ...mockRD,
+      contributions: [
+        { date: '2026-01-01', amount: 10000 },
+        { date: '2028-01-01', amount: 50000 },
+      ],
+    };
+    expect(getRDInvestedAmount(rdWithFuture, new Date('2026-06-01'))).toBe(10000);
+  });
 });

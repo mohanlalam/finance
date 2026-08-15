@@ -1,7 +1,7 @@
 import { SIPAccount } from '../types/portfolio';
 import { fetchAMFIScheme } from './amfiClient';
 import * as idb from 'idb-keyval';
-import { getElapsedMonthsStandard } from './rdUtils';
+import { getElapsedMonthsStandard, parseLocalDate } from './rdUtils';
 
 /**
  * Returns the estimated total amount invested in the SIP.
@@ -12,8 +12,8 @@ export function getSIPInvestedAmount(account: SIPAccount, now: Date = new Date()
   const monthly = Number(account.monthly_sip);
   if (isNaN(monthly) || monthly <= 0) return 0;
 
-  const start = new Date(account.start_date);
-  if (isNaN(start.getTime())) return monthly;
+  const start = parseLocalDate(account.start_date);
+  if (!start || isNaN(start.getTime())) return 0;
 
   const elapsed = getElapsedMonthsStandard(start, now);
   return monthly * Math.max(0, elapsed);

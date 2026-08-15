@@ -14,6 +14,20 @@ export default function App() {
   useAutoLock(pinVerified ? handleLock : () => {}, 300000);
 
   useEffect(() => {
+    // Eagerly prefetch MainApp chunk while user is viewing PIN screen
+    if (!pinVerified) {
+      const prefetch = () => {
+        import('./MainApp').catch(() => {});
+      };
+      if ('requestIdleCallback' in window) {
+        (window as unknown as { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(prefetch);
+      } else {
+        setTimeout(prefetch, 200);
+      }
+    }
+  }, [pinVerified]);
+
+  useEffect(() => {
     const globalWin = window as unknown as { __lastInputSource?: string; __lastShortcutTime?: number };
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {

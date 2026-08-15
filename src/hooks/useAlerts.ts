@@ -42,7 +42,8 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
   }, [portfolios]);
 
   useEffect(() => {
-    if (baselinePnlPctRef.current === null && portfolios.length > 0) {
+    const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
+    if (baselinePnlPctRef.current === null && portfolios.length > 0 && totalInvested > 0) {
       baselinePnlPctRef.current = currentPct;
       setLastPnlPct(currentPct);
     }

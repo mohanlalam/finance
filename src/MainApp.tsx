@@ -10,6 +10,8 @@ import DashboardError from './components/DashboardError';
 import { PrivacyProvider } from './contexts/PrivacyContext';
 
 const AppShell = lazy(() => import('./layouts/AppShell'));
+// Eagerly prefetch AppShell chunk in background
+import('./layouts/AppShell').catch(() => {});
 
 interface MainAppProps {
   onAuthExpired: () => void;
@@ -50,17 +52,17 @@ export default function MainApp({ onAuthExpired }: MainAppProps) {
   );
 }
 
-
 /** Gate that shows loading/error states before rendering the dashboard */
 function LoadGate({ onUnlock }: { onUnlock: () => void }) {
-  const { loadStatus, loadError, isAuthRequired } = usePortfolioState();
+  const { loadStatus, loadError, isAuthRequired, portfolios } = usePortfolioState();
   const { load } = usePortfolioActions();
 
-  if (loadStatus === 'idle' || loadStatus === 'loading') {
+  // If we already have cached portfolios in memory/IDB, render AppShell immediately (Stale-While-Revalidate)
+  if (portfolios.length === 0 && (loadStatus === 'idle' || loadStatus === 'loading')) {
     return <DashboardLoading />;
   }
 
-  if (loadStatus === 'error') {
+  if (portfolios.length === 0 && loadStatus === 'error') {
     return (
       <DashboardError
         message={loadError}
