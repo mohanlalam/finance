@@ -817,12 +817,13 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     }
   }, [mutateAssets, handleAuthExpired]);
 
-  // document visibilitychange listener to refresh SWR hook data on focus/resume
+  // document visibilitychange listener to refresh SWR hook data on focus/resume with a 3-minute cooldown
   useEffect(() => {
+    const RESUME_COOLDOWN_MS = 180_000; // 3 minutes cooldown between resume syncs
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         const now = Date.now();
-        if (now - lastRefreshRef.current < SWR_DEDUPING_INTERVAL) return;
+        if (now - lastRefreshRef.current < RESUME_COOLDOWN_MS) return;
         lastRefreshRef.current = now;
         load().catch((err) => console.warn('[portfolio] Visibility load failed:', err));
         refreshPrices().catch((err) => console.warn('[portfolio] Visibility price refresh failed:', err));

@@ -250,12 +250,12 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title || ariaLabel}
-        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-large)] rounded-b-none sm:rounded-b-[var(--radius-large)] shadow-2xl w-full ${maxWidth} max-h-[92vh] sm:max-h-[88vh] mb-0 sm:my-auto pb-safe sm:pb-0 flex flex-col min-h-0 overflow-hidden outline-none ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
+        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[20px] sm:rounded-[var(--radius-large)] rounded-b-none sm:rounded-b-[var(--radius-large)] shadow-2xl w-full ${maxWidth} max-h-[92dvh] sm:max-h-[88vh] mb-0 sm:my-auto pb-safe sm:pb-0 flex flex-col min-h-0 overflow-hidden outline-none ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
         style={hasDragOffset ? { transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)` } : undefined}
         onPointerDown={handlePointerDown}
       >
-        <div className="w-full flex justify-center pt-2 pb-0.5 sm:hidden cursor-grab active:cursor-grabbing modal-drag-handle animate-fade-in" data-drag-handle="true" aria-hidden="true">
-          <div className="w-10 h-1 rounded-[var(--radius-pill)] bg-[var(--surface-tertiary)] opacity-85" />
+        <div className="w-full flex justify-center pt-2.5 pb-1 sm:hidden cursor-grab active:cursor-grabbing modal-drag-handle animate-fade-in" data-drag-handle="true" aria-hidden="true">
+          <div className="w-12 h-1.5 rounded-full bg-[var(--surface-tertiary)] opacity-90" />
         </div>
         {title && (
           <header className="px-5 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--surface)]">

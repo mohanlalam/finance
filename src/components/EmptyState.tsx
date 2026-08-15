@@ -51,6 +51,8 @@ interface EmptyStateProps {
   title: string;
   description: string;
   actionButton?: ReactNode;
+  actionLabel?: string;
+  onAction?: () => void;
 }
 
 export default function EmptyState({
@@ -58,6 +60,8 @@ export default function EmptyState({
   title,
   description,
   actionButton,
+  actionLabel,
+  onAction,
 }: EmptyStateProps) {
   const getIllustration = () => {
     switch (type) {
@@ -88,7 +92,16 @@ export default function EmptyState({
       </div>
       <h4 className="text-sm font-bold text-[var(--text-primary)] mb-1.5">{title}</h4>
       <p className="text-xs text-[var(--text-secondary)] max-w-sm leading-relaxed mb-6">{description}</p>
-      {actionButton}
+      {actionButton ? (
+        actionButton
+      ) : actionLabel && onAction ? (
+        <button
+          onClick={onAction}
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[var(--accent-blue)] text-[var(--surface)] font-bold text-xs rounded-[var(--radius-medium)] shadow-xs hover:opacity-90 ios-press cursor-pointer"
+        >
+          {actionLabel}
+        </button>
+      ) : null}
     </div>
   );
 }

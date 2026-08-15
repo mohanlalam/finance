@@ -7,9 +7,10 @@ interface FloatingAddMenuProps {
   onAddStock: () => void;
   onAddAsset: (type: 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
   isHidden?: boolean;
+  isScrollingDown?: boolean;
 }
 
-export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = false }: FloatingAddMenuProps) {
+export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = false, isScrollingDown = false }: FloatingAddMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState<FabPosition>(() => {
     try {
@@ -106,7 +107,7 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
       )}
 
       {/* Floating Menu Container with Safe Area Spacing */}
-      <div className={`fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] z-50 flex flex-col gap-3 pointer-events-none px-3 ${getPositionClasses()}`}>
+      <div className={`fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] z-50 flex flex-col gap-3 pointer-events-none px-3 transition-all duration-300 ease-out ${isScrollingDown && !isOpen ? 'translate-y-24 opacity-0' : 'translate-y-0 opacity-100'} ${getPositionClasses()}`}>
         {/* Categorized Quick-Add Card */}
         {isOpen && (
           <div

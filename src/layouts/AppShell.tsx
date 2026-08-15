@@ -255,6 +255,30 @@ export default function AppShell() {
   const handleOpenFamilyComparison = useCallback(() => setShowFamilyComparison(true), []);
   const handleOpenActivityLog = useCallback(() => setShowActivityLog(true), []);
 
+  const [isScrollingDown, setIsScrollingDown] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          if (currentScrollY > 120 && currentScrollY > lastScrollY.current + 15) {
+            setIsScrollingDown(true);
+          } else if (currentScrollY < lastScrollY.current - 15 || currentScrollY <= 60) {
+            setIsScrollingDown(false);
+          }
+          lastScrollY.current = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const effectiveAsset = activeAsset === 'home' && !isMobile ? 'stocks' : activeAsset;
 
   const handleSidebarTabChange = useCallback((tabId: string) => {
@@ -873,6 +897,7 @@ export default function AppShell() {
       {/* Floating Add Menu (FAB) */}
       <FloatingAddMenu
         isHidden={isAnyModalOpen}
+        isScrollingDown={isScrollingDown}
         onAddStock={openAddModal}
         onAddAsset={handleFloatingAddAsset}
       />
