@@ -565,6 +565,7 @@ export default function AppShell() {
         isPriceStale={isPriceStale}
         isUsingCachedData={isUsingCachedData}
         onChangePinClick={openChangePinModal}
+        onOpenSmartImport={openSmartImport}
       />
 
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -716,6 +717,7 @@ export default function AppShell() {
                   onSelectPortfolio={setActiveTab}
                   onOpenAddFamily={openAddFamily}
                   onOpenRename={openRenameModal}
+                  onOpenSmartImport={openSmartImport}
                 />
               </Suspense>
 
@@ -884,7 +886,12 @@ export default function AppShell() {
       </footer>
 
       {/* Mobile Bottom Navigation */}
-      <MobileBottomNav activeAsset={activeAsset} onChangeAsset={setActiveAsset} alertCount={visibleAlerts.length} />
+      <MobileBottomNav
+        activeAsset={activeAsset}
+        onChangeAsset={setActiveAsset}
+        alertCount={visibleAlerts.length}
+        onOpenSmartImport={openSmartImport}
+      />
 
       {/* Floating Add Menu (FAB) */}
       <FloatingAddMenu

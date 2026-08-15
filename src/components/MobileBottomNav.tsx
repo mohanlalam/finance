@@ -8,6 +8,7 @@ interface MobileBottomNavProps {
   activeAsset: AssetTab;
   onChangeAsset: (tab: AssetTab) => void;
   alertCount?: number;
+  onOpenSmartImport?: () => void;
 }
 
 const mainTabs: { id: AssetTab; label: string; icon: React.ReactNode }[] = [
@@ -26,7 +27,7 @@ const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.Reac
   { id: 'tax', label: 'Tax Harvesting', subtext: 'LTCG / STCG tax optimization', icon: <TrendingUp size={18} /> },
 ];
 
-function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileBottomNavProps) {
+function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSmartImport }: MobileBottomNavProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Close drawer when active asset changes
@@ -89,6 +90,30 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
             <X size={18} aria-hidden="true" />
           </button>
         </div>
+
+        {/* Quick Smart AI Import Option inside More Drawer */}
+        {onOpenSmartImport && (
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              setIsDrawerOpen(false);
+              onOpenSmartImport();
+            }}
+            className="w-full flex items-center justify-between p-3 mb-3 bg-gradient-to-r from-amber-500/15 to-amber-600/15 border border-amber-500/30 rounded-[var(--radius-medium)] text-amber-800 dark:text-amber-300 ios-press cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0">
+                <Sparkles size={16} />
+              </div>
+              <div className="text-left">
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-100">✨ Smart AI Import</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">Scan FD, Gold, or Insurance photo/PDF</p>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-amber-500 shrink-0" />
+          </button>
+        )}
 
         {/* Compact Vertical List */}
         <div className="space-y-1.5 overflow-y-auto max-h-[50vh] pr-1">

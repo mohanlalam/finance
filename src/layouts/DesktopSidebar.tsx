@@ -1,4 +1,4 @@
-import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, TrendingDown, Pencil, Plus } from '../components/icons/AppIcons';
+import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, TrendingDown, Pencil, Plus, Sparkles } from '../components/icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
 
 export interface DesktopSidebarProps {
@@ -9,6 +9,7 @@ export interface DesktopSidebarProps {
   onSelectPortfolio: (id: string) => void;
   onOpenAddFamily: () => void;
   onOpenRename: (target: { id: string; name: string; label: string }) => void;
+  onOpenSmartImport?: () => void;
 }
 
 export default function DesktopSidebar({
@@ -18,7 +19,8 @@ export default function DesktopSidebar({
   selectedPortfolioId,
   onSelectPortfolio,
   onOpenAddFamily,
-  onOpenRename
+  onOpenRename,
+  onOpenSmartImport,
 }: DesktopSidebarProps) {
   const getNavItemClass = (isActive: boolean) =>
     `flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-[var(--radius-small)] text-xs font-semibold ios-press transition-all outline-none ${
@@ -29,6 +31,20 @@ export default function DesktopSidebar({
 
   return (
     <div role="tablist" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-60 self-start sticky top-20 max-h-[calc(100vh-5.5rem)] overflow-y-auto">
+      {/* AI Smart Import Button */}
+      {onOpenSmartImport && (
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={onOpenSmartImport}
+            className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-[var(--radius-medium)] text-xs font-bold text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-sm transition-all ios-press active:scale-95 cursor-pointer"
+          >
+            <Sparkles size={15} />
+            <span>✨ Smart AI Import</span>
+          </button>
+        </div>
+      )}
+
       {/* Portfolios Section */}
       <div className="mb-5">
         <h3 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-3">

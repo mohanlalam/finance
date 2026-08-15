@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff, Users, Clock } from './icons/AppIcons';
+import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff, Sparkles } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { FetchStatus } from '../types/portfolio';
 import { Portfolio } from '../types/portfolio';
@@ -31,6 +31,7 @@ interface HeaderProps {
   isPriceStale?: boolean;
   isUsingCachedData?: boolean;
   onChangePinClick?: () => void;
+  onOpenSmartImport?: () => void;
 }
 
 const ALERTS_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
@@ -85,6 +86,7 @@ function Header({
   isPriceStale = false,
   isUsingCachedData = false,
   onChangePinClick,
+  onOpenSmartImport,
 }: HeaderProps) {
   const isGain = totalPnL >= 0;
   const isLoading = status === 'loading';
@@ -103,90 +105,92 @@ function Header({
     };
   }, []);
 
-  const visibleAlerts = alerts;
-
   return (
-    <header className="sticky top-0 z-[var(--z-sticky)] bg-[var(--surface)] border-b border-[var(--border-subtle)] text-[var(--text-primary)] transition-colors">
+    <header className="sticky top-0 z-[var(--z-header)] bg-[var(--surface-header)] backdrop-blur-md border-b border-[var(--border-subtle)] transition-colors">
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14">
-          
-          {/* Left: App Logo & Selected Context */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-[var(--radius-medium)] bg-[var(--accent-blue)] flex items-center justify-center text-white shrink-0 shadow-sm">
-              <TrendingUp size={16} />
+        <div className="flex items-center justify-between h-16">
+          {/* Logo & title */}
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-[var(--radius-medium)] bg-[var(--accent-blue)] flex items-center justify-center text-white shadow-sm ring-1 ring-[var(--border-subtle)]">
+              <TrendingUp size={18} />
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-extrabold tracking-tight text-[var(--text-primary)] truncate">
-                Family Wealth
-              </span>
-              <span className="text-label-micro font-semibold text-[var(--text-tertiary)] leading-none truncate">
-                {activePortfolioLabel || 'Portfolio Tracker'}
-              </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base font-bold text-[var(--text-primary)] tracking-tight leading-none">
+                  Portfolio Tracker
+                </h1>
+                {activePortfolioLabel && (
+                  <span className="hidden sm:inline text-label-micro font-semibold px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                    {activePortfolioLabel}
+                  </span>
+                )}
+              </div>
+              <p className="text-label-micro text-[var(--text-tertiary)] flex items-center gap-1.5 mt-0.5">
+                <span className="font-semibold">{portfolios.length} portfolios</span>
+                <span>&bull;</span>
+                <span className="flex items-center gap-1">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-[var(--positive)]' : 'bg-[var(--negative)]'}`} />
+                  {isOnline ? 'Online' : 'Offline'}
+                </span>
+                <span>&bull;</span>
+                <span>Half-yearly compounding</span>
+              </p>
             </div>
           </div>
 
-          {/* Right: Net Worth Summary & Utility Buttons */}
-          <div className="flex items-center gap-3">
-            
-            {/* Value Indicators (Desktop & Tablet) */}
-            <div className="hidden sm:flex items-center gap-2.5 text-right">
-              <div className="flex flex-col">
-                <span className="text-xs font-extrabold tnum leading-tight text-[var(--text-primary)]">
-                  {formatINR(totalCurrentValue)}
-                </span>
-                <span className="text-label-micro text-[var(--text-tertiary)] font-semibold leading-none mt-0.5">
-                  Net Worth
+          {/* Quick stats & action buttons */}
+          <div className="flex items-center gap-4">
+            {/* Net Worth & P&L pill */}
+            <div className="hidden lg:flex items-center gap-3 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3.5 py-1.5">
+              <div>
+                <span className="text-label-micro text-[var(--text-tertiary)] block font-semibold leading-none">Total Net Worth</span>
+                <span className="text-xs font-bold text-[var(--text-primary)] font-mono">
+                  {isBalancesHidden ? '••••••' : formatINR(totalCurrentValue)}
                 </span>
               </div>
-              <Badge variant={isGain ? 'positive' : 'negative'} className="text-label-micro font-bold px-2 py-0.5">
-                {formatPercent(totalPnLPercent, 1)}
-              </Badge>
+              <div className="h-6 w-px bg-[var(--border-subtle)]" />
+              <div>
+                <span className="text-label-micro text-[var(--text-tertiary)] block font-semibold leading-none">Total P&amp;L</span>
+                <span className={`text-xs font-bold font-mono ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                  {isBalancesHidden ? '••••••' : `${isGain ? '+' : ''}${formatINR(totalPnL)} (${formatPercent(totalPnLPercent, 2)})`}
+                </span>
+              </div>
             </div>
 
-            <div className="hidden sm:block h-4 w-px bg-[var(--border-subtle)]" />
+            {/* Controls */}
+            <div className="flex items-center gap-1.5">
+              {/* Smart AI Import Button */}
+              {onOpenSmartImport && (
+                <button
+                  type="button"
+                  onClick={onOpenSmartImport}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-[var(--radius-medium)] text-xs font-bold shadow-sm transition-all ios-press active:scale-95 cursor-pointer"
+                  title="Smart AI Document & Receipt Import"
+                >
+                  <Sparkles size={13} />
+                  <span className="hidden sm:inline">✨ AI Import</span>
+                </button>
+              )}
 
-            {/* Action Icons */}
-            <div className="flex items-center gap-1">
-              {/* Status Pill Badge (Desktop) */}
+              {/* Data freshness badge */}
               <button
                 onClick={onRefresh}
-                title={
-                  !isOnline
-                    ? 'Offline mode. Connect to the internet to sync.'
-                    : isUsingCachedData
-                    ? 'Displaying cached portfolio data.'
-                    : isLoading
-                    ? 'Syncing live market prices...'
-                    : isPriceStale || status === 'error'
-                    ? 'Prices may be outdated (>15m). Click to refresh.'
-                    : `Prices live & up to date.${lastUpdated ? ` Last synced at ${lastUpdated.toLocaleTimeString()}` : ''}`
-                }
-                className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-micro font-bold border transition-all ${
-                  !isOnline || isUsingCachedData
-                    ? 'bg-[var(--negative-soft)] text-[var(--negative)] border-[var(--negative)]/30'
-                    : isLoading
-                    ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border-[var(--accent-blue)]/30'
-                    : isPriceStale || status === 'error'
-                    ? 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/30'
-                    : 'bg-[var(--positive-soft)] text-[var(--positive)] border-[var(--positive)]/30'
-                }`}
+                disabled={isLoading}
+                title={lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : 'Click to refresh'}
+                className="hidden xl:flex items-center gap-1 px-2 py-1 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] hover:bg-[var(--border-subtle)] transition-colors border border-[var(--border-subtle)] cursor-pointer disabled:cursor-not-allowed text-label-micro font-semibold text-[var(--text-secondary)]"
               >
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    !isOnline || isUsingCachedData
-                      ? 'bg-[var(--negative)]'
-                      : isLoading
-                      ? 'bg-[var(--accent-blue)] animate-pulse'
-                      : isPriceStale || status === 'error'
-                      ? 'bg-[var(--warning)]'
-                      : 'bg-[var(--positive)]'
-                  }`}
-                />
+                <span className={`w-1.5 h-1.5 rounded-full ${
+                  isUsingCachedData
+                    ? 'bg-[var(--accent-blue)]'
+                    : isPriceStale || status === 'error'
+                    ? 'bg-[var(--warning)]'
+                    : isLoading
+                    ? 'bg-[var(--accent-blue)] animate-pulse'
+                    : 'bg-[var(--positive)]'
+                }`} />
                 <span>
-                  {!isOnline
+                  {isUsingCachedData
                     ? 'Offline'
-                    : isUsingCachedData
-                    ? 'Cached'
                     : isLoading
                     ? 'Syncing'
                     : isPriceStale || status === 'error'
