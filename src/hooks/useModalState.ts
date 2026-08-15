@@ -15,6 +15,7 @@ export type ActiveModal =
   | { type: 'delete_portfolio'; target: PortfolioTarget }
   | { type: 'change_pin' }
   | { type: 'mobile_alerts' }
+  | { type: 'smart_import' }
   | null;
 
 export function useModalState() {
@@ -50,6 +51,10 @@ export function useModalState() {
   const openChangePinModal = useCallback(() => setActiveModal({ type: 'change_pin' }), []);
   const closeChangePinModal = useCallback(() => setActiveModal(null), []);
 
+  const showSmartImport = activeModal?.type === 'smart_import';
+  const openSmartImport = useCallback(() => setActiveModal({ type: 'smart_import' }), []);
+  const closeSmartImport = useCallback(() => setActiveModal(null), []);
+
   const clearQuickAddTarget = useCallback(() => setQuickAddTarget(null), []);
 
   const isAnyModalOpen = useMemo(() => {
@@ -83,6 +88,9 @@ export function useModalState() {
     showChangePinModal,
     openChangePinModal,
     closeChangePinModal,
+    showSmartImport,
+    openSmartImport,
+    closeSmartImport,
     isAnyModalOpen,
   };
 }

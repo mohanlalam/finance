@@ -6,11 +6,18 @@ type FabPosition = 'right' | 'center' | 'left';
 interface FloatingAddMenuProps {
   onAddStock: () => void;
   onAddAsset: (type: 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
+  onOpenSmartImport?: () => void;
   isHidden?: boolean;
   isScrollingDown?: boolean;
 }
 
-export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = false, isScrollingDown = false }: FloatingAddMenuProps) {
+export default function FloatingAddMenu({
+  onAddStock,
+  onAddAsset,
+  onOpenSmartImport,
+  isHidden = false,
+  isScrollingDown = false,
+}: FloatingAddMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState<FabPosition>(() => {
     try {
@@ -45,6 +52,20 @@ export default function FloatingAddMenu({ onAddStock, onAddAsset, isHidden = fal
   if (isHidden) return null;
 
   const menuGroups = [
+    {
+      category: 'AI Powered',
+      items: [
+        {
+          label: '✨ Smart AI Import',
+          icon: <Sparkles size={16} aria-hidden="true" />,
+          onClick: () => {
+            onOpenSmartImport?.();
+            setIsOpen(false);
+          },
+          color: 'bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold',
+        },
+      ],
+    },
     {
       category: 'Market',
       items: [

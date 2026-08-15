@@ -28,6 +28,7 @@ const RenamePortfolioModal = React.lazy(() => import('../components/RenamePortfo
 const ChangePinModal = React.lazy(() => import('../components/ChangePinModal'));
 const FamilyComparisonModal = React.lazy(() => import('../components/FamilyComparisonModal'));
 const ActivityLogDrawer = React.lazy(() => import('../components/ActivityLogDrawer'));
+const SmartImportModal = React.lazy(() => import('../components/SmartImportModal'));
 import type { ImportRow } from '../components/ExportPanel'; // type-only: erased at build time
 import { AddHoldingPayload } from '../components/AddHoldingModal';
 
@@ -201,6 +202,7 @@ export default function AppShell() {
     isDeleting, setIsDeleting,
     showMobileAlerts, openMobileAlerts, closeMobileAlerts,
     showChangePinModal, openChangePinModal, closeChangePinModal,
+    showSmartImport, openSmartImport, closeSmartImport,
     isAnyModalOpen,
   } = useModalState();
 
@@ -900,10 +902,19 @@ export default function AppShell() {
         isScrollingDown={isScrollingDown}
         onAddStock={openAddModal}
         onAddAsset={handleFloatingAddAsset}
+        onOpenSmartImport={openSmartImport}
       />
 
       {/* Lazy loaded Modals wrapped in Suspense */}
       <Suspense fallback={null}>
+        {/* Smart AI Document Import Modal */}
+        {showSmartImport && (
+          <SmartImportModal
+            isOpen={showSmartImport}
+            onClose={closeSmartImport}
+          />
+        )}
+
         {/* Add Holding Modal */}
         {showAddModal && (
           <AddHoldingModal

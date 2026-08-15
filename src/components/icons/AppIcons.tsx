@@ -782,3 +782,22 @@ export function PieChart({ size = 24, className = '' }: IconProps) {
     </svg>
   );
 }
+
+export function Camera({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+      <circle cx="12" cy="13" r="3" />
+    </svg>
+  );
+}
+
+export function Key({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="m21 2-2 2m-1.5 1.5L14 9a5 5 0 1 0 3 3l5.5-5.5a1 1 0 0 0 0-1.42l-1.58-1.58a1 1 0 0 0-1.42 0z" />
+      <path d="m15.5 7.5 3 3" />
+    </svg>
+  );
+}
+
