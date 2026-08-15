@@ -203,6 +203,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
             </label>
             <input
               type="number"
+              inputMode="decimal"
               step="0.01"
               required
               placeholder="e.g. 10.5"
@@ -220,6 +221,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
             </label>
             <input
               type="number"
+              inputMode="decimal"
               step="0.01"
               placeholder="e.g. 60000"
               value={purchasePrice}
@@ -233,6 +235,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
             </label>
             <input
               type="number"
+              inputMode="decimal"
               step="0.01"
               placeholder="e.g. 72000"
               value={currentValuation}

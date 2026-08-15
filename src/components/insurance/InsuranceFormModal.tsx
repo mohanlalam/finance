@@ -234,6 +234,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
             </label>
             <input
               type="number"
+              inputMode="decimal"
               step="0.01"
               required
               placeholder="e.g. 1000000"
@@ -251,6 +252,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
             </label>
             <input
               type="number"
+              inputMode="decimal"
               step="0.01"
               placeholder="e.g. 24000"
               value={premiumAmount}

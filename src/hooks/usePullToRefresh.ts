@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
+import { triggerHaptic } from '../utils/haptics';
 
 interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void> | void;
@@ -53,6 +54,7 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
     isPulling.current = false;
     
     if (pullDistance > 65 && !isRefreshing && !disabled) {
+      triggerHaptic('medium');
       setIsRefreshing(true);
       setPullDistance(0);
       try {

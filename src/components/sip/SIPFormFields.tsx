@@ -79,6 +79,7 @@ export function SIPFormFields({
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Monthly SIP (₹)</label>
           <input
             type="number"
+            inputMode="decimal"
             placeholder="0"
             value={monthlySip}
             onChange={(e) => setMonthlySip(e.target.value)}
@@ -89,6 +90,7 @@ export function SIPFormFields({
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Expected CAGR (%)</label>
           <input
             type="number"
+            inputMode="decimal"
             step="0.01"
             placeholder="e.g. 12.00"
             value={expectedCagr}
@@ -100,6 +102,7 @@ export function SIPFormFields({
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Units Owned</label>
           <input
             type="number"
+            inputMode="decimal"
             step="0.001"
             placeholder="0.000"
             value={units}
@@ -136,6 +139,7 @@ export function SIPFormFields({
         <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Current / Fallback Valuation (₹)</label>
         <input
           type="number"
+          inputMode="decimal"
           placeholder="Manual / Fallback valuation"
           value={fallbackValuation}
           onChange={(e) => setFallbackValuation(e.target.value)}

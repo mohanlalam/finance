@@ -210,6 +210,7 @@ export function RDFormModal({
               <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Monthly Deposit (₹)</label>
               <input
                 type="number"
+                inputMode="decimal"
                 placeholder="0"
                 value={monthlyDeposit}
                 onChange={(e) => setMonthlyDeposit(e.target.value)}
@@ -221,6 +222,7 @@ export function RDFormModal({
               <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Interest Rate (% p.a.)</label>
               <input
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 placeholder="e.g. 6.80"
                 value={interestRate}

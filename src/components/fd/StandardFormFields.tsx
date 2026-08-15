@@ -53,6 +53,7 @@ export function StandardFormFields({
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Principal Amount (₹)</label>
           <input
             type="number"
+            inputMode="decimal"
             placeholder="0"
             value={principalAmount}
             onChange={(e) => setPrincipalAmount(e.target.value)}
@@ -64,6 +65,7 @@ export function StandardFormFields({
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Interest Rate (% p.a.)</label>
           <input
             type="number"
+            inputMode="decimal"
             step="0.01"
             placeholder="e.g. 7.10"
             value={interestRate}
@@ -102,6 +104,7 @@ export function StandardFormFields({
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Maturity Amount (₹)</label>
           <input
             type="number"
+            inputMode="decimal"
             placeholder="Auto-computed"
             value={maturityAmount}
             onChange={(e) => setMaturityAmount(e.target.value)}

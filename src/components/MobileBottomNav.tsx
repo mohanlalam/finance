@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Home as HomeIcon, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, ChevronUp, ChevronRight, X, Sparkles } from './icons/AppIcons';
+import { triggerHaptic } from '../utils/haptics';
 
 type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
 
@@ -141,6 +142,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
                 key={tab.id}
                 type="button"
                 onClick={() => {
+                  triggerHaptic('selection');
                   onChangeAsset(tab.id);
                   setIsDrawerOpen(false);
                 }}
@@ -174,7 +176,10 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0 }: MobileB
           {/* More Tab */}
           <button
             type="button"
-            onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+            onClick={() => {
+              triggerHaptic('selection');
+              setIsDrawerOpen(!isDrawerOpen);
+            }}
             aria-expanded={isDrawerOpen}
             className={`relative flex-1 flex flex-col items-center justify-center h-full py-1 min-h-[48px] touch-manipulation transition-all duration-150 outline-none cursor-pointer active:scale-95 ${
               isMoreActive || isDrawerOpen

@@ -214,6 +214,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
             </label>
             <input
               type="number"
+              inputMode="decimal"
               step="0.01"
               placeholder="e.g. 7500000"
               value={purchasePrice}
@@ -227,6 +228,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
             </label>
             <input
               type="number"
+              inputMode="decimal"
               step="0.01"
               placeholder="e.g. 9200000"
               value={currentValuation}

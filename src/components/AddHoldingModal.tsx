@@ -216,6 +216,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Quantity</label>
             <input
               type="number"
+              inputMode="decimal"
               placeholder="0"
               min="0"
               step="any"
@@ -230,6 +231,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Avg Buy Price (₹)</label>
             <input
               type="number"
+              inputMode="decimal"
               placeholder="0.00"
               min="0"
               step="any"
@@ -249,6 +251,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
           </label>
           <input
             type="number"
+            inputMode="decimal"
             placeholder="0.00"
             min="0"
             step="any"
@@ -263,6 +266,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">52W Low (₹) <span className="font-normal text-slate-400 dark:text-slate-550">optional</span></label>
             <input
               type="number"
+              inputMode="decimal"
               placeholder="0.00"
               min="0"
               step="any"
@@ -275,6 +279,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">52W High (₹) <span className="font-normal text-slate-400 dark:text-slate-550">optional</span></label>
             <input
               type="number"
+              inputMode="decimal"
               placeholder="0.00"
               min="0"
               step="any"

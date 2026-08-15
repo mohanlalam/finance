@@ -586,6 +586,30 @@ h3, .text-card-title {
 
 
 
+/* -- Mobile Touch & Performance Optimizations -- */
+button,
+input,
+select,
+textarea,
+a,
+.ios-press,
+.interactive-btn,
+.mobile-asset-card {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-hardware-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
 /* -- Mobile Asset Card Press Feedback & Render Containment -- */
 .mobile-asset-card {
   content-visibility: auto;

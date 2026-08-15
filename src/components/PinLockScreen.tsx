@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { markSessionVerified, hashPin, getPinLength, verifyPin, clearCustomPin } from '../utils/auth';
+import { triggerHaptic } from '../utils/haptics';
 
 function IconDelete({ size = 22 }: { size?: number }) {
   return (
@@ -79,7 +80,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
 
   const handleClear = useCallback(() => {
     if (success || isVerifyingRef.current) return;
-    try { navigator.vibrate?.(8); } catch { /* ignore */ }
+    triggerHaptic('selection');
     pinRef.current = '';
     setPin('');
     setError('');
@@ -87,7 +88,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
 
   const handleForgotPin = useCallback(() => {
     if (success) return;
-    try { navigator.vibrate?.(15); } catch { /* ignore */ }
+    triggerHaptic('warning');
     clearCustomPin();
     pinRef.current = '';
     setPin('');
@@ -96,7 +97,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
 
   const handleBackspace = useCallback(() => {
     if (success || isVerifyingRef.current) return;
-    try { navigator.vibrate?.(8); } catch { /* ignore */ }
+    triggerHaptic('selection');
     const nextPin = pinRef.current.slice(0, -1);
     pinRef.current = nextPin;
     setPin(nextPin);
@@ -109,7 +110,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     const currentPin = pinRef.current;
     if (currentPin.length >= pinLength) return;
 
-    try { navigator.vibrate?.(10); } catch { /* ignore */ }
+    triggerHaptic('selection');
     const nextPin = currentPin + num;
     pinRef.current = nextPin;
     setPin(nextPin);
@@ -119,6 +120,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
       isVerifyingRef.current = true;
       verifyPin(nextPin).then((isValid) => {
         if (isValid) {
+          triggerHaptic('success');
           setSuccess(true);
           hashPin(nextPin).then((hash) => {
             markSessionVerified(hash);
@@ -127,6 +129,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             }, 300);
           });
         } else {
+          triggerHaptic('error');
           setShake(true);
           setError('Incorrect PIN');
           setTimeout(() => {
@@ -137,6 +140,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
           }, 600);
         }
       }).catch(() => {
+        triggerHaptic('error');
         setShake(true);
         setError('Verification failed');
         setTimeout(() => {
