@@ -105,6 +105,8 @@ function Header({
     };
   }, []);
 
+  const visibleAlerts = alerts;
+
   return (
     <header className="sticky top-0 z-[var(--z-header)] bg-[var(--surface-header)] backdrop-blur-md border-b border-[var(--border-subtle)] transition-colors">
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">
