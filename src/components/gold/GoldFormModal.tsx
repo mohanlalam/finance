@@ -52,7 +52,10 @@ export const GoldFormModal = React.memo(function GoldFormModal({
     ? documents.filter((d) => d.asset_type === 'gold' && d.asset_id === editingHolding.id)
     : [];
 
+  const createdAssetIdRef = useRef<string | null>(null);
+
   useEffect(() => {
+    createdAssetIdRef.current = null;
     if (editingHolding) {
       setItemName(editingHolding.item_name || '');
       setPurity(editingHolding.purity || '24K');
@@ -101,13 +104,17 @@ export const GoldFormModal = React.memo(function GoldFormModal({
         notes: notes.trim() || undefined,
       };
 
-      let assetId = editingHolding?.id;
+      const createdId = createdAssetIdRef.current || editingHolding?.id;
 
-      if (editingHolding) {
-        await onUpdate('gold', editingHolding.id, payload);
+      if (createdId) {
+        await onUpdate('gold', createdId, payload);
+        assetId = createdId;
       } else {
         const res = await onAdd('gold', targetPortfolio, payload);
         assetId = res?.id || res?.data?.id;
+        if (assetId) {
+          createdAssetIdRef.current = assetId;
+        }
       }
 
       // Upload and link all supporting documents

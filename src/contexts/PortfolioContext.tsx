@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useCallback, useRef, useMemo, Rea
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Portfolio, PortfolioName, AssetPayload, RDPayload, SIPPayload } from '../types/portfolio';
 import { NetWorthSnapshot, usePortfolioData, LoadStatus } from '../hooks/usePortfolioData';
+import { invokeFunction } from '../utils/apiClient';
 
 
 export interface PortfolioEntitiesContextValue {
@@ -175,17 +176,14 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const lastSnapshot = localStorage.getItem('finance_last_snapshot_date');
     if (lastSnapshot !== todayStr) {
-      import('../utils/apiClient').then(({ invokeFunction }) => {
-        if (!isMounted) return;
-        invokeFunction('snapshot-net-worth', { method: 'POST' })
-          .then(() => {
-            if (!isMounted) return;
-            localStorage.setItem('finance_last_snapshot_date', todayStr);
-          })
-          .catch((err) => {
-            console.warn('[portfolio] failed to record daily net worth snapshot:', err);
-          });
-      });
+      invokeFunction('snapshot-net-worth', { method: 'POST' })
+        .then(() => {
+          if (!isMounted) return;
+          localStorage.setItem('finance_last_snapshot_date', todayStr);
+        })
+        .catch((err) => {
+          console.warn('[portfolio] failed to record daily net worth snapshot:', err);
+        });
     }
     return () => {
       isMounted = false;

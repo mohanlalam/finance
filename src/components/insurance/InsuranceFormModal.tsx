@@ -53,7 +53,10 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
     ? documents.filter((d) => d.asset_type === 'insurance' && d.asset_id === editingPolicy.id)
     : [];
 
+  const createdAssetIdRef = useRef<string | null>(null);
+
   useEffect(() => {
+    createdAssetIdRef.current = null;
     if (editingPolicy) {
       setPolicyName(editingPolicy.policy_name || '');
       setInsuranceType(editingPolicy.insurance_type || 'health');
@@ -105,13 +108,17 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
         notes: notes.trim() || undefined,
       };
 
-      let assetId = editingPolicy?.id;
+      const createdId = createdAssetIdRef.current || editingPolicy?.id;
+      let assetId = createdId;
 
-      if (editingPolicy) {
-        await onUpdate('insurance', editingPolicy.id, payload);
+      if (createdId) {
+        await onUpdate('insurance', createdId, payload);
       } else {
         const res = await onAdd('insurance', targetPortfolio, payload);
         assetId = res?.id || res?.data?.id;
+        if (assetId) {
+          createdAssetIdRef.current = assetId;
+        }
       }
 
       // Upload and link all supporting documents

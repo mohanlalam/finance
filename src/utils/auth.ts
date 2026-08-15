@@ -1,4 +1,4 @@
-import { clearApiSessionCache } from './apiClient';
+import { clearApiSessionCache, invokeFunction } from './apiClient';
 
 const APP_PIN = (import.meta.env.VITE_APP_PIN as string | undefined) ?? '';
 const SESSION_KEY = 'finance_pin_verified';
@@ -82,12 +82,12 @@ export async function verifyPin(pin: string): Promise<boolean> {
 
   // 4. Fallback to backend Edge Function
   try {
-    const { invokeFunction } = await import('./apiClient');
     const result = await invokeFunction<{ verified: boolean }>('verify-pin', {
       method: 'POST',
       body: { pin_hash: inputHash },
     });
     if (result?.verified === true) {
+      markSessionVerified(inputHash);
       return true;
     }
   } catch {

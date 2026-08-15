@@ -111,6 +111,16 @@ export function RDFormModal({
       return;
     }
 
+    if (isNaN(r) || r < 0) {
+      setError('Interest rate must be a valid non-negative number.');
+      return;
+    }
+
+    if (maturityDate < startDate) {
+      setError('Maturity date cannot be earlier than start date.');
+      return;
+    }
+
     setLoading(true);
     setError('');
 

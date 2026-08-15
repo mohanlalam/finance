@@ -108,6 +108,11 @@ export function SIPFormModal({
       return;
     }
 
+    if (isNaN(cagr) || cagr < -100) {
+      setError('Expected CAGR must be a valid percentage.');
+      return;
+    }
+
     setLoading(true);
     setError('');
 

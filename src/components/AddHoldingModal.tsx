@@ -94,16 +94,22 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
       setError('Stock name, ticker, quantity and average price are required.');
       return;
     }
+    const qty = parseFloat(form.qty);
+    const avgPrice = parseFloat(form.avgPrice);
+    if (isNaN(qty) || qty <= 0 || isNaN(avgPrice) || avgPrice <= 0) {
+      setError('Quantity and Average Price must be positive numbers.');
+      return;
+    }
     setSaving(true);
     try {
       await onAdd({
         portfolioName: form.portfolioName,
-        stockName: form.stockName,
-        ticker: form.ticker.toUpperCase(),
-        yahooSymbol: form.yahooSymbol || form.ticker.toUpperCase() + '.NS',
-        qty: parseFloat(form.qty),
-        avgPrice: parseFloat(form.avgPrice),
-        amountInvested: form.amountInvested ? parseFloat(form.amountInvested) : parseFloat(form.qty) * parseFloat(form.avgPrice),
+        stockName: form.stockName.trim(),
+        ticker: form.ticker.trim().toUpperCase(),
+        yahooSymbol: (form.yahooSymbol || form.ticker.trim().toUpperCase() + '.NS').trim(),
+        qty,
+        avgPrice,
+        amountInvested: form.amountInvested ? parseFloat(form.amountInvested) : qty * avgPrice,
         weekLow52: form.weekLow52 ? parseFloat(form.weekLow52) : 0,
         weekHigh52: form.weekHigh52 ? parseFloat(form.weekHigh52) : 0,
       });

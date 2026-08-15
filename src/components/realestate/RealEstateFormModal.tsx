@@ -52,7 +52,10 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
     ? documents.filter((d) => d.asset_type === 'real_estate' && d.asset_id === editingProperty.id)
     : [];
 
+  const createdAssetIdRef = useRef<string | null>(null);
+
   useEffect(() => {
+    createdAssetIdRef.current = null;
     if (editingProperty) {
       setPropertyName(editingProperty.property_name || '');
       setPropertyType(editingProperty.property_type || 'apartment');
@@ -85,6 +88,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
 
     setLoading(true);
     setError(null);
+
     try {
       const payload = {
         property_name: propertyName.trim(),
@@ -96,13 +100,17 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
         notes: notes.trim() || undefined,
       };
 
-      let assetId = editingProperty?.id;
+      const createdId = createdAssetIdRef.current || editingProperty?.id;
+      let assetId = createdId;
 
-      if (editingProperty) {
-        await onUpdate('real_estate', editingProperty.id, payload);
+      if (createdId) {
+        await onUpdate('real_estate', createdId, payload);
       } else {
         const res = await onAdd('real_estate', targetPortfolio, payload);
         assetId = res?.id || res?.data?.id;
+        if (assetId) {
+          createdAssetIdRef.current = assetId;
+        }
       }
 
       // Upload and link all supporting documents

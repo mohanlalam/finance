@@ -102,6 +102,10 @@ export const FDFormModal = React.memo(function FDFormModal({
       setError('Start date is required');
       return;
     }
+    if (maturityDate && maturityDate < startDate) {
+      setError('Maturity date cannot be earlier than start date');
+      return;
+    }
 
     setLoading(true);
     setError(null);
