@@ -26,8 +26,6 @@ const AddHoldingModal = React.lazy(() => import('../components/AddHoldingModal')
 const AddFamilyModal = React.lazy(() => import('../components/AddFamilyModal'));
 const RenamePortfolioModal = React.lazy(() => import('../components/RenamePortfolioModal'));
 const ChangePinModal = React.lazy(() => import('../components/ChangePinModal'));
-const FamilyComparisonModal = React.lazy(() => import('../components/FamilyComparisonModal'));
-const ActivityLogDrawer = React.lazy(() => import('../components/ActivityLogDrawer'));
 const SmartImportModal = React.lazy(() => import('../components/SmartImportModal'));
 import type { ImportRow } from '../components/ExportPanel'; // type-only: erased at build time
 import { AddHoldingPayload } from '../components/AddHoldingModal';
@@ -206,9 +204,6 @@ export default function AppShell() {
     isAnyModalOpen,
   } = useModalState();
 
-  const [showFamilyComparison, setShowFamilyComparison] = useState(false);
-  const [showActivityLog, setShowActivityLog] = useState(false);
-
   // Persist active asset tab
   useEffect(() => {
     try { localStorage.setItem('finance_last_asset_tab', activeAsset); } catch { /* ignore */ }
@@ -248,14 +243,6 @@ export default function AppShell() {
 
   const portfolio = activePortfolio;
   const todayPnL = useMemo(() => estimateTodayPnL(portfolio, portfolios), [portfolio, portfolios]);
-  const todayPnLPercent = useMemo(() => {
-    const totalCurrentStocks = portfolio ? (portfolio.stocksValue || 0) : breakdown.stocks;
-    const prevCurrentStocks = totalCurrentStocks - todayPnL;
-    return prevCurrentStocks > 0 ? (todayPnL / prevCurrentStocks) * 100 : 0;
-  }, [portfolio, breakdown.stocks, todayPnL]);
-
-  const handleOpenFamilyComparison = useCallback(() => setShowFamilyComparison(true), []);
-  const handleOpenActivityLog = useCallback(() => setShowActivityLog(true), []);
 
   const [isScrollingDown, setIsScrollingDown] = useState(false);
   const lastScrollY = useRef(0);
@@ -342,6 +329,11 @@ export default function AppShell() {
 
   const breakdown = useMemo(() => classBreakdown(portfolios, portfolio), [portfolios, portfolio]);
   const breakdownSlices = useMemo(() => getBreakdownSlices(breakdown), [breakdown]);
+  const todayPnLPercent = useMemo(() => {
+    const totalCurrentStocks = portfolio ? (portfolio.stocksValue || 0) : breakdown.stocks;
+    const prevCurrentStocks = totalCurrentStocks - todayPnL;
+    return prevCurrentStocks > 0 ? (todayPnL / prevCurrentStocks) * 100 : 0;
+  }, [portfolio, breakdown.stocks, todayPnL]);
 
   const barChartPortfolios = useMemo(
     () => (activeTab === 'all' ? portfolios : (portfolio ? [portfolio] : [])),
@@ -573,8 +565,6 @@ export default function AppShell() {
         isPriceStale={isPriceStale}
         isUsingCachedData={isUsingCachedData}
         onChangePinClick={openChangePinModal}
-        onOpenFamilyComparison={handleOpenFamilyComparison}
-        onOpenActivityLog={handleOpenActivityLog}
       />
 
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -962,24 +952,6 @@ export default function AppShell() {
             onClose={closeMobileAlerts}
             onDismissAlert={handleDismissAlert}
             onDismissAll={handleDismissAll}
-          />
-        )}
-
-        {/* Family Members Comparison Modal */}
-        {showFamilyComparison && (
-          <FamilyComparisonModal
-            isOpen={showFamilyComparison}
-            onClose={() => setShowFamilyComparison(false)}
-            portfolios={portfolios}
-            onSelectPortfolio={setActiveTab}
-          />
-        )}
-
-        {/* Activity & Audit History Drawer */}
-        {showActivityLog && (
-          <ActivityLogDrawer
-            isOpen={showActivityLog}
-            onClose={() => setShowActivityLog(false)}
           />
         )}
       </Suspense>

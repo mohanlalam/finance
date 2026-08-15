@@ -7,7 +7,6 @@ import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiCl
 import useSWR from 'swr';
 import * as idb from 'idb-keyval';
 import { SWR_DEDUPING_INTERVAL, SWR_ERROR_RETRY_COUNT, STOCK_PRICE_CACHE_TTL } from '../utils/constants';
-import { logActivity, ActivityAssetType } from '../utils/activityLogger';
 
 function isValidCachedData(data: unknown): data is { portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[]; cachedAt: string } {
   return data != null && typeof data === 'object' && Array.isArray((data as Record<string, unknown>).portfolios);
@@ -888,7 +887,6 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           body: { name: trimmedName, label: trimmedLabel },
         });
         await invalidateIDBCache();
-        await logActivity('add', 'family', `Added family member: ${trimmedLabel}`);
         await load();
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
@@ -917,7 +915,6 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           },
         });
         await invalidateIDBCache();
-        await logActivity('update', 'family', `Renamed family member to: ${trimmedLabel}`);
         setPortfolios((prev) =>
           prev.map((p) => (p.id === portfolioId ? { ...p, label: trimmedLabel } : p))
         );
@@ -952,8 +949,6 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           },
         });
         await invalidateIDBCache();
-        const assetTitle = (finalPayload.ticker as string) || (finalPayload.bank_name as string) || (finalPayload.fund_name as string) || (finalPayload.item_name as string) || (finalPayload.property_name as string) || (finalPayload.policy_name as string) || (finalPayload.name as string) || assetType;
-        await logActivity('add', assetType as ActivityAssetType, `Added ${assetTitle}`, portfolioName);
         if (options.reload !== false) {
           await load();
         }
@@ -981,8 +976,6 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           },
         });
         await invalidateIDBCache();
-        const assetTitle = (finalPayload.ticker as string) || (finalPayload.bank_name as string) || (finalPayload.fund_name as string) || (finalPayload.item_name as string) || (finalPayload.property_name as string) || (finalPayload.policy_name as string) || (finalPayload.name as string) || assetType;
-        await logActivity('update', assetType as ActivityAssetType, `Updated ${assetTitle}`);
         await load();
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
@@ -1004,7 +997,6 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           },
         });
         await invalidateIDBCache();
-        await logActivity('delete', assetType as ActivityAssetType, `Deleted ${assetType} item`);
         await load();
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();
@@ -1024,7 +1016,6 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           },
         });
         await invalidateIDBCache();
-        await logActivity('delete', 'family', 'Deleted family member');
         await load();
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') handleAuthExpired();

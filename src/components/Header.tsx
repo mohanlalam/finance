@@ -31,8 +31,6 @@ interface HeaderProps {
   isPriceStale?: boolean;
   isUsingCachedData?: boolean;
   onChangePinClick?: () => void;
-  onOpenFamilyComparison?: () => void;
-  onOpenActivityLog?: () => void;
 }
 
 const ALERTS_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
@@ -87,8 +85,6 @@ function Header({
   isPriceStale = false,
   isUsingCachedData = false,
   onChangePinClick,
-  onOpenFamilyComparison,
-  onOpenActivityLog,
 }: HeaderProps) {
   const isGain = totalPnL >= 0;
   const isLoading = status === 'loading';
@@ -217,28 +213,6 @@ function Header({
                   />
                 </Suspense>
               </div>
-
-              {/* Family Comparison Modal (Desktop & Tablet) */}
-              {onOpenFamilyComparison && portfolios.length > 1 && (
-                <div className="hidden sm:block">
-                  <IconButton
-                    icon={<Users size={14} />}
-                    title="Compare Family Members"
-                    onClick={onOpenFamilyComparison}
-                  />
-                </div>
-              )}
-
-              {/* Activity Log Drawer */}
-              {onOpenActivityLog && (
-                <div className="hidden sm:block">
-                  <IconButton
-                    icon={<Clock size={14} />}
-                    title="Activity & Audit History"
-                    onClick={onOpenActivityLog}
-                  />
-                </div>
-              )}
 
               {/* Change PIN (Desktop) */}
               {onChangePinClick && (
