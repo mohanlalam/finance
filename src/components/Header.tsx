@@ -1,21 +1,21 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff, Sparkles } from './icons/AppIcons';
-import { formatINR, formatPercent } from '../utils/formatters';
+import { TrendingUp, RefreshCw, Bell, X, TrendingDown, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff, FileText, CheckCircle2 } from './icons/AppIcons';
 import { FetchStatus } from '../types/portfolio';
 import { Portfolio } from '../types/portfolio';
 import type { ImportRow } from './ExportPanel';
 import { Alert } from '../hooks/useAlerts';
 import { IconButton } from './ui/IconButton';
 import { Badge } from './ui/Badge';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 import { usePrivacy } from '../contexts/PrivacyContext';
 
 const ExportPanel = React.lazy(() => import('./ExportPanel'));
 
 interface HeaderProps {
-  totalCurrentValue: number;
-  totalPnL: number;
-  totalPnLPercent: number;
+  totalCurrentValue?: number;
+  totalPnL?: number;
+  totalPnLPercent?: number;
   status: FetchStatus;
   lastUpdated: Date | null;
   onRefresh: () => void;
@@ -32,45 +32,49 @@ interface HeaderProps {
   isUsingCachedData?: boolean;
   onChangePinClick?: () => void;
   onOpenSmartImport?: () => void;
+  onOpenMobileAlerts?: () => void;
 }
 
 const ALERTS_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
   '52w_high': {
-    icon: <TrendingUp size={13} />,
-    color: 'text-blue-600',
-    bg: 'bg-blue-50 dark:bg-blue-950/20',
-    border: 'border-blue-100 dark:border-blue-900/30',
+    icon: <TrendingUp size={14} />,
+    color: 'text-emerald-600 dark:text-emerald-400',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/40',
+    border: 'border-emerald-200 dark:border-emerald-800/40',
   },
   '52w_low': {
-    icon: <TrendingDown size={13} />,
-    color: 'text-amber-600',
-    bg: 'bg-amber-50 dark:bg-amber-950/20',
-    border: 'border-amber-100 dark:border-amber-900/30',
+    icon: <TrendingDown size={14} />,
+    color: 'text-amber-600 dark:text-amber-400',
+    bg: 'bg-amber-50 dark:bg-amber-950/40',
+    border: 'border-amber-200 dark:border-amber-800/40',
   },
   fd_maturity: {
-    icon: <Landmark size={13} />,
-    color: 'text-indigo-600',
-    bg: 'bg-indigo-50 dark:bg-indigo-950/20',
-    border: 'border-indigo-100 dark:border-indigo-900/30',
+    icon: <Landmark size={14} />,
+    color: 'text-indigo-600 dark:text-indigo-400',
+    bg: 'bg-indigo-50 dark:bg-indigo-950/40',
+    border: 'border-indigo-200 dark:border-indigo-800/40',
   },
   insurance_renewal: {
-    icon: <Shield size={13} />,
-    color: 'text-rose-600',
-    bg: 'bg-rose-50 dark:bg-rose-950/20',
-    border: 'border-rose-100 dark:border-rose-900/30',
+    icon: <Shield size={14} />,
+    color: 'text-rose-600 dark:text-rose-400',
+    bg: 'bg-rose-50 dark:bg-rose-950/40',
+    border: 'border-rose-200 dark:border-rose-800/40',
   },
   portfolio_swing: {
-    icon: <Activity size={13} />,
-    color: 'text-purple-600',
-    bg: 'bg-purple-50 dark:bg-purple-950/20',
-    border: 'border-purple-100 dark:border-purple-900/30',
+    icon: <Activity size={14} />,
+    color: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-purple-50 dark:bg-purple-950/40',
+    border: 'border-purple-200 dark:border-purple-800/40',
+  },
+  document_expiry: {
+    icon: <FileText size={14} />,
+    color: 'text-slate-600 dark:text-slate-400',
+    bg: 'bg-slate-50 dark:bg-slate-800/60',
+    border: 'border-slate-200 dark:border-slate-700/50',
   },
 };
 
 function Header({
-  totalCurrentValue,
-  totalPnL,
-  totalPnLPercent,
   status,
   lastUpdated,
   onRefresh,
@@ -86,13 +90,13 @@ function Header({
   isPriceStale = false,
   isUsingCachedData = false,
   onChangePinClick,
-  onOpenSmartImport,
+  onOpenMobileAlerts,
 }: HeaderProps) {
-  const isGain = totalPnL >= 0;
   const isLoading = status === 'loading';
   const [openAlerts, setOpenAlerts] = useState(false);
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
-  const { isBalancesHidden, toggleHideBalances } = usePrivacy();
+  const { toggleHideBalances, isBalancesHidden } = usePrivacy();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -105,7 +109,25 @@ function Header({
     };
   }, []);
 
+  // Close alerts on Escape key
+  useEffect(() => {
+    if (!openAlerts) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenAlerts(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [openAlerts]);
+
   const visibleAlerts = alerts;
+
+  const handleAlertsClick = () => {
+    if (isMobile && onOpenMobileAlerts) {
+      onOpenMobileAlerts();
+    } else {
+      setOpenAlerts((prev) => !prev);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-[var(--z-header)] bg-[var(--surface-header)] backdrop-blur-md border-b border-[var(--border-subtle)] transition-colors">
@@ -128,52 +150,18 @@ function Header({
                 )}
               </div>
               <p className="text-label-micro text-[var(--text-tertiary)] flex items-center gap-1.5 mt-0.5">
-                <span className="font-semibold">{portfolios.length} portfolios</span>
-                <span>&bull;</span>
                 <span className="flex items-center gap-1">
                   <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-[var(--positive)]' : 'bg-[var(--negative)]'}`} />
                   {isOnline ? 'Online' : 'Offline'}
                 </span>
-                <span>&bull;</span>
-                <span>Half-yearly compounding</span>
               </p>
             </div>
           </div>
 
           {/* Quick stats & action buttons */}
           <div className="flex items-center gap-4">
-            {/* Net Worth & P&L pill */}
-            <div className="hidden lg:flex items-center gap-3 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3.5 py-1.5">
-              <div>
-                <span className="text-label-micro text-[var(--text-tertiary)] block font-semibold leading-none">Total Net Worth</span>
-                <span className="text-xs font-bold text-[var(--text-primary)] font-mono">
-                  {isBalancesHidden ? '••••••' : formatINR(totalCurrentValue)}
-                </span>
-              </div>
-              <div className="h-6 w-px bg-[var(--border-subtle)]" />
-              <div>
-                <span className="text-label-micro text-[var(--text-tertiary)] block font-semibold leading-none">Total P&amp;L</span>
-                <span className={`text-xs font-bold font-mono ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-                  {isBalancesHidden ? '••••••' : `${isGain ? '+' : ''}${formatINR(totalPnL)} (${formatPercent(totalPnLPercent, 2)})`}
-                </span>
-              </div>
-            </div>
-
             {/* Controls */}
             <div className="flex items-center gap-1.5">
-              {/* Smart AI Import Button */}
-              {onOpenSmartImport && (
-                <button
-                  type="button"
-                  onClick={onOpenSmartImport}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-[var(--radius-medium)] text-xs font-bold shadow-sm transition-all ios-press active:scale-95 cursor-pointer"
-                  title="Smart AI Document & Receipt Import"
-                >
-                  <Sparkles size={13} />
-                  <span className="hidden sm:inline">✨ AI Import</span>
-                </button>
-              )}
-
               {/* Data freshness badge */}
               <button
                 onClick={onRefresh}
@@ -250,14 +238,14 @@ function Header({
                 <IconButton
                   icon={<Bell size={14} />}
                   title={`Notifications (${visibleAlerts.length})`}
-                  onClick={() => setOpenAlerts(!openAlerts)}
-                  className={openAlerts ? 'bg-[var(--surface-secondary)]' : ''}
+                  onClick={handleAlertsClick}
+                  className={openAlerts ? 'bg-[var(--surface-secondary)] text-[var(--accent-blue)]' : ''}
                 />
                 {visibleAlerts.length > 0 && (
                   <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--negative)] rounded-full ring-2 ring-[var(--surface)]" />
                 )}
 
-                {openAlerts && (
+                {openAlerts && !isMobile && (
                   <>
                     {/* Backdrop to dismiss alerts panel */}
                     <div
@@ -268,12 +256,18 @@ function Header({
                     <div
                       role="region"
                       aria-label="Notifications panel"
-                      className="fixed left-4 right-4 top-16 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-floating)] z-[var(--z-modal)] overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80"
+                      className="absolute right-0 top-full mt-2 w-96 max-w-[calc(100vw-2rem)] bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-floating)] z-[var(--z-modal)] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
                     >
-                      <div className="px-3.5 py-2.5 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex items-center justify-between">
-                        <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
-                          Alerts ({visibleAlerts.length})
-                        </span>
+                      {/* Header */}
+                      <div className="px-4 py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                            Notifications
+                          </span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]">
+                            {visibleAlerts.length}
+                          </span>
+                        </div>
                         {visibleAlerts.length > 0 && (
                           <button
                             type="button"
@@ -288,16 +282,20 @@ function Header({
                         )}
                       </div>
 
-                      <div className="max-h-72 overflow-y-auto divide-y divide-[var(--border-subtle)]">
+                      {/* Alerts list */}
+                      <div className="max-h-[380px] overflow-y-auto divide-y divide-[var(--border-subtle)]">
                         {visibleAlerts.length === 0 ? (
-                          <div className="p-5 text-center text-xs text-[var(--text-tertiary)] flex flex-col items-center justify-center gap-1.5">
-                            <span className="font-semibold text-[var(--text-secondary)]">All Clear!</span>
-                            <span>No active notifications. You're completely up to date.</span>
+                          <div className="py-8 px-4 text-center flex flex-col items-center justify-center gap-2">
+                            <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                              <CheckCircle2 size={20} />
+                            </div>
+                            <span className="text-xs font-bold text-[var(--text-primary)]">All Caught Up!</span>
+                            <span className="text-[11px] text-[var(--text-tertiary)] max-w-[220px]">No active notifications. You're completely up to date.</span>
                           </div>
                         ) : (
                           visibleAlerts.map((alert) => {
                             const cfg = ALERTS_TYPE_CONFIG[alert.type] ?? {
-                              icon: <Bell size={13} />,
+                              icon: <Bell size={14} />,
                               color: 'text-[var(--text-secondary)]',
                               bg: 'bg-[var(--surface-secondary)]',
                               border: 'border-[var(--border-subtle)]',
@@ -305,14 +303,21 @@ function Header({
                             return (
                               <div
                                 key={alert.id}
-                                className="p-3 hover:bg-[var(--surface-secondary)] transition-colors flex items-start gap-2.5"
+                                className="p-3.5 hover:bg-[var(--surface-secondary)] transition-colors flex items-start gap-3 group"
                               >
-                                <div className={`p-1 rounded-[var(--radius-small)] ${cfg.bg} ${cfg.color} shrink-0 mt-0.5`}>
+                                <div className={`p-1.5 rounded-[var(--radius-small)] ${cfg.bg} ${cfg.color} shrink-0 mt-0.5 border ${cfg.border}`}>
                                   {cfg.icon}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-bold text-[var(--text-primary)] truncate">{alert.title}</p>
-                                  <p className="text-label-micro text-[var(--text-tertiary)] line-clamp-2 mt-0.5">{alert.message}</p>
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <p className="text-xs font-bold text-[var(--text-primary)] leading-tight">{alert.title}</p>
+                                    {alert.portfolioLabel && (
+                                      <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-[var(--surface-secondary)] text-[var(--text-tertiary)] border border-[var(--border-subtle)]">
+                                        {alert.portfolioLabel}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed mt-1">{alert.message}</p>
                                 </div>
                                 <button
                                   type="button"
@@ -320,7 +325,7 @@ function Header({
                                     e.stopPropagation();
                                     onDismissAlert(alert.id);
                                   }}
-                                  className="w-6 h-6 flex items-center justify-center rounded-[var(--radius-small)] text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--surface)] transition-colors cursor-pointer"
+                                  className="w-6 h-6 flex items-center justify-center rounded-[var(--radius-small)] text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--surface)] transition-colors cursor-pointer shrink-0 opacity-70 group-hover:opacity-100"
                                   aria-label="Dismiss alert"
                                   title="Dismiss alert"
                                 >

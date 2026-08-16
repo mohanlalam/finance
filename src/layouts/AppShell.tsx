@@ -566,6 +566,7 @@ export default function AppShell() {
         isUsingCachedData={isUsingCachedData}
         onChangePinClick={openChangePinModal}
         onOpenSmartImport={openSmartImport}
+        onOpenMobileAlerts={openMobileAlerts}
       />
 
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -658,11 +659,6 @@ export default function AppShell() {
                 )}
 
                 {renderDashboardWidgets(true)}
-
-                <QuickAccessShortcuts
-                  activeAsset={activeAsset}
-                  onSelectAsset={setActiveAsset}
-                />
               </div>
             ) : (
               <div className="space-y-4">
