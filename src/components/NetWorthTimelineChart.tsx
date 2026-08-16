@@ -210,8 +210,8 @@ export default function NetWorthTimelineChart({
   const { width, height } = dimensions;
   const paddingLeft = 55;
   const paddingRight = 15;
-  const paddingTop = 16;
-  const paddingBottom = 36;
+  const paddingTop = 24;
+  const paddingBottom = 32;
 
   const chartWidth = Math.max(width - paddingLeft - paddingRight, 10);
   const chartHeight = Math.max(height - paddingTop - paddingBottom, 10);
@@ -369,9 +369,9 @@ export default function NetWorthTimelineChart({
   const hoverX = hoveredIdx !== null ? pointsMap.totalPoints[hoveredIdx]?.x : null;
 
   return (
-    <div ref={containerRef} className="apple-card p-5 relative overflow-hidden flex flex-col h-[370px] justify-between">
+    <div ref={containerRef} className="apple-card p-5 relative overflow-hidden flex flex-col min-h-[370px] justify-between">
       {/* Header with Title, Period Performance & Controls */}
-      <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
+      <div className="flex justify-between items-start mb-2.5 flex-wrap gap-2">
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-card-title font-bold text-[var(--text-primary)]">
@@ -385,12 +385,12 @@ export default function NetWorthTimelineChart({
           </div>
 
           {/* Period Performance Subtitle */}
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
             <p className="text-supporting text-xs">
               {seriesMode === 'total' ? 'Compound net worth history' : seriesMode === 'both' ? 'Stocks vs FDs comparison' : seriesMode === 'stocks' ? 'Stocks & equity valuation' : 'Fixed Deposits accumulation'}
             </p>
             {periodPerformance && (
-              <span className={`inline-flex items-center gap-0.5 text-[11px] font-extrabold px-1.5 py-0.2 rounded-[var(--radius-small)] tnum ${
+              <span className={`inline-flex items-center gap-0.5 text-[11px] font-extrabold px-2 py-0.5 rounded-[var(--radius-small)] tnum ${
                 periodPerformance.isPositive ? 'text-[var(--positive)] bg-[var(--positive-soft)]' : 'text-[var(--negative)] bg-[var(--negative-soft)]'
               }`}>
                 {periodPerformance.isPositive ? <TrendingUp size={11} aria-hidden="true" /> : <TrendingDown size={11} aria-hidden="true" />}
@@ -401,7 +401,7 @@ export default function NetWorthTimelineChart({
         </div>
 
         {/* Date Range Selector */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <SegmentedControl
             options={[
               { id: '1M', label: '1M' },
@@ -416,24 +416,24 @@ export default function NetWorthTimelineChart({
         </div>
       </div>
 
-      {/* Series Filter Selector Bar (Total | Stocks vs FDs | Stocks | FDs) */}
-      <div className="flex items-center justify-between gap-1.5 pb-1 border-b border-[var(--border-subtle)] text-[11px] overflow-x-auto">
-        <div className="flex items-center gap-1">
+      {/* Series Filter Selector Bar (Segmented & Cleaned) */}
+      <div className="flex items-center justify-between gap-1.5 py-1.5 border-b border-[var(--border-subtle)] text-xs">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
           <button
             onClick={() => setSeriesMode('total')}
-            className={`px-2.5 py-1 rounded-[var(--radius-small)] font-bold transition-all ios-press flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded-[var(--radius-small)] font-bold text-xs transition-all ios-press shrink-0 flex items-center gap-1.5 ${
               seriesMode === 'total'
                 ? 'bg-[var(--accent-blue)] text-white shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]'
             }`}
           >
-            <span className="w-2 h-2 rounded-full bg-white/80" />
+            <span className="w-1.5 h-1.5 rounded-full bg-white" />
             Total Net Worth
           </button>
 
           <button
             onClick={() => setSeriesMode('both')}
-            className={`px-2.5 py-1 rounded-[var(--radius-small)] font-bold transition-all ios-press flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded-[var(--radius-small)] font-bold text-xs transition-all ios-press shrink-0 flex items-center gap-1.5 ${
               seriesMode === 'both'
                 ? 'bg-[var(--text-primary)] text-[var(--surface)] shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]'
@@ -445,39 +445,39 @@ export default function NetWorthTimelineChart({
 
           <button
             onClick={() => setSeriesMode('stocks')}
-            className={`px-2 py-1 rounded-[var(--radius-small)] font-bold transition-all ios-press flex items-center gap-1 ${
+            className={`px-2.5 py-1 rounded-[var(--radius-small)] font-bold text-xs transition-all ios-press shrink-0 flex items-center gap-1.5 ${
               seriesMode === 'stocks'
                 ? 'bg-[var(--accent-blue)] text-white shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]'
             }`}
           >
-            <span className="w-2 h-2 rounded-full bg-[#387ed1]" />
-            Stocks Only
+            <span className="w-1.5 h-1.5 rounded-full bg-[#387ed1]" />
+            Stocks
           </button>
 
           <button
             onClick={() => setSeriesMode('fd')}
-            className={`px-2 py-1 rounded-[var(--radius-small)] font-bold transition-all ios-press flex items-center gap-1 ${
+            className={`px-2.5 py-1 rounded-[var(--radius-small)] font-bold text-xs transition-all ios-press shrink-0 flex items-center gap-1.5 ${
               seriesMode === 'fd'
                 ? 'bg-[var(--warning)] text-white shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]'
             }`}
           >
             <Landmark size={12} aria-hidden="true" />
-            FDs Only
+            FDs
           </button>
         </div>
 
         {/* Milestone All-Time High Badge */}
         {peakNetWorth > 0 && (
-          <span className="text-[10px] font-semibold text-[var(--text-tertiary)] shrink-0 hidden sm:inline tnum">
-            ATH Peak: <span className="font-bold text-[var(--text-secondary)]">{formatCompactINR(peakNetWorth)}</span>
+          <span className="text-xs font-semibold text-[var(--text-tertiary)] shrink-0 hidden sm:inline tnum pl-2">
+            Peak: <span className="font-bold text-[var(--text-secondary)]">{formatCompactINR(peakNetWorth)}</span>
           </span>
         )}
       </div>
 
       {/* SVG Multi-Series Interactive Chart Area */}
-      <div className="relative w-full h-[225px]">
+      <div className="relative w-full flex-1 min-h-[210px] mt-2">
         {history.length < 2 && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none mt-4">
             <div className="bg-[var(--surface)]/80 backdrop-blur-sm rounded-[var(--radius-pill)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] shadow-sm mb-1 border border-[var(--border-subtle)]">

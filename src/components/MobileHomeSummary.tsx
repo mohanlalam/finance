@@ -50,6 +50,7 @@ function MobileHomeSummary({
   todayPnLPercent,
   breakdown,
   alertCount,
+  lastUpdated,
   onRefresh,
   isLoadingPrices,
   onNavigateAsset,
@@ -212,85 +213,83 @@ function MobileHomeSummary({
   return (
     <div className="space-y-3.5 md:hidden">
 
-      {/* ── Flat Hero Summary Card ── */}
-      <div className="rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-xs space-y-4 apple-card">
-        {/* Header row */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
-            {summaryData.label} Net Worth
-          </span>
+      {/* ── Unified Single Top Net Worth Card ── */}
+      <div className="rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-xs space-y-3.5 apple-card">
+        {/* Header row: Label & Refresh/Sync Button */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider truncate">
+              {summaryData.label} Net Worth
+            </span>
+            {lastUpdated && (
+              <span className="text-[10px] text-[var(--text-tertiary)] flex items-center gap-1 truncate shrink-0">
+                • {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
+          </div>
           <button
             onClick={onRefresh}
             disabled={isLoadingPrices}
-            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] text-xs font-bold transition-all ios-press border border-[var(--border-subtle)]"
+            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[32px] rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-bold transition-all ios-press border border-[var(--border-subtle)] shrink-0"
+            title="Refresh prices & valuations"
+            aria-label="Refresh prices and valuations"
           >
-            <RefreshCw size={13} className={isLoadingPrices ? 'animate-spin text-[var(--accent-blue)]' : ''} aria-hidden="true" />
-            <span>{isLoadingPrices ? 'Syncing' : 'Sync'}</span>
+            <RefreshCw size={12} className={isLoadingPrices ? 'animate-spin text-[var(--accent-blue)]' : ''} aria-hidden="true" />
+            <span>{isLoadingPrices ? 'Syncing...' : 'Sync'}</span>
           </button>
         </div>
 
-        {/* Hero Valuation */}
-        <div className="flex items-end justify-between gap-2">
+        {/* Primary Hero: Net Worth & Today's Gain/Loss Badge */}
+        <div className="flex items-end justify-between gap-2 pt-0.5">
           <div className="min-w-0 flex-1">
-            <h2 className="text-2xl font-extrabold text-[var(--text-primary)] tnum leading-tight tracking-tight truncate">
+            <div className="text-2xl font-extrabold text-[var(--text-primary)] tnum leading-none tracking-tight truncate">
               {renderValue(summaryData.totalCurrentValue)}
-            </h2>
-            <p className="text-xs text-[var(--text-tertiary)] mt-0.5 truncate">
-              Invested: <span className="font-extrabold text-[var(--text-secondary)] tnum">{renderValue(summaryData.totalInvested)}</span>
-            </p>
+            </div>
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <span className={`inline-flex items-center gap-1 text-xs font-bold tnum px-2 py-0.5 rounded-[var(--radius-pill)] ${
+                isTodayGain ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'
+              }`}>
+                {isTodayGain ? <TrendingUp size={12} className="shrink-0" /> : <TrendingDown size={12} className="shrink-0" />}
+                <span>
+                  {isTodayGain ? '+' : ''}{isBalancesHidden ? '••••' : formatINR(todayPnL)} ({formatPercent(todayPnLPercent, 1)}) Today
+                </span>
+              </span>
+            </div>
           </div>
           {sparklineData.length > 1 && (
-            <div className="shrink-0 mb-1">
-              <Sparkline data={sparklineData} color={sparklineColor} width={72} height={28} />
+            <div className="shrink-0 mb-0.5">
+              <Sparkline data={sparklineData} color={sparklineColor} width={68} height={26} />
             </div>
           )}
         </div>
 
-        {/* Net Worth Big Number */}
-        <div className="flex items-baseline justify-between gap-2 pt-0.5">
-          <div className="flex items-baseline gap-1 text-2xl font-extrabold text-[var(--text-primary)] tnum tracking-tight">
-            <span className="text-[var(--text-tertiary)] font-medium text-lg">₹</span>
-            {isBalancesHidden ? (
-              <span aria-label="Amount hidden">••••••</span>
-            ) : (
-              <AnimatedNumber value={summaryData.totalCurrentValue} formatter={formatINR} />
-            )}
-          </div>
-          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-[var(--radius-pill)] text-xs font-bold tnum shrink-0 ${
-            isTodayGain ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'
-          }`}>
-            {isTodayGain ? <TrendingUp size={13} className="shrink-0" aria-hidden="true" /> : <TrendingDown size={13} className="shrink-0" aria-hidden="true" />}
-            <span>{isTodayGain ? '+' : ''}{formatPercent(todayPnLPercent, 1)} Today</span>
-          </div>
-        </div>
-
-        {/* Metric Grid: Invested | Total Return | Today's Return */}
-        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[var(--border-subtle)]">
+        {/* Metrics Row: Invested | Total Return */}
+        <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-[var(--border-subtle)]">
           {/* Invested */}
           <div className="p-2.5 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] min-w-0">
-            <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Invested</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">
+              Invested Capital
+            </span>
             <span className="text-xs font-extrabold text-[var(--text-primary)] tnum block truncate">
-              {isBalancesHidden ? <span aria-label="Amount hidden">••••••</span> : formatINR(summaryData.totalInvested)}
+              {renderValue(summaryData.totalInvested)}
             </span>
           </div>
 
           {/* Total Return */}
           <div className="p-2.5 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] min-w-0">
-            <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Total Return</span>
-            <div className={`flex items-center gap-1 text-xs font-extrabold tnum min-w-0 ${isTotalGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-              {isTotalGain ? <TrendingUp size={13} className="shrink-0" aria-hidden="true" /> : <TrendingDown size={13} className="shrink-0" aria-hidden="true" />}
-              <span className="truncate">{isBalancesHidden ? <span aria-label="Amount hidden">••••••</span> : <>{isTotalGain ? '+' : ''}{formatINR(summaryData.totalPnL)}</>}</span>
-              <span className="text-xs font-extrabold ml-auto shrink-0">({formatPercent(summaryData.totalPnLPercent, 1)})</span>
-            </div>
-          </div>
-
-          {/* Today's Return */}
-          <div className="p-2.5 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] min-w-0">
-            <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">Today's Return</span>
-            <div className={`flex items-center gap-1 text-xs font-extrabold tnum min-w-0 ${isTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-              {isTodayGain ? <TrendingUp size={13} className="shrink-0" aria-hidden="true" /> : <TrendingDown size={13} className="shrink-0" aria-hidden="true" />}
-              <span className="truncate">{isBalancesHidden ? <span aria-label="Amount hidden">••••••</span> : <>{isTodayGain ? '+' : ''}{formatINR(todayPnL)}</>}</span>
-              <span className="text-xs font-extrabold ml-auto shrink-0">({formatPercent(todayPnLPercent, 1)})</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">
+              Total Overall Return
+            </span>
+            <div className={`flex items-center gap-1 text-xs font-extrabold tnum truncate ${
+              isTotalGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'
+            }`}>
+              {isTotalGain ? <TrendingUp size={12} className="shrink-0" /> : <TrendingDown size={12} className="shrink-0" />}
+              <span className="truncate">
+                {isBalancesHidden ? '••••••' : <>{isTotalGain ? '+' : ''}{formatINR(summaryData.totalPnL)}</>}
+              </span>
+              <span className="text-[11px] opacity-90 shrink-0 font-bold">
+                ({formatPercent(summaryData.totalPnLPercent, 1)})
+              </span>
             </div>
           </div>
         </div>

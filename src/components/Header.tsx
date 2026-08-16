@@ -5,7 +5,6 @@ import { Portfolio } from '../types/portfolio';
 import type { ImportRow } from './ExportPanel';
 import { Alert } from '../hooks/useAlerts';
 import { IconButton } from './ui/IconButton';
-import { Badge } from './ui/Badge';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 import { usePrivacy } from '../contexts/PrivacyContext';

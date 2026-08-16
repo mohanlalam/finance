@@ -1,5 +1,7 @@
 export type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
 
+export type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
+
 export interface LivePrices {
   [yahooSymbol: string]: { ltp: number; todayPct: number };
 }

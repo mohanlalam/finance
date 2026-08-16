@@ -122,9 +122,9 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
   const hoverSlice = hovered !== null ? slices[hovered] : null;
 
   return (
-    <div className="apple-card p-5 flex flex-col h-[370px] justify-between">
+    <div className="apple-card p-4 sm:p-5 flex flex-col min-h-[370px] justify-between">
       {/* Header */}
-      <div className="flex justify-between items-start mb-2">
+      <div className="flex justify-between items-start mb-2 shrink-0">
         <div>
           <h3 className="text-card-title font-bold text-[var(--text-primary)]">
             {title}
@@ -133,7 +133,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
             Portfolio distribution &amp; diversification weight
           </p>
         </div>
-        <div className="w-7 h-7 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)]">
+        <div className="w-7 h-7 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] shrink-0">
           <PieChartIcon size={14} aria-hidden="true" />
         </div>
       </div>
@@ -144,16 +144,16 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
           <span className="text-[10px] mt-1">Add stocks, FDs or gold to populate allocation</span>
         </div>
       ) : (
-        <div className="flex flex-col sm:flex-row gap-5 items-center justify-between flex-1">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-center justify-between flex-1 min-h-0">
           {/* Donut Visualizer with Interactive Center HUD */}
-          <div className="relative shrink-0">
+          <div className="relative shrink-0 flex items-center justify-center py-1">
             <svg
-              width={230}
-              height={230}
+              width={190}
+              height={190}
               viewBox="0 0 230 230"
               role="img"
               aria-label={`${title} donut chart showing ${slices.length} segments totalling ${isBalancesHidden ? 'hidden' : formatINR(total)}`}
-              className="overflow-visible"
+              className="overflow-visible max-w-full"
             >
               <title>{title}</title>
               {computedPaths.map(({ d, color, i, isHovered }) => (

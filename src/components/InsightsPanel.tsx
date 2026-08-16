@@ -1,5 +1,16 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { TrendingUp, TrendingDown, Landmark, Shield, Activity, Crown, Target, BarChart3, Filter } from './icons/AppIcons';
+import React, { useState, useMemo, useCallback, Suspense } from 'react';
+import {
+  TrendingUp,
+  TrendingDown,
+  Landmark,
+  Shield,
+  Activity,
+  Crown,
+  Target,
+  BarChart3,
+  Filter,
+  ChevronRight
+} from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import {
   PortfolioInsights,
@@ -8,14 +19,21 @@ import {
   InsuranceRenewalAlert,
   PortfolioBestWorst,
 } from '../hooks/usePortfolioInsights';
-
-import { Portfolio } from '../types/portfolio';
+import { Portfolio, AssetTab, FetchStatus } from '../types/portfolio';
 import { InsightsSkeleton } from './ui/ChartSkeleton';
+import { analyzePortfolioHealth } from '../utils/dataQuality';
+
+const DataQualityHealthModal = React.lazy(() => import('./DataQualityHealthModal'));
 
 interface InsightsPanelProps {
   insights: PortfolioInsights;
   portfolios: Portfolio[];
   activePortfolio: Portfolio | null;
+  onNavigateAsset?: (tab: AssetTab) => void;
+  onRefreshPrices?: () => void;
+  isLoadingPrices?: boolean;
+  isPriceStale?: boolean;
+  priceStatus?: FetchStatus;
 }
 
 /* ── Clean Apple-style card wrapper ── */
@@ -58,9 +76,14 @@ const TopHoldings = React.memo(function TopHoldings({ items }: { items: HoldingI
                 <span className="text-xs font-bold text-[var(--text-primary)] truncate">{item.holding.ticker}</span>
                 <span className="text-label-micro text-[var(--text-tertiary)] truncate hidden sm:inline">{item.portfolioLabel}</span>
               </div>
+              <div className="w-full bg-[var(--surface-secondary)] h-1 rounded-full overflow-hidden mt-1">
+                <div className="bg-[var(--accent-blue)] h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(alloc, 100)}%` }} />
+              </div>
             </div>
-            <span className="text-xs font-bold text-[var(--text-primary)] shrink-0 tnum">{formatINR(item.holding.currentValue)}</span>
-            <span className="text-label-micro text-[var(--text-tertiary)] shrink-0 w-10 text-right tnum">{alloc.toFixed(1)}%</span>
+            <div className="text-right shrink-0">
+              <p className="text-xs font-bold text-[var(--text-primary)] tnum">{formatINR(item.holding.currentValue)}</p>
+              <p className="text-[10px] text-[var(--text-tertiary)] tnum">{alloc.toFixed(1)}%</p>
+            </div>
           </div>
         );
       })}
@@ -69,18 +92,27 @@ const TopHoldings = React.memo(function TopHoldings({ items }: { items: HoldingI
 });
 
 const GainersList = React.memo(function GainersList({ items, type }: { items: HoldingInsight[]; type: 'gain' | 'loss' }) {
-  if (items.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">None</p>;
+  if (items.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No {type === 'gain' ? 'gainers' : 'losers'} yet</p>;
+  const isGain = type === 'gain';
   return (
     <div className="space-y-2">
       {items.map((item, idx) => (
-        <div key={`${item.holding.ticker}-${idx}`} className="flex items-center gap-2">
-          <span className={`w-5 h-5 rounded-[var(--radius-small)] flex items-center justify-center shrink-0 ${type === 'gain' ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
-            {type === 'gain' ? <TrendingUp size={10} aria-hidden="true" /> : <TrendingDown size={10} aria-hidden="true" />}
-          </span>
-          <span className="text-xs font-bold text-[var(--text-primary)] truncate flex-1">{item.holding.ticker}</span>
-          <span className={`text-xs font-bold shrink-0 tnum ${type === 'gain' ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-            {formatPercent(item.holding.pnlPercent, 1)}
-          </span>
+        <div key={`${item.holding.ticker}-${idx}`} className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className={`w-5 h-5 rounded-[var(--radius-small)] flex items-center justify-center shrink-0 ${isGain ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
+              {isGain ? <TrendingUp size={10} aria-hidden="true" /> : <TrendingDown size={10} aria-hidden="true" />}
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-bold text-[var(--text-primary)] truncate block">{item.holding.ticker}</span>
+              <span className="text-label-micro text-[var(--text-tertiary)] truncate block">{item.portfolioLabel}</span>
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <span className={`text-xs font-bold tnum ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+              {formatPercent(item.holding.pnlPercent, 1)}
+            </span>
+            <p className="text-[10px] text-[var(--text-tertiary)] tnum">{formatINR(item.holding.unrealizedPnL)}</p>
+          </div>
         </div>
       ))}
     </div>
@@ -88,28 +120,27 @@ const GainersList = React.memo(function GainersList({ items, type }: { items: Ho
 });
 
 const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: HoldingInsight[] }) {
-  if (movers.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No data</p>;
+  if (movers.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No movements today</p>;
   return (
     <div className="space-y-2">
-      {movers.map((mover, idx) => {
-        const h = mover.holding;
-        const isUp = h.todayPnLPercent >= 0;
+      {movers.map((m, idx) => {
+        const isUp = m.holding.todayPnLPercent >= 0;
         return (
-          <div key={`${h.ticker}-${idx}`} className="flex items-center gap-2.5">
-            <div className={`w-7 h-7 rounded-[var(--radius-small)] flex items-center justify-center shrink-0 ${isUp ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
-              {isUp ? <TrendingUp size={13} aria-hidden="true" /> : <TrendingDown size={13} aria-hidden="true" />}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-[var(--text-primary)] truncate">{h.ticker}</span>
-                <span className="text-[9px] text-[var(--text-tertiary)] truncate">{mover.portfolioLabel}</span>
+          <div key={`${m.holding.ticker}-${idx}`} className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className={`w-5 h-5 rounded-[var(--radius-small)] flex items-center justify-center shrink-0 ${isUp ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
+                {isUp ? <TrendingUp size={10} aria-hidden="true" /> : <TrendingDown size={10} aria-hidden="true" />}
               </div>
-              <p className="text-[9px] text-[var(--text-tertiary)] truncate leading-none mt-0.5">{h.stockName}</p>
+              <div className="min-w-0">
+                <span className="text-xs font-bold text-[var(--text-primary)] truncate block">{m.holding.ticker}</span>
+                <span className="text-label-micro text-[var(--text-tertiary)] truncate block">{m.portfolioLabel}</span>
+              </div>
             </div>
             <div className="text-right shrink-0">
-              <p className={`text-xs font-bold tnum ${isUp ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-                {formatPercent(h.todayPnLPercent, 2)}
-              </p>
+              <span className={`text-xs font-bold tnum ${isUp ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                {formatPercent(m.holding.todayPnLPercent, 2)}
+              </span>
+              <p className="text-[10px] text-[var(--text-tertiary)] tnum">LTP {formatINR(m.holding.ltp)}</p>
             </div>
           </div>
         );
@@ -119,20 +150,20 @@ const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: Ho
 });
 
 const FDReminders = React.memo(function FDReminders({ alerts }: { alerts: FDMaturityAlert[] }) {
-  if (alerts.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No upcoming maturities</p>;
+  if (alerts.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No FDs maturing in the next 30 days</p>;
   return (
     <div className="space-y-2">
       {alerts.map((a, i) => (
-        <div key={`fd-${i}`} className="flex items-center gap-2">
-          <div className={`w-6 h-6 rounded-[var(--radius-medium)] flex items-center justify-center shrink-0 ${a.daysLeft <= 7 ? 'bg-[var(--negative-soft)] text-[var(--negative)]' : 'bg-[var(--warning-soft)] text-[var(--warning)]'}`}>
+        <div key={i} className="flex items-center gap-2 p-2 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)]">
+          <div className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
             <Landmark size={12} aria-hidden="true" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-[var(--text-primary)] truncate">{a.fd.bank_name}</p>
-            <p className="text-[10px] text-[var(--text-tertiary)]">{a.portfolioLabel} · <span className="tnum">{formatINR(Number(a.fd.principal_amount))}</span></p>
+            <p className="text-[10px] text-[var(--text-tertiary)]">{a.portfolioLabel} · <span className="tnum">{formatINR(Number(a.fd.maturity_amount))}</span></p>
           </div>
-          <span className={`text-xs font-bold shrink-0 tnum ${a.daysLeft <= 7 ? 'text-[var(--negative)]' : 'text-[var(--warning)]'}`}>
-            {a.daysLeft === 0 ? 'Today' : `${a.daysLeft}d`}
+          <span className={`text-xs font-bold shrink-0 tnum ${a.daysLeft <= 7 ? 'text-[var(--warning)]' : 'text-[var(--text-secondary)]'}`}>
+            {a.daysLeft}d
           </span>
         </div>
       ))}
@@ -141,12 +172,12 @@ const FDReminders = React.memo(function FDReminders({ alerts }: { alerts: FDMatu
 });
 
 const InsuranceReminders = React.memo(function InsuranceReminders({ alerts }: { alerts: InsuranceRenewalAlert[] }) {
-  if (alerts.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No upcoming renewals</p>;
+  if (alerts.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No renewals in next 60 days</p>;
   return (
     <div className="space-y-2">
       {alerts.map((a, i) => (
-        <div key={`ins-${i}`} className="flex items-center gap-2">
-          <div className={`w-6 h-6 rounded-[var(--radius-medium)] flex items-center justify-center shrink-0 ${a.daysLeft <= 15 ? 'bg-[var(--negative-soft)] text-[var(--negative)]' : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)]'}`}>
+        <div key={i} className="flex items-center gap-2 p-2 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)]">
+          <div className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--negative-soft)] text-[var(--negative)] flex items-center justify-center shrink-0">
             <Shield size={12} aria-hidden="true" />
           </div>
           <div className="flex-1 min-w-0">
@@ -194,10 +225,11 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
 
 /* ── Main Component ── */
 
-type InsightFilter = 'all' | 'stocks' | 'fds' | 'insurance' | 'due_soon';
+type InsightFilter = 'all' | 'health' | 'stocks' | 'fds' | 'insurance' | 'due_soon';
 
 const FILTERS: { id: InsightFilter; label: string }[] = [
   { id: 'all', label: 'All Insights' },
+  { id: 'health', label: '🛡️ Health Check' },
   { id: 'stocks', label: 'Stocks' },
   { id: 'fds', label: 'Deposits' },
   { id: 'insurance', label: 'Insurance' },
@@ -207,13 +239,25 @@ const FILTERS: { id: InsightFilter; label: string }[] = [
 export default React.memo(function InsightsPanel({
   insights,
   portfolios = [],
+  onNavigateAsset,
+  onRefreshPrices,
+  isLoadingPrices = false,
+  isPriceStale = false,
+  priceStatus = 'idle',
 }: InsightsPanelProps) {
   const [activeFilter, setActiveFilter] = useState<InsightFilter>('all');
+  const [showHealthModal, setShowHealthModal] = useState(false);
+
   const handleFilterClick = useCallback((id: InsightFilter) => {
     setActiveFilter(id);
   }, []);
 
+  const healthSummary = useMemo(() => {
+    return analyzePortfolioHealth(portfolios, { isPriceStale, priceStatus });
+  }, [portfolios, isPriceStale, priceStatus]);
+
   const f = activeFilter;
+  const showHealth = f === 'all' || f === 'health';
   const showStocks = f === 'all' || f === 'stocks';
   const showFDs = f === 'all' || f === 'fds' || f === 'due_soon';
   const showInsurance = f === 'all' || f === 'insurance' || f === 'due_soon';
@@ -225,6 +269,14 @@ export default React.memo(function InsightsPanel({
     return <InsightsSkeleton />;
   }
 
+  const getHealthBadge = (score: number) => {
+    if (score >= 90) return { label: 'A+ (Optimal)', color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200' };
+    if (score >= 70) return { label: 'B (Good)', color: 'text-amber-500 bg-amber-50 dark:bg-amber-950/40 border-amber-200' };
+    return { label: 'Action Needed', color: 'text-red-500 bg-red-50 dark:bg-red-950/40 border-red-200' };
+  };
+
+  const healthBadge = getHealthBadge(healthSummary.score);
+
   return (
     <div role="region" aria-label="Portfolio Insights" className="space-y-6">
       
@@ -234,7 +286,7 @@ export default React.memo(function InsightsPanel({
           <div className="w-6 h-6 rounded-[var(--radius-medium)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center">
             <BarChart3 size={13} aria-hidden="true" />
           </div>
-          <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider">Portfolio Insights</h3>
+          <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider">Portfolio Insights & Health</h3>
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
@@ -257,6 +309,40 @@ export default React.memo(function InsightsPanel({
           })}
         </div>
       </div>
+
+      {/* 0. Data Quality & Health Check Strip */}
+      {showHealth && (
+        <div className="apple-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[var(--border-subtle)] hover:border-blue-300 dark:hover:border-blue-700 transition-all">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-12 h-12 rounded-xl bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex flex-col items-center justify-center shrink-0 border border-blue-200/50 dark:border-blue-800/50">
+              <span className="text-base font-black leading-none">{healthSummary.score}</span>
+              <span className="text-[8px] font-bold opacity-80 uppercase">Score</span>
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold text-[var(--text-primary)]">Data Quality & Completeness</span>
+                <span className={`px-2 py-0.5 rounded-[var(--radius-small)] text-[10px] font-bold border ${healthBadge.color}`}>
+                  {healthBadge.label}
+                </span>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                {healthSummary.issues.length === 0
+                  ? 'All records, valuations, maturity dates, and attached vault documents are complete.'
+                  : `${healthSummary.criticalCount} critical, ${healthSummary.warningCount} warnings, and ${healthSummary.infoCount} missing documents found.`}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowHealthModal(true)}
+            className="shrink-0 w-full sm:w-auto px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[var(--radius-medium)] text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm ios-press transition-colors"
+          >
+            <span>{healthSummary.issues.length > 0 ? 'Run Health Audit' : 'View Audit Details'}</span>
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
 
       {/* 1. Performance Overview Section */}
       {hasPerformanceCards && (
@@ -297,6 +383,20 @@ export default React.memo(function InsightsPanel({
             )}
           </div>
         </div>
+      )}
+
+      {/* Modal Dialog */}
+      {showHealthModal && (
+        <Suspense fallback={null}>
+          <DataQualityHealthModal
+            isOpen={showHealthModal}
+            onClose={() => setShowHealthModal(false)}
+            healthSummary={healthSummary}
+            onNavigateAsset={onNavigateAsset}
+            onRefreshPrices={onRefreshPrices}
+            isLoadingPrices={isLoadingPrices}
+          />
+        </Suspense>
       )}
 
     </div>

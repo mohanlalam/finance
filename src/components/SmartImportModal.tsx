@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Upload, Sparkles, X, CheckCircle, AlertCircle, FileText, Camera, Key } from './icons/AppIcons';
+import { useState, useRef, DragEvent } from 'react';
+import { Upload, Sparkles, CheckCircle, AlertCircle, FileText, Camera, Key } from './icons/AppIcons';
 import Modal from './Modal';
 import { Button } from './ui/Button';
 import { extractAssetFromDocument, getGeminiApiKey, setStoredGeminiApiKey, ExtractedAssetResult } from '../utils/aiDocumentExtractor';
@@ -31,52 +31,68 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (selectedFile: File) => {
-    setError(null);
     setFile(selectedFile);
+    setError(null);
     setExtractedResult(null);
 
     if (selectedFile.type.startsWith('image/')) {
-      const previewUrl = URL.createObjectURL(selectedFile);
-      setFilePreview(previewUrl);
+      const reader = new FileReader();
+      reader.onload = (e) => setFilePreview(e.target?.result as string);
+      reader.readAsDataURL(selectedFile);
     } else {
       setFilePreview(null);
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileSelect(e.dataTransfer.files[0]);
     }
   };
 
-  const handleExtract = async () => {
+  const handleSaveApiKey = () => {
+    if (apiKey.trim()) {
+      setStoredGeminiApiKey(apiKey.trim());
+      setShowApiKeyInput(false);
+    }
+  };
+
+  const handleProcessDocument = async () => {
     if (!file) {
-      setError('Please select a file or take a photo first.');
+      setError('Please select a document or image file first.');
       return;
     }
 
-    const currentKey = apiKey.trim() || getGeminiApiKey();
-    if (!currentKey) {
-      setShowApiKeyInput(true);
-      setError('Please enter your free Google Gemini API Key below.');
-      return;
-    }
-
-    setStoredGeminiApiKey(currentKey);
     setIsProcessing(true);
     setError(null);
-    setProgressStep('Analyzing document structure with Gemini 1.5 Flash...');
+    setProgressStep('Analyzing document structure...');
 
     try {
-      const result = await extractAssetFromDocument(file, currentKey);
+      setTimeout(() => setProgressStep('Extracting financial values with Gemini AI...'), 1200);
+      const result = await extractAssetFromDocument(file, apiKey || undefined);
       setExtractedResult(result);
-      setProgressStep('Complete!');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to extract data from document.');
+      setError(err instanceof Error ? err.message : 'Failed to extract financial data from document.');
     } finally {
       setIsProcessing(false);
+      setProgressStep('');
     }
+  };
+
+  const normalizeInsuranceType = (type?: string): 'health' | 'term' | 'life' | 'motor' | 'other' => {
+    if (!type) return 'life';
+    const t = type.toLowerCase();
+    if (t === 'health' || t === 'term' || t === 'life' || t === 'motor') return t;
+    return 'other'; // home, travel, etc. map cleanly to 'other'
+  };
+
+  const normalizePropertyType = (type?: string): 'apartment' | 'plot' | 'house' | 'commercial' => {
+    if (!type) return 'apartment';
+    const t = type.toLowerCase();
+    if (t === 'apartment' || t === 'plot' || t === 'house' || t === 'commercial') return t;
+    if (t === 'villa') return 'house';
+    return 'apartment'; // fallback
   };
 
   const handleSaveAsset = async () => {
@@ -90,59 +106,69 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
 
       // 1. Create the financial holding
       if (assetType === 'fd') {
+        const principal = data.principalAmount || 0;
+        const rate = data.interestRate || 0;
+        const maturityAmt = data.maturityAmount || principal * (1 + (rate * 0.01));
         const res = await addAsset('fd', targetPortfolio, {
           bank_name: data.bankName || 'Unknown Bank',
-          principal_amount: data.principalAmount || 0,
-          interest_rate: data.interestRate || 0,
+          principal_amount: principal,
+          interest_rate: rate,
           start_date: data.startDate || new Date().toISOString().split('T')[0],
-          maturity_date: data.maturityDate,
-          maturity_amount: data.maturityAmount,
+          maturity_date: data.maturityDate || null,
+          maturity_amount: maturityAmt,
+          status: 'active',
           notes: data.notes,
         });
-        createdAssetId = res?.id || res?.data?.id;
+        createdAssetId = res?.id;
       } else if (assetType === 'gold') {
+        const pPrice = data.purchasePrice || 0;
         const res = await addAsset('gold', targetPortfolio, {
           item_name: data.itemName || 'Gold Holding',
           purity: data.purity || '24K',
           weight_grams: data.weightGrams || 0,
-          purchase_price: data.purchasePrice,
-          current_valuation: data.currentValuation || data.purchasePrice,
+          purchase_price: pPrice,
+          current_valuation: data.currentValuation || pPrice,
           purchase_date: data.purchaseDate,
           notes: data.notes,
         });
-        createdAssetId = res?.id || res?.data?.id;
+        createdAssetId = res?.id;
       } else if (assetType === 'insurance') {
         const res = await addAsset('insurance', targetPortfolio, {
           policy_name: data.policyName || 'Insurance Policy',
-          insurance_type: data.insuranceType || 'life',
-          provider: data.provider,
+          insurance_type: normalizeInsuranceType(data.insuranceType),
+          provider: data.provider || 'Unknown Provider',
           policy_number: data.policyNumber,
           sum_assured: data.sumAssured || 0,
-          premium_amount: data.premiumAmount,
+          premium_amount: data.premiumAmount || 0,
           renewal_date: data.renewalDate,
           notes: data.notes,
         });
-        createdAssetId = res?.id || res?.data?.id;
+        createdAssetId = res?.id;
       } else if (assetType === 'real_estate') {
+        const pPrice = data.purchasePrice || 0;
         const res = await addAsset('real_estate', targetPortfolio, {
           property_name: data.propertyName || 'Real Estate Property',
-          property_type: data.propertyType || 'apartment',
+          property_type: normalizePropertyType(data.propertyType),
           location: data.location,
-          purchase_price: data.purchasePrice,
-          current_valuation: data.currentValuation || data.purchasePrice,
+          purchase_price: pPrice,
+          current_valuation: data.currentValuation || pPrice,
           purchase_date: data.startDate || data.purchaseDate,
+          monthly_rent: 0,
           notes: data.notes,
         });
-        createdAssetId = res?.id || res?.data?.id;
+        createdAssetId = res?.id;
       } else if (assetType === 'sip') {
-        await addAsset('sip', targetPortfolio, {
+        const monthlySip = data.monthlySip || 0;
+        const res = await addAsset('sip', targetPortfolio, {
           fund_name: data.fundName || 'Mutual Fund SIP',
-          monthly_sip: data.monthlySip || 0,
+          monthly_sip: monthlySip,
           expected_cagr: data.expectedCagr || 12,
           units: data.units || 0,
           start_date: data.startDate || new Date().toISOString().split('T')[0],
+          fallback_valuation: monthlySip * 12,
           notes: data.notes,
         });
+        createdAssetId = res?.id;
       }
 
       // 2. Upload file to Supabase storage and link to Document Vault
@@ -206,10 +232,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
               />
               <button
                 type="button"
-                onClick={() => {
-                  setStoredGeminiApiKey(apiKey);
-                  setShowApiKeyInput(false);
-                }}
+                onClick={handleSaveApiKey}
                 className="px-3 py-1.5 bg-blue-600 text-white rounded-[var(--radius-small)] font-bold text-xs hover:bg-blue-700 ios-press"
               >
                 Save
@@ -304,7 +327,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
             <Button
               type="button"
               variant="primary"
-              onClick={handleExtract}
+              onClick={handleProcessDocument}
               disabled={!file || isProcessing}
               className="w-full py-2.5"
             >

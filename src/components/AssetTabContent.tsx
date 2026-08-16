@@ -34,7 +34,7 @@ interface AssetTabContentProps {
   onAddHoldingClick: () => void;
   onDeleteStock: (holdingId: string) => Promise<void>;
   onUpdateStock: (holdingId: string, qty: number, avgPrice: number) => Promise<void>;
-  onAddAsset: (assetType: string, portfolioName: string, payload: AssetPayload) => Promise<void>;
+  onAddAsset: (assetType: string, portfolioName: string, payload: AssetPayload) => Promise<{ id?: string } | undefined | void>;
   onUpdateAsset: (assetType: string, id: string, payload: Partial<AssetPayload>) => Promise<void>;
   onDeleteAsset: (assetType: string, id: string) => Promise<void>;
   quickAddTarget?: 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null;

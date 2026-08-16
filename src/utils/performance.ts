@@ -301,7 +301,6 @@ export function getPortfolioCashFlows(portfolio: Portfolio, target: CashFlow[] =
   if (!portfolio) return target;
   const cashflows = target;
   const now = new Date();
-  const nowMs = now.getTime();
   const nowStr = formatLocalDate(now.getFullYear(), now.getMonth(), now.getDate());
 
   const addFlow = (dateStr: string | undefined, amount: number) => {

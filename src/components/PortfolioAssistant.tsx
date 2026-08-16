@@ -344,7 +344,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
   };
 
   return (
-    <div className="apple-card p-4 sm:p-5 text-slate-800 dark:text-slate-100 relative overflow-hidden flex flex-col h-[370px] justify-between">
+    <div className="apple-card p-4 sm:p-5 text-slate-800 dark:text-slate-100 relative overflow-hidden flex flex-col min-h-[370px] justify-between">
       {/* Background ambient lighting */}
       <div className="absolute top-[-40px] right-[-40px] w-[140px] h-[140px] bg-blue-500/8 dark:bg-blue-500/15 rounded-full blur-[35px] pointer-events-none" />
 

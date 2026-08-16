@@ -59,7 +59,7 @@ describe('aiDocumentExtractor', () => {
       ],
     };
 
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => mockJsonResponse,
     } as unknown as Response);

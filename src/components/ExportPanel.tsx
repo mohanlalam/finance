@@ -1,5 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, FileSpreadsheet, FileText, Database, X, Loader2, CheckCircle, AlertCircle, TrendingUp, Landmark, FolderOpen } from './icons/AppIcons';
+import {
+  Upload,
+  FileSpreadsheet,
+  FileText,
+  Database,
+  X,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  AlertTriangle,
+  TrendingUp,
+  Landmark,
+  FolderOpen,
+  ShieldCheck
+} from './icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
 import { getRDEffectiveValue } from '../utils/rdUtils';
@@ -8,6 +22,8 @@ import { openPDFReportInNewTab } from '../utils/pdfReport';
 import Modal from './Modal';
 import { Button } from './ui/Button';
 import { IconButton } from './ui/IconButton';
+import { validateBackupJSON, BackupValidationReport, RestoreExecutionReport } from '../utils/backupValidation';
+import { usePortfolioActions } from '../contexts/PortfolioContext';
 
 interface ExportPanelProps {
   portfolios: Portfolio[];
@@ -161,27 +177,29 @@ function documentsToCSV(portfolios: Portfolio[]): string {
   return lines.join('\n');
 }
 
-/* ── CSV Parser ── */
+/* ── CSV Import Parser ── */
 
 function parseCSV(text: string): string[][] {
-  const lines = text.split('\n').filter((l) => l.trim());
+  const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
   return lines.map((line) => {
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
     for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"') {
+      const ch = line[i];
+      if (ch === '"') {
         if (inQuotes && line[i + 1] === '"') {
           current += '"';
           i++;
         } else {
           inQuotes = !inQuotes;
         }
-        continue;
+      } else if (ch === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += ch;
       }
-      if (char === ',' && !inQuotes) { result.push(current.trim()); current = ''; continue; }
-      current += char;
     }
     result.push(current.trim());
     return result;
@@ -381,6 +399,184 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
     }
   }
 
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [backupJSONText, setBackupJSONText] = useState('');
+  const [validationReport, setValidationReport] = useState<BackupValidationReport | null>(null);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [restoreReport, setRestoreReport] = useState<RestoreExecutionReport | null>(null);
+  const jsonFileInputRef = useRef<HTMLInputElement>(null);
+
+  const { addAsset, addPortfolio } = usePortfolioActions();
+
+  function handleRestoreJSONFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = reader.result as string;
+      setBackupJSONText(text);
+      const report = validateBackupJSON(text, portfolios);
+      setValidationReport(report);
+      setRestoreReport(null);
+      setShowRestoreModal(true);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  async function handleExecuteRestore() {
+    if (!backupJSONText || !validationReport?.isValid) return;
+    setIsRestoring(true);
+
+    try {
+      const parsedData = JSON.parse(backupJSONText);
+      const portfoliosToRestore: Portfolio[] = Array.isArray(parsedData)
+        ? parsedData
+        : Array.isArray(parsedData.portfolios)
+        ? parsedData.portfolios
+        : [];
+
+      let createdAssets = 0;
+      const errors: string[] = [];
+      const restoredPortfolios: string[] = [];
+
+      for (const p of portfoliosToRestore) {
+        const pName = p.name || p.id;
+        restoredPortfolios.push(pName);
+
+        // 1. Ensure Portfolio exists or create it
+        const exists = portfolios.some(ep => ep.name === pName);
+        if (!exists && pName) {
+          try {
+            await addPortfolio(pName, p.label || pName);
+          } catch {
+            // may already exist
+          }
+        }
+
+        // 2. Restore Stocks
+        if (Array.isArray(p.holdings)) {
+          for (const h of p.holdings) {
+            try {
+              const qty = Number(h.qty) || 0;
+              const avgPrice = Number(h.avgPrice) || 0;
+              await addAsset('stock', pName, {
+                stockName: h.stockName || h.ticker,
+                ticker: h.ticker,
+                yahooSymbol: h.yahooSymbol || `${h.ticker}.NS`,
+                qty,
+                avgPrice,
+                amountInvested: qty * avgPrice,
+                weekLow52: 0,
+                weekHigh52: 0,
+              });
+              createdAssets++;
+            } catch (err: any) {
+              errors.push(`Stock ${h.ticker}: ${err.message || 'Failed'}`);
+            }
+          }
+        }
+
+        // 3. Restore Fixed Deposits
+        if (Array.isArray(p.fixedDeposits)) {
+          for (const fd of p.fixedDeposits) {
+            try {
+              await addAsset('fd', pName, {
+                bank_name: fd.bank_name,
+                principal_amount: Number(fd.principal_amount),
+                interest_rate: Number(fd.interest_rate),
+                start_date: fd.start_date,
+                maturity_date: fd.maturity_date || null,
+                maturity_amount: Number(fd.maturity_amount) || Number(fd.principal_amount),
+                status: fd.status || 'active',
+                notes: fd.notes,
+              });
+              createdAssets++;
+            } catch (err: any) {
+              errors.push(`FD ${fd.bank_name}: ${err.message || 'Failed'}`);
+            }
+          }
+        }
+
+        // 4. Restore Gold Holdings
+        if (Array.isArray(p.goldHoldings)) {
+          for (const g of p.goldHoldings) {
+            try {
+              await addAsset('gold', pName, {
+                item_name: g.item_name,
+                purity: g.purity || '24K',
+                weight_grams: Number(g.weight_grams),
+                purchase_price: Number(g.purchase_price),
+                current_valuation: Number(g.current_valuation) || Number(g.purchase_price),
+                purchase_date: g.purchase_date,
+                notes: g.notes,
+              });
+              createdAssets++;
+            } catch (err: any) {
+              errors.push(`Gold ${g.item_name}: ${err.message || 'Failed'}`);
+            }
+          }
+        }
+
+        // 5. Restore Real Estate
+        if (Array.isArray(p.realEstate)) {
+          for (const re of p.realEstate) {
+            try {
+              await addAsset('real_estate', pName, {
+                property_name: re.property_name,
+                property_type: re.property_type || 'apartment',
+                location: re.location,
+                purchase_price: Number(re.purchase_price),
+                current_valuation: Number(re.current_valuation) || Number(re.purchase_price),
+                purchase_date: re.purchase_date,
+                monthly_rent: Number(re.monthly_rent) || 0,
+                notes: re.notes,
+              });
+              createdAssets++;
+            } catch (err: any) {
+              errors.push(`Property ${re.property_name}: ${err.message || 'Failed'}`);
+            }
+          }
+        }
+
+        // 6. Restore Insurance
+        if (Array.isArray(p.insurances)) {
+          for (const ins of p.insurances) {
+            try {
+              await addAsset('insurance', pName, {
+                policy_name: ins.policy_name,
+                insurance_type: ins.insurance_type || 'life',
+                provider: ins.provider || 'Provider',
+                policy_number: ins.policy_number,
+                sum_assured: Number(ins.sum_assured),
+                premium_amount: Number(ins.premium_amount),
+                renewal_date: ins.renewal_date,
+                notes: ins.notes,
+              });
+              createdAssets++;
+            } catch (err: any) {
+              errors.push(`Insurance ${ins.policy_name}: ${err.message || 'Failed'}`);
+            }
+          }
+        }
+      }
+
+      setRestoreReport({
+        timestamp: new Date().toISOString(),
+        createdAssets,
+        updatedAssets: 0,
+        skippedDuplicates: 0,
+        errors,
+        restoredPortfolios,
+      });
+    } catch (err: any) {
+      setValidationReport(prev => prev ? { ...prev, schemaErrors: [err.message || 'Restore failed'] } : null);
+    } finally {
+      setIsRestoring(false);
+    }
+  }
+
   return (
     <>
       <div className="relative" ref={containerRef}>
@@ -396,8 +592,8 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[14px] shadow-xl z-50 w-60 py-1">
-            <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Export All</div>
+          <div className="absolute right-0 top-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[14px] shadow-xl z-50 w-64 py-1">
+            <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Export & Backup</div>
             <button
               onClick={handleExportCSV}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
@@ -426,6 +622,23 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             </button>
 
             <div className="border-t border-slate-100 dark:border-slate-700 my-1" />
+            <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Restore & Import</div>
+            <button
+              onClick={() => { jsonFileInputRef.current?.click(); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors text-left"
+            >
+              <ShieldCheck size={14} className="text-blue-500" />
+              Restore Backup (JSON with Preview)
+            </button>
+            <button
+              onClick={() => { setShowImport(true); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/30 transition-colors text-left"
+            >
+              <Upload size={14} className="text-violet-500" />
+              Import Zerodha / Groww / CAS
+            </button>
+
+            <div className="border-t border-slate-100 dark:border-slate-700 my-1" />
             <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Export Specific</div>
             <button
               onClick={() => { downloadFile(stocksToCSV(portfolios), `stocks-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv'); setOpen(false); }}
@@ -448,20 +661,154 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
               <FolderOpen size={14} className="text-slate-500" />
               Documents Only (CSV)
             </button>
-
-            <div className="border-t border-slate-100 dark:border-slate-700 my-1" />
-            <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Import Broker Data</div>
-            <button
-              onClick={() => { setShowImport(true); setOpen(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/30 transition-colors text-left"
-            >
-              <Upload size={14} className="text-violet-500" />
-              Import Zerodha / Groww / CAS
-            </button>
           </div>
         )}
       </div>
 
+      {/* Hidden JSON file input for backup restore */}
+      <input
+        ref={jsonFileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleRestoreJSONFileSelect}
+        className="hidden"
+      />
+
+      {/* Backup Restore Preview Modal */}
+      {showRestoreModal && validationReport && (
+        <Modal
+          isOpen={showRestoreModal}
+          onClose={() => !isRestoring && setShowRestoreModal(false)}
+          title="🛡️ Backup Restore & Schema Validation Preview"
+          maxWidth="max-w-xl"
+          preventClose={isRestoring}
+        >
+          <div className="p-5 space-y-4">
+            {/* Status Header */}
+            <div className={`p-3.5 rounded-[var(--radius-medium)] border flex items-start gap-3 ${
+              validationReport.isValid
+                ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-300'
+                : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300'
+            }`}>
+              {validationReport.isValid ? <ShieldCheck size={20} className="shrink-0 text-emerald-600 mt-0.5" /> : <AlertCircle size={20} className="shrink-0 text-red-600 mt-0.5" />}
+              <div className="min-w-0">
+                <h4 className="font-bold text-xs">
+                  {validationReport.isValid ? 'Valid Backup Schema Verified' : 'Invalid Backup File'}
+                </h4>
+                <p className="text-[11px] mt-0.5 opacity-90">
+                  {validationReport.isValid
+                    ? `Contains ${validationReport.counts.totalAssets} records across ${validationReport.portfolioCount} family portfolios (${validationReport.portfolioNames.join(', ')}).`
+                    : 'The selected file contains errors and cannot be safely restored.'}
+                </p>
+                {validationReport.exportedAt && (
+                  <p className="text-[10px] mt-1 font-semibold opacity-75">
+                    Exported timestamp: {new Date(validationReport.exportedAt).toLocaleString()}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Counts by Category */}
+            {validationReport.isValid && (
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
+                  Asset Breakdown in Backup
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
+                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.stocks}</span>
+                    <span className="text-[10px] text-slate-500">Stocks</span>
+                  </div>
+                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
+                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.fixedDeposits}</span>
+                    <span className="text-[10px] text-slate-500">FDs</span>
+                  </div>
+                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
+                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.goldHoldings}</span>
+                    <span className="text-[10px] text-slate-500">Gold</span>
+                  </div>
+                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
+                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.realEstate}</span>
+                    <span className="text-[10px] text-slate-500">Real Estate</span>
+                  </div>
+                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
+                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.insurances}</span>
+                    <span className="text-[10px] text-slate-500">Insurance</span>
+                  </div>
+                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
+                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.sipAccounts}</span>
+                    <span className="text-[10px] text-slate-500">SIPs</span>
+                  </div>
+                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
+                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.rdAccounts}</span>
+                    <span className="text-[10px] text-slate-500">RDs</span>
+                  </div>
+                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
+                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.documents}</span>
+                    <span className="text-[10px] text-slate-500">Documents</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Warnings / Duplicates */}
+            {validationReport.warnings.length > 0 && (
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-[var(--radius-medium)] text-xs text-amber-800 dark:text-amber-300 space-y-1">
+                <div className="font-bold flex items-center gap-1">
+                  <AlertTriangle size={14} className="text-amber-600" />
+                  <span>Dry-run Diagnostics:</span>
+                </div>
+                {validationReport.warnings.map((w, idx) => (
+                  <p key={idx} className="text-[11px] leading-relaxed pl-4">• {w}</p>
+                ))}
+              </div>
+            )}
+
+            {/* Post-Restore Report */}
+            {restoreReport && (
+              <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-[var(--radius-medium)] text-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold text-emerald-800 dark:text-emerald-300">
+                  <CheckCircle size={16} className="text-emerald-600" />
+                  <span>Restore Completed Successfully</span>
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                  Restored {restoreReport.createdAssets} asset records into {restoreReport.restoredPortfolios.join(', ')}.
+                </p>
+                {restoreReport.errors.length > 0 && (
+                  <div className="text-red-500 text-[10px]">
+                    {restoreReport.errors.length} items encountered issues: {restoreReport.errors.slice(0, 3).join(', ')}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 pt-2 border-t border-[var(--border-subtle)]">
+              <Button
+                variant="secondary"
+                disabled={isRestoring}
+                onClick={() => setShowRestoreModal(false)}
+                className="flex-1 text-xs py-2"
+              >
+                {restoreReport ? 'Close' : 'Cancel'}
+              </Button>
+              {!restoreReport && (
+                <Button
+                  variant="primary"
+                  disabled={isRestoring || !validationReport.isValid}
+                  onClick={handleExecuteRestore}
+                  className="flex-1 text-xs py-2 flex items-center justify-center gap-1.5"
+                >
+                  {isRestoring ? <Loader2 size={13} className="animate-spin" /> : <ShieldCheck size={14} />}
+                  <span>{isRestoring ? 'Restoring Data...' : 'Confirm & Restore'}</span>
+                </Button>
+              )}
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Existing CSV Import Modal */}
       <Modal
         isOpen={showImport}
         onClose={() => !importing && setShowImport(false)}

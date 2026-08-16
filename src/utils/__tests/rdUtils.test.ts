@@ -49,7 +49,7 @@ describe('rdUtils', () => {
       ...mockRD,
       start_date: '2028-01-01',
       maturity_date: '2029-01-01',
-      contributions: undefined,
+      contributions: [],
     };
     expect(getRDEffectiveValue(futureRD, new Date('2026-06-01'))).toBe(0);
   });

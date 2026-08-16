@@ -653,6 +653,11 @@ export default function AppShell() {
                         insights={insights}
                         portfolios={portfolios}
                         activePortfolio={portfolio}
+                        onNavigateAsset={setActiveAsset}
+                        onRefreshPrices={refreshPrices}
+                        isLoadingPrices={isLoadingPrices}
+                        isPriceStale={isPriceStale}
+                        priceStatus={priceStatus}
                       />
                     </Suspense>
                   </SectionErrorBoundary>
@@ -820,6 +825,11 @@ export default function AppShell() {
                         insights={insights}
                         portfolios={portfolios}
                         activePortfolio={portfolio}
+                        onNavigateAsset={setActiveAsset}
+                        onRefreshPrices={refreshPrices}
+                        isLoadingPrices={isLoadingPrices}
+                        isPriceStale={isPriceStale}
+                        priceStatus={priceStatus}
                       />
                     </Suspense>
                   </SectionErrorBoundary>

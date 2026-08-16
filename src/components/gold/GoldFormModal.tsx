@@ -94,6 +94,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
     setLoading(true);
     setError(null);
     try {
+      let assetId: string | undefined;
       const payload = {
         item_name: itemName.trim(),
         purity,

@@ -95,6 +95,15 @@ export function DepositDetailsCard({
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${isMatured ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'}`}>
                 {isMatured ? 'Matured' : `${fd.interest_rate}% p.a.`}
               </span>
+              {fdDocs.length > 0 ? (
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">
+                  📎 {fdDocs.length} Doc{fdDocs.length > 1 ? 's' : ''}
+                </span>
+              ) : (
+                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 shrink-0">
+                  No Doc
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">
               {fd.start_date} &rarr; {fd.maturity_date || 'Ongoing'}

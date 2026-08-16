@@ -37,7 +37,7 @@ export interface PortfolioActionContextValue {
   addPortfolio: (name: string, label: string) => Promise<void>;
   renamePortfolio: (id: string, label: string) => Promise<void>;
   deletePortfolio: (id: string) => Promise<void>;
-  addAsset: (assetType: string, portfolioName: string, payload: AssetPayload, options?: { reload?: boolean }) => Promise<void>;
+  addAsset: (assetType: string, portfolioName: string, payload: AssetPayload, options?: { reload?: boolean }) => Promise<{ id?: string } | undefined>;
   updateAsset: (assetType: string, id: string, payload: Partial<AssetPayload>) => Promise<void>;
   deleteAsset: (assetType: string, id: string) => Promise<void>;
   isMutatingRef: MutableRefObject<boolean>;

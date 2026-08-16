@@ -1,14 +1,47 @@
 import React, { useId, useState } from 'react';
-import { FileText, Upload, X, Trash2, Paperclip, ExternalLink, Calendar, Plus } from '../icons/AppIcons';
+import { FileText, Upload, X, Trash2, Paperclip, ExternalLink, Calendar, Plus, AlertCircle } from '../icons/AppIcons';
 import { DocumentMetadata } from '../../types/portfolio';
 import { getDocumentUrl } from '../../utils/formatters';
+
+export type DocumentCategory =
+  | 'fd_advice'
+  | 'policy_schedule'
+  | 'title_deed'
+  | 'tax_receipt'
+  | 'invoice'
+  | 'gold_hallmark'
+  | 'account_statement'
+  | 'general';
 
 export interface PendingDocument {
   id: string;
   file: File;
   name: string;
+  category?: DocumentCategory;
   expiryDate?: string;
 }
+
+const CATEGORY_OPTIONS: { id: DocumentCategory; label: string }[] = [
+  { id: 'general', label: '📄 General Document' },
+  { id: 'fd_advice', label: '🏦 FD Deposit Advice' },
+  { id: 'policy_schedule', label: '🛡️ Policy Schedule / Bond' },
+  { id: 'title_deed', label: '🏡 Title Deed / Sale Agreement' },
+  { id: 'tax_receipt', label: '🧾 Tax / Property Tax Receipt' },
+  { id: 'invoice', label: '🛒 Purchase Bill / Invoice' },
+  { id: 'gold_hallmark', label: '✨ Hallmark / Purity Certificate' },
+  { id: 'account_statement', label: '📊 Account Statement' },
+];
+
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+const ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/csv',
+]);
 
 interface DocumentAttachmentFieldProps {
   files: PendingDocument[];
@@ -19,6 +52,7 @@ interface DocumentAttachmentFieldProps {
   onDeleteExistingDoc?: (docId: string) => Promise<void>;
   assetTypeLabel?: string;
   hintText?: string;
+  defaultCategory?: DocumentCategory;
 }
 
 export function DocumentAttachmentField({
@@ -29,19 +63,57 @@ export function DocumentAttachmentField({
   existingDocuments = [],
   onDeleteExistingDoc,
   assetTypeLabel = 'asset',
-  hintText = 'Upload receipts, certificates, deeds, or policy bonds (PDF, JPG, PNG, DOCX, XLSX up to 10MB)',
+  hintText,
+  defaultCategory = 'general',
 }: DocumentAttachmentFieldProps) {
   const inputId = useId();
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Asset-tailored default hint
+  const effectiveHint =
+    hintText ||
+    (assetTypeLabel === 'gold'
+      ? 'Recommended: Upload purchase invoice, tax bill or hallmark purity certificate (Max 10MB)'
+      : assetTypeLabel === 'real_estate'
+      ? 'Recommended: Upload registered title deed, khata, or latest property tax receipt (Max 10MB)'
+      : assetTypeLabel === 'insurance'
+      ? 'Recommended: Upload digital policy bond or renewal premium receipt (Max 10MB)'
+      : assetTypeLabel === 'fd'
+      ? 'Recommended: Upload fixed deposit advice or TDS certificate (Max 10MB)'
+      : 'Upload receipts, certificates, deeds, or policy bonds (PDF, JPG, PNG, DOCX up to 10MB)');
 
   const addFiles = (newFileList: FileList | File[]) => {
-    const newDocs: PendingDocument[] = Array.from(newFileList).map((file, idx) => ({
-      id: `pending-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 7)}`,
-      file,
-      name: file.name.replace(/\.[^/.]+$/, ''), // Default name without file extension for clean display
-      expiryDate: '',
-    }));
-    onFilesChange([...files, ...newDocs]);
+    setValidationError(null);
+    const errors: string[] = [];
+    const validDocs: PendingDocument[] = [];
+
+    Array.from(newFileList).forEach((file, idx) => {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        errors.push(`"${file.name}" exceeds the 10MB file size limit.`);
+        return;
+      }
+      if (file.type && !ALLOWED_MIME_TYPES.has(file.type) && !file.name.match(/\.(pdf|jpg|jpeg|png|webp|docx|xlsx|csv)$/i)) {
+        errors.push(`"${file.name}" has an unsupported format. Please upload PDF, Image, Word, or Excel.`);
+        return;
+      }
+
+      validDocs.push({
+        id: `pending-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 7)}`,
+        file,
+        name: file.name.replace(/\.[^/.]+$/, ''), // Default name without file extension
+        category: defaultCategory,
+        expiryDate: '',
+      });
+    });
+
+    if (errors.length > 0) {
+      setValidationError(errors.join(' '));
+    }
+
+    if (validDocs.length > 0) {
+      onFilesChange([...files, ...validDocs]);
+    }
   };
 
   const handleSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,18 +248,39 @@ export function DocumentAttachmentField({
                 </button>
               </div>
 
-              {/* Editable Label */}
-              <div>
-                <label className="block text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
-                  Document Label / Description
-                </label>
-                <input
-                  type="text"
-                  value={doc.name}
-                  onChange={(e) => handleUpdatePendingName(doc.id, e.target.value)}
-                  placeholder="e.g. Purchase Invoice / Hallmark Certificate / Deed"
-                  className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-small)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
-                />
+              {/* Editable Label & Category Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
+                    Document Category
+                  </label>
+                  <select
+                    value={doc.category || defaultCategory}
+                    onChange={(e) => {
+                      const cat = e.target.value as DocumentCategory;
+                      onFilesChange(files.map((d) => (d.id === doc.id ? { ...d, category: cat } : d)));
+                    }}
+                    className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-small)] px-2 py-1.5 text-xs text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                  >
+                    {CATEGORY_OPTIONS.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
+                    Document Label / Description
+                  </label>
+                  <input
+                    type="text"
+                    value={doc.name}
+                    onChange={(e) => handleUpdatePendingName(doc.id, e.target.value)}
+                    placeholder="e.g. Purchase Invoice / Deed"
+                    className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-small)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                  />
+                </div>
               </div>
 
               {/* Optional Expiry Date */}
@@ -207,6 +300,14 @@ export function DocumentAttachmentField({
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Validation Error Banner */}
+      {validationError && (
+        <div className="p-2.5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-[var(--radius-medium)] text-xs text-red-600 dark:text-red-400 flex items-center gap-2">
+          <AlertCircle size={14} className="shrink-0" />
+          <span>{validationError}</span>
         </div>
       )}
 
@@ -242,7 +343,7 @@ export function DocumentAttachmentField({
             <p className="font-semibold text-center pointer-events-none">
               <span className="text-[var(--accent-blue)] underline">Click to upload</span> or drag &amp; drop files
             </p>
-            <p className="text-[10px] text-[var(--text-tertiary)] text-center pointer-events-none">{hintText}</p>
+            <p className="text-[10px] text-[var(--text-tertiary)] text-center pointer-events-none">{effectiveHint}</p>
           </>
         ) : (
           <>
