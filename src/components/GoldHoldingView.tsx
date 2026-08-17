@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { GoldHolding, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import ConfirmModal from './ConfirmModal';
 import Modal from './Modal';
@@ -11,7 +11,7 @@ import { useAssetModal } from '../hooks/useAssetModal';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
 
-import { deriveGoldRates } from '../utils/goldPricing';
+import { deriveGoldRates, getStoredGoldRate, saveStoredGoldRate, syncDailyGoldRateIfNeeded } from '../utils/goldPricing';
 import { formatINR } from '../utils/formatters';
 
 interface PortfolioOption {
@@ -71,15 +71,23 @@ export function GoldHoldingView({
   }, [onDelete, addToast, setConfirmDeleteItem]);
 
   const [customRate, setCustomRate] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem('finance_custom_gold_rate_24k');
-      return saved ? parseFloat(saved) : 15200;
-    } catch {
-      return 15200;
-    }
+    return getStoredGoldRate();
   });
   const [isEditingRate, setIsEditingRate] = useState(false);
   const [tempRateInput, setTempRateInput] = useState('');
+
+  // Daily automatic gold rate sync (only executes once every 24 hours)
+  useEffect(() => {
+    let isMounted = true;
+    syncDailyGoldRateIfNeeded().then((rate) => {
+      if (isMounted && rate) {
+        setCustomRate(rate);
+      }
+    }).catch((err) => {
+      console.warn('[GoldHoldingView] Daily gold sync skipped:', err);
+    });
+    return () => { isMounted = false; };
+  }, []);
 
   const rates = deriveGoldRates(customRate);
 
@@ -87,9 +95,7 @@ export function GoldHoldingView({
     const val = parseFloat(tempRateInput);
     if (!isNaN(val) && val > 1000) {
       setCustomRate(val);
-      try {
-        localStorage.setItem('finance_custom_gold_rate_24k', String(val));
-      } catch { /* ignore */ }
+      saveStoredGoldRate(val);
       addToast(`24K Gold spot rate updated to ${formatINR(val)}/g`, 'success');
     }
     setIsEditingRate(false);
