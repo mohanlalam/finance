@@ -11,8 +11,25 @@ export interface GoldRates {
   source: string;
 }
 
-// Fallback baseline spot rate per gram in INR (calibrated to current Indian Bullion & Jewellers Association rate ~ ₹7,250/g for 24K)
-export const DEFAULT_GOLD_RATE_24K = 7250;
+// Current baseline spot rate per gram in INR (calibrated to Indian Bullion & Jewellers Association rate ~ ₹15,200/g for 24K per gram / ₹1,52,000 per 10g)
+export const DEFAULT_GOLD_RATE_24K = 15200;
+
+export function getStoredGoldRate(): number {
+  try {
+    const saved = localStorage.getItem('finance_custom_gold_rate_24k');
+    if (saved) {
+      const val = parseFloat(saved);
+      if (!isNaN(val) && val > 1000) return val;
+    }
+  } catch { /* ignore */ }
+  return DEFAULT_GOLD_RATE_24K;
+}
+
+export function saveStoredGoldRate(rate24k: number): void {
+  try {
+    localStorage.setItem('finance_custom_gold_rate_24k', String(rate24k));
+  } catch { /* ignore */ }
+}
 
 /**
  * Normalizes purity string into multiplier factor
@@ -33,23 +50,25 @@ export function getPurityMultiplier(purityStr: string): number {
 export function calculateGoldValuation(
   weightGrams: number,
   purity: string,
-  rate24kPerGram: number = DEFAULT_GOLD_RATE_24K
+  rate24kPerGram?: number
 ): number {
   const weight = Number(weightGrams) || 0;
   if (weight <= 0) return 0;
+  const rate = rate24kPerGram ?? getStoredGoldRate();
   const multiplier = getPurityMultiplier(purity);
-  return Math.round(weight * rate24kPerGram * multiplier);
+  return Math.round(weight * rate * multiplier);
 }
 
 /**
  * Computes full rates bundle for display
  */
-export function deriveGoldRates(rate24k: number = DEFAULT_GOLD_RATE_24K): GoldRates {
+export function deriveGoldRates(customRate?: number): GoldRates {
+  const rate24k = customRate ?? getStoredGoldRate();
   return {
     rate24kPerGram: Math.round(rate24k),
     rate22kPerGram: Math.round(rate24k * (22 / 24)),
     rate18kPerGram: Math.round(rate24k * (18 / 24)),
     lastUpdated: new Date().toISOString(),
-    source: 'MCX / IBJA Indicative Rate',
+    source: 'IBJA / MCX Spot Benchmark',
   };
 }

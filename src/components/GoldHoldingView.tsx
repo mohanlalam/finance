@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { GoldHolding, DocumentMetadata, PortfolioName } from '../types/portfolio';
 import ConfirmModal from './ConfirmModal';
+import Modal from './Modal';
 import GoldHoldingCard from './gold/GoldHoldingCard';
 import GoldFormModal from './gold/GoldFormModal';
 import AssetRegistryContainer from './ui/AssetRegistryContainer';
@@ -44,7 +45,6 @@ export function GoldHoldingView({
   const isMobile = useIsMobile();
   const { isMutating } = usePortfolioState();
   const { addToast } = useToastActions();
-  const rates = deriveGoldRates();
   const {
     showModal,
     editingItem,
@@ -70,6 +70,31 @@ export function GoldHoldingView({
     }
   }, [onDelete, addToast, setConfirmDeleteItem]);
 
+  const [customRate, setCustomRate] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('finance_custom_gold_rate_24k');
+      return saved ? parseFloat(saved) : 15200;
+    } catch {
+      return 15200;
+    }
+  });
+  const [isEditingRate, setIsEditingRate] = useState(false);
+  const [tempRateInput, setTempRateInput] = useState('');
+
+  const rates = deriveGoldRates(customRate);
+
+  const handleSaveRate = () => {
+    const val = parseFloat(tempRateInput);
+    if (!isNaN(val) && val > 1000) {
+      setCustomRate(val);
+      try {
+        localStorage.setItem('finance_custom_gold_rate_24k', String(val));
+      } catch { /* ignore */ }
+      addToast(`24K Gold spot rate updated to ${formatINR(val)}/g`, 'success');
+    }
+    setIsEditingRate(false);
+  };
+
   return (
     <div className="space-y-4">
       {/* Live Market Rate Strip */}
@@ -89,17 +114,72 @@ export function GoldHoldingView({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4 text-xs font-bold tnum">
-          <div className="px-2.5 py-1 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)]">
+        <div className="flex items-center gap-2 sm:gap-3 text-xs font-bold tnum">
+          <button
+            type="button"
+            onClick={() => {
+              setTempRateInput(String(rates.rate24kPerGram));
+              setIsEditingRate(true);
+            }}
+            title="Click to calibrate market spot rate"
+            className="px-2.5 py-1 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)] hover:border-amber-500/50 transition-colors cursor-pointer text-left ios-press"
+          >
             <span className="text-[var(--text-tertiary)] text-[10px] uppercase font-semibold mr-1.5">24K (99.9%):</span>
             <span className="text-amber-600 dark:text-amber-400">{formatINR(rates.rate24kPerGram)}/g</span>
-          </div>
+            <span className="text-[10px] ml-1 text-slate-400">✎</span>
+          </button>
           <div className="px-2.5 py-1 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)]">
             <span className="text-[var(--text-tertiary)] text-[10px] uppercase font-semibold mr-1.5">22K (91.6%):</span>
             <span className="text-[var(--text-primary)]">{formatINR(rates.rate22kPerGram)}/g</span>
           </div>
         </div>
       </div>
+
+      {/* Spot Rate Calibration Modal */}
+      {isEditingRate && (
+        <Modal
+          isOpen={isEditingRate}
+          onClose={() => setIsEditingRate(false)}
+          title="Calibrate 24K Gold Spot Rate"
+        >
+          <div className="p-6 space-y-4">
+            <p className="text-xs text-slate-600 dark:text-slate-300">
+              Enter the current market rate per gram for 24K pure gold in ₹ INR (e.g. 15200). 22K (91.6%) and 18K (75%) valuations will automatically derive from this rate.
+            </p>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                24K Rate per gram (₹) *
+              </label>
+              <input
+                type="number"
+                inputMode="decimal"
+                step="1"
+                value={tempRateInput}
+                onChange={(e) => setTempRateInput(e.target.value)}
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-[10px] px-3 py-2 text-sm text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                placeholder="e.g. 15200"
+                autoFocus
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+              <button
+                type="button"
+                onClick={() => setIsEditingRate(false)}
+                className="px-3 py-1.5 text-xs font-semibold rounded-[8px] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveRate}
+                className="px-4 py-1.5 text-xs font-bold rounded-[8px] bg-amber-600 hover:bg-amber-700 text-white shadow-xs"
+              >
+                Update Rate
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       <AssetRegistryContainer
         title="Gold &amp; Precious Metals"
