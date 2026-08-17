@@ -86,8 +86,6 @@ function Header({
   darkMode,
   onToggleDarkMode,
   activePortfolioLabel = 'Family',
-  isPriceStale = false,
-  isUsingCachedData = false,
   onChangePinClick,
   onOpenMobileAlerts,
 }: HeaderProps) {
@@ -161,33 +159,6 @@ function Header({
           <div className="flex items-center gap-4">
             {/* Controls */}
             <div className="flex items-center gap-1.5">
-              {/* Data freshness badge */}
-              <button
-                onClick={onRefresh}
-                disabled={isLoading}
-                title={lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : 'Click to refresh'}
-                className="hidden xl:flex items-center gap-1 px-2 py-1 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] hover:bg-[var(--border-subtle)] transition-colors border border-[var(--border-subtle)] cursor-pointer disabled:cursor-not-allowed text-label-micro font-semibold text-[var(--text-secondary)]"
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${
-                  isUsingCachedData
-                    ? 'bg-[var(--accent-blue)]'
-                    : isPriceStale || status === 'error'
-                    ? 'bg-[var(--warning)]'
-                    : isLoading
-                    ? 'bg-[var(--accent-blue)] animate-pulse'
-                    : 'bg-[var(--positive)]'
-                }`} />
-                <span>
-                  {isUsingCachedData
-                    ? 'Offline'
-                    : isLoading
-                    ? 'Syncing'
-                    : isPriceStale || status === 'error'
-                    ? 'Stale'
-                    : 'Live'}
-                </span>
-              </button>
-
               {/* Sync Status / Refresh button */}
               <IconButton
                 icon={<RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />}
