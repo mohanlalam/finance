@@ -582,7 +582,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
       <div className="relative" ref={containerRef}>
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 text-xs text-slate-400 dark:text-slate-300 hover:text-blue-500 border border-slate-700 dark:border-slate-600 rounded-[10px] hover:border-slate-500 transition-colors"
+          className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] rounded-[var(--radius-small)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
           title="Import/Export Options"
           aria-expanded={open}
           aria-haspopup="true"
@@ -592,73 +592,73 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[14px] shadow-xl z-50 w-64 py-1">
-            <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Export & Backup</div>
+          <div className="absolute right-0 top-full mt-1 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-modal)] z-50 w-64 max-w-[calc(100vw-24px)] py-1">
+            <div className="px-3 py-1.5 text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Export &amp; Backup</div>
             <button
               onClick={handleExportCSV}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] transition-colors text-left cursor-pointer"
             >
-              <FileSpreadsheet size={14} className="text-emerald-500" />
+              <FileSpreadsheet size={14} className="text-[var(--positive)]" />
               Full Export (CSV)
             </button>
             <button
               onClick={handleExportPDF}
               disabled={isGeneratingPDF}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left disabled:opacity-50"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] transition-colors text-left disabled:opacity-50 cursor-pointer"
             >
               {isGeneratingPDF ? (
-                <svg className="animate-spin h-3.5 w-3.5 text-red-500" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                <svg className="animate-spin h-3.5 w-3.5 text-rose-500" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
               ) : (
-                <FileText size={14} className="text-red-500" />
+                <FileText size={14} className="text-rose-500" />
               )}
               {isGeneratingPDF ? 'Generating...' : 'PDF Report (Print)'}
             </button>
             <button
               onClick={handleExportJSON}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] transition-colors text-left cursor-pointer"
             >
-              <Database size={14} className="text-blue-500" />
+              <Database size={14} className="text-[var(--accent-blue)]" />
               Full Backup (JSON)
             </button>
 
-            <div className="border-t border-slate-100 dark:border-slate-700 my-1" />
-            <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Restore & Import</div>
+            <div className="border-t border-[var(--border-subtle)] my-1" />
+            <div className="px-3 py-1.5 text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Restore &amp; Import</div>
             <button
               onClick={() => { jsonFileInputRef.current?.click(); setOpen(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--accent-blue)] hover:bg-[var(--accent-blue-soft)] transition-colors text-left cursor-pointer"
             >
-              <ShieldCheck size={14} className="text-blue-500" />
+              <ShieldCheck size={14} className="text-[var(--accent-blue)]" />
               Restore Backup (JSON with Preview)
             </button>
             <button
               onClick={() => { setShowImport(true); setOpen(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/30 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--accent-blue)] hover:bg-[var(--accent-blue-soft)] transition-colors text-left cursor-pointer"
             >
-              <Upload size={14} className="text-violet-500" />
+              <Upload size={14} className="text-[var(--accent-blue)]" />
               Import Zerodha / Groww / CAS
             </button>
 
-            <div className="border-t border-slate-100 dark:border-slate-700 my-1" />
-            <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Export Specific</div>
+            <div className="border-t border-[var(--border-subtle)] my-1" />
+            <div className="px-3 py-1.5 text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Export Specific</div>
             <button
               onClick={() => { downloadFile(stocksToCSV(portfolios), `stocks-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv'); setOpen(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] transition-colors text-left cursor-pointer"
             >
-              <TrendingUp size={14} className="text-blue-500" />
+              <TrendingUp size={14} className="text-[var(--accent-blue)]" />
               Stocks Only (CSV)
             </button>
             <button
               onClick={() => { downloadFile(fdsToCSV(portfolios), `fds-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv'); setOpen(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] transition-colors text-left cursor-pointer"
             >
-              <Landmark size={14} className="text-indigo-500" />
+              <Landmark size={14} className="text-[var(--accent-blue)]" />
               FDs Only (CSV)
             </button>
             <button
               onClick={() => { downloadFile(documentsToCSV(portfolios), `documents-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv'); setOpen(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] transition-colors text-left cursor-pointer"
             >
-              <FolderOpen size={14} className="text-slate-500" />
+              <FolderOpen size={14} className="text-[var(--text-tertiary)]" />
               Documents Only (CSV)
             </button>
           </div>
@@ -687,10 +687,10 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             {/* Status Header */}
             <div className={`p-3.5 rounded-[var(--radius-medium)] border flex items-start gap-3 ${
               validationReport.isValid
-                ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-300'
-                : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300'
+                ? 'bg-[var(--positive-soft)] border-[var(--positive)]/30 text-[var(--positive)]'
+                : 'bg-[var(--negative-soft)] border-[var(--negative)]/30 text-[var(--negative)]'
             }`}>
-              {validationReport.isValid ? <ShieldCheck size={20} className="shrink-0 text-emerald-600 mt-0.5" /> : <AlertCircle size={20} className="shrink-0 text-red-600 mt-0.5" />}
+              {validationReport.isValid ? <ShieldCheck size={20} className="shrink-0 text-[var(--positive)] mt-0.5" /> : <AlertCircle size={20} className="shrink-0 text-[var(--negative)] mt-0.5" />}
               <div className="min-w-0">
                 <h4 className="font-bold text-xs">
                   {validationReport.isValid ? 'Valid Backup Schema Verified' : 'Invalid Backup File'}
@@ -711,41 +711,41 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             {/* Counts by Category */}
             {validationReport.isValid && (
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
+                <label className="block text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
                   Asset Breakdown in Backup
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
-                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
-                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.stocks}</span>
-                    <span className="text-[10px] text-slate-500">Stocks</span>
+                  <div className="p-2 bg-[var(--surface-secondary)] rounded border border-[var(--border-subtle)]">
+                    <span className="font-bold text-[var(--text-primary)] block">{validationReport.counts.stocks}</span>
+                    <span className="text-[10px] text-[var(--text-tertiary)]">Stocks</span>
                   </div>
-                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
-                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.fixedDeposits}</span>
-                    <span className="text-[10px] text-slate-500">FDs</span>
+                  <div className="p-2 bg-[var(--surface-secondary)] rounded border border-[var(--border-subtle)]">
+                    <span className="font-bold text-[var(--text-primary)] block">{validationReport.counts.fixedDeposits}</span>
+                    <span className="text-[10px] text-[var(--text-tertiary)]">FDs</span>
                   </div>
-                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
-                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.goldHoldings}</span>
-                    <span className="text-[10px] text-slate-500">Gold</span>
+                  <div className="p-2 bg-[var(--surface-secondary)] rounded border border-[var(--border-subtle)]">
+                    <span className="font-bold text-[var(--text-primary)] block">{validationReport.counts.goldHoldings}</span>
+                    <span className="text-[10px] text-[var(--text-tertiary)]">Gold</span>
                   </div>
-                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
-                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.realEstate}</span>
-                    <span className="text-[10px] text-slate-500">Real Estate</span>
+                  <div className="p-2 bg-[var(--surface-secondary)] rounded border border-[var(--border-subtle)]">
+                    <span className="font-bold text-[var(--text-primary)] block">{validationReport.counts.realEstate}</span>
+                    <span className="text-[10px] text-[var(--text-tertiary)]">Real Estate</span>
                   </div>
-                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
-                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.insurances}</span>
-                    <span className="text-[10px] text-slate-500">Insurance</span>
+                  <div className="p-2 bg-[var(--surface-secondary)] rounded border border-[var(--border-subtle)]">
+                    <span className="font-bold text-[var(--text-primary)] block">{validationReport.counts.insurances}</span>
+                    <span className="text-[10px] text-[var(--text-tertiary)]">Insurance</span>
                   </div>
-                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
-                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.sipAccounts}</span>
-                    <span className="text-[10px] text-slate-500">SIPs</span>
+                  <div className="p-2 bg-[var(--surface-secondary)] rounded border border-[var(--border-subtle)]">
+                    <span className="font-bold text-[var(--text-primary)] block">{validationReport.counts.sipAccounts}</span>
+                    <span className="text-[10px] text-[var(--text-tertiary)]">SIPs</span>
                   </div>
-                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
-                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.rdAccounts}</span>
-                    <span className="text-[10px] text-slate-500">RDs</span>
+                  <div className="p-2 bg-[var(--surface-secondary)] rounded border border-[var(--border-subtle)]">
+                    <span className="font-bold text-[var(--text-primary)] block">{validationReport.counts.rdAccounts}</span>
+                    <span className="text-[10px] text-[var(--text-tertiary)]">RDs</span>
                   </div>
-                  <div className="p-2 bg-slate-50 dark:bg-zinc-800/40 rounded border border-slate-200/50 dark:border-zinc-700/50">
-                    <span className="font-bold text-slate-800 dark:text-slate-100 block">{validationReport.counts.documents}</span>
-                    <span className="text-[10px] text-slate-500">Documents</span>
+                  <div className="p-2 bg-[var(--surface-secondary)] rounded border border-[var(--border-subtle)]">
+                    <span className="font-bold text-[var(--text-primary)] block">{validationReport.counts.documents}</span>
+                    <span className="text-[10px] text-[var(--text-tertiary)]">Documents</span>
                   </div>
                 </div>
               </div>
@@ -753,9 +753,9 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
 
             {/* Warnings / Duplicates */}
             {validationReport.warnings.length > 0 && (
-              <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-[var(--radius-medium)] text-xs text-amber-800 dark:text-amber-300 space-y-1">
+              <div className="p-3 bg-[var(--warning-soft)] border border-[var(--warning)]/30 rounded-[var(--radius-medium)] text-xs text-[var(--warning)] space-y-1">
                 <div className="font-bold flex items-center gap-1">
-                  <AlertTriangle size={14} className="text-amber-600" />
+                  <AlertTriangle size={14} className="text-[var(--warning)]" />
                   <span>Dry-run Diagnostics:</span>
                 </div>
                 {validationReport.warnings.map((w, idx) => (
@@ -766,16 +766,16 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
 
             {/* Post-Restore Report */}
             {restoreReport && (
-              <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-[var(--radius-medium)] text-xs space-y-2">
-                <div className="flex items-center gap-2 font-bold text-emerald-800 dark:text-emerald-300">
-                  <CheckCircle size={16} className="text-emerald-600" />
+              <div className="p-3.5 bg-[var(--positive-soft)] border border-[var(--positive)]/30 rounded-[var(--radius-medium)] text-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold text-[var(--positive)]">
+                  <CheckCircle size={16} />
                   <span>Restore Completed Successfully</span>
                 </div>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                <p className="text-[11px] text-[var(--text-secondary)]">
                   Restored {restoreReport.createdAssets} asset records into {restoreReport.restoredPortfolios.join(', ')}.
                 </p>
                 {restoreReport.errors.length > 0 && (
-                  <div className="text-red-500 text-[10px]">
+                  <div className="text-[var(--negative)] text-[10px]">
                     {restoreReport.errors.length} items encountered issues: {restoreReport.errors.slice(0, 3).join(', ')}
                   </div>
                 )}
@@ -816,10 +816,10 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
         preventClose={importing}
         maxWidth="max-w-lg"
       >
-        <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center bg-slate-50/50 dark:bg-zinc-800/10">
+        <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--surface-secondary)]">
           <div>
-            <h3 className="text-card-title font-semibold text-slate-800 dark:text-slate-200">Import Holdings (Zerodha, Groww, CAS)</h3>
-            <p className="text-supporting mt-0.5">Supports Zerodha, Groww, AngelOne, Upstox & CAS CSV formats</p>
+            <h3 className="text-card-title font-semibold text-[var(--text-primary)]">Import Holdings (Zerodha, Groww, CAS)</h3>
+            <p className="text-supporting mt-0.5">Supports Zerodha, Groww, AngelOne, Upstox &amp; CAS CSV formats</p>
           </div>
           <IconButton
             icon={<X size={15} />}
@@ -831,66 +831,66 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
 
         <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Target Family Member Portfolio</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Target Family Member Portfolio</label>
             <select
               value={importTarget}
               onChange={(e) => setImportTarget(e.target.value)}
-              className="w-full bg-slate-100 dark:bg-slate-800 border border-transparent rounded-[14px] px-3.5 py-2.5 text-sm font-semibold text-[var(--text-primary)] focus:bg-white dark:focus:bg-slate-700/80 focus:ring-2 focus:ring-blue-500/30 transition-all duration-150 outline-none"
+              className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-small)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] focus:bg-[var(--surface)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 transition-all duration-150 outline-none"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label} Portfolio</option>
               ))}
             </select>
-            <p className="text-[10.5px] text-slate-400 dark:text-slate-500 mt-1">
+            <p className="text-[10.5px] text-[var(--text-tertiary)] mt-1">
               Select which family member's portfolio to add these imported holdings to.
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Broker Holdings CSV File</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Broker Holdings CSV File</label>
             <input
               ref={fileRef}
               type="file"
               accept=".csv"
               onChange={handleFileSelect}
-              className="w-full bg-slate-100 dark:bg-slate-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] focus:bg-white dark:focus:bg-slate-700/80 focus:ring-2 focus:ring-blue-500/30 transition-all duration-150 outline-none file:mr-3 file:border-0 file:bg-violet-100 dark:file:bg-violet-950/50 file:text-violet-700 dark:file:text-violet-300 file:text-xs file:font-bold file:rounded-[10px] file:px-3 file:py-1 cursor-pointer"
+              className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-small)] px-3 py-2 text-xs text-[var(--text-primary)] focus:bg-[var(--surface)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 transition-all duration-150 outline-none file:mr-3 file:border-0 file:bg-[var(--accent-blue-soft)] file:text-[var(--accent-blue)] file:text-xs file:font-bold file:rounded-[6px] file:px-2.5 file:py-1 cursor-pointer"
             />
           </div>
 
           {detectedFormat && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-bold">
-              <span className="w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--accent-blue-soft)] border border-[var(--accent-blue)]/30 text-[var(--accent-blue)] text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-[var(--accent-blue)] animate-pulse" />
               <span>Format Detected: {detectedFormat}</span>
             </div>
           )}
 
           {importErrors.length > 0 && (
-            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-[14px] px-3 py-2 text-xs text-amber-700 dark:text-amber-400 max-h-24 overflow-y-auto">
+            <div className="bg-[var(--warning-soft)] border border-[var(--warning)]/30 rounded-[var(--radius-small)] px-3 py-2 text-xs text-[var(--warning)] max-h-24 overflow-y-auto">
               {importErrors.map((e, i) => <p key={i}>{e}</p>)}
             </div>
           )}
 
           {importRows.length > 0 && (
-            <div className="bg-slate-50 dark:bg-slate-800/10 border border-[var(--border-subtle)] rounded-[14px] overflow-hidden">
-              <div className="px-3 py-2 bg-slate-100 dark:bg-slate-800 flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <div className="bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] overflow-hidden">
+              <div className="px-3 py-2 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex items-center justify-between text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
                 <span>Holdings Preview ({importRows.length} stocks)</span>
-                <span className="text-blue-600 dark:text-blue-400 font-extrabold">Total: ₹{importRows.reduce((sum, r) => sum + (r.qty * r.avg_price), 0).toLocaleString('en-IN')}</span>
+                <span className="text-[var(--accent-blue)] font-extrabold">Total: ₹{importRows.reduce((sum, r) => sum + (r.qty * r.avg_price), 0).toLocaleString('en-IN')}</span>
               </div>
               <div className="max-h-48 overflow-y-auto divide-y divide-[var(--border-subtle)]">
                 {importRows.slice(0, 20).map((r, i) => (
-                  <div key={i} className="px-3 py-2 flex items-center justify-between text-xs dark:text-slate-300">
+                  <div key={i} className="px-3 py-2 flex items-center justify-between text-xs text-[var(--text-primary)]">
                     <div className="min-w-0 flex-1 pr-2">
-                      <span className="font-bold text-slate-700 dark:text-slate-200 mr-2">{r.ticker}</span>
-                      <span className="text-slate-500 dark:text-slate-400 text-[11px] truncate">{r.stock_name}</span>
+                      <span className="font-bold text-[var(--text-primary)] mr-2">{r.ticker}</span>
+                      <span className="text-[var(--text-tertiary)] text-[11px] truncate">{r.stock_name}</span>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="text-slate-500 dark:text-slate-400 font-semibold mr-2">{r.qty} Qty</span>
-                      <span className="font-bold text-slate-800 dark:text-slate-100 tnum">₹{r.avg_price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                      <span className="text-[var(--text-secondary)] font-semibold mr-2">{r.qty} Qty</span>
+                      <span className="font-bold text-[var(--text-primary)] tnum">₹{r.avg_price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                 ))}
                 {importRows.length > 20 && (
-                  <div className="px-3 py-1.5 text-[10px] text-slate-400 dark:text-slate-500 text-center">
+                  <div className="px-3 py-1.5 text-[10px] text-[var(--text-tertiary)] text-center">
                     +{importRows.length - 20} more rows
                   </div>
                 )}
@@ -899,13 +899,13 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
           )}
 
           {importDone && (
-            <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 rounded-[14px] px-3.5 py-2.5">
+            <div className="flex items-center gap-2 text-xs font-bold text-[var(--positive)] bg-[var(--positive-soft)] border border-[var(--positive)]/30 rounded-[var(--radius-small)] px-3.5 py-2.5">
               <CheckCircle size={15} /> Successfully imported {importRows.length} holdings into {portfolioOptions.find(p => p.name === importTarget)?.label || importTarget}!
             </div>
           )}
 
           {importError && (
-            <div className="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-[14px] px-3 py-2">
+            <div className="flex items-center gap-2 text-xs text-[var(--negative)] bg-[var(--negative-soft)] border border-[var(--negative)]/30 rounded-[var(--radius-small)] px-3 py-2">
               <AlertCircle size={14} /> {importError}
             </div>
           )}
@@ -916,7 +916,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
               variant="secondary"
               disabled={importing}
               onClick={() => setShowImport(false)}
-              className="flex-1"
+              className="flex-1 text-xs py-2 truncate"
             >
               Cancel
             </Button>
@@ -924,10 +924,10 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
               variant="primary"
               onClick={handleImport}
               disabled={importing || importRows.length === 0}
-              className="flex-1"
+              className="flex-1 text-xs py-2 truncate"
             >
-              {importing ? <Loader2 size={14} className="animate-spin mr-1.5" /> : <Upload size={14} className="mr-1.5" />}
-              {importing ? 'Importing...' : `Import into ${portfolioOptions.find(p => p.name === importTarget)?.label || 'Portfolio'}`}
+              {importing ? <Loader2 size={14} className="animate-spin mr-1.5" /> : <Upload size={14} className="mr-1.5 shrink-0" />}
+              <span className="truncate">{importing ? 'Importing...' : `Import into ${portfolioOptions.find(p => p.name === importTarget)?.label || 'Portfolio'}`}</span>
             </Button>
           </div>
         </div>

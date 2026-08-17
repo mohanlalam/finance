@@ -395,21 +395,21 @@ export default React.memo(function PortfolioTable({
                     key={`${h.ticker}-${h.sno}`}
                     className={`py-3 flex flex-col gap-2 transition-opacity ${isDeleting ? 'opacity-40' : ''}`}
                   >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="flex items-center gap-2">
+                    <div className="flex justify-between items-start gap-2.5">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 min-w-0">
                           <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-extrabold text-xs flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
                             {h.ticker.slice(0, 2)}
                           </div>
-                          <div>
+                          <div className="min-w-0 flex-1">
                             <button
                               onClick={() => setSelectedDetailHolding(h)}
-                              className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight block text-left hover:text-[var(--accent-blue)] transition-colors ios-press"
+                              className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight block text-left hover:text-[var(--accent-blue)] transition-colors ios-press truncate max-w-full"
                               title={h.stockName}
                             >
                               {h.ticker}
                             </button>
-                            <span className="text-[10px] text-[var(--text-tertiary)] block -mt-0.5 truncate max-w-[150px]">
+                            <span className="text-[10px] text-[var(--text-tertiary)] block -mt-0.5 truncate max-w-full">
                               {h.stockName}
                             </span>
                           </div>
@@ -417,7 +417,7 @@ export default React.memo(function PortfolioTable({
                         {isEditing ? (
                           <div className="mt-2 space-y-2 border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-[var(--radius-small)] p-2">
                             <div className="flex gap-2">
-                              <div>
+                              <div className="flex-1">
                                 <label className="block text-[10px] font-semibold text-[var(--text-secondary)] uppercase">Qty</label>
                                 <input
                                   ref={editInputRef}
@@ -430,7 +430,7 @@ export default React.memo(function PortfolioTable({
                                   className="w-full border border-[var(--border-subtle)] rounded px-1.5 py-1 text-xs text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none"
                                 />
                               </div>
-                              <div>
+                              <div className="flex-1">
                                 <label className="block text-[10px] font-semibold text-[var(--text-secondary)] uppercase">Avg Price (₹)</label>
                                 <input
                                   type="number"
@@ -466,13 +466,13 @@ export default React.memo(function PortfolioTable({
                             </div>
                           </div>
                         ) : (
-                          <p className="text-[10px] text-[var(--text-secondary)] mt-1">
+                          <p className="text-[10px] text-[var(--text-secondary)] mt-1.5 truncate">
                             {isBalancesHidden ? '••••••' : <>{formatNumber(h.qty, 0)} shares @ ₹{formatNumber(h.avgPrice)}</>} · LTP: ₹{formatNumber(h.ltp)}
                           </p>
                         )}
                       </div>
 
-                      <div className="text-right">
+                      <div className="text-right shrink-0 flex flex-col items-end">
                         <p className="text-xs font-extrabold text-[var(--text-primary)] tnum">
                           {renderValue(h.currentValue)}
                         </p>
@@ -488,17 +488,17 @@ export default React.memo(function PortfolioTable({
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center text-[10px] text-[var(--text-secondary)] pt-1 border-t border-[var(--border-subtle)]">
-                      <div className="flex gap-2.5">
+                    <div className="flex justify-between items-center text-[10px] text-[var(--text-secondary)] pt-1.5 border-t border-[var(--border-subtle)] gap-2">
+                      <div className="flex items-center gap-2.5 flex-wrap">
                         <span>Alloc: <span className="font-semibold text-[var(--text-primary)] tnum">{h._allocation.toFixed(1)}%</span></span>
                         <span>Today: <span className={`font-semibold tnum ${h.todayPnLPercent >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>{formatPercent(h.todayPnLPercent)}</span></span>
                       </div>
 
                       {!isEditing && (
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 shrink-0">
                           <button
                             onClick={() => shareHolding(h, addToast)}
-                            className="w-7 h-7 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press"
+                            className="w-11 h-11 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press"
                             title="Share holding"
                             aria-label="Share holding summary"
                           >
@@ -507,7 +507,7 @@ export default React.memo(function PortfolioTable({
                           {onUpdate && (
                             <button
                               onClick={() => startEdit(h)}
-                              className="w-7 h-7 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press"
+                              className="w-11 h-11 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press"
                               aria-label="Edit holding quantity and price"
                               title="Edit holding"
                             >
@@ -517,7 +517,7 @@ export default React.memo(function PortfolioTable({
                           {onDelete && (
                             <button
                               onClick={() => handleDelete(h)}
-                              className="w-7 h-7 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--negative)] border border-[var(--border-subtle)] shadow-xs ios-press"
+                              className="w-11 h-11 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--negative)] border border-[var(--border-subtle)] shadow-xs ios-press"
                               aria-label="Delete holding"
                               title="Delete holding"
                             >

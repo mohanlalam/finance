@@ -14,46 +14,46 @@ type FilterTab = 'all' | 'due_soon' | 'stocks' | 'insurance' | 'documents';
 const TYPE_CONFIG: Record<AlertType, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
   '52w_high': {
     icon: <TrendingUp size={16} />,
-    color: 'text-blue-700 dark:text-blue-400',
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
-    border: 'border-blue-200 dark:border-blue-800',
+    color: 'text-[var(--accent-blue)]',
+    bg: 'bg-[var(--accent-blue-soft)]',
+    border: 'border-[var(--accent-blue)]/30',
   },
   '52w_low': {
     icon: <TrendingDown size={16} />,
-    color: 'text-amber-700 dark:text-amber-400',
-    bg: 'bg-amber-50 dark:bg-amber-900/20',
-    border: 'border-amber-200 dark:border-amber-800',
+    color: 'text-[var(--warning)]',
+    bg: 'bg-[var(--warning-soft)]',
+    border: 'border-[var(--warning)]/30',
   },
   fd_maturity: {
     icon: <Landmark size={16} />,
-    color: 'text-indigo-700 dark:text-indigo-400',
-    bg: 'bg-indigo-50 dark:bg-indigo-900/20',
-    border: 'border-indigo-200 dark:border-indigo-800',
+    color: 'text-[var(--accent-blue)]',
+    bg: 'bg-[var(--accent-blue-soft)]',
+    border: 'border-[var(--accent-blue)]/30',
   },
   insurance_renewal: {
     icon: <Shield size={16} />,
-    color: 'text-rose-700 dark:text-rose-400',
-    bg: 'bg-rose-50 dark:bg-rose-900/20',
-    border: 'border-rose-200 dark:border-rose-800',
+    color: 'text-[var(--negative)]',
+    bg: 'bg-[var(--negative-soft)]',
+    border: 'border-[var(--negative)]/30',
   },
   portfolio_swing: {
     icon: <Activity size={16} />,
-    color: 'text-violet-700 dark:text-violet-400',
-    bg: 'bg-violet-50 dark:bg-violet-900/20',
-    border: 'border-violet-200 dark:border-violet-800',
+    color: 'text-[var(--text-secondary)]',
+    bg: 'bg-[var(--surface-secondary)]',
+    border: 'border-[var(--border-subtle)]',
   },
   document_expiry: {
     icon: <FileText size={16} />,
-    color: 'text-slate-700 dark:text-slate-300',
-    bg: 'bg-slate-50 dark:bg-slate-800/40',
-    border: 'border-slate-200 dark:border-slate-700',
+    color: 'text-[var(--text-secondary)]',
+    bg: 'bg-[var(--surface-secondary)]',
+    border: 'border-[var(--border-subtle)]',
   },
 };
 
 const SEVERITY_STYLES: Record<AlertSeverity, { bg: string; text: string }> = {
-  critical: { bg: 'bg-red-500 text-white', text: 'text-red-500' },
-  warning: { bg: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400', text: 'text-amber-500' },
-  info: { bg: 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400', text: 'text-blue-500' },
+  critical: { bg: 'bg-[var(--negative)] text-white', text: 'text-[var(--negative)]' },
+  warning: { bg: 'bg-[var(--warning-soft)] text-[var(--warning)] border border-[var(--warning)]/30', text: 'text-[var(--warning)]' },
+  info: { bg: 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border border-[var(--accent-blue)]/30', text: 'text-[var(--accent-blue)]' },
 };
 
 export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDismissAll }: MobileAlertsViewProps) {
@@ -94,7 +94,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
         {/* Header */}
         <div className="px-4 py-3.5 border-b border-[var(--border-subtle)] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center">
               <Bell size={16} />
             </div>
             <div>
@@ -104,14 +104,14 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 ios-press transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] ios-press transition-colors"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="px-3 py-2 border-b border-[var(--border-subtle)] flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
+        <div className="px-3 py-2 pb-3 border-b border-[var(--border-subtle)] flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
           {tabs.map((tab) => {
             const count = alerts.filter((a) => {
               if (tab.key === 'due_soon') return a.type === 'fd_maturity' || a.type === 'insurance_renewal' || a.type === 'document_expiry';
@@ -126,16 +126,16 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-md text-xs font-bold transition-all shrink-0 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-[var(--radius-small)] text-xs font-bold transition-all shrink-0 ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                    ? 'bg-[var(--accent-blue)] text-white shadow-xs'
+                    : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
                 }`}
               >
                 <span>{tab.label}</span>
                 {count > 0 && (
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                    isActive ? 'bg-white/20 text-white' : 'bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]'
                   }`}>
                     {count}
                   </span>
@@ -149,11 +149,11 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {filteredAlerts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
+              <div className="w-12 h-12 rounded-xl bg-[var(--positive-soft)] text-[var(--positive)] border border-[var(--positive)]/20 flex items-center justify-center mb-3">
                 <CheckCircle2 size={24} />
               </div>
               <h3 className="text-sm font-extrabold text-[var(--text-primary)] mb-1">All Clear!</h3>
-              <p className="text-xs text-[var(--text-tertiary)] max-w-[220px]">
+              <p className="text-xs text-[var(--text-tertiary)] max-w-xs">
                 No active notifications in this category. You're completely up to date.
               </p>
             </div>
@@ -161,9 +161,9 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
             filteredAlerts.map((alert) => {
               const cfg = TYPE_CONFIG[alert.type] || {
                 icon: <AlertTriangle size={16} />,
-                color: 'text-slate-700',
-                bg: 'bg-slate-50',
-                border: 'border-slate-200',
+                color: 'text-[var(--text-secondary)]',
+                bg: 'bg-[var(--surface-secondary)]',
+                border: 'border-[var(--border-subtle)]',
               };
               const severity = SEVERITY_STYLES[alert.severity];
 
@@ -174,14 +174,14 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex gap-3">
-                      <div className="mt-0.5 w-7 h-7 rounded-md bg-white/80 dark:bg-slate-900/50 flex items-center justify-center shadow-xs shrink-0">
+                      <div className="mt-0.5 w-7 h-7 rounded-md bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center shadow-xs shrink-0">
                         {cfg.icon}
                       </div>
-                      <div>
-                        <p className="text-xs font-extrabold leading-tight text-[var(--text-primary)]">{alert.title}</p>
-                        <p className="text-xs font-medium opacity-90 mt-1">{alert.message}</p>
+                      <div className="min-w-0">
+                        <p className="text-xs font-extrabold leading-tight text-[var(--text-primary)] break-words">{alert.title}</p>
+                        <p className="text-xs font-medium opacity-90 mt-1 break-words">{alert.message}</p>
                         {alert.portfolioLabel && (
-                          <span className="inline-block mt-2 text-[10px] font-bold uppercase bg-white/80 dark:bg-slate-900/60 px-2 py-0.5 rounded">
+                          <span className="inline-block mt-2 text-[10px] font-bold uppercase bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] px-2 py-0.5 rounded">
                             Member: {alert.portfolioLabel}
                           </span>
                         )}
@@ -189,7 +189,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
                     </div>
 
                     <div className="flex flex-col items-end gap-2 shrink-0">
-                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${severity.bg}`}>
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full whitespace-nowrap ${severity.bg}`}>
                         {alert.severity}
                       </span>
                       <button
@@ -199,7 +199,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
                           onDismissAlert(alert.id);
                         }}
                         aria-label={`Dismiss ${alert.title}`}
-                        className="w-8 h-8 rounded-lg bg-white/60 dark:bg-slate-900/40 flex items-center justify-center hover:bg-white dark:hover:bg-slate-900 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer active:scale-95"
+                        className="w-8 h-8 rounded-lg bg-[var(--surface)]/80 hover:bg-[var(--surface)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
                       >
                         <X size={14} />
                       </button>
@@ -220,7 +220,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
                 e.stopPropagation();
                 onDismissAll();
               }}
-              className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-[10px] ios-press transition-all cursor-pointer"
+              className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-[var(--surface-secondary)] hover:bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] ios-press transition-all cursor-pointer"
             >
               Clear All ({alerts.length})
             </button>
@@ -228,7 +228,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] ios-press transition-all shadow-xs cursor-pointer"
+            className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-[var(--accent-blue)] hover:brightness-110 active:scale-95 text-white rounded-[var(--radius-medium)] ios-press transition-all shadow-xs cursor-pointer"
           >
             Back to Dashboard
           </button>

@@ -371,26 +371,26 @@ export default function NetWorthTimelineChart({
   return (
     <div ref={containerRef} className="apple-card p-4 sm:p-5 relative overflow-hidden flex flex-col min-h-[320px] sm:min-h-[370px] justify-between">
       {/* Header with Title, Period Performance & Controls */}
-      <div className="flex justify-between items-start mb-2.5 flex-wrap gap-2">
-        <div>
-          <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2.5 mb-2.5">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-card-title font-bold text-[var(--text-primary)]">
               Net worth timeline
             </h3>
             {history.length < 2 && (
-              <span className="text-[9px] font-extrabold bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] px-2 py-0.5 rounded-[var(--radius-pill)] uppercase tracking-wider">
+              <span className="text-[9px] font-extrabold bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] px-2 py-0.5 rounded-[var(--radius-pill)] uppercase tracking-wider shrink-0">
                 Simulated
               </span>
             )}
           </div>
 
           {/* Period Performance Subtitle */}
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <p className="text-supporting text-xs">
+          <div className="flex items-center gap-2 mt-1 flex-wrap min-w-0">
+            <p className="text-supporting text-xs truncate max-w-full">
               {seriesMode === 'total' ? 'Compound net worth history' : seriesMode === 'both' ? 'Stocks vs FDs comparison' : seriesMode === 'stocks' ? 'Stocks & equity valuation' : 'Fixed Deposits accumulation'}
             </p>
             {periodPerformance && (
-              <span className={`inline-flex items-center gap-0.5 text-[11px] font-extrabold px-2 py-0.5 rounded-[var(--radius-small)] tnum ${
+              <span className={`inline-flex items-center gap-0.5 text-[11px] font-extrabold px-2 py-0.5 rounded-[var(--radius-small)] tnum whitespace-nowrap shrink-0 ${
                 periodPerformance.isPositive ? 'text-[var(--positive)] bg-[var(--positive-soft)]' : 'text-[var(--negative)] bg-[var(--negative-soft)]'
               }`}>
                 {periodPerformance.isPositive ? <TrendingUp size={11} aria-hidden="true" /> : <TrendingDown size={11} aria-hidden="true" />}
@@ -401,7 +401,7 @@ export default function NetWorthTimelineChart({
         </div>
 
         {/* Date Range Selector */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center self-start sm:self-auto shrink-0 overflow-x-auto max-w-full">
           <SegmentedControl
             options={[
               { id: '1M', label: '1M' },

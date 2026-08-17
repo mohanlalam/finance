@@ -1,57 +1,16 @@
-# Implementation Plan: Live Gold Spot Rates, Modular Sub-Hooks & Localhost Dev Server
+# Implementation Plan: UI Token Polish & Mobile Visual Refinements
 
-This implementation executes the 3 chosen tasks:
-1. **Task 2: Live MCX Gold & Bullion Spot Rate Integration**:
-   - Add live gold rate fetching service (24K, 22K per gram in INR) with automatic fallback and caching.
-   - Dynamically compute gold holdings valuation using live market rate × weight in grams when active.
-   - Display live 24K/22K per gram rate badge in `GoldHoldingView.tsx`.
-2. **Task 4: Run Localhost Dev Server**:
-   - Start Vite development server at `http://localhost:5173/` and verify connectivity.
-3. **Task 5: Modular Sub-Hooks Refactoring**:
-   - Extract domain sub-hooks from `usePortfolioData.ts` to reduce monolithic bloat:
-     - `src/hooks/useLivePrices.ts`: Encapsulates stock quote polling, Yahoo symbol alias mapping, and AMFI mutual fund NAV fetching.
-     - `src/hooks/useLiveGoldPrices.ts`: Encapsulates gold spot rate fetching and valuation calculations.
+This plan executes the 5 requested polish items:
 
----
-
-## User Review Required
-> [!NOTE]
-> Gold valuations will cleanly fallback to user-entered purchase prices/valuations if network is offline or live rate is unavailable.
-
----
-
-## Proposed Changes
-
-### 1. Gold Price Service & Type Definitions
-#### [NEW] [src/utils/goldPricing.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/goldPricing.ts)
-- Exposes `fetchLiveGoldRate()` with SWR / local caching.
-- Handles 24K and 22K spot rate estimation based on gold price feeds (e.g. IBJA / MCX spot rate or Yahoo `GOLDBEES.NS` / `GC=F` calibrated per gram).
-
-#### [MODIFY] [src/types/portfolio.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/types/portfolio.ts)
-- Add optional `liveRatePerGram?: number` and `isLiveValuation?: boolean` to `GoldHolding`.
-
-#### [MODIFY] [src/components/gold/GoldHoldingCard.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/gold/GoldHoldingCard.tsx) & [src/components/GoldHoldingView.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/GoldHoldingView.tsx)
-- Show current 24K / 22K live market rate badge in header.
-- Display live rate per gram and calculated valuation.
-
-### 2. Refactor & Modularize Domain Hooks
-#### [NEW] [src/hooks/useLivePrices.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useLivePrices.ts)
-- Extracts stock Yahoo quote resolution and mutual fund AMFI NAV batch fetching from `usePortfolioData.ts`.
-
-#### [NEW] [src/hooks/useLiveGoldPrices.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useLiveGoldPrices.ts)
-- Manages gold spot rate polling interval and applies live valuation across gold holdings.
-
-#### [MODIFY] [src/hooks/usePortfolioData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/usePortfolioData.ts)
-- Consumes extracted sub-hooks, trimming ~300 lines of complex pricing logic.
-
----
-
-## Verification Plan
-### Automated Tests
-- Create unit tests for gold pricing calculations: `src/utils/__tests/goldPricing.test.ts`.
-- Run `npm run typecheck`.
-- Run `npm run test`.
-- Run `npm run build`.
-
-### Manual Testing
-- Check live gold rate display on `http://localhost:5173/` under Gold tab.
+- [x] **Task 1: PortfolioAssistant.tsx Token Cleanup**
+  - Replaced raw Tailwind colors (`bg-slate-100 dark:bg-slate-800/60`, `border-slate-200/60`, `text-slate-400 dark:text-slate-500`, etc.) with design system tokens (`var(--surface-secondary)`, `var(--border-subtle)`, `var(--text-secondary)`, `var(--text-tertiary)`, `var(--accent-blue)`, `var(--accent-blue-soft)`).
+- [x] **Task 2: MobileAlertsView.tsx Token Audit & Cleanup**
+  - Audited and replaced all raw `slate-*` / hardcoded color classes with design system tokens across alert types, severities, tab switcher, empty state, and modal footer.
+- [x] **Task 3: PortfolioTable.tsx Mobile Card Rendering Polish (Lines 377–535)**
+  - Polished mobile card view (`isMobile = true`) with resilient flexbox truncation for long tickers and stock names, right-aligned P&L stack, improved tap ergonomics (`sm:w-8 sm:h-8`), and clean token usage.
+- [x] **Task 4: ExportPanel.tsx Mobile Responsiveness Polish**
+  - Constrained dropdown menu width (`max-w-[calc(100vw-24px)]`), standardized all dropdown menu items, backup category cards, and CSV broker import modal controls with design system tokens and button text truncation.
+- [x] **Task 5: NetWorthTimelineChart Header Mobile Layout Polish**
+  - Restructured header controls with responsive `flex flex-col sm:flex-row sm:justify-between sm:items-start` layout and horizontal scrolling support on xs viewports so the title, period gain pill, and date range pills never collide or wrap awkwardly.
+- [x] **Task 6: Verification & Build**
+  - Ran `npm run build` with 0 compilation and TypeScript errors.
