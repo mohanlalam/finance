@@ -31,6 +31,12 @@ This document provides a high-level overview of the folder structure, data flow,
   * Computes aggregate `isAnyModalOpen` boolean flag to gate Floating Add Button (`FloatingAddMenu`) visibility.
 * **[ToastContext.tsx](src/contexts/ToastContext.tsx)**
   * Exposes global toast/snackbar notifications state (`useToast`) and auto-dismissals, entirely replacing raw browser `alert()` popups across the app.
+* **[backupValidation.ts](src/utils/backupValidation.ts)**
+  * Schema-enforcing backup and restore diagnostic engine.
+  * Validates JSON schema envelopes, item counts per asset domain, active duplicate collisions, and unlinked file references prior to data mutations.
+* **[dataQuality.ts](src/utils/dataQuality.ts)**
+  * Rules engine for portfolio data integrity (missing maturity dates, zero valuations, missing document attachments, and stale prices).
+  * Manages 30-entry rolling snapshot persistence in `localStorage` for historical score trends and monthly resolution metrics.
 
 
 ### 2. App Shell & Navigation Router
@@ -41,7 +47,7 @@ This document provides a high-level overview of the folder structure, data flow,
 * **[AppShell.tsx](src/layouts/AppShell.tsx)**
   * Core responsive layout manager combining `DesktopSidebar` with main content area.
   * Consumes `useIsMobile()` for viewport checks and `useModalState()` to decouple modal visibility state.
-  * Lazy-loads heavy action modals (`AddHoldingModal`, `AddFamilyModal`, `RenamePortfolioModal`, `ChangePinModal`) with `React.lazy` and `Suspense`, shrinking initial entry bundle size.
+  * Lazy-loads heavy action modals (`AddHoldingModal`, `AddFamilyModal`, `RenamePortfolioModal`, `ChangePinModal`, `DataQualityHealthModal`) with `React.lazy` and `Suspense`, shrinking initial entry bundle size.
 * **[DesktopSidebar.tsx](src/layouts/DesktopSidebar.tsx)**
   * Desktop navigation sidebar featuring sticky top alignment (`sticky top-6`) and `self-start` height constraint.
 * **[PinLockScreen.tsx](src/components/PinLockScreen.tsx)**
@@ -56,23 +62,26 @@ This document provides a high-level overview of the folder structure, data flow,
 
 * **Modular Domain Components**:
   * **[src/components/ui/AssetRegistryContainer.tsx](src/components/ui/AssetRegistryContainer.tsx)**: Standardized shell for asset registry headers, add buttons, `<AssetCardSkeleton>` loading fallbacks, and `<EmptyState>` placeholders.
-  * **[src/components/gold/](src/components/gold/)**: Standalone `GoldHoldingCard.tsx` and `GoldFormModal.tsx`.
-  * **[src/components/realestate/](src/components/realestate/)**: Standalone `RealEstateCard.tsx` and `RealEstateFormModal.tsx`.
-  * **[src/components/insurance/](src/components/insurance/)**: Standalone `InsurancePolicyCard.tsx` and `InsuranceFormModal.tsx`.
-  * **[src/components/fd/](src/components/fd/)**: Standalone `DepositDetailsCard.tsx`, `FDFormModal.tsx`, and `StandardFormFields.tsx`.
+  * **[src/components/ui/DocumentAttachmentField.tsx](src/components/ui/DocumentAttachmentField.tsx)**: Hardened document uploader with document taxonomy selectors (`fd_advice`, `policy_schedule`, `title_deed`, `tax_receipt`, `invoice`, `gold_hallmark`, `account_statement`, `general`), 10MB limits, and contextual guidance.
+  * **[src/components/gold/](src/components/gold/)**: Standalone `GoldHoldingCard.tsx` (with hallmark attachment badges) and `GoldFormModal.tsx`.
+  * **[src/components/realestate/](src/components/realestate/)**: Standalone `RealEstateCard.tsx` (with title deed badges) and `RealEstateFormModal.tsx`.
+  * **[src/components/insurance/](src/components/insurance/)**: Standalone `InsurancePolicyCard.tsx` (with policy bond badges) and `InsuranceFormModal.tsx`.
+  * **[src/components/fd/](src/components/fd/)**: Standalone `DepositDetailsCard.tsx` (with FD advice badges), `FDFormModal.tsx`, and `StandardFormFields.tsx`.
   * **[src/components/rd/](src/components/rd/)**: `RDView.tsx`, `RDAccountCard.tsx`, `RDFormModal.tsx`, and `RDInstallmentSchedule.tsx`.
   * **[src/components/sip/](src/components/sip/)**: `SIPView.tsx`, `SIPAccountCard.tsx`, `SIPFormModal.tsx`, and `SIPFormFields.tsx`.
 
 
 ### 4. UI Dashboard & Widget Performance
 * **Single-Pass Responsive Table**:
-  * **[PortfolioTable.tsx](src/components/PortfolioTable.tsx)**: Replaced parallel dual-layout DOM rendering (`md:hidden` vs `hidden md:block`) with single-pass conditional view rendering (`isMobile ? ... : ...`) using `useIsMobile()`, cutting mounted DOM node count by 50%.
-* **Quick Access Navigation Bar**:
-  * **[QuickAccessShortcuts.tsx](src/components/ui/QuickAccessShortcuts.tsx)**: Inline navigation panel containing quick jump shortcuts for all 10 asset categories and calculators, directly linked to offset-controlled anchor scrolling.
+  * **[PortfolioTable.tsx](src/components/PortfolioTable.tsx)**: Single-pass conditional view rendering (`isMobile ? ... : ...`) using `useIsMobile()`, cutting mounted DOM node count by 50%.
+* **Mobile Home Summary**:
+  * **[MobileHomeSummary.tsx](src/components/MobileHomeSummary.tsx)**: Unified clean top card displaying live Net Worth, Sparkline trajectory, Today's Gain/Loss badge, Invested Capital, and Total Overall Return without duplication or visual crowding.
 * **Visual Dashboard Grid**:
-  * **Standardized 2x2 Widget Cards Grid**: Core dashboard cards (`NetWorthTimelineChart.tsx`, `PortfolioAssistant.tsx`, `PieChart.tsx`, `BarChart.tsx`) use a uniform height (`370px`) inside a `grid-cols-1 lg:grid-cols-2 gap-5` grid.
-  * **[NetWorthTimelineChart.tsx](src/components/NetWorthTimelineChart.tsx)**: Responsive SVG area chart with date-range filtering (1M, 3M, 6M, 1Y, ALL). Uses `requestAnimationFrame` inside `ResizeObserver` for instant, jank-free chart reflow.
+  * **Standardized 2x2 Responsive Widget Cards Grid**: Core dashboard cards (`NetWorthTimelineChart.tsx`, `PortfolioAssistant.tsx`, `PieChart.tsx`, `BarChart.tsx`) use a minimum height (`min-h-[370px]`) inside a responsive `grid-cols-1 lg:grid-cols-2 gap-5` grid.
+  * **[NetWorthTimelineChart.tsx](src/components/NetWorthTimelineChart.tsx)**: Responsive SVG area chart with date-range filtering (1M, 3M, 6M, 1Y, ALL) and multi-series selection (Total, Stocks vs FDs, Stocks, FDs).
+  * **[PieChart.tsx](src/components/PieChart.tsx)**: Responsive asset class donut visualization with dynamic center HUD and progress proportion bars.
   * **[PortfolioAssistant.tsx](src/components/PortfolioAssistant.tsx)**: Conversational NLP assistant with memoized `ChatMessageItem` component to stop user query typing from re-parsing markdown across chat transcript history.
+  * **[DataQualityHealthModal.tsx](src/components/DataQualityHealthModal.tsx)**: Modal auditing data completeness, tracking monthly resolved issues and score progression over time.
   * **[InsightsPanel.tsx](src/components/InsightsPanel.tsx)**: Displays top 5 movers, top holdings by value, best/worst performance indicators, top gainers/losers, and upcoming deposit maturities & insurance renewal notifications.
 
 ---
@@ -126,7 +135,22 @@ Every deposit registry maps to its own separate database table:
 * **[portfolioCalcs.ts](src/utils/portfolioCalcs.ts)**: Single-pass `for` loop portfolio totals aggregator.
 * **[performance.ts](src/utils/performance.ts)**: Newton-Raphson XIRR solver with `Float64Array` year offsets and persistent Web Worker singleton.
 * **[assistant.ts](src/utils/assistant.ts)**: Intent-based NLP query classification system.
+* **[backupValidation.ts](src/utils/backupValidation.ts)**: JSON envelope validation, duplicate detection, and schema verification.
+* **[dataQuality.ts](src/utils/dataQuality.ts)**: Health scoring, discrepancy diagnostics, and history tracking.
 * **[formatters.ts](src/utils/formatters.ts)**: Indian currency formatters (`formatINR`) and date helpers.
+
+---
+
+## 🚀 Future Enhancements Roadmap (Queued)
+
+1. **Broker Integration & Automation (Free Daily Sync)**:
+   - **Padmavathi**: Fyers API v3 (free app registration, automated daily morning sync of equity holdings).
+   - **Ram Mohan & Sai Laxmi**: Automated NSDL/CDSL Consolidated Account Statement (CAS) e-CAS parser or Zerodha Kite Connect/Account Aggregator.
+2. **Multi-User Security & Row-Level Tenancy (RLS)**:
+   - Transition from master PIN to Supabase Auth (`auth.users`) with per-user RLS policies across all tables and storage buckets (`investment-documents/{user_id}/*`).
+3. **Advanced Asset Analytics**:
+   - Capital Gains Realization & Tax Harvesting Planner.
+   - Gold price live market sync via MCX/Bullion API.
 
 ---
 
