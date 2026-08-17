@@ -371,8 +371,10 @@ function MobileHomeSummary({
             className="w-full flex items-center justify-between p-3.5 rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] transition-all text-left ios-press apple-card"
           >
             <div className="flex items-center gap-3 min-w-0">
-              {/* Left Accent Indicator Pill */}
-              <div className={`w-1.5 h-7 rounded-full ${item.accentColor} shrink-0`} />
+              {/* Category Icon Badge */}
+              <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 border border-[var(--border-subtle)]">
+                {item.icon}
+              </div>
               <div className="min-w-0">
                 <h4 className="text-xs font-bold text-[var(--text-primary)] truncate">{item.label}</h4>
                 <p className="text-xs font-medium text-[var(--text-tertiary)] mt-0.5 truncate">{item.subtext}</p>

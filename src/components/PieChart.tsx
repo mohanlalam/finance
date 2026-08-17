@@ -122,7 +122,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
   const hoverSlice = hovered !== null ? slices[hovered] : null;
 
   return (
-    <div className="apple-card p-4 sm:p-5 flex flex-col min-h-[370px] justify-between">
+    <div className="apple-card p-4 sm:p-5 flex flex-col min-h-[320px] sm:min-h-[370px] justify-between">
       {/* Header */}
       <div className="flex justify-between items-start mb-2 shrink-0">
         <div>

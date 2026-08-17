@@ -53,7 +53,7 @@ export default React.memo(function FamilyTabBar({
       <div
         role="tablist"
         aria-label="Family members portfolios"
-        className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-800/90 p-1 rounded-lg border border-slate-200/60 dark:border-slate-700/60 w-full sm:w-auto"
+        className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1 bg-[var(--surface-secondary)] p-1 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] w-full sm:w-auto"
       >
         {/* Overview Tab */}
         <button
@@ -62,13 +62,13 @@ export default React.memo(function FamilyTabBar({
           aria-controls="portfolio-content"
           id="tab-all"
           onClick={() => onTabChange('all')}
-          className={`flex items-center gap-2 h-8 px-2.5 rounded-md text-xs font-bold transition-all outline-none min-w-0 ${
+          className={`flex items-center gap-2 h-8 px-2.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none min-w-0 ${
             activeTab === 'all'
-              ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600'
-              : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+              ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-xs border border-[var(--border-subtle)]'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
           }`}
         >
-          <div className="w-4 h-4 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+          <div className="w-4 h-4 rounded bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
             <LayoutDashboard size={12} />
           </div>
           <span className="truncate">Family Overview</span>
@@ -88,10 +88,10 @@ export default React.memo(function FamilyTabBar({
                 aria-controls="portfolio-content"
                 id={`tab-${p.name}`}
                 onClick={() => onTabChange(p.name)}
-                className={`flex items-center justify-between gap-1 h-8 px-2 rounded-md text-xs font-bold transition-all outline-none flex-1 min-w-0 ${
+                className={`flex items-center justify-between gap-1 h-8 px-2 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none flex-1 min-w-0 ${
                   isActive
-                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                    ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-xs border border-[var(--border-subtle)]'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 <div className="flex items-center gap-1.5 min-w-0 truncate">
@@ -107,8 +107,8 @@ export default React.memo(function FamilyTabBar({
                 <span
                   className={`text-[10px] font-extrabold px-1 py-0.5 rounded tnum transition-colors shrink-0 ${
                     isPositive
-                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                      : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                      ? 'bg-[var(--positive-soft)] text-[var(--positive)]'
+                      : 'bg-[var(--negative-soft)] text-[var(--negative)]'
                   }`}
                 >
                   {formatPercent(p.totalPnLPercent, 1)}
@@ -122,7 +122,7 @@ export default React.memo(function FamilyTabBar({
                     e.stopPropagation();
                     onRenameClick({ id: p.id, name: p.name, label: p.label });
                   }}
-                  className="w-4 h-4 rounded flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:bg-zinc-600 transition-colors"
+                  className="w-4 h-4 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition-colors"
                   title={`Rename ${p.label}`}
                   aria-label={`Rename portfolio ${p.label}`}
                 >
@@ -133,7 +133,7 @@ export default React.memo(function FamilyTabBar({
                     e.stopPropagation();
                     onDeleteClick({ id: p.id, name: p.name, label: p.label });
                   }}
-                  className="w-4 h-4 rounded flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                  className="w-4 h-4 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors"
                   title={`Delete ${p.label}`}
                   aria-label={`Delete portfolio ${p.label}`}
                 >
@@ -148,10 +148,10 @@ export default React.memo(function FamilyTabBar({
       {/* Add family control */}
       <button
         onClick={onAddFamilyClick}
-        className="flex items-center gap-1.5 px-3.5 h-9 rounded-xl text-xs font-bold border border-slate-200 hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] dark:border-slate-700 dark:text-slate-300 dark:hover:text-blue-400 dark:hover:border-blue-400 ios-press transition-colors shrink-0"
+        className="flex items-center gap-1.5 px-3.5 h-8 sm:h-9 rounded-[var(--radius-medium)] text-xs font-bold border border-[var(--border-subtle)] bg-[var(--surface)] hover:border-[var(--accent-blue)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] ios-press transition-colors shrink-0 cursor-pointer"
         aria-label="Add family member"
       >
-        <UserPlus size={15} />
+        <UserPlus size={14} />
         <span>Add Member</span>
       </button>
 

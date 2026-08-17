@@ -120,7 +120,7 @@ export function GoldHoldingView({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 text-xs font-bold tnum">
+        <div className="flex items-stretch gap-2 sm:gap-3 text-xs font-bold tnum flex-wrap w-full sm:w-auto justify-between sm:justify-end pt-1 sm:pt-0 border-t sm:border-t-0 border-amber-500/10">
           <button
             type="button"
             onClick={() => {
@@ -128,15 +128,19 @@ export function GoldHoldingView({
               setIsEditingRate(true);
             }}
             title="Click to calibrate market spot rate"
-            className="px-2.5 py-1 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)] hover:border-amber-500/50 transition-colors cursor-pointer text-left ios-press"
+            className="flex-1 sm:flex-initial flex flex-col justify-center min-w-[125px] px-3 py-1.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)] hover:border-amber-500/50 transition-colors cursor-pointer text-left ios-press"
           >
-            <span className="text-[var(--text-tertiary)] text-[10px] uppercase font-semibold mr-1.5">24K (99.9%):</span>
-            <span className="text-amber-600 dark:text-amber-400">{formatINR(rates.rate24kPerGram)}/g</span>
-            <span className="text-[10px] ml-1 text-slate-400">✎</span>
+            <span className="text-[var(--text-tertiary)] text-[10px] uppercase font-semibold">24K (99.9%):</span>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="text-amber-600 dark:text-amber-400 font-bold text-xs">{formatINR(rates.rate24kPerGram)}/g</span>
+              <span className="text-[10px] text-slate-400">✎</span>
+            </div>
           </button>
-          <div className="px-2.5 py-1 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)]">
-            <span className="text-[var(--text-tertiary)] text-[10px] uppercase font-semibold mr-1.5">22K (91.6%):</span>
-            <span className="text-[var(--text-primary)]">{formatINR(rates.rate22kPerGram)}/g</span>
+          <div className="flex-1 sm:flex-initial flex flex-col justify-center min-w-[125px] px-3 py-1.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)] text-left">
+            <span className="text-[var(--text-tertiary)] text-[10px] uppercase font-semibold">22K (91.6%):</span>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="text-[var(--text-primary)] font-bold text-xs">{formatINR(rates.rate22kPerGram)}/g</span>
+            </div>
           </div>
         </div>
       </div>

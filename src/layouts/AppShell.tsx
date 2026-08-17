@@ -357,12 +357,14 @@ export default function AppShell() {
 
   // ─── Handlers ───
   const renderDashboardWidgets = (isMobileLayout: boolean) => {
+    const phHeight = isMobileLayout ? 300 : 370;
+
     const netWorthChart = (
       <SectionErrorBoundary sectionName="Net Worth Timeline">
         <LazyChartWrapper
           importFunc={() => import('../components/NetWorthTimelineChart')}
-          placeholderHeight={370}
-          fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
+          placeholderHeight={phHeight}
+          fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
           props={{ 
             history: netWorthHistory, 
             currentNetWorth: summaryData.totalCurrentValue,
@@ -375,8 +377,8 @@ export default function AppShell() {
 
     const portfolioAssistant = (
       <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-        <LazyViewport placeholderHeight={370}>
-          <Suspense fallback={<div className="h-[370px] apple-card rounded-xl animate-pulse" />}>
+        <LazyViewport placeholderHeight={phHeight}>
+          <Suspense fallback={<div className="h-[300px] sm:h-[370px] apple-card rounded-xl animate-pulse" />}>
             <PortfolioAssistant portfolios={portfolios} />
           </Suspense>
         </LazyViewport>
@@ -385,8 +387,8 @@ export default function AppShell() {
 
     const pieChart = (
       <SectionErrorBoundary sectionName="Asset Class Pie Chart">
-        <LazyViewport placeholderHeight={370}>
-          <Suspense fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
+        <LazyViewport placeholderHeight={phHeight}>
+          <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
             <PieChart 
               slices={breakdownSlices} 
               title={`Asset Class Breakdown — ${summaryData.label}`}
@@ -399,8 +401,8 @@ export default function AppShell() {
 
     const barChart = (
       <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
-        <LazyViewport placeholderHeight={370}>
-          <Suspense fallback={<div className="h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
+        <LazyViewport placeholderHeight={phHeight}>
+          <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
             <BarChart portfolios={barChartPortfolios} />
           </Suspense>
         </LazyViewport>
@@ -668,20 +670,20 @@ export default function AppShell() {
             ) : (
               <div className="space-y-4">
                 {/* Sticky Mini Refresh Status Bar */}
-                <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/70 dark:bg-slate-800/70 border border-slate-200/50 dark:border-slate-700/30 rounded-xl text-[11px] text-slate-500 dark:text-slate-400 backdrop-blur shadow-sm">
+                <div className="flex items-center justify-between px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] text-[11px] text-[var(--text-secondary)] shadow-xs apple-card">
                   <div className="flex items-center gap-1.5 min-w-0" aria-live="polite">
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${priceStatus === 'success' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
-                    <span className="font-semibold shrink-0">{priceStatus === 'success' ? 'Live Prices' : 'Snapshot'}</span>
-                    <span className="text-slate-400 dark:text-slate-700 shrink-0">•</span>
-                    <span className="truncate">Updated {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Never'}</span>
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${priceStatus === 'success' ? 'bg-[var(--positive)] animate-pulse' : 'bg-[var(--warning)]'}`} />
+                    <span className="font-bold text-[var(--text-primary)] shrink-0">{priceStatus === 'success' ? 'Live Prices' : 'Snapshot'}</span>
+                    <span className="text-[var(--text-tertiary)] shrink-0">•</span>
+                    <span className="truncate text-[var(--text-tertiary)]">Updated {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Never'}</span>
                   </div>
                   <button
                     onClick={refreshPrices}
                     disabled={isLoadingPrices}
-                    className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 active:scale-[0.97] transition-all shrink-0 ml-2"
+                    className="flex items-center gap-1 font-bold text-[var(--accent-blue)] hover:opacity-80 active:scale-[0.97] transition-all shrink-0 ml-2 cursor-pointer"
                   >
                     <RefreshCw size={11} className={isLoadingPrices ? 'animate-spin' : ''} />
-                    Refresh
+                    <span>Sync</span>
                   </button>
                 </div>
 

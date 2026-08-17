@@ -42,7 +42,6 @@ This document provides a comprehensive, exhaustive overview of the **User Interf
    - [Insurance Policies View & Renewal Urgency](#insurance-policies-view--renewal-urgency)
    - [Document Vault View & Taxonomy Attachment](#document-vault-view--taxonomy-attachment)
    - [Tax Harvesting Recommendation View](#tax-harvesting-recommendation-view)
-   - [What-If Compound Wealth Calculator](#what-if-compound-wealth-calculator)
    - [Portfolio Assistant (AI Conversational UI)](#portfolio-assistant-ai-conversational-ui)
 6. [Modal System & Overlay Architecture](#6-modal-system--overlay-architecture)
    - [Unified Draggable Modal Frame](#unified-draggable-modal-frame)
@@ -213,9 +212,9 @@ The web view is designed for wide screens (`md: 768px` up to `2xl: 1720px`), emp
 |  🏢 Real Estate               |  | Net Worth Timeline Chart (SVG)    | Portfolio AI Assistant (Chatbot)    |  |
 |  🛡️ Insurance Policies        |  +-----------------------------------+-------------------------------------+  |
 |  📁 Document Vault            |  | Asset Allocation (Pie / Donut)    | Asset Performance (Bar Chart)       |  |
-|  🧩 Dashboard Widgets         |  +-----------------------------------+-------------------------------------+  |
-|  🧮 What-If Calculator        |                                                                               |
-|  ⚖️ Tax Harvesting            |  [ PORTFOLIO INSIGHTS & DATA HEALTH METRICS PANEL ]                           |
+|  ⚖️ Tax Harvesting            |  +-----------------------------------+-------------------------------------+  |
+|                               |                                                                               |
+|                               |  [ PORTFOLIO INSIGHTS & DATA HEALTH METRICS PANEL ]                           |
 |                               |                                                                               |
 |                               |  [ ACTIVE ASSET REGISTRY TABLE / CONTAINER VIEW ]                             |
 +-------------------------------+-------------------------------------------------------------------------------+
@@ -270,9 +269,7 @@ The web view is designed for wide screens (`md: 768px` up to `2xl: 1720px`), emp
   7. 🏢 **Real Estate** (`'real_estate'`)
   8. 🛡️ **Insurance Policies** (`'insurance'`)
   9. 📁 **Document Vault** (`'documents'`)
-  10. 🧩 **Dashboard Widgets** (`'widgets'`)
-  11. 🧮 **What-If Calculator** (`'calculator'`)
-  12. ⚖️ **Tax Harvesting** (`'tax_harvesting'`)
+  10. ⚖️ **Tax Harvesting** (`'tax'`)
 * **Item Styling**:
   * Inactive Item: `text-[var(--text-secondary)]`, hover background `bg-[var(--surface-secondary)]`.
   * Active Item: `bg-blue-600 text-white font-semibold shadow-sm`.
@@ -390,10 +387,10 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 * Safe Area: Utilizes `.pb-safe` (`padding-bottom: env(safe-area-inset-bottom, 8px)`) to accommodate iOS home indicator bars.
 * Nav Items:
   1. **Home**: Directs to overall mobile summary view.
-  2. **Assets**: Opens active asset tab menu.
-  3. **Add (+ FAB)**: Center elevated action button opening `FloatingAddMenu`.
-  4. **Alerts**: Opens `MobileAlertsView` drawer with active alert badge.
-  5. **Tools / Widgets**: Accesses What-If calculator and tax harvesting views.
+  2. **Stocks**: Directly switches to Stocks & ETF holdings.
+  3. **SIP & MF**: Directly switches to Mutual Fund SIP accounts.
+  4. **Deposits**: Directly switches to Fixed Deposits registry.
+  5. **More (Drawer)**: Opens bottom sheet to access Recurring Deposits, Gold, Real Estate, Insurance Policies, Document Vault, and Tax Harvesting.
 
 ### Mobile Floating Add Menu (FAB & Action Sheet)
 
@@ -533,11 +530,6 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   * Short-Term Capital Gains (STCG) vs Long-Term Capital Gains (LTCG) Summary Cards.
   * ₹1.25 Lakh Annual LTCG Exemption Progress Bar.
   * Harvesting Opportunity List: Recommends specific stock/ETF holdings to sell and repurchase to offset taxable capital gains.
-
-### What-If Compound Wealth Calculator
-
-* Component: `DashboardWidgets.tsx`
-* Interactive calculation sliders for Initial Lump Sum, Monthly SIP, Expected Return Rate (%), and Time Horizon (Years) with live projected maturity totals and wealth gain charts.
 
 ### Portfolio Assistant (AI Conversational UI)
 
@@ -693,7 +685,7 @@ The application includes dedicated `@media print` CSS overrides optimized for cl
   }
 
   /* Force background colors and remove card shadows */
-  body { background: white !important; color: #1d1d1f !important; }
+  body { background: white !important; color: #0f172a !important; /* matches --text-primary */ }
   .apple-card, .glass-panel { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
 
   /* Page break optimization */
@@ -713,14 +705,16 @@ The application includes dedicated `@media print` CSS overrides optimized for cl
 
 ## 10. 📐 Responsive Breakpoint Matrix & Summary
 
+> **Breakpoint Architecture Note**: Breakpoint prefixes strictly correspond to Tailwind CSS default theme boundaries (`sm: 640px`, `md: 768px`, `lg: 1024px`, `xl: 1280px`, `2xl: 1536px`). In JavaScript, `useIsMobile()` gates mobile layout branches below `768px` (`max-width: 767px`), seamlessly matching the `md:` breakpoint threshold where the pinned desktop sidebar and multi-column views take effect.
+
 | Breakpoint Target | Width Boundary | Applied Adaptations & Layout Behavior |
 | :--- | :--- | :--- |
-| **Mobile Extra Small (`xs`)** | `< 375px` | Single-column summary layout, compact financial numbers (`text-[20px]`), hidden secondary metadata, 44px tap targets. |
-| **Mobile Standard (`sm`)** | `375px – 639px` | Mobile Home Summary view, horizontal family pill selector, 2-column asset grid, fixed bottom nav bar, swipe gestures active. |
-| **Tablet (`md`)** | `640px – 767px` | 2-column summary cards, visible header net worth indicator, enlarged chart containers, slide-over modals. |
-| **Desktop Small (`lg`)** | `768px – 1023px` | Pinned desktop sidebar appears (`w-64`), bottom nav hidden, 2x2 equalized widget grid (370px height), desktop header active. |
-| **Desktop Standard (`xl`)** | `1024px – 1279px` | 4-column summary cards, expanded stock holdings table (11 columns visible without horizontal scrollbar), live price badges. |
-| **Widescreen Desktop (`2xl`)** | `≥ 1280px` | Maximum container width capped at `1720px`, centered with full-density metrics panels, insights breakdown, and chart crosshairs. |
+| **Mobile Compact (`< sm`)** | `< 640px` (with `< 375px` xs sub-tier) | Mobile Home Summary view, horizontal family pill selector, 2-column asset grid, fixed bottom nav bar, swipe gestures active. Compact financial numbers (`text-[20px]`) on `< 375px`. |
+| **Mobile Standard / Phablet (`sm`)** | `640px – 767px` | 2-column summary cards, visible header net worth indicator, enlarged chart containers, slide-over modals (within mobile bottom-nav shell). |
+| **Tablet / Desktop Small (`md`)** | `768px – 1023px` | Pinned desktop sidebar appears (`w-64`), bottom nav hidden (`useIsMobile` returns false), desktop header active, fluid content area. |
+| **Desktop Standard (`lg`)** | `1024px – 1279px` | 2x2 equalized widget grid (370px height), 3-column / 4-column summary metric cards, expanded stock holdings table (11 columns visible without horizontal scrollbar). |
+| **Desktop Large (`xl`)** | `1280px – 1535px` | 4-column summary cards (`xl:grid-cols-4`), high-density metrics ribbons, live price badges, chart crosshairs. |
+| **Widescreen Desktop (`2xl`)** | `≥ 1536px` | Maximum container width capped at `1720px` (`max-w-[1720px] mx-auto`), centered with full-density metrics panels and insights breakdown. |
 
 ---
 

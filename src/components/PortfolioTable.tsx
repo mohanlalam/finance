@@ -286,28 +286,28 @@ export default React.memo(function PortfolioTable({
   return (
     <div className="apple-card overflow-hidden">
       {/* Zerodha Kite Holdings Overview Ribbon */}
-      <div className="px-4 py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-          <div className="flex items-center gap-1.5">
+      <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-xs">
+        <div className="flex items-center justify-between sm:justify-start gap-2.5 sm:gap-4 flex-wrap">
+          <div className="flex items-center gap-1.5 shrink-0">
             <span className="font-bold text-[var(--text-primary)]">Holdings</span>
             <span className="px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] text-[11px] font-extrabold tnum">
               {holdings.length}
             </span>
           </div>
           <div className="hidden sm:block h-3.5 w-px bg-[var(--border-subtle)]" />
-          <div className="flex items-center gap-1.5">
-            <span className="text-[var(--text-tertiary)]">Total inv.:</span>
+          <div className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+            <span className="text-[var(--text-tertiary)]">Invested:</span>
             <span className="font-bold text-[var(--text-primary)] tnum">{renderValue(totalInvested)}</span>
           </div>
           <div className="hidden sm:block h-3.5 w-px bg-[var(--border-subtle)]" />
-          <div className="flex items-center gap-1.5">
-            <span className="text-[var(--text-tertiary)]">Current val.:</span>
+          <div className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+            <span className="text-[var(--text-tertiary)]">Current:</span>
             <span className="font-bold text-[var(--text-primary)] tnum">{renderValue(totalCurrentValue)}</span>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-4 pt-1 sm:pt-0 border-t sm:border-t-0 border-[var(--border-subtle)]/60">
+          <div className="flex items-center gap-1.5 text-[11px] sm:text-xs">
             <span className="text-[var(--text-tertiary)]">Total P&amp;L:</span>
             <span className={`font-extrabold tnum ${totalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
               {isBalancesHidden ? '••••••' : <>{totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)} ({formatPercent(totalPnLPercent)})</>}
@@ -316,8 +316,8 @@ export default React.memo(function PortfolioTable({
           {todayTotalPnL !== 0 && (
             <>
               <div className="hidden sm:block h-3.5 w-px bg-[var(--border-subtle)]" />
-              <div className="flex items-center gap-1.5">
-                <span className="text-[var(--text-tertiary)]">Day's P&amp;L:</span>
+              <div className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+                <span className="text-[var(--text-tertiary)]">Day:</span>
                 <span className={`font-bold tnum ${todayTotalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                   {isBalancesHidden ? '••••••' : <>{todayTotalPnL >= 0 ? '+' : ''}{formatINR(todayTotalPnL)} ({formatPercent(todayTotalPnLPercent)})</>}
                 </span>

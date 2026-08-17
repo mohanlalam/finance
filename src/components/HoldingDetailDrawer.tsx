@@ -78,7 +78,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
   const todayPnLAmount = (holding.currentValue * (holding.todayPnLPercent || 0)) / 100;
 
   return (
-    <div className="fixed inset-0 z-[300] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <div className="fixed inset-0 z-[300] flex items-end sm:items-stretch justify-center sm:justify-end" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-[var(--backdrop-overlay)] backdrop-blur-xs transition-opacity duration-300 animate-fade-in"
@@ -89,10 +89,13 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
       {/* Slide-Over Drawer Container (Desktop) & Bottom Sheet (Mobile) */}
       <div 
         ref={drawerRef}
-        className="relative z-10 w-full sm:max-w-md bg-[var(--surface)] border-l border-[var(--border-subtle)] shadow-2xl flex flex-col h-full overflow-hidden transition-transform duration-300 animate-slide-in"
+        className="relative z-10 w-full sm:max-w-md max-h-[88vh] sm:max-h-full h-auto sm:h-full bg-[var(--surface)] border-t sm:border-t-0 sm:border-l border-[var(--border-subtle)] rounded-t-2xl sm:rounded-none shadow-2xl flex flex-col overflow-hidden transition-transform duration-300 animate-slide-in pb-safe"
       >
+        {/* Mobile Drag Indicator Handle */}
+        <div className="w-10 h-1 rounded-full bg-[var(--border-subtle)] mx-auto mt-2.5 mb-1 sm:hidden" aria-hidden="true" />
+
         {/* Drawer Header */}
-        <div className="px-5 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--surface-secondary)]/50">
+        <div className="px-5 py-3.5 sm:py-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--surface-secondary)]/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-extrabold text-sm flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
               {holding.ticker.slice(0, 2)}

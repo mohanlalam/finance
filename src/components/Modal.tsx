@@ -250,7 +250,7 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title || ariaLabel}
-        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[20px] sm:rounded-[var(--radius-large)] rounded-b-none sm:rounded-b-[var(--radius-large)] shadow-2xl w-full ${maxWidth} max-h-[92dvh] sm:max-h-[88vh] mb-0 sm:my-auto pb-safe sm:pb-0 flex flex-col min-h-0 overflow-hidden outline-none ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
+        className={`relative z-10 bg-[var(--surface)] text-[var(--text-primary)] rounded-t-[20px] sm:rounded-[var(--radius-large)] rounded-b-none sm:rounded-b-[var(--radius-large)] shadow-2xl w-full ${maxWidth} max-h-[90dvh] sm:max-h-[88vh] mb-0 sm:my-auto pb-[max(env(safe-area-inset-bottom,0px),0.75rem)] sm:pb-0 flex flex-col min-h-0 overflow-hidden outline-none ${isExiting ? 'animate-modal-content-out' : 'animate-modal-content'} border border-[var(--border-subtle)]`}
         style={hasDragOffset ? { transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0)` } : undefined}
         onPointerDown={handlePointerDown}
       >
@@ -258,12 +258,12 @@ export default function Modal({
           <div className="w-12 h-1.5 rounded-full bg-[var(--surface-tertiary)] opacity-90" />
         </div>
         {title && (
-          <header className="px-5 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--surface)]">
+          <header className="px-5 py-3.5 sm:py-4 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--surface)]">
             <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">{title}</h3>
             {!preventClose && (
               <button 
                 onClick={onClose} 
-                className="p-1.5 rounded-[var(--radius-pill)] text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] ios-press"
+                className="p-1.5 rounded-[var(--radius-pill)] text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] ios-press cursor-pointer"
                 aria-label="Close dialog"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -273,7 +273,7 @@ export default function Modal({
             )}
           </header>
         )}
-        <div className="overflow-y-auto flex-1 min-h-0 overscroll-contain">
+        <div className="overflow-y-auto flex-1 min-h-0 overscroll-contain px-0.5">
           {children}
         </div>
       </div>
