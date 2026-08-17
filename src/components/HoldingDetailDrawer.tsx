@@ -77,12 +77,6 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
   const isOverallProfit = holding.unrealizedPnL >= 0;
   const todayPnLAmount = (holding.currentValue * (holding.todayPnLPercent || 0)) / 100;
 
-  // 52-Week Range calculation
-  const weekLow = holding.weekLow52 || holding.avgPrice * 0.8;
-  const weekHigh = holding.weekHigh52 || holding.avgPrice * 1.3;
-  const rangeSpan = Math.max(weekHigh - weekLow, 1);
-  const currentPosPct = Math.min(Math.max(((holding.ltp - weekLow) / rangeSpan) * 100, 0), 100);
-
   return (
     <div className="fixed inset-0 z-[300] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
       {/* Backdrop */}
@@ -141,38 +135,6 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
                   {isUp ? '+' : ''}{formatINR(todayPnLAmount)} ({formatPercent(holding.todayPnLPercent)})
                 </span>
               </div>
-            </div>
-          </div>
-
-          {/* 52-Week High / Low Gauge */}
-          <div className="apple-card p-4 space-y-2">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
-                52-Week Range
-              </span>
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tnum">
-                Current: ₹{formatNumber(holding.ltp)}
-              </span>
-            </div>
-            
-            {/* Range Bar */}
-            <div 
-              role="progressbar"
-              aria-label="52-Week Price Range Position"
-              aria-valuenow={Math.round(currentPosPct)}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              className="relative h-2 bg-[var(--surface-secondary)] rounded-[var(--radius-pill)] overflow-hidden border border-[var(--border-subtle)]"
-            >
-              <div
-                className="absolute top-0 bottom-0 bg-[var(--accent-blue)] rounded-[var(--radius-pill)] opacity-80"
-                style={{ width: `${currentPosPct}%` }}
-              />
-            </div>
-
-            <div className="flex justify-between items-center text-[11px] text-[var(--text-tertiary)] font-bold tnum">
-              <span>L: ₹{formatNumber(weekLow)}</span>
-              <span>H: ₹{formatNumber(weekHigh)}</span>
             </div>
           </div>
 
