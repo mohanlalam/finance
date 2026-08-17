@@ -83,3 +83,12 @@ After **any correction** from the user, append a new entry here with the pattern
 **Root Cause**: Multiple documents asserted token definitions independently without designating one as the canonical source of truth, and qualitative accessibility guidelines inadvertently superseded quantitative/measurable contrast audit flags.  
 **Fix**: Designated `UI.md` (and `src/index.css`) as the authoritative single source of truth for all tokens across documents. Added explicit WCAG 2.1 contrast ratios (4.5:1 text, 3.0:1 UI) and the two measurable audit flags (`--text-tertiary` on `--surface-secondary` in light mode; `--positive`/`--negative` on `-soft` backgrounds in dark mode). Removed stale `🆕` markers.  
 **Rule**: Never duplicate token definitions across architectural documents without declaring one canonical source of truth (`UI.md`). Never drop measurable, quantitative acceptance criteria (such as contrast ratios) when cleaning up accessibility specifications.
+
+---
+
+### 2026-08-17 — Mobile Responsive Bottom Sheets, Dynamic Chart Heights & 24h Rate Caching
+**Mistake**: Holding details opened as full-width side drawers on mobile; chart containers forced tall fixed heights (`370px`) causing excessive scrolling; commodity rate sync ran on every mount.  
+**Root Cause**: Desktop-first layout defaults (`justify-end`, fixed heights) were applied without dedicated mobile-specific bottom-sheet flex containers and touch drag handles.  
+**Fix**: (1) Converted `HoldingDetailDrawer` into an Apple-style bottom sheet (`items-end`, `rounded-t-2xl`, drag handle) on mobile and side drawer on desktop. (2) Set responsive chart heights (`min-h-[320px] sm:min-h-[370px]`) and dynamic skeleton placeholders in `AppShell`. (3) Gated daily commodity sync with a 24-hour timestamp check in `localStorage`.  
+**Rule**: For detail drawers and complex forms, always branch layout into slide-up bottom sheets on mobile (`< 768px`) with top drag handles and safe-area padding. Always gate external daily market rate syncs behind 24-hour cache intervals.
+
