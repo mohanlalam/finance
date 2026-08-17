@@ -374,20 +374,6 @@ export function analyzePortfolioHealth(
           actionLabel: 'Set Buy Price',
         });
       }
-      if ((!h.weekLow52 || h.weekLow52 <= 0 || !h.weekHigh52 || h.weekHigh52 <= 0) && h.ltp > 0) {
-        issues.push({
-          id: `stock-no-52w-${h.id}`,
-          category: 'market_data',
-          severity: 'info',
-          title: `Incomplete 52-week range`,
-          description: `${h.ticker} is missing 52-week high/low market metrics.`,
-          assetTab: 'stocks',
-          portfolioName: pName,
-          portfolioLabel: pLabel,
-          assetId: h.id,
-          actionLabel: 'Refresh Price',
-        });
-      }
     });
 
     // 8. Document Vault Expiries

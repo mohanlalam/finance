@@ -24,8 +24,8 @@ export interface AddHoldingPayload {
   qty: number;
   avgPrice: number;
   amountInvested: number;
-  weekLow52: number;
-  weekHigh52: number;
+  weekLow52?: number;
+  weekHigh52?: number;
 }
 
 const EXCHANGE_OPTIONS = ['.NS (NSE)', '.BO (BSE)'];
@@ -46,8 +46,6 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
     qty: '',
     avgPrice: '',
     amountInvested: '',
-    weekLow52: '',
-    weekHigh52: '',
   });
 
   const validateField = (field: string) => {
@@ -110,8 +108,6 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
         qty,
         avgPrice,
         amountInvested: form.amountInvested ? parseFloat(form.amountInvested) : qty * avgPrice,
-        weekLow52: form.weekLow52 ? parseFloat(form.weekLow52) : 0,
-        weekHigh52: form.weekHigh52 ? parseFloat(form.weekHigh52) : 0,
       });
       onClose();
     } catch (err: unknown) {
@@ -259,35 +255,6 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             onChange={(e) => setForm((p) => ({ ...p, amountInvested: e.target.value }))}
             className={inputStyle}
           />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">52W Low (₹) <span className="font-normal text-slate-400 dark:text-slate-550">optional</span></label>
-            <input
-              type="number"
-              inputMode="decimal"
-              placeholder="0.00"
-              min="0"
-              step="any"
-              value={form.weekLow52}
-              onChange={(e) => set('weekLow52', e.target.value)}
-              className={inputStyle}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">52W High (₹) <span className="font-normal text-slate-400 dark:text-slate-550">optional</span></label>
-            <input
-              type="number"
-              inputMode="decimal"
-              placeholder="0.00"
-              min="0"
-              step="any"
-              value={form.weekHigh52}
-              onChange={(e) => set('weekHigh52', e.target.value)}
-              className={inputStyle}
-            />
-          </div>
         </div>
 
         {error && (

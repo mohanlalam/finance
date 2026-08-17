@@ -16,14 +16,14 @@ export interface Holding {
   yahooSymbol: string;
   qty: number;
   avgPrice: number;
-  weekLow52: number;
-  weekHigh52: number;
   ltp: number;
   amountInvested: number;
   unrealizedPnL: number;
   pnlPercent: number;
   todayPnLPercent: number;
   currentValue: number;
+  weekLow52?: number;
+  weekHigh52?: number;
   created_at?: string;
 }
 
@@ -169,8 +169,8 @@ export interface StockPayload {
   qty: number;
   avgPrice: number;
   amountInvested: number;
-  weekLow52: number;
-  weekHigh52: number;
+  weekLow52?: number;
+  weekHigh52?: number;
 }
 
 export interface FDPayload {

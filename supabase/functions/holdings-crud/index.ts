@@ -183,8 +183,6 @@ Deno.serve(async (req: Request) => {
             qty: Number(payload.qty),
             avg_price: Number(payload.avgPrice),
             amount_invested: Number(payload.amountInvested),
-            week_low_52: Number(payload.weekLow52 ?? 0),
-            week_high_52: Number(payload.weekHigh52 ?? 0),
           })
           .select()
           .single();

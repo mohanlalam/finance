@@ -65,7 +65,7 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
     for (const p of portfolios) {
       // ── 52-week high/low alerts ──
       for (const h of p.holdings) {
-        if (h.ltp <= 0 || h.weekHigh52 <= 0 || h.weekLow52 <= 0) continue;
+        if (h.ltp <= 0 || !h.weekHigh52 || !h.weekLow52 || h.weekHigh52 <= 0 || h.weekLow52 <= 0) continue;
 
         // Above or near 52-week high
         if (h.ltp > h.weekHigh52) {
