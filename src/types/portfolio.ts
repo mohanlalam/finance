@@ -89,6 +89,8 @@ export interface GoldHolding {
   purchase_price: number;
   current_valuation: number;
   purchase_date?: string;
+  liveRatePerGram?: number;
+  isLiveValuation?: boolean;
   notes?: string;
   created_at?: string;
 }

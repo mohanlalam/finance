@@ -75,3 +75,11 @@ After **any correction** from the user, append a new entry here with the pattern
 **Root Cause**: Utilities calling browser storage APIs (`idb-keyval`, `localStorage`, `Notification`) run in Node.js test runner environments where browser globals are absent without browser polyfills.  
 **Fix**: Guard browser API access with `typeof indexedDB === 'undefined'` or `typeof localStorage === 'undefined'`, and provide seamless in-memory fallbacks.  
 **Rule**: Always wrap browser-only storage primitives (`indexedDB`, `localStorage`, `Notification`) in safety guards with memory fallbacks so code runs deterministically in both browser and test environments.
+
+---
+
+### 2026-08-17 — Design Token Single Source of Truth & Concrete Accessibility Measurement Specs
+**Mistake**: Token values differed between `UI.md` and `GEMINI.md` (e.g. slash-separated vs. single Kite-style hexes), and concrete WCAG contrast measurement rules & audit flags were omitted when standardizing the accessibility section. Stale `🆕` tag remained in documentation.  
+**Root Cause**: Multiple documents asserted token definitions independently without designating one as the canonical source of truth, and qualitative accessibility guidelines inadvertently superseded quantitative/measurable contrast audit flags.  
+**Fix**: Designated `UI.md` (and `src/index.css`) as the authoritative single source of truth for all tokens across documents. Added explicit WCAG 2.1 contrast ratios (4.5:1 text, 3.0:1 UI) and the two measurable audit flags (`--text-tertiary` on `--surface-secondary` in light mode; `--positive`/`--negative` on `-soft` backgrounds in dark mode). Removed stale `🆕` markers.  
+**Rule**: Never duplicate token definitions across architectural documents without declaring one canonical source of truth (`UI.md`). Never drop measurable, quantitative acceptance criteria (such as contrast ratios) when cleaning up accessibility specifications.

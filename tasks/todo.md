@@ -1,65 +1,57 @@
-# Implementation Plan: Backup/Restore Validation, Document Upload Hardening & Health Check Persistence
+# Implementation Plan: Live Gold Spot Rates, Modular Sub-Hooks & Localhost Dev Server
 
-This implementation addresses three high-value data integrity features:
-1. **Backup / Restore Validation & Preview**: Full JSON backup schema verification, counts by asset type, duplicate asset/document detection, missing linked document detection, dry-run simulation, and detailed restore report modal.
-2. **Document Upload Hardening & Badging**: Document type taxonomy (`invoice`, `policy_schedule`, `title_deed`, `tax_receipt`, `fd_advice`, `general`), required document hints per asset type, file size (max 10MB) & MIME type validation, clearer upload error reporting, and visual attachment status badges on asset cards.
-3. **Health Check Persistence & Trends**: LocalStorage/IndexedDB snapshot persistence for health scores over time, recording last checked timestamps, tracking resolved vs unresolved critical issues, and displaying progress trends.
+This implementation executes the 3 chosen tasks:
+1. **Task 2: Live MCX Gold & Bullion Spot Rate Integration**:
+   - Add live gold rate fetching service (24K, 22K per gram in INR) with automatic fallback and caching.
+   - Dynamically compute gold holdings valuation using live market rate × weight in grams when active.
+   - Display live 24K/22K per gram rate badge in `GoldHoldingView.tsx`.
+2. **Task 4: Run Localhost Dev Server**:
+   - Start Vite development server at `http://localhost:5173/` and verify connectivity.
+3. **Task 5: Modular Sub-Hooks Refactoring**:
+   - Extract domain sub-hooks from `usePortfolioData.ts` to reduce monolithic bloat:
+     - `src/hooks/useLivePrices.ts`: Encapsulates stock quote polling, Yahoo symbol alias mapping, and AMFI mutual fund NAV fetching.
+     - `src/hooks/useLiveGoldPrices.ts`: Encapsulates gold spot rate fetching and valuation calculations.
 
 ---
 
 ## User Review Required
-
 > [!NOTE]
-> All changes are non-destructive and backward compatible with existing backups and document records.
+> Gold valuations will cleanly fallback to user-entered purchase prices/valuations if network is offline or live rate is unavailable.
 
 ---
 
 ## Proposed Changes
 
-### 1. Backup / Restore Validation Engine
-#### [NEW] [src/utils/backupValidation.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/backupValidation.ts)
-- Comprehensive schema validation for JSON backups (`portfolios` array, holding records, FDs, RDs, SIPs, gold, real estate, insurances, documents).
-- Pre-import analysis: asset count breakdown per category, duplicate detection against existing portfolios, missing linked document detection.
-- Dry run restore simulation returning exact create vs overwrite vs duplicate stats.
-- Detailed post-restore report generator.
+### 1. Gold Price Service & Type Definitions
+#### [NEW] [src/utils/goldPricing.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/goldPricing.ts)
+- Exposes `fetchLiveGoldRate()` with SWR / local caching.
+- Handles 24K and 22K spot rate estimation based on gold price feeds (e.g. IBJA / MCX spot rate or Yahoo `GOLDBEES.NS` / `GC=F` calibrated per gram).
 
-#### [MODIFY] [src/components/ExportPanel.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/ExportPanel.tsx)
-- Add JSON Backup Restore action with pre-import dry-run inspection modal.
-- Shows asset breakdown chips, duplicates warning, unlinked document file warnings.
-- Generates post-restore summary report.
+#### [MODIFY] [src/types/portfolio.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/types/portfolio.ts)
+- Add optional `liveRatePerGram?: number` and `isLiveValuation?: boolean` to `GoldHolding`.
 
----
+#### [MODIFY] [src/components/gold/GoldHoldingCard.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/gold/GoldHoldingCard.tsx) & [src/components/GoldHoldingView.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/GoldHoldingView.tsx)
+- Show current 24K / 22K live market rate badge in header.
+- Display live rate per gram and calculated valuation.
 
-### 2. Document Upload Hardening & Status Badges
-#### [MODIFY] [src/components/ui/DocumentAttachmentField.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/ui/DocumentAttachmentField.tsx)
-- Add Document Type Selector dropdown (`fd_advice`, `policy_schedule`, `title_deed`, `tax_receipt`, `invoice`, `gold_hallmark`, `general`).
-- Add required document hints tailored to the asset (e.g. "FD Advice", "Insurance Policy Bond", "Title Deed / Tax Receipt", "Hallmark Invoice").
-- Strict file validation: max 10MB, allowed types (`.pdf`, `.jpg`, `.png`, `.webp`, `.docx`, `.xlsx`).
-- Clear descriptive failure messages if file validation fails.
+### 2. Refactor & Modularize Domain Hooks
+#### [NEW] [src/hooks/useLivePrices.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useLivePrices.ts)
+- Extracts stock Yahoo quote resolution and mutual fund AMFI NAV batch fetching from `usePortfolioData.ts`.
 
-#### [MODIFY] Asset Cards:
-- [src/components/fd/DepositDetailsCard.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/fd/DepositDetailsCard.tsx)
-- [src/components/gold/GoldHoldingCard.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/gold/GoldHoldingCard.tsx)
-- [src/components/realestate/RealEstateCard.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/realestate/RealEstateCard.tsx)
-- [src/components/insurance/InsurancePolicyCard.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/insurance/InsurancePolicyCard.tsx)
-  - Add visual **Attachment Status Badge** (`📎 {n} Docs Attached` / `⚠️ No Doc Attached`) on each card header.
+#### [NEW] [src/hooks/useLiveGoldPrices.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/useLiveGoldPrices.ts)
+- Manages gold spot rate polling interval and applies live valuation across gold holdings.
 
----
-
-### 3. Health Check Persistence & Trend Tracking
-#### [MODIFY] [src/utils/dataQuality.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/utils/dataQuality.ts)
-- Add `saveHealthSnapshot()`, `getHealthHistory()`, `getHealthTrend()`.
-- Tracks score over time, resolved issues count, and timestamp of last audit.
-
-#### [MODIFY] [src/components/DataQualityHealthModal.tsx](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/DataQualityHealthModal.tsx)
-- Show Health History Trend strip (e.g., Score History, Last Audit timestamp, Issues resolved this month).
+#### [MODIFY] [src/hooks/usePortfolioData.ts](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/hooks/usePortfolioData.ts)
+- Consumes extracted sub-hooks, trimming ~300 lines of complex pricing logic.
 
 ---
 
 ## Verification Plan
-
 ### Automated Tests
-- Create unit tests for backup validator: `src/utils/__tests/backupValidation.test.ts`
-- Run `npm run test`
-- Run `npm run typecheck`
-- Run `npm run build`
+- Create unit tests for gold pricing calculations: `src/utils/__tests/goldPricing.test.ts`.
+- Run `npm run typecheck`.
+- Run `npm run test`.
+- Run `npm run build`.
+
+### Manual Testing
+- Check live gold rate display on `http://localhost:5173/` under Gold tab.
