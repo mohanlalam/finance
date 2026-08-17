@@ -55,7 +55,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="radiogroup"
       aria-label={name}
-      className={`inline-flex p-1 bg-slate-100 dark:bg-slate-800/90 rounded-xl gap-0.5 border border-slate-200/60 dark:border-slate-700/60 max-w-full overflow-x-auto scrollbar-none ${className}`}
+      className={`inline-flex p-1 bg-[var(--surface-secondary)]/90 backdrop-blur-md rounded-[var(--radius-large)] gap-1 border border-[var(--border-subtle)] max-w-full overflow-x-auto scrollbar-none shadow-xs ${className}`}
     >
       {options.map((opt) => {
         const isActive = opt.id === value;
@@ -73,10 +73,10 @@ export function SegmentedControl<T extends string>({
             disabled={opt.disabled}
             onClick={() => onChange(opt.id)}
             onKeyDown={handleKeyDown}
-            className={`px-3 py-1.5 rounded-[9px] text-xs font-semibold ios-press transition-all duration-150 outline-none whitespace-nowrap focus-visible:ring-2 focus-visible:ring-blue-600 ${
+            className={`px-3 py-1.5 rounded-[var(--radius-medium)] text-xs font-bold ios-press transition-all duration-200 outline-none whitespace-nowrap focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${
               isActive
-                ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-slate-100'
-                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-sm border border-[var(--border-glass)] dark:shadow-md'
+                : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]/40'
             } ${opt.disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
           >
             {opt.label}

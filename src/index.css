@@ -9,6 +9,7 @@
   --surface: #ffffff;
   --surface-secondary: #f1f5f9;
   --surface-tertiary: #e2e8f0;
+  --surface-glass: rgba(255, 255, 255, 0.82);
 
   --text-primary: #0f172a;
   --text-secondary: #475569;
@@ -26,18 +27,19 @@
   --warning: #f59e0b;
   --warning-soft: rgba(245, 158, 11, 0.08);
 
-  --border-subtle: rgba(148, 163, 184, 0.2);
-  --backdrop-overlay: rgba(0, 0, 0, 0.4);
+  --border-subtle: rgba(148, 163, 184, 0.22);
+  --border-glass: rgba(255, 255, 255, 0.6);
+  --backdrop-overlay: rgba(15, 23, 42, 0.35);
 
   /* Radius Tokens - Tight 6-12px for crisp data-first UI */
   --radius-small: 6px;
   --radius-medium: 10px;
-  --radius-large: 12px;
+  --radius-large: 14px;
   --radius-pill: 999px;
 
-  /* Shadows - Subtle & quiet */
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
-  --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.1);
+  /* Shadows - Layered, rich & ambient */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.03), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  --shadow-floating: 0 12px 32px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
 
   /* Z-index hierarchy */
   --z-base: 1;
@@ -55,18 +57,19 @@
 
 /* Tactile Press Feedback */
 .ios-press {
-  transition: transform 0.12s var(--ios-spring), background-color 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.14s var(--ios-spring), background-color 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
 }
 .ios-press:active {
-  transform: scale(0.97);
-  opacity: 0.9;
+  transform: scale(0.975);
+  opacity: 0.92;
 }
 
 .dark {
-  --app-background: #090d16;
-  --surface: #131b2e;
-  --surface-secondary: #1e293b;
-  --surface-tertiary: #334155;
+  --app-background: #080c14;
+  --surface: #111827;
+  --surface-secondary: #1a2234;
+  --surface-tertiary: #283548;
+  --surface-glass: rgba(17, 24, 39, 0.82);
 
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
@@ -84,11 +87,12 @@
   --warning: #f59e0b;
   --warning-soft: rgba(245, 158, 11, 0.15);
 
-  --border-subtle: rgba(255, 255, 255, 0.1);
-  --backdrop-overlay: rgba(0, 0, 0, 0.7);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-glass: rgba(255, 255, 255, 0.12);
+  --backdrop-overlay: rgba(0, 0, 0, 0.75);
 
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
-  --shadow-floating: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  --shadow-floating: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 /* Global scrollbars and transitions */

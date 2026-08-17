@@ -148,13 +148,18 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
           {/* Donut Visualizer with Interactive Center HUD */}
           <div className="relative shrink-0 flex items-center justify-center py-1">
             <svg
-              width={190}
-              height={190}
+              width={195}
+              height={195}
               viewBox="0 0 230 230"
               role="img"
               aria-label={`${title} donut chart showing ${slices.length} segments totalling ${isBalancesHidden ? 'hidden' : formatINR(total)}`}
-              className="overflow-visible max-w-full"
+              className="overflow-visible max-w-full drop-shadow-sm"
             >
+              <defs>
+                <filter id="donutGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.25" />
+                </filter>
+              </defs>
               <title>{title}</title>
               {computedPaths.map(({ d, color, i, isHovered }) => (
                 <path
@@ -162,11 +167,13 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                   d={d}
                   fill={color}
                   stroke="var(--surface)"
-                  strokeWidth={2}
-                  className="cursor-pointer transition-all duration-200"
+                  strokeWidth={2.5}
+                  className="cursor-pointer transition-all duration-300"
                   style={{
-                    opacity: hovered !== null && !isHovered ? 0.45 : 1,
-                    filter: isHovered ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))' : 'none',
+                    opacity: hovered !== null && !isHovered ? 0.35 : 1,
+                    filter: isHovered ? 'url(#donutGlow)' : 'none',
+                    transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+                    transformOrigin: `${cx}px ${cy}px`,
                   }}
                   onMouseEnter={() => setHovered(i)}
                   onMouseLeave={() => setHovered(null)}
@@ -174,23 +181,24 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                 />
               ))}
 
-              {/* Center Cutout Disk */}
-              <circle cx={cx} cy={cy} r={innerR - 2} className="fill-[var(--surface)]" />
+              {/* Center Cutout Disk with Glassmorphic Ring */}
+              <circle cx={cx} cy={cy} r={innerR - 2} className="fill-[var(--surface)] shadow-inner" />
+              <circle cx={cx} cy={cy} r={innerR - 2} fill="none" stroke="var(--border-subtle)" strokeWidth={1} />
 
               {/* Center HUD Text */}
               {hoverSlice ? (
                 <>
                   <text
                     x={cx}
-                    y={cy - 12}
+                    y={cy - 14}
                     textAnchor="middle"
-                    className="fill-[var(--text-secondary)] font-extrabold uppercase tracking-wider text-[10px]"
+                    className="fill-[var(--text-secondary)] font-extrabold uppercase tracking-wider text-[9.5px]"
                   >
                     {hoverSlice.fullName.length > 14 ? hoverSlice.label : hoverSlice.fullName}
                   </text>
                   <text
                     x={cx}
-                    y={cy + 7}
+                    y={cy + 6}
                     textAnchor="middle"
                     className="fill-[var(--text-primary)] font-black text-sm tnum"
                   >
@@ -198,9 +206,9 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                   </text>
                   <text
                     x={cx}
-                    y={cy + 23}
+                    y={cy + 22}
                     textAnchor="middle"
-                    className="fill-[var(--accent-blue)] font-bold text-[10.5px] tnum"
+                    className="fill-[var(--accent-blue)] font-bold text-[10px] tnum"
                   >
                     {hoverSlice.pct.toFixed(1)}% of total
                   </text>
@@ -209,7 +217,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                 <>
                   <text
                     x={cx}
-                    y={cy - 10}
+                    y={cy - 12}
                     textAnchor="middle"
                     className="fill-[var(--text-tertiary)] font-bold text-[9px] uppercase tracking-wider"
                   >
@@ -217,7 +225,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                   </text>
                   <text
                     x={cx}
-                    y={cy + 8}
+                    y={cy + 7}
                     textAnchor="middle"
                     className="fill-[var(--text-primary)] font-black text-sm tnum"
                   >
@@ -227,7 +235,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                     x={cx}
                     y={cy + 22}
                     textAnchor="middle"
-                    className="fill-[var(--text-tertiary)] font-medium text-[9px]"
+                    className="fill-[var(--text-tertiary)] font-semibold text-[9.5px]"
                   >
                     {slices.length} Asset {slices.length === 1 ? 'Class' : 'Classes'}
                   </text>

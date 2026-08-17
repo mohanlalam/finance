@@ -497,18 +497,19 @@ export default function NetWorthTimelineChart({
           onPointerLeave={() => { setHoveredIdx(null); svgRectRef.current = null; }}
           className={`w-full h-full touch-none select-none ${history.length < 2 ? 'opacity-40' : ''}`}
         >
-          {/* Gradients */}
+          {/* Gradients & Filters */}
           <defs>
             <linearGradient id="totalAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#387ed1" stopOpacity="0.18" />
+              <stop offset="0%" stopColor="#387ed1" stopOpacity="0.25" />
+              <stop offset="50%" stopColor="#387ed1" stopOpacity="0.08" />
               <stop offset="100%" stopColor="#387ed1" stopOpacity="0.0" />
             </linearGradient>
             <linearGradient id="stocksAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#387ed1" stopOpacity="0.18" />
+              <stop offset="0%" stopColor="#387ed1" stopOpacity="0.22" />
               <stop offset="100%" stopColor="#387ed1" stopOpacity="0.0" />
             </linearGradient>
             <linearGradient id="fdAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.18" />
+              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.22" />
               <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.0" />
             </linearGradient>
           </defs>
