@@ -103,15 +103,18 @@ The application implements a series of high-performance strategies to guarantee 
 
 ## 🎨 Clean Data-First Design System Architecture (Zerodha Kite & Apple Hybrid)
 
-* **Flat Neutral Canvas**: Standardized `#f8fafc` light / `#090d16` dark background system.
-* **Zerodha Kite Signature Palette**: Non-glaring, professional financial tokens: Kite Blue (`#387ed1`), clean profit green (`#00b074`), and clean loss red (`#df514c`).
+> **Single Source of Truth**: All design tokens, canonical hex values, typography scales, and accessibility requirements are authoritatively governed by [`UI.md`](UI.md) (specifically `UI.md §2` and `UI.md §11`) and implemented in `src/index.css`. All components and documentation must strictly reference `UI.md` to prevent token drift.
+
+* **Flat Neutral Canvas**: Standardized `#f8fafc` light / `#080c14` dark canvas background system.
+* **Zerodha Kite Signature Palette**: Canonical financial tokens: Kite Blue (`#387ed1`), clean profit green (`#00b074`), and clean loss red (`#df514c`).
 * **High-Density Holdings Ribbon**: Horizontal overview strip (*Holdings count, Total inv., Current val., Overall P&L, Day's P&L*) above asset tables.
 * **Hover-Activated Action Dock**: Row action buttons quietly hidden at rest and revealed on desktop hover (`group-hover:opacity-100`) for zero visual distraction.
 * **Single Card Surface (`.apple-card`)**: Solid surface (`var(--surface)`), 1px crisp border (`var(--border-subtle)`), and quiet static shadows (`var(--shadow-card)`).
 * **Tactile Spring Feedback**: Unified `.ios-press` tactile transition scaling triggers (`active:scale(0.97)`).
 * **Color System Extension**: Soft-tint variable tokens (`--positive-soft`, `--negative-soft`, `--warning-soft`, `--accent-blue-soft`, and `--backdrop-overlay` backdrop filters) mapped dynamically for dark mode.
-* **Tightened Border Radius Tokens**: `--radius-small` (`6px`), `--radius-medium` (`10px`), `--radius-large` (`12px`).
+* **Tightened Border Radius Tokens**: `--radius-small` (`6px`), `--radius-medium` (`10px`), `--radius-large` (`14px`), `--radius-pill` (`999px`).
 * **Compact Financial Typography**: `.text-financial` with tabular font features (`.tnum`).
+* **Accessibility & Measurement Standards**: Enforces WCAG 2.1 contrast ratios (4.5:1 text, 3.0:1 UI) and specific measurement audits for light-mode tertiary text and dark-mode positive/negative soft badges per `UI.md §11`.
 
 ---
 

@@ -68,7 +68,7 @@ npm run build
 - **SWR & IndexedDB Caching**: Remote portfolio and market data fetching must use `SWR` with SWR keys. Local caching is strictly offloaded to IndexedDB (`idb-keyval`) to avoid `localStorage` size limits.
 
 ### 2. Styling & Dark Mode
-- **Tailwind & Dark Mode**: Never use hardcoded light-only colors without providing corresponding `dark:` variants (e.g. `text-[#34C759] dark:text-emerald-400`). Use System Green (`#34C759`) for positive financial gains.
+- **Design System Tokens**: All design tokens, canonical hex values, and typography scales are governed by `UI.md` and `src/index.css`. Use canonical financial tokens: `--positive` (`#00b074`), `--negative` (`#df514c`), and `--accent-blue` (`#387ed1`). Never use hardcoded light-only colors without providing corresponding `dark:` variants.
 - **Consistent Dark Scale**: Always use the `slate` scale for dark mode neutrals (e.g. `dark:bg-slate-800`, `dark:border-slate-700`). Never mix `zinc` into dark variants.
 - **Valid Tailwind Classes**: Only use standard Tailwind color stops (`50`, `100`, `200`, ..., `900`, `950`). Invalid stops like `text-blue-650` or `text-slate-350` produce no CSS output.
 - **Tabular Numerals & Typography**: Apply the `.tnum` or `.ios-number` class to financial numbers and percentages for consistent monospace alignment and tabular display.
