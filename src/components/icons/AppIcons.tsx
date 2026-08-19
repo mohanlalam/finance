@@ -820,3 +820,23 @@ export function Key({ size = 24, className = '' }: IconProps) {
   );
 }
 
+export function Wallet({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+      <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+      <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+    </svg>
+  );
+}
+
+export function Menu({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <line x1="4" x2="20" y1="12" y2="12" />
+      <line x1="4" x2="20" y1="6" y2="6" />
+      <line x1="4" x2="20" y1="18" y2="18" />
+    </svg>
+  );
+}
+

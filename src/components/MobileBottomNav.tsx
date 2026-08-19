@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Home as HomeIcon, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, ChevronUp, ChevronRight, X, Sparkles } from './icons/AppIcons';
+import { Home as HomeIcon, TrendingUp, Landmark, Wallet, Menu, Coins, Building2, Shield, FolderOpen, Clock, ChevronRight, X, Sparkles } from './icons/AppIcons';
 import { triggerHaptic } from '../utils/haptics';
 
 type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
@@ -11,11 +11,27 @@ interface MobileBottomNavProps {
   onOpenSmartImport?: () => void;
 }
 
-const mainTabs: { id: AssetTab; label: string; icon: React.ReactNode }[] = [
-  { id: 'home', label: 'Home', icon: <HomeIcon size={20} /> },
-  { id: 'stocks', label: 'Stocks', icon: <TrendingUp size={20} /> },
-  { id: 'sip', label: 'SIP & MF', icon: <Sparkles size={20} /> },
-  { id: 'fd', label: 'Deposits', icon: <Landmark size={20} /> },
+const mainTabs: { id: AssetTab; label: string; icon: (isActive: boolean) => React.ReactNode }[] = [
+  { 
+    id: 'home', 
+    label: 'Home', 
+    icon: (isActive) => <HomeIcon size={20} className={isActive ? 'fill-[var(--accent-blue)] stroke-[var(--accent-blue)]' : ''} /> 
+  },
+  { 
+    id: 'stocks', 
+    label: 'Stocks', 
+    icon: () => <TrendingUp size={20} /> 
+  },
+  { 
+    id: 'sip', 
+    label: 'SIP & MF', 
+    icon: () => <Wallet size={20} /> 
+  },
+  { 
+    id: 'fd', 
+    label: 'Deposits', 
+    icon: () => <Landmark size={20} /> 
+  },
 ];
 
 const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.ReactNode }[] = [
@@ -154,7 +170,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
       {/* Persistent Bottom Bar */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--surface)] border-t border-[var(--border-subtle)] md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.08)] select-none will-change-transform transform-gpu"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--surface)] border-t border-[var(--border-subtle)] md:hidden shadow-[0_-2px_10px_rgba(0,0,0,0.05)] select-none will-change-transform transform-gpu"
         style={{
           paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 0px)',
         }}
@@ -178,10 +194,8 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                     : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
                 }`}
               >
-                <div className="relative flex items-center justify-center">
-                  <div className={`p-1 rounded-full transition-colors ${isActive ? 'bg-[var(--accent-blue-soft)]' : ''}`}>
-                    {tab.icon}
-                  </div>
+                <div className="relative flex items-center justify-center mb-0.5">
+                  {tab.icon(isActive)}
                   {tab.id === 'home' && alertCount > 0 && (
                     <span 
                       className="absolute -top-1 -right-2 min-w-[15px] h-[15px] rounded-full bg-[var(--negative)] text-white text-[9px] font-extrabold flex items-center justify-center px-1 leading-none shadow-xs"
@@ -191,7 +205,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                     </span>
                   )}
                 </div>
-                <span className={`text-[10px] tracking-tight leading-tight mt-0.5 max-w-full truncate px-0.5 ${isActive ? 'font-extrabold text-[var(--accent-blue)]' : 'font-semibold'}`}>
+                <span className={`text-[11px] tracking-tight leading-tight max-w-full truncate px-0.5 ${isActive ? 'font-bold text-[var(--accent-blue)]' : 'font-medium text-[var(--text-secondary)]'}`}>
                   {tab.label}
                 </span>
               </button>
@@ -212,12 +226,10 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                 : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
             }`}
           >
-            <div className="relative flex items-center justify-center">
-              <div className={`p-1 rounded-full transition-colors ${isMoreActive || isDrawerOpen ? 'bg-[var(--accent-blue-soft)]' : ''}`}>
-                <ChevronUp size={20} className={`transition-transform duration-200 ${isDrawerOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
-              </div>
+            <div className="relative flex items-center justify-center mb-0.5">
+              <Menu size={20} aria-hidden="true" />
             </div>
-            <span className={`text-[10px] tracking-tight leading-tight mt-0.5 max-w-full truncate px-0.5 ${isMoreActive || isDrawerOpen ? 'font-extrabold text-[var(--accent-blue)]' : 'font-semibold'}`}>
+            <span className={`text-[11px] tracking-tight leading-tight max-w-full truncate px-0.5 ${isMoreActive || isDrawerOpen ? 'font-bold text-[var(--accent-blue)]' : 'font-medium text-[var(--text-secondary)]'}`}>
               More
             </span>
           </button>
