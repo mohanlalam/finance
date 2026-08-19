@@ -3,7 +3,6 @@ import { IndianRupee, BarChart2, TrendingUp, TrendingDown, Activity, Share2 } fr
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { estimateTodayPnL } from '../utils/portfolioCalcs';
-import { Card } from './ui/Card';
 import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { Sparkline } from './ui/Sparkline';
 import { AnimatedNumber } from './ui/AnimatedNumber';
@@ -70,180 +69,182 @@ function SummaryCards({
   };
 
   return (
-    <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4">
-      
-      {/* 1. Net Worth Card (Neutral featured card) */}
-      <Card padding="md" className="relative overflow-hidden flex flex-col gap-1">
-        <div className="flex items-center justify-between">
-          <span className="text-label-small">{label} Net Worth</span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => sharePortfolioSummary({ name: label, totalValue: totalCurrentValue, totalPnL, totalPnLPercent }, addToast)}
-              className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center hover:opacity-80 transition-opacity"
-              title="Share Summary"
-              aria-label="Share Portfolio Summary"
-            >
-              <Share2 size={13} />
-            </button>
-            <span className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center">
-              <IndianRupee size={13} className="text-[var(--text-secondary)]" />
-            </span>
-          </div>
-        </div>
-        <div className="flex items-end justify-between">
-          <div>
-            <p className={`text-financial tnum transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
-              {renderValue(totalCurrentValue)}
-            </p>
-            <p className="text-supporting">
-              {isLoading ? 'Syncing prices...' : 'Current valuation'}
-            </p>
-          </div>
-          {sparklineData.length > 1 && (
-            <div className="mb-1 ml-2 shrink-0">
-              <Sparkline data={sparklineData} color={sparklineColor} />
-            </div>
-          )}
-        </div>
-
-        {activePortfolio === null && portfolios && portfolios.length > 0 && (
-          <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
-            {portfolios.map((p, idx) => {
-              const val = p.totalCurrentValue;
-              return (
-                <span key={p.id} className="flex items-center gap-0.5">
-                  <span>{p.label}:</span>
-                  <span className="text-[var(--text-primary)] font-bold tnum">
-                    {renderValue(val)}
-                  </span>
-                  {idx < portfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1.5">|</span>}
-                </span>
-              );
-            })}
-          </div>
-        )}
-      </Card>
-
-      {/* Remaining Cards: Horizontal scroll on mobile, normal grid columns on desktop */}
-      <div className="relative block lg:contents">
-        <div className="absolute -left-4 top-0 bottom-2 w-8 bg-gradient-to-r from-[var(--app-background)] to-transparent pointer-events-none sm:hidden z-10" />
-        <div className="absolute -right-4 top-0 bottom-2 w-12 bg-gradient-to-l from-[var(--app-background)] to-transparent pointer-events-none sm:hidden z-10" />
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none lg:contents">
+    <div className="w-full bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-card)] p-5 sm:p-6 transition-all duration-200">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x divide-[var(--border-subtle)]">
         
-        {/* 2. Invested Card (Neutral) */}
-        <Card padding="md" className="shrink-0 w-[min(240px,75vw)] sm:w-auto sm:shrink flex flex-col gap-1">
+        {/* 1. Net Worth */}
+        <div className="flex flex-col justify-between gap-1 lg:pr-6">
           <div className="flex items-center justify-between">
-            <span className="text-label-small">Invested</span>
-            <span className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center">
-              <BarChart2 size={13} className="text-[var(--text-secondary)]" />
-            </span>
+            <span className="text-label-small text-[var(--text-secondary)] font-semibold">{label} Net Worth</span>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => sharePortfolioSummary({ name: label, totalValue: totalCurrentValue, totalPnL, totalPnLPercent }, addToast)}
+                className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center hover:opacity-80 transition-opacity ios-press"
+                title="Share Summary"
+                aria-label="Share Portfolio Summary"
+              >
+                <Share2 size={13} />
+              </button>
+              <span className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center">
+                <IndianRupee size={13} className="text-[var(--text-secondary)]" />
+              </span>
+            </div>
           </div>
-          <p className="text-financial tnum">{renderValue(totalInvested)}</p>
-          <p className="text-supporting">Total capital deployed</p>
+
+          <div className="flex items-end justify-between mt-1">
+            <div>
+              <p className={`text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] text-financial tnum tracking-tight transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
+                {renderValue(totalCurrentValue)}
+              </p>
+              <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">
+                {isLoading ? 'Syncing prices...' : 'Current valuation'}
+              </p>
+            </div>
+            {sparklineData.length > 1 && (
+              <div className="mb-1 ml-2 shrink-0">
+                <Sparkline data={sparklineData} color={sparklineColor} />
+              </div>
+            )}
+          </div>
 
           {activePortfolio === null && portfolios && portfolios.length > 0 && (
-            <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
+            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
               {portfolios.map((p, idx) => {
-                const val = p.totalInvested;
+                const val = p.totalCurrentValue;
                 return (
-                  <span key={p.id} className="flex items-center gap-0.5">
+                  <span key={p.id} className="flex items-center gap-1">
                     <span>{p.label}:</span>
                     <span className="text-[var(--text-primary)] font-bold tnum">
                       {renderValue(val)}
                     </span>
-                    {idx < portfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1.5">|</span>}
+                    {idx < portfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1">|</span>}
                   </span>
                 );
               })}
             </div>
           )}
-        </Card>
+        </div>
 
-        {/* 3. Total P&L Card (Soft colored feedback) */}
-        <Card padding="md" className="shrink-0 w-[min(240px,75vw)] sm:w-auto sm:shrink flex flex-col gap-1">
+        {/* 2. Invested */}
+        <div className="flex flex-col justify-between gap-1 lg:px-6">
           <div className="flex items-center justify-between">
-            <span className="text-label-small">Total Return</span>
+            <span className="text-label-small text-[var(--text-secondary)] font-semibold">Invested</span>
+            <span className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center">
+              <BarChart2 size={13} className="text-[var(--text-secondary)]" />
+            </span>
+          </div>
+
+          <div className="mt-1">
+            <p className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] text-financial tnum tracking-tight">
+              {renderValue(totalInvested)}
+            </p>
+            <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">Total capital deployed</p>
+          </div>
+
+          {activePortfolio === null && portfolios && portfolios.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
+              {portfolios.map((p, idx) => {
+                const val = p.totalInvested;
+                return (
+                  <span key={p.id} className="flex items-center gap-1">
+                    <span>{p.label}:</span>
+                    <span className="text-[var(--text-primary)] font-bold tnum">
+                      {renderValue(val)}
+                    </span>
+                    {idx < portfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1">|</span>}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* 3. Total Return */}
+        <div className="flex flex-col justify-between gap-1 lg:px-6">
+          <div className="flex items-center justify-between">
+            <span className="text-label-small text-[var(--text-secondary)] font-semibold">Total Return</span>
             <span className={`w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center ${
               isGain ? 'bg-[var(--positive-soft)]' : 'bg-[var(--negative-soft)]'
             }`}>
               {isGain ? <TrendingUp size={13} className="text-[var(--positive)]" /> : <TrendingDown size={13} className="text-[var(--negative)]" />}
             </span>
           </div>
-          <p className={`text-financial tnum ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-            {isBalancesHidden ? '••••••' : <>{isGain ? '+' : ''}<AnimatedNumber value={totalPnL} formatter={formatINR} /></>}
-          </p>
-          <p className="text-supporting">
-            {formatPercent(totalPnLPercent)} gain
-          </p>
+
+          <div className="mt-1">
+            <p className={`text-2xl sm:text-3xl font-extrabold text-financial tnum tracking-tight ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+              {isBalancesHidden ? '••••••' : <>{isGain ? '+' : ''}<AnimatedNumber value={totalPnL} formatter={formatINR} /></>}
+            </p>
+            <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">
+              {formatPercent(totalPnLPercent)} gain
+            </p>
+          </div>
 
           {activePortfolio === null && portfolios && portfolios.length > 0 && (
-            <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
+            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
               {portfolios.map((p, idx) => {
                 const pnl = p.totalPnL;
                 const localGain = pnl >= 0;
                 return (
-                  <span key={p.id} className="flex items-center gap-0.5">
+                  <span key={p.id} className="flex items-center gap-1">
                     <span>{p.label}:</span>
                     <span className={`font-bold tnum ${localGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                       {isBalancesHidden ? '••••••' : <>{localGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
                     </span>
-                    {idx < portfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1.5">|</span>}
+                    {idx < portfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1">|</span>}
                   </span>
                 );
               })}
             </div>
           )}
-        </Card>
-
-        {/* 4. Today's P&L Card (Soft colored daily changes) */}
-        {todayPnL !== undefined ? (
-          <Card padding="md" className="shrink-0 w-[min(240px,75vw)] sm:w-auto sm:shrink flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <span className="text-label-small">Today's Return</span>
-              <span className={`w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center ${
-                isTodayGain ? 'bg-[var(--positive-soft)]' : 'bg-[var(--negative-soft)]'
-              }`}>
-                {isTodayGain ? <TrendingUp size={13} className="text-[var(--positive)]" /> : <TrendingDown size={13} className="text-[var(--negative)]" />}
-              </span>
-            </div>
-            <p className={`text-financial tnum ${isTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-              {isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
-            </p>
-            <p className="text-supporting">
-              Intraday delta
-            </p>
-
-            {activePortfolio === null && portfolios && portfolios.length > 0 && (
-              <div className="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2.5 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
-                {memberBreakdowns.map((p, idx) => {
-                  const localTodayGain = p.todayPnL >= 0;
-                  return (
-                    <span key={p.id} className="flex items-center gap-0.5">
-                      <span>{p.label}:</span>
-                      <span className={`font-bold tnum ${localTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-                        {isBalancesHidden ? '••••••' : <>{localTodayGain ? '+' : ''}<AnimatedNumber value={p.todayPnL} formatter={formatINR} /></>}
-                      </span>
-                      {idx < memberBreakdowns.length - 1 && <span className="text-[var(--border-subtle)] ml-1.5">|</span>}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-          </Card>
-        ) : (
-          <Card padding="md" className="shrink-0 w-[min(240px,75vw)] sm:w-auto sm:shrink flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <span className="text-label-small">Today</span>
-              <span className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center">
-                <Activity size={13} className="text-[var(--text-secondary)]" />
-              </span>
-            </div>
-            <p className="text-financial tnum opacity-40">--</p>
-            <p className="text-supporting">Delta unavailable</p>
-          </Card>
-        )}
-
         </div>
+
+        {/* 4. Today's Return */}
+        <div className="flex flex-col justify-between gap-1 lg:pl-6">
+          <div className="flex items-center justify-between">
+            <span className="text-label-small text-[var(--text-secondary)] font-semibold">Today's Return</span>
+            <span className={`w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center ${
+              isTodayGain ? 'bg-[var(--positive-soft)]' : 'bg-[var(--negative-soft)]'
+            }`}>
+              {isTodayGain ? <TrendingUp size={13} className="text-[var(--positive)]" /> : <TrendingDown size={13} className="text-[var(--negative)]" />}
+            </span>
+          </div>
+
+          <div className="mt-1">
+            {todayPnL !== undefined ? (
+              <>
+                <p className={`text-2xl sm:text-3xl font-extrabold text-financial tnum tracking-tight ${isTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                  {isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
+                </p>
+                <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">
+                  Intraday delta
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-2xl sm:text-3xl font-extrabold text-financial tnum opacity-40">--</p>
+                <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">Delta unavailable</p>
+              </>
+            )}
+          </div>
+
+          {activePortfolio === null && portfolios && portfolios.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
+              {memberBreakdowns.map((p, idx) => {
+                const localTodayGain = p.todayPnL >= 0;
+                return (
+                  <span key={p.id} className="flex items-center gap-1">
+                    <span>{p.label}:</span>
+                    <span className={`font-bold tnum ${localTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                      {isBalancesHidden ? '••••••' : <>{localTodayGain ? '+' : ''}<AnimatedNumber value={p.todayPnL} formatter={formatINR} /></>}
+                    </span>
+                    {idx < memberBreakdowns.length - 1 && <span className="text-[var(--border-subtle)] ml-1">|</span>}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );
