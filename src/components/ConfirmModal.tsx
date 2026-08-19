@@ -1,6 +1,8 @@
 import { useCallback } from 'react';
 import { AlertTriangle, Trash2, X } from './icons/AppIcons';
 import Modal from './Modal';
+import { Button } from './ui/Button';
+import { IconButton } from './ui/IconButton';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -17,19 +19,19 @@ interface ConfirmModalProps {
 
 const VARIANT_STYLES = {
   danger: {
-    icon: <Trash2 size={20} className="text-red-500 dark:text-red-400" />,
-    iconBg: 'bg-red-50 dark:bg-red-950/30',
-    btn: 'bg-red-600 hover:bg-red-700 focus-visible:ring-red-500',
+    icon: <Trash2 size={20} className="text-[var(--negative)]" />,
+    iconBg: 'bg-[var(--negative-soft)]',
+    btnVariant: 'danger' as const,
   },
   warning: {
-    icon: <AlertTriangle size={20} className="text-amber-500 dark:text-amber-400" />,
-    iconBg: 'bg-amber-50 dark:bg-amber-950/30',
-    btn: 'bg-amber-600 hover:bg-amber-700 focus-visible:ring-amber-500',
+    icon: <AlertTriangle size={20} className="text-[var(--warning)]" />,
+    iconBg: 'bg-[var(--warning-soft)]',
+    btnVariant: 'secondary' as const,
   },
   info: {
-    icon: <AlertTriangle size={20} className="text-blue-500 dark:text-blue-400" />,
-    iconBg: 'bg-blue-50 dark:bg-blue-950/30',
-    btn: 'bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500',
+    icon: <AlertTriangle size={20} className="text-[var(--accent-blue)]" />,
+    iconBg: 'bg-[var(--accent-blue-soft)]',
+    btnVariant: 'primary' as const,
   },
 };
 
@@ -64,44 +66,44 @@ export default function ConfirmModal({
     >
       <div className="p-6">
         <div className="flex items-start gap-4">
-          <div className={`w-10 h-10 rounded-full ${styles.iconBg} flex items-center justify-center shrink-0`}>
+          <div className={`w-10 h-10 rounded-[var(--radius-pill)] ${styles.iconBg} flex items-center justify-center shrink-0`}>
             {styles.icon}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 leading-snug">
+            <h3 className="text-base font-bold text-[var(--text-primary)] leading-snug">
               {title}
             </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+            <p className="text-sm text-[var(--text-secondary)] mt-1 leading-relaxed">
               {message}
             </p>
           </div>
-          <button
+          <IconButton
+            icon={<X size={15} />}
+            title="Close"
             onClick={onClose}
             disabled={isLoading}
-            className="w-7 h-7 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors shrink-0 disabled:opacity-40"
-            aria-label="Close"
-          >
-            <X size={14} />
-          </button>
+          />
         </div>
 
         <div className="flex gap-3 mt-6">
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={onClose}
             disabled={isLoading}
-            className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-xl py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+            className="flex-1"
           >
             {cancelLabel}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant={styles.btnVariant}
             onClick={handleConfirm}
             disabled={isLoading}
-            className={`flex-1 text-white font-semibold text-sm rounded-xl py-2.5 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${styles.btn}`}
+            className="flex-1"
           >
             {isLoading ? 'Please wait…' : confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

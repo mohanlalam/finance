@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
+import { X, Loader2, Key } from './icons/AppIcons';
 import Modal from './Modal';
+import { Button } from './ui/Button';
+import { IconButton } from './ui/IconButton';
 import { verifyPin, setCustomPin } from '../utils/auth';
 
 interface ChangePinModalProps {
@@ -52,40 +55,43 @@ export default function ChangePinModal({ onClose, onSuccess }: ChangePinModalPro
   };
 
   return (
-    <Modal isOpen={true} onClose={onClose} ariaLabel="Change PIN">
-      <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Change PIN</h3>
-        <button
-          type="button"
+    <Modal isOpen={true} onClose={onClose} ariaLabel="Change PIN" maxWidth="max-w-sm">
+      <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--surface-secondary)]">
+        <div>
+          <h3 className="text-card-title font-semibold text-[var(--text-primary)]">Change Security PIN</h3>
+          <p className="text-supporting mt-0.5">Update the passcode for app unlock</p>
+        </div>
+        <IconButton
+          icon={<X size={15} />}
+          title="Close dialog"
           onClick={onClose}
-          className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold"
-        >
-          ✕
-        </button>
+          disabled={isSubmitting}
+        />
       </div>
-      <form onSubmit={handleSubmit} className="p-4 space-y-4">
+      <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
+          <div className="bg-[var(--negative-soft)] text-[var(--negative)] border border-[var(--negative)]/30 p-3 rounded-[var(--radius-medium)] text-xs font-semibold" role="alert">
             {error}
           </div>
         )}
 
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <div>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
             Current PIN
           </label>
           <input
             type="password"
             inputMode="numeric"
+            autoFocus
             value={currentPin}
             onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, ''))}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+            className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none"
             maxLength={10}
           />
         </div>
 
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <div>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
             New PIN (min 4 digits)
           </label>
           <input
@@ -93,13 +99,13 @@ export default function ChangePinModal({ onClose, onSuccess }: ChangePinModalPro
             inputMode="numeric"
             value={newPin}
             onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ''))}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+            className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none"
             maxLength={10}
           />
         </div>
 
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <div>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
             Confirm New PIN
           </label>
           <input
@@ -107,26 +113,30 @@ export default function ChangePinModal({ onClose, onSuccess }: ChangePinModalPro
             inputMode="numeric"
             value={confirmPin}
             onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+            className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none"
             maxLength={10}
           />
         </div>
 
-        <div className="pt-4 flex justify-end gap-3">
-          <button
+        <div className="flex gap-3 pt-2">
+          <Button
             type="button"
+            variant="secondary"
+            disabled={isSubmitting}
             onClick={onClose}
-            className="px-4 py-2 text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            className="flex-1"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
+            variant="primary"
             disabled={isSubmitting}
-            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="flex-1"
           >
+            {isSubmitting ? <Loader2 size={14} className="animate-spin mr-1.5" /> : <Key size={14} className="mr-1.5" />}
             {isSubmitting ? 'Saving...' : 'Change PIN'}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

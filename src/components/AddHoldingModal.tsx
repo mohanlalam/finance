@@ -117,8 +117,8 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
     }
   }
 
-  const selectStyle = "w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none";
-  const inputStyle = "w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-450 dark:placeholder-zinc-650 focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none";
+  const selectStyle = "w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none";
+  const inputStyle = "w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none";
 
   return (
     <Modal
@@ -128,9 +128,9 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
       preventClose={saving}
       maxWidth="max-w-lg"
     >
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] bg-slate-50/50 dark:bg-zinc-800/10 modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
         <div>
-          <h2 className="text-card-title font-semibold text-slate-800 dark:text-slate-200">Add New Holding</h2>
+          <h2 className="text-card-title font-semibold text-[var(--text-primary)]">Add New Holding</h2>
           <p className="text-supporting mt-0.5">Stock will be fetched from Yahoo Finance on next refresh</p>
         </div>
         <IconButton
@@ -143,7 +143,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
 
       <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 overflow-y-auto min-h-0 flex-1">
         <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio</label>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Portfolio</label>
           <select
             value={form.portfolioName}
             onChange={(e) => set('portfolioName', e.target.value)}
@@ -156,7 +156,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Stock / ETF Name</label>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Stock / ETF Name</label>
           <input
             type="text"
             placeholder="e.g. Reliance Industries Limited"
@@ -168,7 +168,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Ticker Symbol</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Ticker Symbol</label>
             <input
               type="text"
               placeholder="e.g. RELIANCE"
@@ -177,10 +177,10 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               onBlur={() => validateField('ticker')}
               className={`${inputStyle} uppercase`}
             />
-            {fieldErrors.ticker && <p className="text-[10px] text-red-500 mt-1">{fieldErrors.ticker}</p>}
+            {fieldErrors.ticker && <p className="text-[10px] text-[var(--negative)] mt-1">{fieldErrors.ticker}</p>}
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Exchange</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Exchange</label>
             <select
               value={form.exchange}
               onChange={(e) => set('exchange', e.target.value)}
@@ -194,9 +194,9 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
             Yahoo Finance Symbol
-            <span className="font-normal text-slate-400 dark:text-slate-500 ml-1">(auto-filled)</span>
+            <span className="font-normal text-[var(--text-tertiary)] ml-1">(auto-filled)</span>
           </label>
           <input
             type="text"
@@ -209,7 +209,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Quantity</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Quantity</label>
             <input
               type="number"
               inputMode="decimal"
@@ -221,10 +221,10 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               onBlur={() => validateField('qty')}
               className={inputStyle}
             />
-            {fieldErrors.qty && <p className="text-[10px] text-red-500 mt-1">{fieldErrors.qty}</p>}
+            {fieldErrors.qty && <p className="text-[10px] text-[var(--negative)] mt-1">{fieldErrors.qty}</p>}
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Avg Buy Price (₹)</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Avg Buy Price (₹)</label>
             <input
               type="number"
               inputMode="decimal"
@@ -236,14 +236,14 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
               onBlur={() => validateField('avgPrice')}
               className={inputStyle}
             />
-            {fieldErrors.avgPrice && <p className="text-[10px] text-red-500 mt-1">{fieldErrors.avgPrice}</p>}
+            {fieldErrors.avgPrice && <p className="text-[10px] text-[var(--negative)] mt-1">{fieldErrors.avgPrice}</p>}
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
             Amount Invested (₹)
-            <span className="font-normal text-slate-400 dark:text-slate-550 ml-1">(auto-computed)</span>
+            <span className="font-normal text-[var(--text-tertiary)] ml-1">(auto-computed)</span>
           </label>
           <input
             type="number"
@@ -258,7 +258,7 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
         </div>
 
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2">{error}</p>
+          <p className="text-xs text-[var(--negative)] bg-[var(--negative-soft)] border border-[var(--negative)]/30 rounded-[var(--radius-medium)] px-3 py-2">{error}</p>
         )}
 
         <div className="flex items-center gap-3 pt-2">

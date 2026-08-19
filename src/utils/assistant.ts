@@ -974,9 +974,11 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     const props: PropertyYield[] = [];
     for (const p of portfolios) {
       for (const re of p.realEstate) {
-        const annualRent = Number(re.monthly_rent) * 12;
-        const purchase = Number(re.purchase_price) || 1; // avoid division by zero
-        const yieldPct = (annualRent / purchase) * 100;
+        const annualRent = (Number(re.monthly_rent) || 0) * 12;
+        const denominator = Number(re.purchase_price) > 0 
+          ? Number(re.purchase_price) 
+          : (Number(re.current_valuation) > 0 ? Number(re.current_valuation) : 0);
+        const yieldPct = denominator > 0 ? (annualRent / denominator) * 100 : 0;
         props.push({
           name: re.property_name,
           owner: p.label,

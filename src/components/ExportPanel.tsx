@@ -244,9 +244,21 @@ function csvToImportRows(rows: string[][]): ParseResult {
     h === 'qty.' || h === 'qty' || h === 'quantity' || h === 'units' || h.includes('qty') || h.includes('quantity')
   );
 
-  const priceIdx = rawHeaders.findIndex(h =>
-    h === 'avg.cost' || h === 'avgcost' || h === 'averageprice' || h === 'avgprice' || h === 'buyprice' || h === 'costprice' || h.includes('price') || h.includes('cost')
+  let priceIdx = rawHeaders.findIndex(h =>
+    h === 'avg.cost' || h === 'avgcost' || h === 'averageprice' || h === 'avgprice' || h === 'buyprice' || h === 'costprice' || h === 'purchaseprice'
   );
+  if (priceIdx === -1) {
+    priceIdx = rawHeaders.findIndex(h =>
+      (h.includes('avg') && h.includes('price')) ||
+      (h.includes('buy') && h.includes('price')) ||
+      (h.includes('cost') && !h.includes('total'))
+    );
+  }
+  if (priceIdx === -1) {
+    priceIdx = rawHeaders.findIndex(h =>
+      (h.includes('price') || h.includes('cost')) && !h.includes('market') && !h.includes('ltp') && !h.includes('current') && !h.includes('cmp') && !h.includes('total')
+    );
+  }
 
   const yahooIdx = rawHeaders.findIndex(h => h.includes('yahoo'));
 
@@ -557,6 +569,73 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
               createdAssets++;
             } catch (err: any) {
               errors.push(`Insurance ${ins.policy_name}: ${err.message || 'Failed'}`);
+            }
+          }
+        }
+
+        // 7. Restore Recurring Deposits
+        if (Array.isArray(p.rdAccounts)) {
+          for (const rd of p.rdAccounts) {
+            try {
+              await addAsset('rd', pName, {
+                bank_name: rd.bank_name,
+                monthly_deposit: Number(rd.monthly_deposit),
+                interest_rate: Number(rd.interest_rate),
+                start_date: rd.start_date,
+                tenure_months: Number(rd.tenure_months),
+                maturity_amount: Number(rd.maturity_amount) || 0,
+                status: rd.status || 'active',
+                notes: rd.notes,
+                installment_dates: Array.isArray(rd.installment_dates) ? rd.installment_dates : undefined,
+              });
+              createdAssets++;
+            } catch (err: any) {
+              errors.push(`RD ${rd.bank_name}: ${err.message || 'Failed'}`);
+            }
+          }
+        }
+
+        // 8. Restore SIP Accounts
+        if (Array.isArray(p.sipAccounts)) {
+          for (const sip of p.sipAccounts) {
+            try {
+              await addAsset('sip', pName, {
+                fund_name: sip.fund_name,
+                monthly_investment: Number(sip.monthly_investment || (sip as any).monthly_sip),
+                units: Number(sip.units || (sip as any).qty) || 0,
+                sip_day: Number(sip.sip_day) || 1,
+                start_date: sip.start_date,
+                status: sip.status || 'active',
+                scheme_code: sip.scheme_code,
+                amfi_code: sip.amfi_code,
+                expected_cagr: Number(sip.expected_cagr) || 12,
+                notes: sip.notes,
+              });
+              createdAssets++;
+            } catch (err: any) {
+              errors.push(`SIP ${sip.fund_name}: ${err.message || 'Failed'}`);
+            }
+          }
+        }
+
+        // 9. Restore Document Vault Metadata
+        if (Array.isArray(p.documents)) {
+          for (const doc of p.documents) {
+            try {
+              await addAsset('document', pName, {
+                name: doc.name,
+                file_path: doc.file_path,
+                file_type: doc.file_type,
+                file_size: Number(doc.file_size) || 0,
+                expiry_date: doc.expiry_date || null,
+                document_type: doc.document_type || 'general',
+                asset_type: doc.asset_type || null,
+                asset_id: doc.asset_id || null,
+                notes: doc.notes,
+              });
+              createdAssets++;
+            } catch (err: any) {
+              errors.push(`Document ${doc.name}: ${err.message || 'Failed'}`);
             }
           }
         }

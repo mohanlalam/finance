@@ -50,9 +50,9 @@ export default React.memo(function AddFamilyModal({
       ariaLabel="Add Family Member"
       preventClose={submitting}
     >
-      <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center bg-slate-50/50 dark:bg-zinc-800/10">
+      <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--surface-secondary)]">
         <div>
-          <h3 className="text-card-title font-semibold text-slate-800 dark:text-slate-200">Add Family Member</h3>
+          <h3 className="text-card-title font-semibold text-[var(--text-primary)]">Add Family Member</h3>
           <p className="text-supporting mt-0.5">A new portfolio shell will appear in the family tabs</p>
         </div>
         <IconButton
@@ -64,30 +64,30 @@ export default React.memo(function AddFamilyModal({
       </div>
       <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Display Label</label>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Display Label</label>
           <input
             type="text"
             placeholder="e.g. Father's Portfolio"
             value={newFamilyLabel}
             onChange={(e) => setNewFamilyLabel(e.target.value)}
-            className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-450 dark:placeholder-zinc-650 focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none"
+            className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none"
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
-            Machine Key <span className="text-slate-400 dark:text-slate-550 font-normal">(optional)</span>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+            Machine Key <span className="text-[var(--text-tertiary)] font-normal">(optional)</span>
           </label>
           <input
             type="text"
             placeholder="e.g. father"
             value={newFamilyName}
             onChange={(e) => setNewFamilyName(e.target.value)}
-            className="w-full bg-[#f2f2f7] dark:bg-zinc-800 border border-transparent rounded-[14px] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-450 dark:placeholder-zinc-650 focus:bg-white dark:focus:bg-zinc-700/80 focus:ring-2 focus:ring-[#007aff] transition-all duration-150 outline-none"
+            className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none"
           />
         </div>
 
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2" role="alert">
+          <p className="text-xs text-[var(--negative)] bg-[var(--negative-soft)] border border-[var(--negative)]/30 rounded-[var(--radius-medium)] px-3 py-2" role="alert">
             {error}
           </p>
         )}

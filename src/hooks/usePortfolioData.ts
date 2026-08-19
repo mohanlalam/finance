@@ -395,7 +395,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
   const isMutatingRef = useRef(false);
   const [isMutating, setIsMutating] = useState(false);
   const mutationQueue = useRef<Promise<unknown>>(Promise.resolve());
-  const lastRefreshRef = useRef<number>(0);
+  const lastRefreshRef = useRef<number>(Date.now());
   // Guard: prevents IDB cache from applying after SWR has already hydrated state
   const hasHydratedRef = useRef(false);
 
@@ -428,11 +428,12 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       });
     });
 
-    mutationQueue.current = nextPromise.catch(() => {}).finally(() => {
-      if (mutationQueue.current === nextPromise) {
+    const queuedPromise = nextPromise.catch(() => {}).finally(() => {
+      if (mutationQueue.current === queuedPromise) {
         mutationQueue.current = Promise.resolve();
       }
     });
+    mutationQueue.current = queuedPromise;
     return nextPromise;
   }, []);
 
@@ -709,8 +710,14 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
         return buildPortfolio(dbP, holdings, fds, rds, sips, gold, realEstate, insurances, docs);
       });
 
+      let finalBuilt = built;
+      if (livePrices) {
+        const withPrices = applyLivePrices(built, livePrices.priceMap);
+        finalBuilt = applyLiveMFNavs(withPrices, livePrices.navData.navMap, livePrices.navData.staleSchemes);
+      }
+
       hasHydratedRef.current = true;
-      setPortfolios(built);
+      setPortfolios(finalBuilt);
       setNetWorthHistory(dbNetWorthHistory);
       setIsUsingCachedData(false);
       setCacheUpdatedAt(new Date());
@@ -719,22 +726,20 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
       // Write cache to IndexedDB
       idb.set('portfolio_data_cache', {
-        portfolios: built,
+        portfolios: finalBuilt,
         netWorthHistory: dbNetWorthHistory,
         cachedAt: new Date().toISOString(),
       }).catch((err) => {
         console.warn('[portfolio] IndexedDB write error:', err);
       });
 
-      // SWR's live-prices key automatically handles pricing and NAV updates when portfolios are populated.
-      // SWR deduping prevents redundant network bursts.
       return () => {};
     } catch (err) {
       console.error('[portfolio] Database parsing error:', err);
       setLoadStatus('error');
       setLoadError(getFriendlyMessage(err));
     }
-  }, [dbData, handleAuthExpired, refreshPricesSWR]);
+  }, [dbData, livePrices, handleAuthExpired]);
 
   // 4. Handle SWR Errors
   useEffect(() => {

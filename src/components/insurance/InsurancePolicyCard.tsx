@@ -40,29 +40,29 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
   }
 
   return (
-    <div className="p-4 sm:p-5 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
+    <div className="p-4 sm:p-5 hover:bg-[var(--surface-secondary)]/50 transition-colors">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/50 dark:border-slate-700/50 ${style.bg}`}>
-            {isExpiringSoon ? <ShieldAlert size={18} className="text-rose-500" /> : <Shield size={18} className={style.text} />}
+          <div className={`w-10 h-10 rounded-[var(--radius-medium)] flex items-center justify-center shrink-0 border border-[var(--border-subtle)] ${style.bg}`}>
+            {isExpiringSoon ? <ShieldAlert size={18} className="text-[var(--negative)]" /> : <Shield size={18} className={style.text} />}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="font-bold text-slate-800 dark:text-slate-100 text-base">{policy.policy_name}</h4>
-              <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md ${style.bg}`}>
+              <h4 className="font-bold text-[var(--text-primary)] text-base">{policy.policy_name}</h4>
+              <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-[var(--radius-pill)] ${style.bg}`}>
                 {style.label}
               </span>
               {docs.length > 0 ? (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--positive-soft)] text-[var(--positive)] border border-[var(--positive)]/30 shrink-0">
                   📎 {docs.length} Doc{docs.length > 1 ? 's' : ''}
                 </span>
               ) : (
-                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 shrink-0">
+                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] shrink-0">
                   No Bond
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
               {policy.provider} {policy.policy_number ? `• Policy #${policy.policy_number}` : ''}
             </p>
           </div>
@@ -70,26 +70,28 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
 
         <div className="flex items-center justify-between sm:justify-end gap-4">
           <div className="text-right">
-            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 tnum">{formatINR(policy.sum_assured)}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 tnum">
+            <p className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(policy.sum_assured)}</p>
+            <p className="text-xs text-[var(--text-tertiary)] tnum">
               Prem: {formatINR(policy.premium_amount)}
             </p>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => onOpenEdit(policy)}
-              className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:border-[var(--negative)] ios-press transition-colors"
               title="Edit policy & documents"
+              aria-label={`Edit ${policy.policy_name}`}
             >
               <Edit2 size={13} />
             </button>
             <button
               type="button"
               onClick={() => onConfirmDelete(policy)}
-              className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:border-[var(--negative)] ios-press transition-colors"
               title="Delete policy"
+              aria-label={`Delete ${policy.policy_name}`}
             >
               <Trash2 size={13} />
             </button>
@@ -97,14 +99,14 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--border-subtle)] text-xs">
         <div className="flex flex-wrap items-center gap-2">
           {policy.renewal_date && (
-            <span className={`inline-flex items-center gap-1 font-medium mr-1 ${isExpiringSoon ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-slate-500 dark:text-slate-400'}`}>
+            <span className={`inline-flex items-center gap-1 font-medium mr-1 ${isExpiringSoon ? 'text-[var(--negative)] font-bold' : 'text-[var(--text-secondary)]'}`}>
               <Calendar size={12} />
               Renewal: {new Date(policy.renewal_date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
               {daysRemaining !== null && daysRemaining <= 60 && (
-                <span className={`ml-1 text-[10px] px-1.5 py-0.5 rounded-full ${daysRemaining <= 0 ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'}`}>
+                <span className={`ml-1 text-[10px] px-1.5 py-0.5 rounded-[var(--radius-pill)] ${daysRemaining <= 0 ? 'bg-[var(--negative-soft)] text-[var(--negative)]' : 'bg-[var(--warning-soft)] text-[var(--warning)]'}`}>
                   {daysRemaining <= 0 ? 'Expired' : `${daysRemaining}d left`}
                 </span>
               )}
@@ -116,7 +118,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
               href={getDocumentUrl(doc.file_path)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 border border-rose-200/50 dark:border-rose-800/40 text-rose-700 dark:text-rose-300 hover:underline font-medium text-[11px] max-w-[220px] truncate"
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--negative-soft)] border border-[var(--negative)]/30 text-[var(--negative)] hover:underline font-medium text-[11px] max-w-[220px] truncate"
               title={`View ${doc.name}`}
             >
               <FileText size={11} className="shrink-0" />
@@ -127,7 +129,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
             <button
               type="button"
               onClick={() => onOpenEdit(policy)}
-              className="inline-flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+              className="inline-flex items-center gap-1 text-[11px] text-[var(--text-tertiary)] hover:text-[var(--negative)] transition-colors"
               title="Attach policy document"
             >
               <Paperclip size={11} />
@@ -140,7 +142,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
           <button
             type="button"
             onClick={() => setShowNotes(!showNotes)}
-            className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs font-medium ml-auto"
+            className="inline-flex items-center gap-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium ml-auto"
           >
             <StickyNote size={12} />
             {showNotes ? 'Hide Notes' : 'View Notes'}
@@ -149,7 +151,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
       </div>
 
       {showNotes && policy.notes && (
-        <p className="mt-2 p-2.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl text-xs text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700/50">
+        <p className="mt-2 p-2.5 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)] text-xs text-[var(--text-secondary)] border border-[var(--border-subtle)]">
           {policy.notes}
         </p>
       )}

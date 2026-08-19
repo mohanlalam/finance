@@ -25,35 +25,35 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
   const docs = documents.filter((d) => d.asset_type === 'gold' && d.asset_id === holding.id);
 
   return (
-    <div className="p-4 sm:p-5 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
+    <div className="p-4 sm:p-5 hover:bg-[var(--surface-secondary)]/50 transition-colors">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/50 dark:border-amber-800/40 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+          <div className="w-10 h-10 rounded-[var(--radius-medium)] bg-[var(--warning-soft)] border border-[var(--warning)]/30 flex items-center justify-center text-[var(--warning)] shrink-0">
             <Coins size={18} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="font-bold text-slate-800 dark:text-slate-100 text-base">{holding.item_name}</h4>
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">
+              <h4 className="font-bold text-[var(--text-primary)] text-base">{holding.item_name}</h4>
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-[var(--radius-pill)] bg-[var(--warning-soft)] text-[var(--warning)]">
                 {holding.purity}
               </span>
               {holding.isLiveValuation && (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--warning-soft)] text-[var(--warning)] border border-[var(--warning)]/30 shrink-0">
                   MCX Live
                 </span>
               )}
               {docs.length > 0 ? (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--positive-soft)] text-[var(--positive)] border border-[var(--positive)]/30 shrink-0">
                   📎 {docs.length} Doc{docs.length > 1 ? 's' : ''}
                 </span>
               ) : (
-                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 shrink-0">
+                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] shrink-0">
                   No Bill
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
-              <Scale size={12} className="text-slate-400" />
+            <p className="text-xs text-[var(--text-tertiary)] flex items-center gap-1 mt-0.5">
+              <Scale size={12} className="text-[var(--text-tertiary)]" />
               {holding.weight_grams} grams
             </p>
           </div>
@@ -61,26 +61,28 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
 
         <div className="flex items-center justify-between sm:justify-end gap-4">
           <div className="text-right">
-            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 tnum">{formatINR(currentValuation)}</p>
+            <p className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(currentValuation)}</p>
             <p className={`text-xs font-semibold tnum ${pnlColor(pnl)}`}>
               {pnl >= 0 ? '+' : ''}{formatINR(pnl)} ({formatPercent(pnlPct)})
             </p>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => onOpenEdit(holding)}
-              className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--warning)] hover:border-[var(--warning)] ios-press transition-colors"
               title="Edit holding & documents"
+              aria-label={`Edit ${holding.item_name}`}
             >
               <Edit2 size={13} />
             </button>
             <button
               type="button"
               onClick={() => onConfirmDelete(holding)}
-              className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:border-[var(--negative)] ios-press transition-colors"
               title="Delete holding"
+              aria-label={`Delete ${holding.item_name}`}
             >
               <Trash2 size={13} />
             </button>
@@ -88,14 +90,14 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60 text-xs">
+      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--border-subtle)] text-xs">
         {docs.map((doc) => (
           <a
             key={doc.id}
             href={getDocumentUrl(doc.file_path)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200/50 dark:border-amber-800/40 text-amber-700 dark:text-amber-300 hover:underline font-medium text-[11px] max-w-[220px] truncate"
+            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--warning-soft)] border border-[var(--warning)]/30 text-[var(--warning)] hover:underline font-medium text-[11px] max-w-[220px] truncate"
             title={`View ${doc.name}`}
           >
             <FileText size={11} className="shrink-0" />
@@ -106,7 +108,7 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
           <button
             type="button"
             onClick={() => onOpenEdit(holding)}
-            className="inline-flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+            className="inline-flex items-center gap-1 text-[11px] text-[var(--text-tertiary)] hover:text-[var(--warning)] transition-colors"
             title="Attach supporting document"
           >
             <Paperclip size={11} />
@@ -117,7 +119,7 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
           <button
             type="button"
             onClick={() => setShowNotes(!showNotes)}
-            className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs font-medium ml-auto"
+            className="inline-flex items-center gap-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium ml-auto"
           >
             <StickyNote size={12} />
             {showNotes ? 'Hide Notes' : 'View Notes'}
@@ -126,7 +128,7 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
       </div>
 
       {showNotes && holding.notes && (
-        <p className="mt-2 p-2.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl text-xs text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700/50">
+        <p className="mt-2 p-2.5 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)] text-xs text-[var(--text-secondary)] border border-[var(--border-subtle)]">
           {holding.notes}
         </p>
       )}

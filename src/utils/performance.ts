@@ -411,18 +411,29 @@ export function getPortfolioCashFlows(portfolio: Portfolio, target: CashFlow[] =
   }
 
   if (portfolio.goldHoldings) {
-    const goldHoldings = portfolio.goldHoldings;
-    const gLen = goldHoldings.length;
-    for (let i = 0; i < gLen; i++) {
-      addFlow(goldHoldings[i].purchase_date, goldHoldings[i].purchase_price);
+    for (let i = 0; i < portfolio.goldHoldings.length; i++) {
+      const g = portfolio.goldHoldings[i];
+      if (!g) continue;
+      const inv = Number(g.purchase_price);
+      if (isNaN(inv) || inv <= 0) continue;
+      const d = g.purchase_date && !isNaN(parseLocalDate(g.purchase_date))
+        ? g.purchase_date
+        : nowStr;
+      cashflows.push({ date: d, amount: -inv });
     }
   }
 
+  // 6. Real Estate
   if (portfolio.realEstate) {
-    const realEstate = portfolio.realEstate;
-    const reLen = realEstate.length;
-    for (let i = 0; i < reLen; i++) {
-      addFlow(realEstate[i].purchase_date, realEstate[i].purchase_price);
+    for (let i = 0; i < portfolio.realEstate.length; i++) {
+      const re = portfolio.realEstate[i];
+      if (!re) continue;
+      const inv = Number(re.purchase_price);
+      if (isNaN(inv) || inv <= 0) continue;
+      const d = re.purchase_date && !isNaN(parseLocalDate(re.purchase_date))
+        ? re.purchase_date
+        : nowStr;
+      cashflows.push({ date: d, amount: -inv });
     }
   }
 
@@ -503,16 +514,21 @@ export function calculateMultiplePortfoliosXIRR(portfolios: Portfolio[]): number
 export function getPortfolioAnnualizedReturn(portfolio: Portfolio): number {
   if (!portfolio) return 0;
   const xirr = calculatePortfolioXIRR(portfolio);
-  if (xirr !== null && !isNaN(xirr)) return xirr;
+  if (xirr !== null && !isNaN(xirr) && xirr !== 0) return xirr;
 
   const age = calculateWeightedAge(portfolio);
-  return calculateCAGR(portfolio.totalInvested, portfolio.totalCurrentValue, age);
+  const cagr = calculateCAGR(portfolio.totalInvested, portfolio.totalCurrentValue, age);
+  if (!isNaN(cagr) && cagr !== 0) return cagr;
+
+  const inv = Number(portfolio.totalInvested) || 0;
+  const curr = Number(portfolio.totalCurrentValue) || 0;
+  return inv > 0 ? ((curr - inv) / inv) * 100 : 0;
 }
 
 export function getMultiplePortfoliosAnnualizedReturn(portfolios: Portfolio[]): number {
   if (!portfolios || portfolios.length === 0) return 0;
   const xirr = calculateMultiplePortfoliosXIRR(portfolios);
-  if (xirr !== null && !isNaN(xirr)) return xirr;
+  if (xirr !== null && !isNaN(xirr) && xirr !== 0) return xirr;
 
   let weightedTimeSum = 0;
   let totalInvestedForAge = 0;
@@ -533,5 +549,8 @@ export function getMultiplePortfoliosAnnualizedReturn(portfolios: Portfolio[]): 
   }
 
   const combinedAge = totalInvestedForAge > 0 ? weightedTimeSum / totalInvestedForAge : 1.0;
-  return calculateCAGR(totalInvested, totalCurrentValue, combinedAge);
+  const cagr = calculateCAGR(totalInvested, totalCurrentValue, combinedAge);
+  if (!isNaN(cagr) && cagr !== 0) return cagr;
+
+  return totalInvested > 0 ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 : 0;
 }

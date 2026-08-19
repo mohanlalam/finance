@@ -1,16 +1,28 @@
-# Implementation Plan: Codebase Enhancements & Bug Fixes
+# Implementation Plan: Full Project Audit Fixes & Enhancements (Round 2)
 
-- [x] **Phase 1: Fix Real Bugs & Token Harmonization**
-  - [x] Clean up dead 52-week alert code in `useAlerts.ts`, `AlertsBanner.tsx`, `Header.tsx`, and `MobileAlertsView.tsx`
-  - [x] Token-harmonize RD & SIP components (`RDAccountCard.tsx`, `SIPAccountCard.tsx`, `RDFormModal.tsx`, `SIPFormModal.tsx`, `SIPFormFields.tsx`, `RDInstallmentSchedule.tsx`, `RDView.tsx`, `SIPView.tsx`) & fix `text-sky-650` typo
-- [x] **Phase 2: Implement Feature Enhancements**
-  - [x] Add RD maturity alerts to `useAlerts.ts`
-  - [x] Add RD tenure countdown & completion progress bar to `RDAccountCard.tsx`
-  - [x] Show actual realized P&L % alongside Expected CAGR on `SIPAccountCard.tsx`
-  - [x] Add inline expired & expiring-soon badges to `DocumentVaultView.tsx`
-  - [x] Add Real Estate rental yield & rental income metrics to `InsightsPanel.tsx`
-  - [x] Add RD installment completeness check to `dataQuality.ts`
-- [x] **Phase 3: Polish & Verification**
-  - [x] Prefix bare `console.error` in `PortfolioAssistant.tsx`
-  - [x] Verify `npm run build` and `npm test` pass with 0 errors
-  - [x] Commit & push changes to git
+- [x] **Phase 1: Critical Logic & Data Flow Bug Fixes**
+  - [x] 1.1 Fix Backup Restore in `src/components/ExportPanel.tsx` to restore RD, SIP, and Document records
+  - [x] 1.2 Prevent live quotes/NAVs wipeout on mutation in `src/hooks/usePortfolioData.ts`
+  - [x] 1.3 Fix promise chain reset in `runMutation` in `src/hooks/usePortfolioData.ts`
+  - [x] 1.4 Fix false-positive price column matching in `src/components/ExportPanel.tsx`
+  - [x] 1.5 Fix rental yield calculation on 0/missing purchase price in `src/utils/assistant.ts`
+  - [x] 1.6 Fix zero-day cashflow collapse fallback in `src/utils/performance.ts`
+- [x] **Phase 2: Mobile Tap Targets & List Key Stability**
+  - [x] 2.1 Standardize action button touch targets (>=44px on mobile) across `DepositDetailsCard`, `GoldHoldingCard`, `InsurancePolicyCard`, `RealEstateCard`, `RDAccountCard`, `SIPAccountCard`
+  - [x] 2.2 Stabilize React list keys in `src/components/InsightsPanel.tsx`
+- [x] **Phase 3: Design Token Harmonization in Modals & Cards**
+  - [x] 3.1 Tokenize `src/components/AddFamilyModal.tsx`
+  - [x] 3.2 Tokenize `src/components/RenamePortfolioModal.tsx`
+  - [x] 3.3 Tokenize `src/components/ChangePinModal.tsx`
+  - [x] 3.4 Tokenize `src/components/AddHoldingModal.tsx`
+  - [x] 3.5 Tokenize `src/components/EditStockModal.tsx`
+  - [x] 3.6 Tokenize `src/components/ConfirmModal.tsx`
+  - [x] 3.7 Tokenize `src/components/fd/DepositDetailsCard.tsx`
+  - [x] 3.8 Tokenize `src/components/gold/GoldHoldingCard.tsx`
+  - [x] 3.9 Tokenize `src/components/insurance/InsurancePolicyCard.tsx`
+  - [x] 3.10 Tokenize `src/components/realestate/RealEstateCard.tsx`
+- [x] **Phase 4: Full Verification & Git Sync**
+  - [x] 4.1 Run `npx tsc --noEmit`
+  - [x] 4.2 Run `npm test`
+  - [x] 4.3 Run `npm run build`
+  - [x] 4.4 Commit & push to `origin/main`

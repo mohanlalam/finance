@@ -68,7 +68,7 @@ const TopHoldings = React.memo(function TopHoldings({ items }: { items: HoldingI
       {items.map((item, idx) => {
         const alloc = totalVal > 0 ? (item.holding.currentValue / totalVal) * 100 : 0;
         return (
-          <div key={`${item.holding.ticker}-${idx}`} className="flex items-center gap-2">
+          <div key={`${item.portfolioName}-${item.holding.id || item.holding.ticker}`} className="flex items-center gap-2">
             <span className="w-5 h-5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center text-label-micro font-bold shrink-0">
               {idx + 1}
             </span>
@@ -97,8 +97,8 @@ const GainersList = React.memo(function GainersList({ items, type }: { items: Ho
   const isGain = type === 'gain';
   return (
     <div className="space-y-2">
-      {items.map((item, idx) => (
-        <div key={`${item.holding.ticker}-${idx}`} className="flex items-center justify-between gap-2">
+      {items.map((item) => (
+        <div key={`${item.portfolioName}-${item.holding.id || item.holding.ticker}`} className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <div className={`w-5 h-5 rounded-[var(--radius-small)] flex items-center justify-center shrink-0 ${isGain ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
               {isGain ? <TrendingUp size={10} aria-hidden="true" /> : <TrendingDown size={10} aria-hidden="true" />}
@@ -124,10 +124,10 @@ const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: Ho
   if (movers.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No movements today</p>;
   return (
     <div className="space-y-2">
-      {movers.map((m, idx) => {
+      {movers.map((m) => {
         const isUp = m.holding.todayPnLPercent >= 0;
         return (
-          <div key={`${m.holding.ticker}-${idx}`} className="flex items-center justify-between gap-2">
+          <div key={`${m.portfolioName}-${m.holding.id || m.holding.ticker}`} className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <div className={`w-5 h-5 rounded-[var(--radius-small)] flex items-center justify-center shrink-0 ${isUp ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
                 {isUp ? <TrendingUp size={10} aria-hidden="true" /> : <TrendingDown size={10} aria-hidden="true" />}
@@ -154,8 +154,8 @@ const FDReminders = React.memo(function FDReminders({ alerts }: { alerts: FDMatu
   if (alerts.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No FDs maturing in the next 30 days</p>;
   return (
     <div className="space-y-2">
-      {alerts.map((a, i) => (
-        <div key={i} className="flex items-center gap-2 p-2 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)]">
+      {alerts.map((a) => (
+        <div key={`${a.fd.id || a.fd.bank_name}-${a.daysLeft}`} className="flex items-center gap-2 p-2 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)]">
           <div className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
             <Landmark size={12} aria-hidden="true" />
           </div>
@@ -176,8 +176,8 @@ const InsuranceReminders = React.memo(function InsuranceReminders({ alerts }: { 
   if (alerts.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No renewals in next 60 days</p>;
   return (
     <div className="space-y-2">
-      {alerts.map((a, i) => (
-        <div key={i} className="flex items-center gap-2 p-2 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)]">
+      {alerts.map((a) => (
+        <div key={`${a.insurance.id || a.insurance.policy_name}-${a.daysLeft}`} className="flex items-center gap-2 p-2 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)]">
           <div className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--negative-soft)] text-[var(--negative)] flex items-center justify-center shrink-0">
             <Shield size={12} aria-hidden="true" />
           </div>

@@ -158,21 +158,21 @@ export function RDAccountCard({
               target="_blank"
               rel="noopener noreferrer"
               title={`View Attached Document: ${linkedDocs[0].name}`}
-              className="w-8 h-8 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press"
+              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press"
             >
               <FileText size={15} />
             </a>
           )}
           <button
             onClick={() => onOpenEdit(account)}
-            className="w-8 h-8 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] transition-colors ios-press"
+            className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] transition-colors ios-press"
             aria-label="Edit Recurring Deposit"
           >
             <Edit2 size={14} />
           </button>
           <button
             onClick={() => onConfirmDelete(account)}
-            className="w-8 h-8 rounded-[var(--radius-small)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] transition-colors ios-press"
+            className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] transition-colors ios-press"
             aria-label="Delete Recurring Deposit"
           >
             <Trash2 size={14} />

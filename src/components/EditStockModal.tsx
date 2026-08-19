@@ -84,21 +84,21 @@ export default function EditStockModal({
       maxWidth="max-w-lg"
     >
       {/* Header */}
-      <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-slate-50/50 dark:bg-zinc-800/20">
+      <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--surface-secondary)]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-extrabold text-sm flex items-center justify-center shadow-md shadow-blue-500/20 uppercase">
+          <div className="w-10 h-10 rounded-[var(--radius-medium)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-extrabold text-sm flex items-center justify-center uppercase">
             {holding.ticker.slice(0, 2)}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
+              <h3 className="text-base font-extrabold text-[var(--text-primary)] tracking-tight">
                 {holding.ticker}
               </h3>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400">
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-[var(--radius-pill)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]">
                 LTP: ₹{holding.ltp.toLocaleString('en-IN')}
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[220px]">
+            <p className="text-xs text-[var(--text-tertiary)] truncate max-w-[220px]">
               {holding.stockName}
             </p>
           </div>
@@ -113,26 +113,26 @@ export default function EditStockModal({
 
       <form onSubmit={handleSubmit} className="flex-1 min-h-0 overflow-y-auto px-6 py-5 space-y-5">
         {/* Live Calculation Preview Banner */}
-        <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-zinc-900 text-white shadow-xl space-y-3 border border-white/10">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="p-4 rounded-[var(--radius-large)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] space-y-3">
+          <div className="flex items-center justify-between text-xs text-[var(--text-tertiary)]">
             <span className="font-semibold uppercase tracking-wider text-[10px]">Live Projection Preview</span>
-            <span className="text-[11px] font-bold text-slate-300">
+            <span className="text-[11px] font-bold text-[var(--text-secondary)]">
               LTP: ₹{holding.ltp.toLocaleString('en-IN')}
             </span>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 pt-1 border-t border-white/10 text-center">
+          <div className="grid grid-cols-3 gap-2 pt-1 border-t border-[var(--border-subtle)] text-center">
             <div>
-              <p className="text-[10px] text-slate-400 font-semibold uppercase">New Invested</p>
-              <p className="text-sm font-extrabold tnum text-slate-100 mt-0.5">{formatINR(newInvested)}</p>
+              <p className="text-[10px] text-[var(--text-tertiary)] font-semibold uppercase">New Invested</p>
+              <p className="text-sm font-extrabold tnum text-[var(--text-primary)] mt-0.5">{formatINR(newInvested)}</p>
             </div>
             <div>
-              <p className="text-[10px] text-slate-400 font-semibold uppercase">Current Value</p>
-              <p className="text-sm font-extrabold tnum text-slate-100 mt-0.5">{formatINR(newCurrentValue)}</p>
+              <p className="text-[10px] text-[var(--text-tertiary)] font-semibold uppercase">Current Value</p>
+              <p className="text-sm font-extrabold tnum text-[var(--text-primary)] mt-0.5">{formatINR(newCurrentValue)}</p>
             </div>
             <div>
-              <p className="text-[10px] text-slate-400 font-semibold uppercase">Estimated P&amp;L</p>
-              <p className={`text-sm font-extrabold tnum mt-0.5 flex items-center justify-center gap-0.5 ${isGain ? 'text-emerald-400' : 'text-rose-400'}`}>
+              <p className="text-[10px] text-[var(--text-tertiary)] font-semibold uppercase">Estimated P&amp;L</p>
+              <p className={`text-sm font-extrabold tnum mt-0.5 flex items-center justify-center gap-0.5 ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                 {isGain ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                 {formatPercent(newPnLPct, 1)}
               </p>
@@ -143,10 +143,10 @@ export default function EditStockModal({
         {/* Quantity Field with Quick Steppers */}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-bold text-[var(--text-primary)]">
               Holding Quantity (Shares)
             </label>
-            <span className="text-[11px] text-slate-400">Current: {holding.qty} shares</span>
+            <span className="text-[11px] text-[var(--text-tertiary)]">Current: {holding.qty} shares</span>
           </div>
 
           <div className="flex gap-2 items-center">
@@ -157,7 +157,7 @@ export default function EditStockModal({
               value={qty}
               onChange={(e) => setQty(e.target.value)}
               disabled={saving}
-              className="flex-1 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-extrabold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30 tnum"
+              className="flex-1 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3.5 py-2.5 text-sm font-extrabold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none tnum"
               placeholder="Enter quantity"
               required
             />
@@ -165,13 +165,13 @@ export default function EditStockModal({
 
           {/* Stepper Shortcut Pills */}
           <div className="flex items-center gap-1.5 pt-1 flex-wrap">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Quick Add:</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mr-1">Quick Add:</span>
             {[-10, -1, +1, +5, +10, +50].map((delta) => (
               <button
                 key={delta}
                 type="button"
                 onClick={() => handleStepper(delta)}
-                className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200/60 dark:border-slate-700/60 transition-all active:scale-95"
+                className="px-2.5 py-1 rounded-[var(--radius-small)] text-xs font-extrabold bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:bg-[var(--accent-blue-soft)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] transition-all active:scale-95"
               >
                 {delta > 0 ? `+${delta}` : delta}
               </button>
@@ -182,20 +182,20 @@ export default function EditStockModal({
         {/* Avg Purchase Price Field with LTP Auto-Fill */}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-bold text-[var(--text-primary)]">
               Average Buy Price (₹)
             </label>
             <button
               type="button"
               onClick={handleUseLtp}
-              className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+              className="text-[11px] font-bold text-[var(--accent-blue)] hover:underline flex items-center gap-1"
             >
               Use LTP (₹{holding.ltp.toLocaleString('en-IN')})
             </button>
           </div>
 
           <div className="relative">
-            <span className="absolute left-3.5 top-2.5 text-sm font-bold text-slate-400">₹</span>
+            <span className="absolute left-3.5 top-2.5 text-sm font-bold text-[var(--text-tertiary)]">₹</span>
             <input
               type="number"
               min="0.01"
@@ -203,7 +203,7 @@ export default function EditStockModal({
               value={avgPrice}
               onChange={(e) => setAvgPrice(e.target.value)}
               disabled={saving}
-              className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-8 pr-3.5 py-2.5 text-sm font-extrabold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30 tnum"
+              className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] pl-8 pr-3.5 py-2.5 text-sm font-extrabold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none tnum"
               placeholder="Enter avg price"
               required
             />
@@ -213,15 +213,15 @@ export default function EditStockModal({
         {/* Portfolio Target Selector (if multiple portfolios exist) */}
         {portfolioOptions.length > 1 && (
           <div className="space-y-2 pt-2 border-t border-[var(--border-subtle)]">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-              <ArrowRightLeft size={13} className="text-blue-500" />
+            <label className="block text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
+              <ArrowRightLeft size={13} className="text-[var(--accent-blue)]" />
               Target Portfolio Member
             </label>
             <select
               value={targetPortfolio}
               onChange={(e) => setTargetPortfolio(e.target.value)}
               disabled={saving}
-              className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3.5 py-2.5 text-sm font-semibold text-[var(--text-primary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none"
             >
               {portfolioOptions.map((opt) => (
                 <option key={opt.name} value={opt.name}>
@@ -233,7 +233,7 @@ export default function EditStockModal({
         )}
 
         {error && (
-          <p className="text-xs font-semibold text-rose-500 bg-rose-50 dark:bg-rose-950/30 p-3 rounded-xl border border-rose-200 dark:border-rose-900/40">
+          <p className="text-xs font-semibold text-[var(--negative)] bg-[var(--negative-soft)] p-3 rounded-[var(--radius-medium)] border border-[var(--negative)]/30">
             {error}
           </p>
         )}

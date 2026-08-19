@@ -80,32 +80,32 @@ export function DepositDetailsCard({
   return (
     <>
       <div 
-        className="p-4 sm:p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors select-none" 
+        className="p-4 sm:p-6 hover:bg-[var(--surface-secondary)]/50 transition-colors select-none" 
         role="listitem"
         {...longPressProps}
       >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3 min-w-0">
-          <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 ${isMatured ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' : cfg.iconBg}`}>
+          <div className={`w-10 h-10 rounded-[var(--radius-medium)] flex items-center justify-center shrink-0 ${isMatured ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]'}`}>
             {isMatured ? <CheckCircle size={20} aria-hidden="true" /> : <IconComponent size={20} aria-hidden="true" />}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{fd.bank_name}</h4>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${isMatured ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'}`}>
+              <h4 className="text-sm font-bold text-[var(--text-primary)] truncate">{fd.bank_name}</h4>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-[var(--radius-pill)] shrink-0 ${isMatured ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]'}`}>
                 {isMatured ? 'Matured' : `${fd.interest_rate}% p.a.`}
               </span>
               {fdDocs.length > 0 ? (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--positive-soft)] text-[var(--positive)] border border-[var(--positive)]/30 shrink-0">
                   📎 {fdDocs.length} Doc{fdDocs.length > 1 ? 's' : ''}
                 </span>
               ) : (
-                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 shrink-0">
+                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] shrink-0">
                   No Doc
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">
+            <p className="text-xs text-[var(--text-tertiary)] mt-0.5 truncate">
               {fd.start_date} &rarr; {fd.maturity_date || 'Ongoing'}
             </p>
           </div>
@@ -113,12 +113,12 @@ export function DepositDetailsCard({
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6 md:text-right">
           <div className="min-w-0">
-            <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{cfg.principalLabel.replace(' (₹)', '')}</p>
-            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{formatINR(Number(fd.principal_amount))}</p>
+            <p className="text-xs text-[var(--text-tertiary)] truncate">{cfg.principalLabel.replace(' (₹)', '')}</p>
+            <p className="text-sm font-bold text-[var(--text-primary)] truncate tnum">{formatINR(Number(fd.principal_amount))}</p>
           </div>
           <div className="min-w-0">
-            <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{fd.maturity_date ? 'Maturity Value' : 'Current Value'}</p>
-            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{formatINR(getFDEffectiveValue(fd))}</p>
+            <p className="text-xs text-[var(--text-tertiary)] truncate">{fd.maturity_date ? 'Maturity Value' : 'Current Value'}</p>
+            <p className="text-sm font-bold text-[var(--text-primary)] truncate tnum">{formatINR(getFDEffectiveValue(fd))}</p>
           </div>
           <div className="col-span-2 sm:col-span-1 flex items-center justify-start md:justify-end gap-2">
             {fdDocs.map((doc) => (
@@ -127,7 +127,7 @@ export function DepositDetailsCard({
                 href={getDocumentUrl(doc.file_path)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-800 ios-press transition-colors"
+                className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] ios-press transition-colors"
                 title={doc.name}
                 aria-label={`Open document: ${doc.name}`}
               >
@@ -136,7 +136,7 @@ export function DepositDetailsCard({
             ))}
             <button
               onClick={() => onOpenEdit(fd)}
-              className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 ios-press transition-colors"
+              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] ios-press transition-colors"
               title={`Edit ${cfg.title}`}
               aria-label={`Edit ${cfg.title} at ${fd.bank_name}`}
             >
@@ -144,7 +144,7 @@ export function DepositDetailsCard({
             </button>
             <button
               onClick={() => onConfirmDelete(fd)}
-              className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 ios-press transition-colors"
+              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:border-[var(--negative)] ios-press transition-colors"
               title={`Delete ${cfg.title}`}
               aria-label={`Delete ${cfg.title} at ${fd.bank_name}`}
             >
@@ -156,7 +156,7 @@ export function DepositDetailsCard({
 
       <div className="mt-4 space-y-4">
         <div>
-          <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-400 mb-1">
+          <div className="flex items-center justify-between text-[10px] text-[var(--text-tertiary)] mb-1">
             <span className="flex items-center gap-1">
               <Clock size={10} aria-hidden="true" />
               Maturity Timeline
@@ -164,9 +164,9 @@ export function DepositDetailsCard({
             <span>{fd.maturity_date ? `${progress.toFixed(0)}% elapsed` : 'Ongoing accumulation'}</span>
           </div>
           {fd.maturity_date && (
-            <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Maturity timeline progress">
+            <div className="h-1.5 bg-[var(--surface-secondary)] rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Maturity timeline progress">
               <div
-                className={`h-full rounded-full transition-all duration-300 ${isMatured ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                className={`h-full rounded-full transition-all duration-300 ${isMatured ? 'bg-[var(--positive)]' : 'bg-[var(--accent-blue)]'}`}
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -174,7 +174,7 @@ export function DepositDetailsCard({
         </div>
 
         {fd.notes && (
-          <p className="text-xs text-slate-400 dark:text-slate-500 flex items-start gap-1.5">
+          <p className="text-xs text-[var(--text-tertiary)] flex items-start gap-1.5">
             <StickyNote size={11} className="shrink-0 mt-0.5" />
             <span className="italic">{fd.notes}</span>
           </p>
