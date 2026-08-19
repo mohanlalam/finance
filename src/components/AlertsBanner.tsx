@@ -9,22 +9,16 @@ interface AlertsBannerProps {
 }
 
 const TYPE_CONFIG: Record<AlertType, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
-  '52w_high': {
-    icon: <TrendingUp size={14} aria-hidden="true" />,
-    color: 'text-[var(--accent-blue)]',
-    bg: 'bg-[var(--accent-blue-soft)]',
-    border: 'border-[var(--border-subtle)]',
-  },
-  '52w_low': {
-    icon: <TrendingDown size={14} aria-hidden="true" />,
-    color: 'text-[var(--warning)]',
-    bg: 'bg-[var(--warning-soft)]',
-    border: 'border-[var(--border-subtle)]',
-  },
   fd_maturity: {
     icon: <Landmark size={14} aria-hidden="true" />,
     color: 'text-[var(--text-primary)]',
     bg: 'bg-[var(--surface-secondary)]',
+    border: 'border-[var(--border-subtle)]',
+  },
+  rd_maturity: {
+    icon: <Landmark size={14} aria-hidden="true" />,
+    color: 'text-[var(--accent-blue)]',
+    bg: 'bg-[var(--accent-blue-soft)]',
     border: 'border-[var(--border-subtle)]',
   },
   insurance_renewal: {

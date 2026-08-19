@@ -152,16 +152,16 @@ export function SIPFormModal({
       maxWidth="max-w-lg"
       ariaLabel={editingAccount ? 'Edit SIP' : 'Create SIP'}
     >
-      <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
+      <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
         <div>
-          <h3 id="sip-modal-title" className="text-base font-bold text-slate-800 dark:text-slate-100">
+          <h3 id="sip-modal-title" className="text-base font-bold text-[var(--text-primary)]">
             {editingAccount ? 'Edit SIP' : 'Create SIP'}
           </h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Enter details to track fund growth and units</p>
+          <p className="text-xs text-[var(--text-tertiary)] mt-0.5">Enter details to track fund growth and units</p>
         </div>
         <button
           onClick={onClose}
-          className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors text-xl font-bold"
+          className="w-8 h-8 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors text-xl font-bold ios-press"
           aria-label="Close modal"
         >
           &times;
@@ -171,12 +171,12 @@ export function SIPFormModal({
       <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 overflow-y-auto min-h-0 flex-1">
           {/* Portfolio Select */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Portfolio Owner</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Portfolio Owner</label>
             <select
               value={formPortfolio}
               onChange={(e) => setFormPortfolio(e.target.value)}
               disabled={!!editingAccount}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors disabled:opacity-50"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors disabled:opacity-50"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
@@ -207,19 +207,19 @@ export function SIPFormModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Notes <span className="font-normal text-slate-400">(optional)</span></label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Notes <span className="font-normal text-[var(--text-tertiary)]">(optional)</span></label>
             <textarea
               rows={2}
               placeholder="e.g. Linked to child education, monthly auto-debit"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 transition-colors resize-none"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors resize-none"
             />
           </div>
 
           {/* Error message */}
           {error && (
-            <p className="text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-[14px] px-3 py-2" role="alert">
+            <p className="text-xs text-[var(--negative)] bg-[var(--negative-soft)] border border-[var(--negative)]/30 rounded-[var(--radius-medium)] px-3 py-2" role="alert">
               {error}
             </p>
           )}
@@ -229,14 +229,14 @@ export function SIPFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="flex-1 border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold text-sm rounded-[var(--radius-medium)] py-2.5 hover:bg-[var(--surface-secondary)] transition-colors ios-press"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-sky-600 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-sky-700 transition-colors disabled:opacity-50"
+              className="flex-1 bg-[var(--accent-blue)] text-white font-semibold text-sm rounded-[var(--radius-medium)] py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50 ios-press shadow-xs"
             >
               {loading ? 'Saving...' : editingAccount ? 'Save Changes' : 'Create SIP'}
             </button>

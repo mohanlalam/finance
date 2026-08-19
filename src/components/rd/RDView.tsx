@@ -82,7 +82,7 @@ export function RDView({
       <AssetRegistryContainer
         title="Recurring Deposits"
         createBtnLabel="Add RD"
-        themeColor="bg-blue-600 hover:bg-blue-700"
+        themeColor="bg-[var(--accent-blue)] hover:opacity-90"
         emptyType="rd"
         emptyTitle="No Recurring Deposits"
         emptyDescription="Track monthly systematic deposits across banks."
@@ -100,7 +100,7 @@ export function RDView({
             {({ index, style }) => {
               const account = filteredAccounts[index];
               return (
-                <div style={style} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
                   <RDAccountCard
                     account={account}
                     documents={documents}

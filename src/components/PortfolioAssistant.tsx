@@ -321,7 +321,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
       };
       setMessages(prev => [...prev, assistantMsg]);
     } catch (e) {
-      console.error(e);
+      console.error('[assistant] Query processing failed:', e);
       const errorMsg: ChatMessage = {
         id: Math.random().toString(36).substring(7),
         role: 'assistant',

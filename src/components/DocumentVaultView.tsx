@@ -110,17 +110,17 @@ export default React.memo(function DocumentVaultView({
     let text = `Expires ${new Date(expiryDateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 
     if (isExpired) {
-      badgeColor = "bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border border-rose-100 dark:border-rose-900/50";
+      badgeColor = "bg-[var(--negative-soft)] text-[var(--negative)] border border-[var(--negative)]/30";
       text += " (Expired)";
     } else if (isExpiringSoon) {
-      badgeColor = "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50";
+      badgeColor = "bg-[var(--warning-soft)] text-[var(--warning)] border border-[var(--warning)]/30";
       text += ` (${daysLeft}d left)`;
     } else {
-      badgeColor = "bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700";
+      badgeColor = "bg-[var(--surface-secondary)] text-[var(--text-tertiary)] border border-[var(--border-subtle)]";
     }
 
     return (
-      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md flex items-center gap-1 ${badgeColor}`}>
+      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] flex items-center gap-1 ${badgeColor}`}>
         {text}
       </span>
     );
@@ -328,23 +328,23 @@ export default React.memo(function DocumentVaultView({
             }
           />
         ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+          <div className="divide-y divide-[var(--border-subtle)]">
             {folderDocs.map((doc) => {
               const linkedLabel = doc.asset_id ? assetLabelMap.get(doc.asset_id) || null : null;
               return (
-                <div key={doc.id} className="px-6 py-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors flex items-center justify-between gap-4">
+                <div key={doc.id} className="px-6 py-4 hover:bg-[var(--surface-secondary)]/50 transition-colors flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-[14px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
                       <FileText size={18} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate" title={doc.name}>{doc.name}</p>
+                      <p className="text-sm font-semibold text-[var(--text-primary)] truncate" title={doc.name}>{doc.name}</p>
                       <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         {doc.file_type && (
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{doc.file_type}</span>
+                          <span className="text-[10px] text-[var(--text-tertiary)] font-mono">{doc.file_type}</span>
                         )}
                         {linkedLabel && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 flex items-center gap-1">
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border border-[var(--accent-blue)]/30 flex items-center gap-1">
                             <Paperclip size={9} />
                             {linkedLabel}
                           </span>
@@ -353,19 +353,19 @@ export default React.memo(function DocumentVaultView({
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <a
                       href={getDocumentUrl(doc.file_path)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
+                      className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press"
                       title="Open"
                     >
                       <ExternalLink size={14} />
                     </a>
                     <button
                       onClick={() => handleDelete(doc)}
-                      className="w-8 h-8 rounded-[10px] border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
+                      className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press"
                       title="Delete"
                     >
                       <Trash2 size={14} />

@@ -153,6 +153,28 @@ export function analyzePortfolioHealth(
           actionLabel: 'Fix Amount',
         });
       }
+      if (rd.status !== 'matured' && rd.start_date) {
+        const start = new Date(rd.start_date);
+        const current = new Date();
+        if (!isNaN(start.getTime())) {
+          const monthsPassed = Math.max(0, (current.getFullYear() - start.getFullYear()) * 12 + (current.getMonth() - start.getMonth()) + 1);
+          const paidCount = rd.contributions?.length ?? 0;
+          if (monthsPassed >= 3 && paidCount < monthsPassed - 1) {
+            issues.push({
+              id: `rd-lagging-installments-${rd.id}`,
+              category: 'deposit',
+              severity: 'warning',
+              title: `RD installments behind schedule`,
+              description: `${rd.bank_name} has ${paidCount} of ${monthsPassed} expected monthly installments recorded.`,
+              assetTab: 'rd',
+              portfolioName: pName,
+              portfolioLabel: pLabel,
+              assetId: rd.id,
+              actionLabel: 'Record Installments',
+            });
+          }
+        }
+      }
     });
 
     // 3. SIP Mutual Funds Checks

@@ -74,18 +74,18 @@ export function RDInstallmentSchedule({ account, onUpdate }: RDInstallmentSchedu
   };
 
   return (
-    <div className="pt-2 border-t border-slate-100 dark:border-slate-700/50">
+    <div className="pt-2 border-t border-[var(--border-subtle)]">
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-1 text-[11px] font-bold text-pink-600 dark:text-pink-400 hover:underline"
+        className="flex items-center gap-1 text-[11px] font-bold text-[var(--accent-blue)] hover:underline ios-press"
       >
         {expanded ? 'Hide Installment Schedule' : 'Show Installment Schedule'}
       </button>
       
       {expanded && (
         <div className="mt-3 space-y-2">
-          <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+          <p className="text-[9px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">
             Monthly Installments
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
@@ -105,39 +105,39 @@ export function RDInstallmentSchedule({ account, onUpdate }: RDInstallmentSchedu
 
               let cardClasses = '';
               if (isPaid) {
-                cardClasses = 'bg-emerald-50/30 border-emerald-200 dark:bg-emerald-950/10 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-400';
+                cardClasses = 'bg-[var(--positive-soft)] border-[var(--positive)]/30 text-[var(--positive)]';
               } else if (isPastMonth) {
-                cardClasses = 'bg-rose-50/30 border-rose-200 dark:bg-rose-950/10 dark:border-rose-900/40 text-rose-800 dark:text-rose-400';
+                cardClasses = 'bg-[var(--negative-soft)] border-[var(--negative)]/30 text-[var(--negative)]';
               } else {
-                cardClasses = 'bg-amber-50/30 border-amber-200 dark:bg-amber-950/10 dark:border-amber-900/40 text-amber-800 dark:text-amber-400';
+                cardClasses = 'bg-[var(--warning-soft)] border-[var(--warning)]/30 text-[var(--warning)]';
               }
 
               return (
                 <div
                   key={idx}
-                  className={`rounded-xl border p-2 flex flex-col items-center justify-between text-center gap-1.5 transition-all ${cardClasses}`}
+                  className={`rounded-[var(--radius-medium)] border p-2 flex flex-col items-center justify-between text-center gap-1.5 transition-all ${cardClasses}`}
                 >
                   <span className="text-[10px] font-bold tracking-wide">{label}</span>
                   {isPaid ? (
-                    <span className="text-[9px] font-semibold bg-emerald-100 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded-md">
+                    <span className="text-[9px] font-semibold bg-[var(--positive)]/20 px-1.5 py-0.5 rounded-[var(--radius-small)]">
                       ✓ Paid
                     </span>
                   ) : (
                     <div className="flex flex-col items-center gap-1 w-full">
-                      <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-md ${
+                      <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-[var(--radius-small)] ${
                         isPastMonth
-                          ? 'bg-rose-100 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400'
-                          : 'bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400'
+                          ? 'bg-[var(--negative)]/20 text-[var(--negative)]'
+                          : 'bg-[var(--warning)]/20 text-[var(--warning)]'
                       }`}>
                         {isPastMonth ? 'Overdue' : 'Due'}
                       </span>
                       <button
                         type="button"
                         onClick={() => void handleRecordInstallment(account, monthDate)}
-                        className={`text-[9px] font-extrabold text-white px-2 py-0.5 rounded-md transition-all active:scale-[0.97] shadow-xs ${
+                        className={`text-[9px] font-extrabold text-white px-2 py-0.5 rounded-[var(--radius-small)] transition-all ios-press shadow-xs ${
                           isPastMonth
-                            ? 'bg-rose-600 hover:bg-rose-700'
-                            : 'bg-amber-600 hover:bg-amber-700'
+                            ? 'bg-[var(--negative)] hover:opacity-90'
+                            : 'bg-[var(--warning)] hover:opacity-90'
                         }`}
                       >
                         + Pay

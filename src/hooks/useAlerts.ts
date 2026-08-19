@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Portfolio } from '../types/portfolio';
 
 export type AlertSeverity = 'critical' | 'warning' | 'info';
-export type AlertType = '52w_high' | '52w_low' | 'fd_maturity' | 'insurance_renewal' | 'portfolio_swing' | 'document_expiry';
+export type AlertType = 'fd_maturity' | 'rd_maturity' | 'insurance_renewal' | 'portfolio_swing' | 'document_expiry';
 
 export interface Alert {
   id: string;
@@ -63,48 +63,28 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
     swingAlertRef.current = null;
 
     for (const p of portfolios) {
-      // ── 52-week high/low alerts ──
-      for (const h of p.holdings) {
-        if (h.ltp <= 0 || !h.weekHigh52 || !h.weekLow52 || h.weekHigh52 <= 0 || h.weekLow52 <= 0) continue;
-
-        // Above or near 52-week high
-        if (h.ltp > h.weekHigh52) {
+      // ── RD maturity alerts ──
+      for (const rd of p.rdAccounts ?? []) {
+        if (rd.status === 'matured' || !rd.maturity_date) continue;
+        const maturityTs = Date.parse(rd.maturity_date);
+        if (isNaN(maturityTs)) continue;
+        const days = Math.ceil((maturityTs - Date.now()) / (1000 * 3600 * 24));
+        if (days < 0) {
           alerts.push({
-            id: `52w-high-above-${p.name}-${h.id ?? h.ticker}`,
-            type: '52w_high',
-            severity: 'info',
-            title: `${h.ticker} above 52-week high`,
-            message: `LTP ₹${h.ltp.toLocaleString('en-IN')} vs High ₹${h.weekHigh52.toLocaleString('en-IN')}`,
+            id: `rd-overdue-${p.name}-${rd.id}`,
+            type: 'rd_maturity',
+            severity: 'critical',
+            title: `RD overdue for maturity`,
+            message: `${rd.bank_name} — ₹${Number(rd.maturity_amount || rd.monthly_deposit).toLocaleString('en-IN')} (Matured ${Math.abs(days)} days ago)`,
             portfolioLabel: p.label,
           });
-        } else if (h.ltp >= h.weekHigh52 * 0.98) {
+        } else if (days <= 30) {
           alerts.push({
-            id: `52w-high-${p.name}-${h.id ?? h.ticker}`,
-            type: '52w_high',
-            severity: 'info',
-            title: `${h.ticker} near 52-week high`,
-            message: `LTP ₹${h.ltp.toLocaleString('en-IN')} vs High ₹${h.weekHigh52.toLocaleString('en-IN')}`,
-            portfolioLabel: p.label,
-          });
-        }
-
-        // Below or near 52-week low
-        if (h.ltp < h.weekLow52) {
-          alerts.push({
-            id: `52w-low-below-${p.name}-${h.id ?? h.ticker}`,
-            type: '52w_low',
-            severity: 'warning',
-            title: `${h.ticker} below 52-week low`,
-            message: `LTP ₹${h.ltp.toLocaleString('en-IN')} vs Low ₹${h.weekLow52.toLocaleString('en-IN')}`,
-            portfolioLabel: p.label,
-          });
-        } else if (h.ltp <= h.weekLow52 * 1.02 && h.weekLow52 > 0) {
-          alerts.push({
-            id: `52w-low-${p.name}-${h.id ?? h.ticker}`,
-            type: '52w_low',
-            severity: 'warning',
-            title: `${h.ticker} near 52-week low`,
-            message: `LTP ₹${h.ltp.toLocaleString('en-IN')} vs Low ₹${h.weekLow52.toLocaleString('en-IN')}`,
+            id: `rd-maturity-${p.name}-${rd.id}`,
+            type: 'rd_maturity',
+            severity: days <= 7 ? 'critical' : 'warning',
+            title: `RD maturing ${days === 0 ? 'today' : `in ${days} days`}`,
+            message: `${rd.bank_name} — ₹${Number(rd.maturity_amount || rd.monthly_deposit).toLocaleString('en-IN')}`,
             portfolioLabel: p.label,
           });
         }

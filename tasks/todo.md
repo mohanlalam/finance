@@ -1,16 +1,16 @@
-# Implementation Plan: UI Token Polish & Mobile Visual Refinements
+# Implementation Plan: Codebase Enhancements & Bug Fixes
 
-This plan executes the 5 requested polish items:
-
-- [x] **Task 1: PortfolioAssistant.tsx Token Cleanup**
-  - Replaced raw Tailwind colors (`bg-slate-100 dark:bg-slate-800/60`, `border-slate-200/60`, `text-slate-400 dark:text-slate-500`, etc.) with design system tokens (`var(--surface-secondary)`, `var(--border-subtle)`, `var(--text-secondary)`, `var(--text-tertiary)`, `var(--accent-blue)`, `var(--accent-blue-soft)`).
-- [x] **Task 2: MobileAlertsView.tsx Token Audit & Cleanup**
-  - Audited and replaced all raw `slate-*` / hardcoded color classes with design system tokens across alert types, severities, tab switcher, empty state, and modal footer.
-- [x] **Task 3: PortfolioTable.tsx Mobile Card Rendering Polish (Lines 377–535)**
-  - Polished mobile card view (`isMobile = true`) with resilient flexbox truncation for long tickers and stock names, right-aligned P&L stack, improved tap ergonomics (`sm:w-8 sm:h-8`), and clean token usage.
-- [x] **Task 4: ExportPanel.tsx Mobile Responsiveness Polish**
-  - Constrained dropdown menu width (`max-w-[calc(100vw-24px)]`), standardized all dropdown menu items, backup category cards, and CSV broker import modal controls with design system tokens and button text truncation.
-- [x] **Task 5: NetWorthTimelineChart Header Mobile Layout Polish**
-  - Restructured header controls with responsive `flex flex-col sm:flex-row sm:justify-between sm:items-start` layout and horizontal scrolling support on xs viewports so the title, period gain pill, and date range pills never collide or wrap awkwardly.
-- [x] **Task 6: Verification & Build**
-  - Ran `npm run build` with 0 compilation and TypeScript errors.
+- [x] **Phase 1: Fix Real Bugs & Token Harmonization**
+  - [x] Clean up dead 52-week alert code in `useAlerts.ts`, `AlertsBanner.tsx`, `Header.tsx`, and `MobileAlertsView.tsx`
+  - [x] Token-harmonize RD & SIP components (`RDAccountCard.tsx`, `SIPAccountCard.tsx`, `RDFormModal.tsx`, `SIPFormModal.tsx`, `SIPFormFields.tsx`, `RDInstallmentSchedule.tsx`, `RDView.tsx`, `SIPView.tsx`) & fix `text-sky-650` typo
+- [x] **Phase 2: Implement Feature Enhancements**
+  - [x] Add RD maturity alerts to `useAlerts.ts`
+  - [x] Add RD tenure countdown & completion progress bar to `RDAccountCard.tsx`
+  - [x] Show actual realized P&L % alongside Expected CAGR on `SIPAccountCard.tsx`
+  - [x] Add inline expired & expiring-soon badges to `DocumentVaultView.tsx`
+  - [x] Add Real Estate rental yield & rental income metrics to `InsightsPanel.tsx`
+  - [x] Add RD installment completeness check to `dataQuality.ts`
+- [x] **Phase 3: Polish & Verification**
+  - [x] Prefix bare `console.error` in `PortfolioAssistant.tsx`
+  - [x] Verify `npm run build` and `npm test` pass with 0 errors
+  - [x] Commit & push changes to git

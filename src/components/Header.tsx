@@ -35,41 +35,35 @@ interface HeaderProps {
 }
 
 const ALERTS_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
-  '52w_high': {
-    icon: <TrendingUp size={14} />,
-    color: 'text-emerald-600 dark:text-emerald-400',
-    bg: 'bg-emerald-50 dark:bg-emerald-950/40',
-    border: 'border-emerald-200 dark:border-emerald-800/40',
-  },
-  '52w_low': {
-    icon: <TrendingDown size={14} />,
-    color: 'text-amber-600 dark:text-amber-400',
-    bg: 'bg-amber-50 dark:bg-amber-950/40',
-    border: 'border-amber-200 dark:border-amber-800/40',
-  },
   fd_maturity: {
     icon: <Landmark size={14} />,
-    color: 'text-indigo-600 dark:text-indigo-400',
-    bg: 'bg-indigo-50 dark:bg-indigo-950/40',
-    border: 'border-indigo-200 dark:border-indigo-800/40',
+    color: 'text-[var(--text-primary)]',
+    bg: 'bg-[var(--surface-secondary)]',
+    border: 'border-[var(--border-subtle)]',
+  },
+  rd_maturity: {
+    icon: <Landmark size={14} />,
+    color: 'text-[var(--accent-blue)]',
+    bg: 'bg-[var(--accent-blue-soft)]',
+    border: 'border-[var(--accent-blue)]/30',
   },
   insurance_renewal: {
     icon: <Shield size={14} />,
-    color: 'text-rose-600 dark:text-rose-400',
-    bg: 'bg-rose-50 dark:bg-rose-950/40',
-    border: 'border-rose-200 dark:border-rose-800/40',
+    color: 'text-[var(--negative)]',
+    bg: 'bg-[var(--negative-soft)]',
+    border: 'border-[var(--negative)]/30',
   },
   portfolio_swing: {
     icon: <Activity size={14} />,
-    color: 'text-purple-600 dark:text-purple-400',
-    bg: 'bg-purple-50 dark:bg-purple-950/40',
-    border: 'border-purple-200 dark:border-purple-800/40',
+    color: 'text-[var(--accent-blue)]',
+    bg: 'bg-[var(--accent-blue-soft)]',
+    border: 'border-[var(--border-subtle)]',
   },
   document_expiry: {
     icon: <FileText size={14} />,
-    color: 'text-slate-600 dark:text-slate-400',
-    bg: 'bg-slate-50 dark:bg-slate-800/60',
-    border: 'border-slate-200 dark:border-slate-700/50',
+    color: 'text-[var(--text-secondary)]',
+    bg: 'bg-[var(--surface-secondary)]',
+    border: 'border-[var(--border-subtle)]',
   },
 };
 

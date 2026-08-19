@@ -82,7 +82,7 @@ export function SIPView({
       <AssetRegistryContainer
         title="Mutual Fund SIPs"
         createBtnLabel="Add SIP"
-        themeColor="bg-emerald-600 hover:bg-emerald-700"
+        themeColor="bg-[var(--positive)] hover:opacity-90"
         emptyType="sip"
         emptyTitle="No Mutual Fund SIPs"
         emptyDescription="Track systematic investment plans and live AMFI NAV valuations."
@@ -100,7 +100,7 @@ export function SIPView({
             {({ index, style }) => {
               const account = filteredAccounts[index];
               return (
-                <div style={style} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
                   <SIPAccountCard
                     account={account}
                     documents={documents}

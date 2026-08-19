@@ -9,7 +9,8 @@ import {
   Target,
   BarChart3,
   Filter,
-  ChevronRight
+  ChevronRight,
+  Home
 } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import {
@@ -256,6 +257,22 @@ export default React.memo(function InsightsPanel({
     return analyzePortfolioHealth(portfolios, { isPriceStale, priceStatus });
   }, [portfolios, isPriceStale, priceStatus]);
 
+  const realEstateMetrics = useMemo(() => {
+    let totalVal = 0;
+    let totalMonthlyRental = 0;
+    let propertyCount = 0;
+    for (const p of portfolios) {
+      for (const re of p.realEstate ?? []) {
+        totalVal += Number(re.current_valuation) || 0;
+        totalMonthlyRental += Number(re.monthly_rental_income) || 0;
+        propertyCount++;
+      }
+    }
+    const annualRental = totalMonthlyRental * 12;
+    const grossYield = totalVal > 0 ? (annualRental / totalVal) * 100 : 0;
+    return { totalVal, totalMonthlyRental, annualRental, grossYield, propertyCount };
+  }, [portfolios]);
+
   const f = activeFilter;
   const showHealth = f === 'all' || f === 'health';
   const showStocks = f === 'all' || f === 'stocks';
@@ -270,9 +287,9 @@ export default React.memo(function InsightsPanel({
   }
 
   const getHealthBadge = (score: number) => {
-    if (score >= 90) return { label: 'A+ (Optimal)', color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200' };
-    if (score >= 70) return { label: 'B (Good)', color: 'text-amber-500 bg-amber-50 dark:bg-amber-950/40 border-amber-200' };
-    return { label: 'Action Needed', color: 'text-red-500 bg-red-50 dark:bg-red-950/40 border-red-200' };
+    if (score >= 90) return { label: 'A+ (Optimal)', color: 'text-[var(--positive)] bg-[var(--positive-soft)] border-[var(--positive)]/30' };
+    if (score >= 70) return { label: 'B (Good)', color: 'text-[var(--warning)] bg-[var(--warning-soft)] border-[var(--warning)]/30' };
+    return { label: 'Action Needed', color: 'text-[var(--negative)] bg-[var(--negative-soft)] border-[var(--negative)]/30' };
   };
 
   const healthBadge = getHealthBadge(healthSummary.score);
@@ -299,7 +316,7 @@ export default React.memo(function InsightsPanel({
                 onClick={() => handleFilterClick(filter.id)}
                 className={`shrink-0 px-2.5 py-1 rounded-[var(--radius-medium)] text-[10px] font-bold transition-all duration-150 outline-none ios-press ${
                   isActive
-                    ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-sm'
+                    ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs'
                     : 'bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]'
                 }`}
               >
@@ -312,10 +329,10 @@ export default React.memo(function InsightsPanel({
 
       {/* 0. Data Quality & Health Check Strip */}
       {showHealth && (
-        <div className="apple-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[var(--border-subtle)] hover:border-blue-300 dark:hover:border-blue-700 transition-all">
+        <div className="apple-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[var(--border-subtle)] hover:border-[var(--accent-blue)]/50 transition-all">
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-12 h-12 rounded-xl bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex flex-col items-center justify-center shrink-0 border border-blue-200/50 dark:border-blue-800/50">
-              <span className="text-base font-black leading-none">{healthSummary.score}</span>
+            <div className="w-12 h-12 rounded-[var(--radius-medium)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex flex-col items-center justify-center shrink-0 border border-[var(--accent-blue)]/30">
+              <span className="text-base font-black leading-none tnum">{healthSummary.score}</span>
               <span className="text-[8px] font-bold opacity-80 uppercase">Score</span>
             </div>
             <div className="min-w-0">
@@ -336,11 +353,38 @@ export default React.memo(function InsightsPanel({
           <button
             type="button"
             onClick={() => setShowHealthModal(true)}
-            className="shrink-0 w-full sm:w-auto px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[var(--radius-medium)] text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm ios-press transition-colors"
+            className="shrink-0 w-full sm:w-auto px-3.5 py-2 bg-[var(--accent-blue)] hover:opacity-90 text-white rounded-[var(--radius-medium)] text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs ios-press transition-opacity"
           >
             <span>{healthSummary.issues.length > 0 ? 'Run Health Audit' : 'View Audit Details'}</span>
             <ChevronRight size={14} />
           </button>
+        </div>
+      )}
+
+      {/* Real Estate Rental Yield Banner if properties exist */}
+      {realEstateMetrics.propertyCount > 0 && (
+        <div className="apple-card p-3.5 flex items-center justify-between gap-3 bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
+              <Home size={16} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-[var(--text-primary)]">
+                Real Estate Yield: <span className="text-[var(--accent-blue)] font-extrabold tnum">{realEstateMetrics.grossYield.toFixed(2)}% p.a.</span>
+              </p>
+              <p className="text-[11px] text-[var(--text-tertiary)] truncate">
+                {realEstateMetrics.propertyCount} propert{realEstateMetrics.propertyCount > 1 ? 'ies' : 'y'} · {formatINR(realEstateMetrics.totalVal)} val · {formatINR(realEstateMetrics.totalMonthlyRental)}/mo rental
+              </p>
+            </div>
+          </div>
+          {onNavigateAsset && (
+            <button
+              onClick={() => onNavigateAsset('real_estate')}
+              className="text-xs font-semibold text-[var(--accent-blue)] hover:underline shrink-0 ios-press"
+            >
+              View &rarr;
+            </button>
+          )}
         </div>
       )}
 
@@ -355,7 +399,7 @@ export default React.memo(function InsightsPanel({
             <Card title="Top Holdings by Value" icon={<Crown size={13} className="text-[var(--accent-blue)]" aria-hidden="true" />}>
               <TopHoldings items={insights.topByValue} />
             </Card>
-            <Card title="Best / Worst performers" icon={<Target size={13} className="text-purple-500" aria-hidden="true" />}>
+            <Card title="Best / Worst performers" icon={<Target size={13} className="text-[var(--accent-blue)]" aria-hidden="true" />}>
               <BestWorstPerformers items={insights.portfolioBestWorst} />
             </Card>
             <Card title="Top Gainers" icon={<TrendingUp size={13} className="text-[var(--positive)]" aria-hidden="true" />}>

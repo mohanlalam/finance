@@ -9,22 +9,16 @@ interface MobileAlertsViewProps {
   onDismissAll: () => void;
 }
 
-type FilterTab = 'all' | 'due_soon' | 'stocks' | 'insurance' | 'documents';
+type FilterTab = 'all' | 'due_soon' | 'deposits' | 'insurance' | 'documents';
 
 const TYPE_CONFIG: Record<AlertType, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
-  '52w_high': {
-    icon: <TrendingUp size={16} />,
+  fd_maturity: {
+    icon: <Landmark size={16} />,
     color: 'text-[var(--accent-blue)]',
     bg: 'bg-[var(--accent-blue-soft)]',
     border: 'border-[var(--accent-blue)]/30',
   },
-  '52w_low': {
-    icon: <TrendingDown size={16} />,
-    color: 'text-[var(--warning)]',
-    bg: 'bg-[var(--warning-soft)]',
-    border: 'border-[var(--warning)]/30',
-  },
-  fd_maturity: {
+  rd_maturity: {
     icon: <Landmark size={16} />,
     color: 'text-[var(--accent-blue)]',
     bg: 'bg-[var(--accent-blue-soft)]',
@@ -62,7 +56,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
   const tabs: { key: FilterTab; label: string }[] = [
     { key: 'all', label: 'All' },
     { key: 'due_soon', label: 'Due Soon' },
-    { key: 'stocks', label: 'Stocks' },
+    { key: 'deposits', label: 'Deposits' },
     { key: 'insurance', label: 'Insurance' },
     { key: 'documents', label: 'Documents' },
   ];
@@ -70,9 +64,9 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
   const filteredAlerts = alerts.filter((alert) => {
     switch (activeTab) {
       case 'due_soon':
-        return alert.type === 'fd_maturity' || alert.type === 'insurance_renewal' || alert.type === 'document_expiry';
-      case 'stocks':
-        return alert.type === '52w_high' || alert.type === '52w_low';
+        return alert.type === 'fd_maturity' || alert.type === 'rd_maturity' || alert.type === 'insurance_renewal' || alert.type === 'document_expiry';
+      case 'deposits':
+        return alert.type === 'fd_maturity' || alert.type === 'rd_maturity';
       case 'insurance':
         return alert.type === 'insurance_renewal';
       case 'documents':
@@ -114,8 +108,8 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
         <div className="px-3 py-2 pb-3 border-b border-[var(--border-subtle)] flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
           {tabs.map((tab) => {
             const count = alerts.filter((a) => {
-              if (tab.key === 'due_soon') return a.type === 'fd_maturity' || a.type === 'insurance_renewal' || a.type === 'document_expiry';
-              if (tab.key === 'stocks') return a.type === '52w_high' || a.type === '52w_low';
+              if (tab.key === 'due_soon') return a.type === 'fd_maturity' || a.type === 'rd_maturity' || a.type === 'insurance_renewal' || a.type === 'document_expiry';
+              if (tab.key === 'deposits') return a.type === 'fd_maturity' || a.type === 'rd_maturity';
               if (tab.key === 'insurance') return a.type === 'insurance_renewal';
               if (tab.key === 'documents') return a.type === 'document_expiry';
               return true;
