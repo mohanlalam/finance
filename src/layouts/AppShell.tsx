@@ -741,80 +741,84 @@ export default function AppShell() {
 
                 {/* Family Overview - drill-down member cards */}
                 {activeTab === 'all' && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {portfolios.map((p) => {
-                      const pnlGain = p.totalPnL >= 0;
-                      return (
-                        <button
-                          key={p.name}
-                          onClick={() => setActiveTab(p.name)}
-                          className="apple-card p-4 text-left hover:shadow-md transition-all duration-200 flex flex-col justify-between h-48 focus:ring-2 focus:ring-[#007aff]"
-                        >
-                          <div>
-                            <div className="flex items-center justify-between gap-2 mb-2">
-                              <span className="text-xs font-semibold text-[var(--text-secondary)] truncate">{p.label}</span>
-                              <Badge variant={pnlGain ? 'positive' : 'negative'} className="text-[10px] py-0 px-2">
-                                {formatPercent(p.totalPnLPercent, 1)}
-                              </Badge>
+                  <div className="apple-card rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] shadow-[var(--shadow-card)] overflow-hidden">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-subtle)]">
+                      {portfolios.map((p) => {
+                        const pnlGain = p.totalPnL >= 0;
+                        return (
+                          <button
+                            key={p.name}
+                            onClick={() => setActiveTab(p.name)}
+                            className="p-5 text-left hover:bg-[var(--surface-secondary)]/60 transition-colors flex flex-col justify-between h-48 focus:outline-none focus:bg-[var(--surface-secondary)]/80 group cursor-pointer"
+                          >
+                            <div>
+                              <div className="flex items-center justify-between gap-2 mb-2">
+                                <span className="text-xs font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors truncate">{p.label}</span>
+                                <Badge variant={pnlGain ? 'positive' : 'negative'} className="text-[10px] py-0.5 px-2 font-extrabold">
+                                  {formatPercent(p.totalPnLPercent, 1)}
+                                </Badge>
+                              </div>
+                              <p className={`text-2xl font-extrabold text-[var(--text-primary)] text-financial tnum tracking-tight transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>
+                                {formatINR(p.totalCurrentValue)}
+                              </p>
+                              <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">
+                                Invested: <span className="font-semibold text-[var(--text-secondary)] tnum">{formatINR(p.totalInvested)}</span>
+                              </p>
                             </div>
-                            <p className={`text-xl font-bold text-[var(--text-primary)] tnum transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>
-                              {formatINR(p.totalCurrentValue)}
-                            </p>
-                            <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
-                              Invested: <span className="font-medium tnum">{formatINR(p.totalInvested)}</span>
-                            </p>
-                          </div>
 
-                          <div className="pt-3 border-t border-[var(--border-subtle)] grid grid-cols-3 gap-2 text-[10px] text-[var(--text-secondary)]">
-                            <div>
-                              <p className="font-normal text-[var(--text-tertiary)]">Stocks</p>
-                              <p className="font-semibold text-[var(--text-primary)] mt-0.5 tnum">{p.holdings.length}</p>
+                            <div className="pt-3 border-t border-[var(--border-subtle)] grid grid-cols-3 gap-2 text-[10px] text-[var(--text-secondary)]">
+                              <div>
+                                <p className="font-normal text-[var(--text-tertiary)]">Stocks</p>
+                                <p className="font-bold text-[var(--text-primary)] mt-0.5 tnum">{p.holdings.length}</p>
+                              </div>
+                              <div>
+                                <p className="font-normal text-[var(--text-tertiary)]">FDs</p>
+                                <p className="font-bold text-[var(--text-primary)] mt-0.5 tnum">{p.fixedDeposits.length}</p>
+                              </div>
+                              <div>
+                                <p className="font-normal text-[var(--text-tertiary)]">Properties</p>
+                                <p className="font-bold text-[var(--text-primary)] mt-0.5 tnum">{p.realEstate.length}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-normal text-[var(--text-tertiary)]">FDs</p>
-                              <p className="font-semibold text-[var(--text-primary)] mt-0.5 tnum">{p.fixedDeposits.length}</p>
-                            </div>
-                            <div>
-                              <p className="font-normal text-[var(--text-tertiary)]">Properties</p>
-                              <p className="font-semibold text-[var(--text-primary)] mt-0.5 tnum">{p.realEstate.length}</p>
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 
                 {/* Wealth Mosaic — asset class totals */}
                 {activeTab === 'all' && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-                    {[
-                      { label: 'Stocks', value: breakdown.stocks, id: 'stocks' },
-                      { label: 'FDs', value: breakdown.fd, id: 'fd' },
-                      { label: 'RDs', value: breakdown.rd, id: 'rd' },
-                      { label: 'SIPs', value: breakdown.sip, id: 'sip' },
-                      { label: 'Gold', value: breakdown.gold, id: 'gold' },
-                      { label: 'Real Estate', value: breakdown.realEstate, id: 'real_estate' },
-                    ].map((item) => (
+                  <div className="apple-card rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] shadow-[var(--shadow-card)] overflow-hidden">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-subtle)]">
+                      {[
+                        { label: 'Stocks', value: breakdown.stocks, id: 'stocks' },
+                        { label: 'FDs', value: breakdown.fd, id: 'fd' },
+                        { label: 'RDs', value: breakdown.rd, id: 'rd' },
+                        { label: 'SIPs', value: breakdown.sip, id: 'sip' },
+                        { label: 'Gold', value: breakdown.gold, id: 'gold' },
+                        { label: 'Real Estate', value: breakdown.realEstate, id: 'real_estate' },
+                      ].map((item) => (
+                        <button
+                          key={item.label}
+                          onClick={() => setActiveAsset(item.id as AssetTab)}
+                          className="p-4 flex flex-col justify-between text-left hover:bg-[var(--surface-secondary)]/60 transition-colors cursor-pointer focus:outline-none focus:bg-[var(--surface-secondary)]/80 group"
+                        >
+                          <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">{item.label}</span>
+                          <p className="text-base font-extrabold text-[var(--text-primary)] mt-1.5 text-financial tnum truncate">{formatINR(item.value)}</p>
+                        </button>
+                      ))}
                       <button
-                        key={item.label}
-                        onClick={() => setActiveAsset(item.id as AssetTab)}
-                        className="apple-card p-3 flex flex-col justify-between text-left hover:shadow-md transition-all duration-200 cursor-pointer focus:ring-2 focus:ring-[#007aff]"
+                        onClick={() => setActiveAsset('insurance')}
+                        className="p-4 flex flex-col justify-between text-left hover:bg-[var(--surface-secondary)]/60 transition-colors cursor-pointer focus:outline-none focus:bg-[var(--surface-secondary)]/80 group"
                       >
-                        <span className="text-[10px] font-semibold text-[var(--text-secondary)]">{item.label}</span>
-                        <p className="text-sm font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(item.value)}</p>
+                        <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">Insurance</span>
+                        <div>
+                          <p className="text-base font-extrabold text-[var(--text-primary)] mt-1.5 text-financial tnum truncate">{formatINR(breakdown.insuranceCover)}</p>
+                          <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5 tnum">{formatINR(breakdown.insurancePremium)}/yr premium</p>
+                        </div>
                       </button>
-                    ))}
-                    <button
-                      onClick={() => setActiveAsset('insurance')}
-                      className="apple-card p-3 flex flex-col justify-between text-left hover:shadow-md transition-all duration-200 cursor-pointer focus:ring-2 focus:ring-[#007aff]"
-                    >
-                      <span className="text-[10px] font-semibold text-[var(--text-secondary)]">Insurance</span>
-                      <div>
-                        <p className="text-sm font-bold text-[var(--text-primary)] mt-1 tnum">{formatINR(breakdown.insuranceCover)}</p>
-                        <p className="text-[9px] text-[var(--text-tertiary)] mt-0.5 tnum">{formatINR(breakdown.insurancePremium)}/yr premium</p>
-                      </div>
-                    </button>
+                    </div>
                   </div>
                 )}
 
