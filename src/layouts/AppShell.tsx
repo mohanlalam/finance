@@ -741,15 +741,15 @@ export default function AppShell() {
 
                 {/* Family Overview - drill-down member cards */}
                 {activeTab === 'all' && (
-                  <div className="apple-card rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] shadow-[var(--shadow-card)] overflow-hidden">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-subtle)]">
+                  <div className="apple-card rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] shadow-[var(--shadow-card)] p-4 sm:p-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {portfolios.map((p) => {
                         const pnlGain = p.totalPnL >= 0;
                         return (
                           <button
                             key={p.name}
                             onClick={() => setActiveTab(p.name)}
-                            className="p-5 text-left hover:bg-[var(--surface-secondary)]/60 transition-colors flex flex-col justify-between h-48 focus:outline-none focus:bg-[var(--surface-secondary)]/80 group cursor-pointer"
+                            className="p-4 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 text-left transition-all duration-150 flex flex-col justify-between h-44 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group cursor-pointer"
                           >
                             <div>
                               <div className="flex items-center justify-between gap-2 mb-2">
@@ -766,7 +766,7 @@ export default function AppShell() {
                               </p>
                             </div>
 
-                            <div className="pt-3 border-t border-[var(--border-subtle)] grid grid-cols-3 gap-2 text-[10px] text-[var(--text-secondary)]">
+                            <div className="pt-2.5 border-t border-[var(--border-subtle)] grid grid-cols-3 gap-2 text-[10px] text-[var(--text-secondary)]">
                               <div>
                                 <p className="font-normal text-[var(--text-tertiary)]">Stocks</p>
                                 <p className="font-bold text-[var(--text-primary)] mt-0.5 tnum">{p.holdings.length}</p>
@@ -789,8 +789,8 @@ export default function AppShell() {
 
                 {/* Wealth Mosaic — asset class totals */}
                 {activeTab === 'all' && (
-                  <div className="apple-card rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] shadow-[var(--shadow-card)] overflow-hidden">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-subtle)]">
+                  <div className="apple-card rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] shadow-[var(--shadow-card)] p-3 sm:p-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-3">
                       {[
                         { label: 'Stocks', value: breakdown.stocks, id: 'stocks' },
                         { label: 'FDs', value: breakdown.fd, id: 'fd' },
@@ -802,19 +802,19 @@ export default function AppShell() {
                         <button
                           key={item.label}
                           onClick={() => setActiveAsset(item.id as AssetTab)}
-                          className="p-4 flex flex-col justify-between text-left hover:bg-[var(--surface-secondary)]/60 transition-colors cursor-pointer focus:outline-none focus:bg-[var(--surface-secondary)]/80 group"
+                          className="p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 flex flex-col justify-between text-left transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
                         >
                           <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">{item.label}</span>
-                          <p className="text-base font-extrabold text-[var(--text-primary)] mt-1.5 text-financial tnum truncate">{formatINR(item.value)}</p>
+                          <p className="text-sm sm:text-base font-extrabold text-[var(--text-primary)] mt-1 text-financial tnum truncate">{formatINR(item.value)}</p>
                         </button>
                       ))}
                       <button
                         onClick={() => setActiveAsset('insurance')}
-                        className="p-4 flex flex-col justify-between text-left hover:bg-[var(--surface-secondary)]/60 transition-colors cursor-pointer focus:outline-none focus:bg-[var(--surface-secondary)]/80 group"
+                        className="p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 flex flex-col justify-between text-left transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
                       >
                         <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">Insurance</span>
                         <div>
-                          <p className="text-base font-extrabold text-[var(--text-primary)] mt-1.5 text-financial tnum truncate">{formatINR(breakdown.insuranceCover)}</p>
+                          <p className="text-sm sm:text-base font-extrabold text-[var(--text-primary)] mt-1 text-financial tnum truncate">{formatINR(breakdown.insuranceCover)}</p>
                           <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5 tnum">{formatINR(breakdown.insurancePremium)}/yr premium</p>
                         </div>
                       </button>

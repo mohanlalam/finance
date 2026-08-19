@@ -70,10 +70,10 @@ function SummaryCards({
 
   return (
     <div className="w-full bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-card)] p-5 sm:p-6 transition-all duration-200">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x divide-[var(--border-subtle)]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* 1. Net Worth */}
-        <div className="flex flex-col justify-between gap-1 lg:pr-6">
+        <div className="flex flex-col justify-between gap-1">
           <div className="flex items-center justify-between">
             <span className="text-label-small text-[var(--text-secondary)] font-semibold">{label} Net Worth</span>
             <div className="flex items-center gap-1.5">
@@ -126,7 +126,7 @@ function SummaryCards({
         </div>
 
         {/* 2. Invested */}
-        <div className="flex flex-col justify-between gap-1 lg:px-6">
+        <div className="flex flex-col justify-between gap-1">
           <div className="flex items-center justify-between">
             <span className="text-label-small text-[var(--text-secondary)] font-semibold">Invested</span>
             <span className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center">
@@ -160,7 +160,7 @@ function SummaryCards({
         </div>
 
         {/* 3. Total Return */}
-        <div className="flex flex-col justify-between gap-1 lg:px-6">
+        <div className="flex flex-col justify-between gap-1">
           <div className="flex items-center justify-between">
             <span className="text-label-small text-[var(--text-secondary)] font-semibold">Total Return</span>
             <span className={`w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center ${
@@ -199,7 +199,7 @@ function SummaryCards({
         </div>
 
         {/* 4. Today's Return */}
-        <div className="flex flex-col justify-between gap-1 lg:pl-6">
+        <div className="flex flex-col justify-between gap-1">
           <div className="flex items-center justify-between">
             <span className="text-label-small text-[var(--text-secondary)] font-semibold">Today's Return</span>
             <span className={`w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center ${
