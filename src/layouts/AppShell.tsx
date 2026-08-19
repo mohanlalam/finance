@@ -276,9 +276,8 @@ export default function AppShell() {
 
   const handleFloatingAddAsset = useCallback((type: AssetTab) => {
     setActiveAsset(type);
-    if (type !== 'home') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setQuickAddTarget(type as any);
+    if (type !== 'home' && type !== 'widgets' && type !== 'tax') {
+      setQuickAddTarget(type);
     }
   }, [setQuickAddTarget, setActiveAsset]);
 
