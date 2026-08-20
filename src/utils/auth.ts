@@ -1,4 +1,5 @@
 import { clearApiSessionCache, invokeFunction } from './apiClient';
+import { updateBiometricPinHash, disableBiometrics } from './biometrics';
 
 const APP_PIN = (import.meta.env.VITE_APP_PIN as string | undefined) ?? '';
 const SESSION_KEY = 'finance_pin_verified';
@@ -101,6 +102,7 @@ export async function verifyPin(pin: string): Promise<boolean> {
 export function clearCustomPin(): void {
   localStorage.removeItem(CUSTOM_HASH_KEY);
   localStorage.removeItem(CUSTOM_LENGTH_KEY);
+  disableBiometrics();
   clearApiSessionCache();
 }
 
@@ -108,6 +110,7 @@ export async function setCustomPin(newPin: string): Promise<void> {
   const hash = await hashPin(newPin);
   localStorage.setItem(CUSTOM_HASH_KEY, hash);
   localStorage.setItem(CUSTOM_LENGTH_KEY, newPin.length.toString());
+  updateBiometricPinHash(hash);
   clearApiSessionCache(); // Flush cached PIN hash & inflight requests immediately
   markSessionVerified(hash);
 }

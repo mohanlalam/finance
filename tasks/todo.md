@@ -1,28 +1,14 @@
-# Implementation Plan: Full Project Audit Fixes & Enhancements (Round 2)
+# Tasks: Biometric Unlock Implementation
 
-- [x] **Phase 1: Critical Logic & Data Flow Bug Fixes**
-  - [x] 1.1 Fix Backup Restore in `src/components/ExportPanel.tsx` to restore RD, SIP, and Document records
-  - [x] 1.2 Prevent live quotes/NAVs wipeout on mutation in `src/hooks/usePortfolioData.ts`
-  - [x] 1.3 Fix promise chain reset in `runMutation` in `src/hooks/usePortfolioData.ts`
-  - [x] 1.4 Fix false-positive price column matching in `src/components/ExportPanel.tsx`
-  - [x] 1.5 Fix rental yield calculation on 0/missing purchase price in `src/utils/assistant.ts`
-  - [x] 1.6 Fix zero-day cashflow collapse fallback in `src/utils/performance.ts`
-- [x] **Phase 2: Mobile Tap Targets & List Key Stability**
-  - [x] 2.1 Standardize action button touch targets (>=44px on mobile) across `DepositDetailsCard`, `GoldHoldingCard`, `InsurancePolicyCard`, `RealEstateCard`, `RDAccountCard`, `SIPAccountCard`
-  - [x] 2.2 Stabilize React list keys in `src/components/InsightsPanel.tsx`
-- [x] **Phase 3: Design Token Harmonization in Modals & Cards**
-  - [x] 3.1 Tokenize `src/components/AddFamilyModal.tsx`
-  - [x] 3.2 Tokenize `src/components/RenamePortfolioModal.tsx`
-  - [x] 3.3 Tokenize `src/components/ChangePinModal.tsx`
-  - [x] 3.4 Tokenize `src/components/AddHoldingModal.tsx`
-  - [x] 3.5 Tokenize `src/components/EditStockModal.tsx`
-  - [x] 3.6 Tokenize `src/components/ConfirmModal.tsx`
-  - [x] 3.7 Tokenize `src/components/fd/DepositDetailsCard.tsx`
-  - [x] 3.8 Tokenize `src/components/gold/GoldHoldingCard.tsx`
-  - [x] 3.9 Tokenize `src/components/insurance/InsurancePolicyCard.tsx`
-  - [x] 3.10 Tokenize `src/components/realestate/RealEstateCard.tsx`
-- [x] **Phase 4: Full Verification & Git Sync**
-  - [x] 4.1 Run `npx tsc --noEmit`
-  - [x] 4.2 Run `npm test`
-  - [x] 4.3 Run `npm run build`
-  - [x] 4.4 Commit & push to `origin/main`
+- [x] **Phase 1: Security & WebAuthn Utilities**
+  - [x] 1.1 Create `src/utils/biometrics.ts` (hardware detection, WebAuthn create/get credentials, vault storage)
+  - [x] 1.2 Update `src/utils/auth.ts` to sync biometric state during PIN changes/resets
+- [x] **Phase 2: UI & Lock Screen Integration**
+  - [x] 2.1 Add `Fingerprint` and `ScanFace` icons to `src/components/icons/AppIcons.tsx`
+  - [x] 2.2 Update `src/components/PinLockScreen.tsx` with biometric keypad button & auto-prompt flow
+  - [x] 2.3 Add Biometric toggle switch in `src/components/ChangePinModal.tsx`
+- [x] **Phase 3: Verification & Git Sync**
+  - [x] 3.1 Run `npx tsc --noEmit`
+  - [x] 3.2 Run `npm test` (15/15 test suites, 89/89 tests passed)
+  - [x] 3.3 Run `npm run build` (PWA generated cleanly)
+  - [x] 3.4 Commit and push to `origin/main`
