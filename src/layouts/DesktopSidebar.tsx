@@ -1,4 +1,4 @@
-import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, TrendingDown, Pencil, Plus, Sparkles } from '../components/icons/AppIcons';
+import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, TrendingDown, Pencil, Trash2, Plus, Sparkles } from '../components/icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
 
 export interface DesktopSidebarProps {
@@ -9,6 +9,7 @@ export interface DesktopSidebarProps {
   onSelectPortfolio: (id: string) => void;
   onOpenAddFamily: () => void;
   onOpenRename: (target: { id: string; name: string; label: string }) => void;
+  onOpenDelete?: (target: { id: string; name: string; label: string }) => void;
   onOpenSmartImport?: () => void;
 }
 
@@ -20,6 +21,7 @@ export default function DesktopSidebar({
   onSelectPortfolio,
   onOpenAddFamily,
   onOpenRename,
+  onOpenDelete,
   onOpenSmartImport,
 }: DesktopSidebarProps) {
   const getNavItemClass = (isActive: boolean) =>
@@ -58,26 +60,46 @@ export default function DesktopSidebar({
             Family Overview
           </button>
           {portfolios.map((p) => (
-            <div key={p.name} className="flex items-center group">
+            <div key={p.name} className="flex items-center group relative">
               <button
                 onClick={() => onSelectPortfolio(p.name)}
-                className={getNavItemClass(selectedPortfolioId === p.name)}
+                className={`flex-1 ${getNavItemClass(selectedPortfolioId === p.name)}`}
               >
-                {p.label}
+                <span className="truncate">{p.label}</span>
               </button>
-              <button
-                onClick={() => onOpenRename({ id: p.id, name: p.name, label: p.label })}
-                className="opacity-0 group-hover:opacity-100 p-1.5 text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] transition-opacity"
-                title={`Rename ${p.label}`}
-                aria-label={`Rename ${p.label}`}
-              >
-                <Pencil size={13} />
-              </button>
+              <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity pr-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenRename({ id: p.id, name: p.name, label: p.label });
+                  }}
+                  className="p-1 text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] rounded hover:bg-[var(--surface-secondary)] transition-colors cursor-pointer"
+                  title={`Rename ${p.label}`}
+                  aria-label={`Rename ${p.label}`}
+                >
+                  <Pencil size={12} />
+                </button>
+                {onOpenDelete && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenDelete({ id: p.id, name: p.name, label: p.label });
+                    }}
+                    className="p-1 text-[var(--text-tertiary)] hover:text-[var(--negative)] rounded hover:bg-[var(--negative-soft)] transition-colors cursor-pointer"
+                    title={`Delete ${p.label}`}
+                    aria-label={`Delete ${p.label}`}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                )}
+              </div>
             </div>
           ))}
           <button
             onClick={onOpenAddFamily}
-            className="flex items-center gap-1.5 w-full text-left px-3 py-1.5 rounded-[var(--radius-small)] text-xs font-semibold text-[var(--accent-blue)] hover:bg-[var(--accent-blue-soft)] transition-colors mt-1"
+            className="flex items-center gap-1.5 w-full text-left px-3 py-1.5 rounded-[var(--radius-small)] text-xs font-semibold text-[var(--accent-blue)] hover:bg-[var(--accent-blue-soft)] transition-colors mt-1 cursor-pointer"
           >
             <Plus size={13} />
             <span>Add Member</span>

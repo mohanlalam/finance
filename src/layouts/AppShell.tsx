@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react';
 // Inline SVG icons — keeps lucide-react out of the critical post-unlock bundle
-import { WifiOff, AlertCircle, RefreshCw } from '../components/icons/AppIcons';
+import { WifiOff, AlertCircle, RefreshCw, Pencil, Trash2 } from '../components/icons/AppIcons';
 
 
 import Header from '../components/Header';
@@ -719,6 +719,7 @@ export default function AppShell() {
                   onSelectPortfolio={setActiveTab}
                   onOpenAddFamily={openAddFamily}
                   onOpenRename={openRenameModal}
+                  onOpenDelete={openDeleteModal}
                   onOpenSmartImport={openSmartImport}
                 />
               </Suspense>
@@ -746,17 +747,45 @@ export default function AppShell() {
                       {portfolios.map((p) => {
                         const pnlGain = p.totalPnL >= 0;
                         return (
-                          <button
+                          <div
                             key={p.name}
                             onClick={() => setActiveTab(p.name)}
-                            className="p-4 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 text-left transition-all duration-150 flex flex-col justify-between h-44 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group cursor-pointer"
+                            className="p-4 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 text-left transition-all duration-150 flex flex-col justify-between h-44 group cursor-pointer relative"
                           >
                             <div>
                               <div className="flex items-center justify-between gap-2 mb-2">
                                 <span className="text-xs font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors truncate">{p.label}</span>
-                                <Badge variant={pnlGain ? 'positive' : 'negative'} className="text-[10px] py-0.5 px-2 font-extrabold">
-                                  {formatPercent(p.totalPnLPercent, 1)}
-                                </Badge>
+                                <div className="flex items-center gap-1.5">
+                                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openRenameModal({ id: p.id, name: p.name, label: p.label });
+                                      }}
+                                      className="p-1 rounded text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface)] transition-colors cursor-pointer"
+                                      title={`Rename ${p.label}`}
+                                      aria-label={`Rename ${p.label}`}
+                                    >
+                                      <Pencil size={11} />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openDeleteModal({ id: p.id, name: p.name, label: p.label });
+                                      }}
+                                      className="p-1 rounded text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors cursor-pointer"
+                                      title={`Delete ${p.label}`}
+                                      aria-label={`Delete ${p.label}`}
+                                    >
+                                      <Trash2 size={11} />
+                                    </button>
+                                  </div>
+                                  <Badge variant={pnlGain ? 'positive' : 'negative'} className="text-[10px] py-0.5 px-2 font-extrabold">
+                                    {formatPercent(p.totalPnLPercent, 1)}
+                                  </Badge>
+                                </div>
                               </div>
                               <p className={`text-2xl font-extrabold text-[var(--text-primary)] text-financial tnum tracking-tight transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>
                                 {formatINR(p.totalCurrentValue)}
@@ -780,7 +809,7 @@ export default function AppShell() {
                                 <p className="font-bold text-[var(--text-primary)] mt-0.5 tnum">{p.realEstate.length}</p>
                               </div>
                             </div>
-                          </button>
+                          </div>
                         );
                       })}
                     </div>
