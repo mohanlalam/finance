@@ -122,6 +122,17 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
   }, [success, isBiometricPrompting, onUnlock]);
 
 
+  // Direct access to Face ID / Touch ID on mobile app launch
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    if (isBiometricsEnrolled()) {
+      timer = setTimeout(() => {
+        handleBiometricUnlock();
+      }, 150);
+    }
+    return () => clearTimeout(timer);
+  }, [handleBiometricUnlock]);
+
   const handleClear = useCallback(() => {
     if (success || isVerifyingRef.current) return;
     triggerHaptic('selection');
