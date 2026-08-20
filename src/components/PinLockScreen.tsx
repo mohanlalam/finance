@@ -5,7 +5,6 @@ import {
   isBiometricsSupported, 
   isBiometricsEnrolled, 
   authenticateWithBiometrics, 
-  registerBiometrics, 
   isBiometricAutoPromptEnabled 
 } from '../utils/biometrics';
 import { Fingerprint } from './icons/AppIcons';
@@ -179,19 +178,8 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
         if (isValid) {
           triggerHaptic('success');
           setSuccess(true);
-          hashPin(nextPin).then(async (hash) => {
+          hashPin(nextPin).then((hash) => {
             markSessionVerified(hash);
-            
-            // Auto-enroll biometrics if hardware supports it and not yet enrolled
-            if (biometricsAvailable && !isBiometricsEnrolled()) {
-              try {
-                // Store hash ready for biometric enrollment
-                await registerBiometrics(hash);
-              } catch {
-                // Ignore background enrollment cancellation
-              }
-            }
-
             setTimeout(() => {
               onUnlock();
             }, 300);
