@@ -77,19 +77,17 @@ export function GoldHoldingView({
     }
   }, [onDelete, addToast, setConfirmDeleteItem]);
 
-  const [customRate, setCustomRate] = useState<number>(() => {
-    return getStoredGoldRate();
-  });
   const [isEditingRate, setIsEditingRate] = useState(false);
   const [tempRateInput, setTempRateInput] = useState('');
+  const [rateTick, setRateTick] = useState(0);
 
   const syncRates = useCallback(async (force = false) => {
     setIsSyncing(true);
     try {
       const fetched = await fetchLiveGoldRates(force);
-      setCustomRate(fetched.rate24kPerGram);
+      setRateTick((t) => t + 1);
       if (force) {
-        addToast(`Updated 24K Gold spot rate to ${formatINR(fetched.rate24kPerGram)}/g`, 'success');
+        addToast(`Updated 24K Gold rate to ${formatINR(fetched.rate24kPerGram)}/g`, 'success');
       }
     } catch {
       if (force) {
@@ -105,24 +103,25 @@ export function GoldHoldingView({
     syncRates(false);
   }, [syncRates]);
 
-  const rates = deriveGoldRates(customRate);
+  const rates = useMemo(() => deriveGoldRates(), [rateTick, isSyncing]);
 
   const handleSaveRate = () => {
     const val = parseFloat(tempRateInput);
-    if (!isNaN(val) && val > 1000) {
-      setCustomRate(val);
+    if (!isNaN(val) && val >= 5000) {
       saveStoredGoldRate(val);
+      setRateTick((t) => t + 1);
       addToast(`Custom 24K Gold rate set to ${formatINR(val)}/g`, 'success');
       setIsEditingRate(false);
     } else {
-      addToast('Please enter a valid rate greater than ₹1,000/g', 'error');
+      addToast('Please enter a valid rate greater than ₹5,000/g', 'error');
     }
   };
 
   const handleResetToLive = async () => {
     clearCustomGoldRate();
+    setRateTick((t) => t + 1);
     await syncRates(true);
-    addToast('Reverted to Live MCX Bullion rate', 'success');
+    addToast('Reverted to Live MCX & IBJA Bullion rates', 'success');
     setIsEditingRate(false);
   };
 
