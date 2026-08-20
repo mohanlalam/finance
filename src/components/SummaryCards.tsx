@@ -175,7 +175,7 @@ function SummaryCards({
               {isBalancesHidden ? '••••••' : <>{isGain ? '+' : ''}<AnimatedNumber value={totalPnL} formatter={formatINR} /></>}
             </p>
             <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">
-              {formatPercent(totalPnLPercent)} return (all assets)
+              {formatPercent(totalPnLPercent)} gain
             </p>
           </div>
 
@@ -216,7 +216,7 @@ function SummaryCards({
                   {isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
                 </p>
                 <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">
-                  Intraday stock movement
+                  Intraday delta
                 </p>
               </>
             ) : (

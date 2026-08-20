@@ -10,7 +10,6 @@ import EmptyState from './EmptyState';
 import EditStockModal from './EditStockModal';
 import { useIsMobile } from '../hooks/useIsMobile';
 import HoldingDetailDrawer from './HoldingDetailDrawer';
-import { calcHoldingTodayPnL } from '../utils/portfolioCalcs';
 
 type SortPreset = 'value' | 'pnl' | 'pnlPct' | 'todayPct' | 'allocation';
 
@@ -273,7 +272,10 @@ export default React.memo(function PortfolioTable({
   }, [editingId]);
 
   const todayTotalPnL = useMemo(() => {
-    return holdings.reduce((sum, h) => sum + calcHoldingTodayPnL(h), 0);
+    return holdings.reduce((sum, h) => {
+      const dayPnL = (h.currentValue * (h.todayPnLPercent || 0)) / 100;
+      return sum + (dayPnL || 0);
+    }, 0);
   }, [holdings]);
 
   const todayTotalPnLPercent = useMemo(() => {
@@ -306,7 +308,7 @@ export default React.memo(function PortfolioTable({
 
         <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-4 pt-1 sm:pt-0 border-t sm:border-t-0 border-[var(--border-subtle)]/60">
           <div className="flex items-center gap-1.5 text-[11px] sm:text-xs">
-            <span className="text-[var(--text-tertiary)]">Stock P&amp;L:</span>
+            <span className="text-[var(--text-tertiary)]">Total P&amp;L:</span>
             <span className={`font-extrabold tnum ${totalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
               {isBalancesHidden ? '••••••' : <>{totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)} ({formatPercent(totalPnLPercent)})</>}
             </span>

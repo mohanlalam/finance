@@ -60,14 +60,13 @@ const Card = React.memo(function Card({ title, icon, children, action }: {
 
 /* ── Sub-sections ── */
 
-const TopHoldings = React.memo(function TopHoldings({ items, totalStockValue }: { items: HoldingInsight[]; totalStockValue?: number }) {
-  const fallbackVal = useMemo(() => items.reduce((s, i) => s + i.holding.currentValue, 0), [items]);
-  const effectiveTotal = totalStockValue !== undefined && totalStockValue > 0 ? totalStockValue : fallbackVal;
+const TopHoldings = React.memo(function TopHoldings({ items }: { items: HoldingInsight[] }) {
+  const totalVal = useMemo(() => items.reduce((s, i) => s + i.holding.currentValue, 0), [items]);
   if (items.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No holdings yet</p>;
   return (
     <div className="space-y-2">
       {items.map((item, idx) => {
-        const alloc = effectiveTotal > 0 ? (item.holding.currentValue / effectiveTotal) * 100 : 0;
+        const alloc = totalVal > 0 ? (item.holding.currentValue / totalVal) * 100 : 0;
         return (
           <div key={`${item.portfolioName}-${item.holding.id || item.holding.ticker}`} className="flex items-center gap-2">
             <span className="w-5 h-5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center text-label-micro font-bold shrink-0">
@@ -274,19 +273,6 @@ export default React.memo(function InsightsPanel({
     return { totalVal, totalMonthlyRental, annualRental, grossYield, propertyCount };
   }, [portfolios]);
 
-  const totalStockValue = useMemo(() => {
-    let sum = 0;
-    for (let i = 0; i < portfolios.length; i++) {
-      const holdings = portfolios[i]?.holdings;
-      if (holdings) {
-        for (let j = 0; j < holdings.length; j++) {
-          sum += Number(holdings[j]?.currentValue) || 0;
-        }
-      }
-    }
-    return sum;
-  }, [portfolios]);
-
   const f = activeFilter;
   const showHealth = f === 'all' || f === 'health';
   const showStocks = f === 'all' || f === 'stocks';
@@ -411,7 +397,7 @@ export default React.memo(function InsightsPanel({
               <BiggestMovers movers={insights.biggestMovers} />
             </Card>
             <Card title="Top Holdings by Value" icon={<Crown size={13} className="text-[var(--accent-blue)]" aria-hidden="true" />}>
-              <TopHoldings items={insights.topByValue} totalStockValue={totalStockValue} />
+              <TopHoldings items={insights.topByValue} />
             </Card>
             <Card title="Best / Worst performers" icon={<Target size={13} className="text-[var(--accent-blue)]" aria-hidden="true" />}>
               <BestWorstPerformers items={insights.portfolioBestWorst} />

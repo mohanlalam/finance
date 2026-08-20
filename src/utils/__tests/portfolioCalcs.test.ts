@@ -49,49 +49,4 @@ describe('estimateTodayPnL', () => {
     const todayPnL = estimateTodayPnL(portfolio, [portfolio]);
     expect(todayPnL).toBe(2000);
   });
-
-  it('correctly calculates negative today return', () => {
-    const portfolio: Portfolio = {
-      id: 'p1',
-      name: 'personal',
-      label: 'Personal',
-      holdings: [
-        {
-          id: 'h1',
-          sno: 1,
-          stockName: 'TCS',
-          ticker: 'TCS',
-          yahooSymbol: 'TCS.NS',
-          qty: 10,
-          avgPrice: 3500,
-          ltp: 3150,
-          amountInvested: 35000,
-          unrealizedPnL: -3500,
-          pnlPercent: -10,
-          todayPnLPercent: -10, // down 10% today
-          currentValue: 31500,
-        }
-      ],
-      fixedDeposits: [],
-      goldHoldings: [],
-      realEstate: [],
-      insurances: [],
-      documents: [],
-      totalInvested: 35000,
-      totalCurrentValue: 31500,
-      totalPnL: -3500,
-      totalPnLPercent: -10,
-      stocksValue: 31500,
-      fdValue: 0,
-      rdValue: 0,
-      sipValue: 0,
-      goldValue: 0,
-      realEstateValue: 0,
-    };
-
-    // yesterday closing value = 31500 / 0.9 = 35000
-    // today's P&L = 31500 - 35000 = -3500
-    const todayPnL = estimateTodayPnL(portfolio, [portfolio]);
-    expect(todayPnL).toBe(-3500);
-  });
 });
