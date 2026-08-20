@@ -4,8 +4,7 @@ import { triggerHaptic } from '../utils/haptics';
 import { 
   isBiometricsSupported, 
   isBiometricsEnrolled, 
-  authenticateWithBiometrics, 
-  isBiometricAutoPromptEnabled 
+  authenticateWithBiometrics 
 } from '../utils/biometrics';
 import { Fingerprint } from './icons/AppIcons';
 
@@ -122,16 +121,6 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     }
   }, [success, isBiometricPrompting, onUnlock]);
 
-  // Auto-prompt on mount if biometrics are enrolled
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    if (isBiometricsEnrolled() && isBiometricAutoPromptEnabled()) {
-      timeoutId = setTimeout(() => {
-        handleBiometricUnlock();
-      }, 350);
-    }
-    return () => clearTimeout(timeoutId);
-  }, [handleBiometricUnlock]);
 
   const handleClear = useCallback(() => {
     if (success || isVerifyingRef.current) return;

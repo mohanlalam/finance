@@ -59,13 +59,13 @@ export function isBiometricsEnrolled(): boolean {
   }
 }
 
-/** Check if auto-prompt on lock screen is enabled */
+/** Check if auto-prompt on lock screen is enabled (default false to prevent automatic Use Key modal) */
 export function isBiometricAutoPromptEnabled(): boolean {
   try {
     const val = localStorage.getItem(BIOMETRIC_AUTO_PROMPT_KEY);
-    return val === null ? true : val === 'true';
+    return val === 'true';
   } catch {
-    return true;
+    return false;
   }
 }
 
