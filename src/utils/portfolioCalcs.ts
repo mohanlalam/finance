@@ -86,9 +86,12 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
   return { stocks, fd, rd, sip, gold, realEstate, insuranceCover, insurancePremium };
 }
 
-/** Fast intraday PnL calculation for a single holding without closure overhead */
-function getHoldingTodayDelta(curr: number, pnlPct: number): number {
-  if (isNaN(curr) || isNaN(pnlPct) || curr <= 0) return 0;
+/** Accurate intraday PnL calculation for a single holding based on yesterday close */
+export function calcHoldingTodayPnL(h: { currentValue?: number; todayPnLPercent?: number } | null | undefined): number {
+  if (!h) return 0;
+  const curr = Number(h.currentValue) || 0;
+  const pnlPct = Number(h.todayPnLPercent) || 0;
+  if (isNaN(curr) || isNaN(pnlPct) || curr <= 0 || pnlPct === 0) return 0;
   const factor = 1 + pnlPct / 100;
   if (factor <= 0.0001) {
     return -curr; // 100% drop
@@ -97,6 +100,9 @@ function getHoldingTodayDelta(curr: number, pnlPct: number): number {
   return isNaN(yesterdayValue) ? 0 : curr - yesterdayValue;
 }
 
+/** Legacy alias */
+export const getHoldingTodayDelta = calcHoldingTodayPnL;
+
 /** Estimate today's P&L from intraday movement cleanly without NaN or zero-division bugs */
 export function estimateTodayPnL(portfolio: Portfolio | null, all: Portfolio[]): number {
   let sum = 0;
@@ -104,20 +110,14 @@ export function estimateTodayPnL(portfolio: Portfolio | null, all: Portfolio[]):
   if (portfolio && portfolio.holdings) {
     const holdings = portfolio.holdings;
     for (let i = 0; i < holdings.length; i++) {
-      const h = holdings[i];
-      if (h) {
-        sum += getHoldingTodayDelta(Number(h.currentValue), Number(h.todayPnLPercent));
-      }
+      sum += calcHoldingTodayPnL(holdings[i]);
     }
   } else if (all && all.length > 0) {
     for (let i = 0; i < all.length; i++) {
       const holdings = all[i]?.holdings;
       if (holdings) {
         for (let j = 0; j < holdings.length; j++) {
-          const h = holdings[j];
-          if (h) {
-            sum += getHoldingTodayDelta(Number(h.currentValue), Number(h.todayPnLPercent));
-          }
+          sum += calcHoldingTodayPnL(holdings[j]);
         }
       }
     }

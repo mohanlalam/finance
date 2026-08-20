@@ -318,7 +318,16 @@ export default function NetWorthTimelineChart({
     });
   }, [minVal, maxVal, chartHeight]);
 
-  // Collision-Free X-Axis Date Generator (Guarantees zero overlapping labels)
+  function formatDateLabel(isoString: string, currentRange: TimeRange): string {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return '';
+    if (currentRange === '1M' || currentRange === '3M') {
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    }
+    return d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+  }
+
+  // Collision-Free & Deduplicated X-Axis Date Generator
   const xAxisLabels = useMemo(() => {
     const pts = pointsMap.totalPoints;
     if (pts.length === 0) return [];
@@ -330,35 +339,37 @@ export default function NetWorthTimelineChart({
 
     for (let i = 0; i < pts.length; i += step) {
       const p = pts[i];
+      const label = formatDateLabel(p.date, range);
       if (p.x - lastX >= minSpacingPx) {
-        result.push({ x: p.x, label: formatDateLabel(p.date) });
-        lastX = p.x;
+        if (result.length === 0 || result[result.length - 1].label !== label) {
+          result.push({ x: p.x, label });
+          lastX = p.x;
+        }
       }
     }
 
-    // Ensure final date point is cleanly anchored without colliding with preceding label
+    // Ensure final date point is cleanly anchored without colliding with or duplicating preceding label
     const lastPoint = pts[pts.length - 1];
     if (lastPoint) {
-      if (lastPoint.x - lastX >= minSpacingPx - 15) {
-        result.push({ x: lastPoint.x, label: formatDateLabel(lastPoint.date) });
+      const finalLabel = formatDateLabel(lastPoint.date, range);
+      if (result.length > 0 && result[result.length - 1].label === finalLabel) {
+        // If identical label (e.g. same month), anchor x to the final point without duplicate label
+        result[result.length - 1].x = lastPoint.x;
+      } else if (lastPoint.x - lastX >= minSpacingPx - 15) {
+        result.push({ x: lastPoint.x, label: finalLabel });
       } else if (result.length > 1) {
         // Swap last label to end point to preserve right boundary
-        result[result.length - 1] = { x: lastPoint.x, label: formatDateLabel(lastPoint.date) };
+        result[result.length - 1] = { x: lastPoint.x, label: finalLabel };
       }
     }
 
     return result;
-  }, [pointsMap.totalPoints, chartWidth]);
+  }, [pointsMap.totalPoints, chartWidth, range]);
 
   function formatCompactINR(val: number): string {
     if (val >= 10000000) return `₹${(val / 10000000).toFixed(1)}Cr`;
     if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
     return `₹${val.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
-  }
-
-  function formatDateLabel(isoString: string): string {
-    const d = new Date(isoString);
-    return d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
   }
 
   if (chartData.length === 0) {
