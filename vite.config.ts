@@ -11,8 +11,11 @@ export default defineConfig(({ command }) => ({
     command === 'build' && compression({ algorithm: 'gzip', exclude: [/\.(br)$/, /\.(gz)$/] }),
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: false,
+      injectRegister: 'auto',
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         globPatterns: [
           '**/*.{js,css,html,ico,png,svg,woff2}'
         ],
