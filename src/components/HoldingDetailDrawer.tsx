@@ -3,6 +3,7 @@ import { X, TrendingUp, TrendingDown, Pencil, Trash2, Share2, ExternalLink } fro
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent } from '../utils/formatters';
 import { usePrivacy } from '../contexts/PrivacyContext';
+import { calcHoldingTodayPnL } from '../utils/portfolioCalcs';
 
 interface HoldingDetailDrawerProps {
   holding: Holding | null;
@@ -75,7 +76,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
 
   const isUp = holding.todayPnLPercent >= 0;
   const isOverallProfit = holding.unrealizedPnL >= 0;
-  const todayPnLAmount = (holding.currentValue * (holding.todayPnLPercent || 0)) / 100;
+  const todayPnLAmount = calcHoldingTodayPnL(holding);
 
   return (
     <div className="fixed inset-0 z-[300] flex items-end sm:items-stretch justify-center sm:justify-end" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
