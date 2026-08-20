@@ -145,7 +145,7 @@ export default function ChangePinModal({ onClose, onSuccess }: ChangePinModalPro
               type="button"
               onClick={handleToggleBiometrics}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                biometricEnabled ? 'bg-[var(--accent-blue)]' : 'bg-slate-300 dark:bg-slate-700'
+                biometricEnabled ? 'bg-[var(--accent-blue)]' : 'bg-[var(--border-subtle)]'
               }`}
               role="switch"
               aria-checked={biometricEnabled}

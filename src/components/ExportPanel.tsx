@@ -48,7 +48,7 @@ export interface ParseResult {
 /* ── Export helpers ── */
 
 function portfoliosToJSON(portfolios: Portfolio[]): string {
-  return JSON.stringify({ portfolios, exportedAt: new Date().toISOString() }, null, 2);
+  return JSON.stringify({ schema_version: 2, version: 2, portfolios, exportedAt: new Date().toISOString() }, null, 2);
 }
 
 function downloadFile(content: string, filename: string, mime: string) {

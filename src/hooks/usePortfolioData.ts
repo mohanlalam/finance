@@ -632,8 +632,11 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     }
   );
 
+  const latestPricesRef = useRef<typeof livePrices>(undefined);
+
   useEffect(() => {
     if (!livePrices) return;
+    latestPricesRef.current = livePrices;
     setPortfolios((prev) => {
       const withPrices = applyLivePrices(prev, livePrices.priceMap);
       return applyLiveMFNavs(withPrices, livePrices.navData.navMap, livePrices.navData.staleSchemes);
@@ -711,9 +714,10 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
       });
 
       let finalBuilt = built;
-      if (livePrices) {
-        const withPrices = applyLivePrices(built, livePrices.priceMap);
-        finalBuilt = applyLiveMFNavs(withPrices, livePrices.navData.navMap, livePrices.navData.staleSchemes);
+      const pricesToApply = livePrices || latestPricesRef.current;
+      if (pricesToApply) {
+        const withPrices = applyLivePrices(built, pricesToApply.priceMap);
+        finalBuilt = applyLiveMFNavs(withPrices, pricesToApply.navData.navMap, pricesToApply.navData.staleSchemes);
       }
 
       hasHydratedRef.current = true;

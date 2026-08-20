@@ -128,23 +128,23 @@ export default React.memo(function AssetTabContent({
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 {priceStatus === 'success' && (
-                  <span className="flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded-lg">
+                  <span className="flex items-center gap-1 text-xs text-[var(--positive)] bg-[var(--positive-soft)] px-2 py-1 rounded-[var(--radius-small)]">
                     <Wifi size={11} />
                     Live prices
                   </span>
                 )}
                 {priceStatus === 'error' && (
-                  <span className="flex items-center gap-1 text-xs text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-lg">
+                  <span className="flex items-center gap-1 text-xs text-[var(--text-secondary)] bg-[var(--surface-secondary)] px-2 py-1 rounded-[var(--radius-small)]">
                     <WifiOff size={11} />
                     Snapshot data
                   </span>
                 )}
-                <span className="text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/40 px-2 py-1 rounded-lg">
+                <span className="text-xs text-[var(--text-tertiary)] bg-[var(--surface-secondary)] px-2 py-1 rounded-[var(--radius-small)]">
                   {visiblePortfolio.holdings.length} stocks &bull; Click column to sort
                 </span>
                 <button
                   onClick={onAddHoldingClick}
-                  className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                  className="flex items-center gap-1.5 bg-[var(--accent-blue)] hover:brightness-110 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] transition-colors shadow-sm ios-press cursor-pointer"
                 >
                   <Plus size={13} />
                   Add Holding
@@ -268,7 +268,7 @@ export default React.memo(function AssetTabContent({
             <h2 className="text-base font-bold text-slate-700 dark:text-slate-200">All Stock Holdings</h2>
             <button
               onClick={onAddHoldingClick}
-              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+              className="flex items-center gap-1.5 bg-[var(--accent-blue)] hover:brightness-110 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] transition-colors shadow-sm ios-press cursor-pointer"
             >
               <Plus size={13} />
               Add Holding
@@ -278,10 +278,10 @@ export default React.memo(function AssetTabContent({
             {portfolios.map((p) => (
               <div key={p.name} className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
-                  <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
+                  <div className="h-px flex-1 bg-[var(--border-subtle)]" />
                   <span className={`flex items-center gap-1.5 text-xs font-bold ${pnlColor(p.totalPnL)}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p.totalPnL >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p.totalPnL >= 0 ? 'bg-[var(--positive)]' : 'bg-[var(--negative)]'}`} />
                     {formatPercent(p.totalPnLPercent, 2)} ({formatINR(p.totalPnL)})
                   </span>
                 </div>
@@ -293,7 +293,7 @@ export default React.memo(function AssetTabContent({
                     actionButton={
                       <button
                         onClick={onAddHoldingClick}
-                        className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                        className="inline-flex items-center gap-1.5 bg-[var(--accent-blue)] hover:brightness-110 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] transition-colors shadow-sm ios-press cursor-pointer"
                       >
                         <Plus size={13} />
                         Add Holding
@@ -326,8 +326,8 @@ export default React.memo(function AssetTabContent({
           {portfolios.map((p, index) => (
             <div key={p.name}>
               <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
+                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
               </div>
               <FixedDepositView
                 fixedDeposits={p.fixedDeposits.filter(f => f.fd_type === 'regular' || !f.fd_type)}
@@ -349,8 +349,8 @@ export default React.memo(function AssetTabContent({
           {portfolios.map((p, index) => (
             <div key={p.name}>
               <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
+                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
               </div>
               <RDView
                 documents={p.documents}
@@ -370,8 +370,8 @@ export default React.memo(function AssetTabContent({
           {portfolios.map((p, index) => (
             <div key={p.name}>
               <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
+                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
               </div>
               <SIPView
                 documents={p.documents}
@@ -389,8 +389,8 @@ export default React.memo(function AssetTabContent({
           {portfolios.map((p, index) => (
             <div key={p.name}>
               <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
+                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
               </div>
               <GoldHoldingView
                 goldHoldings={p.goldHoldings}
@@ -412,8 +412,8 @@ export default React.memo(function AssetTabContent({
           {portfolios.map((p, index) => (
             <div key={p.name}>
               <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
+                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
               </div>
               <RealEstateView
                 realEstate={p.realEstate}
@@ -435,8 +435,8 @@ export default React.memo(function AssetTabContent({
           {portfolios.map((p, index) => (
             <div key={p.name}>
               <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
+                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
               </div>
               <InsuranceView
                 insurances={p.insurances}
@@ -458,8 +458,8 @@ export default React.memo(function AssetTabContent({
           {portfolios.map((p, index) => (
             <div key={p.name}>
               <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-300">{p.label}</h3>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
+                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
               </div>
               <DocumentVaultView
                 portfolio={p}
