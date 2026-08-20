@@ -232,17 +232,6 @@ export function GoldHoldingView({
               </p>
             </div>
 
-            {/* 18K Fine Gold */}
-            <div className="flex-1 sm:flex-initial flex flex-col justify-center px-3 py-1.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)] text-left">
-              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)]">18K (75.0%)</span>
-              <p className="text-xs font-bold text-[var(--text-primary)] tnum mt-0.5">
-                {formatINR(rates.rate18kPerGram)}<span className="text-[10px] font-normal text-[var(--text-tertiary)]">/g</span>
-              </p>
-              <p className="text-[9.5px] text-[var(--text-tertiary)] tnum">
-                {formatINR(rates.rate18kPer10g)}/10g
-              </p>
-            </div>
-
             {/* Sync Now Button (Desktop) */}
             <button
               type="button"
@@ -318,7 +307,7 @@ export function GoldHoldingView({
           </div>
           <div className="p-6 space-y-4">
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              Enter the rate per gram for 24K pure gold in ₹ INR (e.g. 8850). 22K (91.6%) and 18K (75%) valuations will automatically derive based on hallmark standards.
+              Enter the rate per gram for 24K pure gold in ₹ INR (e.g. 15840). 22K (91.6%) standard hallmark rate will automatically derive.
             </p>
             <div>
               <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
@@ -331,7 +320,7 @@ export function GoldHoldingView({
                 value={tempRateInput}
                 onChange={(e) => setTempRateInput(e.target.value)}
                 className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] focus:border-[var(--accent-blue)]"
-                placeholder="e.g. 8850"
+                placeholder="e.g. 15840"
                 autoFocus
               />
             </div>
