@@ -1,30 +1,46 @@
 /**
  * Gold Market Pricing Utility
- * Calculates live gold rate per gram (24K / 22K / 18K) using market benchmarks.
+ * Calculates live MCX & NSE gold bullion rates per gram & 10g (24K / 22K / 18K)
+ * with intraday change tracking and custom jeweler rate overrides.
  */
 
 export interface GoldRates {
   rate24kPerGram: number;
   rate22kPerGram: number;
   rate18kPerGram: number;
+  rate24kPer10g: number;
+  rate22kPer10g: number;
+  rate18kPer10g: number;
+  changeINR: number;
+  changePercent: number;
+  isLive: boolean;
+  isCustom: boolean;
   lastUpdated: string;
   source: string;
 }
 
-// 24 Hours in milliseconds for daily sync
-export const DAILY_SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
+// 15 Minutes in milliseconds for live rate refresh
+export const LIVE_SYNC_INTERVAL_MS = 15 * 60 * 1000;
 
-// Current baseline spot rate per gram in INR (calibrated to Indian Bullion & Jewellers Association rate ~ ₹15,200/g for 24K per gram / ₹1,52,000 per 10g)
-export const DEFAULT_GOLD_RATE_24K = 15200;
+// Current baseline spot rate in INR (~ ₹8,850/g for 24K per gram / ₹88,500 per 10g)
+export const DEFAULT_GOLD_RATE_24K = 8850;
 
 export interface GoldRateSnapshot {
   rate24k: number;
+  previousClose?: number;
+  changeINR?: number;
+  changePercent?: number;
+  isLive?: boolean;
   lastFetchedAt: string;
+  source?: string;
 }
+
+const SNAPSHOT_KEY = 'finance_gold_rate_snapshot';
+const CUSTOM_RATE_KEY = 'finance_custom_gold_rate_24k';
 
 export function getStoredGoldSnapshot(): GoldRateSnapshot {
   try {
-    const saved = localStorage.getItem('finance_gold_rate_snapshot');
+    const saved = localStorage.getItem(SNAPSHOT_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed && typeof parsed.rate24k === 'number' && parsed.rate24k > 1000) {
@@ -34,88 +50,132 @@ export function getStoredGoldSnapshot(): GoldRateSnapshot {
   } catch { /* ignore */ }
   return {
     rate24k: DEFAULT_GOLD_RATE_24K,
+    previousClose: DEFAULT_GOLD_RATE_24K,
+    changeINR: 0,
+    changePercent: 0,
+    isLive: false,
     lastFetchedAt: new Date().toISOString(),
+    source: 'IBJA Baseline Benchmark',
   };
 }
 
-export function saveStoredGoldSnapshot(rate24k: number): void {
+export function saveStoredGoldSnapshot(snapshot: GoldRateSnapshot): void {
   try {
-    const snapshot: GoldRateSnapshot = {
-      rate24k,
-      lastFetchedAt: new Date().toISOString(),
-    };
-    localStorage.setItem('finance_gold_rate_snapshot', JSON.stringify(snapshot));
-    localStorage.setItem('finance_custom_gold_rate_24k', String(rate24k));
+    localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot));
   } catch { /* ignore */ }
 }
 
-/**
- * Checks if the gold rate should automatically refresh (only once per day)
- */
-export function isDailyGoldRateStale(): boolean {
+/** Check if custom user override rate is set */
+export function getCustomGoldRate(): number | null {
+  try {
+    const val = localStorage.getItem(CUSTOM_RATE_KEY);
+    if (val) {
+      const num = parseFloat(val);
+      if (!isNaN(num) && num > 1000) return num;
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
+export function saveCustomGoldRate(rate24k: number): void {
+  try {
+    localStorage.setItem(CUSTOM_RATE_KEY, String(rate24k));
+  } catch { /* ignore */ }
+}
+
+export function clearCustomGoldRate(): void {
+  try {
+    localStorage.removeItem(CUSTOM_RATE_KEY);
+  } catch { /* ignore */ }
+}
+
+/** Check if the gold rate should automatically refresh (every 15 mins during market hours) */
+export function isGoldRateStale(): boolean {
   try {
     const snapshot = getStoredGoldSnapshot();
     if (!snapshot.lastFetchedAt) return true;
     const elapsed = Date.now() - new Date(snapshot.lastFetchedAt).getTime();
-    return elapsed >= DAILY_SYNC_INTERVAL_MS;
+    return elapsed >= LIVE_SYNC_INTERVAL_MS;
   } catch {
     return true;
   }
 }
 
 /**
- * Fetches and updates gold rate once per day
+ * Fetches real-time MCX / NSE Gold Bullion spot rate.
+ * Uses GOLDBEES.NS / HDFCMFGETF.NS on NSE where 1 unit tracks ~0.01g pure 24K physical gold.
  */
-export async function syncDailyGoldRateIfNeeded(): Promise<number> {
+export async function fetchLiveGoldRates(forceRefresh = false): Promise<GoldRates> {
+  const customRate = getCustomGoldRate();
   const snapshot = getStoredGoldSnapshot();
-  if (!isDailyGoldRateStale()) {
-    return snapshot.rate24k;
+
+  if (!forceRefresh && !isGoldRateStale() && snapshot.rate24k > 1000) {
+    return deriveGoldRates(customRate ?? snapshot.rate24k);
   }
 
   try {
-    // Check Yahoo benchmark for Gold ETF (GOLDBEES.NS is equivalent to ~0.01g / calibrated spot multiplier)
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/GOLDBEES.NS?range=1d&interval=1d`;
+    // Primary benchmark: GOLDBEES.NS (tracks 1/100th gram of 24K pure gold on NSE/MCX)
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/GOLDBEES.NS?range=1d&interval=5m`;
     const res = await fetch(url, { headers: { Accept: 'application/json' } });
     if (res.ok) {
       const data = await res.json();
-      const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+      const meta = data?.chart?.result?.[0]?.meta;
+      const price = meta?.regularMarketPrice;
+      const prevClose = meta?.chartPreviousClose || meta?.previousClose || price;
+
       if (typeof price === 'number' && price > 0) {
-        // GOLDBEES tracks ~0.01g pure gold + premium (approx multiplier ~160x to 175x for 1g 24K)
-        // If price is within standard range, compute calibrated 1g 24k rate
-        const calibratedRate = Math.round(price * 175);
-        if (calibratedRate >= 10000 && calibratedRate <= 25000) {
-          saveStoredGoldSnapshot(calibratedRate);
-          return calibratedRate;
+        // GOLDBEES tracks ~0.01g pure gold -> 1g 24K = price * 100
+        const rate24k = Math.round(price * 100);
+        const prevCloseRate = Math.round((prevClose || price) * 100);
+        const changeINR = rate24k - prevCloseRate;
+        const changePercent = prevCloseRate > 0 ? ((rate24k - prevCloseRate) / prevCloseRate) * 100 : 0;
+
+        if (rate24k >= 5000 && rate24k <= 20000) {
+          const newSnapshot: GoldRateSnapshot = {
+            rate24k,
+            previousClose: prevCloseRate,
+            changeINR,
+            changePercent,
+            isLive: true,
+            lastFetchedAt: new Date().toISOString(),
+            source: 'MCX / NSE Gold Spot Benchmark',
+          };
+          saveStoredGoldSnapshot(newSnapshot);
+          return deriveGoldRates(customRate ?? rate24k);
         }
       }
     }
   } catch (err) {
-    console.warn('[goldPricing] Daily gold rate sync notice:', err);
+    console.warn('[goldPricing] Live gold fetch warning:', err);
   }
 
-  // Preserve existing snapshot and update timestamp to avoid retry loops today
-  saveStoredGoldSnapshot(snapshot.rate24k);
-  return snapshot.rate24k;
+  // Fallback to existing snapshot
+  return deriveGoldRates(customRate ?? snapshot.rate24k);
 }
 
+/** Legacy alias for backwards compatibility */
+export const syncDailyGoldRateIfNeeded = fetchLiveGoldRates;
+
 export function getStoredGoldRate(): number {
+  const custom = getCustomGoldRate();
+  if (custom) return custom;
   return getStoredGoldSnapshot().rate24k;
 }
 
 export function saveStoredGoldRate(rate24k: number): void {
-  saveStoredGoldSnapshot(rate24k);
+  saveCustomGoldRate(rate24k);
 }
 
 /**
  * Normalizes purity string into multiplier factor
- * e.g., '24k' -> 1.0, '22k' -> 0.916, '18k' -> 0.75
+ * e.g., '24k' -> 1.0, '22k' -> 0.9167, '18k' -> 0.75, '14k' -> 0.5833
  */
 export function getPurityMultiplier(purityStr: string): number {
   const clean = (purityStr || '').toLowerCase().trim();
   if (clean.includes('24')) return 1.0;
   if (clean.includes('22') || clean.includes('916')) return 22 / 24; // ~0.9167
   if (clean.includes('18') || clean.includes('750')) return 18 / 24; // 0.75
-  if (clean.includes('14')) return 14 / 24; // ~0.5833
+  if (clean.includes('14') || clean.includes('585')) return 14 / 24; // ~0.5833
   return 0.9167; // Default to 22K standard hallmark jewelry
 }
 
@@ -139,12 +199,23 @@ export function calculateGoldValuation(
  */
 export function deriveGoldRates(customRate?: number): GoldRates {
   const snapshot = getStoredGoldSnapshot();
-  const rate24k = customRate ?? snapshot.rate24k;
+  const custom = getCustomGoldRate();
+  const effective24k = customRate ?? custom ?? snapshot.rate24k;
+  const isCustom = !!(customRate || custom);
+
   return {
-    rate24kPerGram: Math.round(rate24k),
-    rate22kPerGram: Math.round(rate24k * (22 / 24)),
-    rate18kPerGram: Math.round(rate24k * (18 / 24)),
+    rate24kPerGram: Math.round(effective24k),
+    rate22kPerGram: Math.round(effective24k * (22 / 24)),
+    rate18kPerGram: Math.round(effective24k * (18 / 24)),
+    rate24kPer10g: Math.round(effective24k * 10),
+    rate22kPer10g: Math.round(effective24k * (22 / 24) * 10),
+    rate18kPer10g: Math.round(effective24k * (18 / 24) * 10),
+    changeINR: snapshot.changeINR ?? 0,
+    changePercent: snapshot.changePercent ?? 0,
+    isLive: isCustom ? false : (snapshot.isLive ?? true),
+    isCustom,
     lastUpdated: snapshot.lastFetchedAt,
-    source: 'IBJA / MCX Daily Benchmark',
+    source: isCustom ? 'Custom Jeweler Rate' : (snapshot.source || 'MCX / NSE Gold Spot Benchmark'),
   };
 }
+

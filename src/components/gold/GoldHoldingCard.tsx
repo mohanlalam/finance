@@ -24,6 +24,10 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
   const pnlPct = purchasePrice > 0 ? (pnl / purchasePrice) * 100 : 0;
   const docs = documents.filter((d) => d.asset_type === 'gold' && d.asset_id === holding.id);
 
+  const weight = Number(holding.weight_grams) || 0;
+  const buyPricePerGram = weight > 0 && purchasePrice > 0 ? Math.round(purchasePrice / weight) : null;
+  const curPricePerGram = weight > 0 && currentValuation > 0 ? Math.round(currentValuation / weight) : null;
+
   return (
     <div className="p-4 sm:p-5 hover:bg-[var(--surface-secondary)]/50 transition-colors">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
@@ -32,16 +36,11 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
             <Coins size={18} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h4 className="font-bold text-[var(--text-primary)] text-base">{holding.item_name}</h4>
               <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-[var(--radius-pill)] bg-[var(--warning-soft)] text-[var(--warning)]">
                 {holding.purity}
               </span>
-              {holding.isLiveValuation && (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--warning-soft)] text-[var(--warning)] border border-[var(--warning)]/30 shrink-0">
-                  MCX Live
-                </span>
-              )}
               {docs.length > 0 ? (
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--positive-soft)] text-[var(--positive)] border border-[var(--positive)]/30 shrink-0">
                   📎 {docs.length} Doc{docs.length > 1 ? 's' : ''}
@@ -52,9 +51,21 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
                 </span>
               )}
             </div>
-            <p className="text-xs text-[var(--text-tertiary)] flex items-center gap-1 mt-0.5">
-              <Scale size={12} className="text-[var(--text-tertiary)]" />
-              {holding.weight_grams} grams
+            <p className="text-xs text-[var(--text-tertiary)] flex items-center gap-1.5 mt-0.5 tnum">
+              <Scale size={12} className="text-[var(--text-tertiary)] shrink-0" />
+              <span>{holding.weight_grams} grams</span>
+              {buyPricePerGram && (
+                <>
+                  <span className="text-[var(--border-subtle)]">•</span>
+                  <span>Buy: {formatINR(buyPricePerGram)}/g</span>
+                </>
+              )}
+              {curPricePerGram && (
+                <>
+                  <span className="text-[var(--border-subtle)]">•</span>
+                  <span className="text-amber-600 dark:text-amber-400 font-semibold">Live: {formatINR(curPricePerGram)}/g</span>
+                </>
+              )}
             </p>
           </div>
         </div>

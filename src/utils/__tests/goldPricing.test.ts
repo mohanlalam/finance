@@ -28,11 +28,14 @@ describe('goldPricing utilities', () => {
     expect(calculateGoldValuation(0, '22K', rate24k)).toBe(0);
   });
 
-  it('derives rates bundle with correct 24K, 22K and 18K values', () => {
+  it('derives rates bundle with correct 24K, 22K and 18K values for 1g and 10g', () => {
     const rates = deriveGoldRates(DEFAULT_GOLD_RATE_24K);
     expect(rates.rate24kPerGram).toBe(DEFAULT_GOLD_RATE_24K);
     expect(rates.rate22kPerGram).toBe(Math.round(DEFAULT_GOLD_RATE_24K * (22 / 24)));
     expect(rates.rate18kPerGram).toBe(Math.round(DEFAULT_GOLD_RATE_24K * (18 / 24)));
+    expect(rates.rate24kPer10g).toBe(DEFAULT_GOLD_RATE_24K * 10);
+    expect(rates.rate22kPer10g).toBe(Math.round(DEFAULT_GOLD_RATE_24K * (22 / 24) * 10));
+    expect(rates.rate18kPer10g).toBe(Math.round(DEFAULT_GOLD_RATE_24K * (18 / 24) * 10));
     expect(rates.source).toBeDefined();
   });
 });

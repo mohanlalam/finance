@@ -112,6 +112,8 @@ export function RefreshCw({ size = 24, className = '' }: IconProps) {
   );
 }
 
+export const RotateCw = RefreshCw;
+
 export function Share2({ size = 24, className = '' }: IconProps) {
   return (
     <svg {...base(size, className)}>
