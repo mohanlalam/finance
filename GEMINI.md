@@ -29,6 +29,14 @@ This document provides a high-level overview of the folder structure, data flow,
 * **[useModalState.ts](src/hooks/useModalState.ts)**
   * Dedicated custom hook encapsulating all modal visibility and target state (`quickAddTarget`, `showAddModal`, `showAddFamily`, `renameTarget`, `deleteTarget`, `isDeleting`, `showMobileAlerts`, `showChangePinModal`).
   * Computes aggregate `isAnyModalOpen` boolean flag to gate Floating Add Button (`FloatingAddMenu`) visibility.
+* **[biometrics.ts](src/utils/biometrics.ts)**
+  * Native WebAuthn Platform Authenticator integration (FaceID, TouchID, Windows Hello, Android Biometrics).
+  * Manages hardware capability detection (`isUserVerifyingPlatformAuthenticatorAvailable()`), platform credential generation (`navigator.credentials.create`), credential challenge assertions (`navigator.credentials.get`), and biometric PIN hash synchronization.
+* **[goldPricing.ts](src/utils/goldPricing.ts)**
+  * Real-time MCX & NSE Gold Bullion pricing engine with 15-minute polling intervals.
+  * Dynamically computes 24K (99.9% fine), 22K (91.6% standard hallmark), and 18K (75.0% fine) rates per gram and per 10g (Tola).
+  * Tracks intraday price movements (₹/g delta and % change) against previous market close.
+  * Supports custom jeweler rate overrides with single-click reset to live MCX rates.
 * **[ToastContext.tsx](src/contexts/ToastContext.tsx)**
   * Exposes global toast/snackbar notifications state (`useToast`) and auto-dismissals, entirely replacing raw browser `alert()` popups across the app.
 * **[backupValidation.ts](src/utils/backupValidation.ts)**
@@ -39,7 +47,7 @@ This document provides a high-level overview of the folder structure, data flow,
   * Manages 30-entry rolling snapshot persistence in `localStorage` for historical score trends and monthly resolution metrics.
 
 
-### 2. App Shell & Navigation Router
+### 2. App Shell, Security Gate & Navigation Router
 * **[App.tsx](src/App.tsx)**
   * Lightweight entry gate. Renders `PinLockScreen` from a clean, provider-free chunk. Once unlocked, dynamically imports and mounts `MainApp` using `React.lazy`.
 * **[MainApp.tsx](src/MainApp.tsx)**
@@ -47,11 +55,17 @@ This document provides a high-level overview of the folder structure, data flow,
 * **[AppShell.tsx](src/layouts/AppShell.tsx)**
   * Core responsive layout manager combining `DesktopSidebar` with main content area.
   * Consumes `useIsMobile()` for viewport checks and `useModalState()` to decouple modal visibility state.
+  * Hosts unified Family Member cards and Wealth Mosaic strip with clean natural gap spacing and zero vertical divider clutter.
   * Lazy-loads heavy action modals (`AddHoldingModal`, `AddFamilyModal`, `RenamePortfolioModal`, `ChangePinModal`, `DataQualityHealthModal`) with `React.lazy` and `Suspense`, shrinking initial entry bundle size.
 * **[DesktopSidebar.tsx](src/layouts/DesktopSidebar.tsx)**
   * Desktop navigation sidebar featuring sticky top alignment (`sticky top-6`) and `self-start` height constraint.
+* **[MobileBottomNav.tsx](src/components/MobileBottomNav.tsx)**
+  * High-density mobile bottom navigation bar (Google Stitch UI standard) featuring 5 core navigation tabs: *Home*, *Stocks*, *SIP & MF* (`Wallet`), *Deposits* (`Landmark`), and *More* (`Menu`).
 * **[PinLockScreen.tsx](src/components/PinLockScreen.tsx)**
   * Restricts app access via passcode lock screen over purple-to-blue aurora gradient background with live clock display and frosted glass buttons.
+  * Features integrated **Biometric Keypad Button** and auto-prompt on mount for instant 1-second FaceID / TouchID / Fingerprint unlocking with 4-digit PIN fallback.
+* **[ChangePinModal.tsx](src/components/ChangePinModal.tsx)**
+  * Security modal managing PIN changes and dedicated **Biometric Unlock Switch** toggle.
 
 
 ### 3. Registry Component Routing & Modular Views
@@ -63,7 +77,7 @@ This document provides a high-level overview of the folder structure, data flow,
 * **Modular Domain Components**:
   * **[src/components/ui/AssetRegistryContainer.tsx](src/components/ui/AssetRegistryContainer.tsx)**: Standardized shell for asset registry headers, add buttons, `<AssetCardSkeleton>` loading fallbacks, and `<EmptyState>` placeholders.
   * **[src/components/ui/DocumentAttachmentField.tsx](src/components/ui/DocumentAttachmentField.tsx)**: Hardened document uploader with document taxonomy selectors (`fd_advice`, `policy_schedule`, `title_deed`, `tax_receipt`, `invoice`, `gold_hallmark`, `account_statement`, `general`), 10MB limits, and contextual guidance.
-  * **[src/components/gold/](src/components/gold/)**: Standalone `GoldHoldingCard.tsx` (with hallmark attachment badges) and `GoldFormModal.tsx`.
+  * **[src/components/gold/](src/components/gold/)**: `GoldHoldingView.tsx` (with Live MCX Bullion Ribbon, 24K/22K/18K ticker, manual sync, and aggregate portfolio weight/valuation strip), `GoldHoldingCard.tsx` (with buy price/g vs live rate/g and hallmark attachment badges), and `GoldFormModal.tsx`.
   * **[src/components/realestate/](src/components/realestate/)**: Standalone `RealEstateCard.tsx` (with title deed badges) and `RealEstateFormModal.tsx`.
   * **[src/components/insurance/](src/components/insurance/)**: Standalone `InsurancePolicyCard.tsx` (with policy bond badges) and `InsuranceFormModal.tsx`.
   * **[src/components/fd/](src/components/fd/)**: Standalone `DepositDetailsCard.tsx` (with FD advice badges), `FDFormModal.tsx`, and `StandardFormFields.tsx`.
@@ -74,6 +88,8 @@ This document provides a high-level overview of the folder structure, data flow,
 ### 4. UI Dashboard & Widget Performance
 * **Single-Pass Responsive Table**:
   * **[PortfolioTable.tsx](src/components/PortfolioTable.tsx)**: Single-pass conditional view rendering (`isMobile ? ... : ...`) using `useIsMobile()`, cutting mounted DOM node count by 50%.
+* **Unified Summary Overview Card**:
+  * **[SummaryCards.tsx](src/components/SummaryCards.tsx)**: Merged 4-column unified overview card (*Net Worth, Invested, Total Return, Today's Return*) with family breakdown tiles beneath each metric.
 * **Mobile Home Summary**:
   * **[MobileHomeSummary.tsx](src/components/MobileHomeSummary.tsx)**: Unified clean top card displaying live Net Worth, Sparkline trajectory, Today's Gain/Loss badge, Invested Capital, and Total Overall Return without duplication or visual crowding.
 * **Visual Dashboard Grid**:
@@ -98,6 +114,10 @@ The application implements a series of high-performance strategies to guarantee 
 * **List Virtualization**: Registry views (`FixedDepositView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`) utilize `react-window` to virtualize accounts when lists grow, binding rows to unique asset IDs to optimize DOM recycling.
 * **Card Memoization**: Asset card components (`GoldHoldingCard`, `RealEstateCard`, `InsurancePolicyCard`, `DepositDetailsCard`, `ChatMessageItem`) use `React.memo` with strict equality functions comparing primary metrics to prevent redundant child re-renders.
 * **Single-Pass Viewport Selection**: Components condition layout branches using `useIsMobile()` to avoid creating hidden desktop/mobile duplicate DOM subtrees.
+
+### 3. PWA Auto-Update & iOS Standalone Lifecycle
+* **Workbox Instant Takeover**: Configured `skipWaiting: true`, `clientsClaim: true`, and `cleanupOutdatedCaches: true` in [`vite.config.ts`](vite.config.ts) to prevent service worker waiting traps.
+* **App Resume & Focus Polling**: [`main.tsx`](src/main.tsx) monitors document `visibilitychange` events and checks `registration.update()` every time an iOS Home Screen shortcut resumes from sleep, reloading smoothly via `controllerchange` listener.
 
 ---
 
@@ -127,7 +147,7 @@ Every deposit registry maps to its own separate database table:
 | **Fixed Deposit (FD)** | `fixed_deposits` | Half-yearly compounding (FD interest rates) |
 | **Recurring Deposit (RD)** | `rd_accounts` | Quarterly compounding + Contribution dates array |
 | **SIP Mutual Fund (SIP)** | `sip_accounts` | Live AMFI NAV scheme price multiplication |
-| **Gold Holding** | `gold_holdings` | Gram weight × purchase/live gold rate |
+| **Gold Holding** | `gold_holdings` | Gram weight × purchase/live MCX gold rate |
 | **Real Estate** | `real_estate` | Current valuation + rental income yield |
 | **Insurance** | `insurances` | Sum assured + premium renewal warning tracking |
 | **Document Vault** | `documents` | Expiry tracking + asset reference linking |
@@ -141,6 +161,8 @@ Every deposit registry maps to its own separate database table:
 * **[backupValidation.ts](src/utils/backupValidation.ts)**: JSON envelope validation, duplicate detection, and schema verification.
 * **[dataQuality.ts](src/utils/dataQuality.ts)**: Health scoring, discrepancy diagnostics, and history tracking.
 * **[formatters.ts](src/utils/formatters.ts)**: Indian currency formatters (`formatINR`) and date helpers.
+* **[biometrics.ts](src/utils/biometrics.ts)**: WebAuthn public key credential helper and hardware authenticator verifier.
+* **[goldPricing.ts](src/utils/goldPricing.ts)**: MCX / NSE live bullion feed parser and hallmark rate calculator.
 
 ---
 
@@ -153,7 +175,7 @@ Every deposit registry maps to its own separate database table:
    - Transition from master PIN to Supabase Auth (`auth.users`) with per-user RLS policies across all tables and storage buckets (`investment-documents/{user_id}/*`).
 3. **Advanced Asset Analytics**:
    - Capital Gains Realization & Tax Harvesting Planner.
-   - Gold price live market sync via MCX/Bullion API.
+   - Maturity Timeline & Cash Flow Forecast Calendar.
 
 ---
 
