@@ -312,14 +312,14 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             ))}
             
             {/* Biometric Keypad Button (Bottom Left) */}
-            {biometricsAvailable && biometricsEnrolled ? (
+            {biometricsAvailable ? (
               <button
                 type="button"
-                className="pin-key w-[75px] h-[75px] flex items-center justify-center rounded-full transition-all duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer text-white/90 hover:text-white"
-                onClick={handleBiometricUnlock}
+                className={`pin-key w-[75px] h-[75px] flex items-center justify-center rounded-full transition-all duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer text-white/90 hover:text-white ${!biometricsEnrolled ? 'opacity-50' : ''}`}
+                onClick={biometricsEnrolled ? handleBiometricUnlock : () => setError('Unlock with PIN first, then enable Biometrics in Settings')}
                 disabled={success || isBiometricPrompting}
-                aria-label="Unlock with Biometrics (FaceID / Fingerprint)"
-                title="Unlock with Biometrics"
+                aria-label={biometricsEnrolled ? "Unlock with Biometrics (FaceID / Fingerprint)" : "Biometrics available (Enable in Settings)"}
+                title={biometricsEnrolled ? "Unlock with Biometrics" : "Enable Biometrics in Settings"}
               >
                 <Fingerprint size={28} className={isBiometricPrompting ? 'animate-pulse text-[#34C759]' : ''} />
               </button>
