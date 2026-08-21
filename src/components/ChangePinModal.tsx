@@ -3,7 +3,7 @@ import { X, Loader2, Key, Fingerprint } from './icons/AppIcons';
 import Modal from './Modal';
 import { Button } from './ui/Button';
 import { IconButton } from './ui/IconButton';
-import { verifyPin, setCustomPin, ensureHashedPin } from '../utils/auth';
+import { verifyPin, setCustomPin, ensureHashedPin, hashPin } from '../utils/auth';
 import { 
   isBiometricsSupported, 
   isBiometricsEnrolled, 
@@ -45,7 +45,13 @@ export default function ChangePinModal({ onClose, onSuccess }: ChangePinModalPro
       setBiometricMsg('Biometric unlock disabled');
     } else {
       try {
-        const pinHash = await ensureHashedPin();
+        let pinHash = await ensureHashedPin();
+        if (!pinHash && currentPin) {
+          const isValid = await verifyPin(currentPin);
+          if (isValid) {
+            pinHash = await hashPin(currentPin);
+          }
+        }
         if (!pinHash) {
           setError('Enter and verify current PIN first to enable biometrics');
           return;
@@ -55,7 +61,7 @@ export default function ChangePinModal({ onClose, onSuccess }: ChangePinModalPro
           setBiometricEnabled(true);
           setBiometricMsg('Biometric unlock enabled successfully');
         } else {
-          setError('Biometric enrollment was cancelled or not completed');
+          setError('Biometric enrollment was cancelled or not supported on this device');
         }
       } catch {
         setError('Failed to setup biometric unlock');

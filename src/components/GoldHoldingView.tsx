@@ -13,7 +13,6 @@ import { FixedSizeList as List } from 'react-window';
 import { RotateCw, TrendingUp, TrendingDown, Scale, Coins, Check } from './icons/AppIcons';
 import { 
   deriveGoldRates, 
-  getStoredGoldRate, 
   saveStoredGoldRate, 
   fetchLiveGoldRates, 
   clearCustomGoldRate 
@@ -435,10 +434,10 @@ export function GoldHoldingView({
           title="Delete Gold Holding"
           message={`Are you sure you want to delete "${confirmDeleteItem.item_name}" (${confirmDeleteItem.weight_grams}g ${confirmDeleteItem.purity})? This action cannot be undone.`}
           confirmLabel="Delete Holding"
-          isDestructive={true}
+          variant="danger"
           isLoading={deleting}
           onConfirm={() => handleDelete(confirmDeleteItem.id)}
-          onCancel={() => setConfirmDeleteItem(null)}
+          onClose={() => setConfirmDeleteItem(null)}
         />
       )}
     </div>

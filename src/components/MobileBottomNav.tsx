@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Home as HomeIcon, TrendingUp, Landmark, Wallet, Menu, Coins, Building2, Shield, FolderOpen, Clock, ChevronRight, X, Sparkles } from './icons/AppIcons';
 import { triggerHaptic } from '../utils/haptics';
 
@@ -45,22 +45,34 @@ const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.Reac
 
 function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSmartImport }: MobileBottomNavProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  // Keep a ref in sync with state so the Escape keydown handler can read the
+  // current value without being listed as a dependency (avoids re-attaching
+  // the event listener every time the drawer opens or closes).
+  const isDrawerOpenRef = useRef(isDrawerOpen);
+  useEffect(() => { isDrawerOpenRef.current = isDrawerOpen; }, [isDrawerOpen]);
 
   // Close drawer when active asset changes
   useEffect(() => {
     setIsDrawerOpen(false);
   }, [activeAsset]);
 
-  // Trap Escape key for accessibility
+  // Trap Escape key for accessibility — stable listener, reads state via ref
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isDrawerOpen) {
+      if (e.key === 'Escape' && isDrawerOpenRef.current) {
         setIsDrawerOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDrawerOpen]);
+  }, []); // empty deps: listener is attached once and reads state via ref
+
+  // Stable handler for More Drawer tab items — avoids new inline arrow
+  // functions per list item per render, which would bust React.memo on buttons.
+  const handleMoreTabClick = useCallback((tabId: typeof moreTabs[number]['id']) => {
+    onChangeAsset(tabId);
+    setIsDrawerOpen(false);
+  }, [onChangeAsset]);
 
   const isMoreActive = moreTabs.some((tab) => tab.id === activeAsset);
 
@@ -80,7 +92,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
         role="dialog"
         aria-modal="true"
         aria-label="All Asset Categories"
-        className={`fixed left-0 right-0 z-50 bg-[var(--surface)] border-t border-[var(--border-subtle)] rounded-t-2xl shadow-2xl p-4 md:hidden transition-transform duration-250 ease-out max-w-lg mx-auto ${
+        className={`fixed left-0 right-0 z-50 bg-[var(--surface)] border-t border-[var(--border-subtle)] rounded-t-2xl shadow-2xl p-4 md:hidden transition-transform duration-250 ease-out max-w-lg mx-auto will-change-transform transform-gpu ${
           isDrawerOpen ? 'translate-y-0 pointer-events-auto' : 'translate-y-full pointer-events-none'
         }`}
         style={{
@@ -139,10 +151,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => {
-                  onChangeAsset(tab.id);
-                  setIsDrawerOpen(false);
-                }}
+                onClick={() => handleMoreTabClick(tab.id)}
                 className={`w-full flex items-center justify-between px-3 min-h-[48px] py-2.5 rounded-[var(--radius-medium)] transition-colors text-left outline-none cursor-pointer active:scale-[0.99] ${
                   isActive
                     ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-bold border border-[var(--accent-blue)]/30'

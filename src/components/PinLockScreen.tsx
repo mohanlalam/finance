@@ -4,6 +4,7 @@ import { triggerHaptic } from '../utils/haptics';
 import { 
   isBiometricsSupported, 
   isBiometricsEnrolled, 
+  isBiometricAutoPromptEnabled,
   authenticateWithBiometrics 
 } from '../utils/biometrics';
 import { Fingerprint } from './icons/AppIcons';
@@ -112,6 +113,10 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
           setTimeout(() => {
             onUnlock();
           }, 300);
+        } else {
+          // authenticateWithBiometrics() may have auto-cleared stale enrollment
+          // (e.g. after device restore or PWA reinstall) — sync the UI state
+          setBiometricsEnrolled(isBiometricsEnrolled());
         }
       }
     } catch {
@@ -122,10 +127,10 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
   }, [success, isBiometricPrompting, onUnlock]);
 
 
-  // Direct access to Face ID / Touch ID on mobile app launch
+  // Direct access to Face ID / Touch ID on mobile app launch if auto-prompt enabled
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
-    if (isBiometricsEnrolled()) {
+    if (isBiometricsEnrolled() && isBiometricAutoPromptEnabled()) {
       timer = setTimeout(() => {
         handleBiometricUnlock();
       }, 150);

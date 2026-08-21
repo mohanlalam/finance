@@ -582,11 +582,11 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
                 monthly_deposit: Number(rd.monthly_deposit),
                 interest_rate: Number(rd.interest_rate),
                 start_date: rd.start_date,
-                tenure_months: Number(rd.tenure_months),
+                maturity_date: rd.maturity_date || '',
                 maturity_amount: Number(rd.maturity_amount) || 0,
                 status: rd.status || 'active',
                 notes: rd.notes,
-                installment_dates: Array.isArray(rd.installment_dates) ? rd.installment_dates : undefined,
+                contributions: Array.isArray(rd.contributions) ? rd.contributions : undefined,
               });
               createdAssets++;
             } catch (err: any) {
@@ -601,13 +601,12 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             try {
               await addAsset('sip', pName, {
                 fund_name: sip.fund_name,
-                monthly_investment: Number(sip.monthly_investment || (sip as any).monthly_sip),
+                monthly_sip: Number(sip.monthly_sip || (sip as any).monthly_investment || 0),
                 units: Number(sip.units || (sip as any).qty) || 0,
-                sip_day: Number(sip.sip_day) || 1,
                 start_date: sip.start_date,
-                status: sip.status || 'active',
-                scheme_code: sip.scheme_code,
-                amfi_code: sip.amfi_code,
+                next_sip_date: sip.next_sip_date || null,
+                fallback_valuation: Number(sip.fallback_valuation) || 0,
+                mf_scheme_code: sip.mf_scheme_code || (sip as any).scheme_code || (sip as any).amfi_code,
                 expected_cagr: Number(sip.expected_cagr) || 12,
                 notes: sip.notes,
               });
@@ -624,14 +623,11 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             try {
               await addAsset('document', pName, {
                 name: doc.name,
-                file_path: doc.file_path,
-                file_type: doc.file_type,
-                file_size: Number(doc.file_size) || 0,
-                expiry_date: doc.expiry_date || null,
-                document_type: doc.document_type || 'general',
-                asset_type: doc.asset_type || null,
-                asset_id: doc.asset_id || null,
-                notes: doc.notes,
+                filePath: doc.file_path,
+                fileType: doc.file_type || 'other',
+                expiryDate: doc.expiry_date || null,
+                linkedAssetType: doc.asset_type || 'general',
+                linkedAssetId: doc.asset_id || null,
               });
               createdAssets++;
             } catch (err: any) {

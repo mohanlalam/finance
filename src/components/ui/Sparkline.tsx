@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-interface SparklineProps {
+export interface SparklineProps {
   data: number[];
   width?: number;
   height?: number;
@@ -8,14 +8,17 @@ interface SparklineProps {
   className?: string;
 }
 
-export function Sparkline({
+export const Sparkline = React.memo(function Sparkline({
   data,
   width = 80,
   height = 28,
   color = '#10b981', // emerald-500
   className = '',
 }: SparklineProps) {
-  const gradientId = useMemo(() => `sparkline-gradient-${Math.random().toString(36).substring(2, 9)}`, []);
+  const gradientId = useMemo(
+    () => `sparkline-gradient-${color.replace(/[^a-zA-Z0-9]/g, '')}-${width}-${height}`,
+    [color, width, height]
+  );
 
   const points = useMemo(() => {
     if (!data || data.length === 0) return '';
@@ -76,6 +79,6 @@ export function Sparkline({
       />
     </svg>
   );
-}
+});
 
-export default React.memo(Sparkline);
+export default Sparkline;

@@ -8,7 +8,6 @@ interface FloatingAddMenuProps {
   onAddAsset: (type: 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
   onOpenSmartImport?: () => void;
   isHidden?: boolean;
-  isScrollingDown?: boolean;
 }
 
 export default function FloatingAddMenu({
@@ -16,7 +15,6 @@ export default function FloatingAddMenu({
   onAddAsset,
   onOpenSmartImport,
   isHidden = false,
-  isScrollingDown = false,
 }: FloatingAddMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState<FabPosition>(() => {
@@ -128,7 +126,7 @@ export default function FloatingAddMenu({
       )}
 
       {/* Floating Menu Container with Safe Area Spacing */}
-      <div className={`fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] z-50 flex flex-col gap-3 pointer-events-none px-3 transition-all duration-300 ease-out ${isScrollingDown && !isOpen ? 'translate-y-24 opacity-0' : 'translate-y-0 opacity-100'} ${getPositionClasses()}`}>
+      <div className={`fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] z-50 flex flex-col gap-3 pointer-events-none px-3 transition-all duration-300 ease-out ${isOpen ? 'translate-y-0 opacity-100' : 'fab-scroll-hide'} ${getPositionClasses()}`}>
         {/* Categorized Quick-Add Card */}
         {isOpen && (
           <div

@@ -318,7 +318,7 @@ export default function NetWorthTimelineChart({
     });
   }, [minVal, maxVal, chartHeight]);
 
-  function formatDateLabel(isoString: string, currentRange: TimeRange): string {
+  function formatDateLabel(isoString: string, currentRange: DateRange): string {
     const d = new Date(isoString);
     if (isNaN(d.getTime())) return '';
     if (currentRange === '1M' || currentRange === '3M') {

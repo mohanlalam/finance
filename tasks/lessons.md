@@ -86,6 +86,19 @@ After **any correction** from the user, append a new entry here with the pattern
 
 ---
 
+### 2026-08-21 — iOS PWA Background Freeze & WebAuthn Credential Persistence
+**Mistake**: Deferring `window.location.reload()` to `document.visibilityState === 'hidden'` completely prevented iOS PWAs from updating, and auto-clearing biometric enrollment on non-`NotAllowedError` exceptions wiped valid FaceID/TouchID enrollments on transient errors (such as background switches or missing user gestures).
+**Root Cause**:
+1. iOS WebKit immediately suspends/freezes JavaScript execution when a standalone PWA is minimized. Calling `window.location.reload()` inside a hidden/background listener is paused or discarded by WebKit, leaving `pendingReload = true` and permanently stalling updates.
+2. WebAuthn throws `SecurityError`, `AbortError`, or `TimeoutError` when auto-prompted without transient user activation on iOS Safari. Treating any non-`NotAllowedError` exception as "credential deleted" caused the app to wipe the user's stored biometric keys on their very first launch.
+**Fix**:
+1. Handled Service Worker takeover cleanly on `controllerchange` with immediate reload guard, and added active update checks on `visibilitychange` (when app is opened/resumed to `visible`), `window.focus`, and `window.online`.
+2. Removed destructive `disableBiometrics()` calls from transient error catch blocks in `biometrics.ts`. Biometric enrollment is now safely preserved across app restarts and device sleep.
+3. Added cache-control meta tags (`no-cache, no-store, must-revalidate`) to `index.html`.
+**Rule**: Never rely on `visibilitychange === 'hidden'` to execute critical operations like `reload()` on iOS PWAs because iOS suspends background execution. Never delete user biometric enrollment on transient WebAuthn errors (`AbortError`, `SecurityError`, timeout); only clear enrollment on explicit user disable or PIN reset.
+
+---
+
 ### 2026-08-17 — Mobile Responsive Bottom Sheets, Dynamic Chart Heights & 24h Rate Caching
 **Mistake**: Holding details opened as full-width side drawers on mobile; chart containers forced tall fixed heights (`370px`) causing excessive scrolling; commodity rate sync ran on every mount.  
 **Root Cause**: Desktop-first layout defaults (`justify-end`, fixed heights) were applied without dedicated mobile-specific bottom-sheet flex containers and touch drag handles.  

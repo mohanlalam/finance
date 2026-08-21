@@ -1,13 +1,14 @@
-# Tasks: Dashboard Mathematical & Logical Inconsistency Fixes
+# Tasks: Biometric Login & iOS PWA Auto-Update Hardening
 
-- [x] **Phase 1: Calculation & Allocation Fixes**
-  - [x] 1.1 Fix Top Holdings allocation percentage in `src/components/InsightsPanel.tsx` using true portfolio stock total
-  - [x] 1.2 Unify Today's Return formula across `src/utils/portfolioCalcs.ts`, `src/components/PortfolioTable.tsx`, and `src/components/HoldingDetailDrawer.tsx`
-- [x] **Phase 2: Header Demarcation & Timeline X-Axis Deduplication**
-  - [x] 2.1 Clarify Net Worth vs Stock Holdings P&L labels in `src/components/SummaryCards.tsx` and `src/components/PortfolioTable.tsx`
-  - [x] 2.2 Deduplicate and refine X-axis date labels in `src/components/NetWorthTimelineChart.tsx`
-- [x] **Phase 3: Verification & Git Sync**
-  - [x] 3.1 Run `npx tsc --noEmit`
-  - [x] 3.2 Run `npm test` (15/15 test suites, 90/90 tests passed)
-  - [x] 3.3 Run `npm run build` (PWA generated cleanly)
-  - [x] 3.4 Commit and push to `origin/main`
+- [x] **Phase 1: Biometric Authentication Hardening**
+  - [x] 1.1 Update `src/utils/biometrics.ts` to prevent deleting credentials on transient errors and broaden transport matching
+  - [x] 1.2 Update `src/components/PinLockScreen.tsx` to handle direct user gesture tap and safe auto-prompt
+  - [x] 1.3 Update `src/components/ChangePinModal.tsx` for seamless biometric enrollment
+- [x] **Phase 2: iOS PWA Auto-Update Fix**
+  - [x] 2.1 Update `src/main.tsx` to fix the `controllerchange` update handler and listen for app focus/resume
+  - [x] 2.2 Add cache-control meta tags to `index.html`
+  - [x] 2.3 Verify `vite.config.ts` Workbox PWA caching configuration
+- [x] **Phase 3: Verification & Quality Assurance**
+  - [x] 3.1 Update and run unit tests (`npm test` — 15/15 test files, 90/90 tests passed)
+  - [x] 3.2 Run TypeScript verification (`npm run typecheck` — 0 errors)
+  - [x] 3.3 Run production build (`npm run build` — PWA generated cleanly)

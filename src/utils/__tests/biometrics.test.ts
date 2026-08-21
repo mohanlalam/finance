@@ -15,8 +15,7 @@ describe('biometrics.ts', () => {
   beforeEach(() => {
     localStorage.clear();
     vi.restoreAllMocks();
-    // @ts-expect-error Mocking secure context in jsdom
-    window.isSecureContext = true;
+    Object.defineProperty(window, 'isSecureContext', { value: true, configurable: true, writable: true });
   });
 
   describe('isBiometricsSupported', () => {
@@ -73,8 +72,8 @@ describe('biometrics.ts', () => {
   });
 
   describe('Auto-prompt preferences', () => {
-    it('defaults to true when unset', () => {
-      expect(isBiometricAutoPromptEnabled()).toBe(true);
+    it('defaults to false when unset', () => {
+      expect(isBiometricAutoPromptEnabled()).toBe(false);
     });
 
     it('updates auto-prompt setting', () => {

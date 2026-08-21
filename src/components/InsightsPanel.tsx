@@ -265,7 +265,7 @@ export default React.memo(function InsightsPanel({
     for (const p of portfolios) {
       for (const re of p.realEstate ?? []) {
         totalVal += Number(re.current_valuation) || 0;
-        totalMonthlyRental += Number(re.monthly_rental_income) || 0;
+        totalMonthlyRental += Number(re.monthly_rent) || 0;
         propertyCount++;
       }
     }

@@ -617,7 +617,8 @@ a,
 /* -- Mobile Asset Card Press Feedback & Render Containment -- */
 .mobile-asset-card {
   content-visibility: auto;
-  contain-intrinsic-size: 0 160px;
+  contain-intrinsic-size: 0 100px;
+  contain: layout style;
   transition:
     transform 0.12s cubic-bezier(0.32, 1.2, 0.64, 1),
     box-shadow 0.15s ease,
@@ -626,6 +627,13 @@ a,
 .mobile-asset-card:active {
   transform: scale(0.98);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Floating Action Button (FAB) Scroll Concealment */
+body.is-scrolling-down .fab-scroll-hide {
+  transform: translateY(6rem);
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Reduced motion accessibility support */

@@ -9,6 +9,17 @@ import { Sparkline } from './ui/Sparkline';
 import { AnimatedNumber } from './ui/AnimatedNumber';
 import { usePrivacy } from '../contexts/PrivacyContext';
 
+// Hoist static icon elements at module level — prevents new React element
+// objects from being allocated on every component render cycle.
+const ICON_STOCKS    = <TrendingUp size={16} aria-hidden="true" />;
+const ICON_FD        = <Landmark size={16} aria-hidden="true" />;
+const ICON_RD        = <Clock size={16} aria-hidden="true" />;
+const ICON_SIP       = <TrendingUp size={16} aria-hidden="true" />;
+const ICON_GOLD      = <Coins size={16} aria-hidden="true" />;
+const ICON_REALTY    = <Building2 size={16} aria-hidden="true" />;
+const ICON_INSURANCE = <Shield size={16} aria-hidden="true" />;
+const ICON_DOCS      = <FolderOpen size={16} aria-hidden="true" />;
+
 interface MobileHomeSummaryProps {
   summaryData: {
     totalCurrentValue: number;
@@ -130,19 +141,22 @@ function MobileHomeSummary({
     return breakdown.stocks + breakdown.fd + breakdown.rd + breakdown.sip + breakdown.gold + breakdown.realEstate;
   }, [breakdown]);
 
-  const getPercent = (val: number) => {
+  // Stable reference — avoids re-creating this function on every render
+  const getPercent = useCallback((val: number) => {
     if (totalAllocated <= 0) return 0;
     return (val / totalAllocated) * 100;
-  };
+  }, [totalAllocated]);
 
-  const assetList = [
+  // Memoized: only recomputes when breakdown values or counts change.
+  // Using module-level icon constants prevents new JSX elements per render.
+  const assetList = useMemo(() => [
     {
       id: 'stocks' as const,
       label: 'Stocks & ETFs',
       value: breakdown.stocks,
       subtext: `${stockCount} Tickers`,
       returnBadge: breakdown.stocks > 0 ? `${getPercent(breakdown.stocks).toFixed(0)}% Share` : null,
-      icon: <TrendingUp size={16} aria-hidden="true" />,
+      icon: ICON_STOCKS,
       accentColor: 'bg-[var(--accent-blue)]',
     },
     {
@@ -151,7 +165,7 @@ function MobileHomeSummary({
       value: breakdown.fd,
       subtext: `${fdCount} FDs`,
       returnBadge: breakdown.fd > 0 ? `${getPercent(breakdown.fd).toFixed(0)}% Share` : null,
-      icon: <Landmark size={16} aria-hidden="true" />,
+      icon: ICON_FD,
       accentColor: 'bg-[var(--warning)]',
     },
     {
@@ -160,7 +174,7 @@ function MobileHomeSummary({
       value: breakdown.rd,
       subtext: `${rdCount} Accounts`,
       returnBadge: breakdown.rd > 0 ? `${getPercent(breakdown.rd).toFixed(0)}% Share` : null,
-      icon: <Clock size={16} aria-hidden="true" />,
+      icon: ICON_RD,
       accentColor: 'bg-indigo-500 dark:bg-indigo-400',
     },
     {
@@ -169,7 +183,7 @@ function MobileHomeSummary({
       value: breakdown.sip,
       subtext: `${sipCount} Active SIPs`,
       returnBadge: breakdown.sip > 0 ? `${getPercent(breakdown.sip).toFixed(0)}% Share` : null,
-      icon: <TrendingUp size={16} aria-hidden="true" />,
+      icon: ICON_SIP,
       accentColor: 'bg-emerald-500 dark:bg-emerald-400',
     },
     {
@@ -178,7 +192,7 @@ function MobileHomeSummary({
       value: breakdown.gold,
       subtext: `${goldCount} Items`,
       returnBadge: breakdown.gold > 0 ? `${getPercent(breakdown.gold).toFixed(0)}% Share` : null,
-      icon: <Coins size={16} aria-hidden="true" />,
+      icon: ICON_GOLD,
       accentColor: 'bg-yellow-500 dark:bg-yellow-400',
     },
     {
@@ -187,7 +201,7 @@ function MobileHomeSummary({
       value: breakdown.realEstate,
       subtext: `${propertyCount} Properties`,
       returnBadge: breakdown.realEstate > 0 ? `${getPercent(breakdown.realEstate).toFixed(0)}% Share` : null,
-      icon: <Building2 size={16} aria-hidden="true" />,
+      icon: ICON_REALTY,
       accentColor: 'bg-purple-500 dark:bg-purple-400',
     },
     {
@@ -196,7 +210,7 @@ function MobileHomeSummary({
       value: breakdown.insuranceCover,
       subtext: `${insuranceCount} Policies`,
       returnBadge: null,
-      icon: <Shield size={16} aria-hidden="true" />,
+      icon: ICON_INSURANCE,
       accentColor: 'bg-[var(--negative)]',
     },
     {
@@ -205,10 +219,10 @@ function MobileHomeSummary({
       value: null,
       subtext: `${docCount} Documents`,
       returnBadge: null,
-      icon: <FolderOpen size={16} aria-hidden="true" />,
+      icon: ICON_DOCS,
       accentColor: 'bg-[var(--text-tertiary)]',
     },
-  ];
+  ], [breakdown, stockCount, fdCount, rdCount, sipCount, goldCount, propertyCount, insuranceCount, docCount, getPercent]);
 
   return (
     <div className="space-y-3.5 md:hidden">

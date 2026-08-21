@@ -15,26 +15,30 @@ createRoot(document.getElementById('root')!).render(
 // Register SW update listener in production to ensure iOS Standalone PWA updates automatically
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   navigator.serviceWorker.ready.then((registration) => {
-    // Check for updates when the user re-opens the app from iOS home screen
+    // Check for updates when user returns to app, focuses window, or comes online
+    const checkForUpdates = () => {
+      registration.update().catch(() => {});
+    };
+
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
-        registration.update().catch(() => {});
+        checkForUpdates();
       }
     });
 
-    // Check for updates every 15 minutes while app remains open
-    setInterval(() => {
-      registration.update().catch(() => {});
-    }, 15 * 60 * 1000);
+    window.addEventListener('focus', checkForUpdates);
+    window.addEventListener('online', checkForUpdates);
+
+    // Periodic check every 10 minutes
+    setInterval(checkForUpdates, 10 * 60 * 1000);
   }).catch(() => {});
 
-  // Reload window when new service worker takes over control
-  let refreshing = false;
+  // When a new service worker takes over, reload to apply the latest update immediately
+  let isRefreshing = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!refreshing) {
-      refreshing = true;
-      window.location.reload();
-    }
+    if (isRefreshing) return;
+    isRefreshing = true;
+    window.location.reload();
   });
 }
 

@@ -244,7 +244,10 @@ export default function AppShell() {
   const portfolio = activePortfolio;
   const todayPnL = useMemo(() => estimateTodayPnL(portfolio, portfolios), [portfolio, portfolios]);
 
-  const [isScrollingDown, setIsScrollingDown] = useState(false);
+  // Imperatively toggle a body class on scroll instead of calling setState.
+  // This prevents AppShell (and all its children) from re-rendering on every
+  // scroll RAF callback — the previous isScrollingDown state was never
+  // consumed in JSX and was causing pure re-render overhead.
   const lastScrollY = useRef(0);
 
   useEffect(() => {
@@ -254,9 +257,9 @@ export default function AppShell() {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
           if (currentScrollY > 120 && currentScrollY > lastScrollY.current + 15) {
-            setIsScrollingDown(true);
+            document.body.classList.add('is-scrolling-down');
           } else if (currentScrollY < lastScrollY.current - 15 || currentScrollY <= 60) {
-            setIsScrollingDown(false);
+            document.body.classList.remove('is-scrolling-down');
           }
           lastScrollY.current = currentScrollY;
           ticking = false;
@@ -265,7 +268,10 @@ export default function AppShell() {
       }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.body.classList.remove('is-scrolling-down');
+    };
   }, []);
 
   const effectiveAsset = activeAsset === 'home' && !isMobile ? 'stocks' : activeAsset;
@@ -354,80 +360,94 @@ export default function AppShell() {
     }
   }, [setActiveAsset]);
 
-  // ─── Handlers ───
-  const renderDashboardWidgets = (isMobileLayout: boolean) => {
-    const phHeight = isMobileLayout ? 300 : 370;
-
-    const netWorthChart = (
+  // ─── Memoized Dashboard Widget Trees ───
+  // Split into separate mobile/desktop memos so each only re-renders when its
+  // specific data dependencies change — not on every AppShell state update.
+  const mobileDashboardWidgets = useMemo(() => (
+    <div className="space-y-4">
       <SectionErrorBoundary sectionName="Net Worth Timeline">
         <LazyChartWrapper
           importFunc={() => import('../components/NetWorthTimelineChart')}
-          placeholderHeight={phHeight}
+          placeholderHeight={300}
           fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
-          props={{ 
-            history: netWorthHistory, 
+          props={{
+            history: netWorthHistory,
             currentNetWorth: summaryData.totalCurrentValue,
             currentStocks: breakdown.stocks,
             currentFD: breakdown.fd,
           }}
         />
       </SectionErrorBoundary>
-    );
-
-    const portfolioAssistant = (
       <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-        <LazyViewport placeholderHeight={phHeight}>
+        <LazyViewport placeholderHeight={300}>
           <Suspense fallback={<div className="h-[300px] sm:h-[370px] apple-card rounded-xl animate-pulse" />}>
             <PortfolioAssistant portfolios={portfolios} />
           </Suspense>
         </LazyViewport>
       </SectionErrorBoundary>
-    );
-
-    const pieChart = (
       <SectionErrorBoundary sectionName="Asset Class Pie Chart">
-        <LazyViewport placeholderHeight={phHeight}>
+        <LazyViewport placeholderHeight={300}>
           <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
-            <PieChart 
-              slices={breakdownSlices} 
+            <PieChart
+              slices={breakdownSlices}
               title={`Asset Class Breakdown — ${summaryData.label}`}
               onSelectSlice={handleSliceClick}
             />
           </Suspense>
         </LazyViewport>
       </SectionErrorBoundary>
-    );
-
-    const barChart = (
       <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
-        <LazyViewport placeholderHeight={phHeight}>
+        <LazyViewport placeholderHeight={300}>
           <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
             <BarChart portfolios={barChartPortfolios} />
           </Suspense>
         </LazyViewport>
       </SectionErrorBoundary>
-    );
+    </div>
+  ), [netWorthHistory, summaryData.totalCurrentValue, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick]);
 
-    if (isMobileLayout) {
-      return (
-        <div className="space-y-4">
-          {netWorthChart}
-          {portfolioAssistant}
-          {pieChart}
-          {barChart}
-        </div>
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {netWorthChart}
-        {portfolioAssistant}
-        {pieChart}
-        {barChart}
-      </div>
-    );
-  };
+  const desktopDashboardWidgets = useMemo(() => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <SectionErrorBoundary sectionName="Net Worth Timeline">
+        <LazyChartWrapper
+          importFunc={() => import('../components/NetWorthTimelineChart')}
+          placeholderHeight={370}
+          fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
+          props={{
+            history: netWorthHistory,
+            currentNetWorth: summaryData.totalCurrentValue,
+            currentStocks: breakdown.stocks,
+            currentFD: breakdown.fd,
+          }}
+        />
+      </SectionErrorBoundary>
+      <SectionErrorBoundary sectionName="AI Portfolio Assistant">
+        <LazyViewport placeholderHeight={370}>
+          <Suspense fallback={<div className="h-[300px] sm:h-[370px] apple-card rounded-xl animate-pulse" />}>
+            <PortfolioAssistant portfolios={portfolios} />
+          </Suspense>
+        </LazyViewport>
+      </SectionErrorBoundary>
+      <SectionErrorBoundary sectionName="Asset Class Pie Chart">
+        <LazyViewport placeholderHeight={370}>
+          <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
+            <PieChart
+              slices={breakdownSlices}
+              title={`Asset Class Breakdown — ${summaryData.label}`}
+              onSelectSlice={handleSliceClick}
+            />
+          </Suspense>
+        </LazyViewport>
+      </SectionErrorBoundary>
+      <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
+        <LazyViewport placeholderHeight={370}>
+          <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
+            <BarChart portfolios={barChartPortfolios} />
+          </Suspense>
+        </LazyViewport>
+      </SectionErrorBoundary>
+    </div>
+  ), [netWorthHistory, summaryData.totalCurrentValue, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick]);
 
 
   const handleImportCSV = useCallback(async (rows: ImportRow[], portfolioName: string) => {
@@ -664,7 +684,7 @@ export default function AppShell() {
                   </SectionErrorBoundary>
                 )}
 
-                {renderDashboardWidgets(true)}
+                {mobileDashboardWidgets}
               </div>
             ) : (
               <div className="space-y-4">
@@ -870,7 +890,7 @@ export default function AppShell() {
                 )}
 
                 {/* Dashboard charts — only on family overview */}
-                {activeTab === 'all' && renderDashboardWidgets(false)}
+                {activeTab === 'all' && desktopDashboardWidgets}
 
                 {/* 10-Asset Quick Access Shortcut Bar */}
                 <QuickAccessShortcuts
@@ -936,7 +956,6 @@ export default function AppShell() {
       {/* Floating Add Menu (FAB) */}
       <FloatingAddMenu
         isHidden={isAnyModalOpen}
-        isScrollingDown={isScrollingDown}
         onAddStock={openAddModal}
         onAddAsset={handleFloatingAddAsset}
         onOpenSmartImport={openSmartImport}

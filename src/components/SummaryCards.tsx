@@ -1,5 +1,5 @@
 import React from 'react';
-import { IndianRupee, BarChart2, TrendingUp, TrendingDown, Activity, Share2 } from './icons/AppIcons';
+import { IndianRupee, BarChart2, TrendingUp, TrendingDown, Share2 } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { estimateTodayPnL } from '../utils/portfolioCalcs';

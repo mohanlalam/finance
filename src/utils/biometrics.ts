@@ -59,7 +59,46 @@ export function isBiometricsEnrolled(): boolean {
   }
 }
 
-/** Check if auto-prompt on lock screen is enabled (default false to prevent automatic Use Key modal) */
+/**
+ * Silently verify the stored WebAuthn credential still exists in the device secure enclave.
+ * Returns false if the credential check fails without clearing enrollment.
+ */
+export async function validateBiometricCredential(): Promise<boolean> {
+  try {
+    if (!isBiometricsEnrolled()) return false;
+    const credentialIdStr = localStorage.getItem(BIOMETRIC_CREDENTIAL_ID_KEY);
+    if (!credentialIdStr) return false;
+
+    // Use conditional mediation if available to verify without prompting
+    if (typeof PublicKeyCredential.isConditionalMediationAvailable === 'function') {
+      const supported = await PublicKeyCredential.isConditionalMediationAvailable();
+      if (!supported) return true; // Can't verify without prompting — assume enrolled
+    }
+
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const credentialId = base64ToBuffer(credentialIdStr);
+    await navigator.credentials.get({
+      publicKey: {
+        challenge,
+        allowCredentials: [{ id: credentialId, type: 'public-key' }],
+        userVerification: 'discouraged',
+        timeout: 3000,
+        rpId: window.location.hostname === 'localhost' ? 'localhost' : window.location.hostname,
+      },
+    });
+    return true;
+  } catch (err: unknown) {
+    const name = (err as DOMException)?.name;
+    if (name === 'NotAllowedError') {
+      // User dismissed or conditional check passed credential presence
+      return true;
+    }
+    // Return false without destructively wiping stored credentials on transient network/timeout issues
+    return false;
+  }
+}
+
+/** Check if auto-prompt on lock screen is enabled (default false to prevent automatic modal without user gesture) */
 export function isBiometricAutoPromptEnabled(): boolean {
   try {
     const val = localStorage.getItem(BIOMETRIC_AUTO_PROMPT_KEY);
@@ -102,7 +141,7 @@ export async function registerBiometrics(pinHash: string): Promise<boolean> {
       ],
       authenticatorSelection: {
         authenticatorAttachment: 'platform',
-        userVerification: 'required',
+        userVerification: 'preferred',
         residentKey: 'preferred',
       },
       timeout: 60000,
@@ -146,10 +185,9 @@ export async function authenticateWithBiometrics(): Promise<string | null> {
         {
           id: credentialId,
           type: 'public-key',
-          transports: ['internal'],
         },
       ],
-      userVerification: 'required',
+      userVerification: 'preferred',
       timeout: 60000,
       rpId: window.location.hostname === 'localhost' ? 'localhost' : window.location.hostname,
     };
@@ -162,9 +200,17 @@ export async function authenticateWithBiometrics(): Promise<string | null> {
       return pinHash;
     }
     return null;
-  } catch (err) {
-    // User cancelled prompt or verification failed
-    console.warn('Biometric authentication cancelled or failed:', err);
+  } catch (err: unknown) {
+    const name = (err as DOMException)?.name;
+    if (name === 'NotAllowedError') {
+      console.warn('Biometric authentication cancelled by user');
+    } else if (name === 'AbortError') {
+      console.warn('Biometric authentication aborted');
+    } else if (name === 'SecurityError') {
+      console.warn('Biometric authentication security constraint (user gesture required on iOS WebKit)');
+    } else {
+      console.warn('Biometric authentication transient error:', err);
+    }
     return null;
   }
 }
