@@ -11,27 +11,19 @@ interface MobileBottomNavProps {
   onOpenSmartImport?: () => void;
 }
 
-const mainTabs: { id: AssetTab; label: string; icon: (isActive: boolean) => React.ReactNode }[] = [
-  { 
-    id: 'home', 
-    label: 'Home', 
-    icon: (isActive) => <HomeIcon size={20} className={isActive ? 'fill-[var(--accent-blue)] stroke-[var(--accent-blue)]' : ''} /> 
-  },
-  { 
-    id: 'stocks', 
-    label: 'Stocks', 
-    icon: () => <TrendingUp size={20} /> 
-  },
-  { 
-    id: 'sip', 
-    label: 'SIP & MF', 
-    icon: () => <Wallet size={20} /> 
-  },
-  { 
-    id: 'fd', 
-    label: 'Deposits', 
-    icon: () => <Landmark size={20} /> 
-  },
+const ICON_STOCKS = <TrendingUp size={20} aria-hidden="true" />;
+const ICON_SIP = <Wallet size={20} aria-hidden="true" />;
+const ICON_FD = <Landmark size={20} aria-hidden="true" />;
+
+function HomeNavIcon({ isActive }: { isActive: boolean }) {
+  return <HomeIcon size={20} className={isActive ? 'fill-[var(--accent-blue)] stroke-[var(--accent-blue)]' : ''} aria-hidden="true" />;
+}
+
+const mainTabs: { id: AssetTab; label: string }[] = [
+  { id: 'home', label: 'Home' },
+  { id: 'stocks', label: 'Stocks' },
+  { id: 'sip', label: 'SIP & MF' },
+  { id: 'fd', label: 'Deposits' },
 ];
 
 const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.ReactNode }[] = [
@@ -204,7 +196,15 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                 }`}
               >
                 <div className="relative flex items-center justify-center mb-0.5">
-                  {tab.icon(isActive)}
+                  {tab.id === 'home' ? (
+                    <HomeNavIcon isActive={isActive} />
+                  ) : tab.id === 'stocks' ? (
+                    ICON_STOCKS
+                  ) : tab.id === 'sip' ? (
+                    ICON_SIP
+                  ) : (
+                    ICON_FD
+                  )}
                   {tab.id === 'home' && alertCount > 0 && (
                     <span 
                       className="absolute -top-1 -right-2 min-w-[15px] h-[15px] rounded-full bg-[var(--negative)] text-white text-[9px] font-extrabold flex items-center justify-center px-1 leading-none shadow-xs"

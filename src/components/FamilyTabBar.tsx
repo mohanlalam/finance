@@ -1,5 +1,5 @@
-import React from 'react';
-import { LayoutDashboard, Pencil, Trash2, UserPlus, User, Heart, Users } from './icons/AppIcons';
+import React, { useState, useRef, useEffect } from 'react';
+import { LayoutDashboard, Pencil, Trash2, UserPlus, User, Heart, Users, MoreVertical } from './icons/AppIcons';
 import { Portfolio, PortfolioName } from '../types/portfolio';
 import { formatPercent } from '../utils/formatters';
 
@@ -46,14 +46,31 @@ export default React.memo(function FamilyTabBar({
   onRenameClick,
   onDeleteClick,
 }: FamilyTabBarProps) {
+  const [menuTarget, setMenuTarget] = useState<{ id: string; name: string; label: string } | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuTarget) return;
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuTarget(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [menuTarget]);
+
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
-      
-      {/* Segmented Track */}
+    <div className="flex items-center justify-between gap-2 pb-1 relative">
+      {/* Segmented Track with Horizontal Scroll on Mobile */}
       <div
         role="tablist"
         aria-label="Family members portfolios"
-        className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1 bg-[var(--surface-secondary)] p-1 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] w-full sm:w-auto"
+        className="flex items-center gap-1 bg-[var(--surface-secondary)] p-1 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] overflow-x-auto scrollbar-none max-w-full sm:flex-wrap flex-1 sm:flex-initial"
       >
         {/* Overview Tab */}
         <button
@@ -61,8 +78,11 @@ export default React.memo(function FamilyTabBar({
           aria-selected={activeTab === 'all'}
           aria-controls="portfolio-content"
           id="tab-all"
-          onClick={() => onTabChange('all')}
-          className={`flex items-center gap-2 h-8 px-2.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none min-w-0 ${
+          onClick={() => {
+            setMenuTarget(null);
+            onTabChange('all');
+          }}
+          className={`flex items-center gap-2 h-8 px-2.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none shrink-0 ${
             activeTab === 'all'
               ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-xs border border-[var(--border-subtle)]'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -71,7 +91,7 @@ export default React.memo(function FamilyTabBar({
           <div className="w-4 h-4 rounded bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
             <LayoutDashboard size={12} />
           </div>
-          <span className="truncate">Family Overview</span>
+          <span className="whitespace-nowrap">Family Overview</span>
         </button>
 
         {/* Member Tabs */}
@@ -79,28 +99,32 @@ export default React.memo(function FamilyTabBar({
           const isActive = activeTab === p.name;
           const iconConfig = getFamilyIconConfig(p.name);
           const isPositive = p.totalPnL >= 0;
+          const isMenuOpen = menuTarget?.id === p.id;
 
           return (
-            <div key={p.name} className="relative group flex items-center justify-between min-w-0">
+            <div key={p.name} className="relative group flex items-center justify-between shrink-0">
               <button
                 role="tab"
                 aria-selected={isActive}
                 aria-controls="portfolio-content"
                 id={`tab-${p.name}`}
-                onClick={() => onTabChange(p.name)}
-                className={`flex items-center justify-between gap-1 h-8 px-2 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none flex-1 min-w-0 ${
+                onClick={() => {
+                  setMenuTarget(null);
+                  onTabChange(p.name);
+                }}
+                className={`flex items-center justify-between gap-1.5 h-8 px-2 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none shrink-0 ${
                   isActive
                     ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-xs border border-[var(--border-subtle)]'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
-                <div className="flex items-center gap-1.5 min-w-0 truncate">
+                <div className="flex items-center gap-1.5 shrink-0">
                   {/* Styled icon badge */}
                   <div className={`w-4 h-4 rounded ${iconConfig.bg} ${iconConfig.text} flex items-center justify-center shrink-0`}>
                     {iconConfig.icon}
                   </div>
 
-                  <span className="truncate">{p.label}</span>
+                  <span className="whitespace-nowrap">{p.label}</span>
                 </div>
 
                 {/* Return Percentage Badge */}
@@ -115,31 +139,81 @@ export default React.memo(function FamilyTabBar({
                 </span>
               </button>
 
-              {/* Action buttons (pencil, trash) displayed on hover */}
-              <div className="flex items-center gap-0.5 ml-0.5 opacity-40 group-hover:opacity-100 transition-opacity duration-150 shrink-0">
+              {/* Mobile ellipsis menu button */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuTarget(isMenuOpen ? null : { id: p.id, name: p.name, label: p.label });
+                }}
+                className="sm:hidden w-5 h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-0.5"
+                title={`Options for ${p.label}`}
+                aria-label={`Options for portfolio ${p.label}`}
+                aria-expanded={isMenuOpen}
+              >
+                <MoreVertical size={13} />
+              </button>
+
+              {/* Desktop action buttons (pencil, trash) displayed on hover */}
+              <div className="hidden sm:flex items-center gap-0.5 ml-0.5 opacity-40 group-hover:opacity-100 transition-opacity duration-150 shrink-0">
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onRenameClick({ id: p.id, name: p.name, label: p.label });
                   }}
-                  className="w-4 h-4 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition-colors"
+                  className="w-4 h-4 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition-colors cursor-pointer"
                   title={`Rename ${p.label}`}
                   aria-label={`Rename portfolio ${p.label}`}
                 >
                   <Pencil size={10} />
                 </button>
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteClick({ id: p.id, name: p.name, label: p.label });
                   }}
-                  className="w-4 h-4 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors"
+                  className="w-4 h-4 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors cursor-pointer"
                   title={`Delete ${p.label}`}
                   aria-label={`Delete portfolio ${p.label}`}
                 >
                   <Trash2 size={10} />
                 </button>
               </div>
+
+              {/* Mobile Popover Menu */}
+              {isMenuOpen && (
+                <div
+                  ref={menuRef}
+                  className="absolute top-9 right-0 z-50 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] shadow-xl p-1 min-w-[120px] animate-scale-in sm:hidden"
+                >
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMenuTarget(null);
+                      onRenameClick({ id: p.id, name: p.name, label: p.label });
+                    }}
+                    className="w-full flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] rounded-[var(--radius-small)] transition-colors cursor-pointer"
+                  >
+                    <Pencil size={12} className="text-[var(--text-secondary)]" />
+                    <span>Rename</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMenuTarget(null);
+                      onDeleteClick({ id: p.id, name: p.name, label: p.label });
+                    }}
+                    className="w-full flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-[var(--negative)] hover:bg-[var(--negative-soft)] rounded-[var(--radius-small)] transition-colors cursor-pointer"
+                  >
+                    <Trash2 size={12} />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              )}
             </div>
           );
         })}
@@ -148,13 +222,14 @@ export default React.memo(function FamilyTabBar({
       {/* Add family control */}
       <button
         onClick={onAddFamilyClick}
-        className="flex items-center gap-1.5 px-3.5 h-8 sm:h-9 rounded-[var(--radius-medium)] text-xs font-bold border border-[var(--border-subtle)] bg-[var(--surface)] hover:border-[var(--accent-blue)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] ios-press transition-colors shrink-0 cursor-pointer"
+        className="flex items-center gap-1.5 px-3 h-8 rounded-[var(--radius-medium)] text-xs font-bold border border-[var(--border-subtle)] bg-[var(--surface)] hover:border-[var(--accent-blue)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] ios-press transition-colors shrink-0 cursor-pointer"
         aria-label="Add family member"
       >
         <UserPlus size={14} />
-        <span>Add Member</span>
+        <span className="hidden sm:inline">Add Member</span>
+        <span className="sm:hidden">Add</span>
       </button>
-
     </div>
   );
 });
+

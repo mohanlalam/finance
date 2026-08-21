@@ -1,29 +1,38 @@
 import { useState, useEffect } from 'react';
+import { useIsMobileContext } from '../contexts/MobileContext';
 
 /**
  * Shared reactive hook for mobile viewport detection (<= 767px).
- * Uses a single matchMedia listener per subscriber to ensure exact sync.
+ * Uses MobileContext when available to share a single mediaQuery subscriber across the entire component tree.
  */
 export function useIsMobile(breakpoint: number = 767): boolean {
-  const [isMobile, setIsMobile] = useState<boolean>(() => {
+  const contextValue = useIsMobileContext();
+
+  const [customIsMobile, setCustomIsMobile] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return window.matchMedia(`(max-width: ${breakpoint}px)`).matches;
   });
 
   useEffect(() => {
+    if (breakpoint === 767) return; // Managed by MobileContext
     if (typeof window === 'undefined') return;
     const mediaQuery = window.matchMedia(`(max-width: ${breakpoint}px)`);
     
     const handleChange = (e: MediaQueryListEvent) => {
-      setIsMobile(e.matches);
+      setCustomIsMobile(e.matches);
     };
 
-    setIsMobile(mediaQuery.matches);
+    setCustomIsMobile(mediaQuery.matches);
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [breakpoint]);
 
-  return isMobile;
+  if (breakpoint === 767) {
+    return contextValue;
+  }
+
+  return customIsMobile;
 }
 
 export default useIsMobile;
+

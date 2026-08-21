@@ -11,6 +11,7 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
   const [isRefreshing, setIsRefreshing] = useState(false);
   const touchStartY = useRef(0);
   const isPulling = useRef(false);
+  const pullDistanceRef = useRef(0);
   const rafId = useRef<number | null>(null);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -25,6 +26,7 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
 
     touchStartY.current = e.targetTouches[0].clientY;
     isPulling.current = true;
+    pullDistanceRef.current = 0;
   }, [disabled, isRefreshing]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
@@ -35,6 +37,7 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
     
     if (diffY > 0) {
       const rawDistance = Math.min(100, Math.pow(diffY, 0.85) * 2.5);
+      pullDistanceRef.current = rawDistance;
       if (rafId.current === null) {
         rafId.current = requestAnimationFrame(() => {
           setPullDistance(rawDistance);
@@ -53,7 +56,10 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
     if (!isPulling.current) return;
     isPulling.current = false;
     
-    if (pullDistance > 65 && !isRefreshing && !disabled) {
+    const currentDistance = pullDistanceRef.current;
+    pullDistanceRef.current = 0;
+
+    if (currentDistance > 65 && !isRefreshing && !disabled) {
       triggerHaptic('medium');
       setIsRefreshing(true);
       setPullDistance(0);
@@ -65,7 +71,7 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
     } else {
       setPullDistance(0);
     }
-  }, [pullDistance, isRefreshing, disabled, onRefresh]);
+  }, [isRefreshing, disabled, onRefresh]);
 
   const handleTouchCancel = useCallback(() => {
     if (rafId.current !== null) {
@@ -73,6 +79,7 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
       rafId.current = null;
     }
     isPulling.current = false;
+    pullDistanceRef.current = 0;
     setPullDistance(0);
   }, []);
 
@@ -85,3 +92,4 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
     handleTouchCancel,
   }), [isRefreshing, pullDistance, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel]);
 }
+

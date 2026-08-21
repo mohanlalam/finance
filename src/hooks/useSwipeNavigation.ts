@@ -76,7 +76,7 @@ export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavi
     // 3. Dominant horizontal ratio: X movement >= 2.5x Y movement
     // 4. Min velocity: 0.4 px/ms
     if (absX > 130 && absY < 45 && absX > absY * 2.5 && velocity > 0.4) {
-      const tabOrder: AssetTab[] = ['home', 'stocks', 'fd', 'rd', 'sip', 'gold', 'real_estate', 'insurance', 'documents'];
+      const tabOrder: AssetTab[] = ['home', 'stocks', 'fd', 'rd', 'sip', 'gold', 'real_estate', 'insurance', 'documents', 'tax'];
       const currentIndex = tabOrder.indexOf(activeAsset);
 
       if (diffX > 0) {

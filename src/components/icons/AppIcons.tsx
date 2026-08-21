@@ -872,4 +872,25 @@ export function ScanFace({ size = 24, className = '' }: IconProps) {
   );
 }
 
+export function MoreHorizontal({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="19" cy="12" r="1" />
+      <circle cx="5" cy="12" r="1" />
+    </svg>
+  );
+}
+
+export function MoreVertical({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="12" cy="5" r="1" />
+      <circle cx="12" cy="19" r="1" />
+    </svg>
+  );
+}
+
+
 

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, HashRouter } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { PortfolioProvider, usePortfolioState, usePortfolioActions } from './contexts/PortfolioContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { MobileProvider } from './contexts/MobileContext';
 import ToastContainer from './components/Toast';
 import ErrorBoundary from './components/ErrorBoundary';
 import DashboardLoading from './components/DashboardLoading';
@@ -34,18 +35,20 @@ export default function MainApp({ onAuthExpired }: MainAppProps) {
     <HashRouter>
       <ErrorBoundary>
         <ToastProvider>
-          <ThemeProvider>
-            <PrivacyProvider>
-              <PortfolioProvider onAuthExpired={onAuthExpired}>
-                <Routes>
-                  <Route path="/" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
-                  <Route path="/:family/:asset" element={<LoadGate onUnlock={onAuthExpired} />} />
-                  <Route path="*" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
-                </Routes>
-                <ToastContainer />
-              </PortfolioProvider>
-            </PrivacyProvider>
-          </ThemeProvider>
+          <MobileProvider>
+            <ThemeProvider>
+              <PrivacyProvider>
+                <PortfolioProvider onAuthExpired={onAuthExpired}>
+                  <Routes>
+                    <Route path="/" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
+                    <Route path="/:family/:asset" element={<LoadGate onUnlock={onAuthExpired} />} />
+                    <Route path="*" element={<Navigate to={`/${initialFamily}/${initialAsset}`} replace />} />
+                  </Routes>
+                  <ToastContainer />
+                </PortfolioProvider>
+              </PrivacyProvider>
+            </ThemeProvider>
+          </MobileProvider>
         </ToastProvider>
       </ErrorBoundary>
     </HashRouter>

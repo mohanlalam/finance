@@ -137,92 +137,87 @@ function MobileHomeSummary({
   const insuranceCount = assetCounts.insurance;
   const docCount = assetCounts.doc;
 
-  const totalAllocated = useMemo(() => {
-    return breakdown.stocks + breakdown.fd + breakdown.rd + breakdown.sip + breakdown.gold + breakdown.realEstate;
-  }, [breakdown]);
-
-  // Stable reference — avoids re-creating this function on every render
-  const getPercent = useCallback((val: number) => {
-    if (totalAllocated <= 0) return 0;
-    return (val / totalAllocated) * 100;
-  }, [totalAllocated]);
-
   // Memoized: only recomputes when breakdown values or counts change.
   // Using module-level icon constants prevents new JSX elements per render.
-  const assetList = useMemo(() => [
-    {
-      id: 'stocks' as const,
-      label: 'Stocks & ETFs',
-      value: breakdown.stocks,
-      subtext: `${stockCount} Tickers`,
-      returnBadge: breakdown.stocks > 0 ? `${getPercent(breakdown.stocks).toFixed(0)}% Share` : null,
-      icon: ICON_STOCKS,
-      accentColor: 'bg-[var(--accent-blue)]',
-    },
-    {
-      id: 'fd' as const,
-      label: 'Fixed Deposits',
-      value: breakdown.fd,
-      subtext: `${fdCount} FDs`,
-      returnBadge: breakdown.fd > 0 ? `${getPercent(breakdown.fd).toFixed(0)}% Share` : null,
-      icon: ICON_FD,
-      accentColor: 'bg-[var(--warning)]',
-    },
-    {
-      id: 'rd' as const,
-      label: 'Recurring Deposits',
-      value: breakdown.rd,
-      subtext: `${rdCount} Accounts`,
-      returnBadge: breakdown.rd > 0 ? `${getPercent(breakdown.rd).toFixed(0)}% Share` : null,
-      icon: ICON_RD,
-      accentColor: 'bg-indigo-500 dark:bg-indigo-400',
-    },
-    {
-      id: 'sip' as const,
-      label: 'SIP Mutual Funds',
-      value: breakdown.sip,
-      subtext: `${sipCount} Active SIPs`,
-      returnBadge: breakdown.sip > 0 ? `${getPercent(breakdown.sip).toFixed(0)}% Share` : null,
-      icon: ICON_SIP,
-      accentColor: 'bg-emerald-500 dark:bg-emerald-400',
-    },
-    {
-      id: 'gold' as const,
-      label: 'Gold Holdings',
-      value: breakdown.gold,
-      subtext: `${goldCount} Items`,
-      returnBadge: breakdown.gold > 0 ? `${getPercent(breakdown.gold).toFixed(0)}% Share` : null,
-      icon: ICON_GOLD,
-      accentColor: 'bg-yellow-500 dark:bg-yellow-400',
-    },
-    {
-      id: 'real_estate' as const,
-      label: 'Real Estate',
-      value: breakdown.realEstate,
-      subtext: `${propertyCount} Properties`,
-      returnBadge: breakdown.realEstate > 0 ? `${getPercent(breakdown.realEstate).toFixed(0)}% Share` : null,
-      icon: ICON_REALTY,
-      accentColor: 'bg-purple-500 dark:bg-purple-400',
-    },
-    {
-      id: 'insurance' as const,
-      label: 'Insurance Cover',
-      value: breakdown.insuranceCover,
-      subtext: `${insuranceCount} Policies`,
-      returnBadge: null,
-      icon: ICON_INSURANCE,
-      accentColor: 'bg-[var(--negative)]',
-    },
-    {
-      id: 'documents' as const,
-      label: 'Document Vault',
-      value: null,
-      subtext: `${docCount} Documents`,
-      returnBadge: null,
-      icon: ICON_DOCS,
-      accentColor: 'bg-[var(--text-tertiary)]',
-    },
-  ], [breakdown, stockCount, fdCount, rdCount, sipCount, goldCount, propertyCount, insuranceCount, docCount, getPercent]);
+  const assetList = useMemo(() => {
+    const totalAllocated = breakdown.stocks + breakdown.fd + breakdown.rd + breakdown.sip + breakdown.gold + breakdown.realEstate;
+    const calcShare = (val: number) => (totalAllocated > 0 ? `${((val / totalAllocated) * 100).toFixed(0)}% Share` : null);
+
+    return [
+      {
+        id: 'stocks' as const,
+        label: 'Stocks & ETFs',
+        value: breakdown.stocks,
+        subtext: `${stockCount} Tickers`,
+        returnBadge: breakdown.stocks > 0 ? calcShare(breakdown.stocks) : null,
+        icon: ICON_STOCKS,
+        accentColor: 'bg-[var(--accent-blue)]',
+      },
+      {
+        id: 'fd' as const,
+        label: 'Fixed Deposits',
+        value: breakdown.fd,
+        subtext: `${fdCount} FDs`,
+        returnBadge: breakdown.fd > 0 ? calcShare(breakdown.fd) : null,
+        icon: ICON_FD,
+        accentColor: 'bg-[var(--warning)]',
+      },
+      {
+        id: 'rd' as const,
+        label: 'Recurring Deposits',
+        value: breakdown.rd,
+        subtext: `${rdCount} Accounts`,
+        returnBadge: breakdown.rd > 0 ? calcShare(breakdown.rd) : null,
+        icon: ICON_RD,
+        accentColor: 'bg-indigo-500 dark:bg-indigo-400',
+      },
+      {
+        id: 'sip' as const,
+        label: 'SIP Mutual Funds',
+        value: breakdown.sip,
+        subtext: `${sipCount} Active SIPs`,
+        returnBadge: breakdown.sip > 0 ? calcShare(breakdown.sip) : null,
+        icon: ICON_SIP,
+        accentColor: 'bg-emerald-500 dark:bg-emerald-400',
+      },
+      {
+        id: 'gold' as const,
+        label: 'Gold Holdings',
+        value: breakdown.gold,
+        subtext: `${goldCount} Items`,
+        returnBadge: breakdown.gold > 0 ? calcShare(breakdown.gold) : null,
+        icon: ICON_GOLD,
+        accentColor: 'bg-yellow-500 dark:bg-yellow-400',
+      },
+      {
+        id: 'real_estate' as const,
+        label: 'Real Estate',
+        value: breakdown.realEstate,
+        subtext: `${propertyCount} Properties`,
+        returnBadge: breakdown.realEstate > 0 ? calcShare(breakdown.realEstate) : null,
+        icon: ICON_REALTY,
+        accentColor: 'bg-purple-500 dark:bg-purple-400',
+      },
+      {
+        id: 'insurance' as const,
+        label: 'Insurance Cover',
+        value: breakdown.insuranceCover,
+        subtext: `${insuranceCount} Policies`,
+        returnBadge: null,
+        icon: ICON_INSURANCE,
+        accentColor: 'bg-[var(--negative)]',
+      },
+      {
+        id: 'documents' as const,
+        label: 'Document Vault',
+        value: null,
+        subtext: `${docCount} Documents`,
+        returnBadge: null,
+        icon: ICON_DOCS,
+        accentColor: 'bg-[var(--text-tertiary)]',
+      },
+    ];
+  }, [breakdown, stockCount, fdCount, rdCount, sipCount, goldCount, propertyCount, insuranceCount, docCount]);
 
   return (
     <div className="space-y-3.5 md:hidden">
@@ -382,7 +377,7 @@ function MobileHomeSummary({
           <button
             key={item.id}
             onClick={() => onNavigateAsset(item.id)}
-            className="w-full flex items-center justify-between p-3.5 rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] transition-all text-left ios-press apple-card"
+            className="mobile-asset-card w-full flex items-center justify-between p-3.5 rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] transition-all text-left ios-press apple-card"
           >
             <div className="flex items-center gap-3 min-w-0">
               {/* Category Icon Badge */}

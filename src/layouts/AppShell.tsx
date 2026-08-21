@@ -15,6 +15,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { QuickAccessShortcuts } from '../components/ui/QuickAccessShortcuts';
 
 import MobileBottomNav from '../components/MobileBottomNav';
+import MobileStatusBar from '../components/MobileStatusBar';
 
 // Viewport-specific lazy loaded layouts
 const DesktopSidebar = React.lazy(() => import('./DesktopSidebar'));
@@ -364,7 +365,7 @@ export default function AppShell() {
   // Split into separate mobile/desktop memos so each only re-renders when its
   // specific data dependencies change — not on every AppShell state update.
   const mobileDashboardWidgets = useMemo(() => (
-    <div className="space-y-4">
+    <div className="space-y-4 mobile-section">
       <SectionErrorBoundary sectionName="Net Worth Timeline">
         <LazyChartWrapper
           importFunc={() => import('../components/NetWorthTimelineChart')}
@@ -668,20 +669,22 @@ export default function AppShell() {
                 </Suspense>
 
                 {activeTab === 'all' && (
-                  <SectionErrorBoundary sectionName="Portfolio Insights">
-                    <Suspense fallback={<div className="h-40 bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                      <InsightsPanel
-                        insights={insights}
-                        portfolios={portfolios}
-                        activePortfolio={portfolio}
-                        onNavigateAsset={setActiveAsset}
-                        onRefreshPrices={refreshPrices}
-                        isLoadingPrices={isLoadingPrices}
-                        isPriceStale={isPriceStale}
-                        priceStatus={priceStatus}
-                      />
-                    </Suspense>
-                  </SectionErrorBoundary>
+                  <div className="mobile-section">
+                    <SectionErrorBoundary sectionName="Portfolio Insights">
+                      <Suspense fallback={<div className="h-40 bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                        <InsightsPanel
+                          insights={insights}
+                          portfolios={portfolios}
+                          activePortfolio={portfolio}
+                          onNavigateAsset={setActiveAsset}
+                          onRefreshPrices={refreshPrices}
+                          isLoadingPrices={isLoadingPrices}
+                          isPriceStale={isPriceStale}
+                          priceStatus={priceStatus}
+                        />
+                      </Suspense>
+                    </SectionErrorBoundary>
+                  </div>
                 )}
 
                 {mobileDashboardWidgets}
@@ -689,22 +692,12 @@ export default function AppShell() {
             ) : (
               <div className="space-y-4">
                 {/* Sticky Mini Refresh Status Bar */}
-                <div className="flex items-center justify-between px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] text-[11px] text-[var(--text-secondary)] shadow-xs apple-card">
-                  <div className="flex items-center gap-1.5 min-w-0" aria-live="polite">
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${priceStatus === 'success' ? 'bg-[var(--positive)] animate-pulse' : 'bg-[var(--warning)]'}`} />
-                    <span className="font-bold text-[var(--text-primary)] shrink-0">{priceStatus === 'success' ? 'Live Prices' : 'Snapshot'}</span>
-                    <span className="text-[var(--text-tertiary)] shrink-0">•</span>
-                    <span className="truncate text-[var(--text-tertiary)]">Updated {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Never'}</span>
-                  </div>
-                  <button
-                    onClick={refreshPrices}
-                    disabled={isLoadingPrices}
-                    className="flex items-center gap-1 font-bold text-[var(--accent-blue)] hover:opacity-80 active:scale-[0.97] transition-all shrink-0 ml-2 cursor-pointer"
-                  >
-                    <RefreshCw size={11} className={isLoadingPrices ? 'animate-spin' : ''} />
-                    <span>Sync</span>
-                  </button>
-                </div>
+                <MobileStatusBar
+                  priceStatus={priceStatus}
+                  lastUpdated={lastUpdated}
+                  isLoadingPrices={isLoadingPrices}
+                  onRefresh={refreshPrices}
+                />
 
                 <SectionErrorBoundary sectionName="Asset Tab Content">
                   <AssetTabContent
