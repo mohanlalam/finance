@@ -98,13 +98,13 @@ export async function validateBiometricCredential(): Promise<boolean> {
   }
 }
 
-/** Check if auto-prompt on lock screen is enabled (default false to prevent automatic modal without user gesture) */
+/** Check if auto-prompt on lock screen is enabled (defaults to true if enrolled unless explicitly disabled) */
 export function isBiometricAutoPromptEnabled(): boolean {
   try {
     const val = localStorage.getItem(BIOMETRIC_AUTO_PROMPT_KEY);
-    return val === 'true';
+    return val !== 'false';
   } catch {
-    return false;
+    return true;
   }
 }
 
@@ -132,17 +132,17 @@ export async function registerBiometrics(pinHash: string): Promise<boolean> {
       },
       user: {
         id: userId,
-        name: 'family-wealth-manager',
-        displayName: 'Family Wealth Office',
+        name: 'user@family-portfolio.app',
+        displayName: 'Portfolio Owner',
       },
       pubKeyCredParams: [
-        { alg: -7, type: 'public-key' }, // ES256
+        { alg: -7, type: 'public-key' },  // ES256
         { alg: -257, type: 'public-key' }, // RS256
       ],
       authenticatorSelection: {
         authenticatorAttachment: 'platform',
         userVerification: 'preferred',
-        residentKey: 'preferred',
+        requireResidentKey: false,
       },
       timeout: 60000,
       attestation: 'none',
@@ -152,15 +152,16 @@ export async function registerBiometrics(pinHash: string): Promise<boolean> {
       publicKey: publicKeyCredentialCreationOptions,
     })) as PublicKeyCredential | null;
 
-    if (!credential) return false;
-
-    const credentialId = bufferToBase64(credential.rawId);
-    localStorage.setItem(BIOMETRIC_CREDENTIAL_ID_KEY, credentialId);
-    localStorage.setItem(BIOMETRIC_PIN_HASH_KEY, pinHash);
-    localStorage.setItem(BIOMETRIC_ENROLLED_KEY, 'true');
-
-    return true;
-  } catch (err) {
+    if (credential) {
+      const credentialIdStr = bufferToBase64(credential.rawId);
+      localStorage.setItem(BIOMETRIC_ENROLLED_KEY, 'true');
+      localStorage.setItem(BIOMETRIC_CREDENTIAL_ID_KEY, credentialIdStr);
+      localStorage.setItem(BIOMETRIC_PIN_HASH_KEY, pinHash);
+      localStorage.setItem(BIOMETRIC_AUTO_PROMPT_KEY, 'true');
+      return true;
+    }
+    return false;
+  } catch (err: unknown) {
     // User cancelled or platform authenticator error
     console.warn('Biometric registration was cancelled or failed:', err);
     return false;

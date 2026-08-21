@@ -81,25 +81,18 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     return () => clearInterval(timer);
   }, []);
 
-  // Check hardware biometric capability
-  useEffect(() => {
-    isBiometricsSupported().then((supported) => {
-      setBiometricsAvailable(supported);
-      if (supported) {
-        setBiometricsEnrolled(isBiometricsEnrolled());
-      }
-    });
-  }, []);
-
   const pinRef = useRef(pin);
   useEffect(() => {
     pinRef.current = pin;
   }, [pin]);
 
   const isVerifyingRef = useRef(false);
+  const isPromptingRef = useRef(false);
+  const autoPromptedRef = useRef(false);
 
   const handleBiometricUnlock = useCallback(async () => {
-    if (success || isVerifyingRef.current || isBiometricPrompting) return;
+    if (success || isVerifyingRef.current || isPromptingRef.current) return;
+    isPromptingRef.current = true;
     setIsBiometricPrompting(true);
     setError('');
 
@@ -122,20 +115,26 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
     } catch {
       // User dismissed prompt or verification failed
     } finally {
+      isPromptingRef.current = false;
       setIsBiometricPrompting(false);
     }
-  }, [success, isBiometricPrompting, onUnlock]);
+  }, [success, onUnlock]);
 
-
-  // Direct access to Face ID / Touch ID on mobile app launch if auto-prompt enabled
+  // Check hardware biometric capability & auto-prompt on initial screen open
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-    if (isBiometricsEnrolled() && isBiometricAutoPromptEnabled()) {
-      timer = setTimeout(() => {
-        handleBiometricUnlock();
-      }, 150);
-    }
-    return () => clearTimeout(timer);
+    isBiometricsSupported().then((supported) => {
+      setBiometricsAvailable(supported);
+      if (supported) {
+        const enrolled = isBiometricsEnrolled();
+        setBiometricsEnrolled(enrolled);
+        if (enrolled && isBiometricAutoPromptEnabled() && !autoPromptedRef.current) {
+          autoPromptedRef.current = true;
+          setTimeout(() => {
+            handleBiometricUnlock();
+          }, 150);
+        }
+      }
+    });
   }, [handleBiometricUnlock]);
 
   const handleClear = useCallback(() => {

@@ -72,8 +72,8 @@ describe('biometrics.ts', () => {
   });
 
   describe('Auto-prompt preferences', () => {
-    it('defaults to false when unset', () => {
-      expect(isBiometricAutoPromptEnabled()).toBe(false);
+    it('defaults to true when unset to auto-prompt on open', () => {
+      expect(isBiometricAutoPromptEnabled()).toBe(true);
     });
 
     it('updates auto-prompt setting', () => {
