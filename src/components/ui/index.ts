@@ -9,8 +9,6 @@ export * from './Card';
 export * from './Badge';
 export * from './Input';
 export * from './Select';
-export * from './Dialog';
-export * from './Drawer';
 export * from './Alert';
 export * from './Tabs';
 export * from './Tooltip';

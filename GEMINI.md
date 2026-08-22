@@ -2,15 +2,17 @@
 
 This document provides a high-level overview of the folder structure, data flow, state management, database mappings, and performance optimizations of the Family Portfolio Tracker application. It is designed to help developers and AI agents navigate the codebase efficiently.
 
+> ⚠️ **Design Token Rule**: [`UI.md`](UI.md) is the single authoritative source of truth for all visual tokens. Never introduce a new color hex, corner radius, shadow, or typography token in code or docs without first declaring it in `UI.md §2` and `src/index.css`.
+
 ---
 
 ## 📁 Key File Structures & Domains
 
 ### 1. State Management & Shared Custom Hooks
 * **[PortfolioContext.tsx](src/contexts/PortfolioContext.tsx)**
-  * Split into `PortfolioDataContext` (containing global asset lists, pricing sync statuses, and last updated timestamps) and `PortfolioActionContext` (consolidated CRUD action triggers: `addAsset`, `updateAsset`, `deleteAsset`, and `refresh`).
-  * Exposes optimized `usePortfolioState()` and `usePortfolioActions()` hooks separately. The unified `usePortfolio()` combined hook has been completely removed to prevent form modals and write-only components from re-rendering during data/price ticks.
-  * Sets up a background price refresh polling interval (15 minutes). The tab visibility refresh gate and resume cooldown are offloaded to `usePortfolioData.ts` to prevent redundant fetches.
+  * Split into `PortfolioEntitiesContext` (portfolios, active tabs, net worth history), `PortfolioStatusContext` (load/price statuses, cached timestamps, staleness flags, mutation lock), and `PortfolioActionContext` (consolidated CRUD action triggers: `addAsset`, `updateAsset`, `deleteAsset`, `addPortfolio`, `renamePortfolio`, `deletePortfolio`, `load`, `refreshSnapshot`, `refreshPrices`).
+  * Exposes fine-grained `usePortfolioEntities()`, `usePortfolioStatus()`, `usePortfolioState()`, and `usePortfolioActions()` hooks separately to prevent form modals and write-only components from re-rendering during data/price ticks.
+  * Sets up background price refresh polling interval (15 minutes). The tab visibility refresh gate and resume cooldown are offloaded to `usePortfolioData.ts` to prevent redundant fetches.
 * **[usePortfolioData.ts](src/hooks/usePortfolioData.ts)**
   * Source of truth for portfolio assets, net worth snapshots, and database transactions.
   * Integrated **SWR caching** and automatic IndexedDB caching (`idb-keyval`) to implement stale-while-revalidate instant loads.
@@ -19,27 +21,30 @@ This document provides a high-level overview of the folder structure, data flow,
   * Listens to document `visibilitychange` events to trigger background SWR reloads and price refreshes on window focus/resume.
   * Implements a `recalcPortfolioTotals` performance guard that skips recalculation tasks if the underlying asset details haven't changed.
   * Guarantees race-free state transitions by processing queries/mutations through a serialized promise queue (`runMutation`) with debounced mutation coalescing.
-  * Connects to Supabase Edge Functions via [apiClient.ts](src/utils/apiClient.ts) with SHA-256 PIN hash caching (`_cachedPinHash`).
+  * Connects to Supabase Edge Functions via [apiClient.ts](src/utils/apiClient.ts) with SHA-256 PIN hash caching (`_cachedPinHash`) and in-flight request deduplication.
 * **[useIsMobile.ts](src/hooks/useIsMobile.ts)**
   * Centralized reactive hook for mobile viewport checking (`window.matchMedia('(max-width: 767px)')`). Prevents layout thrashing by eliminating repeated `window.innerWidth` reads across components.
 * **[useAssetModal.ts](src/hooks/useAssetModal.ts)**
-  * Generic reusable hook encapsulating modal visibility, editing item state (`editingItem`), delete confirmation target (`confirmDeleteItem`), and auto-open quick-add triggers. Used across Gold, Real Estate, Insurance, and FD views to eliminate ~30 lines of boilerplate per view.
+  * Generic reusable hook encapsulating modal visibility, editing item state (`editingItem`), delete confirmation target (`confirmDeleteItem`), and auto-open quick-add triggers. Used across Gold, Real Estate, Insurance, and FD views to eliminate boilerplate per view.
 * **[useAssetFilterSort.ts](src/hooks/useAssetFilterSort.ts)**
   * Standardized client-side filtering and multi-field sorting hook for asset registries. Supports query search matching and sort directions.
 * **[useModalState.ts](src/hooks/useModalState.ts)**
   * Dedicated custom hook encapsulating all modal visibility and target state (`quickAddTarget`, `showAddModal`, `showAddFamily`, `renameTarget`, `deleteTarget`, `isDeleting`, `showMobileAlerts`, `showChangePinModal`).
   * Cleans up `quickAddTarget` on `closeModal` to ensure floating add buttons never get orphaned.
   * Computes aggregate `isAnyModalOpen` boolean flag to gate Floating Add Button (`FloatingAddMenu`) visibility.
+* **[useLongPress.ts](src/hooks/useLongPress.ts)**, **[useSwipeNavigation.ts](src/hooks/useSwipeNavigation.ts)**, **[usePullToRefresh.ts](src/hooks/usePullToRefresh.ts)**
+  * Mobile gesture and tactile interaction suite tailored for PWA gesture navigation without interfering with native scroll boundaries.
 * **[biometrics.ts](src/utils/biometrics.ts)**
   * Native WebAuthn Platform Authenticator integration (FaceID, TouchID, Windows Hello, Android Biometrics).
   * Manages hardware capability detection (`isUserVerifyingPlatformAuthenticatorAvailable()`), platform credential generation (`navigator.credentials.create`), credential challenge assertions (`navigator.credentials.get`), and biometric PIN hash synchronization.
+  * Preserves biometric credentials during transient iOS Safari gesture timeouts, only unbinding credentials on explicit PIN resets.
 * **[goldPricing.ts](src/utils/goldPricing.ts)**
   * Real-time MCX & NSE Gold Bullion pricing engine with 15-minute polling intervals.
   * Dynamically computes 24K (99.9% fine), 22K (91.6% standard hallmark), and 18K (75.0% fine) rates per gram and per 10g (Tola).
   * Tracks intraday price movements (₹/g delta and % change) against previous market close.
   * Supports custom jeweler rate overrides with single-click reset to live MCX rates.
 * **[ToastContext.tsx](src/contexts/ToastContext.tsx)**
-  * Exposes global toast/snackbar notifications state (`useToast`) and auto-dismissals, entirely replacing raw browser `alert()` popups across the app.
+  * Exposes global toast/snackbar notifications state (`useToast`, `useToastActions`) and auto-dismissals, entirely replacing raw browser `alert()` popups across the app.
 * **[backupValidation.ts](src/utils/backupValidation.ts)**
   * Schema-enforcing backup and restore diagnostic engine.
   * Validates JSON schema envelopes, item counts per asset domain, active duplicate collisions, and unlinked file references prior to data mutations.
@@ -53,19 +58,21 @@ This document provides a high-level overview of the folder structure, data flow,
 
 ### 2. App Shell, Security Gate & Navigation Router
 * **[App.tsx](src/App.tsx)**
-  * Lightweight entry gate. Renders `PinLockScreen` from a clean, provider-free chunk. Once unlocked, dynamically imports and mounts `MainApp` using `React.lazy`.
+  * Lightweight entry gate. Renders `PinLockScreen` from a clean, provider-free chunk. Once unlocked, dynamically imports and mounts `MainApp` using `React.lazy`. Prefetches `MainApp` during device idle time.
 * **[MainApp.tsx](src/MainApp.tsx)**
-  * Hosts context providers (`ThemeProvider`, `PortfolioProvider`), Router structure, and dashboard load gates.
+  * Hosts context providers (`ThemeProvider`, `PrivacyContext`, `ToastProvider`, `PortfolioProvider`), Router structure, and dashboard load gates.
 * **[AppShell.tsx](src/layouts/AppShell.tsx)**
   * Core responsive layout manager combining `DesktopSidebar` with main content area.
   * Consumes `useIsMobile()` for viewport checks and `useModalState()` to decouple modal visibility state.
   * Features **Idle Chunk Pre-warming** via `requestIdleCallback` to prefetch `PortfolioTable`, `FixedDepositView`, `SIPView`, and `GoldHoldingView` during device idle time for zero-skeleton tab switching.
-  * Implements **Segmented Mobile Home View** (*"📊 Summary & Assets"* vs *"📈 Charts & AI"*), eliminating ~800 DOM nodes and 4 concurrent SVG chart renders on initial mobile unlock.
-  * Lazy-loads heavy action modals (`AddHoldingModal`, `AddFamilyModal`, `RenamePortfolioModal`, `ChangePinModal`, `DataQualityHealthModal`) with `React.lazy` and `Suspense`, shrinking initial entry bundle size.
+  * Implements **Segmented Mobile Home View** (*"📊 Summary & Assets"* vs *"📈 Charts & AI"*), eliminating DOM nodes and concurrent SVG chart renders on initial mobile unlock.
+  * Lazy-loads heavy action modals (`AddHoldingModal`, `AddFamilyModal`, `RenamePortfolioModal`, `ChangePinModal`, `DataQualityHealthModal`, `SmartImportModal`, `ExportPanel`) with `React.lazy` and `Suspense`.
 * **[DesktopSidebar.tsx](src/layouts/DesktopSidebar.tsx)**
   * Desktop navigation sidebar featuring sticky top alignment (`sticky top-6`) and `self-start` height constraint.
 * **[MobileBottomNav.tsx](src/components/MobileBottomNav.tsx)**
   * High-density mobile bottom navigation bar (Google Stitch UI standard) featuring 5 core navigation tabs: *Home*, *Stocks*, *SIP & MF* (`Wallet`), *Deposits* (`Landmark`), and *More* (`Menu`). Promoted to GPU compositor layer.
+* **[SearchBar.tsx](src/components/SearchBar.tsx)**
+  * Omni-search palette (`Cmd/Ctrl + K`) providing instant client-side indexing and navigation across all family portfolios, assets, and vault documents with category filtering.
 * **[PinLockScreen.tsx](src/components/PinLockScreen.tsx)**
   * Restricts app access via passcode lock screen over purple-to-blue aurora gradient background with live clock display and frosted glass buttons.
   * Features integrated **Biometric Keypad Button** and auto-prompt on mount for instant 1-second FaceID / TouchID / Fingerprint unlocking with 4-digit PIN fallback.
@@ -77,12 +84,14 @@ This document provides a high-level overview of the folder structure, data flow,
 ### 3. Registry Component Routing & Modular Views
 * **[AssetTabContent.tsx](src/components/AssetTabContent.tsx)**
   * Orchestrator component rendering the active asset registry view.
-  * Integrates **dynamic lazy loading** (`React.lazy` and `React.Suspense`) for ALL registry views and tables: `FixedDepositView`, `RDView`, `SIPView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, and `PortfolioTable` using [AssetCardSkeleton.tsx](src/components/AssetCardSkeleton.tsx) as the loading fallback.
+  * Integrates **dynamic lazy loading** (`React.lazy` and `React.Suspense`) for ALL registry views and tables: `FixedDepositView`, `RDView`, `SIPView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, `TaxHarvestingView`, and `PortfolioTable` using [AssetCardSkeleton.tsx](src/components/AssetCardSkeleton.tsx) as the loading fallback.
   * Applies `.tab-transition` CSS animation class with a unique `key` prop tied to the active tab.
 
 * **Modular Domain Components**:
   * **[src/components/ui/AssetRegistryContainer.tsx](src/components/ui/AssetRegistryContainer.tsx)**: Standardized shell for asset registry headers, add buttons, `<AssetCardSkeleton>` loading fallbacks, and `<EmptyState>` placeholders.
   * **[src/components/ui/DocumentAttachmentField.tsx](src/components/ui/DocumentAttachmentField.tsx)**: Hardened document uploader with document taxonomy selectors (`fd_advice`, `policy_schedule`, `title_deed`, `tax_receipt`, `invoice`, `gold_hallmark`, `account_statement`, `general`), 10MB limits, and contextual guidance.
+  * **[src/components/ui/QuickAccessShortcuts.tsx](src/components/ui/QuickAccessShortcuts.tsx)**: Quick access cheat-sheet overlay documenting all global keyboard shortcuts.
+  * **[src/components/ExportPanel.tsx](src/components/ExportPanel.tsx)**: Unified data export panel (JSON/CSV), schema-validated full restore engine, and print-optimized `@media print` A4 PDF statement generator.
   * **[src/components/gold/](src/components/gold/)**: `GoldHoldingView.tsx` (with Live MCX Bullion Ribbon, 24K/22K/18K ticker, manual sync, and aggregate portfolio weight/valuation strip), `GoldHoldingCard.tsx` (with buy price/g vs live rate/g, hallmark attachment badges, and `.mobile-asset-card` containment), and `GoldFormModal.tsx`.
   * **[src/components/realestate/](src/components/realestate/)**: Standalone `RealEstateCard.tsx` (with title deed badges and `.mobile-asset-card` containment) and `RealEstateFormModal.tsx`.
   * **[src/components/insurance/](src/components/insurance/)**: Standalone `InsurancePolicyCard.tsx` (with policy bond badges, overdue renewal indicators, and `.mobile-asset-card` containment) and `InsuranceFormModal.tsx`.
@@ -90,6 +99,7 @@ This document provides a high-level overview of the folder structure, data flow,
   * **[src/components/rd/](src/components/rd/)**: `RDView.tsx`, `RDAccountCard.tsx` (with `.mobile-asset-card` containment), `RDFormModal.tsx`, and `RDInstallmentSchedule.tsx`.
   * **[src/components/sip/](src/components/sip/)**: `SIPView.tsx`, `SIPAccountCard.tsx` (with `.mobile-asset-card` containment), `SIPFormModal.tsx`, and `SIPFormFields.tsx`.
   * **[src/components/TaxHarvestingView.tsx](src/components/TaxHarvestingView.tsx)**: Real-time tax loss harvesting opportunity finder, separating equity LTCG/STCG from slab-rate debt and gold holdings.
+  * **[src/components/HoldingDetailDrawer.tsx](src/components/HoldingDetailDrawer.tsx)**: Apple-style responsive holding detail view (slide-up bottom sheet on mobile, clean drawer on desktop).
 
 
 ### 4. UI Dashboard & Widget Performance
@@ -103,7 +113,7 @@ This document provides a high-level overview of the folder structure, data flow,
   * **Standardized 2x2 Responsive Widget Cards Grid**: Core dashboard cards (`NetWorthTimelineChart.tsx`, `PortfolioAssistant.tsx`, `PieChart.tsx`, `BarChart.tsx`) use a minimum height (`min-h-[370px]`) inside a responsive `grid-cols-1 lg:grid-cols-2 gap-5` grid.
   * **[NetWorthTimelineChart.tsx](src/components/NetWorthTimelineChart.tsx)**: Responsive SVG area chart with date-range filtering (1M, 3M, 6M, 1Y, ALL) and multi-series selection (Total, Stocks vs FDs, Stocks, FDs).
   * **[PieChart.tsx](src/components/PieChart.tsx)**: Responsive asset class donut visualization with dynamic center HUD and progress proportion bars.
-  * **[PortfolioAssistant.tsx](src/components/PortfolioAssistant.tsx)**: Conversational NLP assistant with memoized `ChatMessageItem` component to stop user query typing from re-parsing markdown across chat transcript history.
+  * **[PortfolioAssistant.tsx](src/components/PortfolioAssistant.tsx)**: Conversational NLP assistant with 17 discrete intents and memoized `ChatMessageItem` component to prevent chat transcript re-rendering.
   * **[DataQualityHealthModal.tsx](src/components/DataQualityHealthModal.tsx)**: Modal auditing data completeness, tracking monthly resolved issues and score progression over time.
   * **[InsightsPanel.tsx](src/components/InsightsPanel.tsx)**: Displays top 5 movers, top holdings by value, best/worst performance indicators, top gainers/losers, and upcoming deposit maturities & insurance renewal notifications.
 
@@ -125,6 +135,7 @@ The application implements a series of high-performance strategies to guarantee 
 
 ### 4. Persistent Web Worker Singletons
 * CPU-heavy financial calculations are offloaded to Vite-compatible background Web Workers using persistent lazy singletons. Eliminates 15–40ms thread instantiation overhead per calculation tick:
+  * **[WorkerPool.ts](src/services/WorkerPool.ts)**: Generic persistent worker singleton manager.
   * **[xirr.worker.ts](src/workers/xirr.worker.ts)**: Handles Newton-Raphson cash flow solvers (`runXIRRAsync` in [`performance.ts`](src/utils/performance.ts)).
 
 ### 5. Render Memoization & Virtualization
@@ -168,19 +179,21 @@ Every deposit registry maps to its own separate database table:
 | **Real Estate** | `real_estate` | Current valuation + rental income yield |
 | **Insurance** | `insurances` | Sum assured + premium renewal warning tracking |
 | **Document Vault** | `documents` | Expiry tracking + asset reference linking |
+| **Net Worth Snapshot** | `net_worth_history` | Historical daily total and asset-class breakdown |
+| **Market Cache** | `market_price_cache` | 2-minute cached Yahoo Finance stock quotes |
 
 ---
 
 ## 🧮 Calculations & Formatters
-* **[portfolioCalcs.ts](src/utils/portfolioCalcs.ts)**: Single-pass `for` loop portfolio totals aggregator.
+* **[portfolioCalcs.ts](src/utils/portfolioCalcs.ts)**: Single-pass `for` loop portfolio totals aggregator and Method-B daily delta calculator.
 * **[performance.ts](src/utils/performance.ts)**: Newton-Raphson XIRR solver with `Float64Array` year offsets, monotonic task ID counter, and persistent Web Worker singleton.
 * **[rdUtils.ts](src/utils/rdUtils.ts)**: Indian Banking standard quarterly compounding RD valuation and closed-form maturity solver.
 * **[taxUtils.ts](src/utils/taxUtils.ts)**: Financial year tax loss harvesting calculator distinguishing equity STCG (20%) / LTCG (12.5% over ₹1.25L) from slab-rate debt and gold bullion assets.
 * **[supabaseStorage.ts](src/utils/supabaseStorage.ts)**: Path-sanitizing document storage client with directory traversal (`..`) protection and Edge Function admin routing.
-* **[assistant.ts](src/utils/assistant.ts)**: Intent-based NLP query classification system.
+* **[assistant.ts](src/utils/assistant.ts)**: Intent-based NLP query classification system across 17 financial intents.
 * **[backupValidation.ts](src/utils/backupValidation.ts)**: JSON envelope validation, duplicate detection, and schema verification.
 * **[dataQuality.ts](src/utils/dataQuality.ts)**: Health scoring, discrepancy diagnostics, and history tracking.
-* **[formatters.ts](src/utils/formatters.ts)**: Indian currency formatters (`formatINR`) and date helpers.
+* **[formatters.ts](src/utils/formatters.ts)**: Indian currency formatters (`formatINR`), compact values, and date helpers.
 * **[biometrics.ts](src/utils/biometrics.ts)**: WebAuthn public key credential helper and hardware authenticator verifier.
 * **[goldPricing.ts](src/utils/goldPricing.ts)**: MCX / NSE live bullion feed parser and hallmark rate calculator.
 
@@ -265,6 +278,8 @@ Every non-trivial task must follow this workflow:
 
 ## ⚙️ Core Principles
 
+- **Single Design Source of Truth** — Never introduce a new color, radius, shadow, or typography token. If it is not in `UI.md §2`, declare it in `UI.md §2` first, then implement and reference it.
 - **Simplicity First** — Make every change as simple as possible. Impact minimal code.
 - **No Laziness** — Find root causes. No temporary fixes. Senior developer standards.
 - **Minimal Impact** — Changes should only touch what's necessary. Avoid introducing bugs.
+

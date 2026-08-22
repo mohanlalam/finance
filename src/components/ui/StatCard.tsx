@@ -89,7 +89,7 @@ export function StatCard({
 
   const trendStyles: Record<TrendDirection, { pill: string; icon: ReactNode }> = {
     positive: {
-      pill: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60',
+      pill: 'bg-[var(--positive-soft)] text-[var(--positive)] border border-[var(--positive)]/20',
       icon: (
         <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <polyline points="18 15 12 9 6 15" />
@@ -97,7 +97,7 @@ export function StatCard({
       ),
     },
     negative: {
-      pill: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/60',
+      pill: 'bg-[var(--negative-soft)] text-[var(--negative)] border border-[var(--negative)]/20',
       icon: (
         <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <polyline points="6 9 12 15 18 9" />
@@ -105,7 +105,7 @@ export function StatCard({
       ),
     },
     neutral: {
-      pill: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60',
+      pill: 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]',
       icon: null,
     },
   };
@@ -120,14 +120,14 @@ export function StatCard({
       {/* Top row: Title + Tooltip + Icon */}
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">
+          <span className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider truncate">
             {title}
           </span>
           {tooltip && (
             <Tooltip content={tooltip} placement="top">
               <button
                 type="button"
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none"
+                className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] focus:outline-none"
                 aria-label={`Info about ${title}`}
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -141,7 +141,7 @@ export function StatCard({
         </div>
 
         {icon && (
-          <div className="w-8 h-8 rounded-[8px] bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center text-slate-600 dark:text-slate-300 shrink-0">
+          <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] shrink-0">
             {icon}
           </div>
         )}
@@ -150,11 +150,11 @@ export function StatCard({
       {/* Center: Metric Value */}
       <div className="my-1 flex items-baseline gap-1">
         {prefix && (
-          <span className="text-base sm:text-lg font-medium text-slate-400 dark:text-slate-500 select-none text-financial">
+          <span className="text-base sm:text-lg font-medium text-[var(--text-tertiary)] select-none text-financial">
             {prefix}
           </span>
         )}
-        <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight text-financial">
+        <div className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-tight text-financial">
           {value}
         </div>
       </div>
@@ -172,7 +172,7 @@ export function StatCard({
           )}
 
           {changePeriod && (
-            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-normal">
+            <span className="text-[11px] text-[var(--text-tertiary)] font-normal">
               {changePeriod}
             </span>
           )}
@@ -185,7 +185,7 @@ export function StatCard({
               data={sparklineData}
               color={
                 sparklineColor ||
-                (trend === 'positive' ? '#10b981' : trend === 'negative' ? '#ef4444' : '#3b82f6')
+                (trend === 'positive' ? 'var(--positive, #00b074)' : trend === 'negative' ? 'var(--negative, #df514c)' : 'var(--accent-blue, #387ed1)')
               }
               height={24}
               width={64}

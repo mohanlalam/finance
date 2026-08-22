@@ -12,7 +12,7 @@ export const Sparkline = React.memo(function Sparkline({
   data,
   width = 80,
   height = 28,
-  color = '#10b981', // emerald-500
+  color = 'var(--positive, #00b074)',
   className = '',
 }: SparklineProps) {
   const gradientId = useMemo(

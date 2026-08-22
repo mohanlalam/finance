@@ -14,8 +14,8 @@ export interface StorageUploadResult {
 
 /**
  * Uploads a file to Supabase Storage.
- * Uses Edge Function with service role (admin) as primary route to bypass Storage RLS,
- * and falls back to direct Storage REST API.
+ * Routes exclusively through the holdings-crud Edge Function (service role) to enforce PIN authentication
+ * and prevent unauthenticated write access via public anon storage policies.
  */
 export async function uploadDocumentFile(
   bucket: string,
@@ -33,42 +33,23 @@ export async function uploadDocumentFile(
     .filter((seg) => seg.length > 0 && seg !== '..' && seg !== '.')
     .join('/');
 
-  // 1. Primary: Upload via Edge Function (admin service role bypasses Storage RLS)
-  try {
-    const formData = new FormData();
-    formData.append('bucket', bucket);
-    formData.append('path', cleanPath);
-    formData.append('file', file);
-
-    const headers = await getApiAuthHeaders();
-    delete headers['Content-Type']; // Let browser set multipart boundary
-
-    const edgeUrl = `${SUPABASE_URL}/functions/v1/holdings-crud?action=upload_file`;
-    const res = await fetch(edgeUrl, {
-      method: 'POST',
-      headers,
-      body: formData,
-    });
-
-    if (res.ok) {
-      return { path: cleanPath };
-    }
-    const errText = await res.text().catch(() => '');
-    console.warn('[storage] Edge function upload returned non-OK status:', res.status, errText);
-  } catch (edgeErr) {
-    console.warn('[storage] Edge function upload attempt failed, falling back to direct REST', edgeErr);
+  if (!cleanPath) {
+    throw new Error('Invalid storage path');
   }
 
-  // 2. Fallback: Direct Storage REST API
-  const encodedPath = cleanPath.split('/').map(encodeURIComponent).join('/');
-  const url = `${SUPABASE_URL}/storage/v1/object/${encodeURIComponent(bucket)}/${encodedPath}`;
-  const directHeaders = await getApiAuthHeaders(file.type || 'application/octet-stream');
-  directHeaders['x-upsert'] = 'true';
+  const formData = new FormData();
+  formData.append('bucket', bucket);
+  formData.append('path', cleanPath);
+  formData.append('file', file);
 
-  const res = await fetch(url, {
+  const headers = await getApiAuthHeaders();
+  delete headers['Content-Type']; // Let browser set multipart boundary
+
+  const edgeUrl = `${SUPABASE_URL}/functions/v1/holdings-crud?action=upload_file`;
+  const res = await fetch(edgeUrl, {
     method: 'POST',
-    headers: directHeaders,
-    body: file,
+    headers,
+    body: formData,
   });
 
   if (!res.ok) {
@@ -87,6 +68,7 @@ export async function uploadDocumentFile(
 
 /**
  * Deletes one or more files from Supabase Storage.
+ * Routes exclusively through the holdings-crud Edge Function to enforce PIN authentication.
  */
 export async function removeDocumentFiles(
   bucket: string,
@@ -106,30 +88,22 @@ export async function removeDocumentFiles(
 
   if (cleanPaths.length === 0) return;
 
-  // 1. Primary: Edge Function delete
-  try {
-    const headers = await getApiAuthHeaders('application/json');
-    const edgeUrl = `${SUPABASE_URL}/functions/v1/holdings-crud?action=delete_file`;
-    const res = await fetch(edgeUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ bucket, paths: cleanPaths }),
-    });
-    if (res.ok) return;
-  } catch (edgeErr) {
-    console.warn('[storage] Edge function delete failed, trying direct REST', edgeErr);
-  }
-
-  // 2. Fallback: Direct REST API
-  const url = `${SUPABASE_URL}/storage/v1/object/${encodeURIComponent(bucket)}`;
-  const directHeaders = await getApiAuthHeaders('application/json');
-  const res = await fetch(url, {
-    method: 'DELETE',
-    headers: directHeaders,
-    body: JSON.stringify({ prefixes: cleanPaths }),
+  const headers = await getApiAuthHeaders('application/json');
+  const edgeUrl = `${SUPABASE_URL}/functions/v1/holdings-crud?action=delete_file`;
+  const res = await fetch(edgeUrl, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ bucket, paths: cleanPaths }),
   });
 
   if (!res.ok) {
-    console.warn(`[storage] Delete failed with status ${res.status}`);
+    let errorMsg = `Delete failed with status ${res.status}`;
+    try {
+      const json = await res.json();
+      errorMsg = json.error || json.message || errorMsg;
+    } catch {
+      // ignore
+    }
+    console.warn('[storage] Edge function delete failed:', errorMsg);
   }
 }

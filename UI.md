@@ -177,7 +177,7 @@ Located in `src/components/ui/`, this collection of atomic primitives standardiz
 * **`Card.tsx`**: Surface container with `.apple-card` styling, header/body/footer sub-components, and optional hover elevation.
 * **`Badge.tsx`**: Status indicator pill supporting variants (`success`, `danger`, `warning`, `info`, `neutral`) and sizes (`sm`, `md`).
 * **`Input.tsx` & `Select.tsx`**: Styled form controls with floating labels, error text support, prefix/suffix currency adornments, and clean dark mode styles.
-* **`Dialog.tsx` & `Drawer.tsx`**: Foundation primitives for modals and slide-over side sheets with hardware-accelerated transitions and focus trapping.
+* **`Modal.tsx` (`src/components/Modal.tsx`)**: Canonical draggable form modal frame with hardware-accelerated transitions, pointer drag repositioning, Escape dismiss, and mobile slide-up bottom sheet transitions.
 * **`FinancialMetric.tsx`**: Compact tabular metric component rendering label, primary value (`formatINR`), and positive/negative delta badge.
 * **`Sparkline.tsx`**: Standalone SVG micro-chart with dynamic gradient fills and mount draw animations.
 * **`StatCard.tsx`**: High-level statistical summary card with sparkline slot and subtitle deltas.
@@ -353,7 +353,7 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 |                                                             |
 +-------------------------------------------------------------+
 | FIXED BOTTOM NAVIGATION BAR (with Safe-Area Padding)        |
-| [ 🏠 Home ]  [ 📈 Assets ]  [ ➕ FAB ]  [ 🔔 Alerts ] [ ⚙️ ]  |
+| [ 🏠 Home ] [ 📈 Stocks ] [ 💰 SIP & MF ] [ 🏦 Deposits ] [ ☰ More ] |
 +-------------------------------------------------------------+
 ```
 
@@ -399,10 +399,13 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 * Position Customization: Features customizable button positioning (`'right'` | `'center'` | `'left'`) with persistent `localStorage` storage (`finance_fab_position`). Defaulted to **Right side** (`right-2 items-end`) to prevent blocking center card titles and values. Includes an interactive position switcher pill (`[ Left ↙ | Center ⬇ | Right ↘ ]`) inside the menu header bar for instant toggling.
 * State Visibility: Automatically hidden when `isAnyModalOpen` is true (managed via `useModalState.ts`).
 
-### Holding Detail Slide-Over Drawer
+### Holding Detail Drawer & Responsive Bottom Sheet
 
 * Component: `HoldingDetailDrawer.tsx` & `Drawer.tsx`
-* Provides deep dive analysis when tapping any stock or asset on mobile:
+* Responsive Adaptation:
+  * **Mobile (< 768px)**: Rendered as an Apple-style slide-up **bottom sheet** (`items-end`, `rounded-t-2xl`, touch drag indicator bar, safe-area bottom padding).
+  * **Desktop (≥ 768px)**: Rendered as a sleek slide-over **side drawer** (`justify-end`, `max-w-md`, full-height).
+* Provides deep dive analysis when tapping any stock or asset:
   * Real-time holding valuation, CMP, quantity, and average purchase price.
   * Unrealized P&L breakdown and today's day-change performance.
   * Target allocation vs actual allocation share.

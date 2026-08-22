@@ -31,12 +31,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run Linters & Typecheck
+        run: |
+          npm run lint
+          npm run typecheck
+
+      - name: Run Test Suite
+        run: npm test
+
       - name: Build
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          VITE_APP_PIN: ${{ secrets.VITE_APP_PIN }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

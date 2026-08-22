@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Holding } from '../types/portfolio';
 import { formatINR } from '../utils/formatters';
 import { usePrivacy } from '../contexts/PrivacyContext';
@@ -30,34 +30,40 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
   // 1. Memoize Slices Computation & Single-pass Sorting
   const { total, slices } = useMemo(() => {
     if (customSlices && customSlices.length > 0) {
-      const sum = customSlices.reduce((s, x) => s + x.value, 0);
+      const sum = customSlices.reduce((s, x) => s + (Number(x.value) || 0), 0);
       const filtered = customSlices
-        .filter((s) => s.value > 0)
-        .map((s) => ({
-          label: s.label,
-          fullName: s.fullName,
-          value: s.value,
-          pct: sum > 0 ? (s.value / sum) * 100 : 0,
-          color: s.color,
-        }))
+        .filter((s) => Number(s.value) > 0)
+        .map((s) => {
+          const val = Number(s.value) || 0;
+          return {
+            label: s.label,
+            fullName: s.fullName,
+            value: val,
+            pct: sum > 0 ? (val / sum) * 100 : 0,
+            color: s.color,
+          };
+        })
         .sort((a, b) => b.value - a.value);
       return { total: sum, slices: filtered };
     }
 
     const holdingsList = holdings ?? [];
-    const sum = holdingsList.reduce((s, h) => s + h.currentValue, 0);
+    const sum = holdingsList.reduce((s, h) => s + (Number(h.currentValue) || 0), 0);
 
-    const sorted = [...holdingsList].sort((a, b) => b.currentValue - a.currentValue);
+    const sorted = [...holdingsList].sort((a, b) => (b.currentValue || 0) - (a.currentValue || 0));
     const top6 = sorted.slice(0, 6);
-    const otherValue = sorted.slice(6).reduce((s, h) => s + h.currentValue, 0);
+    const otherValue = sorted.slice(6).reduce((s, h) => s + (Number(h.currentValue) || 0), 0);
 
-    const resultSlices = top6.map((h, i) => ({
-      label: h.ticker,
-      fullName: h.stockName,
-      value: h.currentValue,
-      pct: sum > 0 ? (h.currentValue / sum) * 100 : 0,
-      color: COLORS[i % COLORS.length],
-    }));
+    const resultSlices = top6.map((h, i) => {
+      const val = Number(h.currentValue) || 0;
+      return {
+        label: h.ticker,
+        fullName: h.stockName,
+        value: val,
+        pct: sum > 0 ? (val / sum) * 100 : 0,
+        color: COLORS[i % COLORS.length],
+      };
+    });
 
     if (otherValue > 0) {
       resultSlices.push({
@@ -72,6 +78,10 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
     return { total: sum, slices: resultSlices };
   }, [holdings, customSlices]);
 
+  // Safe hovered index clamped to current slices bounds
+  const safeHovered = hovered !== null && hovered >= 0 && hovered < slices.length ? hovered : null;
+  const hoverSlice = safeHovered !== null ? slices[safeHovered] : null;
+
   // 2. Trigonometric SVG Geometry Setup
   const cx = 115;
   const cy = 115;
@@ -81,7 +91,10 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
   const paths = useMemo(() => {
     let cumAngle = -Math.PI / 2;
     return slices.map((slice, i) => {
-      const angle = (slice.pct / 100) * 2 * Math.PI;
+      // Avoid exact 2*PI boundary where start point == end point causing SVG arc collapse
+      const rawAngle = (slice.pct / 100) * 2 * Math.PI;
+      const angle = Math.min(rawAngle, 2 * Math.PI - 0.0001);
+
       const startAngle = cumAngle;
       const endAngle = cumAngle + angle;
       cumAngle = endAngle;
@@ -107,7 +120,11 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
     });
   }, [slices]);
 
-  const hoverSlice = hovered !== null ? slices[hovered] : null;
+  const handleSliceClick = useCallback((label: string) => {
+    if (onSelectSlice) {
+      onSelectSlice(label);
+    }
+  }, [onSelectSlice]);
 
   return (
     <div className="apple-card p-4 sm:p-5 flex flex-col min-h-[320px] sm:min-h-[370px] justify-between">
@@ -129,7 +146,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
       {slices.length === 0 || total === 0 ? (
         <div className="flex flex-col items-center justify-center h-[240px] text-xs text-[var(--text-tertiary)]">
           <span>No assets recorded yet</span>
-          <span className="text-[10px] mt-1">Add stocks, FDs or gold to populate allocation</span>
+          <span className="text-[10px] mt-1">Add stocks, FDs, SIPs or gold to populate allocation</span>
         </div>
       ) : (
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-center justify-between flex-1 min-h-0">
@@ -144,13 +161,13 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
               className="overflow-visible max-w-full drop-shadow-sm"
             >
               <defs>
-                <filter id="donutGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <filter id="donutGlow" x="-30%" y="-30%" width="160%" height="160%">
                   <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.25" />
                 </filter>
               </defs>
               <title>{title}</title>
               {paths.map(({ d, color, i }) => {
-                const isHovered = hovered === i;
+                const isHovered = safeHovered === i;
                 return (
                   <path
                     key={i}
@@ -158,16 +175,25 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                     fill={color}
                     stroke="var(--surface)"
                     strokeWidth={2.5}
-                    className="cursor-pointer transition-all duration-150"
+                    className="cursor-pointer transition-all duration-150 focus:outline-none"
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`${slices[i].fullName}: ${slices[i].pct.toFixed(1)}%`}
                     style={{
-                      opacity: hovered !== null && !isHovered ? 0.35 : 1,
+                      opacity: safeHovered !== null && !isHovered ? 0.35 : 1,
                       filter: isHovered ? 'url(#donutGlow)' : 'none',
-                      transform: isHovered ? 'scale(1.03)' : 'scale(1)',
+                      transform: isHovered ? 'scale(1.035)' : 'scale(1)',
                       transformOrigin: `${cx}px ${cy}px`,
                     }}
                     onMouseEnter={() => setHovered(i)}
                     onMouseLeave={() => setHovered(null)}
-                    onClick={() => onSelectSlice && onSelectSlice(slices[i].label)}
+                    onClick={() => handleSliceClick(slices[i].label)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSliceClick(slices[i].label);
+                      }
+                    }}
                   />
                 );
               })}
@@ -201,7 +227,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                     textAnchor="middle"
                     className="fill-[var(--accent-blue)] font-bold text-[10px] tnum"
                   >
-                    {hoverSlice.pct.toFixed(1)}% of total
+                    {hoverSlice.pct < 0.1 && hoverSlice.pct > 0 ? '< 0.1%' : `${hoverSlice.pct.toFixed(1)}%`} of total
                   </text>
                 </>
               ) : (
@@ -238,7 +264,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
           {/* High-Density Legend with Mini Proportion Bars */}
           <div className="flex-1 w-full space-y-1.5 overflow-y-auto max-h-[220px] pr-1">
             {slices.map((slice, i) => {
-              const isHovered = hovered === i;
+              const isHovered = safeHovered === i;
               return (
                 <div
                   key={i}
@@ -247,9 +273,18 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                       ? 'bg-[var(--surface-secondary)] border-[var(--border-subtle)] shadow-xs scale-[1.01]'
                       : 'bg-transparent border-transparent hover:bg-[var(--surface-secondary)]/60'
                   }`}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Select ${slice.fullName}`}
                   onMouseEnter={() => setHovered(i)}
                   onMouseLeave={() => setHovered(null)}
-                  onClick={() => onSelectSlice && onSelectSlice(slice.label)}
+                  onClick={() => handleSliceClick(slice.label)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleSliceClick(slice.label);
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -276,7 +311,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                           color: slice.color,
                         }}
                       >
-                        {slice.pct.toFixed(1)}%
+                        {slice.pct < 0.1 && slice.pct > 0 ? '<0.1%' : `${slice.pct.toFixed(1)}%`}
                       </span>
                     </div>
                   </div>
@@ -286,7 +321,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                     <div
                       className="h-full rounded-[var(--radius-pill)] transition-all duration-300"
                       style={{
-                        width: `${slice.pct}%`,
+                        width: `${Math.max(1, Math.min(100, slice.pct))}%`,
                         backgroundColor: slice.color,
                       }}
                     />
@@ -302,3 +337,4 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
 }
 
 export default React.memo(PieChart);
+
