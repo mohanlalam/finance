@@ -12,8 +12,7 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **Sankey Flow Diagram** — Native SVG flow diagram charting wealth streams from net worth categories to individual sub-assets. Safeguarded against zero-thickness path and degenerate node renders.
 - **Equity Concentration Treemap** — SVG treemap visualization showing relative sizes of top stock holdings. Includes division-by-zero guards and filters out sub-1px elements to ensure overlapping coordinate safety.
 - **P&L Visuals** — Direct indications of profits and losses with custom positive/negative indicators and INR formatting.
-- **Comparison Engine** — Multi-dimensional bar chart comparing total invested vs. current value per family member.
-- **Live Prices** — Live feeds for stock and ETF holdings (every 30 seconds) showing intraday changes and overall returns.
+- **Market Pricing** — Automated background refresh for stock and ETF holdings (15-minute intervals) with on-demand sync and cached quotes.
 
 ### 💡 Portfolio Insights & Rebalancing
 - **Performance Highlights** — Instantly view top stock holdings, top gainers, top losers, and today's biggest absolute price movement.
