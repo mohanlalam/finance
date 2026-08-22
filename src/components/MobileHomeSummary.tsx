@@ -317,9 +317,9 @@ function MobileHomeSummary({
               const isTodayGain = pTodayPnL >= 0;
               return (
                 <div key={p.id} className="p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] space-y-2">
-                  <div className="flex items-center justify-between gap-2 min-w-0">
-                    <span className="text-xs font-bold text-[var(--text-primary)] truncate min-w-0 flex-1">{p.label} Portfolio</span>
-                    <span className="text-xs font-extrabold text-[var(--text-primary)] tnum shrink-0 ml-2">{renderValue(p.totalCurrentValue)}</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-[var(--text-primary)] truncate">{p.label} Portfolio</span>
+                    <span className="text-xs font-extrabold text-[var(--text-primary)] tnum shrink-0">{renderValue(p.totalCurrentValue)}</span>
                   </div>
 
                   <div className="grid grid-cols-3 gap-1 pt-2 border-t border-[var(--border-subtle)] text-xs">
