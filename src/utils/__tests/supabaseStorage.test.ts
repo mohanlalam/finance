@@ -23,11 +23,11 @@ describe('supabaseStorage', () => {
   describe('uploadDocumentFile', () => {
     it('sanitizes storage paths against directory traversal', async () => {
       let requestedUrl = '';
-      let requestedFormData: any = null;
+      let capturedBody: unknown = null;
 
       globalThis.fetch = vi.fn().mockImplementation(async (url: string, init: RequestInit) => {
         requestedUrl = url;
-        requestedFormData = init.body;
+        capturedBody = init.body;
         return {
           ok: true,
           status: 200,
@@ -40,8 +40,9 @@ describe('supabaseStorage', () => {
 
       expect(requestedUrl).toContain('/functions/v1/holdings-crud?action=upload_file');
       expect(result.path).toBe('secret/docs/fd_1.pdf');
-      expect(requestedFormData?.get('path')).toBe('secret/docs/fd_1.pdf');
-      expect(requestedFormData?.get('bucket')).toBe('investment-documents');
+      const formData = capturedBody as { get(k: string): unknown };
+      expect(formData?.get('path')).toBe('secret/docs/fd_1.pdf');
+      expect(formData?.get('bucket')).toBe('investment-documents');
     });
 
     it('rejects empty or completely invalid paths', async () => {
