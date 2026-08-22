@@ -54,7 +54,6 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { getBreakdownSlices } from '../utils/chartHelpers';
 import { classBreakdown, estimateTodayPnL } from '../utils/portfolioCalcs';
 import { Badge } from '../components/ui/Badge';
-import { SegmentedControl } from '../components/ui/SegmentedControl';
 
 // Lazy viewport container that loads child components only when they are visible
 function LazyViewport({ children, placeholderHeight = 240 }: { children: React.ReactNode; placeholderHeight?: number }) {
@@ -208,8 +207,6 @@ export default function AppShell() {
     showSmartImport, openSmartImport, closeSmartImport,
     isAnyModalOpen,
   } = useModalState();
-
-  const [mobileHomeView, setMobileHomeView] = useState<'overview' | 'charts'>('overview');
 
   // Idle prefetch primary registry view chunks to eliminate loading skeletons on tab switch
   useEffect(() => {
@@ -672,65 +669,49 @@ export default function AppShell() {
 
             {activeAsset === 'home' ? (
               <div className="space-y-4">
-                {/* Segmented View Switch for Mobile Home: Overview vs Analytics */}
-                <div className="flex justify-center pt-0.5">
-                  <SegmentedControl
-                    name="Mobile Home View"
-                    value={mobileHomeView}
-                    onChange={setMobileHomeView}
-                    options={[
-                      { id: 'overview', label: '📊 Summary & Assets' },
-                      { id: 'charts', label: '📈 Charts & AI' },
-                    ]}
+                <Suspense fallback={null}>
+                  <MobileHomeSummary
+                    summaryData={summaryData}
+                    todayPnL={todayPnL}
+                    todayPnLPercent={todayPnLPercent}
+                    breakdown={breakdown}
+                    alertCount={visibleAlerts.length}
+                    alerts={visibleAlerts}
+                    lastUpdated={lastUpdated}
+                    priceStatus={priceStatus}
+                    onRefresh={refreshPrices}
+                    isLoadingPrices={isLoadingPrices}
+                    onNavigateAsset={setActiveAsset}
+                    onOpenAlerts={openMobileAlerts}
+                    portfolios={portfolios}
+                    activePortfolio={portfolio}
+                    netWorthHistory={netWorthHistory}
                   />
-                </div>
+                </Suspense>
 
-                {mobileHomeView === 'overview' ? (
-                  <>
-                    <Suspense fallback={null}>
-                      <MobileHomeSummary
-                        summaryData={summaryData}
-                        todayPnL={todayPnL}
-                        todayPnLPercent={todayPnLPercent}
-                        breakdown={breakdown}
-                        alertCount={visibleAlerts.length}
-                        alerts={visibleAlerts}
-                        lastUpdated={lastUpdated}
-                        priceStatus={priceStatus}
-                        onRefresh={refreshPrices}
-                        isLoadingPrices={isLoadingPrices}
-                        onNavigateAsset={setActiveAsset}
-                        onOpenAlerts={openMobileAlerts}
-                        portfolios={portfolios}
-                        activePortfolio={portfolio}
-                        netWorthHistory={netWorthHistory}
-                      />
-                    </Suspense>
-
-                    {activeTab === 'all' && (
-                      <div className="mobile-section">
-                        <SectionErrorBoundary sectionName="Portfolio Insights">
-                          <Suspense fallback={<div className="h-40 bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                            <InsightsPanel
-                              insights={insights}
-                              portfolios={portfolios}
-                              activePortfolio={portfolio}
-                              onNavigateAsset={setActiveAsset}
-                              onRefreshPrices={refreshPrices}
-                              isLoadingPrices={isLoadingPrices}
-                              isPriceStale={isPriceStale}
-                              priceStatus={priceStatus}
-                            />
-                          </Suspense>
-                        </SectionErrorBoundary>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="space-y-4 pt-1">
-                    {mobileDashboardWidgets}
+                {activeTab === 'all' && (
+                  <div className="mobile-section">
+                    <SectionErrorBoundary sectionName="Portfolio Insights">
+                      <Suspense fallback={<div className="h-40 bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                        <InsightsPanel
+                          insights={insights}
+                          portfolios={portfolios}
+                          activePortfolio={portfolio}
+                          onNavigateAsset={setActiveAsset}
+                          onRefreshPrices={refreshPrices}
+                          isLoadingPrices={isLoadingPrices}
+                          isPriceStale={isPriceStale}
+                          priceStatus={priceStatus}
+                        />
+                      </Suspense>
+                    </SectionErrorBoundary>
                   </div>
                 )}
+
+                {/* Charts & AI Dashboard Widgets in Home after Assets */}
+                <div className="space-y-4 pt-1">
+                  {mobileDashboardWidgets}
+                </div>
               </div>
             ) : (
               <div className="space-y-4">

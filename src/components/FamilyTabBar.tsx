@@ -65,12 +65,12 @@ export default React.memo(function FamilyTabBar({
   }, [menuTarget]);
 
   return (
-    <div className="flex items-center justify-between gap-2 pb-1 relative">
-      {/* Segmented Track with Horizontal Scroll on Mobile */}
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1 relative">
+      {/* Segmented Track: 2 columns on mobile, horizontal flex on desktop */}
       <div
         role="tablist"
         aria-label="Family members portfolios"
-        className="flex items-center gap-1 bg-[var(--surface-secondary)] p-1 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] overflow-x-auto scrollbar-none max-w-full sm:flex-wrap flex-1 sm:flex-initial"
+        className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 sm:gap-1 bg-[var(--surface-secondary)] p-1.5 sm:p-1 rounded-[var(--radius-large)] sm:rounded-[var(--radius-medium)] border border-[var(--border-subtle)] w-full sm:w-auto"
       >
         {/* Overview Tab */}
         <button
@@ -82,7 +82,7 @@ export default React.memo(function FamilyTabBar({
             setMenuTarget(null);
             onTabChange('all');
           }}
-          className={`flex items-center gap-2 h-8 px-2.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none shrink-0 ${
+          className={`flex items-center gap-2 h-9 sm:h-8 px-2.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none min-w-0 ${
             activeTab === 'all'
               ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-xs border border-[var(--border-subtle)]'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -91,7 +91,7 @@ export default React.memo(function FamilyTabBar({
           <div className="w-4 h-4 rounded bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
             <LayoutDashboard size={12} />
           </div>
-          <span className="whitespace-nowrap">Family Overview</span>
+          <span className="truncate">Family Overview</span>
         </button>
 
         {/* Member Tabs */}
@@ -102,7 +102,7 @@ export default React.memo(function FamilyTabBar({
           const isMenuOpen = menuTarget?.id === p.id;
 
           return (
-            <div key={p.name} className="relative group flex items-center justify-between shrink-0">
+            <div key={p.name} className="relative group flex items-center justify-between min-w-0">
               <button
                 role="tab"
                 aria-selected={isActive}
@@ -112,19 +112,19 @@ export default React.memo(function FamilyTabBar({
                   setMenuTarget(null);
                   onTabChange(p.name);
                 }}
-                className={`flex items-center justify-between gap-1.5 h-8 px-2 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none shrink-0 ${
+                className={`flex items-center justify-between gap-1 h-9 sm:h-8 px-2 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none w-full min-w-0 ${
                   isActive
                     ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-xs border border-[var(--border-subtle)]'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1.5 min-w-0 truncate">
                   {/* Styled icon badge */}
                   <div className={`w-4 h-4 rounded ${iconConfig.bg} ${iconConfig.text} flex items-center justify-center shrink-0`}>
                     {iconConfig.icon}
                   </div>
 
-                  <span className="whitespace-nowrap">{p.label}</span>
+                  <span className="truncate">{p.label}</span>
                 </div>
 
                 {/* Return Percentage Badge */}
@@ -146,7 +146,7 @@ export default React.memo(function FamilyTabBar({
                   e.stopPropagation();
                   setMenuTarget(isMenuOpen ? null : { id: p.id, name: p.name, label: p.label });
                 }}
-                className="sm:hidden w-5 h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-0.5"
+                className="sm:hidden w-4 h-9 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-0.5 shrink-0"
                 title={`Options for ${p.label}`}
                 aria-label={`Options for portfolio ${p.label}`}
                 aria-expanded={isMenuOpen}
@@ -186,7 +186,7 @@ export default React.memo(function FamilyTabBar({
               {isMenuOpen && (
                 <div
                   ref={menuRef}
-                  className="absolute top-9 right-0 z-50 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] shadow-xl p-1 min-w-[120px] animate-scale-in sm:hidden"
+                  className="absolute top-10 right-0 z-50 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] shadow-xl p-1 min-w-[120px] animate-scale-in sm:hidden"
                 >
                   <button
                     type="button"
@@ -217,17 +217,26 @@ export default React.memo(function FamilyTabBar({
             </div>
           );
         })}
+
+        {/* Mobile Add Member Slot in Grid */}
+        <button
+          onClick={onAddFamilyClick}
+          className="flex items-center justify-center gap-1.5 px-2 h-9 rounded-[var(--radius-small)] text-xs font-bold border border-dashed border-[var(--border-subtle)] bg-[var(--surface)] hover:border-[var(--accent-blue)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] ios-press transition-colors cursor-pointer min-w-0 sm:hidden"
+          aria-label="Add family member"
+        >
+          <UserPlus size={13} />
+          <span className="truncate">Add Member</span>
+        </button>
       </div>
 
-      {/* Add family control */}
+      {/* Desktop Add family control */}
       <button
         onClick={onAddFamilyClick}
-        className="flex items-center gap-1.5 px-3 h-8 rounded-[var(--radius-medium)] text-xs font-bold border border-[var(--border-subtle)] bg-[var(--surface)] hover:border-[var(--accent-blue)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] ios-press transition-colors shrink-0 cursor-pointer"
+        className="hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-[var(--radius-medium)] text-xs font-bold border border-[var(--border-subtle)] bg-[var(--surface)] hover:border-[var(--accent-blue)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] ios-press transition-colors shrink-0 cursor-pointer"
         aria-label="Add family member"
       >
         <UserPlus size={14} />
-        <span className="hidden sm:inline">Add Member</span>
-        <span className="sm:hidden">Add</span>
+        <span>Add Member</span>
       </button>
     </div>
   );
