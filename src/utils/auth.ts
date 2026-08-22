@@ -62,12 +62,27 @@ export async function verifyPin(pin: string): Promise<boolean> {
 
   // 1. Custom PIN hash match (user configured PIN via device settings)
   const customHash = localStorage.getItem(CUSTOM_HASH_KEY);
-  if (customHash && customHash === inputHash) {
+  if (customHash) {
+    if (customHash === inputHash) {
+      markSessionVerified(inputHash);
+      return true;
+    }
+    // Custom PIN is set but doesn't match — definitive wrong PIN
+    return false;
+  }
+
+  // 2. Legacy VITE_APP_PIN migration: if it's still baked into the bundle,
+  //    use it as a one-time fallback and migrate to localStorage automatically.
+  const legacyPlainPin = (import.meta.env.VITE_APP_PIN as string | undefined)?.trim();
+  if (legacyPlainPin && pin === legacyPlainPin) {
+    // Auto-migrate: store the hash locally so we never hit this path again
+    localStorage.setItem(CUSTOM_HASH_KEY, inputHash);
+    localStorage.setItem(CUSTOM_LENGTH_KEY, pin.length.toString());
     markSessionVerified(inputHash);
     return true;
   }
 
-  // 2. Authoritative backend Edge Function check
+  // 3. Authoritative backend Edge Function check
   try {
     const result = await invokeFunction<{ verified: boolean }>('verify-pin', {
       method: 'POST',
@@ -77,11 +92,19 @@ export async function verifyPin(pin: string): Promise<boolean> {
       markSessionVerified(inputHash);
       return true;
     }
-  } catch {
-    // Ignore network / server errors — don't block login
+    return false;
+  } catch (err) {
+    // Re-throw config/network errors so PinLockScreen can show a useful message
+    // instead of silently returning false (which looks like a wrong PIN)
+    if (err && typeof err === 'object' && 'code' in err) {
+      const code = (err as { code: string }).code;
+      if (code === 'config' || code === 'network' || code === 'timeout') {
+        throw err;
+      }
+    }
+    // Any other server error → treat as wrong PIN
+    return false;
   }
-
-  return false;
 }
 
 /** Reset any user-defined custom PIN */

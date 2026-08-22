@@ -288,10 +288,15 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             isVerifyingRef.current = false;
           }, 600);
         }
-      }).catch(() => {
+      }).catch((err: unknown) => {
         triggerHaptic('error');
         setShake(true);
-        setError('Verification failed');
+        // Surface config / network errors with a real message
+        const msg =
+          err && typeof err === 'object' && 'message' in err
+            ? String((err as { message: string }).message)
+            : 'Verification failed. Check your connection.';
+        setError(msg);
         setTimeout(() => {
           setShake(false);
           pinRef.current = '';
