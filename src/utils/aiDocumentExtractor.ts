@@ -52,12 +52,17 @@ export interface ExtractedAssetResult {
   };
 }
 
-const GEMINI_STORAGE_KEY = 'finance_gemini_api_key_session';
+const GEMINI_LOCAL_KEY = 'finance_gemini_api_key';
+const GEMINI_SESSION_KEY = 'finance_gemini_api_key_session';
 
 export function getGeminiApiKey(): string {
   try {
-    const stored = sessionStorage.getItem(GEMINI_STORAGE_KEY)?.trim();
-    if (stored) return stored;
+    const local = localStorage.getItem(GEMINI_LOCAL_KEY)?.trim();
+    if (local) return local;
+    const session = sessionStorage.getItem(GEMINI_SESSION_KEY)?.trim();
+    if (session) return session;
+    const envKey = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim();
+    if (envKey) return envKey;
   } catch {
     // Ignore storage quota or security errors
   }
@@ -66,10 +71,13 @@ export function getGeminiApiKey(): string {
 
 export function setStoredGeminiApiKey(key: string): void {
   try {
-    if (key.trim()) {
-      sessionStorage.setItem(GEMINI_STORAGE_KEY, key.trim());
+    const trimmed = key.trim();
+    if (trimmed) {
+      localStorage.setItem(GEMINI_LOCAL_KEY, trimmed);
+      sessionStorage.setItem(GEMINI_SESSION_KEY, trimmed);
     } else {
-      sessionStorage.removeItem(GEMINI_STORAGE_KEY);
+      localStorage.removeItem(GEMINI_LOCAL_KEY);
+      sessionStorage.removeItem(GEMINI_SESSION_KEY);
     }
   } catch {
     // Ignore storage quota or security errors
