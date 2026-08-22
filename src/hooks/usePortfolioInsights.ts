@@ -128,13 +128,20 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
         portfolioBestWorst.push({ portfolioLabel: p?.label ?? '', best: null, worst: null });
         continue;
       }
-      let bestH: Holding = p.holdings[0];
-      let worstH: Holding = p.holdings[0];
-      for (let j = 1; j < p.holdings.length; j++) {
-        const h = p.holdings[j];
-        if (h.pnlPercent > bestH.pnlPercent) bestH = h;
-        if (h.pnlPercent < worstH.pnlPercent) worstH = h;
+
+      const gainers = p.holdings.filter((h) => h.pnlPercent > 0);
+      const losers = p.holdings.filter((h) => h.pnlPercent < 0);
+
+      let bestH: Holding | null = null;
+      if (gainers.length > 0) {
+        bestH = gainers.reduce((max, h) => (h.pnlPercent > max.pnlPercent ? h : max), gainers[0]);
       }
+
+      let worstH: Holding | null = null;
+      if (losers.length > 0) {
+        worstH = losers.reduce((min, h) => (h.pnlPercent < min.pnlPercent ? h : min), losers[0]);
+      }
+
       portfolioBestWorst.push({
         portfolioLabel: p.label,
         best: bestH,

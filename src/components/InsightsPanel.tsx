@@ -209,19 +209,31 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
       {valid.map((pw, i) => (
         <div key={i}>
           <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">{pw.portfolioLabel}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
+          <div className={`grid gap-1.5 sm:gap-2 ${pw.best && pw.worst ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
             {pw.best && (
-              <div className="flex items-center gap-1.5 bg-[var(--positive-soft)] rounded-[var(--radius-medium)] px-2 py-1.5 min-w-0">
-                <TrendingUp size={10} className="text-[var(--positive)] shrink-0" aria-hidden="true" />
-                <span className="text-[10px] font-bold text-[var(--positive)] truncate">{pw.best.ticker}</span>
-                <span className="text-[10px] font-bold text-[var(--positive)] ml-auto shrink-0 tnum">{formatPercent(pw.best.pnlPercent, 1)}</span>
+              <div className={`flex items-center gap-1.5 rounded-[var(--radius-medium)] px-2 py-1.5 min-w-0 ${
+                pw.best.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'
+              }`}>
+                {pw.best.pnlPercent >= 0 ? (
+                  <TrendingUp size={10} className="shrink-0" aria-hidden="true" />
+                ) : (
+                  <TrendingDown size={10} className="shrink-0" aria-hidden="true" />
+                )}
+                <span className="text-[10px] font-bold truncate">{pw.best.ticker}</span>
+                <span className="text-[10px] font-bold ml-auto shrink-0 tnum">{formatPercent(pw.best.pnlPercent, 1)}</span>
               </div>
             )}
             {pw.worst && (
-              <div className="flex items-center gap-1.5 bg-[var(--negative-soft)] rounded-[var(--radius-medium)] px-2 py-1.5 min-w-0">
-                <TrendingDown size={10} className="text-[var(--negative)] shrink-0" aria-hidden="true" />
-                <span className="text-[10px] font-bold text-[var(--negative)] truncate">{pw.worst.ticker}</span>
-                <span className="text-[10px] font-bold text-[var(--negative)] ml-auto shrink-0 tnum">{formatPercent(pw.worst.pnlPercent, 1)}</span>
+              <div className={`flex items-center gap-1.5 rounded-[var(--radius-medium)] px-2 py-1.5 min-w-0 ${
+                pw.worst.pnlPercent <= 0 ? 'bg-[var(--negative-soft)] text-[var(--negative)]' : 'bg-[var(--positive-soft)] text-[var(--positive)]'
+              }`}>
+                {pw.worst.pnlPercent <= 0 ? (
+                  <TrendingDown size={10} className="shrink-0" aria-hidden="true" />
+                ) : (
+                  <TrendingUp size={10} className="shrink-0" aria-hidden="true" />
+                )}
+                <span className="text-[10px] font-bold truncate">{pw.worst.ticker}</span>
+                <span className="text-[10px] font-bold ml-auto shrink-0 tnum">{formatPercent(pw.worst.pnlPercent, 1)}</span>
               </div>
             )}
           </div>
