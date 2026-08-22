@@ -287,7 +287,7 @@ function MobileHomeSummary({
           {/* Total Return */}
           <div className="p-2.5 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] min-w-0">
             <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-0.5 truncate">
-              Total Overall Return
+              Total Return
             </span>
             <div className={`flex items-center gap-1 text-xs font-extrabold tnum truncate ${
               isTotalGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'
@@ -322,20 +322,20 @@ function MobileHomeSummary({
                     <span className="text-xs font-extrabold text-[var(--text-primary)] tnum shrink-0">{renderValue(p.totalCurrentValue)}</span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-1 pt-2 border-t border-[var(--border-subtle)] text-xs">
+                  <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-[var(--border-subtle)] text-xs">
                     <div className="min-w-0">
-                      <span className="text-xs text-[var(--text-tertiary)] uppercase font-semibold block truncate">Invested</span>
-                      <span className="font-extrabold tnum text-[var(--text-secondary)] block truncate">{renderValue(p.totalInvested)}</span>
+                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block truncate">Invested</span>
+                      <span className="font-extrabold tnum text-[var(--text-secondary)] block truncate text-xs">{renderValue(p.totalInvested)}</span>
                     </div>
                     <div className="min-w-0">
-                      <span className="text-xs text-[var(--text-tertiary)] uppercase font-semibold block truncate">Total Return</span>
-                      <span className={`font-extrabold tnum block truncate ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block truncate">Total Return</span>
+                      <span className={`font-extrabold tnum block truncate text-xs ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                         {isBalancesHidden ? '••••••' : formatPercent(p.totalPnLPercent, 1)}
                       </span>
                     </div>
                     <div className="text-right min-w-0">
-                      <span className="text-xs text-[var(--text-tertiary)] uppercase font-semibold block truncate">Today's P&amp;L</span>
-                      <span className={`font-extrabold tnum block truncate ${isTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                      <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-semibold block truncate">Today's P&amp;L</span>
+                      <span className={`font-extrabold tnum block truncate text-xs ${isTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                         {isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}{formatINR(pTodayPnL)}</>}
                       </span>
                     </div>

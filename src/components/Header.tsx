@@ -121,17 +121,17 @@ function Header({
   };
 
   return (
-    <header className="sticky top-0 z-[var(--z-header)] bg-[var(--surface-header)] backdrop-blur-md border-b border-[var(--border-subtle)] transition-colors">
-      <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <header className="sticky top-0 z-[var(--z-header)] bg-[var(--surface-header)] backdrop-blur-md border-b border-[var(--border-subtle)] transition-colors pt-[env(safe-area-inset-top,0px)]">
+      <div className="max-w-[1720px] mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
           {/* Logo & title */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-[var(--radius-medium)] bg-[var(--accent-blue)] flex items-center justify-center text-white shadow-sm ring-1 ring-[var(--border-subtle)]">
-              <TrendingUp size={18} />
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-[var(--radius-medium)] bg-[var(--accent-blue)] flex items-center justify-center text-white shadow-sm ring-1 ring-[var(--border-subtle)] shrink-0">
+              <TrendingUp size={16} className="sm:w-[18px] sm:h-[18px]" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold text-[var(--text-primary)] tracking-tight leading-none">
+                <h1 className="text-sm sm:text-base font-bold text-[var(--text-primary)] tracking-tight leading-none truncate">
                   Portfolio Tracker
                 </h1>
                 {activePortfolioLabel && (
@@ -150,38 +150,35 @@ function Header({
           </div>
 
           {/* Quick stats & action buttons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {/* Controls */}
-            <div className="flex items-center gap-1.5">
-              {/* Sync Status / Refresh button */}
+            {/* Sync Status / Refresh button */}
+            <IconButton
+              icon={<RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />}
+              title={isLoading ? 'Fetching prices...' : lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : 'Sync prices'}
+              onClick={onRefresh}
+              disabled={isLoading}
+            />
+
+            {/* Export Panel (Desktop) */}
+            <div className="hidden sm:block">
+              <Suspense fallback={<div className="w-8 h-8 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] animate-pulse" />}>
+                <ExportPanel
+                  portfolios={portfolios}
+                  onImportCSV={onImportCSV}
+                  portfolioOptions={portfolioOptions}
+                />
+              </Suspense>
+            </div>
+
+            {/* Change PIN (Available on Mobile & Desktop) */}
+            {onChangePinClick && (
               <IconButton
-                icon={<RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />}
-                title={isLoading ? 'Fetching prices...' : lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : 'Sync prices'}
-                onClick={onRefresh}
-                disabled={isLoading}
+                icon={<LockKeyhole size={14} />}
+                title="Change PIN"
+                onClick={onChangePinClick}
               />
-
-              {/* Export Panel (Desktop) */}
-              <div className="hidden sm:block">
-                <Suspense fallback={<div className="w-8 h-8 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] animate-pulse" />}>
-                  <ExportPanel
-                    portfolios={portfolios}
-                    onImportCSV={onImportCSV}
-                    portfolioOptions={portfolioOptions}
-                  />
-                </Suspense>
-              </div>
-
-              {/* Change PIN (Desktop) */}
-              {onChangePinClick && (
-                <div className="hidden sm:block">
-                  <IconButton
-                    icon={<LockKeyhole size={14} />}
-                    title="Change PIN"
-                    onClick={onChangePinClick}
-                  />
-                </div>
-              )}
+            )}
 
               {/* Privacy Toggle */}
               <IconButton
@@ -307,8 +304,7 @@ function Header({
             </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
   );
 }
 
