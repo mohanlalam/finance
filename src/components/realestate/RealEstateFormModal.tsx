@@ -16,10 +16,8 @@ interface RealEstateFormModalProps {
   portfolioName: string;
   portfolioOptions: PortfolioOption[];
   documents?: DocumentMetadata[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<{ id?: string; data?: { id?: string } } | void>;
+  onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDeleteDoc?: (assetType: string, id: string) => Promise<void>;
 }
 
@@ -83,6 +81,18 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
     e.preventDefault();
     if (!propertyName.trim()) {
       setError('Property name is required');
+      return;
+    }
+
+    const buyPrice = purchasePrice ? parseFloat(purchasePrice) : undefined;
+    if (buyPrice !== undefined && (isNaN(buyPrice) || buyPrice < 0 || buyPrice > 5_000_000_000)) {
+      setError('Purchase price cannot exceed ₹500 Crore');
+      return;
+    }
+
+    const currVal = currentValuation ? parseFloat(currentValuation) : undefined;
+    if (currVal !== undefined && (isNaN(currVal) || currVal < 0 || currVal > 5_000_000_000)) {
+      setError('Current valuation cannot exceed ₹500 Crore');
       return;
     }
 

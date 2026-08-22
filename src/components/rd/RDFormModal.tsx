@@ -106,13 +106,13 @@ export function RDFormModal({
     const r = parseFloat(interestRate);
     const matAmt = parseFloat(maturityAmount);
 
-    if (isNaN(p) || p <= 0) {
-      setError('Monthly deposit must be a positive number.');
+    if (isNaN(p) || p <= 0 || p > 50_000_000) {
+      setError('Monthly deposit must be a positive number up to ₹5 Crore.');
       return;
     }
 
-    if (isNaN(r) || r < 0) {
-      setError('Interest rate must be a valid non-negative number.');
+    if (isNaN(r) || r < 0 || r > 50) {
+      setError('Interest rate must be between 0% and 50% p.a.');
       return;
     }
 

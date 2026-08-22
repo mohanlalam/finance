@@ -79,8 +79,8 @@ export default function ChangePinModal({ onClose, onSuccess }: ChangePinModalPro
       return;
     }
 
-    if (newPin.length < 4) {
-      setError('New PIN must be at least 4 digits');
+    if (newPin.length < 4 || newPin.length > 10) {
+      setError('New PIN must be between 4 and 10 digits');
       return;
     }
 

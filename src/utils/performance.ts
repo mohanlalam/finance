@@ -121,14 +121,14 @@ export function calculateXIRR(cashflows: CashFlow[]): number {
     if (rNext <= -0.99) rNext = -0.98;
 
     if (Math.abs(rNext - r) < epsilon) {
-      if (rNext > -0.99 && rNext < 10.0 && !isNaN(rNext)) return rNext;
+      if (rNext > -0.99 && rNext < 3.0 && !isNaN(rNext)) return rNext;
       break;
     }
     r = rNext;
   }
 
   let low = -0.98;
-  let high = 10.0;
+  let high = 3.0;
   let yLow = f(low);
   let yHigh = f(high);
 
@@ -262,6 +262,8 @@ function getXirrWorker(): Worker | null {
   return _xirrWorker;
 }
 
+let _xirrTaskCounter = 0;
+
 export function runXIRRAsync(cashflows: CashFlow[]): Promise<number> {
   const worker = getXirrWorker();
   if (!worker) {
@@ -269,7 +271,7 @@ export function runXIRRAsync(cashflows: CashFlow[]): Promise<number> {
   }
 
   return new Promise((resolve) => {
-    const taskId = Math.random().toString(36).substring(7);
+    const taskId = String(++_xirrTaskCounter);
     _pendingXirrCallbacks.set(taskId, resolve);
     worker.postMessage({ taskId, cashflows });
   });
@@ -294,7 +296,7 @@ function getPortfolioCacheKey(p: Portfolio): string {
   const sipsCount = p.sipAccounts?.length ?? 0;
   const goldCount = p.goldHoldings?.length ?? 0;
   const reCount = p.realEstate?.length ?? 0;
-  return `${p.id || p.name}:${p.totalInvested.toFixed(2)}:${p.totalCurrentValue.toFixed(2)}:${holdingsCount}:${fdsCount}:${rdsCount}:${sipsCount}:${goldCount}:${reCount}`;
+  return `${p.id || p.name}:${Math.round(p.totalInvested)}:${Math.round(p.totalCurrentValue)}:${holdingsCount}:${fdsCount}:${rdsCount}:${sipsCount}:${goldCount}:${reCount}`;
 }
 
 export function getPortfolioCashFlows(portfolio: Portfolio, target: CashFlow[] = []): CashFlow[] {
@@ -522,7 +524,7 @@ export function getPortfolioAnnualizedReturn(portfolio: Portfolio): number {
 
   const inv = Number(portfolio.totalInvested) || 0;
   const curr = Number(portfolio.totalCurrentValue) || 0;
-  return inv > 0 ? ((curr - inv) / inv) * 100 : 0;
+  return inv > 0 ? (curr - inv) / inv : 0;
 }
 
 export function getMultiplePortfoliosAnnualizedReturn(portfolios: Portfolio[]): number {
@@ -552,5 +554,5 @@ export function getMultiplePortfoliosAnnualizedReturn(portfolios: Portfolio[]): 
   const cagr = calculateCAGR(totalInvested, totalCurrentValue, combinedAge);
   if (!isNaN(cagr) && cagr !== 0) return cagr;
 
-  return totalInvested > 0 ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 : 0;
+  return totalInvested > 0 ? (totalCurrentValue - totalInvested) / totalInvested : 0;
 }

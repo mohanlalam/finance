@@ -14,10 +14,8 @@ interface FDFormModalProps {
   editingFd: FixedDeposit | null;
   portfolioName: string;
   portfolioOptions: PortfolioOption[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<unknown>;
+  onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
 }
 
 export const FDFormModal = React.memo(function FDFormModal({
@@ -89,13 +87,13 @@ export const FDFormModal = React.memo(function FDFormModal({
       return;
     }
     const p = parseFloat(principal);
-    if (isNaN(p) || p <= 0) {
-      setError('Please enter a valid principal amount');
+    if (isNaN(p) || p <= 0 || p > 1_000_000_000) {
+      setError('Please enter a valid principal amount up to ₹100 Crore');
       return;
     }
     const rate = parseFloat(interestRate);
-    if (isNaN(rate) || rate <= 0) {
-      setError('Please enter a valid interest rate');
+    if (isNaN(rate) || rate <= 0 || rate > 50) {
+      setError('Please enter a valid interest rate between 0.1% and 50%');
       return;
     }
     if (!startDate) {

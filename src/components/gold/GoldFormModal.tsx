@@ -16,10 +16,8 @@ interface GoldFormModalProps {
   portfolioName: string;
   portfolioOptions: PortfolioOption[];
   documents?: DocumentMetadata[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<{ id?: string; data?: { id?: string } } | void>;
+  onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDeleteDoc?: (assetType: string, id: string) => Promise<void>;
 }
 
@@ -86,8 +84,20 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       return;
     }
     const grams = parseFloat(weightGrams);
-    if (isNaN(grams) || grams <= 0) {
-      setError('Please enter a valid weight in grams');
+    if (isNaN(grams) || grams <= 0 || grams > 100_000) {
+      setError('Please enter a valid weight in grams up to 100,000g');
+      return;
+    }
+
+    const buyPrice = purchasePrice ? parseFloat(purchasePrice) : undefined;
+    if (buyPrice !== undefined && (isNaN(buyPrice) || buyPrice < 0 || buyPrice > 1_000_000_000)) {
+      setError('Purchase price must be up to ₹100 Crore');
+      return;
+    }
+
+    const currVal = currentValuation ? parseFloat(currentValuation) : undefined;
+    if (currVal !== undefined && (isNaN(currVal) || currVal < 0 || currVal > 1_000_000_000)) {
+      setError('Current valuation must be up to ₹100 Crore');
       return;
     }
 

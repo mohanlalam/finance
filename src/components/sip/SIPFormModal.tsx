@@ -103,13 +103,23 @@ export function SIPFormModal({
     const u = parseFloat(units) || 0;
     const val = parseFloat(fallbackValuation) || 0;
 
-    if (isNaN(sip) || sip <= 0) {
-      setError('Monthly SIP amount must be a positive number.');
+    if (isNaN(sip) || sip <= 0 || sip > 50_000_000) {
+      setError('Monthly SIP amount must be a positive number up to ₹5 Crore.');
       return;
     }
 
-    if (isNaN(cagr) || cagr < -100) {
-      setError('Expected CAGR must be a valid percentage.');
+    if (isNaN(cagr) || cagr < -100 || cagr > 100) {
+      setError('Expected CAGR must be between -100% and 100%.');
+      return;
+    }
+
+    if (u < 0 || u > 10_000_000) {
+      setError('Units must be between 0 and 10,000,000.');
+      return;
+    }
+
+    if (val < 0 || val > 1_000_000_000) {
+      setError('Valuation must be between 0 and ₹100 Crore.');
       return;
     }
 

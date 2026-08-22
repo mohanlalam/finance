@@ -33,9 +33,13 @@ const supabase = createClient(
 );
 
 async function fetchQuote(ticker: string, yahooSymbol: string): Promise<Omit<QuoteResult, "ticker">> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?range=1d&interval=1d`;
     const res = await fetch(url, {
+      signal: controller.signal,
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Accept": "application/json",
@@ -61,6 +65,8 @@ async function fetchQuote(ticker: string, yahooSymbol: string): Promise<Omit<Quo
     return { ltp, todayPct };
   } catch (e: unknown) {
     return { ltp: null, todayPct: null, error: e instanceof Error ? e.message : String(e) };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -95,8 +101,6 @@ Deno.serve(async (req: Request) => {
         }
       }
     }
-
-    console.log(`PIN verification: clientPin=${clientPin ? "[provided]" : "[empty]"}, serverPinHash=${serverPinHash ? "[configured]" : "[empty]"}, isValid=${isValid}`);
 
     if (!isValid) {
       return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {

@@ -16,10 +16,8 @@ interface InsuranceFormModalProps {
   portfolioName: string;
   portfolioOptions: PortfolioOption[];
   documents?: DocumentMetadata[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<{ id?: string; data?: { id?: string } } | void>;
+  onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDeleteDoc?: (assetType: string, id: string) => Promise<void>;
 }
 
@@ -89,8 +87,14 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
       return;
     }
     const sum = parseFloat(sumAssured);
-    if (isNaN(sum) || sum <= 0) {
-      setError('Please enter a valid sum assured');
+    if (isNaN(sum) || sum <= 0 || sum > 1_000_000_000) {
+      setError('Please enter a valid sum assured up to ₹100 Crore');
+      return;
+    }
+
+    const prem = premiumAmount ? parseFloat(premiumAmount) : undefined;
+    if (prem !== undefined && (isNaN(prem) || prem < 0 || prem > 100_000_000)) {
+      setError('Premium amount cannot exceed ₹10 Crore');
       return;
     }
 

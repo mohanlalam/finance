@@ -35,19 +35,23 @@ export function useAlerts(portfolios: Portfolio[]): Alert[] {
   // Track whether a swing alert was triggered this render cycle
   const swingAlertRef = useRef<{ diff: number; newPct: number } | null>(null);
 
-  const currentPct = useMemo(() => {
-    const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
-    const totalCurrent = portfolios.reduce((s, p) => s + p.totalCurrentValue, 0);
-    return totalInvested > 0 ? ((totalCurrent - totalInvested) / totalInvested) * 100 : 0;
+  const { currentPct, totalInvested } = useMemo(() => {
+    let invested = 0;
+    let current = 0;
+    for (let i = 0; i < portfolios.length; i++) {
+      invested += portfolios[i].totalInvested;
+      current += portfolios[i].totalCurrentValue;
+    }
+    const pct = invested > 0 ? ((current - invested) / invested) * 100 : 0;
+    return { currentPct: pct, totalInvested: invested };
   }, [portfolios]);
 
   useEffect(() => {
-    const totalInvested = portfolios.reduce((s, p) => s + p.totalInvested, 0);
     if (baselinePnlPctRef.current === null && portfolios.length > 0 && totalInvested > 0) {
       baselinePnlPctRef.current = currentPct;
       setLastPnlPct(currentPct);
     }
-  }, [currentPct, portfolios]);
+  }, [currentPct, portfolios.length, totalInvested]);
 
   // Advance the baseline AFTER render when a swing is detected — safe side-effect
   useEffect(() => {

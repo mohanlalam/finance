@@ -105,3 +105,23 @@ After **any correction** from the user, append a new entry here with the pattern
 **Fix**: (1) Converted `HoldingDetailDrawer` into an Apple-style bottom sheet (`items-end`, `rounded-t-2xl`, drag handle) on mobile and side drawer on desktop. (2) Set responsive chart heights (`min-h-[320px] sm:min-h-[370px]`) and dynamic skeleton placeholders in `AppShell`. (3) Gated daily commodity sync with a 24-hour timestamp check in `localStorage`.  
 **Rule**: For detail drawers and complex forms, always branch layout into slide-up bottom sheets on mobile (`< 768px`) with top drag handles and safe-area padding. Always gate external daily market rate syncs behind 24-hour cache intervals.
 
+---
+
+### 2026-08-21 — Missing `@keyframes` for custom `animate-*` class
+**Mistake**: `FamilyTabBar`'s mobile popover used `animate-scale-in` class, but no `@keyframes scaleIn` / `.animate-scale-in` rule existed in `index.css`. Element appeared instantly with no entrance animation — silently degraded.
+**Root Cause**: Added an animation class to JSX without defining the corresponding keyframe in `index.css`. Tailwind only knows its own built-in animation utilities (`animate-pulse`, `animate-spin`, etc.); custom `animate-*` classes require explicit `@keyframes` + class definitions in CSS.
+**Fix**: Added `@keyframes scaleIn` + `.animate-scale-in { transform-origin: top right; }` to `index.css`.
+**Rule**: Whenever you add an `animate-*` class that is NOT a built-in Tailwind animation, immediately define the `@keyframes` + `.animate-*` rule in `index.css`. Tailwind will not warn about missing custom animation classes — verify with `npm run build`.
+
+---
+
+### 2026-08-22 — Full Project 4-Phase Comprehensive Audit Protocol
+**Mistake**: Partial or superficial audit stopping after high-level files instead of covering 100% of the repository across all domains.
+**Root Cause**: Conducting monolithic or shallow audits without a structured 4-phase decomposition covering all 70+ files in the repository.
+**Fix**: Standardized complete codebase audits into a mandatory 4-phase protocol producing 4 distinct audit reports:
+1. **Audit 1: Core Architecture, Auth & Security** (`App.tsx`, `main.tsx`, `auth.ts`, `biometrics.ts`, `apiClient.ts`, `usePortfolioData.ts`, `PortfolioContext.tsx`, all Edge Functions, build configs, ESLint & TypeScript verification).
+2. **Audit 2: Financial Calculation Engine, Database & NLP** (`performance.ts`, `xirr.worker.ts`, `portfolioCalcs.ts`, `rdUtils.ts`, `mathUtils.ts`, `assistant.ts`, all 16 `supabase/migrations/*.sql` schema files).
+3. **Audit 3: Ingestion, Backup, Security Modals & Contexts** (`ExportPanel.tsx`, `SmartImportModal.tsx`, `PinLockScreen.tsx`, `ChangePinModal.tsx`, `AddHoldingModal.tsx`, `aiDocumentExtractor.ts`, `usePortfolioInsights.ts`, `useAlerts.ts`, `useModalState.ts`, contexts).
+4. **Audit 4: UI Views, Form Modals, Storage & Interactive Utilities** (`PortfolioTable.tsx`, `DocumentVaultView.tsx`, `TaxHarvestingView.tsx`, `EditStockModal.tsx`, all 6 domain Form Modals, `DocumentAttachmentField.tsx`, `supabaseStorage.ts`, `pdfReport.ts`, interactive touch/swipe hooks, `index.css`).
+**Rule**: Whenever the user asks for a complete project audit, ALWAYS execute this 4-phase protocol and generate all 4 audit reports systematically to guarantee 100% file coverage with zero blind spots.
+

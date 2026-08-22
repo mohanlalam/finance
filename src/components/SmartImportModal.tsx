@@ -24,13 +24,23 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
   const [error, setError] = useState<string | null>(null);
   const [extractedResult, setExtractedResult] = useState<ExtractedAssetResult | null>(null);
 
-  const [targetPortfolio, setTargetPortfolio] = useState<string>(() => activeTab || (portfolios[0]?.name ?? 'Personal'));
+  const [targetPortfolio, setTargetPortfolio] = useState<string>(() => {
+    const validPortfolio = portfolios.find((p) => p.name === activeTab);
+    return validPortfolio ? validPortfolio.name : (portfolios[0]?.name ?? 'personal');
+  });
   const [isSaving, setIsSaving] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
+  const MAX_FILE_SIZE_MB = 20;
+
   const handleFileSelect = (selectedFile: File) => {
+    if (selectedFile.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      setError(`File is too large (${(selectedFile.size / (1024 * 1024)).toFixed(1)}MB). Maximum allowed size is ${MAX_FILE_SIZE_MB}MB.`);
+      return;
+    }
+
     setFile(selectedFile);
     setError(null);
     setExtractedResult(null);

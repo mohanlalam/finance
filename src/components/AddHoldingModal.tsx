@@ -94,8 +94,12 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
     }
     const qty = parseFloat(form.qty);
     const avgPrice = parseFloat(form.avgPrice);
-    if (isNaN(qty) || qty <= 0 || isNaN(avgPrice) || avgPrice <= 0) {
-      setError('Quantity and Average Price must be positive numbers.');
+    if (isNaN(qty) || qty <= 0 || qty > 10_000_000) {
+      setError('Quantity must be a positive number up to 10,000,000.');
+      return;
+    }
+    if (isNaN(avgPrice) || avgPrice <= 0 || avgPrice > 100_000_000) {
+      setError('Average Price must be a positive number up to ₹10,00,00,000.');
       return;
     }
     setSaving(true);

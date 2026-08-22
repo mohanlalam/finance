@@ -39,9 +39,9 @@ export default function DesktopSidebar({
           <button
             type="button"
             onClick={onOpenSmartImport}
-            className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-[var(--radius-medium)] text-xs font-bold text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-sm transition-all ios-press active:scale-95 cursor-pointer"
+            className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-[var(--radius-medium)] text-xs font-bold text-[var(--accent-blue)] bg-[var(--accent-blue-soft)] hover:bg-[var(--accent-blue)] hover:text-white border border-[var(--accent-blue)]/30 shadow-[var(--shadow-card)] transition-all ios-press active:scale-95 cursor-pointer group"
           >
-            <Sparkles size={15} />
+            <Sparkles size={14} />
             <span>✨ Smart AI Import</span>
           </button>
         </div>

@@ -52,25 +52,24 @@ export interface ExtractedAssetResult {
   };
 }
 
-const GEMINI_STORAGE_KEY = 'finance_gemini_api_key';
+const GEMINI_STORAGE_KEY = 'finance_gemini_api_key_session';
 
 export function getGeminiApiKey(): string {
   try {
-    const stored = localStorage.getItem(GEMINI_STORAGE_KEY)?.trim();
+    const stored = sessionStorage.getItem(GEMINI_STORAGE_KEY)?.trim();
     if (stored) return stored;
   } catch {
     // Ignore storage quota or security errors
   }
-  const envKey = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined) ?? '';
-  return envKey.trim();
+  return '';
 }
 
 export function setStoredGeminiApiKey(key: string): void {
   try {
     if (key.trim()) {
-      localStorage.setItem(GEMINI_STORAGE_KEY, key.trim());
+      sessionStorage.setItem(GEMINI_STORAGE_KEY, key.trim());
     } else {
-      localStorage.removeItem(GEMINI_STORAGE_KEY);
+      sessionStorage.removeItem(GEMINI_STORAGE_KEY);
     }
   } catch {
     // Ignore storage quota or security errors
@@ -190,6 +189,23 @@ export async function extractAssetFromDocument(
     if (!parsed.assetType || !parsed.data) {
       throw new Error('Incomplete data parsed from document.');
     }
+
+    // Bounds clamping and numeric validation
+    const d = parsed.data;
+    if (d.principalAmount !== undefined) d.principalAmount = Math.max(0, Math.min(Number(d.principalAmount) || 0, 100_000_000));
+    if (d.monthlyDeposit !== undefined) d.monthlyDeposit = Math.max(0, Math.min(Number(d.monthlyDeposit) || 0, 10_000_000));
+    if (d.interestRate !== undefined) d.interestRate = Math.max(0, Math.min(Number(d.interestRate) || 0, 50));
+    if (d.maturityAmount !== undefined) d.maturityAmount = Math.max(0, Math.min(Number(d.maturityAmount) || 0, 200_000_000));
+    if (d.weightGrams !== undefined) d.weightGrams = Math.max(0, Math.min(Number(d.weightGrams) || 0, 50_000));
+    if (d.purchasePrice !== undefined) d.purchasePrice = Math.max(0, Math.min(Number(d.purchasePrice) || 0, 1_000_000_000));
+    if (d.currentValuation !== undefined) d.currentValuation = Math.max(0, Math.min(Number(d.currentValuation) || 0, 1_000_000_000));
+    if (d.sumAssured !== undefined) d.sumAssured = Math.max(0, Math.min(Number(d.sumAssured) || 0, 500_000_000));
+    if (d.premiumAmount !== undefined) d.premiumAmount = Math.max(0, Math.min(Number(d.premiumAmount) || 0, 10_000_000));
+    if (d.qty !== undefined) d.qty = Math.max(0, Math.min(Number(d.qty) || 0, 10_000_000));
+    if (d.avgPrice !== undefined) d.avgPrice = Math.max(0, Math.min(Number(d.avgPrice) || 0, 100_000_000));
+    if (d.monthlySip !== undefined) d.monthlySip = Math.max(0, Math.min(Number(d.monthlySip) || 0, 10_000_000));
+    if (d.expectedCagr !== undefined) d.expectedCagr = Math.max(0, Math.min(Number(d.expectedCagr) || 0, 100));
+
     return parsed;
   } catch {
     throw new Error('Failed to parse AI extraction output. Please verify the document is legible.');

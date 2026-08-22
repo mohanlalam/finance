@@ -89,7 +89,7 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
       : [];
     const biggestMover = biggestMovers[0] || null;
 
-    // ── FD maturity alerts (30 days) ──
+    // ── FD maturity alerts (30 days + overdue) ──
     const fdMaturityAlerts: FDMaturityAlert[] = [];
     for (let i = 0; i < portfolios.length; i++) {
       const p = portfolios[i];
@@ -98,14 +98,14 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
         const fd = p.fixedDeposits[j];
         if (fd.status === 'matured') continue;
         const days = daysUntil(fd.maturity_date, nowMs);
-        if (days !== null && days >= 0 && days <= FD_MATURITY_WARNING_DAYS) {
+        if (days !== null && days <= FD_MATURITY_WARNING_DAYS && days >= -365) {
           fdMaturityAlerts.push({ fd, daysLeft: days, portfolioLabel: p.label });
         }
       }
     }
     fdMaturityAlerts.sort((a, b) => a.daysLeft - b.daysLeft);
 
-    // ── Insurance renewal alerts (60 days) ──
+    // ── Insurance renewal alerts (60 days + overdue) ──
     const insuranceRenewalAlerts: InsuranceRenewalAlert[] = [];
     for (let i = 0; i < portfolios.length; i++) {
       const p = portfolios[i];
@@ -113,7 +113,7 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
       for (let j = 0; j < p.insurances.length; j++) {
         const ins = p.insurances[j];
         const days = daysUntil(ins.renewal_date, nowMs);
-        if (days !== null && days >= 0 && days <= INSURANCE_RENEWAL_WARNING_DAYS) {
+        if (days !== null && days <= INSURANCE_RENEWAL_WARNING_DAYS && days >= -365) {
           insuranceRenewalAlerts.push({ insurance: ins, daysLeft: days, portfolioLabel: p.label });
         }
       }

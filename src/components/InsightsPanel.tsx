@@ -155,20 +155,23 @@ const FDReminders = React.memo(function FDReminders({ alerts }: { alerts: FDMatu
   if (alerts.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No FDs maturing in the next 30 days</p>;
   return (
     <div className="space-y-2">
-      {alerts.map((a) => (
-        <div key={`${a.fd.id || a.fd.bank_name}-${a.daysLeft}`} className="flex items-center gap-2 p-2 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)]">
-          <div className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
-            <Landmark size={12} aria-hidden="true" />
+      {alerts.map((a) => {
+        const isOverdue = a.daysLeft < 0;
+        return (
+          <div key={`${a.fd.id || a.fd.bank_name}-${a.daysLeft}`} className="flex items-center gap-2 p-2 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)]">
+            <div className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
+              <Landmark size={12} aria-hidden="true" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-[var(--text-primary)] truncate">{a.fd.bank_name}</p>
+              <p className="text-[10px] text-[var(--text-tertiary)]">{a.portfolioLabel} · <span className="tnum">{formatINR(Number(a.fd.maturity_amount))}</span></p>
+            </div>
+            <span className={`text-xs font-bold shrink-0 tnum ${a.daysLeft <= 7 || isOverdue ? 'text-[var(--warning)]' : 'text-[var(--text-secondary)]'}`}>
+              {isOverdue ? `${Math.abs(a.daysLeft)}d overdue` : `${a.daysLeft}d`}
+            </span>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-[var(--text-primary)] truncate">{a.fd.bank_name}</p>
-            <p className="text-[10px] text-[var(--text-tertiary)]">{a.portfolioLabel} · <span className="tnum">{formatINR(Number(a.fd.maturity_amount))}</span></p>
-          </div>
-          <span className={`text-xs font-bold shrink-0 tnum ${a.daysLeft <= 7 ? 'text-[var(--warning)]' : 'text-[var(--text-secondary)]'}`}>
-            {a.daysLeft}d
-          </span>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 });
@@ -177,20 +180,23 @@ const InsuranceReminders = React.memo(function InsuranceReminders({ alerts }: { 
   if (alerts.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No renewals in next 60 days</p>;
   return (
     <div className="space-y-2">
-      {alerts.map((a) => (
-        <div key={`${a.insurance.id || a.insurance.policy_name}-${a.daysLeft}`} className="flex items-center gap-2 p-2 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)]">
-          <div className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--negative-soft)] text-[var(--negative)] flex items-center justify-center shrink-0">
-            <Shield size={12} aria-hidden="true" />
+      {alerts.map((a) => {
+        const isOverdue = a.daysLeft < 0;
+        return (
+          <div key={`${a.insurance.id || a.insurance.policy_name}-${a.daysLeft}`} className="flex items-center gap-2 p-2 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)]">
+            <div className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--negative-soft)] text-[var(--negative)] flex items-center justify-center shrink-0">
+              <Shield size={12} aria-hidden="true" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-[var(--text-primary)] truncate">{a.insurance.policy_name}</p>
+              <p className="text-[10px] text-[var(--text-tertiary)]">{a.portfolioLabel} · <span className="tnum">{formatINR(Number(a.insurance.premium_amount))}</span>/yr</p>
+            </div>
+            <span className={`text-xs font-bold shrink-0 tnum ${a.daysLeft <= 15 || isOverdue ? 'text-[var(--negative)]' : 'text-[var(--text-secondary)]'}`}>
+              {isOverdue ? `${Math.abs(a.daysLeft)}d overdue` : `${a.daysLeft}d`}
+            </span>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-[var(--text-primary)] truncate">{a.insurance.policy_name}</p>
-            <p className="text-[10px] text-[var(--text-tertiary)]">{a.portfolioLabel} · <span className="tnum">{formatINR(Number(a.insurance.premium_amount))}</span>/yr</p>
-          </div>
-          <span className={`text-xs font-bold shrink-0 tnum ${a.daysLeft <= 15 ? 'text-[var(--negative)]' : 'text-[var(--text-secondary)]'}`}>
-            {a.daysLeft}d
-          </span>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 });

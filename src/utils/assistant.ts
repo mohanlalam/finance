@@ -265,7 +265,9 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
   // Query 1: Mutual Fund current year investments
   if (intent === Intent.MUTUAL_FUND_YEAR_INVESTMENTS) {
     let totalInvested = 0;
-    const currentYear = new Date().getFullYear();
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
 
     for (const p of portfolios) {
       if (p.sipAccounts) {
@@ -275,9 +277,9 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
           
           let monthsThisYear = 0;
           if (startYear < currentYear) {
-            monthsThisYear = new Date().getMonth() + 1;
+            monthsThisYear = currentMonth + 1;
           } else if (startYear === currentYear) {
-            monthsThisYear = new Date().getMonth() - startDate.getMonth() + 1;
+            monthsThisYear = currentMonth - startDate.getMonth() + 1;
           }
           
           if (monthsThisYear > 0) {
@@ -299,120 +301,116 @@ export function askAssistant(query: string, portfolios: Portfolio[]): AssistantR
     };
   }
 
-  // Helper: Compile all assets for performer and allocation queries
-  interface AssetDetail {
-    name: string;
-    type: string;
-    invested: number;
-    value: number;
-    gain: number;
-    gainPct: number;
-  }
-
-  const allAssets: AssetDetail[] = [];
-
-  for (const p of portfolios) {
-    // Stocks
-    for (const h of p.holdings) {
-      allAssets.push({
-        name: `${h.stockName} (${h.ticker})`,
-        type: 'Stock Holding',
-        invested: h.amountInvested,
-        value: h.currentValue,
-        gain: h.unrealizedPnL,
-        gainPct: h.pnlPercent,
-      });
-    }
-
-    // Gold
-    for (const g of p.goldHoldings) {
-      const val = Number(g.current_valuation) || 0;
-      const inv = Number(g.purchase_price) || 0;
-      const gain = val - inv;
-      const gainPct = inv > 0 ? (gain / inv) * 100 : 0;
-      allAssets.push({
-        name: g.item_name,
-        type: 'Gold Registry',
-        invested: inv,
-        value: val,
-        gain,
-        gainPct,
-      });
-    }
-
-    // Real Estate
-    for (const re of p.realEstate) {
-      const val = Number(re.current_valuation) || 0;
-      const inv = Number(re.purchase_price) || 0;
-      const gain = val - inv;
-      const gainPct = inv > 0 ? (gain / inv) * 100 : 0;
-      allAssets.push({
-        name: re.property_name,
-        type: 'Real Estate Property',
-        invested: inv,
-        value: val,
-        gain,
-        gainPct,
-      });
-    }
-
-    // Fixed Deposits
-    for (const fd of p.fixedDeposits) {
-      const inv = getFDInvestedAmount(fd);
-      const val = getFDEffectiveValue(fd);
-      const gain = val - inv;
-      const gainPct = inv > 0 ? (gain / inv) * 100 : 0;
-      allAssets.push({
-        name: `${fd.bank_name} FD`,
-        type: 'Fixed Deposit',
-        invested: inv,
-        value: val,
-        gain,
-        gainPct,
-      });
-    }
-
-    // Recurring Deposits
-    if (p.rdAccounts) {
-      for (const rd of p.rdAccounts) {
-        const inv = getRDInvestedAmount(rd);
-        const val = getRDEffectiveValue(rd);
-        const gain = val - inv;
-        const gainPct = inv > 0 ? (gain / inv) * 100 : 0;
-        allAssets.push({
-          name: `${rd.bank_name} RD`,
-          type: 'Recurring Deposit',
-          invested: inv,
-          value: val,
-          gain,
-          gainPct,
-        });
-      }
-    }
-
-
-
-    // Mutual Fund SIPs
-    if (p.sipAccounts) {
-      for (const sip of p.sipAccounts) {
-        const inv = getSIPInvestedAmount(sip);
-        const val = getSIPEffectiveValue(sip);
-        const gain = val - inv;
-        const gainPct = inv > 0 ? (gain / inv) * 100 : 0;
-        allAssets.push({
-          name: sip.fund_name,
-          type: 'Mutual Fund SIP',
-          invested: inv,
-          value: val,
-          gain,
-          gainPct,
-        });
-      }
-    }
-  }
-
   // Query 2: Performer Queries (Absolute and Percentage returns)
   if (intent === Intent.PERFORMERS) {
+    interface AssetDetail {
+      name: string;
+      type: string;
+      invested: number;
+      value: number;
+      gain: number;
+      gainPct: number;
+    }
+
+    const allAssets: AssetDetail[] = [];
+
+    for (const p of portfolios) {
+      // Stocks
+      for (const h of p.holdings) {
+        allAssets.push({
+          name: `${h.stockName} (${h.ticker})`,
+          type: 'Stock Holding',
+          invested: h.amountInvested,
+          value: h.currentValue,
+          gain: h.unrealizedPnL,
+          gainPct: h.pnlPercent,
+        });
+      }
+
+      // Gold
+      for (const g of p.goldHoldings) {
+        const val = Number(g.current_valuation) || 0;
+        const inv = Number(g.purchase_price) || 0;
+        const gain = val - inv;
+        const gainPct = inv > 0 ? (gain / inv) * 100 : 0;
+        allAssets.push({
+          name: g.item_name,
+          type: 'Gold Registry',
+          invested: inv,
+          value: val,
+          gain,
+          gainPct,
+        });
+      }
+
+      // Real Estate
+      for (const re of p.realEstate) {
+        const val = Number(re.current_valuation) || 0;
+        const inv = Number(re.purchase_price) || 0;
+        const gain = val - inv;
+        const gainPct = inv > 0 ? (gain / inv) * 100 : 0;
+        allAssets.push({
+          name: re.property_name,
+          type: 'Real Estate Property',
+          invested: inv,
+          value: val,
+          gain,
+          gainPct,
+        });
+      }
+
+      // Fixed Deposits
+      for (const fd of p.fixedDeposits) {
+        const inv = getFDInvestedAmount(fd);
+        const val = getFDEffectiveValue(fd);
+        const gain = val - inv;
+        const gainPct = inv > 0 ? (gain / inv) * 100 : 0;
+        allAssets.push({
+          name: `${fd.bank_name} FD`,
+          type: 'Fixed Deposit',
+          invested: inv,
+          value: val,
+          gain,
+          gainPct,
+        });
+      }
+
+      // Recurring Deposits
+      if (p.rdAccounts) {
+        for (const rd of p.rdAccounts) {
+          const inv = getRDInvestedAmount(rd);
+          const val = getRDEffectiveValue(rd);
+          const gain = val - inv;
+          const gainPct = inv > 0 ? (gain / inv) * 100 : 0;
+          allAssets.push({
+            name: `${rd.bank_name} RD`,
+            type: 'Recurring Deposit',
+            invested: inv,
+            value: val,
+            gain,
+            gainPct,
+          });
+        }
+      }
+
+      // Mutual Fund SIPs
+      if (p.sipAccounts) {
+        for (const sip of p.sipAccounts) {
+          const inv = getSIPInvestedAmount(sip);
+          const val = getSIPEffectiveValue(sip);
+          const gain = val - inv;
+          const gainPct = inv > 0 ? (gain / inv) * 100 : 0;
+          allAssets.push({
+            name: sip.fund_name,
+            type: 'Mutual Fund SIP',
+            invested: inv,
+            value: val,
+            gain,
+            gainPct,
+          });
+        }
+      }
+    }
     const validAssets = allAssets.filter(a => a.invested > 0);
     if (validAssets.length === 0) {
       return {

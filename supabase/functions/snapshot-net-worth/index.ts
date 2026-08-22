@@ -86,12 +86,16 @@ Deno.serve(async (req: Request) => {
     const [
       { data: holdings, error: hErr },
       { data: fixed_deposits, error: fdErr },
+      { data: rd_accounts, error: rdErr },
+      { data: sip_accounts, error: sipErr },
       { data: gold_holdings, error: goldErr },
       { data: real_estate, error: reErr },
       { data: priceCache, error: cacheErr },
     ] = await Promise.all([
       supabase.from("holdings").select("*"),
       supabase.from("fixed_deposits").select("*"),
+      supabase.from("rd_accounts").select("*"),
+      supabase.from("sip_accounts").select("*"),
       supabase.from("gold_holdings").select("*"),
       supabase.from("real_estate").select("*"),
       supabase.from("market_price_cache").select("*"),
@@ -99,6 +103,8 @@ Deno.serve(async (req: Request) => {
 
     if (hErr) throw hErr;
     if (fdErr) throw fdErr;
+    if (rdErr) throw rdErr;
+    if (sipErr) throw sipErr;
     if (goldErr) throw goldErr;
     if (reErr) throw reErr;
 
@@ -112,13 +118,28 @@ Deno.serve(async (req: Request) => {
     // FD Value
     const fdValue = (fixed_deposits || []).reduce((sum, f) => sum + getFDEffectiveValue(f), 0);
 
+    // RD Value
+    const rdValue = (rd_accounts || []).reduce((sum, r) => {
+      if (r.status === 'matured') return sum + Number(r.maturity_amount || 0);
+      if (Array.isArray(r.contributions) && r.contributions.length > 0) {
+        const cSum = r.contributions.reduce((s: number, c: { amount?: number }) => s + Math.max(0, Number(c?.amount) || 0), 0);
+        return sum + cSum;
+      }
+      return sum + Number(r.monthly_deposit || 0);
+    }, 0);
+
+    // SIP Value
+    const sipValue = (sip_accounts || []).reduce((sum, s) => {
+      return sum + Number(s.fallback_valuation || (Number(s.monthly_sip || 0) * 12));
+    }, 0);
+
     // Gold Value
     const goldValue = (gold_holdings || []).reduce((sum, g) => sum + Number(g.current_valuation || g.purchase_price || 0), 0);
 
     // Real Estate Value
     const reValue = (real_estate || []).reduce((sum, r) => sum + Number(r.current_valuation || r.purchase_price || 0), 0);
 
-    const totalValue = stocksValue + fdValue + goldValue + reValue;
+    const totalValue = stocksValue + fdValue + rdValue + sipValue + goldValue + reValue;
     const snapshotDate = new Date().toISOString().split('T')[0];
 
     // 2. Upsert snapshot
@@ -129,6 +150,8 @@ Deno.serve(async (req: Request) => {
         total_value: totalValue,
         stocks_value: stocksValue,
         fd_value: fdValue,
+        rd_value: rdValue,
+        sip_value: sipValue,
         gold_value: goldValue,
         real_estate_value: reValue,
       }, { onConflict: "snapshot_date" })

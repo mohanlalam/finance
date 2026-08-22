@@ -12,7 +12,8 @@ import {
   TrendingUp,
   Landmark,
   FolderOpen,
-  ShieldCheck
+  ShieldCheck,
+  Key
 } from './icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
@@ -24,6 +25,7 @@ import { Button } from './ui/Button';
 import { IconButton } from './ui/IconButton';
 import { validateBackupJSON, BackupValidationReport, RestoreExecutionReport } from '../utils/backupValidation';
 import { usePortfolioActions } from '../contexts/PortfolioContext';
+import { verifyPin } from '../utils/auth';
 
 interface ExportPanelProps {
   portfolios: Portfolio[];
@@ -48,7 +50,38 @@ export interface ParseResult {
 /* ── Export helpers ── */
 
 function portfoliosToJSON(portfolios: Portfolio[]): string {
-  return JSON.stringify({ schema_version: 2, version: 2, portfolios, exportedAt: new Date().toISOString() }, null, 2);
+  const sanitizedPortfolios = portfolios.map((p) => ({
+    id: p.id,
+    name: p.name,
+    label: p.label,
+    holdings: (p.holdings || []).map((h) => ({
+      id: h.id,
+      stockName: h.stockName,
+      ticker: h.ticker,
+      yahooSymbol: h.yahooSymbol,
+      qty: h.qty,
+      avgPrice: h.avgPrice,
+      amountInvested: h.amountInvested,
+      weekLow52: h.weekLow52,
+      weekHigh52: h.weekHigh52,
+    })),
+    fixedDeposits: p.fixedDeposits || [],
+    goldHoldings: p.goldHoldings || [],
+    realEstate: p.realEstate || [],
+    insurances: p.insurances || [],
+    rdAccounts: p.rdAccounts || [],
+    sipAccounts: p.sipAccounts || [],
+    documents: (p.documents || []).map((d) => ({
+      id: d.id,
+      name: d.name,
+      asset_type: d.asset_type,
+      file_type: d.file_type,
+      expiry_date: d.expiry_date,
+      file_path: d.file_path,
+    })),
+  }));
+
+  return JSON.stringify({ schema_version: 2, version: 2, portfolios: sanitizedPortfolios, exportedAt: new Date().toISOString() }, null, 2);
 }
 
 function downloadFile(content: string, filename: string, mime: string) {
@@ -168,10 +201,10 @@ function fdsToCSV(portfolios: Portfolio[]): string {
 
 function documentsToCSV(portfolios: Portfolio[]): string {
   const lines: string[] = [];
-  lines.push(csvRow(['Portfolio', 'Document Name', 'Asset Type', 'File Type', 'Expiry Date', 'File Path']));
+  lines.push(csvRow(['Portfolio', 'Document Name', 'Asset Type', 'File Type', 'Expiry Date', 'Attachment Status']));
   for (const p of portfolios) {
     for (const d of p.documents) {
-      lines.push(csvRow([p.label, d.name, d.asset_type, d.file_type || '', d.expiry_date || '', d.file_path]));
+      lines.push(csvRow([p.label, d.name, d.asset_type, d.file_type || '', d.expiry_date || '', d.file_path ? 'Attached' : 'None']));
     }
   }
   return lines.join('\n');
@@ -364,10 +397,8 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
     setOpen(false);
   }
 
-  async function handleExportPDF() {
+  function handleExportPDF() {
     setIsGeneratingPDF(true);
-    // Yield to let the UI update the spinner
-    await new Promise(resolve => setTimeout(resolve, 50));
     try {
       openPDFReportInNewTab(portfolios);
     } finally {
@@ -416,6 +447,8 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
   const [validationReport, setValidationReport] = useState<BackupValidationReport | null>(null);
   const [isRestoring, setIsRestoring] = useState(false);
   const [restoreReport, setRestoreReport] = useState<RestoreExecutionReport | null>(null);
+  const [restorePin, setRestorePin] = useState('');
+  const [restorePinError, setRestorePinError] = useState('');
   const jsonFileInputRef = useRef<HTMLInputElement>(null);
 
   const { addAsset, addPortfolio } = usePortfolioActions();
@@ -424,6 +457,12 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Backup file is too large (exceeds 10MB limit).');
+      e.target.value = '';
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
       const text = reader.result as string;
@@ -431,6 +470,8 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
       const report = validateBackupJSON(text, portfolios);
       setValidationReport(report);
       setRestoreReport(null);
+      setRestorePin('');
+      setRestorePinError('');
       setShowRestoreModal(true);
     };
     reader.readAsText(file);
@@ -439,9 +480,22 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
 
   async function handleExecuteRestore() {
     if (!backupJSONText || !validationReport?.isValid) return;
+
+    if (!restorePin) {
+      setRestorePinError('Security PIN is required to authorize restore.');
+      return;
+    }
+    setRestorePinError('');
     setIsRestoring(true);
 
     try {
+      const isPinValid = await verifyPin(restorePin);
+      if (!isPinValid) {
+        setRestorePinError('Incorrect PIN. Authorization failed.');
+        setIsRestoring(false);
+        return;
+      }
+
       const parsedData = JSON.parse(backupJSONText);
       const portfoliosToRestore: Portfolio[] = Array.isArray(parsedData)
         ? parsedData
@@ -462,8 +516,11 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
         if (!exists && pName) {
           try {
             await addPortfolio(pName, p.label || pName);
-          } catch {
-            // may already exist
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            if (!msg.toLowerCase().includes('duplicate') && !msg.toLowerCase().includes('already exists')) {
+              errors.push(`Portfolio '${pName}': ${msg}`);
+            }
           }
         }
 
@@ -484,8 +541,9 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
                 weekHigh52: 0,
               });
               createdAssets++;
-            } catch (err: any) {
-              errors.push(`Stock ${h.ticker}: ${err.message || 'Failed'}`);
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : 'Failed';
+              errors.push(`Stock ${h.ticker}: ${msg}`);
             }
           }
         }
@@ -505,8 +563,9 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
                 notes: fd.notes,
               });
               createdAssets++;
-            } catch (err: any) {
-              errors.push(`FD ${fd.bank_name}: ${err.message || 'Failed'}`);
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : 'Failed';
+              errors.push(`FD ${fd.bank_name}: ${msg}`);
             }
           }
         }
@@ -525,8 +584,9 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
                 notes: g.notes,
               });
               createdAssets++;
-            } catch (err: any) {
-              errors.push(`Gold ${g.item_name}: ${err.message || 'Failed'}`);
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : 'Failed';
+              errors.push(`Gold ${g.item_name}: ${msg}`);
             }
           }
         }
@@ -546,8 +606,9 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
                 notes: re.notes,
               });
               createdAssets++;
-            } catch (err: any) {
-              errors.push(`Property ${re.property_name}: ${err.message || 'Failed'}`);
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : 'Failed';
+              errors.push(`Property ${re.property_name}: ${msg}`);
             }
           }
         }
@@ -567,8 +628,9 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
                 notes: ins.notes,
               });
               createdAssets++;
-            } catch (err: any) {
-              errors.push(`Insurance ${ins.policy_name}: ${err.message || 'Failed'}`);
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : 'Failed';
+              errors.push(`Insurance ${ins.policy_name}: ${msg}`);
             }
           }
         }
@@ -589,8 +651,9 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
                 contributions: Array.isArray(rd.contributions) ? rd.contributions : undefined,
               });
               createdAssets++;
-            } catch (err: any) {
-              errors.push(`RD ${rd.bank_name}: ${err.message || 'Failed'}`);
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : 'Failed';
+              errors.push(`RD ${rd.bank_name}: ${msg}`);
             }
           }
         }
@@ -598,21 +661,23 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
         // 8. Restore SIP Accounts
         if (Array.isArray(p.sipAccounts)) {
           for (const sip of p.sipAccounts) {
+            const rawSip = sip as Record<string, unknown>;
             try {
               await addAsset('sip', pName, {
-                fund_name: sip.fund_name,
-                monthly_sip: Number(sip.monthly_sip || (sip as any).monthly_investment || 0),
-                units: Number(sip.units || (sip as any).qty) || 0,
-                start_date: sip.start_date,
-                next_sip_date: sip.next_sip_date || null,
-                fallback_valuation: Number(sip.fallback_valuation) || 0,
-                mf_scheme_code: sip.mf_scheme_code || (sip as any).scheme_code || (sip as any).amfi_code,
-                expected_cagr: Number(sip.expected_cagr) || 12,
-                notes: sip.notes,
+                fund_name: typeof rawSip.fund_name === 'string' ? rawSip.fund_name : '',
+                monthly_sip: Number(rawSip.monthly_sip || rawSip.monthly_investment || 0),
+                units: Number(rawSip.units || rawSip.qty || 0),
+                start_date: typeof rawSip.start_date === 'string' ? rawSip.start_date : '',
+                next_sip_date: typeof rawSip.next_sip_date === 'string' ? rawSip.next_sip_date : null,
+                fallback_valuation: Number(rawSip.fallback_valuation || 0),
+                mf_scheme_code: (rawSip.mf_scheme_code || rawSip.scheme_code || rawSip.amfi_code) as string | undefined,
+                expected_cagr: Number(rawSip.expected_cagr || 12),
+                notes: typeof rawSip.notes === 'string' ? rawSip.notes : undefined,
               });
               createdAssets++;
-            } catch (err: any) {
-              errors.push(`SIP ${sip.fund_name}: ${err.message || 'Failed'}`);
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : 'Failed';
+              errors.push(`SIP ${typeof rawSip.fund_name === 'string' ? rawSip.fund_name : 'Account'}: ${msg}`);
             }
           }
         }
@@ -630,8 +695,9 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
                 linkedAssetId: doc.asset_id || null,
               });
               createdAssets++;
-            } catch (err: any) {
-              errors.push(`Document ${doc.name}: ${err.message || 'Failed'}`);
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : 'Failed';
+              errors.push(`Document ${doc.name}: ${msg}`);
             }
           }
         }
@@ -645,8 +711,9 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
         errors,
         restoredPortfolios,
       });
-    } catch (err: any) {
-      setValidationReport(prev => prev ? { ...prev, schemaErrors: [err.message || 'Restore failed'] } : null);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Restore failed';
+      setValidationReport(prev => prev ? { ...prev, schemaErrors: [msg] } : null);
     } finally {
       setIsRestoring(false);
     }
@@ -853,6 +920,33 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
                   <div className="text-[var(--negative)] text-[10px]">
                     {restoreReport.errors.length} items encountered issues: {restoreReport.errors.slice(0, 3).join(', ')}
                   </div>
+                )}
+              </div>
+            )}
+
+            {/* PIN Authorization Step */}
+            {validationReport.isValid && !restoreReport && (
+              <div className="p-3.5 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] space-y-2">
+                <label className="block text-[11px] font-bold text-[var(--text-primary)] flex items-center gap-1.5">
+                  <Key size={13} className="text-[var(--accent-blue)]" />
+                  Enter Security PIN to Authorize Database Restore
+                </label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  placeholder="Enter PIN (e.g. 1234)"
+                  value={restorePin}
+                  onChange={(e) => {
+                    setRestorePin(e.target.value.replace(/\D/g, ''));
+                    setRestorePinError('');
+                  }}
+                  className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-small)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)]"
+                  maxLength={10}
+                />
+                {restorePinError && (
+                  <p className="text-[11px] text-[var(--negative)] font-semibold flex items-center gap-1">
+                    <AlertCircle size={13} /> {restorePinError}
+                  </p>
                 )}
               </div>
             )}

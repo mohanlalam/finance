@@ -87,6 +87,8 @@ function LazyViewport({ children, placeholderHeight = 240 }: { children: React.R
   );
 }
 
+import { AssetTab } from '../types/portfolio';
+
 // Lazy chart wrapper that ensures the dynamic import is only evaluated on intersection
 function LazyChartWrapper<TProps extends object>({
   importFunc,
@@ -104,6 +106,8 @@ function LazyChartWrapper<TProps extends object>({
   // Pin the import function reference so React.lazy() is only called once per
   // mount — prevents chart components from unmounting on every parent re-render
   const importRef = useRef(importFunc);
+  importRef.current = importFunc;
+  const lazyComponentRef = useRef<React.ComponentType<TProps> | null>(null);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -120,10 +124,11 @@ function LazyChartWrapper<TProps extends object>({
     return () => observer.disconnect();
   }, []);
 
-  const LazyComponent = useMemo(() => {
-    if (!isIntersected) return null;
-    return React.lazy(importRef.current) as unknown as React.ComponentType<TProps>;
-  }, [isIntersected]);
+  if (isIntersected && !lazyComponentRef.current) {
+    lazyComponentRef.current = React.lazy(importRef.current) as unknown as React.ComponentType<TProps>;
+  }
+
+  const LazyComponent = lazyComponentRef.current;
 
   return (
     <div ref={ref} style={{ minHeight: isIntersected ? undefined : placeholderHeight }}>
@@ -140,8 +145,6 @@ function LazyChartWrapper<TProps extends object>({
     </div>
   );
 }
-
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
 
 export default function AppShell() {
   const {

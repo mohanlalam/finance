@@ -64,4 +64,41 @@ describe('rdUtils', () => {
     };
     expect(getRDInvestedAmount(rdWithFuture, new Date('2026-06-01'))).toBe(10000);
   });
+
+  it('calculates quarterly-compounded value for untracked RD without contributions', () => {
+    const untrackedRD: RDAccount = {
+      id: 'rd-untracked',
+      portfolio_id: 'p1',
+      bank_name: 'SBI',
+      monthly_deposit: 1000,
+      interest_rate: 6.0,
+      start_date: '2025-01-01',
+      maturity_date: '2025-12-31',
+      maturity_amount: 0,
+      status: 'active',
+      contributions: [],
+    };
+    // 12 months of 1000 = 12000 principal. With 6% quarterly compounding, value should be ~12395
+    const val = getRDEffectiveValue(untrackedRD, new Date('2025-12-31'));
+    expect(val).toBeGreaterThan(12300);
+    expect(val).toBeLessThan(12500);
+  });
+
+  it('handles 0% interest rate gracefully for untracked RD', () => {
+    const zeroRateRD: RDAccount = {
+      id: 'rd-zero',
+      portfolio_id: 'p1',
+      bank_name: 'Post Office',
+      monthly_deposit: 5000,
+      interest_rate: 0,
+      start_date: '2025-01-01',
+      maturity_date: '2025-06-30',
+      maturity_amount: 0,
+      status: 'active',
+      contributions: [],
+    };
+    // 6 months of 5000 at 0% rate = 30000
+    const val = getRDEffectiveValue(zeroRateRD, new Date('2025-06-30'));
+    expect(val).toBe(30000);
+  });
 });

@@ -121,16 +121,20 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
       }
       return !isNaN(total) && total > 0 ? total : 0;
     } else {
-      if (r === 0) {
+      if (r === 0 || totalMonths <= 0) {
+        return p * Math.max(0, totalMonths);
+      }
+      // Standard Indian Banking quarterly compounding RD formula:
+      // Maturity = P * ((1 + r/400)^(N/3) - 1) / (1 - (1 + r/400)^(-1/3))
+      const qRate = r / 400;
+      const numQuarters = totalMonths / 3;
+      const numerator = Math.pow(1 + qRate, numQuarters) - 1;
+      const denominator = 1 - Math.pow(1 + qRate, -1 / 3);
+      if (Math.abs(denominator) < 1e-12) {
         return p * totalMonths;
       }
-      // O(1) Closed-form geometric series summation: p * k * (k^N - 1) / (k - 1)
-      const k = Math.pow(1 + r / 400, 1 / 3);
-      if (Math.abs(k - 1) < 1e-12) {
-        return p * totalMonths;
-      }
-      const total = p * k * (Math.pow(k, totalMonths) - 1) / (k - 1);
-      return !isNaN(total) && total > 0 ? total : 0;
+      const total = p * (numerator / denominator);
+      return !isNaN(total) && total > 0 ? total : p * totalMonths;
     }
   }
   return 0;

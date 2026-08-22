@@ -65,9 +65,9 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className={`grid grid-cols-1 ${taxData.unrealizedDebtOrGold !== 0 ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
         <div className="apple-card p-4">
-          <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">STCG Breakdown</h4>
+          <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">STCG Breakdown (Equity)</h4>
           <div className="flex justify-between items-center text-sm border-b border-[var(--border-subtle)] pb-2 mb-2">
             <span className="text-[var(--text-secondary)]">Unrealized STCG</span>
             <span className="font-semibold tnum text-[var(--text-primary)]">{formatINR(taxData.unrealizedSTCG)}</span>
@@ -78,7 +78,7 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
           </div>
         </div>
         <div className="apple-card p-4">
-          <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">LTCG Breakdown</h4>
+          <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">LTCG Breakdown (Equity)</h4>
           <div className="flex justify-between items-center text-sm border-b border-[var(--border-subtle)] pb-2 mb-2">
             <span className="text-[var(--text-secondary)]">Unrealized LTCG</span>
             <span className="font-semibold tnum text-[var(--text-primary)]">{formatINR(taxData.unrealizedLTCG)}</span>
@@ -88,6 +88,19 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
             <span className="font-semibold text-[var(--text-secondary)]">12.5% (over ₹1.25L)</span>
           </div>
         </div>
+        {taxData.unrealizedDebtOrGold !== 0 && (
+          <div className="apple-card p-4">
+            <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">Debt &amp; Gold ETFs</h4>
+            <div className="flex justify-between items-center text-sm border-b border-[var(--border-subtle)] pb-2 mb-2">
+              <span className="text-[var(--text-secondary)]">Unrealized Gain/Loss</span>
+              <span className="font-semibold tnum text-[var(--text-primary)]">{formatINR(taxData.unrealizedDebtOrGold)}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm text-[var(--text-tertiary)]">
+              <span>Tax Rate</span>
+              <span className="font-semibold text-[var(--text-secondary)]">Individual Slab Rate</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="apple-card overflow-hidden">

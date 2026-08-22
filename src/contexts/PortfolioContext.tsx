@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useCallback, useRef, useMemo, ReactNode, MutableRefObject } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Portfolio, PortfolioName, AssetPayload, RDPayload, SIPPayload } from '../types/portfolio';
@@ -188,8 +189,6 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     return () => {
       isMounted = false;
     };
-    // Intentionally omitting portfolios from deps — only trigger on loadStatus transition
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadStatus, load]);
 
   const addRDAccount = useCallback(async (portfolioName: string, payload: RDPayload) => {

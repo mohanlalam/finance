@@ -52,8 +52,6 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    console.log(`PIN verification: clientPin=${clientPin ? "[provided]" : "[empty]"}, serverPinHash=${serverPinHash ? "[configured]" : "[empty]"}, isValid=${isValid}`);
-
     if (!isValid) {
       return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
         status: 401,
@@ -177,9 +175,9 @@ Deno.serve(async (req: Request) => {
           .insert({
             portfolio_id: portfolio.id,
             sno: nextSno,
-            stock_name: payload.stockName,
-            ticker: payload.ticker.toUpperCase(),
-            yahoo_symbol: payload.yahooSymbol,
+            stock_name: String(payload.stockName || '').slice(0, 150),
+            ticker: String(payload.ticker || '').toUpperCase().slice(0, 30),
+            yahoo_symbol: String(payload.yahooSymbol || '').slice(0, 50),
             qty: Number(payload.qty),
             avg_price: Number(payload.avgPrice),
             amount_invested: Number(payload.amountInvested),
@@ -193,7 +191,7 @@ Deno.serve(async (req: Request) => {
           .from("fixed_deposits")
           .insert({
             portfolio_id: portfolio.id,
-            bank_name: payload.bankName,
+            bank_name: String(payload.bankName || '').slice(0, 100),
             principal_amount: Number(payload.principalAmount),
             interest_rate: Number(payload.interestRate),
             start_date: payload.startDate,
@@ -202,9 +200,9 @@ Deno.serve(async (req: Request) => {
             status: payload.status || "active",
             fd_type: payload.fdType || "regular",
             contributions: payload.contributions || [],
-            mf_scheme_code: payload.mfSchemeCode || null,
+            mf_scheme_code: payload.mfSchemeCode ? String(payload.mfSchemeCode).slice(0, 50) : null,
             units: payload.units !== undefined && payload.units !== null ? Number(payload.units) : null,
-            notes: payload.notes || null,
+            notes: payload.notes ? String(payload.notes).slice(0, 1000) : null,
             girl_dob: payload.girlDob || null,
             rate_schedule: payload.rateSchedule || null,
           })
@@ -218,7 +216,7 @@ Deno.serve(async (req: Request) => {
           .from("rd_accounts")
           .insert({
             portfolio_id: portfolio.id,
-            bank_name: payload.bank_name,
+            bank_name: String(payload.bank_name || '').slice(0, 100),
             monthly_deposit: Number(payload.monthly_deposit),
             interest_rate: Number(payload.interest_rate),
             start_date: payload.start_date,
@@ -226,7 +224,7 @@ Deno.serve(async (req: Request) => {
             maturity_amount: Number(payload.maturity_amount),
             status: payload.status || "active",
             contributions: payload.contributions || [],
-            notes: payload.notes || null,
+            notes: payload.notes ? String(payload.notes).slice(0, 1000) : null,
           })
           .select()
           .single();
@@ -237,15 +235,15 @@ Deno.serve(async (req: Request) => {
           .from("sip_accounts")
           .insert({
             portfolio_id: portfolio.id,
-            fund_name: payload.fund_name,
+            fund_name: String(payload.fund_name || '').slice(0, 150),
             monthly_sip: Number(payload.monthly_sip),
             expected_cagr: Number(payload.expected_cagr),
             units: Number(payload.units ?? 0),
             start_date: payload.start_date,
             next_sip_date: payload.next_sip_date || null,
             fallback_valuation: Number(payload.fallback_valuation ?? 0),
-            mf_scheme_code: payload.mf_scheme_code || null,
-            notes: payload.notes || null,
+            mf_scheme_code: payload.mf_scheme_code ? String(payload.mf_scheme_code).slice(0, 50) : null,
+            notes: payload.notes ? String(payload.notes).slice(0, 1000) : null,
           })
           .select()
           .single();
@@ -256,13 +254,13 @@ Deno.serve(async (req: Request) => {
           .from("gold_holdings")
           .insert({
             portfolio_id: portfolio.id,
-            item_name: payload.itemName,
+            item_name: String(payload.itemName || '').slice(0, 150),
             purity: payload.purity,
             weight_grams: Number(payload.weightGrams),
             purchase_price: Number(payload.purchasePrice),
             current_valuation: Number(payload.currentValuation ?? payload.purchasePrice),
             purchase_date: payload.purchaseDate,
-            notes: payload.notes || null,
+            notes: payload.notes ? String(payload.notes).slice(0, 1000) : null,
           })
           .select()
           .single();
@@ -273,14 +271,14 @@ Deno.serve(async (req: Request) => {
           .from("real_estate")
           .insert({
             portfolio_id: portfolio.id,
-            property_name: payload.propertyName,
+            property_name: String(payload.propertyName || '').slice(0, 150),
             property_type: payload.propertyType,
-            location: payload.location,
+            location: String(payload.location || '').slice(0, 150),
             purchase_price: Number(payload.purchasePrice),
             current_valuation: Number(payload.currentValuation),
             purchase_date: payload.purchaseDate,
             monthly_rent: Number(payload.monthlyRent ?? 0),
-            notes: payload.notes || null,
+            notes: payload.notes ? String(payload.notes).slice(0, 1000) : null,
           })
           .select()
           .single();
@@ -292,13 +290,13 @@ Deno.serve(async (req: Request) => {
           .insert({
             portfolio_id: portfolio.id,
             insurance_type: payload.insuranceType,
-            provider: payload.provider,
-            policy_name: payload.policyName,
-            policy_number: payload.policyNumber,
+            provider: String(payload.provider || '').slice(0, 100),
+            policy_name: String(payload.policyName || '').slice(0, 150),
+            policy_number: String(payload.policyNumber || '').slice(0, 80),
             sum_assured: Number(payload.sumAssured),
             premium_amount: Number(payload.premiumAmount),
             renewal_date: payload.renewalDate,
-            notes: payload.notes || null,
+            notes: payload.notes ? String(payload.notes).slice(0, 1000) : null,
           })
           .select()
           .single();
@@ -309,9 +307,9 @@ Deno.serve(async (req: Request) => {
           .from("documents")
           .insert({
             portfolio_id: portfolio.id,
-            name: payload.name,
-            file_path: payload.filePath,
-            file_type: payload.fileType,
+            name: String(payload.name || '').slice(0, 150),
+            file_path: String(payload.filePath || '').slice(0, 500),
+            file_type: String(payload.fileType || '').slice(0, 50),
             asset_type: payload.linkedAssetType || "general",
             asset_id: payload.linkedAssetId,
             expiry_date: payload.expiryDate || payload.expiry_date || null,

@@ -6,7 +6,12 @@ import { getSIPInvestedAmount, getSIPEffectiveValue, fetchNAV, initNAVCache, sav
 import { AppApiError, getEnvironmentIssue, invokeFunction } from '../utils/apiClient';
 import useSWR from 'swr';
 import * as idb from 'idb-keyval';
-import { SWR_DEDUPING_INTERVAL, SWR_ERROR_RETRY_COUNT, STOCK_PRICE_CACHE_TTL } from '../utils/constants';
+import {
+  SWR_DEDUPING_INTERVAL,
+  SWR_ERROR_RETRY_COUNT,
+  STOCK_PRICE_CACHE_TTL,
+  VISIBILITY_REFRESH_COOLDOWN,
+} from '../utils/constants';
 
 function isValidCachedData(data: unknown): data is { portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[]; cachedAt: string } {
   return data != null && typeof data === 'object' && Array.isArray((data as Record<string, unknown>).portfolios);
@@ -104,6 +109,8 @@ export interface NetWorthSnapshot {
   total_value: number;
   stocks_value: number;
   fd_value: number;
+  rd_value?: number;
+  sip_value?: number;
   gold_value: number;
   real_estate_value: number;
 }
@@ -401,7 +408,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
   const runMutation = useCallback(async <T>(fn: () => Promise<T>): Promise<T> => {
     const nextPromise = new Promise<T>((resolve, reject) => {
-      mutationQueue.current.then(async () => {
+      const execute = async () => {
         isMutatingRef.current = true;
         setIsMutating(true);
         try {
@@ -413,19 +420,9 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
           isMutatingRef.current = false;
           setIsMutating(false);
         }
-      }).catch(async () => {
-        isMutatingRef.current = true;
-        setIsMutating(true);
-        try {
-          const res = await fn();
-          resolve(res);
-        } catch (err) {
-          reject(err);
-        } finally {
-          isMutatingRef.current = false;
-          setIsMutating(false);
-        }
-      });
+      };
+
+      mutationQueue.current.then(execute, execute);
     });
 
     const queuedPromise = nextPromise.catch(() => {}).finally(() => {
@@ -613,7 +610,7 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
   // 6. Polling prices via SWR (Phase 2.1)
   const { data: livePrices, error: livePricesError, mutate: refreshPricesSWR } = useSWR(
-    portfolios.length > 0 ? 'live-prices' : null,
+    portfolios.length > 0 ? `live-prices:${portfolios.map((p) => p.id).join(',')}` : null,
     async () => {
       const allHoldings = portfolios.flatMap((p) => p.holdings);
       const allSips = portfolios.flatMap((p) => p.sipAccounts || []);
@@ -825,13 +822,12 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
     }
   }, [mutateAssets, handleAuthExpired]);
 
-  // document visibilitychange listener to refresh SWR hook data on focus/resume with a 3-minute cooldown
+  // document visibilitychange listener to refresh SWR hook data on focus/resume with a 5-minute cooldown
   useEffect(() => {
-    const RESUME_COOLDOWN_MS = 180_000; // 3 minutes cooldown between resume syncs
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         const now = Date.now();
-        if (now - lastRefreshRef.current < RESUME_COOLDOWN_MS) return;
+        if (now - lastRefreshRef.current < VISIBILITY_REFRESH_COOLDOWN) return;
         lastRefreshRef.current = now;
         load().catch((err) => console.warn('[portfolio] Visibility load failed:', err));
         refreshPrices().catch((err) => console.warn('[portfolio] Visibility price refresh failed:', err));

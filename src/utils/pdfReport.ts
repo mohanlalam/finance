@@ -392,5 +392,14 @@ export function openPDFReportInNewTab(portfolios: Portfolio[], label?: string) {
   const html = generatePDFReport(portfolios, label);
   const blob = new Blob([html], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
-  window.open(url, '_blank');
+  const win = window.open(url, '_blank');
+  if (!win || win.closed || typeof win.closed === 'undefined') {
+    // If popup was blocked by browser/iOS policy, fallback to anchor download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `portfolio-report-${new Date().toISOString().split('T')[0]}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 }

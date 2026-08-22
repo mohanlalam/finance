@@ -102,7 +102,8 @@ export function GoldHoldingView({
     syncRates(false);
   }, [syncRates]);
 
-  const rates = useMemo(() => deriveGoldRates(), [rateTick, isSyncing]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const rates = useMemo(() => deriveGoldRates(), [rateTick]);
 
   const handleSaveRate = () => {
     const val = parseFloat(tempRateInput);

@@ -24,7 +24,10 @@ export function useModalState() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const openModal = useCallback((modal: ActiveModal) => setActiveModal(modal), []);
-  const closeModal = useCallback(() => setActiveModal(null), []);
+  const closeModal = useCallback(() => {
+    setActiveModal(null);
+    setQuickAddTarget(null);
+  }, []);
 
   // Backwards-compatible convenience getters & setters for AppShell
   const showAddModal = activeModal?.type === 'add_holding';

@@ -43,6 +43,62 @@ export interface RestoreExecutionReport {
   restoredPortfolios: string[];
 }
 
+interface RawStock {
+  id?: string;
+  ticker?: string;
+}
+
+interface RawFixedDeposit {
+  id?: string;
+  bank_name?: string;
+  principal_amount?: number;
+}
+
+interface RawRDAccount {
+  id?: string;
+}
+
+interface RawSIPAccount {
+  id?: string;
+}
+
+interface RawGoldHolding {
+  id?: string;
+  item_name?: string;
+  weight_grams?: number;
+}
+
+interface RawRealEstate {
+  id?: string;
+  property_name?: string;
+}
+
+interface RawInsurance {
+  id?: string;
+  policy_name?: string;
+}
+
+interface RawDocument {
+  id?: string;
+  name?: string;
+  file_path?: string;
+  asset_id?: string;
+  asset_type?: string;
+}
+
+interface RawPortfolio {
+  id?: string;
+  name?: string;
+  holdings?: RawStock[];
+  fixedDeposits?: RawFixedDeposit[];
+  rdAccounts?: RawRDAccount[];
+  sipAccounts?: RawSIPAccount[];
+  goldHoldings?: RawGoldHolding[];
+  realEstate?: RawRealEstate[];
+  insurances?: RawInsurance[];
+  documents?: RawDocument[];
+}
+
 /**
  * Validates a JSON backup file content against the portfolio tracker schema,
  * calculating asset counts, detecting potential duplicates against current live data,
@@ -55,10 +111,10 @@ export function validateBackupJSON(
   const schemaErrors: string[] = [];
   const warnings: string[] = [];
 
-  let data: any;
+  let data: unknown;
   try {
     data = JSON.parse(jsonText);
-  } catch (err) {
+  } catch {
     return {
       isValid: false,
       portfolioCount: 0,
@@ -82,8 +138,14 @@ export function validateBackupJSON(
   }
 
   // Check top-level envelope
-  const portfoliosList: any[] = Array.isArray(data) ? data : (Array.isArray(data.portfolios) ? data.portfolios : []);
-  const exportedAt: string | undefined = typeof data.exportedAt === 'string' ? data.exportedAt : undefined;
+  const parsedObj = data && typeof data === 'object' ? (data as Record<string, unknown>) : null;
+  const portfoliosList: RawPortfolio[] = Array.isArray(data)
+    ? (data as RawPortfolio[])
+    : Array.isArray(parsedObj?.portfolios)
+    ? (parsedObj?.portfolios as RawPortfolio[])
+    : [];
+
+  const exportedAt: string | undefined = typeof parsedObj?.exportedAt === 'string' ? parsedObj.exportedAt : undefined;
 
   if (portfoliosList.length === 0) {
     schemaErrors.push('No valid portfolio records found in the backup file.');
@@ -142,7 +204,7 @@ export function validateBackupJSON(
     // Validate Stocks
     if (Array.isArray(p.holdings)) {
       counts.stocks += p.holdings.length;
-      p.holdings.forEach((h: any, hIdx: number) => {
+      p.holdings.forEach((h: RawStock, hIdx: number) => {
         if (!h.ticker) {
           schemaErrors.push(`Portfolio "${pName}" Stock #${hIdx + 1} is missing a ticker.`);
         } else {
@@ -157,7 +219,7 @@ export function validateBackupJSON(
     // Validate Fixed Deposits
     if (Array.isArray(p.fixedDeposits)) {
       counts.fixedDeposits += p.fixedDeposits.length;
-      p.fixedDeposits.forEach((fd: any, fIdx: number) => {
+      p.fixedDeposits.forEach((fd: RawFixedDeposit, fIdx: number) => {
         if (!fd.bank_name) {
           schemaErrors.push(`Portfolio "${pName}" FD #${fIdx + 1} is missing bank_name.`);
         } else {
@@ -173,7 +235,7 @@ export function validateBackupJSON(
     // Validate Recurring Deposits
     if (Array.isArray(p.rdAccounts)) {
       counts.rdAccounts += p.rdAccounts.length;
-      p.rdAccounts.forEach((rd: any) => {
+      p.rdAccounts.forEach((rd: RawRDAccount) => {
         if (rd.id) backupAssetIds.add(rd.id);
       });
     }
@@ -181,7 +243,7 @@ export function validateBackupJSON(
     // Validate SIPs
     if (Array.isArray(p.sipAccounts)) {
       counts.sipAccounts += p.sipAccounts.length;
-      p.sipAccounts.forEach((sip: any) => {
+      p.sipAccounts.forEach((sip: RawSIPAccount) => {
         if (sip.id) backupAssetIds.add(sip.id);
       });
     }
@@ -189,7 +251,7 @@ export function validateBackupJSON(
     // Validate Gold Holdings
     if (Array.isArray(p.goldHoldings)) {
       counts.goldHoldings += p.goldHoldings.length;
-      p.goldHoldings.forEach((g: any, gIdx: number) => {
+      p.goldHoldings.forEach((g: RawGoldHolding, gIdx: number) => {
         if (!g.item_name) {
           schemaErrors.push(`Portfolio "${pName}" Gold #${gIdx + 1} is missing item_name.`);
         } else {
@@ -205,7 +267,7 @@ export function validateBackupJSON(
     // Validate Real Estate
     if (Array.isArray(p.realEstate)) {
       counts.realEstate += p.realEstate.length;
-      p.realEstate.forEach((re: any, rIdx: number) => {
+      p.realEstate.forEach((re: RawRealEstate, rIdx: number) => {
         if (!re.property_name) {
           schemaErrors.push(`Portfolio "${pName}" Real Estate #${rIdx + 1} is missing property_name.`);
         } else {
@@ -221,7 +283,7 @@ export function validateBackupJSON(
     // Validate Insurance Policies
     if (Array.isArray(p.insurances)) {
       counts.insurances += p.insurances.length;
-      p.insurances.forEach((ins: any, iIdx: number) => {
+      p.insurances.forEach((ins: RawInsurance, iIdx: number) => {
         if (!ins.policy_name) {
           schemaErrors.push(`Portfolio "${pName}" Insurance #${iIdx + 1} is missing policy_name.`);
         } else {
@@ -237,7 +299,7 @@ export function validateBackupJSON(
     // Validate Document Metadata
     if (Array.isArray(p.documents)) {
       counts.documents += p.documents.length;
-      p.documents.forEach((doc: any, dIdx: number) => {
+      p.documents.forEach((doc: RawDocument, dIdx: number) => {
         if (!doc.name || !doc.file_path) {
           schemaErrors.push(`Portfolio "${pName}" Document #${dIdx + 1} is missing name or file_path.`);
         }
@@ -275,6 +337,11 @@ export function validateBackupJSON(
 
   if (missingLinkedDocs.length > 0) {
     warnings.push(`${missingLinkedDocs.length} vault document references point to asset IDs not present in this backup.`);
+  }
+
+  const newPortfolios = portfolioNames.filter(pn => !existingPortfolios.some(ep => ep.name === pn));
+  if (newPortfolios.length > 0) {
+    warnings.push(`Restoring will create ${newPortfolios.length} new portfolio(s): ${newPortfolios.join(', ')}.`);
   }
 
   return {

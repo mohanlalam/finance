@@ -128,7 +128,7 @@ export async function fetchLiveGoldRates(forceRefresh = false): Promise<GoldRate
         const changeINR = rate24k - prevCloseRate;
         const changePercent = prevCloseRate > 0 ? ((rate24k - prevCloseRate) / prevCloseRate) * 100 : 0;
 
-        if (rate24k >= 10000 && rate24k <= 30000) {
+        if (rate24k >= 9000 && rate24k <= 25000) {
           const newSnapshot: GoldRateSnapshot = {
             rate24k,
             previousClose: prevCloseRate,

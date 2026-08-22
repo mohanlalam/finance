@@ -95,8 +95,8 @@ Deno.serve(async (req: Request) => {
     const serverPinHash = Deno.env.get("APP_PIN_HASH");
 
     if (!serverPinHash) {
-      // No PIN configured server-side — allow access (open mode)
-      return new Response(JSON.stringify({ verified: true }), {
+      return new Response(JSON.stringify({ verified: false, error: "Server PIN not configured" }), {
+        status: 503,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

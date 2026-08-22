@@ -26,10 +26,11 @@ export async function uploadDocumentFile(
     throw new Error('Supabase configuration missing');
   }
 
-  // Clean path segments
+  // Clean path segments and prevent directory traversal
   const cleanPath = storagePath
     .split('/')
     .map((seg) => seg.trim().replace(/[^\w.-]/g, '_'))
+    .filter((seg) => seg.length > 0 && seg !== '..' && seg !== '.')
     .join('/');
 
   // 1. Primary: Upload via Edge Function (admin service role bypasses Storage RLS)
@@ -93,6 +94,18 @@ export async function removeDocumentFiles(
 ): Promise<void> {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || paths.length === 0) return;
 
+  const cleanPaths = paths
+    .map((p) =>
+      p
+        .split('/')
+        .map((seg) => seg.trim().replace(/[^\w.-]/g, '_'))
+        .filter((seg) => seg.length > 0 && seg !== '..' && seg !== '.')
+        .join('/')
+    )
+    .filter(Boolean);
+
+  if (cleanPaths.length === 0) return;
+
   // 1. Primary: Edge Function delete
   try {
     const headers = await getApiAuthHeaders('application/json');
@@ -100,7 +113,7 @@ export async function removeDocumentFiles(
     const res = await fetch(edgeUrl, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ bucket, paths }),
+      body: JSON.stringify({ bucket, paths: cleanPaths }),
     });
     if (res.ok) return;
   } catch (edgeErr) {
@@ -113,7 +126,7 @@ export async function removeDocumentFiles(
   const res = await fetch(url, {
     method: 'DELETE',
     headers: directHeaders,
-    body: JSON.stringify({ prefixes: paths }),
+    body: JSON.stringify({ prefixes: cleanPaths }),
   });
 
   if (!res.ok) {

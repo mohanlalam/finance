@@ -144,8 +144,8 @@ export interface Portfolio {
   created_at?: string;
   holdings: Holding[];
   fixedDeposits: FixedDeposit[];
-  rdAccounts?: RDAccount[];
-  sipAccounts?: SIPAccount[];
+  rdAccounts: RDAccount[];
+  sipAccounts: SIPAccount[];
   goldHoldings: GoldHolding[];
   realEstate: RealEstate[];
   insurances: Insurance[];

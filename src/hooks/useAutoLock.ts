@@ -14,7 +14,15 @@ export function useAutoLock(onLock: () => void, timeoutMs: number = 300000) {
   useEffect(() => {
     resetTimer();
 
+    let lastScrollTime = 0;
     const handleInteraction = () => resetTimer();
+    const handleScroll = () => {
+      const now = Date.now();
+      if (now - lastScrollTime > 1000) {
+        lastScrollTime = now;
+        resetTimer();
+      }
+    };
     const handleVisibilityChange = () => {
       if (document.hidden) {
         hiddenTimeRef.current = Date.now();
@@ -31,7 +39,7 @@ export function useAutoLock(onLock: () => void, timeoutMs: number = 300000) {
     window.addEventListener('mousedown', handleInteraction);
     window.addEventListener('keydown', handleInteraction);
     window.addEventListener('touchstart', handleInteraction, { passive: true });
-    window.addEventListener('scroll', handleInteraction, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
@@ -39,7 +47,7 @@ export function useAutoLock(onLock: () => void, timeoutMs: number = 300000) {
       window.removeEventListener('mousedown', handleInteraction);
       window.removeEventListener('keydown', handleInteraction);
       window.removeEventListener('touchstart', handleInteraction);
-      window.removeEventListener('scroll', handleInteraction);
+      window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [resetTimer, onLock, timeoutMs]);

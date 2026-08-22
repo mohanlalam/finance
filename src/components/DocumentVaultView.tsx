@@ -160,6 +160,13 @@ export default React.memo(function DocumentVaultView({
   function handleFilePick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      addToast('File size exceeds 10MB limit.', 'error');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
     setPendingFile(file);
     setDocumentName(file.name);
     setFormPortfolio(portfolioName);

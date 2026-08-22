@@ -65,6 +65,53 @@ interface PinLockScreenProps {
   onUnlock: () => void;
 }
 
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 30_000;
+
+function getStoredLockoutUntil(): number {
+  try {
+    const val = sessionStorage.getItem('pin_lockout_until');
+    return val ? parseInt(val, 10) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function getStoredFailedAttempts(): number {
+  try {
+    const val = sessionStorage.getItem('pin_failed_attempts');
+    return val ? parseInt(val, 10) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function recordFailedAttempt(): number {
+  try {
+    const attempts = getStoredFailedAttempts() + 1;
+    if (attempts >= MAX_FAILED_ATTEMPTS) {
+      const until = Date.now() + LOCKOUT_DURATION_MS;
+      sessionStorage.setItem('pin_lockout_until', String(until));
+      sessionStorage.setItem('pin_failed_attempts', '0');
+      return until;
+    } else {
+      sessionStorage.setItem('pin_failed_attempts', String(attempts));
+      return 0;
+    }
+  } catch {
+    return 0;
+  }
+}
+
+function clearLockoutState(): void {
+  try {
+    sessionStorage.removeItem('pin_failed_attempts');
+    sessionStorage.removeItem('pin_lockout_until');
+  } catch {
+    // ignore
+  }
+}
+
 export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
@@ -74,6 +121,29 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
   const [biometricsEnrolled, setBiometricsEnrolled] = useState(false);
   const [isBiometricPrompting, setIsBiometricPrompting] = useState(false);
+  const [confirmResetPin, setConfirmResetPin] = useState(false);
+  const [lockoutSeconds, setLockoutSeconds] = useState<number>(() => {
+    const until = getStoredLockoutUntil();
+    const diff = Math.ceil((until - Date.now()) / 1000);
+    return diff > 0 ? diff : 0;
+  });
+
+  // Lockout countdown timer
+  useEffect(() => {
+    if (lockoutSeconds <= 0) return;
+    const timer = setInterval(() => {
+      const until = getStoredLockoutUntil();
+      const diff = Math.ceil((until - Date.now()) / 1000);
+      if (diff <= 0) {
+        setLockoutSeconds(0);
+        setError('');
+        clearLockoutState();
+      } else {
+        setLockoutSeconds(diff);
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [lockoutSeconds]);
 
   // Live iOS clock updater
   useEffect(() => {
@@ -91,7 +161,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
   const autoPromptedRef = useRef(false);
 
   const handleBiometricUnlock = useCallback(async () => {
-    if (success || isVerifyingRef.current || isPromptingRef.current) return;
+    if (success || isVerifyingRef.current || isPromptingRef.current || lockoutSeconds > 0) return;
     isPromptingRef.current = true;
     setIsBiometricPrompting(true);
     setError('');
@@ -100,6 +170,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
       if (isBiometricsEnrolled()) {
         const pinHash = await authenticateWithBiometrics();
         if (pinHash) {
+          clearLockoutState();
           triggerHaptic('success');
           setSuccess(true);
           markSessionVerified(pinHash);
@@ -118,7 +189,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
       isPromptingRef.current = false;
       setIsBiometricPrompting(false);
     }
-  }, [success, onUnlock]);
+  }, [success, onUnlock, lockoutSeconds]);
 
   // Check hardware biometric capability & auto-prompt on initial screen open
   useEffect(() => {
@@ -127,7 +198,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
       if (supported) {
         const enrolled = isBiometricsEnrolled();
         setBiometricsEnrolled(enrolled);
-        if (enrolled && isBiometricAutoPromptEnabled() && !autoPromptedRef.current) {
+        if (enrolled && isBiometricAutoPromptEnabled() && !autoPromptedRef.current && lockoutSeconds <= 0) {
           autoPromptedRef.current = true;
           setTimeout(() => {
             handleBiometricUnlock();
@@ -135,37 +206,47 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
         }
       }
     });
-  }, [handleBiometricUnlock]);
+  }, [handleBiometricUnlock, lockoutSeconds]);
 
   const handleClear = useCallback(() => {
-    if (success || isVerifyingRef.current) return;
+    if (success || isVerifyingRef.current || lockoutSeconds > 0) return;
     triggerHaptic('selection');
     pinRef.current = '';
     setPin('');
+    setConfirmResetPin(false);
     setError('');
-  }, [success]);
+  }, [success, lockoutSeconds]);
 
   const handleForgotPin = useCallback(() => {
-    if (success) return;
+    if (success || lockoutSeconds > 0) return;
+    if (!confirmResetPin) {
+      setConfirmResetPin(true);
+      triggerHaptic('warning');
+      setError('Tap again to confirm reset to master PIN');
+      return;
+    }
+    setConfirmResetPin(false);
     triggerHaptic('warning');
     clearCustomPin();
     pinRef.current = '';
     setPin('');
     setBiometricsEnrolled(false);
     setError('Custom PIN cleared. Use master PIN.');
-  }, [success]);
+  }, [success, lockoutSeconds, confirmResetPin]);
 
   const handleBackspace = useCallback(() => {
-    if (success || isVerifyingRef.current) return;
+    if (success || isVerifyingRef.current || lockoutSeconds > 0) return;
     triggerHaptic('selection');
     const nextPin = pinRef.current.slice(0, -1);
     pinRef.current = nextPin;
     setPin(nextPin);
+    setConfirmResetPin(false);
     setError('');
-  }, [success]);
+  }, [success, lockoutSeconds]);
 
   const handlePressKey = useCallback((num: string) => {
-    if (success || isVerifyingRef.current) return;
+    if (success || isVerifyingRef.current || lockoutSeconds > 0) return;
+    setConfirmResetPin(false);
     const pinLength = getPinLength();
     const currentPin = pinRef.current;
     if (currentPin.length >= pinLength) return;
@@ -180,6 +261,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
       isVerifyingRef.current = true;
       verifyPin(nextPin).then((isValid) => {
         if (isValid) {
+          clearLockoutState();
           triggerHaptic('success');
           setSuccess(true);
           hashPin(nextPin).then((hash) => {
@@ -189,9 +271,16 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             }, 300);
           });
         } else {
+          const lockoutUntil = recordFailedAttempt();
           triggerHaptic('error');
           setShake(true);
-          setError('Incorrect PIN');
+          if (lockoutUntil > 0) {
+            setLockoutSeconds(Math.ceil(LOCKOUT_DURATION_MS / 1000));
+            setError('Too many failed attempts. Try again in 30s');
+          } else {
+            const rem = MAX_FAILED_ATTEMPTS - getStoredFailedAttempts();
+            setError(`Incorrect PIN (${rem} attempt${rem === 1 ? '' : 's'} remaining)`);
+          }
           setTimeout(() => {
             setShake(false);
             pinRef.current = '';
@@ -211,7 +300,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
         }, 600);
       });
     }
-  }, [success, biometricsAvailable, onUnlock]);
+  }, [success, onUnlock, lockoutSeconds]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -299,9 +388,9 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
               <button
                 key={num}
                 type="button"
-                className="pin-key w-[75px] h-[75px] flex flex-col items-center justify-center rounded-full transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer"
+                className={`pin-key w-[75px] h-[75px] flex flex-col items-center justify-center rounded-full transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer ${lockoutSeconds > 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
                 onClick={() => handlePressKey(num)}
-                disabled={success}
+                disabled={success || lockoutSeconds > 0}
                 aria-label={`Digit ${num}`}
               >
                 <span className="ios-number text-[30px] leading-none mb-0.5 drop-shadow-sm font-semibold">{num}</span>
@@ -315,9 +404,9 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             {biometricsAvailable ? (
               <button
                 type="button"
-                className={`pin-key w-[75px] h-[75px] flex items-center justify-center rounded-full transition-all duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer text-white/90 hover:text-white ${!biometricsEnrolled ? 'opacity-50' : ''}`}
+                className={`pin-key w-[75px] h-[75px] flex items-center justify-center rounded-full transition-all duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer text-white/90 hover:text-white ${!biometricsEnrolled || lockoutSeconds > 0 ? 'opacity-50' : ''}`}
                 onClick={biometricsEnrolled ? handleBiometricUnlock : () => setError('Unlock with PIN first, then enable Biometrics in Settings')}
-                disabled={success || isBiometricPrompting}
+                disabled={success || isBiometricPrompting || lockoutSeconds > 0}
                 aria-label={biometricsEnrolled ? "Unlock with Biometrics (FaceID / Fingerprint)" : "Biometrics available (Enable in Settings)"}
                 title={biometricsEnrolled ? "Unlock with Biometrics" : "Enable Biometrics in Settings"}
               >
@@ -329,9 +418,9 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             
             <button
               type="button"
-              className="pin-key w-[75px] h-[75px] flex flex-col items-center justify-center rounded-full transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer"
+              className={`pin-key w-[75px] h-[75px] flex flex-col items-center justify-center rounded-full transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer ${lockoutSeconds > 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
               onClick={() => handlePressKey('0')}
-              disabled={success}
+              disabled={success || lockoutSeconds > 0}
               aria-label="Digit 0"
             >
               <span className="ios-number text-[30px] leading-none drop-shadow-sm font-semibold">0</span>
@@ -339,9 +428,9 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             
             <button
               type="button"
-              className="w-[75px] h-[75px] flex items-center justify-center rounded-full active:bg-white/15 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer"
+              className={`w-[75px] h-[75px] flex items-center justify-center rounded-full active:bg-white/15 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer ${lockoutSeconds > 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
               onClick={handleBackspace}
-              disabled={success || pin.length === 0}
+              disabled={success || pin.length === 0 || lockoutSeconds > 0}
               aria-label="Delete last digit"
             >
               {pin.length > 0 && <IconDelete size={22} />}

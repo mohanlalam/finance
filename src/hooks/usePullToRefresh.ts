@@ -19,9 +19,11 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
 
     // Prevent PTR if user is scrolling inside an internal sub-container with scrollTop > 0
     let target = e.target as HTMLElement | null;
-    while (target && target !== document.body) {
+    let depth = 0;
+    while (target && target !== document.body && depth < 6) {
       if (target.scrollTop > 0) return;
       target = target.parentElement;
+      depth++;
     }
 
     touchStartY.current = e.targetTouches[0].clientY;

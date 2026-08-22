@@ -1,20 +1,19 @@
 import { clearApiSessionCache, invokeFunction } from './apiClient';
 import { updateBiometricPinHash, disableBiometrics } from './biometrics';
 
-const APP_PIN = (import.meta.env.VITE_APP_PIN as string | undefined) ?? '';
 const SESSION_KEY = 'finance_pin_verified';
 const HASH_KEY = 'finance_hashed_pin';
 const CUSTOM_HASH_KEY = 'custom_app_pin_hash';
 const CUSTOM_LENGTH_KEY = 'custom_app_pin_length';
 
 export function isPinConfigured(): boolean {
-  return APP_PIN.length >= 4 || !!localStorage.getItem(CUSTOM_HASH_KEY);
+  return !!localStorage.getItem(CUSTOM_HASH_KEY);
 }
 
 export function getPinLength(): number {
   const customLength = localStorage.getItem(CUSTOM_LENGTH_KEY);
   if (customLength) return parseInt(customLength, 10);
-  return APP_PIN.length || 4;
+  return 4;
 }
 
 export function isSessionVerified(): boolean {
@@ -50,7 +49,7 @@ export async function ensureHashedPin(): Promise<string> {
   if (sessionHash) return sessionHash;
 
   const customHash = localStorage.getItem(CUSTOM_HASH_KEY);
-  const hash = customHash || (APP_PIN ? await hashPin(APP_PIN) : '');
+  const hash = customHash || '';
   
   if (hash && isSessionVerified()) {
     sessionStorage.setItem(HASH_KEY, hash);
@@ -59,29 +58,16 @@ export async function ensureHashedPin(): Promise<string> {
 }
 
 export async function verifyPin(pin: string): Promise<boolean> {
-  // 1. Direct plain-text match against master APP_PIN (fastest, no async hashing needed)
-  //    This works for the env-var PIN regardless of any stale localStorage state.
-  if (APP_PIN && pin === APP_PIN) {
-    return true;
-  }
-
   const inputHash = await hashPin(pin);
 
-  // 2. Custom PIN hash match (user changed PIN via settings)
+  // 1. Custom PIN hash match (user configured PIN via device settings)
   const customHash = localStorage.getItem(CUSTOM_HASH_KEY);
   if (customHash && customHash === inputHash) {
+    markSessionVerified(inputHash);
     return true;
   }
 
-  // 3. Master APP_PIN hash match (secondary hash comparison)
-  if (APP_PIN) {
-    const expectedHash = await hashPin(APP_PIN);
-    if (inputHash === expectedHash) {
-      return true;
-    }
-  }
-
-  // 4. Fallback to backend Edge Function
+  // 2. Authoritative backend Edge Function check
   try {
     const result = await invokeFunction<{ verified: boolean }>('verify-pin', {
       method: 'POST',
@@ -98,7 +84,7 @@ export async function verifyPin(pin: string): Promise<boolean> {
   return false;
 }
 
-/** Reset any user-defined custom PIN, reverting to the master APP_PIN */
+/** Reset any user-defined custom PIN */
 export function clearCustomPin(): void {
   localStorage.removeItem(CUSTOM_HASH_KEY);
   localStorage.removeItem(CUSTOM_LENGTH_KEY);
