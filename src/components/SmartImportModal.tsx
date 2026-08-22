@@ -3,7 +3,7 @@ import { Upload, Sparkles, CheckCircle, AlertCircle, FileText, Camera, Key } fro
 import Modal from './Modal';
 import { Button } from './ui/Button';
 import { extractAssetFromDocument, getGeminiApiKey, setStoredGeminiApiKey, ExtractedAssetResult } from '../utils/aiDocumentExtractor';
-import { uploadDocumentFile } from '../utils/supabaseStorage';
+import { uploadDocumentFile, removeDocumentFiles } from '../utils/supabaseStorage';
 import { usePortfolioActions, usePortfolioState } from '../contexts/PortfolioContext';
 
 interface SmartImportModalProps {
@@ -187,14 +187,20 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
       const storagePath = `${targetPortfolio}/${assetType}/${ts}_${safeName}`;
       await uploadDocumentFile('investment-documents', storagePath, file);
 
-      await addAsset('document', targetPortfolio, {
-        name: `${extractedResult.title || file.name}`,
-        filePath: storagePath,
-        fileType: file.type || 'application/pdf',
-        linkedAssetType: assetType,
-        linkedAssetId: createdAssetId || null,
-        expiryDate: data.maturityDate || data.renewalDate || null,
-      });
+      try {
+        await addAsset('document', targetPortfolio, {
+          name: `${extractedResult.title || file.name}`,
+          filePath: storagePath,
+          fileType: file.type || 'application/pdf',
+          linkedAssetType: assetType,
+          linkedAssetId: createdAssetId || null,
+          expiryDate: data.maturityDate || data.renewalDate || null,
+        });
+      } catch (docErr) {
+        // Rollback: remove physical file from storage so it doesn't get orphaned
+        await removeDocumentFiles('investment-documents', [storagePath]).catch(() => {});
+        throw docErr;
+      }
 
       onClose();
     } catch (err: unknown) {

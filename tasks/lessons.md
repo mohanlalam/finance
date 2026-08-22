@@ -125,3 +125,10 @@ After **any correction** from the user, append a new entry here with the pattern
 4. **Audit 4: UI Views, Form Modals, Storage & Interactive Utilities** (`PortfolioTable.tsx`, `DocumentVaultView.tsx`, `TaxHarvestingView.tsx`, `EditStockModal.tsx`, all 6 domain Form Modals, `DocumentAttachmentField.tsx`, `supabaseStorage.ts`, `pdfReport.ts`, interactive touch/swipe hooks, `index.css`).
 **Rule**: Whenever the user asks for a complete project audit, ALWAYS execute this 4-phase protocol and generate all 4 audit reports systematically to guarantee 100% file coverage with zero blind spots.
 
+---
+
+### 2026-08-22 — Fail-Closed Edge Function Security, Storage Whitelisting & Backup Field Parity
+**Mistake**: Edge functions skipped PIN verification when `APP_PIN_HASH` environment variable was empty/missing; storage handlers trusted client-provided bucket names and unvalidated paths; JSON document export omitted `asset_id`; and alert cleanup purged dismissed alerts on empty initial mount.
+**Root Cause**: Missing `else` branch on PIN checks; lack of server-side allowlists for storage operations; missing property in export serialization mapper; and executing state cleanup effects before remote data resolved into memory.
+**Fix**: (1) Forced fail-closed 503/401 responses when `APP_PIN_HASH` is missing across all Edge Functions. (2) Strictly whitelisted `investment-documents` bucket and sanitized storage paths against `..` traversal in `holdings-crud`. (3) Added `asset_id: d.asset_id` to document JSON export and preserved custom stock metrics on restore. (4) Guarded alert cleanup to abort if active alerts haven't finished loading.
+**Rule**: Always make server-side authentication fail-closed. Always enforce storage bucket allowlists and server-side path sanitization. Verify exact 1-to-1 field parity between export serialization and restore ingestion schemas. Never execute time-based cleanup operations on state references before initial data load completes.

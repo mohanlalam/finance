@@ -27,37 +27,41 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
 
-  // Server-side PIN verification
+  // Server-side PIN verification (Fail Closed)
   const serverPinHash = Deno.env.get("APP_PIN_HASH");
-  if (serverPinHash) {
-    const clientPin = req.headers.get("X-App-Pin");
-    
-    let isValid = false;
-    if (clientPin) {
-      if (clientPin === serverPinHash) {
-        isValid = true;
-      } else {
-        // If serverPinHash is raw (e.g. 4-6 digits) and clientPin is hashed, check SHA-256 hash of serverPinHash
-        try {
-          const msgBuffer = new TextEncoder().encode(serverPinHash);
-          const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-          const hashArray = Array.from(new Uint8Array(hashBuffer));
-          const hashedServerPin = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-          if (clientPin === hashedServerPin) {
-            isValid = true;
-          }
-        } catch (e) {
-          console.error("Error hashing server PIN:", e);
+  if (!serverPinHash) {
+    return new Response(JSON.stringify({ error: "Server PIN configuration missing" }), {
+      status: 503,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+  }
+
+  const clientPin = req.headers.get("X-App-Pin");
+  let isValid = false;
+  if (clientPin) {
+    if (clientPin === serverPinHash) {
+      isValid = true;
+    } else {
+      // If serverPinHash is raw (e.g. 4-6 digits) and clientPin is hashed, check SHA-256 hash of serverPinHash
+      try {
+        const msgBuffer = new TextEncoder().encode(serverPinHash);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashedServerPin = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+        if (clientPin === hashedServerPin) {
+          isValid = true;
         }
+      } catch (e) {
+        console.error("Error hashing server PIN:", e);
       }
     }
+  }
 
-    if (!isValid) {
-      return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
+  if (!isValid) {
+    return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
   }
 
   try {
@@ -482,27 +486,54 @@ Deno.serve(async (req: Request) => {
       const formData = await req.formData();
       const file = formData.get("file") as File;
       const bucket = (formData.get("bucket") as string) || "investment-documents";
-      const path = formData.get("path") as string;
-      if (!file || !path) {
-        throw new Error("File and path are required");
+      const rawPath = (formData.get("path") as string) || "";
+      if (bucket !== "investment-documents") {
+        throw new Error("Invalid storage bucket. Only 'investment-documents' is allowed.");
+      }
+      const cleanPath = rawPath
+        .split("/")
+        .map((seg) => seg.trim().replace(/[^\w.-]/g, "_"))
+        .filter((seg) => seg.length > 0 && seg !== ".." && seg !== ".")
+        .join("/");
+      if (!file || !cleanPath) {
+        throw new Error("File and valid storage path are required");
       }
       const arrayBuffer = await file.arrayBuffer();
-      const { data, error } = await supabase.storage.from(bucket).upload(path, arrayBuffer, {
+      const { data, error } = await supabase.storage.from(bucket).upload(cleanPath, arrayBuffer, {
         contentType: file.type || "application/octet-stream",
         upsert: true,
       });
       if (error) throw error;
-      return new Response(JSON.stringify({ data, path }), {
+      return new Response(JSON.stringify({ data, path: cleanPath }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (req.method === "POST" && action === "delete_file") {
       const { bucket = "investment-documents", paths } = await req.json();
+      if (bucket !== "investment-documents") {
+        throw new Error("Invalid storage bucket. Only 'investment-documents' is allowed.");
+      }
       if (!paths || !Array.isArray(paths)) {
         throw new Error("paths array is required");
       }
-      const { data, error } = await supabase.storage.from(bucket).remove(paths);
+      const cleanPaths = paths
+        .map((p: string) =>
+          typeof p === "string"
+            ? p
+                .split("/")
+                .map((seg) => seg.trim().replace(/[^\w.-]/g, "_"))
+                .filter((seg) => seg.length > 0 && seg !== ".." && seg !== ".")
+                .join("/")
+            : ""
+        )
+        .filter(Boolean);
+      if (cleanPaths.length === 0) {
+        return new Response(JSON.stringify({ success: true, count: 0 }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data, error } = await supabase.storage.from(bucket).remove(cleanPaths);
       if (error) throw error;
       return new Response(JSON.stringify({ data, success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -77,37 +77,41 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
 
-  // Server-side PIN verification
+  // Server-side PIN verification (Fail Closed)
   const serverPinHash = Deno.env.get("APP_PIN_HASH");
-  if (serverPinHash) {
-    const clientPin = req.headers.get("X-App-Pin");
-    
-    let isValid = false;
-    if (clientPin) {
-      if (clientPin === serverPinHash) {
-        isValid = true;
-      } else {
-        // If serverPinHash is raw (e.g. 4-6 digits) and clientPin is hashed, check SHA-256 hash of serverPinHash
-        try {
-          const msgBuffer = new TextEncoder().encode(serverPinHash);
-          const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-          const hashArray = Array.from(new Uint8Array(hashBuffer));
-          const hashedServerPin = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-          if (clientPin === hashedServerPin) {
-            isValid = true;
-          }
-        } catch (e) {
-          console.error("Error hashing server PIN:", e);
+  if (!serverPinHash) {
+    return new Response(JSON.stringify({ error: "Server PIN configuration missing" }), {
+      status: 503,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+  }
+
+  const clientPin = req.headers.get("X-App-Pin");
+  let isValid = false;
+  if (clientPin) {
+    if (clientPin === serverPinHash) {
+      isValid = true;
+    } else {
+      // If serverPinHash is raw (e.g. 4-6 digits) and clientPin is hashed, check SHA-256 hash of serverPinHash
+      try {
+        const msgBuffer = new TextEncoder().encode(serverPinHash);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashedServerPin = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+        if (clientPin === hashedServerPin) {
+          isValid = true;
         }
+      } catch (e) {
+        console.error("Error hashing server PIN:", e);
       }
     }
+  }
 
-    if (!isValid) {
-      return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
+  if (!isValid) {
+    return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
   }
 
   try {
@@ -115,6 +119,13 @@ Deno.serve(async (req: Request) => {
 
     if (!symbols || !Array.isArray(symbols)) {
       return new Response(JSON.stringify({ error: "symbols array required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (symbols.length > 100) {
+      return new Response(JSON.stringify({ error: "Too many symbols requested (max 100 allowed per request)" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

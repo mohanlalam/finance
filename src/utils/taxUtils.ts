@@ -27,13 +27,15 @@ export function calculateTaxHarvesting(holdings: Holding[]): TaxSummary {
   let unrealizedSTCG = 0;
   let unrealizedLTCG = 0;
   let unrealizedDebtOrGold = 0;
+  let stcgGrossGains = 0;
+  let ltcgGrossGains = 0;
   
   const opportunities: TaxHarvestingDetails[] = [];
   const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
   const now = Date.now();
 
   for (const h of holdings) {
-    const pnl = h.unrealizedPnL;
+    const pnl = Number(h.unrealizedPnL) || 0;
     let isLTCG = false;
     
     if (h.created_at) {
@@ -47,8 +49,10 @@ export function calculateTaxHarvesting(holdings: Holding[]): TaxSummary {
       unrealizedDebtOrGold += pnl;
     } else if (isLTCG) {
       unrealizedLTCG += pnl;
+      if (pnl > 0) ltcgGrossGains += pnl;
     } else {
       unrealizedSTCG += pnl;
+      if (pnl > 0) stcgGrossGains += pnl;
     }
 
     if (pnl < 0) {
@@ -68,9 +72,9 @@ export function calculateTaxHarvesting(holdings: Holding[]): TaxSummary {
 
   const harvestableLosses = opportunities.reduce((sum, o) => sum + Math.abs(o.unrealizedPnL), 0);
   
-  // Tax savings estimation for equity
-  const stcgGain = Math.max(0, unrealizedSTCG);
-  const ltcgGain = Math.max(0, unrealizedLTCG);
+  // Tax savings estimation for equity based on gross positive gains
+  const stcgGain = stcgGrossGains;
+  const ltcgGain = ltcgGrossGains;
   const taxableLtcg = Math.max(0, ltcgGain - LTCG_EXEMPTION);
   
   const totalEstimatedTax = (stcgGain * STCG_RATE) + (taxableLtcg * LTCG_RATE);

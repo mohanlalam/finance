@@ -75,6 +75,7 @@ function portfoliosToJSON(portfolios: Portfolio[]): string {
       id: d.id,
       name: d.name,
       asset_type: d.asset_type,
+      asset_id: d.asset_id,
       file_type: d.file_type,
       expiry_date: d.expiry_date,
       file_path: d.file_path,
@@ -536,9 +537,9 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
                 yahooSymbol: h.yahooSymbol || `${h.ticker}.NS`,
                 qty,
                 avgPrice,
-                amountInvested: qty * avgPrice,
-                weekLow52: 0,
-                weekHigh52: 0,
+                amountInvested: Number(h.amountInvested) || (qty * avgPrice),
+                weekLow52: Number(h.weekLow52) || 0,
+                weekHigh52: Number(h.weekHigh52) || 0,
               });
               createdAssets++;
             } catch (err: unknown) {
@@ -554,11 +555,11 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             try {
               await addAsset('fd', pName, {
                 bank_name: fd.bank_name,
-                principal_amount: Number(fd.principal_amount),
-                interest_rate: Number(fd.interest_rate),
+                principal_amount: Number(fd.principal_amount) || 0,
+                interest_rate: Number(fd.interest_rate) || 0,
                 start_date: fd.start_date,
                 maturity_date: fd.maturity_date || null,
-                maturity_amount: Number(fd.maturity_amount) || Number(fd.principal_amount),
+                maturity_amount: Number(fd.maturity_amount) || Number(fd.principal_amount) || 0,
                 status: fd.status || 'active',
                 notes: fd.notes,
               });
@@ -577,9 +578,9 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
               await addAsset('gold', pName, {
                 item_name: g.item_name,
                 purity: g.purity || '24K',
-                weight_grams: Number(g.weight_grams),
-                purchase_price: Number(g.purchase_price),
-                current_valuation: Number(g.current_valuation) || Number(g.purchase_price),
+                weight_grams: Number(g.weight_grams) || 0,
+                purchase_price: Number(g.purchase_price) || 0,
+                current_valuation: Number(g.current_valuation) || Number(g.purchase_price) || 0,
                 purchase_date: g.purchase_date,
                 notes: g.notes,
               });
@@ -599,8 +600,8 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
                 property_name: re.property_name,
                 property_type: re.property_type || 'apartment',
                 location: re.location,
-                purchase_price: Number(re.purchase_price),
-                current_valuation: Number(re.current_valuation) || Number(re.purchase_price),
+                purchase_price: Number(re.purchase_price) || 0,
+                current_valuation: Number(re.current_valuation) || Number(re.purchase_price) || 0,
                 purchase_date: re.purchase_date,
                 monthly_rent: Number(re.monthly_rent) || 0,
                 notes: re.notes,
@@ -622,8 +623,8 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
                 insurance_type: ins.insurance_type || 'life',
                 provider: ins.provider || 'Provider',
                 policy_number: ins.policy_number,
-                sum_assured: Number(ins.sum_assured),
-                premium_amount: Number(ins.premium_amount),
+                sum_assured: Number(ins.sum_assured) || 0,
+                premium_amount: Number(ins.premium_amount) || 0,
                 renewal_date: ins.renewal_date,
                 notes: ins.notes,
               });
@@ -641,8 +642,8 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             try {
               await addAsset('rd', pName, {
                 bank_name: rd.bank_name,
-                monthly_deposit: Number(rd.monthly_deposit),
-                interest_rate: Number(rd.interest_rate),
+                monthly_deposit: Number(rd.monthly_deposit) || 0,
+                interest_rate: Number(rd.interest_rate) || 0,
                 start_date: rd.start_date,
                 maturity_date: rd.maturity_date || '',
                 maturity_amount: Number(rd.maturity_amount) || 0,
@@ -665,13 +666,13 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             try {
               await addAsset('sip', pName, {
                 fund_name: typeof rawSip.fund_name === 'string' ? rawSip.fund_name : '',
-                monthly_sip: Number(rawSip.monthly_sip || rawSip.monthly_investment || 0),
-                units: Number(rawSip.units || rawSip.qty || 0),
+                monthly_sip: Number(rawSip.monthly_sip || rawSip.monthly_investment) || 0,
+                units: Number(rawSip.units || rawSip.qty) || 0,
                 start_date: typeof rawSip.start_date === 'string' ? rawSip.start_date : '',
                 next_sip_date: typeof rawSip.next_sip_date === 'string' ? rawSip.next_sip_date : null,
-                fallback_valuation: Number(rawSip.fallback_valuation || 0),
+                fallback_valuation: Number(rawSip.fallback_valuation) || 0,
                 mf_scheme_code: (rawSip.mf_scheme_code || rawSip.scheme_code || rawSip.amfi_code) as string | undefined,
-                expected_cagr: Number(rawSip.expected_cagr || 12),
+                expected_cagr: Number(rawSip.expected_cagr) || 12,
                 notes: typeof rawSip.notes === 'string' ? rawSip.notes : undefined,
               });
               createdAssets++;

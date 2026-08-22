@@ -258,10 +258,12 @@ export function useDismissibleAlerts(portfolios: Portfolio[]) {
 
       // If last cleanup was more than 30 days ago
       if (now - lastCleanup > thirtyDaysMs) {
+        // Guard: Do not run active ID cleanup if alerts haven't loaded yet
+        if (alertsRef.current.length === 0) {
+          return;
+        }
+
         const activeIds = new Set(alertsRef.current.map((a) => a.id));
-        // Compute clean map outside the state updater to avoid side-effects in pure functions
-        const currentMap = alertsRef.current;
-        void currentMap; // suppress unused warning
         setDismissedAlertsMap((prev) => {
           const cleanMap: Record<string, number> = {};
           let changed = false;
@@ -275,10 +277,7 @@ export function useDismissibleAlerts(portfolios: Portfolio[]) {
           }
           return changed ? cleanMap : prev;
         });
-        // Write storage separately (pure state updater above; this runs once)
         try {
-          const latestMap = alertsRef.current;
-          void latestMap;
           localStorage.setItem('portfolio_dismissed_alerts_cleanup', String(now));
         } catch { /* ignore */ }
         lastCleanupRef.current = now;

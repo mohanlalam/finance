@@ -105,6 +105,15 @@ export const FDFormModal = React.memo(function FDFormModal({
       return;
     }
 
+    let matAmt: number | undefined = undefined;
+    if (maturityAmount && maturityAmount.trim() !== '') {
+      matAmt = parseFloat(maturityAmount);
+      if (isNaN(matAmt) || matAmt < 0 || matAmt > 10_000_000_000) {
+        setError('Please enter a valid maturity amount');
+        return;
+      }
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -114,7 +123,7 @@ export const FDFormModal = React.memo(function FDFormModal({
         interest_rate: rate,
         start_date: startDate,
         maturity_date: maturityDate || undefined,
-        maturity_amount: maturityAmount ? parseFloat(maturityAmount) : undefined,
+        maturity_amount: matAmt,
         status: status,
         notes: notes.trim() || undefined,
       };

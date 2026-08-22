@@ -100,8 +100,6 @@ export function SIPFormModal({
 
     const sip = parseFloat(monthlySip);
     const cagr = parseFloat(expectedCagr);
-    const u = parseFloat(units) || 0;
-    const val = parseFloat(fallbackValuation) || 0;
 
     if (isNaN(sip) || sip <= 0 || sip > 50_000_000) {
       setError('Monthly SIP amount must be a positive number up to ₹5 Crore.');
@@ -113,13 +111,15 @@ export function SIPFormModal({
       return;
     }
 
-    if (u < 0 || u > 10_000_000) {
-      setError('Units must be between 0 and 10,000,000.');
+    const u = units.trim() === '' ? 0 : parseFloat(units);
+    if (isNaN(u) || u < 0 || u > 10_000_000) {
+      setError('Units must be a valid number between 0 and 10,000,000.');
       return;
     }
 
-    if (val < 0 || val > 1_000_000_000) {
-      setError('Valuation must be between 0 and ₹100 Crore.');
+    const val = fallbackValuation.trim() === '' ? 0 : parseFloat(fallbackValuation);
+    if (isNaN(val) || val < 0 || val > 1_000_000_000) {
+      setError('Valuation must be a valid number between 0 and ₹100 Crore.');
       return;
     }
 

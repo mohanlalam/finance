@@ -323,8 +323,8 @@ export default React.memo(function PortfolioTable({
       if (h.unrealizedPnL < 0) losers++;
       
       const typeStr = (h as Holding & { type?: string }).type?.toLowerCase();
-      const nameStr = h.stockName.toLowerCase();
-      const tickerStr = h.ticker.toLowerCase();
+      const nameStr = (h.stockName || '').toLowerCase();
+      const tickerStr = (h.ticker || '').toLowerCase();
       if (typeStr === 'etf' || nameStr.includes('etf') || tickerStr.includes('etf')) {
         etfs++;
       }
@@ -338,8 +338,8 @@ export default React.memo(function PortfolioTable({
       if (activeFilter === 'losers') return h.unrealizedPnL < 0;
       if (activeFilter === 'etfs') {
         const typeStr = (h as Holding & { type?: string }).type?.toLowerCase();
-        const nameStr = h.stockName.toLowerCase();
-        const tickerStr = h.ticker.toLowerCase();
+        const nameStr = (h.stockName || '').toLowerCase();
+        const tickerStr = (h.ticker || '').toLowerCase();
         return typeStr === 'etf' || nameStr.includes('etf') || tickerStr.includes('etf');
       }
       return true;

@@ -109,7 +109,9 @@ export function isGoldRateStale(): boolean {
   try {
     const snapshot = getStoredGoldSnapshot();
     if (!snapshot.lastFetchedAt) return true;
-    const elapsed = Date.now() - new Date(snapshot.lastFetchedAt).getTime();
+    const lastTime = new Date(snapshot.lastFetchedAt).getTime();
+    if (isNaN(lastTime)) return true;
+    const elapsed = Date.now() - lastTime;
     return elapsed >= LIVE_SYNC_INTERVAL_MS;
   } catch {
     return true;

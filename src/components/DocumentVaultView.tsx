@@ -388,14 +388,14 @@ export default React.memo(function DocumentVaultView({
       <Modal
         isOpen={showLinkModal && !!pendingFile}
         onClose={() => !uploading && setShowLinkModal(false)}
-        ariaLabel={`Upload to ${FOLDERS.find((f) => f.key === activeFolder)?.label}`}
+        ariaLabel={`Upload to ${FOLDERS.find((f) => f.key === activeFolder)?.label || 'Folder'}`}
         preventClose={uploading}
       >
         {pendingFile && (
           <>
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
               <div>
-                <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Upload to {FOLDERS.find((f) => f.key === activeFolder)?.label}</h3>
+                <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Upload to {FOLDERS.find((f) => f.key === activeFolder)?.label || 'Folder'}</h3>
                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate max-w-xs">File: {pendingFile.name}</p>
               </div>
               <button

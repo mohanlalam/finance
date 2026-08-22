@@ -74,8 +74,8 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
     return formatter(val);
   };
 
-  const isUp = holding.todayPnLPercent >= 0;
-  const isOverallProfit = holding.unrealizedPnL >= 0;
+  const isUp = (holding.todayPnLPercent ?? 0) >= 0;
+  const isOverallProfit = (holding.unrealizedPnL ?? 0) >= 0;
   const todayPnLAmount = calcHoldingTodayPnL(holding);
 
   return (
@@ -136,7 +136,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
               }`}>
                 {isUp ? <TrendingUp size={12} aria-hidden="true" /> : <TrendingDown size={12} aria-hidden="true" />}
                 <span>
-                  {isUp ? '+' : ''}{formatINR(todayPnLAmount)} ({formatPercent(holding.todayPnLPercent)})
+                  {isUp ? '+' : ''}{formatINR(todayPnLAmount)} ({formatPercent(holding.todayPnLPercent ?? 0)})
                 </span>
               </div>
             </div>

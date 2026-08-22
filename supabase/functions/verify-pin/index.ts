@@ -20,8 +20,8 @@ const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 5 * 60 * 1000; // 5-minute window
 
 function getRateLimitKey(req: Request): string {
-  // Use X-Forwarded-For or fall back to a generic key
-  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  // Use X-Real-IP from API Gateway or fall back to X-Forwarded-For / generic key
+  return req.headers.get("x-real-ip")?.trim() || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 }
 
 function checkRateLimit(key: string): { allowed: boolean; retryAfterSeconds: number } {
