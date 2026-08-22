@@ -348,26 +348,26 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
   const dots = Array.from({ length: getPinLength() });
 
   return (
-    <div className="pin-lock-root min-h-screen text-white flex flex-col items-center justify-between py-10 font-sans select-none overflow-hidden">
+    <div className="pin-lock-root min-h-[100dvh] text-white flex flex-col items-center justify-between py-6 sm:py-10 font-sans select-none overflow-y-auto overflow-x-hidden">
       {/* Animated aurora gradient background */}
       <div className="pin-lock-bg" aria-hidden="true" />
       <div className="pin-lock-stars" aria-hidden="true" />
 
       {/* iOS Top Status Bar / Lock Header */}
-      <header className="relative z-10 flex flex-col items-center mt-2 sm:mt-6 text-center">
+      <header className="relative z-10 flex flex-col items-center mt-2 sm:mt-4 text-center shrink-0">
         <div className="mb-2 p-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 shadow-sm">
           <IconLock isUnlocked={success} />
         </div>
         <p className="text-xs sm:text-sm font-semibold tracking-wider text-white/80 uppercase mb-0.5 drop-shadow">
           {formattedDate}
         </p>
-        <h2 className="ios-clock-display text-5xl sm:text-6xl font-bold tracking-tight text-white drop-shadow-md">
+        <h2 className="ios-clock-display text-4xl sm:text-6xl font-bold tracking-tight text-white drop-shadow-md">
           {formattedTime}
         </h2>
       </header>
 
       {/* iOS Passcode Entry Form */}
-      <main className="relative z-10 flex flex-col items-center justify-center w-full max-w-sm px-6 my-auto">
+      <main className="relative z-10 flex flex-col items-center justify-center w-full max-w-sm px-4 sm:px-6 my-auto shrink-0">
         
         <div className={`flex flex-col items-center w-full transition-all duration-300 ${shake ? 'animate-shake' : ''}`}>
           
@@ -399,19 +399,19 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-5 mb-4">
+          <div className="grid grid-cols-3 gap-3 sm:gap-5 mb-4">
             {keypadLayout.map(({ num, letters }) => (
               <button
                 key={num}
                 type="button"
-                className={`pin-key w-[75px] h-[75px] flex flex-col items-center justify-center rounded-full transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer ${lockoutSeconds > 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+                className={`pin-key pin-key-size flex flex-col items-center justify-center rounded-full transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer ${lockoutSeconds > 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
                 onClick={() => handlePressKey(num)}
                 disabled={success || lockoutSeconds > 0}
                 aria-label={`Digit ${num}`}
               >
-                <span className="ios-number text-[30px] leading-none mb-0.5 drop-shadow-sm font-semibold">{num}</span>
+                <span className="ios-number text-[24px] sm:text-[30px] leading-none mb-0.5 drop-shadow-sm font-semibold">{num}</span>
                 {letters && (
-                  <span className="text-[9px] text-white/60 tracking-[2px] uppercase font-bold leading-none">{letters}</span>
+                  <span className="text-[8px] sm:text-[9px] text-white/60 tracking-[2px] uppercase font-bold leading-none">{letters}</span>
                 )}
               </button>
             ))}
@@ -420,36 +420,36 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             {biometricsAvailable ? (
               <button
                 type="button"
-                className={`pin-key w-[75px] h-[75px] flex items-center justify-center rounded-full transition-all duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer text-white/90 hover:text-white ${!biometricsEnrolled || lockoutSeconds > 0 ? 'opacity-50' : ''}`}
+                className={`pin-key pin-key-size flex items-center justify-center rounded-full transition-all duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer text-white/90 hover:text-white ${!biometricsEnrolled || lockoutSeconds > 0 ? 'opacity-50' : ''}`}
                 onClick={biometricsEnrolled ? handleBiometricUnlock : () => setError('Unlock with PIN first, then enable Biometrics in Settings')}
                 disabled={success || isBiometricPrompting || lockoutSeconds > 0}
                 aria-label={biometricsEnrolled ? "Unlock with Biometrics (FaceID / Fingerprint)" : "Biometrics available (Enable in Settings)"}
                 title={biometricsEnrolled ? "Unlock with Biometrics" : "Enable Biometrics in Settings"}
               >
-                <Fingerprint size={28} className={isBiometricPrompting ? 'animate-pulse text-[var(--positive,#00b074)]' : ''} />
+                <Fingerprint size={24} className={isBiometricPrompting ? 'animate-pulse text-[var(--positive,#00b074)]' : ''} />
               </button>
             ) : (
-              <div className="w-[75px] h-[75px]" />
+              <div className="pin-key-size" />
             )}
             
             <button
               type="button"
-              className={`pin-key w-[75px] h-[75px] flex flex-col items-center justify-center rounded-full transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer ${lockoutSeconds > 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+              className={`pin-key pin-key-size flex flex-col items-center justify-center rounded-full transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer ${lockoutSeconds > 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
               onClick={() => handlePressKey('0')}
               disabled={success || lockoutSeconds > 0}
               aria-label="Digit 0"
             >
-              <span className="ios-number text-[30px] leading-none drop-shadow-sm font-semibold">0</span>
+              <span className="ios-number text-[24px] sm:text-[30px] leading-none drop-shadow-sm font-semibold">0</span>
             </button>
             
             <button
               type="button"
-              className={`w-[75px] h-[75px] flex items-center justify-center rounded-full active:bg-white/15 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer ${lockoutSeconds > 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+              className={`pin-key-size flex items-center justify-center rounded-full active:bg-white/15 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer ${lockoutSeconds > 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
               onClick={handleBackspace}
               disabled={success || pin.length === 0 || lockoutSeconds > 0}
               aria-label="Delete last digit"
             >
-              {pin.length > 0 && <IconDelete size={22} />}
+              {pin.length > 0 && <IconDelete size={20} />}
             </button>
           </div>
           
@@ -457,7 +457,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
       </main>
 
       {/* iOS Lock Screen Footer Badge */}
-      <footer className="relative z-10 text-center flex flex-col items-center gap-3">
+      <footer className="relative z-10 text-center flex flex-col items-center gap-3 shrink-0 pb-safe-pin">
         <p className="text-[11px] font-medium text-white/50 tracking-wider uppercase">
           Family Wealth Office • Encrypted Storage
         </p>
@@ -477,6 +477,17 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
         .pin-lock-root {
           position: relative;
           background: #090916;
+        }
+
+        /* Responsive keypad button sizing */
+        .pin-key-size {
+          width: clamp(62px, 18vw, 75px);
+          height: clamp(62px, 18vw, 75px);
+        }
+
+        /* Footer safe-area padding for notched/home-bar devices */
+        .pb-safe-pin {
+          padding-bottom: max(env(safe-area-inset-bottom, 8px), 8px);
         }
 
         .ios-clock-display {

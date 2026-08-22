@@ -394,7 +394,8 @@ h3, .text-card-title {
 
 @media (max-width: 767px) {
   .pb-safe-content {
-    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 24px) !important;
+    /* 56px nav bar + 48px FAB + 16px gap + 16px extra padding + safe-area */
+    padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 
