@@ -80,7 +80,7 @@ export function DepositDetailsCard({
   return (
     <>
       <div 
-        className="p-4 sm:p-6 hover:bg-[var(--surface-secondary)]/50 transition-colors select-none" 
+        className="p-4 sm:p-6 hover:bg-[var(--surface-secondary)]/50 transition-colors select-none mobile-asset-card" 
         role="listitem"
         {...longPressProps}
       >

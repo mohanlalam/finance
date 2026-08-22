@@ -25,7 +25,7 @@ export const RealEstateCard = React.memo(function RealEstateCard({
   const docs = documents.filter((d) => d.asset_type === 'real_estate' && d.asset_id === property.id);
 
   return (
-    <div className="p-4 sm:p-5 hover:bg-[var(--surface-secondary)]/50 transition-colors">
+    <div className="p-4 sm:p-5 hover:bg-[var(--surface-secondary)]/50 transition-colors mobile-asset-card">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-[var(--radius-medium)] bg-[var(--positive-soft)] border border-[var(--positive)]/30 flex items-center justify-center text-[var(--positive)] shrink-0">

@@ -58,7 +58,7 @@ export function SIPAccountCard({
   return (
     <>
       <div 
-        className="py-4 hover:bg-[var(--surface-secondary)]/50 transition-all px-4 sm:px-6 rounded-[var(--radius-large)] border border-transparent hover:border-[var(--border-subtle)] select-none"
+        className="py-4 hover:bg-[var(--surface-secondary)]/50 transition-all px-4 sm:px-6 rounded-[var(--radius-large)] border border-transparent hover:border-[var(--border-subtle)] select-none mobile-asset-card"
         {...longPressProps}
       >
         <div className="flex items-start justify-between gap-4 flex-wrap sm:flex-nowrap">

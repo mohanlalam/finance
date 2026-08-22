@@ -40,7 +40,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
   }
 
   return (
-    <div className="p-4 sm:p-5 hover:bg-[var(--surface-secondary)]/50 transition-colors">
+    <div className="p-4 sm:p-5 hover:bg-[var(--surface-secondary)]/50 transition-colors mobile-asset-card">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-[var(--radius-medium)] flex items-center justify-center shrink-0 border border-[var(--border-subtle)] ${style.bg}`}>
