@@ -1,14 +1,14 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type UserConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { compression } from 'vite-plugin-compression2';
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command }) => ({
+export default defineConfig(({ command }): UserConfig => ({
   plugins: [
     react(),
-    command === 'build' && compression({ algorithm: 'brotliCompress', exclude: [/\.(br)$/, /\.(gz)$/] }),
-    command === 'build' && compression({ algorithm: 'gzip', exclude: [/\.(br)$/, /\.(gz)$/] }),
+    command === 'build' && compression({ algorithms: ['brotliCompress'], exclude: [/\.(br)$/, /\.(gz)$/] }),
+    command === 'build' && compression({ algorithms: ['gzip'], exclude: [/\.(br)$/, /\.(gz)$/] }),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
@@ -75,10 +75,6 @@ export default defineConfig(({ command }) => ({
     })
   ].filter(Boolean),
   base: command === 'serve' ? '/' : '/finance/',
-  esbuild: command === 'serve' ? {} : {
-    pure: ['console.log', 'console.info', 'console.debug', 'console.trace'],
-    drop: ['debugger'],
-  },
   build: {
     target: 'es2020',           // ~10-15% smaller output; modern mobile supports all ES2020 features
     cssMinify: true,            // deduplicate CSS selectors across chunks
