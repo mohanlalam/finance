@@ -1,6 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function useKeyboardShortcuts(onRefresh: () => void) {
+  const onRefreshRef = useRef(onRefresh);
+
+  useEffect(() => {
+    onRefreshRef.current = onRefresh;
+  });
+
   useEffect(() => {
     function handleKeyboard(e: KeyboardEvent) {
       // Ignore global shortcuts if active element is an input control or inside a modal
@@ -22,12 +28,12 @@ export function useKeyboardShortcuts(onRefresh: () => void) {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'r') {
         e.preventDefault();
         (window as unknown as { __lastShortcutTime?: number }).__lastShortcutTime = Date.now();
-        onRefresh();
+        onRefreshRef.current();
       }
     }
     window.addEventListener('keydown', handleKeyboard);
     return () => window.removeEventListener('keydown', handleKeyboard);
-  }, [onRefresh]);
+  }, []);
 }
 
 export default useKeyboardShortcuts;

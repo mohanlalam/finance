@@ -44,6 +44,18 @@ export default defineConfig(({ command }) => ({
               networkTimeoutSeconds: 5,
             },
           },
+          {
+            urlPattern: ({ url }) => url.host === 'api.gold-api.com',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'gold-api-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 15 * 60, // 15 minutes
+              },
+              networkTimeoutSeconds: 4,
+            },
+          },
         ],
       },
       manifest: {

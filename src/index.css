@@ -498,6 +498,7 @@ h3, .text-card-title {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-medium);
   box-shadow: var(--shadow-card);
+  contain: layout style;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 

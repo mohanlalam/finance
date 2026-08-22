@@ -661,7 +661,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
         // 8. Restore SIP Accounts
         if (Array.isArray(p.sipAccounts)) {
           for (const sip of p.sipAccounts) {
-            const rawSip = sip as Record<string, unknown>;
+            const rawSip = sip as unknown as Record<string, unknown>;
             try {
               await addAsset('sip', pName, {
                 fund_name: typeof rawSip.fund_name === 'string' ? rawSip.fund_name : '',

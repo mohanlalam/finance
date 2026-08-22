@@ -3,13 +3,20 @@ import { useEffect, useRef, useCallback } from 'react';
 export function useAutoLock(onLock: () => void, timeoutMs: number = 300000) {
   const timerRef = useRef<number | null>(null);
   const hiddenTimeRef = useRef<number | null>(null);
+  const onLockRef = useRef(onLock);
+  const timeoutMsRef = useRef(timeoutMs);
+
+  useEffect(() => {
+    onLockRef.current = onLock;
+    timeoutMsRef.current = timeoutMs;
+  });
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(() => {
-      onLock();
-    }, timeoutMs);
-  }, [onLock, timeoutMs]);
+      onLockRef.current();
+    }, timeoutMsRef.current);
+  }, []);
 
   useEffect(() => {
     resetTimer();
@@ -27,8 +34,8 @@ export function useAutoLock(onLock: () => void, timeoutMs: number = 300000) {
       if (document.hidden) {
         hiddenTimeRef.current = Date.now();
       } else {
-        if (hiddenTimeRef.current && Date.now() - hiddenTimeRef.current > timeoutMs) {
-          onLock();
+        if (hiddenTimeRef.current && Date.now() - hiddenTimeRef.current > timeoutMsRef.current) {
+          onLockRef.current();
         } else {
           resetTimer();
         }
@@ -50,5 +57,5 @@ export function useAutoLock(onLock: () => void, timeoutMs: number = 300000) {
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [resetTimer, onLock, timeoutMs]);
+  }, [resetTimer]);
 }

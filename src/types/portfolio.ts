@@ -154,6 +154,7 @@ export interface Portfolio {
   totalCurrentValue: number;
   totalPnL: number;
   totalPnLPercent: number;
+  todayPnL?: number;
   stocksValue: number;
   fdValue: number;
   rdValue: number;

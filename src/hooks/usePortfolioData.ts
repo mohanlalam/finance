@@ -610,7 +610,9 @@ export function usePortfolioData({ onAuthExpired }: UsePortfolioDataOptions = {}
 
   // 6. Polling prices via SWR (Phase 2.1)
   const { data: livePrices, error: livePricesError, mutate: refreshPricesSWR } = useSWR(
-    portfolios.length > 0 ? `live-prices:${portfolios.map((p) => p.id).join(',')}` : null,
+    portfolios.length > 0
+      ? `live-prices:${portfolios.map((p) => `${p.id}:${p.holdings?.length || 0}:${p.sipAccounts?.length || 0}`).join(',')}`
+      : null,
     async () => {
       const allHoldings = portfolios.flatMap((p) => p.holdings);
       const allSips = portfolios.flatMap((p) => p.sipAccounts || []);

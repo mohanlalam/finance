@@ -96,28 +96,16 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
       const iy2 = cy + innerR * Math.sin(endAngle);
 
       const largeArc = angle > Math.PI ? 1 : 0;
-      const midAngle = startAngle + angle / 2;
+
+      const d = `M ${ix1} ${iy1} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} L ${ix2} ${iy2} A ${innerR} ${innerR} 0 ${largeArc} 0 ${ix1} ${iy1} Z`;
 
       return {
-        baseProps: { cx, cy, r, innerR, x1, y1, x2, y2, ix1, iy1, ix2, iy2, largeArc, midAngle },
+        d,
         color: slice.color,
         i,
       };
     });
   }, [slices]);
-
-  const computedPaths = useMemo(() => {
-    return paths.map(({ baseProps, color, i }) => {
-      const isHovered = hovered === i;
-      const scale = isHovered ? 1.05 : 1;
-      const offsetX = isHovered ? Math.cos(baseProps.midAngle) * 5 : 0;
-      const offsetY = isHovered ? Math.sin(baseProps.midAngle) * 5 : 0;
-
-      const d = `M ${baseProps.ix1 + offsetX} ${baseProps.iy1 + offsetY} L ${baseProps.x1 + offsetX} ${baseProps.y1 + offsetY} A ${baseProps.r * scale} ${baseProps.r * scale} 0 ${baseProps.largeArc} 1 ${baseProps.x2 + offsetX} ${baseProps.y2 + offsetY} L ${baseProps.ix2 + offsetX} ${baseProps.iy2 + offsetY} A ${baseProps.innerR} ${baseProps.innerR} 0 ${baseProps.largeArc} 0 ${baseProps.ix1 + offsetX} ${baseProps.iy1 + offsetY} Z`;
-
-      return { d, color, i, isHovered };
-    });
-  }, [paths, hovered]);
 
   const hoverSlice = hovered !== null ? slices[hovered] : null;
 
@@ -161,25 +149,28 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                 </filter>
               </defs>
               <title>{title}</title>
-              {computedPaths.map(({ d, color, i, isHovered }) => (
-                <path
-                  key={i}
-                  d={d}
-                  fill={color}
-                  stroke="var(--surface)"
-                  strokeWidth={2.5}
-                  className="cursor-pointer transition-all duration-300"
-                  style={{
-                    opacity: hovered !== null && !isHovered ? 0.35 : 1,
-                    filter: isHovered ? 'url(#donutGlow)' : 'none',
-                    transform: isHovered ? 'scale(1.02)' : 'scale(1)',
-                    transformOrigin: `${cx}px ${cy}px`,
-                  }}
-                  onMouseEnter={() => setHovered(i)}
-                  onMouseLeave={() => setHovered(null)}
-                  onClick={() => onSelectSlice && onSelectSlice(slices[i].label)}
-                />
-              ))}
+              {paths.map(({ d, color, i }) => {
+                const isHovered = hovered === i;
+                return (
+                  <path
+                    key={i}
+                    d={d}
+                    fill={color}
+                    stroke="var(--surface)"
+                    strokeWidth={2.5}
+                    className="cursor-pointer transition-all duration-150"
+                    style={{
+                      opacity: hovered !== null && !isHovered ? 0.35 : 1,
+                      filter: isHovered ? 'url(#donutGlow)' : 'none',
+                      transform: isHovered ? 'scale(1.03)' : 'scale(1)',
+                      transformOrigin: `${cx}px ${cy}px`,
+                    }}
+                    onMouseEnter={() => setHovered(i)}
+                    onMouseLeave={() => setHovered(null)}
+                    onClick={() => onSelectSlice && onSelectSlice(slices[i].label)}
+                  />
+                );
+              })}
 
               {/* Center Cutout Disk with Glassmorphic Ring */}
               <circle cx={cx} cy={cy} r={innerR - 2} className="fill-[var(--surface)] shadow-inner" />

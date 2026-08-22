@@ -65,10 +65,10 @@ export default function NetWorthTimelineChart({
       const { width } = entries[0].contentRect;
       if (animationFrameId) window.cancelAnimationFrame(animationFrameId);
       animationFrameId = window.requestAnimationFrame(() => {
-        setDimensions((prev) => ({
-          width: width > 100 ? width : prev.width,
-          height: 240,
-        }));
+        const roundedWidth = Math.round(width);
+        if (roundedWidth > 100) {
+          setDimensions((prev) => (prev.width === roundedWidth ? prev : { width: roundedWidth, height: 240 }));
+        }
       });
     });
     resizeObserver.observe(containerRef.current);

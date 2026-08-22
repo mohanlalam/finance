@@ -92,7 +92,7 @@ function MobileHomeSummary({
     if (!portfolios || portfolios.length === 0) return [];
     return portfolios.map((p) => ({
       ...p,
-      pTodayPnL: estimateTodayPnL(p, [p]),
+      pTodayPnL: p.todayPnL ?? estimateTodayPnL(p, [p]),
     }));
   }, [portfolios]);
 

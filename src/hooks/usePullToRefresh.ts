@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { triggerHaptic } from '../utils/haptics';
 
 interface UsePullToRefreshOptions {
@@ -13,6 +13,20 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
   const isPulling = useRef(false);
   const pullDistanceRef = useRef(0);
   const rafId = useRef<number | null>(null);
+  const onRefreshRef = useRef(onRefresh);
+
+  useEffect(() => {
+    onRefreshRef.current = onRefresh;
+  });
+
+  useEffect(() => {
+    return () => {
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
+    };
+  }, []);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (disabled || isRefreshing || window.scrollY > 0) return;
@@ -66,14 +80,14 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
       setIsRefreshing(true);
       setPullDistance(0);
       try {
-        await onRefresh();
+        await onRefreshRef.current();
       } finally {
         setIsRefreshing(false);
       }
     } else {
       setPullDistance(0);
     }
-  }, [isRefreshing, disabled, onRefresh]);
+  }, [isRefreshing, disabled]);
 
   const handleTouchCancel = useCallback(() => {
     if (rafId.current !== null) {

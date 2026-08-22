@@ -106,6 +106,8 @@ describe('calculateWeightedAge', () => {
       realEstate: [],
       insurances: [],
       documents: [],
+      rdAccounts: [],
+      sipAccounts: [],
       totalInvested: 20000,
       totalCurrentValue: 22000,
       totalPnL: 2000,
@@ -137,6 +139,7 @@ describe('calculateWeightedAge', () => {
       realEstate: [],
       insurances: [],
       documents: [],
+      rdAccounts: [],
       sipAccounts: [
         {
           id: 'sip-1',
@@ -182,6 +185,7 @@ describe('getPortfolioAnnualizedReturn (XIRR)', () => {
       realEstate: [],
       insurances: [],
       documents: [],
+      rdAccounts: [],
       sipAccounts: [
         {
           id: 'sip-xirr',

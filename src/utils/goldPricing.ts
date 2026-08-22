@@ -38,17 +38,22 @@ export interface GoldRateSnapshot {
 const SNAPSHOT_KEY = 'finance_gold_rate_snapshot';
 const CUSTOM_RATE_KEY = 'finance_custom_gold_rate_24k';
 
+let memorySnapshot: GoldRateSnapshot | null = null;
+let memoryCustomRate: number | null | undefined = undefined;
+
 export function getStoredGoldSnapshot(): GoldRateSnapshot {
+  if (memorySnapshot) return memorySnapshot;
   try {
     const saved = localStorage.getItem(SNAPSHOT_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed && typeof parsed.rate24k === 'number' && parsed.rate24k >= 10000) {
+        memorySnapshot = parsed;
         return parsed;
       }
     }
   } catch { /* ignore */ }
-  return {
+  const fallback: GoldRateSnapshot = {
     rate24k: DEFAULT_GOLD_RATE_24K,
     previousClose: DEFAULT_GOLD_RATE_24K,
     changeINR: 0,
@@ -57,9 +62,12 @@ export function getStoredGoldSnapshot(): GoldRateSnapshot {
     lastFetchedAt: new Date().toISOString(),
     source: 'MCX & IBJA Live Bullion Rates',
   };
+  memorySnapshot = fallback;
+  return fallback;
 }
 
 export function saveStoredGoldSnapshot(snapshot: GoldRateSnapshot): void {
+  memorySnapshot = snapshot;
   try {
     localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot));
   } catch { /* ignore */ }
@@ -67,23 +75,30 @@ export function saveStoredGoldSnapshot(snapshot: GoldRateSnapshot): void {
 
 /** Check if custom user override rate is set */
 export function getCustomGoldRate(): number | null {
+  if (memoryCustomRate !== undefined) return memoryCustomRate;
   try {
     const val = localStorage.getItem(CUSTOM_RATE_KEY);
     if (val) {
       const num = parseFloat(val);
-      if (!isNaN(num) && num >= 5000) return num;
+      if (!isNaN(num) && num >= 5000) {
+        memoryCustomRate = num;
+        return num;
+      }
     }
   } catch { /* ignore */ }
+  memoryCustomRate = null;
   return null;
 }
 
 export function saveCustomGoldRate(rate24k: number): void {
+  memoryCustomRate = rate24k;
   try {
     localStorage.setItem(CUSTOM_RATE_KEY, String(rate24k));
   } catch { /* ignore */ }
 }
 
 export function clearCustomGoldRate(): void {
+  memoryCustomRate = null;
   try {
     localStorage.removeItem(CUSTOM_RATE_KEY);
   } catch { /* ignore */ }

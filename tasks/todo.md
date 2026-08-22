@@ -1,17 +1,25 @@
-# Tasks: Mobile Performance Optimization
+# 📋 Performance Optimization Tasks
 
-- [x] **Phase 1: CSS Rendering & Touch Latency**
-  - [x] 1.1 Add `content-visibility: auto` and `contain-intrinsic-size` for `.mobile-asset-card` in `src/index.css`
-  - [x] 1.2 Add global `touch-action: manipulation` across interactive elements to remove 300ms mobile tap delays
-  - [x] 1.3 Add GPU compositor layer promotion (`transform: translateZ(0)`, `will-change: transform`) for fixed/sticky bars
-- [x] **Phase 2: Mobile Asset Card Class Consistency**
-  - [x] 2.1 Ensure all asset card components (`PortfolioTable.tsx`, `DepositDetailsCard.tsx`, `RDAccountCard.tsx`, `SIPAccountCard.tsx`, `GoldHoldingCard.tsx`, `RealEstateCard.tsx`, `InsurancePolicyCard.tsx`) use `.mobile-asset-card`
-- [x] **Phase 3: Idle Chunk Pre-warming**
-  - [x] 3.1 Implement `requestIdleCallback` asset chunk prefetching in `src/layouts/AppShell.tsx` after initial unlock
-- [x] **Phase 4: Mobile Home View Render Optimization**
-  - [x] 4.1 Optimize `AppShell.tsx` mobile home layout with a Segmented Control toggle (*Overview* vs *Charts & AI*) to eliminate heavy chart DOM mounting on boot
-- [x] **Phase 5: Verification & Production Build**
-  - [x] 5.1 Run `npx tsc --noEmit` (Passed with 0 errors)
-  - [x] 5.2 Run `npm run lint` (Passed with 0 errors/warnings)
-  - [x] 5.3 Run `npm test` (Passed all 16 test suites, 93 tests)
-  - [x] 5.4 Run `npm run build` (Passed, PWA assets and precache generated)
+- [x] **Phase 1: React Runtime & Calculation Performance**
+  - [x] `SummaryCards.tsx`: Use precomputed `p.todayPnL` in `memberBreakdowns`
+  - [x] `MobileHomeSummary.tsx`: Use precomputed `p.todayPnL` in member breakdown tiles
+  - [x] `useAutoLock.ts`: Ref-stabilize `onLock` callback to eliminate global event listener re-binding
+  - [x] `useKeyboardShortcuts.ts`: Ref-stabilize `onRefresh` callback
+  - [x] `usePullToRefresh.ts`: Add unmount cleanup effect for `rafId`
+- [x] **Phase 2: Storage, Network & Bullion/AMFI Caching Engine**
+  - [x] `goldPricing.ts`: Add in-memory singleton cache `_memoryGoldSnapshot` to eliminate synchronous `localStorage` stalls
+  - [x] `sipUtils.ts`: Implement in-flight request deduplication map and debounced IDB sync for fetched AMFI NAVs
+  - [x] `vite.config.ts`: Add `api.gold-api.com` runtime caching and fix `amfi-api-cache` `maxEntries: 100`
+  - [x] `index.html`: Add `<link rel="preconnect" href="https://api.gold-api.com" crossorigin />` and preconnect `api.mfapi.in`
+  - [x] `usePortfolioData.ts`: Enhance SWR live price key with composite holding count to trigger instant refresh on additions/deletions
+- [x] **Phase 3: UI Smoothness, SVG Charts & GPU Acceleration**
+  - [x] `NetWorthTimelineChart.tsx`: Clamp `setDimensions` against same-width thrashing
+  - [x] `PieChart.tsx`: Use CSS hover scale transitions instead of JS-driven trigonometric path re-stringification on mouse move
+  - [x] `index.css`: Add `contain: layout style;` to `.apple-card` for desktop paint isolation
+- [x] **Phase 4: Verification & Production Build**
+  - [x] Run `npx tsc --noEmit` (Passed with 0 errors)
+  - [x] Run `npm run lint` (Passed with 0 errors/warnings)
+  - [x] Run `npm test` (All 16 test suites, 93 tests passed)
+  - [x] Run `npm run build` (Passed, PWA precache & brotli/gzip assets generated)
+
+

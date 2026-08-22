@@ -46,7 +46,7 @@ function SummaryCards({
     return portfolios.map((p) => ({
       id: p.id,
       label: p.label,
-      todayPnL: estimateTodayPnL(p, [p]),
+      todayPnL: p.todayPnL ?? estimateTodayPnL(p, [p]),
     }));
   }, [portfolios]);
 
