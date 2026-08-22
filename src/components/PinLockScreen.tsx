@@ -31,7 +31,7 @@ function IconLock({ isUnlocked = false }: { isUnlocked?: boolean }) {
       strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={`transition-all duration-300 ${isUnlocked ? 'scale-110 text-[#34C759]' : 'text-white/80'}`}
+      className={`transition-all duration-300 ${isUnlocked ? 'scale-110 text-[var(--positive,#00b074)]' : 'text-white/80'}`}
       aria-hidden="true"
     >
       {isUnlocked ? (
@@ -410,7 +410,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
                 aria-label={biometricsEnrolled ? "Unlock with Biometrics (FaceID / Fingerprint)" : "Biometrics available (Enable in Settings)"}
                 title={biometricsEnrolled ? "Unlock with Biometrics" : "Enable Biometrics in Settings"}
               >
-                <Fingerprint size={28} className={isBiometricPrompting ? 'animate-pulse text-[#34C759]' : ''} />
+                <Fingerprint size={28} className={isBiometricPrompting ? 'animate-pulse text-[var(--positive,#00b074)]' : ''} />
               </button>
             ) : (
               <div className="w-[75px] h-[75px]" />

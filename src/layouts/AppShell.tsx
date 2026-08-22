@@ -586,7 +586,7 @@ export default function AppShell() {
         </div>
         <div className="text-right">
           <p className="text-lg font-bold text-slate-800">{formatINR(summaryData.totalCurrentValue)}</p>
-          <p className={`text-sm font-semibold ${summaryData.totalPnL >= 0 ? 'text-[#34C759]' : 'text-[#ff3b30]'}`}>
+          <p className={`text-sm font-semibold ${summaryData.totalPnL >= 0 ? 'text-[var(--positive,#00b074)]' : 'text-[var(--negative,#df514c)]'}`}>
             {summaryData.totalPnL >= 0 ? '+' : ''}{formatINR(summaryData.totalPnL)} ({formatPercent(summaryData.totalPnLPercent)})
           </p>
         </div>

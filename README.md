@@ -226,9 +226,9 @@ Create a `.env` file in the project root:
 ```env
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
-VITE_APP_PIN=your-4-to-6-digit-pin
 ```
 
+> ℹ️ **Access Security**: App PIN authentication is enforced server-side by Supabase Edge Functions via the `APP_PIN_HASH` secret (SHA-256 hash).
 > ⚠️ The `.env` file is git-ignored. Never commit your keys.
 
 ### 4. Set Up the Database & Storage
@@ -291,7 +291,6 @@ To enable this:
 3. Configure the required secrets under **Settings → Secrets and variables → Actions** with your production environment variables:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-   - `VITE_APP_PIN` (optional, 4-6 digit access code)
 
 ---
 

@@ -27,7 +27,6 @@ Edit `.env`:
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
-VITE_APP_PIN=1234 # Optional PIN code gate
 ```
 
 ### 4. Running the Dev Server
