@@ -289,14 +289,25 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
           }, 600);
         }
       }).catch((err: unknown) => {
+        // Network/config/timeout errors: show message but DON'T count as failed attempt
+        const errCode = err && typeof err === 'object' && 'code' in err
+          ? (err as { code: string }).code
+          : '';
+        const isConnectivityError = errCode === 'network' || errCode === 'timeout' || errCode === 'config';
+
         triggerHaptic('error');
         setShake(true);
-        // Surface config / network errors with a real message
         const msg =
           err && typeof err === 'object' && 'message' in err
             ? String((err as { message: string }).message)
             : 'Verification failed. Check your connection.';
         setError(msg);
+
+        if (!isConnectivityError) {
+          // Only count true wrong-PIN failures toward lockout
+          recordFailedAttempt();
+        }
+
         setTimeout(() => {
           setShake(false);
           pinRef.current = '';

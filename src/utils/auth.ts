@@ -94,15 +94,15 @@ export async function verifyPin(pin: string): Promise<boolean> {
     }
     return false;
   } catch (err) {
-    // Re-throw config/network errors so PinLockScreen can show a useful message
-    // instead of silently returning false (which looks like a wrong PIN)
+    // Re-throw config/network/timeout errors so PinLockScreen can show
+    // a helpful message and NOT count this as a failed PIN attempt.
     if (err && typeof err === 'object' && 'code' in err) {
       const code = (err as { code: string }).code;
       if (code === 'config' || code === 'network' || code === 'timeout') {
         throw err;
       }
     }
-    // Any other server error → treat as wrong PIN
+    // 401/403 server response → wrong PIN (don't re-throw)
     return false;
   }
 }
