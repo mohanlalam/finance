@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, X, TrendingUp, Landmark, Coins, Home as HomeIcon, Shield, FolderOpen, ArrowLeft } from './icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface SearchResult {
   type: 'stock' | 'fd' | 'gold' | 'real_estate' | 'insurance' | 'document';
@@ -49,18 +50,11 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
   const [open, setOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<SearchFilter>('all');
   const [selectedIdx, setSelectedIdx] = useState(-1);
-  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
+  const isMobile = useIsMobile();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const mql = window.matchMedia('(max-width: 767px)');
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
-  }, []);
 
   // Build full index
   const allResults = useMemo<SearchResult[]>(() => {
@@ -129,14 +123,15 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
 
   // Click outside to close (desktop only)
   useEffect(() => {
+    if (!open || isMobile) return;
     function handleClick(e: MouseEvent) {
-      if (!isMobile && containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [isMobile]);
+  }, [open, isMobile]);
 
   function handleSelect(result: SearchResult) {
     onNavigate(result.portfolioName, ASSET_TAB_MAP[result.type] ?? 'stocks');

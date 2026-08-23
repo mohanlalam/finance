@@ -126,7 +126,7 @@ const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: Ho
   return (
     <div className="space-y-2">
       {movers.map((m) => {
-        const isUp = m.holding.todayPnLPercent >= 0;
+        const isUp = (m.holding.todayPnLPercent ?? 0) >= 0;
         return (
           <div key={`${m.portfolioName}-${m.holding.id || m.holding.ticker}`} className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">

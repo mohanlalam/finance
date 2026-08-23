@@ -43,6 +43,11 @@ export default function Modal({
 
   // Drag state refs to avoid effect re-binding churn
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const dragOffsetRef = useRef(dragOffset);
+  useEffect(() => {
+    dragOffsetRef.current = dragOffset;
+  }, [dragOffset]);
+
   const isDragging = useRef(false);
   const dragStart = useRef<{ mouseX: number; mouseY: number; offsetX: number; offsetY: number }>({
     mouseX: 0, mouseY: 0, offsetX: 0, offsetY: 0,
@@ -152,13 +157,11 @@ export default function Modal({
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
 
-      setDragOffset((prev) => {
-        if (prev.y > 120 && !preventClose) {
-          onClose();
-          return { x: 0, y: 0 };
-        }
-        return { x: 0, y: 0 };
-      });
+      const shouldClose = dragOffsetRef.current.y > 120 && !preventClose;
+      setDragOffset({ x: 0, y: 0 });
+      if (shouldClose) {
+        onClose();
+      }
     }
 
     window.addEventListener('pointermove', handlePointerMove);

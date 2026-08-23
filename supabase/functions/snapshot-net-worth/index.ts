@@ -37,7 +37,8 @@ function getFDEffectiveValue(f: any, upToDate: Date = new Date()): number {
   const years = timeDiff / (1000 * 3600 * 24 * 365.25);
   
   if (years > 0 && !isNaN(p) && !isNaN(r) && !isNaN(s.getTime())) {
-    return p * Math.pow(1 + r / 400, 4 * years);
+    // FDs compound half-yearly in Indian banking standard
+    return p * Math.pow(1 + r / 200, 2 * years);
   }
   return p;
 }

@@ -72,6 +72,17 @@ export function calculateTaxHarvesting(holdings: Holding[]): TaxSummary {
 
   const harvestableLosses = opportunities.reduce((sum, o) => sum + Math.abs(o.unrealizedPnL), 0);
   
+  // Separate equity STCL and LTCL according to Indian Income Tax Section 70 set-off rules:
+  // - STCL can offset both STCG (at 20%) and LTCG (at 12.5%)
+  // - LTCL can ONLY offset LTCG (at 12.5%), never STCG
+  const equityStclLosses = opportunities
+    .filter((o) => !o.isDebtOrGold && !o.isLTCG)
+    .reduce((sum, o) => sum + Math.abs(o.unrealizedPnL), 0);
+
+  const equityLtclLosses = opportunities
+    .filter((o) => !o.isDebtOrGold && o.isLTCG)
+    .reduce((sum, o) => sum + Math.abs(o.unrealizedPnL), 0);
+
   // Tax savings estimation for equity based on gross positive gains
   const stcgGain = stcgGrossGains;
   const ltcgGain = ltcgGrossGains;
@@ -79,16 +90,15 @@ export function calculateTaxHarvesting(holdings: Holding[]): TaxSummary {
   
   const totalEstimatedTax = (stcgGain * STCG_RATE) + (taxableLtcg * LTCG_RATE);
   
-  // Potential savings: Assume we offset STCG first, then LTCG
-  let remainingLosses = harvestableLosses;
-  let savings = 0;
+  // 1. Offset STCG with STCL (STCL offsets 20% tax)
+  const stcgOffset = Math.min(stcgGain, equityStclLosses);
+  const remainingStcl = equityStclLosses - stcgOffset;
   
-  const stcgOffset = Math.min(stcgGain, remainingLosses);
-  savings += stcgOffset * STCG_RATE;
-  remainingLosses -= stcgOffset;
+  // 2. Offset LTCG with LTCL first, then any remaining STCL
+  const totalLossesAvailableForLtcg = equityLtclLosses + remainingStcl;
+  const ltcgOffset = Math.min(taxableLtcg, totalLossesAvailableForLtcg);
   
-  const ltcgOffset = Math.min(taxableLtcg, remainingLosses);
-  savings += ltcgOffset * LTCG_RATE;
+  const savings = (stcgOffset * STCG_RATE) + (ltcgOffset * LTCG_RATE);
 
   return {
     realizedSTCG: 0,

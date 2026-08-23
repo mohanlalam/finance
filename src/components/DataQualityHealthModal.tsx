@@ -65,16 +65,16 @@ export default function DataQualityHealthModal({
   });
 
   const getScoreColor = (s: number) => {
-    if (s >= 90) return 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60';
-    if (s >= 70) return 'text-amber-500 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60';
-    return 'text-red-500 bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800/60';
+    if (s >= 90) return 'text-[var(--positive)] bg-[var(--positive-soft)] border-[var(--positive)]/30';
+    if (s >= 70) return 'text-[var(--warning)] bg-[var(--warning-soft)] border-[var(--warning)]/30';
+    return 'text-[var(--negative)] bg-[var(--negative-soft)] border-[var(--negative)]/30';
   };
 
   const getScoreBadge = (s: number) => {
-    if (s >= 95) return { grade: 'A+', label: 'Excellent Data Quality', icon: <ShieldCheck size={20} className="text-emerald-500" /> };
-    if (s >= 85) return { grade: 'A', label: 'Healthy & Verified', icon: <ShieldCheck size={20} className="text-emerald-500" /> };
-    if (s >= 70) return { grade: 'B', label: 'Minor Issues Detected', icon: <AlertTriangle size={20} className="text-amber-500" /> };
-    return { grade: 'C', label: 'Action Required', icon: <ShieldAlert size={20} className="text-red-500" /> };
+    if (s >= 95) return { grade: 'A+', label: 'Excellent Data Quality', icon: <ShieldCheck size={20} className="text-[var(--positive)]" /> };
+    if (s >= 85) return { grade: 'A', label: 'Healthy & Verified', icon: <ShieldCheck size={20} className="text-[var(--positive)]" /> };
+    if (s >= 70) return { grade: 'B', label: 'Minor Issues Detected', icon: <AlertTriangle size={20} className="text-[var(--warning)]" /> };
+    return { grade: 'C', label: 'Action Required', icon: <ShieldAlert size={20} className="text-[var(--negative)]" /> };
   };
 
   const badge = getScoreBadge(score);

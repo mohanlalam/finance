@@ -9,7 +9,7 @@ export async function shareHolding(holding: Holding, addToast?: (msg: string, ty
 Qty: ${formatNumber(holding.qty)}
 Invested: ${formatINR(holding.amountInvested)}
 Current Value: ${formatINR(holding.currentValue)}
-P&L: ${pnlPrefix}${formatINR(holding.unrealizedPnL)} (${pnlPrefix}${formatPercent(holding.pnlPercent)})
+P&L: ${pnlPrefix}${formatINR(holding.unrealizedPnL)} (${formatPercent(holding.pnlPercent)})
 
 Date: ${formattedDate}
 
@@ -37,7 +37,7 @@ export async function sharePortfolioSummary(summary: { name: string; totalValue:
   const formattedDate = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   const text = `Portfolio Summary (${summary.name}):
 Total Value: ${formatINR(summary.totalValue)}
-Total P&L: ${pnlPrefix}${formatINR(summary.totalPnL)} (${pnlPrefix}${formatPercent(summary.totalPnLPercent)})
+Total P&L: ${pnlPrefix}${formatINR(summary.totalPnL)} (${formatPercent(summary.totalPnLPercent)})
 
 Date: ${formattedDate}
 

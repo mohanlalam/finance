@@ -379,6 +379,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
 
   // Close dropdown on outside click
   useEffect(() => {
+    if (!open) return;
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
@@ -386,7 +387,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [open]);
 
   function handleExportCSV() {
     downloadFile(allAssetsToCSV(portfolios), `portfolio-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');

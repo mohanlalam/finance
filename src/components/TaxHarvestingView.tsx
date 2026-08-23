@@ -129,7 +129,7 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
               </thead>
               <tbody className="divide-y divide-[var(--border-subtle)]">
                 {taxData.opportunities.map((opp, idx) => (
-                  <tr key={idx} className="hover:bg-[var(--surface-secondary)]/50 transition-colors">
+                  <tr key={`${opp.holding.id || opp.holding.ticker}-${idx}`} className="hover:bg-[var(--surface-secondary)]/50 transition-colors">
                     <td className="px-4 py-3 font-semibold text-[var(--text-primary)]">{opp.holding.ticker}</td>
                     <td className="px-4 py-3 text-right font-bold text-[var(--negative)] tnum">{formatINR(opp.unrealizedPnL)}</td>
                     <td className="px-4 py-3">

@@ -1,5 +1,6 @@
 import { FixedDeposit } from '../types/portfolio';
 import { compoundValue } from './mathUtils';
+import { parseLocalDate } from './dateUtils';
 
 
 
@@ -55,26 +56,26 @@ export function getFDInvestedAmount(f: FixedDeposit): number {
 export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()): number {
   const p = Number(f.principal_amount);
   const r = Number(f.interest_rate);
-  const s = new Date(f.start_date);
+  const startTs = parseLocalDate(f.start_date);
   
   if (f.status === 'matured') {
     return Number(f.maturity_amount);
   }
   
-  const end = f.maturity_date && new Date(f.maturity_date).getTime() < upToDate.getTime()
-    ? new Date(f.maturity_date)
-    : upToDate;
+  if (isNaN(startTs)) return isNaN(p) ? 0 : p;
+  
+  const maturityTs = parseLocalDate(f.maturity_date);
+  const upToTs = upToDate.getTime();
+  const endTs = !isNaN(maturityTs) && maturityTs < upToTs ? maturityTs : upToTs;
      
-  const timeDiff = end.getTime() - s.getTime();
+  const timeDiff = endTs - startTs;
   const years = timeDiff / (1000 * 3600 * 24 * 365.25);
   
-  if (years > 0 && !isNaN(r) && !isNaN(s.getTime())) {
-    if (!isNaN(p)) {
-      // FDs compound half-yearly
-      return compoundValue(p, r, 2, years);
-    }
+  if (years > 0 && !isNaN(r) && r > 0 && !isNaN(p) && p > 0) {
+    // FDs compound half-yearly
+    return compoundValue(p, r, 2, years);
   }
-  return p;
+  return isNaN(p) ? 0 : p;
 }
 
 export function formatINRCompact(value: number): string {

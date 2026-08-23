@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Trash2, Pencil, Loader2, Check, X, SlidersHorizontal, Share2 } from './icons/AppIcons';
+import React, { useState, useMemo, useCallback } from 'react';
+import { Trash2, Pencil, SlidersHorizontal, Share2 } from './icons/AppIcons';
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent } from '../utils/formatters';
 import { usePrivacy } from '../contexts/PrivacyContext';
@@ -92,21 +92,11 @@ type FilterType = 'all' | 'gainers' | 'losers' | 'etfs';
 interface MobileStockRowProps {
   h: Holding & { _allocation: number; todayPnLPercent?: number; todayPnL?: number };
   isDeleting: boolean;
-  isEditing: boolean;
-  updatingId: string | null;
-  editQty: string;
-  editAvgPrice: string;
-  editError: string;
   isBalancesHidden: boolean;
-  editInputRef: React.RefObject<HTMLInputElement>;
   onSelectDetail: (h: Holding) => void;
   onStartEdit: (h: Holding) => void;
-  onSaveEdit: (h: Holding) => void;
-  onCancelEdit: () => void;
   onDelete: (h: Holding) => void;
   onShare: (h: Holding) => void;
-  onEditQtyChange: (val: string) => void;
-  onEditAvgPriceChange: (val: string) => void;
   canUpdate: boolean;
   canDelete: boolean;
   renderValue: (val: number) => React.ReactNode;
@@ -115,21 +105,11 @@ interface MobileStockRowProps {
 const MobileStockRow = React.memo(function MobileStockRow({
   h,
   isDeleting,
-  isEditing,
-  updatingId,
-  editQty,
-  editAvgPrice,
-  editError,
   isBalancesHidden,
-  editInputRef,
   onSelectDetail,
   onStartEdit,
-  onSaveEdit,
-  onCancelEdit,
   onDelete,
   onShare,
-  onEditQtyChange,
-  onEditAvgPriceChange,
   canUpdate,
   canDelete,
   renderValue,
@@ -157,62 +137,9 @@ const MobileStockRow = React.memo(function MobileStockRow({
               </span>
             </div>
           </div>
-          {isEditing ? (
-            <div className="mt-2 space-y-2 border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-[var(--radius-small)] p-2">
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <label className="block text-[10px] font-semibold text-[var(--text-secondary)] uppercase">Qty</label>
-                  <input
-                    ref={editInputRef}
-                    type="number"
-                    min="1"
-                    step="any"
-                    value={editQty}
-                    onChange={(e) => onEditQtyChange(e.target.value)}
-                    disabled={updatingId === h.id}
-                    className="w-full border border-[var(--border-subtle)] rounded px-1.5 py-1 text-xs text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="block text-[10px] font-semibold text-[var(--text-secondary)] uppercase">Avg Price (₹)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="any"
-                    value={editAvgPrice}
-                    onChange={(e) => onEditAvgPriceChange(e.target.value)}
-                    disabled={updatingId === h.id}
-                    className="w-full border border-[var(--border-subtle)] rounded px-1.5 py-1 text-xs text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none"
-                  />
-                </div>
-              </div>
-              {editError && <p className="text-[10px] text-[var(--negative)]">{editError}</p>}
-              <div className="flex gap-2 justify-end">
-                {updatingId === h.id ? (
-                  <Loader2 size={12} className="animate-spin text-[var(--accent-blue)]" aria-hidden="true" />
-                ) : (
-                  <>
-                    <button
-                      onClick={() => onSaveEdit(h)}
-                      className="px-2.5 py-1 bg-[var(--positive)] text-white rounded-[var(--radius-small)] text-xs font-semibold ios-press"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={onCancelEdit}
-                      className="px-2.5 py-1 bg-[var(--surface-tertiary)] text-[var(--text-primary)] rounded-[var(--radius-small)] text-xs font-semibold ios-press"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          ) : (
-            <p className="text-[10px] text-[var(--text-secondary)] mt-1.5 truncate">
-              {isBalancesHidden ? '••••••' : <>{formatNumber(h.qty, 0)} shares @ ₹{formatNumber(h.avgPrice)}</>} · LTP: ₹{formatNumber(h.ltp)}
-            </p>
-          )}
+          <p className="text-[10px] text-[var(--text-secondary)] mt-1.5 truncate">
+            {isBalancesHidden ? '••••••' : <>{formatNumber(h.qty, 0)} shares @ ₹{formatNumber(h.avgPrice)}</>} · LTP: ₹{formatNumber(h.ltp)}
+          </p>
         </div>
 
         <div className="text-right shrink-0 flex flex-col items-end">
@@ -237,38 +164,36 @@ const MobileStockRow = React.memo(function MobileStockRow({
           <span>Today: <span className={`font-semibold tnum ${(h.todayPnLPercent ?? 0) >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>{formatPercent(h.todayPnLPercent ?? 0)}</span></span>
         </div>
 
-        {!isEditing && (
-          <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={() => onShare(h)}
+            className="w-11 h-11 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press"
+            title="Share holding"
+            aria-label="Share holding summary"
+          >
+            <Share2 size={12} aria-hidden="true" />
+          </button>
+          {canUpdate && (
             <button
-              onClick={() => onShare(h)}
+              onClick={() => onStartEdit(h)}
               className="w-11 h-11 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press"
-              title="Share holding"
-              aria-label="Share holding summary"
+              aria-label="Edit holding quantity and price"
+              title="Edit holding"
             >
-              <Share2 size={12} aria-hidden="true" />
+              <Pencil size={12} aria-hidden="true" />
             </button>
-            {canUpdate && (
-              <button
-                onClick={() => onStartEdit(h)}
-                className="w-11 h-11 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press"
-                aria-label="Edit holding quantity and price"
-                title="Edit holding"
-              >
-                <Pencil size={12} aria-hidden="true" />
-              </button>
-            )}
-            {canDelete && (
-              <button
-                onClick={() => onDelete(h)}
-                className="w-11 h-11 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--negative)] border border-[var(--border-subtle)] shadow-xs ios-press"
-                aria-label="Delete holding"
-                title="Delete holding"
-              >
-                <Trash2 size={12} aria-hidden="true" />
-              </button>
-            )}
-          </div>
-        )}
+          )}
+          {canDelete && (
+            <button
+              onClick={() => onDelete(h)}
+              className="w-11 h-11 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--negative)] border border-[var(--border-subtle)] shadow-xs ios-press"
+              aria-label="Delete holding"
+              title="Delete holding"
+            >
+              <Trash2 size={12} aria-hidden="true" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -291,12 +216,6 @@ export default React.memo(function PortfolioTable({
   const [confirmDelete, setConfirmDelete] = useState<Holding | null>(null);
   const [editingHolding, setEditingHolding] = useState<Holding | null>(null);
   const [selectedDetailHolding, setSelectedDetailHolding] = useState<Holding | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editQty, setEditQty] = useState('');
-  const [editAvgPrice, setEditAvgPrice] = useState('');
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [editError, setEditError] = useState('');
-  const editInputRef = useRef<HTMLInputElement>(null);
 
   const { isBalancesHidden } = usePrivacy();
   const { addToast } = useToastActions();
@@ -411,51 +330,6 @@ export default React.memo(function PortfolioTable({
     if (!onUpdate) return;
     setEditingHolding(h);
   }
-
-  function cancelEdit() {
-    setEditingId(null);
-    setEditQty('');
-    setEditAvgPrice('');
-    setEditError('');
-  }
-
-  async function saveEdit(h: Holding) {
-    if (!onUpdate) return;
-    const targetId = getHoldingId(h);
-    const newQty = parseFloat(editQty);
-    const newAvgPrice = parseFloat(editAvgPrice);
-    if (isNaN(newQty) || newQty <= 0) {
-      setEditError('Enter a valid quantity');
-      return;
-    }
-    if (isNaN(newAvgPrice) || newAvgPrice < 0) {
-      setEditError('Enter a valid price');
-      return;
-    }
-    if (newQty === h.qty && newAvgPrice === h.avgPrice) {
-      cancelEdit();
-      return;
-    }
-    setUpdatingId(targetId);
-    setEditError('');
-    try {
-      await onUpdate(targetId, newQty, newAvgPrice);
-      setEditingId(null);
-      setEditQty('');
-      setEditAvgPrice('');
-    } catch (err: unknown) {
-      setEditError(err instanceof Error ? err.message : 'Update failed');
-    } finally {
-      setUpdatingId(null);
-    }
-  }
-
-  useEffect(() => {
-    if (editingId && editInputRef.current) {
-      editInputRef.current.focus();
-      editInputRef.current.select();
-    }
-  }, [editingId]);
 
   const todayTotalPnL = useMemo(() => {
     return holdings.reduce((sum, h) => sum + calcHoldingTodayPnL(h), 0);
@@ -574,21 +448,11 @@ export default React.memo(function PortfolioTable({
                   key={`${h.ticker}-${h.sno}`}
                   h={h}
                   isDeleting={deletingId === h.id}
-                  isEditing={editingId === h.id}
-                  updatingId={updatingId}
-                  editQty={editQty}
-                  editAvgPrice={editAvgPrice}
-                  editError={editError}
                   isBalancesHidden={isBalancesHidden}
-                  editInputRef={editInputRef}
                   onSelectDetail={setSelectedDetailHolding}
                   onStartEdit={startEdit}
-                  onSaveEdit={saveEdit}
-                  onCancelEdit={cancelEdit}
                   onDelete={handleDelete}
                   onShare={(h) => shareHolding(h, addToast)}
-                  onEditQtyChange={setEditQty}
-                  onEditAvgPriceChange={setEditAvgPrice}
                   canUpdate={!!onUpdate}
                   canDelete={!!onDelete}
                   renderValue={renderValue}
@@ -659,61 +523,11 @@ export default React.memo(function PortfolioTable({
                     </td>
 
                     <td role="cell" className="px-3 py-2.5 text-[var(--text-primary)] text-right tnum">
-                      {editingId === h.id ? (
-                        <div className="flex items-center gap-1 justify-end">
-                          <input
-                            ref={editInputRef}
-                            type="number"
-                            min="1"
-                            step="any"
-                            value={editQty}
-                            onChange={(e) => setEditQty(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') saveEdit(h);
-                              if (e.key === 'Escape') cancelEdit();
-                            }}
-                            disabled={updatingId === h.id}
-                            className="w-16 border border-[var(--accent-blue)] rounded px-1.5 py-0.5 text-xs text-right bg-[var(--surface)] text-[var(--text-primary)] focus:outline-none"
-                          />
-                          {updatingId === h.id ? (
-                            <Loader2 size={12} className="animate-spin text-[var(--accent-blue)]" aria-hidden="true" />
-                          ) : (
-                            <>
-                              <button onClick={() => saveEdit(h)} className="text-[var(--positive)] p-0.5 ios-press" title="Save" aria-label="Save changes">
-                                <Check size={13} />
-                              </button>
-                              <button onClick={cancelEdit} className="text-[var(--text-tertiary)] p-0.5 ios-press" title="Cancel" aria-label="Cancel edit">
-                                <X size={13} />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      ) : (
-                        renderValue(h.qty, (v) => formatNumber(v, 0))
-                      )}
-                      {editError && editingId === getHoldingId(h) && (
-                        <p className="text-[9px] text-[var(--negative)] mt-0.5">{editError}</p>
-                      )}
+                      {renderValue(h.qty, (v) => formatNumber(v, 0))}
                     </td>
 
                     <td role="cell" className="px-3 py-2.5 text-[var(--text-secondary)] text-right tnum">
-                      {editingId === getHoldingId(h) ? (
-                        <input
-                          type="number"
-                          min="0"
-                          step="any"
-                          value={editAvgPrice}
-                          onChange={(e) => setEditAvgPrice(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') saveEdit(h);
-                            if (e.key === 'Escape') cancelEdit();
-                          }}
-                          disabled={updatingId === getHoldingId(h)}
-                          className="w-20 border border-[var(--accent-blue)] rounded px-1.5 py-0.5 text-xs text-right bg-[var(--surface)] text-[var(--text-primary)] focus:outline-none"
-                        />
-                      ) : (
-                        isBalancesHidden ? '••••••' : `₹${formatNumber(h.avgPrice)}`
-                      )}
+                      {isBalancesHidden ? '••••••' : `₹${formatNumber(h.avgPrice)}`}
                     </td>
 
                     <td role="cell" className="px-3 py-2.5 font-bold text-[var(--text-primary)] text-right tnum">₹{formatNumber(h.ltp)}</td>

@@ -146,12 +146,12 @@ export default React.memo(function FamilyTabBar({
                   e.stopPropagation();
                   setMenuTarget(isMenuOpen ? null : { id: p.id, name: p.name, label: p.label });
                 }}
-                className="sm:hidden w-4 h-9 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-0.5 shrink-0"
+                className="sm:hidden min-w-[36px] h-9 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-2 shrink-0 touch-manipulation"
                 title={`Options for ${p.label}`}
                 aria-label={`Options for portfolio ${p.label}`}
                 aria-expanded={isMenuOpen}
               >
-                <MoreVertical size={13} />
+                <MoreVertical size={14} />
               </button>
 
               {/* Desktop action buttons (pencil, trash) displayed on hover */}

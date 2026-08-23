@@ -1,36 +1,11 @@
 import { Portfolio } from '../types/portfolio';
 import { getRDInvestedAmount, getElapsedMonthsStandard } from './rdUtils';
 import { getSIPInvestedAmount } from './sipUtils';
+import { parseLocalDate, formatLocalDate, getDaysInMonth } from './dateUtils';
 
 export interface CashFlow {
   date: string; // ISO format: YYYY-MM-DD
   amount: number; // Outflow is negative, inflow/current value is positive
-}
-
-/**
- * Robust date parser returning local timestamp or NaN
- */
-function parseLocalDate(dateStr: string | undefined): number {
-  if (!dateStr) return NaN;
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
-  if (match) {
-    const y = parseInt(match[1], 10);
-    const m = parseInt(match[2], 10) - 1;
-    const d = parseInt(match[3], 10);
-    return new Date(y, m, d).getTime();
-  }
-  const t = new Date(dateStr).getTime();
-  return isNaN(t) ? NaN : t;
-}
-
-/**
- * Format local year, month, day to YYYY-MM-DD without UTC timezone shifts
- */
-function formatLocalDate(year: number, month: number, day: number): string {
-  const y = String(year).padStart(4, '0');
-  const m = String(month + 1).padStart(2, '0');
-  const d = String(day).padStart(2, '0');
-  return `${y}-${m}-${d}`;
 }
 
 /**
@@ -277,14 +252,6 @@ export function runXIRRAsync(cashflows: CashFlow[]): Promise<number> {
   });
 }
 
-const DAYS_IN_MONTH_ARRAY = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-function isLeap(y: number): boolean {
-  return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
-}
-function getDaysInMonthNum(y: number, m: number): number {
-  return m === 1 && isLeap(y) ? 29 : (DAYS_IN_MONTH_ARRAY[m] ?? 30);
-}
-
 // ─── Fast XIRR Cache ───
 const xirrResultCache = new Map<string, number | null>();
 const MAX_XIRR_CACHE_SIZE = 50;
@@ -303,6 +270,7 @@ export function getPortfolioCashFlows(portfolio: Portfolio, target: CashFlow[] =
   if (!portfolio) return target;
   const cashflows = target;
   const now = new Date();
+  const nowMs = now.getTime();
   const nowStr = formatLocalDate(now.getFullYear(), now.getMonth(), now.getDate());
 
   const addFlow = (dateStr: string | undefined, amount: number) => {
@@ -329,7 +297,10 @@ export function getPortfolioCashFlows(portfolio: Portfolio, target: CashFlow[] =
       if (rd.contributions && rd.contributions.length > 0) {
         const cLen = rd.contributions.length;
         for (let j = 0; j < cLen; j++) {
-          addFlow(rd.contributions[j].date, Number(rd.contributions[j].amount));
+          const cDateMs = parseLocalDate(rd.contributions[j].date);
+          if (isNaN(cDateMs) || cDateMs <= nowMs) {
+            addFlow(rd.contributions[j].date, Number(rd.contributions[j].amount));
+          }
         }
       } else {
         const startTime = parseLocalDate(rd.start_date);
@@ -351,7 +322,7 @@ export function getPortfolioCashFlows(portfolio: Portfolio, target: CashFlow[] =
         for (let m = 0; m < elapsed; m++) {
           const targetYear = startYear + Math.floor((startMonth + m) / 12);
           const targetMonth = (startMonth + m) % 12;
-          const lastDay = getDaysInMonthNum(targetYear, targetMonth);
+          const lastDay = getDaysInMonth(targetYear, targetMonth);
           const clampedDay = Math.min(startDay, lastDay);
           const isBeforeNow = targetYear < nowYear || 
             (targetYear === nowYear && (targetMonth < nowMonth || (targetMonth === nowMonth && clampedDay <= nowDay)));
@@ -387,7 +358,7 @@ export function getPortfolioCashFlows(portfolio: Portfolio, target: CashFlow[] =
       for (let m = 0; m < elapsed; m++) {
         const targetYear = startYear + Math.floor((startMonth + m) / 12);
         const targetMonth = (startMonth + m) % 12;
-        const lastDay = getDaysInMonthNum(targetYear, targetMonth);
+        const lastDay = getDaysInMonth(targetYear, targetMonth);
         const clampedDay = Math.min(startDay, lastDay);
         const isBeforeNow = targetYear < nowYear || 
           (targetYear === nowYear && (targetMonth < nowMonth || (targetMonth === nowMonth && clampedDay <= nowDay)));

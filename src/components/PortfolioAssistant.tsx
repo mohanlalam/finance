@@ -112,10 +112,33 @@ const renderMarkdown = (text: string) => {
     currentTableLines = [];
   };
 
+  let currentListType: 'ul' | 'ol' | null = null;
+  let currentListItems: React.ReactNode[] = [];
+
+  const flushList = (keySuffix: string | number) => {
+    if (currentListItems.length === 0 || !currentListType) return;
+    if (currentListType === 'ul') {
+      blocks.push(
+        <ul key={`ul-${keySuffix}`} className="list-disc pl-4 my-1 space-y-0.5 text-xs text-[var(--text-secondary)]">
+          {currentListItems}
+        </ul>
+      );
+    } else {
+      blocks.push(
+        <ol key={`ol-${keySuffix}`} className="list-decimal pl-4 my-1 space-y-0.5 text-xs text-[var(--text-secondary)]">
+          {currentListItems}
+        </ol>
+      );
+    }
+    currentListItems = [];
+    currentListType = null;
+  };
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
     if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+      flushList(i);
       currentTableLines.push(line);
       continue;
     } else if (currentTableLines.length > 0) {
@@ -123,40 +146,49 @@ const renderMarkdown = (text: string) => {
     }
 
     if (line.startsWith('### ')) {
+      flushList(i);
       blocks.push(
         <h4 key={i} className="text-xs font-bold text-[var(--text-primary)] mt-2.5 mb-1 tracking-tight">
           {parseBoldAndCode(line.slice(4))}
         </h4>
       );
     } else if (line.startsWith('## ')) {
+      flushList(i);
       blocks.push(
         <h3 key={i} className="text-xs sm:text-sm font-bold text-[var(--text-primary)] mt-3 mb-1.5 tracking-tight">
           {parseBoldAndCode(line.slice(3))}
         </h3>
       );
     } else if (line.startsWith('# ')) {
+      flushList(i);
       blocks.push(
         <h2 key={i} className="text-sm font-bold text-[var(--text-primary)] mt-3.5 mb-2 tracking-tight">
           {parseBoldAndCode(line.slice(2))}
         </h2>
       );
     } else if (line.startsWith('- ') || line.startsWith('* ')) {
-      blocks.push(
-        <ul key={i} className="list-disc pl-4 my-0.5 text-xs text-[var(--text-secondary)]">
-          <li className="py-0.5 leading-relaxed">{parseBoldAndCode(line.slice(2))}</li>
-        </ul>
+      if (currentListType && currentListType !== 'ul') {
+        flushList(i);
+      }
+      currentListType = 'ul';
+      currentListItems.push(
+        <li key={i} className="py-0.5 leading-relaxed">{parseBoldAndCode(line.slice(2))}</li>
       );
     } else {
       const olMatch = line.match(/^(\d+)\.\s(.*)/);
       if (olMatch) {
-        blocks.push(
-          <ol key={i} className="list-decimal pl-4 my-0.5 text-xs text-[var(--text-secondary)]">
-            <li className="py-0.5 leading-relaxed" value={parseInt(olMatch[1])}>{parseBoldAndCode(olMatch[2])}</li>
-          </ol>
+        if (currentListType && currentListType !== 'ol') {
+          flushList(i);
+        }
+        currentListType = 'ol';
+        currentListItems.push(
+          <li key={i} className="py-0.5 leading-relaxed" value={parseInt(olMatch[1])}>{parseBoldAndCode(olMatch[2])}</li>
         );
       } else if (line.trim() === '') {
+        flushList(i);
         blocks.push(<div key={i} className="h-1.5" />);
       } else {
+        flushList(i);
         blocks.push(
           <p key={i} className="text-xs text-[var(--text-secondary)] leading-relaxed my-0.5">
             {parseBoldAndCode(line)}
@@ -166,6 +198,7 @@ const renderMarkdown = (text: string) => {
     }
   }
 
+  flushList('end');
   if (currentTableLines.length > 0) {
     flushTable('end');
   }

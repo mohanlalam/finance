@@ -19,7 +19,7 @@ import { useToastActions } from '../contexts/ToastContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
 import EmptyState from './EmptyState';
 
-type AssetType = 'general' | 'stock' | 'fd' | 'gold' | 'real_estate' | 'insurance';
+type AssetType = 'general' | 'stock' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance';
 
 interface PortfolioOption {
   name: string;
@@ -41,6 +41,8 @@ const FOLDERS: { key: AssetType; label: string; color: string }[] = [
   { key: 'general', label: 'General', color: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300' },
   { key: 'stock', label: 'Stocks', color: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400' },
   { key: 'fd', label: 'Fixed Deposits', color: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400' },
+  { key: 'rd', label: 'Recurring Deposits', color: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400' },
+  { key: 'sip', label: 'Mutual Funds / SIP', color: 'bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-400' },
   { key: 'gold', label: 'Gold', color: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400' },
   { key: 'real_estate', label: 'Real Estate', color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' },
   { key: 'insurance', label: 'Insurance', color: 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-500' },
@@ -132,6 +134,12 @@ export default React.memo(function DocumentVaultView({
     }
     if (activeFolder === 'fd') {
       return selectedPortfolioObj.fixedDeposits.map((f: FixedDeposit) => ({ id: f.id, label: f.bank_name }));
+    }
+    if (activeFolder === 'rd') {
+      return (selectedPortfolioObj.rdAccounts || []).map((r) => ({ id: r.id, label: `${r.bank_name} (₹${r.monthly_deposit}/mo)` }));
+    }
+    if (activeFolder === 'sip') {
+      return (selectedPortfolioObj.sipAccounts || []).map((s) => ({ id: s.id, label: s.fund_name }));
     }
     if (activeFolder === 'gold') {
       return selectedPortfolioObj.goldHoldings.map((g: GoldHolding) => ({ id: g.id, label: g.item_name }));

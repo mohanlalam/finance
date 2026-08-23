@@ -1,15 +1,6 @@
 import { RDAccount } from '../types/portfolio';
 import { compoundValue } from './mathUtils';
-
-const DAYS_PER_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-function getDaysInMonth(year: number, month: number): number {
-  if (month === 1) {
-    const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-    return isLeap ? 29 : 28;
-  }
-  return DAYS_PER_MONTH[month] ?? 30;
-}
+import { getDaysInMonth, parseLocalDate as parseLocalDateTs } from './dateUtils';
 
 /**
  * Shared standardized month elapsed calculator handling month-end dates (e.g. Jan 31 -> Feb 28)
@@ -38,13 +29,8 @@ export function getElapsedMonthsStandard(startDate: Date, endDate: Date = new Da
  * Safely parse date strings into local date objects avoiding UTC midnight timezone shifts
  */
 export function parseLocalDate(dateStr: string | undefined | null): Date | null {
-  if (!dateStr) return null;
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
-  if (match) {
-    return new Date(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10));
-  }
-  const d = new Date(dateStr);
-  return isNaN(d.getTime()) ? null : d;
+  const ts = parseLocalDateTs(dateStr);
+  return isNaN(ts) ? null : new Date(ts);
 }
 
 /**
