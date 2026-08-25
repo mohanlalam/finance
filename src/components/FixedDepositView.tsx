@@ -4,7 +4,7 @@ import ConfirmModal from './ConfirmModal';
 import DepositDetailsCard from './fd/DepositDetailsCard';
 import FDFormModal from './fd/FDFormModal';
 import AssetRegistryContainer from './ui/AssetRegistryContainer';
-import { usePortfolioState } from '../contexts/PortfolioContext';
+import { usePortfolioStatus } from '../contexts/PortfolioContext';
 import { useToastActions } from '../contexts/ToastContext';
 import { useAssetModal } from '../hooks/useAssetModal';
 import { useIsMobile } from '../hooks/useIsMobile';
@@ -39,7 +39,7 @@ export function FixedDepositView({
   autoOpenAddModal,
 }: FixedDepositViewProps) {
   const isMobile = useIsMobile();
-  const { isMutating } = usePortfolioState();
+  const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
   const {
     showModal,

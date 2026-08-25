@@ -4,7 +4,7 @@ import ConfirmModal from './ConfirmModal';
 import RealEstateCard from './realestate/RealEstateCard';
 import RealEstateFormModal from './realestate/RealEstateFormModal';
 import AssetRegistryContainer from './ui/AssetRegistryContainer';
-import { usePortfolioState } from '../contexts/PortfolioContext';
+import { usePortfolioStatus } from '../contexts/PortfolioContext';
 import { useToastActions } from '../contexts/ToastContext';
 import { useAssetModal } from '../hooks/useAssetModal';
 import { FixedSizeList as List } from 'react-window';
@@ -37,7 +37,7 @@ export function RealEstateView({
   onDelete,
   autoOpenAddModal,
 }: RealEstateViewProps) {
-  const { isMutating } = usePortfolioState();
+  const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
   const {
     showModal,
@@ -77,7 +77,7 @@ export function RealEstateView({
         itemCount={realEstate.length}
         onOpenAdd={openAdd}
       >
-        {realEstate.length > 8 ? (
+        {realEstate.length > 25 ? (
           <List
             height={500}
             itemCount={realEstate.length}

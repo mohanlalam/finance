@@ -5,7 +5,7 @@ import Modal from './Modal';
 import GoldHoldingCard from './gold/GoldHoldingCard';
 import GoldFormModal from './gold/GoldFormModal';
 import AssetRegistryContainer from './ui/AssetRegistryContainer';
-import { usePortfolioState } from '../contexts/PortfolioContext';
+import { usePortfolioStatus } from '../contexts/PortfolioContext';
 import { useToastActions } from '../contexts/ToastContext';
 import { useAssetModal } from '../hooks/useAssetModal';
 import { useIsMobile } from '../hooks/useIsMobile';
@@ -48,7 +48,7 @@ export function GoldHoldingView({
   autoOpenAddModal,
 }: GoldHoldingViewProps) {
   const isMobile = useIsMobile();
-  const { isMutating } = usePortfolioState();
+  const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
   const {
     showModal,

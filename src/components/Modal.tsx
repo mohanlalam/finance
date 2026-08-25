@@ -266,7 +266,7 @@ export default function Modal({
             {!preventClose && (
               <button 
                 onClick={onClose} 
-                className="p-1.5 rounded-[var(--radius-pill)] text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] ios-press cursor-pointer"
+                className="p-2.5 min-w-[44px] min-h-[44px] -mr-2 flex items-center justify-center rounded-[var(--radius-pill)] text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] ios-press cursor-pointer touch-manipulation"
                 aria-label="Close dialog"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { DocumentMetadata, RDAccount } from '../../types/portfolio';
+import { DocumentMetadata, RDAccount, PortfolioName } from '../../types/portfolio';
 import ConfirmModal from '../ConfirmModal';
 import RDAccountCard from './RDAccountCard';
 import { RDFormModal } from './RDFormModal';
 import { useRDData } from '../../hooks/useRDData';
-import { usePortfolioState } from '../../contexts/PortfolioContext';
+import { usePortfolioStatus, usePortfolioEntities } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import { useAssetModal } from '../../hooks/useAssetModal';
@@ -17,7 +17,7 @@ interface PortfolioOption {
 
 interface RDViewProps {
   documents: DocumentMetadata[];
-  portfolioName: string;
+  portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
   autoOpenAddModal?: boolean;
 }
@@ -28,7 +28,8 @@ export function RDView({
   portfolioOptions,
   autoOpenAddModal,
 }: RDViewProps) {
-  const { portfolios, isMutating } = usePortfolioState();
+  const { portfolios } = usePortfolioEntities();
+  const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
   const {
     rdAccounts,
@@ -90,7 +91,7 @@ export function RDView({
         itemCount={filteredAccounts.length}
         onOpenAdd={openAdd}
       >
-        {filteredAccounts.length > 8 ? (
+        {filteredAccounts.length > 25 ? (
           <List
             height={500}
             itemCount={filteredAccounts.length}

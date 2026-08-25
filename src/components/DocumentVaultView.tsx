@@ -14,7 +14,7 @@ import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Pa
 import { getDocumentUrl } from '../utils/formatters';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
-import { usePortfolioState } from '../contexts/PortfolioContext';
+import { usePortfolioStatus } from '../contexts/PortfolioContext';
 import { useToastActions } from '../contexts/ToastContext';
 import AssetCardSkeleton from './AssetCardSkeleton';
 import EmptyState from './EmptyState';
@@ -57,7 +57,7 @@ export default React.memo(function DocumentVaultView({
   onDelete,
   autoOpenAddModal,
 }: DocumentVaultViewProps) {
-  const { isMutating } = usePortfolioState();
+  const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
 
   const assetLabelMap = useMemo(() => {
@@ -347,7 +347,7 @@ export default React.memo(function DocumentVaultView({
             {folderDocs.map((doc) => {
               const linkedLabel = doc.asset_id ? assetLabelMap.get(doc.asset_id) || null : null;
               return (
-                <div key={doc.id} className="px-6 py-4 hover:bg-[var(--surface-secondary)]/50 transition-colors flex items-center justify-between gap-4">
+                <div key={doc.id} className="mobile-asset-card px-6 py-4 hover:bg-[var(--surface-secondary)]/50 transition-colors flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
                       <FileText size={18} />

@@ -144,7 +144,7 @@ export default function FloatingAddMenu({
               <div className="flex items-center gap-1 bg-[var(--surface-secondary)] p-0.5 rounded-[var(--radius-small)] text-[10px]" role="radiogroup" aria-label="Button alignment">
                 <button
                   onClick={() => changePosition('left')}
-                  className={`px-1.5 py-0.5 rounded-[var(--radius-small)] font-bold transition-colors ios-press ${position === 'left' ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                  className={`px-2 py-1 min-h-[28px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation ${position === 'left' ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
                   title="Move button to Left"
                   aria-checked={position === 'left'}
                   role="radio"
@@ -153,7 +153,7 @@ export default function FloatingAddMenu({
                 </button>
                 <button
                   onClick={() => changePosition('center')}
-                  className={`px-1.5 py-0.5 rounded-[var(--radius-small)] font-bold transition-colors ios-press ${position === 'center' ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                  className={`px-2 py-1 min-h-[28px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation ${position === 'center' ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
                   title="Move button to Center"
                   aria-checked={position === 'center'}
                   role="radio"
@@ -162,7 +162,7 @@ export default function FloatingAddMenu({
                 </button>
                 <button
                   onClick={() => changePosition('right')}
-                  className={`px-1.5 py-0.5 rounded-[var(--radius-small)] font-bold transition-colors ios-press ${position === 'right' ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                  className={`px-2 py-1 min-h-[28px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation ${position === 'right' ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
                   title="Move button to Right"
                   aria-checked={position === 'right'}
                   role="radio"
@@ -176,7 +176,7 @@ export default function FloatingAddMenu({
                   setIsOpen(false);
                   fabButtonRef.current?.focus();
                 }}
-                className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-[var(--radius-medium)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] ios-press transition-colors shrink-0"
+                className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-[var(--radius-medium)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] ios-press transition-colors shrink-0 touch-manipulation"
                 aria-label="Close add menu"
               >
                 <X size={18} aria-hidden="true" />

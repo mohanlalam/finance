@@ -4,7 +4,7 @@ import ConfirmModal from '../ConfirmModal';
 import SIPAccountCard from './SIPAccountCard';
 import { SIPFormModal } from './SIPFormModal';
 import { useSIPData } from '../../hooks/useSIPData';
-import { usePortfolioState } from '../../contexts/PortfolioContext';
+import { usePortfolioStatus, usePortfolioEntities } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import { useAssetModal } from '../../hooks/useAssetModal';
@@ -28,7 +28,8 @@ export function SIPView({
   portfolioOptions,
   autoOpenAddModal,
 }: SIPViewProps) {
-  const { portfolios, isMutating } = usePortfolioState();
+  const { portfolios } = usePortfolioEntities();
+  const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
   const {
     sipAccounts,
@@ -90,7 +91,7 @@ export function SIPView({
         itemCount={filteredAccounts.length}
         onOpenAdd={openAdd}
       >
-        {filteredAccounts.length > 8 ? (
+        {filteredAccounts.length > 25 ? (
           <List
             height={500}
             itemCount={filteredAccounts.length}

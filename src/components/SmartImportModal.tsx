@@ -4,7 +4,7 @@ import Modal from './Modal';
 import { Button } from './ui/Button';
 import { extractAssetFromDocument, getGeminiApiKey, setStoredGeminiApiKey, ExtractedAssetResult } from '../utils/aiDocumentExtractor';
 import { uploadDocumentFile, removeDocumentFiles } from '../utils/supabaseStorage';
-import { usePortfolioActions, usePortfolioState } from '../contexts/PortfolioContext';
+import { usePortfolioActions, usePortfolioEntities } from '../contexts/PortfolioContext';
 
 interface SmartImportModalProps {
   isOpen: boolean;
@@ -12,7 +12,7 @@ interface SmartImportModalProps {
 }
 
 export default function SmartImportModal({ isOpen, onClose }: SmartImportModalProps) {
-  const { portfolios, activeTab } = usePortfolioState();
+  const { portfolios, activeTab } = usePortfolioEntities();
   const { addAsset } = usePortfolioActions();
 
   const [file, setFile] = useState<File | null>(null);

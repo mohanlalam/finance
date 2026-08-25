@@ -165,11 +165,6 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [portfolioKeys]);
 
-  // Auto-load on mount (SWR handles background polling and visibility refresh)
-  useEffect(() => {
-    load();
-  }, [load]);
-
   // Daily net worth snapshot trigger
   useEffect(() => {
     let isMounted = true;

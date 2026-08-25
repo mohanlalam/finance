@@ -104,7 +104,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
           <button
             type="button"
             onClick={() => setIsDrawerOpen(false)}
-            className="w-8 h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] rounded-[var(--radius-medium)] hover:bg-[var(--surface-secondary)] transition-colors outline-none cursor-pointer"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] -mr-2 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] rounded-[var(--radius-medium)] hover:bg-[var(--surface-secondary)] transition-colors outline-none cursor-pointer touch-manipulation"
             aria-label="Close menu"
           >
             <X size={18} aria-hidden="true" />

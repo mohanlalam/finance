@@ -35,7 +35,7 @@ export const MobileStatusBar = React.memo(function MobileStatusBar({
       <button
         onClick={onRefresh}
         disabled={isLoadingPrices}
-        className="flex items-center gap-1 font-bold text-[var(--accent-blue)] hover:opacity-80 active:scale-[0.97] transition-all shrink-0 ml-2 cursor-pointer disabled:opacity-50"
+        className="flex items-center gap-1 min-h-[44px] px-2.5 -my-1.5 font-bold text-[var(--accent-blue)] hover:opacity-80 active:scale-[0.97] transition-all shrink-0 ml-1 cursor-pointer disabled:opacity-50 touch-manipulation"
         title="Sync live market rates"
         aria-label="Sync live market rates"
       >
