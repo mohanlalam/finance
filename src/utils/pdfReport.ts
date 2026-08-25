@@ -1,6 +1,6 @@
 import { Portfolio } from '../types/portfolio';
 import { formatINR, formatPercent, getFDEffectiveValue } from './formatters';
-import { estimateTodayPnL } from './portfolioCalcs';
+import { estimateTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
 import { getSIPEffectiveValue } from '../domains/assets/sip/calculations/sipValuation';
 import { getRDEffectiveValue } from '../domains/assets/rd/calculations/rdCompounding';
 

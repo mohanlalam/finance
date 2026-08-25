@@ -170,3 +170,15 @@ export function calculateAggregatedPortfolioTotals(portfolios: Portfolio[]): Por
     realEstateValue,
   };
 }
+
+/**
+ * Get a specific portfolio by name.
+ */
+export function getPortfolioByName(portfolios: Portfolio[], name: string): Portfolio | null {
+  if (!portfolios || name === 'all') return null;
+  for (let i = 0; i < portfolios.length; i++) {
+    if (portfolios[i]?.name === name) return portfolios[i];
+  }
+  return null;
+}
+

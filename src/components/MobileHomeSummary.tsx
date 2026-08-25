@@ -3,7 +3,8 @@ import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpe
 import { formatINR, formatFullINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { Alert } from '../hooks/useAlerts';
-import { estimateTodayPnL } from '../utils/portfolioCalcs';
+import { estimateTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
+
 import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { Sparkline } from './ui/Sparkline';
 import { AnimatedNumber } from './ui/AnimatedNumber';

@@ -1,4 +1,5 @@
-import { calculateXIRR, CashFlow } from '../utils/performance';
+import { calculateXIRR, CashFlow } from '../domains/performance/calculations/xirr';
+
 
 self.onmessage = (e: MessageEvent<{ taskId?: string; cashflows: CashFlow[] }>) => {
   const { taskId, cashflows } = e.data || {};

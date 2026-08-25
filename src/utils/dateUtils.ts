@@ -31,6 +31,14 @@ export function parseLocalDate(dateStr: string | undefined | null): number {
 }
 
 /**
+ * Safely parse date strings into local Date objects avoiding UTC midnight timezone shifts.
+ */
+export function parseLocalDateObj(dateStr: string | undefined | null): Date | null {
+  const ts = parseLocalDate(dateStr);
+  return isNaN(ts) ? null : new Date(ts);
+}
+
+/**
  * Format local year, month, day to YYYY-MM-DD without UTC timezone shifts.
  */
 export function formatLocalDate(year: number, month: number, day: number): string {

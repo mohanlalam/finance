@@ -3,7 +3,8 @@ import { X, TrendingUp, TrendingDown, Pencil, Trash2, Share2, ExternalLink } fro
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent } from '../utils/formatters';
 import { usePrivacy } from '../contexts/PrivacyContext';
-import { calcHoldingTodayPnL } from '../utils/portfolioCalcs';
+import { calcHoldingTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
+
 
 interface HoldingDetailDrawerProps {
   holding: Holding | null;

@@ -2,7 +2,8 @@ import React from 'react';
 import { IndianRupee, BarChart2, TrendingUp, TrendingDown, Share2 } from './icons/AppIcons';
 import { formatINR, formatFullINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
-import { estimateTodayPnL } from '../utils/portfolioCalcs';
+import { estimateTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
+
 import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { Sparkline } from './ui/Sparkline';
 import { AnimatedNumber } from './ui/AnimatedNumber';

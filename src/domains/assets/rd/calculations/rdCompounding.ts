@@ -1,6 +1,8 @@
 import { RDAccount } from '../../../../types/portfolio';
 import { compoundValue } from '../../../../utils/mathUtils';
-import { getDaysInMonth, parseLocalDate as parseLocalDateTs } from '../../../../utils/dateUtils';
+import { getDaysInMonth, parseLocalDateObj as parseLocalDate } from '../../../../utils/dateUtils';
+
+export { parseLocalDate };
 
 export function getElapsedMonthsStandard(startDate: Date, endDate: Date = new Date()): number {
   if (!startDate || isNaN(startDate.getTime()) || !endDate || isNaN(endDate.getTime())) return 0;
@@ -19,11 +21,6 @@ export function getElapsedMonthsStandard(startDate: Date, endDate: Date = new Da
 
   const elapsed = rawMonths + (currentDay >= startDay || isMonthEnd ? 1 : 0);
   return Math.max(0, elapsed);
-}
-
-export function parseLocalDate(dateStr: string | undefined | null): Date | null {
-  const ts = parseLocalDateTs(dateStr);
-  return isNaN(ts) ? null : new Date(ts);
 }
 
 export function getRDInvestedAmount(account: RDAccount, now: Date = new Date()): number {

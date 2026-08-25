@@ -1,6 +1,6 @@
 import React from 'react';
 import { Portfolio } from '../types/portfolio';
-import { calculateTaxHarvesting, TAX_DISCLAIMER } from '../utils/taxUtils';
+import { calculateTaxHarvesting, TAX_DISCLAIMER } from '../domains/taxation/calculations/taxHarvesting';
 import { formatINR } from '../utils/formatters';
 import { TrendingDown, ShieldAlert } from './icons/AppIcons';
 

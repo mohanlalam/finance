@@ -52,7 +52,8 @@ import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { getBreakdownSlices } from '../utils/chartHelpers';
-import { classBreakdown, estimateTodayPnL } from '../utils/portfolioCalcs';
+import { estimateTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
+import { classBreakdown } from '../domains/portfolio/calculations/allocation';
 import { Badge } from '../components/ui/Badge';
 
 // Lazy viewport container that loads child components only when they are visible

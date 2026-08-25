@@ -10,7 +10,8 @@ import EmptyState from './EmptyState';
 import EditStockModal from './EditStockModal';
 import { useIsMobile } from '../hooks/useIsMobile';
 import HoldingDetailDrawer from './HoldingDetailDrawer';
-import { calcHoldingTodayPnL } from '../utils/portfolioCalcs';
+import { calcHoldingTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
+
 
 type SortPreset = 'value' | 'pnl' | 'pnlPct' | 'todayPct' | 'allocation';
 
