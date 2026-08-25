@@ -16,8 +16,8 @@ import {
 } from '../../../types/portfolio';
 import { NetWorthSnapshot } from '../../../domains/portfolio/calculations/netWorth';
 import { invokeFunction, AppApiError } from '../../../utils/apiClient';
-import { getFDInvestedAmount, getFDEffectiveValue } from '../../../utils/formatters';
-import { getRDInvestedAmount, getRDEffectiveValue } from '../../..//domains/assets/rd/calculations/rdCompounding';
+import { getFDInvestedAmount, getFDEffectiveValue } from '../../../domains/assets/fd/calculations/fdCompounding';
+import { getRDInvestedAmount, getRDEffectiveValue } from '../../../domains/assets/rd/calculations/rdCompounding';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../../domains/assets/sip/calculations/sipValuation';
 import { RepositoryError, ValidationError } from '../../../shared/errors/AppError';
 import { sortPortfolios } from '../../../domains/portfolio/calculations/portfolioOrdering';

@@ -24,6 +24,7 @@ import {
   getPurityMultiplier,
   calculateGoldValuation as calcGoldValuationPure,
 } from '../domains/assets/gold/calculations/goldValuation';
+import { mcxGoldDataProvider } from '../infrastructure/market-data/providers/mcxProvider';
 
 export { DEFAULT_GOLD_RATE_24K, getPurityMultiplier };
 
@@ -136,35 +137,19 @@ export async function fetchLiveGoldRates(forceRefresh = false): Promise<GoldRate
   }
 
   try {
-    // 1. Primary Live Spot Endpoint: XAU/INR global bullion rate
-    const res = await fetch('https://api.gold-api.com/price/XAU/INR', {
-      headers: { Accept: 'application/json' },
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const rawOunceINR = Number(data?.price);
-      if (!isNaN(rawOunceINR) && rawOunceINR > 10000) {
-        const basePerGram = rawOunceINR / 31.1034768;
-        // India retail benchmark includes statutory customs duty + GST (~15.19%)
-        const rate24k = Math.round(basePerGram * 1.1519);
-        const prevCloseRate = snapshot.rate24k >= 10000 ? snapshot.rate24k : rate24k;
-        const changeINR = rate24k - prevCloseRate;
-        const changePercent = prevCloseRate > 0 ? ((rate24k - prevCloseRate) / prevCloseRate) * 100 : 0;
-
-        if (rate24k >= 9000 && rate24k <= 25000) {
-          const newSnapshot: GoldRateSnapshot = {
-            rate24k,
-            previousClose: prevCloseRate,
-            changeINR,
-            changePercent,
-            isLive: true,
-            lastFetchedAt: new Date().toISOString(),
-            source: 'MCX & IBJA Live Bullion Rates',
-          };
-          saveStoredGoldSnapshot(newSnapshot);
-          return deriveGoldRates();
-        }
-      }
+    const quote = await mcxGoldDataProvider.getGoldSpotRate();
+    if (quote) {
+      const newSnapshot: GoldRateSnapshot = {
+        rate24k: quote.rate24k,
+        previousClose: quote.previousClose,
+        changeINR: quote.changeINR,
+        changePercent: quote.changePercent,
+        isLive: true,
+        lastFetchedAt: new Date().toISOString(),
+        source: quote.source,
+      };
+      saveStoredGoldSnapshot(newSnapshot);
+      return deriveGoldRates();
     }
   } catch (err) {
     console.warn('[goldPricing] Live gold fetch warning:', err);

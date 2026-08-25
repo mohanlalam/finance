@@ -1,23 +1,35 @@
-export type Severity = 'info' | 'warning' | 'critical';
+import { AssetTab } from '../../types/portfolio';
 
-export interface DataQualityIssue {
-  code: string;
-  severity: Severity;
-  entityType: string;
-  entityId: string;
-  portfolioId?: string;
+export type HealthSeverity = 'critical' | 'warning' | 'info';
+
+export interface HealthIssue {
+  id: string;
+  code?: string;
+  category: 'deposit' | 'valuation' | 'document' | 'insurance' | 'sip' | 'market_data' | 'completeness';
+  severity: HealthSeverity;
+  title: string;
+  description: string;
+  assetTab: AssetTab;
   portfolioName?: string;
-  message: string;
-  fixable: boolean;
-  actionHint?: string;
+  portfolioLabel?: string;
+  assetId?: string;
+  actionLabel?: string;
 }
 
-export interface DataQualityReport {
+export interface PortfolioHealthSummary {
   score: number; // 0 to 100
-  totalAssetsChecked: number;
-  issues: DataQualityIssue[];
+  totalChecks: number;
+  passedChecks: number;
+  issues: HealthIssue[];
   criticalCount: number;
   warningCount: number;
   infoCount: number;
-  calculatedAt: string;
+}
+
+export interface HealthSnapshot {
+  timestamp: string; // ISO date string
+  score: number;
+  criticalCount: number;
+  warningCount: number;
+  totalChecks: number;
 }

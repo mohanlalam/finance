@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useCallback, ReactNode, useMemo } from 'react';
+import { toUserErrorMessage } from '../shared/errors/AppError';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -15,6 +16,7 @@ interface ToastStateContextProps {
 
 interface ToastActionsContextProps {
   addToast: (message: string, type?: ToastType) => void;
+  addErrorToast: (error: unknown) => void;
   removeToast: (id: string) => void;
 }
 
@@ -33,8 +35,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts((prev) => [...prev, { id, message, type }]);
   }, []);
 
+  const addErrorToast = useCallback((error: unknown) => {
+    const message = toUserErrorMessage(error);
+    addToast(message, 'error');
+  }, [addToast]);
+
   const stateValue = useMemo(() => ({ toasts }), [toasts]);
-  const actionsValue = useMemo(() => ({ addToast, removeToast }), [addToast, removeToast]);
+  const actionsValue = useMemo(() => ({ addToast, addErrorToast, removeToast }), [addToast, addErrorToast, removeToast]);
 
   return (
     <ToastStateContext.Provider value={stateValue}>
@@ -54,8 +61,9 @@ export function useToast() {
   return useMemo(() => ({
     toasts: stateContext.toasts,
     addToast: actionsContext.addToast,
+    addErrorToast: actionsContext.addErrorToast,
     removeToast: actionsContext.removeToast,
-  }), [stateContext.toasts, actionsContext.addToast, actionsContext.removeToast]);
+  }), [stateContext.toasts, actionsContext.addToast, actionsContext.addErrorToast, actionsContext.removeToast]);
 }
 
 export function useToastActions() {

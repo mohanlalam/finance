@@ -59,3 +59,10 @@ export function calculateFDMaturityValue(
   const years = (matTs - startTs) / (365.25 * 24 * 3600 * 1000);
   return compoundValue(p, r, 2, years);
 }
+
+export function getFDInvestedAmount(f: FixedDeposit): number {
+  return Number(f?.principal_amount) || 0;
+}
+
+export const getFDEffectiveValue = calculateFDEffectiveValue;
+

@@ -19,7 +19,7 @@ Domain Hooks & Controllers (usePortfolioQuery, usePortfolioMutation, usePortfoli
   ↓
 Domain Services & Calculations (portfolioService, portfolioCalculationService, Pure Financial Math)
   ↓
-Repository Interfaces (IPortfolioRepository, IFDRepository, IRDRepository, ISIPRepository, etc.)
+Repository Interfaces (IPortfolioRepository)
   ↓
 Infrastructure Implementations (Supabase, SWR, IndexedDB, Web Workers, Market Data Providers)
   ↓
@@ -155,7 +155,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 ### 7. Testing Strategy
 * **Test Conventions & Locations**:
   * Unit and pure calculation tests: located under `src/domains/__tests__/` (e.g., `portfolioTotals.test.ts`, `taxHarvesting.test.ts`, `goldValuation.test.ts`, `dataQuality.test.ts`, `backupValidator.test.ts`).
-  * Legacy component & formatter tests: located under `src/utils/__tests__/` and `src/utils/__tests/`.
+  * Component & formatter tests: located under `src/utils/__tests__/` and `src/hooks/__tests__/`.
 * **Mocking & Environment Isolation**:
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:

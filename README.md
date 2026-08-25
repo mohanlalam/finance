@@ -9,8 +9,6 @@ A premium, interactive web application designed to track and manage multi-asset 
 ### 📊 Financial Dashboard & Analytics
 - **Asset Allocation Chart** — Interactive donut chart showcasing distribution across Stocks, FDs, Gold, and Real Estate.
 - **Net Worth Growth Timeline** — Responsive SVG line/area chart with interactive tooltip nodes plotting historical compound wealth appreciation.
-- **Sankey Flow Diagram** — Native SVG flow diagram charting wealth streams from net worth categories to individual sub-assets. Safeguarded against zero-thickness path and degenerate node renders.
-- **Equity Concentration Treemap** — SVG treemap visualization showing relative sizes of top stock holdings. Includes division-by-zero guards and filters out sub-1px elements to ensure overlapping coordinate safety.
 - **P&L Visuals** — Direct indications of profits and losses with custom positive/negative indicators and INR formatting.
 - **Market Pricing** — Automated background refresh for stock and ETF holdings (15-minute intervals) with on-demand sync and cached quotes.
 
@@ -23,9 +21,6 @@ A premium, interactive web application designed to track and manage multi-asset 
 
 ### 🤖 AI Portfolio Assistant
 - **Intent-Based NLP Classifier** — Pre-filters queries into structured intents (e.g. performers, maturities, allocations) to eliminate false positive keywords before parameter extraction.
-
-### 📱 Android Home Screen Widgets
-- **Capacitor WebView Widgets** — Isolated WebView route displaying custom-styled, real-time widgets for Net Worth, Today's Gain, and upcoming FD maturities, optimized for Capacitor home widget slots.
 
 ### 💼 Portfolio Management & Navigation
 - **Global Cross-Asset Search** — Live fuzzy search bar across stocks, banks, gold items, properties, and documents. Instantly jump to the tab and scroll directly to the matching asset.
@@ -40,7 +35,7 @@ A premium, interactive web application designed to track and manage multi-asset 
 - **Dynamic Tab Preloading** — Lazily loads all primary asset views and tables (`FixedDepositView`, `RDView`, `SIPView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, and `PortfolioTable`). Uses an IIFE single-pass preloader on mount to fetch all bundle chunks in parallel, eliminating UI lag on swipe navigation.
 - **Asynchronous Web Workers** — Offloads heavy computations (Newton-Raphson XIRR solvers, multi-factor Health Score scoring, and rebalancing recommendations) to background threads (`src/workers/`) with synchronous fallbacks and detailed diagnostics warnings in case of worker thread initialization failures.
 - **List Virtualization & Row Keys** — Uses `react-window` to virtualize large registry listings (>8 accounts) to keep scrolling fluid and render times minimal. Row key elements are explicitly bound to asset IDs (`itemKey`) to optimize DOM recycling and prevent rendering glitches.
-- **Intersection Lazy Loading** — Leverages a custom type-safe `LazyChartWrapper` component with `IntersectionObserver` to lazy-load charts (`NetWorthTimelineChart`, `TreemapChart`, `SankeyChart`) only when they scroll into the viewport, completely deferring their bundle load and dynamic import evaluation.
+- **Lazy Chart Loading** — Uses responsive SVG charts (`NetWorthTimelineChart`, `PieChart`, `BarChart`) code-split and loaded dynamically when navigating to the analytics view.
 - **Lock Screen Code-Splitting** — Dynamically code-splits the context providers and routing (`MainApp`) as well as the main dashboard layout (`AppShell`) and components (like search bars and insights), keeping the entry bundle size tiny so the zero-dependency PIN Lock screen loads instantly on mobile networks.
 - **Advanced Caching & Focus Resume** — Employs `SWR` for remote state cache validation (customized with a 5-minute `dedupingInterval` and `errorRetryCount: 2`), IndexedDB local caches (`idb-keyval`) for instant stale-while-revalidate loads (invalidated on write/mutations), a 5-minute time-gate cooldown on tab focus resume reloads, module-level in-memory caching of Supabase PIN hashes, async IndexedDB caching for live Mutual Fund NAV fetches, and a ref-based resolver registry queue in `refreshSnapshot` to prevent hanging promises.
 - **Mobile Summary Optimization** — Optimizes `MobileHomeSummary` using `React.memo` to skip re-renders from parent data/price updates and collapses 9 duplicate `reduce()` calls into a single-pass `useMemo` loop.
@@ -76,11 +71,11 @@ A premium, interactive web application designed to track and manage multi-asset 
 ### Frontend
 - **React 18** — Component-based UI with hooks
 - **TypeScript** — End-to-end type safety
-- **Vite 5** — Lightning-fast dev server and optimized builds
+- **Vite 5 / 8** — Lightning-fast dev server and optimized builds
 - **Tailwind CSS 3** — Utility-first styling
-- **Lucide React ^0.511.0** — Modern, consistent iconography (loaded dynamically; fully deferred to off-critical path chunks)
+- **AppIcons** — Custom zero-dependency inline SVG iconography system
 - **SWR ^2.4.1** — Stale-while-revalidate data fetching and caching
-- **react-window ^2.2.7** — Grid and list virtualization
+- **react-window ^1.8.10** — Grid and list virtualization
 - **idb-keyval ^6.2.5** — Minimalistic IndexedDB wrapper for local cache storage
 
 ### Backend (Supabase)
@@ -232,9 +227,9 @@ project antigravity/
 │   │   ├── pdfReport.ts          # Print-ready styled PDF report generator
 │   │   ├── rdUtils.ts            # Canonical RD compounding re-export proxy
 │   │   ├── sipUtils.ts           # Canonical SIP valuation re-export proxy and NAV cache
-│   │   └── supabaseClient.ts     # Supabase SDK initialization
-│   └── data/
-│       └── portfolioData.ts      # Seed and sample data
+│   │   ├── dataQuality.ts        # Canonical Data Quality audit re-export proxy
+│   │   ├── assistant.ts          # Canonical AI Assistant re-export proxy
+│   │   └── backupValidation.ts   # Canonical backup validation re-export proxy
 ├── supabase/
 │   ├── config.toml               # Edge Functions configuration
 │   ├── functions/

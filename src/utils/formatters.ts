@@ -1,6 +1,4 @@
-import { FixedDeposit } from '../types/portfolio';
-import { compoundValue } from './mathUtils';
-import { parseLocalDate } from './dateUtils';
+
 
 
 
@@ -59,34 +57,12 @@ export function getDocumentUrl(filePath: string): string {
   return `${base}/storage/v1/object/public/investment-documents/${filePath}`;
 }
 
-export function getFDInvestedAmount(f: FixedDeposit): number {
-  return Number(f.principal_amount);
-}
-
-export function getFDEffectiveValue(f: FixedDeposit, upToDate: Date = new Date()): number {
-  const p = Number(f.principal_amount);
-  const r = Number(f.interest_rate);
-  const startTs = parseLocalDate(f.start_date);
-  
-  if (f.status === 'matured') {
-    return Number(f.maturity_amount);
-  }
-  
-  if (isNaN(startTs)) return isNaN(p) ? 0 : p;
-  
-  const maturityTs = parseLocalDate(f.maturity_date);
-  const upToTs = upToDate.getTime();
-  const endTs = !isNaN(maturityTs) && maturityTs < upToTs ? maturityTs : upToTs;
-     
-  const timeDiff = endTs - startTs;
-  const years = timeDiff / (1000 * 3600 * 24 * 365.25);
-  
-  if (years > 0 && !isNaN(r) && r > 0 && !isNaN(p) && p > 0) {
-    // FDs compound half-yearly
-    return compoundValue(p, r, 2, years);
-  }
-  return isNaN(p) ? 0 : p;
-}
+export {
+  getFDInvestedAmount,
+  getFDEffectiveValue,
+  calculateFDEffectiveValue,
+  calculateFDMaturityValue,
+} from '../domains/assets/fd/calculations/fdCompounding';
 
 export function formatINRCompact(value: number): string {
   const absVal = Math.abs(value);
