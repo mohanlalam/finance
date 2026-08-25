@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDateDuration } from '../../utils/dateUtils';
 
 interface StandardFormFieldsProps {
   bankName: string;
@@ -97,6 +98,12 @@ export function StandardFormFields({
             className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
           />
         </div>
+        {startDate && maturityDate && (
+          <div className="col-span-2 text-xs text-indigo-600 dark:text-indigo-400 font-medium -mt-1 flex items-center gap-1">
+            <span>Duration:</span>
+            <strong className="font-bold">{formatDateDuration(startDate, maturityDate)}</strong>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3">

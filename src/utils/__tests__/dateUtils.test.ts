@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { parseLocalDate, formatLocalDate, isLeap, getDaysInMonth, toLocalDateString } from '../dateUtils';
+import {
+  parseLocalDate,
+  formatLocalDate,
+  isLeap,
+  getDaysInMonth,
+  toLocalDateString,
+  calculateDateDuration,
+  formatDateDuration,
+} from '../dateUtils';
 
 describe('dateUtils', () => {
   it('correctly identifies leap years', () => {
@@ -34,5 +42,47 @@ describe('dateUtils', () => {
   it('formats local dates consistently', () => {
     expect(formatLocalDate(2026, 7, 23)).toBe('2026-08-23');
     expect(toLocalDateString(new Date(2026, 7, 23))).toBe('2026-08-23');
+  });
+
+  describe('calculateDateDuration & formatDateDuration', () => {
+    it('calculates 1 year tenure correctly', () => {
+      expect(formatDateDuration('2026-02-01', '2027-02-01')).toBe('1 Year');
+    });
+
+    it('calculates 2 years tenure correctly', () => {
+      expect(formatDateDuration('2025-01-01', '2027-01-01')).toBe('2 Years');
+    });
+
+    it('calculates 1 month duration correctly', () => {
+      expect(formatDateDuration('2026-02-01', '2026-03-01')).toBe('1 Month');
+    });
+
+    it('calculates multiple months duration correctly', () => {
+      expect(formatDateDuration('2026-02-01', '2026-08-01')).toBe('6 Months');
+    });
+
+    it('calculates years and months combined duration', () => {
+      expect(formatDateDuration('2025-02-01', '2026-08-01')).toBe('1 Year 6 Months');
+    });
+
+    it('calculates days duration when under a month', () => {
+      expect(formatDateDuration('2026-02-01', '2026-02-15')).toBe('14 Days');
+      expect(formatDateDuration('2026-02-01', '2026-02-02')).toBe('1 Day');
+    });
+
+    it('calculates months and days combined duration', () => {
+      expect(formatDateDuration('2026-02-01', '2026-03-15')).toBe('1 Month 14 Days');
+    });
+
+    it('returns empty string for invalid start date', () => {
+      expect(formatDateDuration('', '2026-08-01')).toBe('');
+      expect(formatDateDuration(null, '2026-08-01')).toBe('');
+    });
+
+    it('calculates duration up to today when end date is omitted', () => {
+      const res = calculateDateDuration('2020-01-01');
+      expect(res).not.toBeNull();
+      expect(res!.years).toBeGreaterThan(0);
+    });
   });
 });

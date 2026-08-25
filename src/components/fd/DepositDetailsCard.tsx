@@ -1,6 +1,7 @@
 import React from 'react';
 import { FixedDeposit, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../../utils/formatters';
+import { calculateDateDuration, formatDateDuration, toLocalDateString } from '../../utils/dateUtils';
 import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote, Share2 } from '../icons/AppIcons';
 import { useLongPress } from '../../hooks/useLongPress';
 import { useToastActions } from '../../contexts/ToastContext';
@@ -76,6 +77,20 @@ export function DepositDetailsCard({
   const progress = getProgressPercent(fd);
   const fdDocs = documents.filter((d) => d.asset_type === 'fd' && d.asset_id === fd.id);
   const isMatured = fd.status === 'matured' || progress >= 100;
+
+  const totalDuration = fd.maturity_date
+    ? formatDateDuration(fd.start_date, fd.maturity_date)
+    : formatDateDuration(fd.start_date);
+
+  const remainingDurationObj = fd.maturity_date && !isMatured
+    ? calculateDateDuration(toLocalDateString(), fd.maturity_date)
+    : null;
+
+  const durationSubtext = isMatured
+    ? 'Matured'
+    : remainingDurationObj
+      ? `${remainingDurationObj.formatted} left`
+      : 'Ongoing';
 
   return (
     <>
@@ -169,6 +184,17 @@ export function DepositDetailsCard({
                 className={`h-full rounded-full transition-all duration-300 ${isMatured ? 'bg-[var(--positive)]' : 'bg-[var(--accent-blue)]'}`}
                 style={{ width: `${progress}%` }}
               />
+            </div>
+          )}
+          {totalDuration && (
+            <div className="flex items-center justify-between text-[11px] text-[var(--text-tertiary)] mt-1.5">
+              <span className="flex items-center gap-1">
+                <span>Duration:</span>
+                <strong className="text-[var(--text-primary)] font-semibold">{totalDuration}</strong>
+              </span>
+              <span className={`text-[10px] font-semibold ${isMatured ? 'text-[var(--positive)]' : 'text-[var(--text-secondary)]'}`}>
+                {durationSubtext}
+              </span>
             </div>
           )}
         </div>
