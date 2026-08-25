@@ -1,5 +1,20 @@
 import { Holding, Portfolio } from '../../../types/portfolio';
-import { PortfolioTotals } from '../../assets/types/AssetValue';
+
+export interface PortfolioTotals {
+  totalInvested: number;
+  totalCurrentValue: number;
+  totalPnL: number;
+  totalPnLPercent: number;
+  todayPnL: number;
+  todayPnLPercent: number;
+  stocksValue: number;
+  fdValue: number;
+  rdValue: number;
+  sipValue: number;
+  goldValue: number;
+  realEstateValue: number;
+}
+
 
 /**
  * Sum invested amounts across holdings safely.

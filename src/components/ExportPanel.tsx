@@ -17,8 +17,8 @@ import {
 } from './icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
 import { getFDEffectiveValue } from '../utils/formatters';
-import { getRDEffectiveValue } from '../utils/rdUtils';
-import { getSIPEffectiveValue } from '../utils/sipUtils';
+import { getRDEffectiveValue } from '../domains/assets/rd/calculations/rdCompounding';
+import { getSIPEffectiveValue } from '../domains/assets/sip/calculations/sipValuation';
 import { openPDFReportInNewTab } from '../utils/pdfReport';
 import Modal from './Modal';
 import { Button } from './ui/Button';

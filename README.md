@@ -105,87 +105,136 @@ project antigravity/
 │   ├── App.tsx                   # Root component — lightweight, zero-dependency PIN screen gate
 │   ├── MainApp.tsx               # Lazy-loaded main app shell container (contexts, routes, load gates)
 │   ├── main.tsx                  # React DOM mount
-│   ├── index.css                 # Global styles / Tailwind imports
+│   ├── index.css                 # Global styles & design tokens (UI.md single source of truth)
 │   ├── vite-env.d.ts             # Vite type declarations
 │   ├── components/
 │   │   ├── icons/
 │   │   │   └── AppIcons.tsx      # Inline SVG icon library replacing lucide-react on critical rendering paths
-│   │   ├── Header.tsx            # Top bar — total value, P&L, refresh controls, Import/Export trigger
-│   │   ├── SummaryCards.tsx      # KPI cards — invested, current, P&L, today (compact on mobile)
-│   │   ├── PortfolioTable.tsx    # Sortable holdings table with preset selectors & allocation column
-│   │   ├── PieChart.tsx          # Asset allocation donut chart
-│   │   ├── BarChart.tsx          # Portfolio comparison bar chart
-│   │   ├── fd/                   # Standard Fixed Deposits
-│   │   │   ├── DepositDetailsCard.tsx # Renders timelines, documents, and notes for FDs
-│   │   │   └── StandardFormFields.tsx # Form inputs for standard FDs
-│   │   ├── rd/                   # Recurring Deposits
-│   │   │   ├── RDAccountCard.tsx     # Card layout for individual RDs
-│   │   │   ├── RDFormModal.tsx       # Create/Edit RD form dialog
-│   │   │   ├── RDInstallmentSchedule.tsx # Month-by-month RD contribution ledger tracking
-│   │   │   └── RDView.tsx            # Main dashboard registry for RDs
-│   │   ├── sip/                  # Mutual Fund SIPs
-│   │   │   ├── SIPAccountCard.tsx    # Card layout showing live/manual valuation for SIPs
-│   │   │   ├── SIPFormFields.tsx     # Inputs for scheme code lookup and unit holdings
-│   │   │   ├── SIPFormModal.tsx      # Create/Edit SIP form dialog
-│   │   │   └── SIPView.tsx           # Main dashboard registry for Mutual Funds (SIP)
-
-│   │   ├── AssetCardSkeleton.tsx # Reusable pulsing shimmer card wireframe for all registry views
-│   │   ├── AddHoldingModal.tsx   # Modal form to add new stock holdings
+│   │   ├── fd/                   # Fixed Deposit cards and forms
+│   │   │   ├── DepositDetailsCard.tsx
+│   │   │   ├── FDFormModal.tsx
+│   │   │   └── StandardFormFields.tsx
+│   │   ├── gold/                 # Gold bullion cards and forms
+│   │   │   ├── GoldFormModal.tsx
+│   │   │   ├── GoldHoldingCard.tsx
+│   │   │   └── GoldHoldingView.tsx
+│   │   ├── insurance/            # Insurance policy cards and forms
+│   │   │   ├── InsuranceFormModal.tsx
+│   │   │   ├── InsurancePolicyCard.tsx
+│   │   │   └── InsuranceView.tsx
+│   │   ├── rd/                   # Recurring Deposit cards and forms
+│   │   │   ├── RDAccountCard.tsx
+│   │   │   ├── RDFormModal.tsx
+│   │   │   ├── RDInstallmentSchedule.tsx
+│   │   │   └── RDView.tsx
+│   │   ├── realestate/           # Real Estate cards and forms
+│   │   │   ├── RealEstateCard.tsx
+│   │   │   ├── RealEstateFormModal.tsx
+│   │   │   └── RealEstateView.tsx
+│   │   ├── sip/                  # Mutual Fund SIP cards and forms
+│   │   │   ├── SIPAccountCard.tsx
+│   │   │   ├── SIPFormFields.tsx
+│   │   │   ├── SIPFormModal.tsx
+│   │   │   └── SIPView.tsx
+│   │   ├── ui/                   # Shared UI primitives (Buttons, Modals, Sparklines, ContextMenu)
 │   │   ├── AddFamilyModal.tsx    # Modal form to add new family members
-│   │   ├── RenamePortfolioModal.tsx # Modal form to rename family member portfolios
-│   │   ├── FixedDepositView.tsx  # FD management — list, add, edit, delete
-│   │   ├── GoldHoldingView.tsx   # Gold holdings management
-│   │   ├── RealEstateView.tsx    # Real estate property management
-│   │   ├── InsuranceView.tsx     # Insurance policy management
-│   │   ├── DocumentVaultView.tsx # Document vault view with expiry fields and sorted indicators
-│   │   ├── SearchBar.tsx         # Fuzzy global search bar component (fuzzy match with tab jumping)
+│   │   ├── AddHoldingModal.tsx   # Modal form to add new stock holdings
 │   │   ├── AlertsBanner.tsx      # Banners showing active notifications (52w high/low, FD due, etc.)
-│   │   ├── ExportPanel.tsx       # Export (CSV, PDF, JSON) and CSV Import dialog box
-│   │   ├── InsightsPanel.tsx     # Detailed drift, gainer, loser, and performer panels
-│   │   ├── AllocationTargetsSettings.tsx # Configurator modal for custom asset allocation target splits
-│   │   ├── ConfirmModal.tsx      # Custom styled backdrop modal replacing native browser confirm/alert
-│   │   ├── Modal.tsx             # Core reusable styled backdrop modal wrapper
-│   │   ├── FloatingAddMenu.tsx   # Quick floating menu to add assets
-│   │   ├── QuickActions.tsx      # Grid of quick action buttons for mobile layout
+│   │   ├── AppErrorBoundary.tsx  # Global React error boundary component
+│   │   ├── AssetCardSkeleton.tsx # Reusable pulsing shimmer card wireframe for all registry views
 │   │   ├── AssetTabContent.tsx   # Orchestrator component rendering the active asset registry view
+│   │   ├── BarChart.tsx          # Portfolio comparison bar chart
+│   │   ├── ChangePinModal.tsx    # Security modal managing PIN changes and biometric toggles
+│   │   ├── ConfirmModal.tsx      # Custom styled backdrop modal replacing native browser confirm/alert
+│   │   ├── DashboardError.tsx    # Full-page retry UI for API/Supabase connection failures
+│   │   ├── DashboardLoading.tsx  # Skeleton loader states for dashboard fetch
+│   │   ├── DashboardWidgets.tsx  # Summary widgets container
+│   │   ├── DataQualityHealthModal.tsx # Data quality audit modal with resolution tracking
+│   │   ├── DocumentVaultView.tsx # Document vault view with expiry fields and sorted indicators
+│   │   ├── EditStockModal.tsx    # Stock holding edit modal
+│   │   ├── EmptyState.tsx        # Styled empty state placeholder with CTA
+│   │   ├── ErrorBoundary.tsx     # Generic component-level error boundary
+│   │   ├── ExportPanel.tsx       # Export (CSV, PDF, JSON) and schema-validated restore engine
 │   │   ├── FamilyTabBar.tsx      # Top tab bar switcher for family member portfolios
+│   │   ├── FixedDepositView.tsx  # FD management — list, add, edit, delete
+│   │   ├── FloatingAddMenu.tsx   # Quick floating menu to add assets
+│   │   ├── GoldHoldingView.tsx   # Gold holdings management view with live MCX ticker
+│   │   ├── Header.tsx            # Top bar — total value, P&L, refresh controls, Import/Export trigger
+│   │   ├── HoldingDetailDrawer.tsx # Apple-style responsive holding detail drawer
+│   │   ├── InsightsPanel.tsx     # Detailed drift, gainer, loser, and performer panels
+│   │   ├── InsuranceView.tsx     # Insurance policy management view
 │   │   ├── MobileAlertsView.tsx  # Mobile view display for dismissed/active portfolio alerts
 │   │   ├── MobileBottomNav.tsx   # Sticky mobile tabs navigation bar with alert badge count
 │   │   ├── MobileHomeSummary.tsx # Mobile view dashboard summary
-│   │   ├── AppErrorBoundary.tsx  # Global React error boundary component
+│   │   ├── MobileStatusBar.tsx   # Mobile fixed status bar
+│   │   ├── Modal.tsx             # Core reusable styled backdrop modal wrapper
+│   │   ├── NetWorthTimelineChart.tsx # Historical net worth area chart with date filtering
+│   │   ├── PWAInstallBanner.tsx  # Native-like PWA home-screen install banner
+│   │   ├── PieChart.tsx          # Asset allocation donut chart
+│   │   ├── PinLockScreen.tsx     # Secure session-based PIN lock keypad gate screen
+│   │   ├── PortfolioAssistant.tsx # Conversational AI portfolio assistant
+│   │   ├── PortfolioTable.tsx    # Sortable holdings table with preset selectors & allocation column
+│   │   ├── RealEstateView.tsx    # Real estate property management view
+│   │   ├── RenamePortfolioModal.tsx # Modal form to rename family member portfolios
+│   │   ├── SearchBar.tsx         # Fuzzy global search palette (Cmd/Ctrl + K)
 │   │   ├── SectionErrorBoundary.tsx # Nested React error boundary for asset-specific dashboard components
-│   │   ├── DashboardLoading.tsx  # Skeleton loader states for dashboard fetch
-│   │   ├── DashboardError.tsx    # Full-page retry UI for API/Supabase connection failures
-│   │   └── PinLockScreen.tsx     # Secure session-based PIN lock keypad gate screen
+│   │   ├── SmartImportModal.tsx  # AI document & CSV smart extraction modal
+│   │   ├── SummaryCards.tsx      # KPI cards — invested, current, P&L, today
+│   │   ├── TaxHarvestingView.tsx # Real-time tax loss harvesting opportunity finder
+│   │   └── Toast.tsx             # Global non-blocking notification toast component
+│   ├── domains/                  # Clean Architecture domain models, calculations, services, and repositories
+│   │   ├── ai/                   # AI assistant intent classifier and deterministic tools
+│   │   ├── assets/               # Domain-specific financial compounding and valuations (FD, RD, SIP, Gold)
+│   │   ├── data-quality/         # Portfolio data health scoring rules
+│   │   ├── performance/          # Pure financial math: Newton-Raphson XIRR, CAGR, weighted age
+│   │   ├── portfolio/            # Portfolio domain hooks, services, calculations, backup schemas
+│   │   └── taxation/             # Indian Income Tax FY24-25 capital gains & tax loss harvesting
+│   ├── infrastructure/           # Infrastructure implementations
+│   │   ├── cache/                # IndexedDB offline hydration and SWR configuration
+│   │   ├── logging/              # Privacy-safe credential-redacting logger
+│   │   ├── market-data/          # Multi-provider market quote service (Yahoo, AMFI, MCX)
+│   │   └── supabase/             # Supabase repositories implementing domain repository contracts
 │   ├── layouts/
-│   │   └── AppShell.tsx          # Main dashboard layout (responsive switcher, lazy panel views)
+│   │   ├── AppShell.tsx          # Main dashboard layout (responsive switcher, lazy panel views)
+│   │   └── DesktopSidebar.tsx    # Desktop sidebar navigation
 │   ├── contexts/
-│   │   └── PortfolioContext.tsx  # Global state provider, pricing sync statuses, and consolidated CRUD functions
+│   │   ├── PortfolioContext.tsx  # Global portfolio state provider (Entities, Status, Actions)
+│   │   ├── PrivacyContext.tsx    # Balance visibility mask state
+│   │   ├── ThemeContext.tsx      # Dark / Light theme provider
+│   │   └── ToastContext.tsx      # Global notification toast provider
 │   ├── hooks/
-│   │   ├── usePortfolioData.ts   # Core data hook — Edge Function list, CRUD operations, local cache, live prices
-│   │   ├── useRDData.ts          # Thin hook wrapper pulling Recurring Deposits CRUD from context
-│   │   ├── useSIPData.ts          # Thin hook wrapper pulling Mutual Fund SIPs CRUD from context
-
-│   │   ├── usePortfolioInsights.ts # Computes allocation, performer, and reminder insights
-│   │   ├── useMarketData.ts      # Standalone market price fetcher (CORS proxied)
 │   │   ├── useAlerts.ts          # Evaluates warnings, contains visible/dismissed states
-│   │   ├── useSwipeNavigation.ts # Touch swipe gesture tracking for mobile tab layout
-│   │   └── useKeyboardShortcuts.ts # Global hotkey listeners for desktop window
+│   │   ├── useAnimatedCounter.ts # Smooth number animation ticker hook
+│   │   ├── useAssetFilterSort.ts # Asset registry search and multi-field sorting
+│   │   ├── useAssetModal.ts      # Reusable asset modal state manager
+│   │   ├── useAutoLock.ts        # Inactivity session auto-lock
+│   │   ├── useIsMobile.ts        # Centralized matchMedia viewport hook
+│   │   ├── useKeyboardShortcuts.ts # Global hotkey listeners
+│   │   ├── useLongPress.ts       # Tactile long-press gesture detector
+│   │   ├── useModalState.ts      # Modal visibility state coordinator
+│   │   ├── usePortfolioData.ts   # Backward-compatible portfolio state facade
+│   │   ├── usePortfolioInsights.ts # Computes allocation, performer, and reminder insights
+│   │   ├── usePullToRefresh.ts   # Tactile mobile pull-to-refresh hook
+│   │   ├── useRDData.ts          # Thin hook wrapper pulling Recurring Deposits CRUD from context
+│   │   ├── useSIPData.ts         # Thin hook wrapper pulling Mutual Fund SIPs CRUD from context
+│   │   └── useSwipeNavigation.ts # Touch swipe gesture tracking for mobile tab layout
+│   ├── workers/
+│   │   └── xirr.worker.ts        # Background Web Worker for Newton-Raphson XIRR cash flow calculation
 │   ├── types/
-│   │   └── portfolio.ts          # TypeScript interfaces (Holding, NetWorthSnapshot, etc.)
+│   │   └── portfolio.ts          # Core TypeScript interfaces (Holding, NetWorthSnapshot, etc.)
 │   ├── utils/
 │   │   ├── apiClient.ts          # Safe wrapper client around Supabase edge functions
 │   │   ├── auth.ts               # Session PIN verification and security helpers
-│   │   ├── chartHelpers.ts       # Groups color configuration hex values and slices formatting
-│   │   ├── formatters.ts         # INR formatting, percent formatting, P&L colors, getDocumentUrl, and FD compounding
-│   │   ├── portfolioCalcs.ts     # Computes aggregate values and drift splits; contains the shared compoundValue engine
-│   │   ├── rdUtils.ts            # Recurring Deposit installment & compounding calculations leveraging the shared engine
-│   │   ├── sipUtils.ts           # SIP contribution & manual valuation helpers
-
+│   │   ├── biometrics.ts         # WebAuthn FaceID / TouchID platform authenticator
+│   │   ├── chartHelpers.ts       # Color configurations and chart formatting helpers
+│   │   ├── formatters.ts         # INR formatting (formatINR, formatFullINR), dates, percentages
+│   │   ├── goldPricing.ts        # Live MCX gold rate parser and hallmark calculators
+│   │   ├── pdfReport.ts          # Print-ready styled PDF report generator
+│   │   ├── rdUtils.ts            # Canonical RD compounding re-export proxy
+│   │   ├── sipUtils.ts           # Canonical SIP valuation re-export proxy and NAV cache
 │   │   └── supabaseClient.ts     # Supabase SDK initialization
 │   └── data/
-│       ├── portfolioData.ts      # Static/seed portfolio data
-│       └── 1.csv                 # Raw CSV data source
+│       └── portfolioData.ts      # Seed and sample data
 ├── supabase/
 │   ├── config.toml               # Edge Functions configuration
 │   ├── functions/

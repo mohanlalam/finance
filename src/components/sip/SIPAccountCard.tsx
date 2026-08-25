@@ -1,7 +1,8 @@
 import React from 'react';
 import { SIPAccount, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, getDocumentUrl, formatPercent } from '../../utils/formatters';
-import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../utils/sipUtils';
+import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../domains/assets/sip/calculations/sipValuation';
+
 import { FileText, Edit2, Trash2, StickyNote, Wifi, Share2 } from '../icons/AppIcons';
 import { useLongPress } from '../../hooks/useLongPress';
 import { ContextMenu } from '../ui/ContextMenu';

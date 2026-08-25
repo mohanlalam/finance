@@ -1,7 +1,8 @@
 import React from 'react';
 import { RDAccount, DocumentMetadata, RDPayload } from '../../types/portfolio';
 import { formatINR, getDocumentUrl } from '../../utils/formatters';
-import { getRDInvestedAmount, getRDEffectiveValue } from '../../utils/rdUtils';
+import { getRDInvestedAmount, getRDEffectiveValue } from '../../domains/assets/rd/calculations/rdCompounding';
+
 import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote, Share2 } from '../icons/AppIcons';
 import RDInstallmentSchedule from './RDInstallmentSchedule';
 import { useLongPress } from '../../hooks/useLongPress';

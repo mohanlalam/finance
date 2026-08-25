@@ -1,3 +1,4 @@
+import { IPortfolioRepository } from '../repositories/IPortfolioRepository';
 import { supabasePortfolioRepository } from '../../../infrastructure/supabase/repositories/SupabasePortfolioRepository';
 import {
   setCachedPortfolioData,
@@ -10,7 +11,11 @@ import { NetWorthSnapshot } from '../calculations/netWorth';
 import { logger } from '../../../infrastructure/logging/logger';
 
 export class PortfolioService {
-  private repository = supabasePortfolioRepository;
+  private repository: IPortfolioRepository;
+
+  constructor(repository: IPortfolioRepository = supabasePortfolioRepository) {
+    this.repository = repository;
+  }
 
   async loadPortfolios(): Promise<{ portfolios: Portfolio[]; netWorthHistory: NetWorthSnapshot[] }> {
     const data = await this.repository.fetchAllData();

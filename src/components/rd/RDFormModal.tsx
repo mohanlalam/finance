@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { RDAccount, RDPayload } from '../../types/portfolio';
-import { getRDEffectiveValue } from '../../utils/rdUtils';
+import { getRDEffectiveValue } from '../../domains/assets/rd/calculations/rdCompounding';
 import Modal from '../Modal';
 
 interface PortfolioOption {

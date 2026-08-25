@@ -1,8 +1,8 @@
 import { Portfolio } from '../../../types/portfolio';
 import { calculateCAGR } from './cagr';
 import { calculateXIRR, CashFlow } from './xirr';
-import { getRDInvestedAmount, getElapsedMonthsStandard } from '../../../utils/rdUtils';
-import { getSIPInvestedAmount } from '../../../utils/sipUtils';
+import { getRDInvestedAmount, getElapsedMonthsStandard } from '../../assets/rd/calculations/rdCompounding';
+import { getSIPInvestedAmount } from '../../assets/sip/calculations/sipValuation';
 import { parseLocalDate, formatLocalDate, getDaysInMonth } from '../../../utils/dateUtils';
 
 // Fast in-memory cache for XIRR results

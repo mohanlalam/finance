@@ -92,8 +92,8 @@ External APIs & Databases (PostgreSQL, Supabase Functions, Yahoo Finance, AMFI, 
     3. Last-Known Stale Quote / Snapshot from Database/IndexedDB
     ```
 * **Workers & Storage**:
-  * **[WorkerPool.ts](src/infrastructure/workers/WorkerPool.ts)** and **[xirr.worker.ts](src/infrastructure/workers/xirr.worker.ts)**: Background Web Worker singletons for off-thread Newton-Raphson cash flow calculations.
-  * **[SupabaseDocumentStorage.ts](src/infrastructure/storage/SupabaseDocumentStorage.ts)**: Supabase Document Storage with client-side path traversal protection and secure Edge Function routing.
+  * **[xirr.worker.ts](src/workers/xirr.worker.ts)**: Dedicated background Web Worker for off-thread Newton-Raphson cash flow calculations.
+  * **[supabaseStorage.ts](src/utils/supabaseStorage.ts)**: Supabase Document Storage with client-side path traversal protection and secure Edge Function routing.
   * **[logger.ts](src/infrastructure/logging/logger.ts)**: Lightweight logger with automated regex-based redaction of sensitive credentials (PINs, API keys, tokens, auth headers).
 
 ---
@@ -196,7 +196,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 1. **Mobile Offscreen Containment (`content-visibility: auto`)**: Mobile holding cards (`.mobile-asset-card`) apply `content-visibility: auto; contain-intrinsic-size: 0 100px; contain: layout style;` to skip layout and style computation until scrolled into the viewport.
 2. **Zero-Latency Touch & GPU Layer Promotion**: Global `touch-action: manipulation` eliminates the 300ms mobile tap delay. Fixed bars (`.mobile-bottom-nav`, `.mobile-status-bar`) promote to GPU compositor layers (`transform: translateZ(0)`).
 3. **Idle Chunk Pre-warming**: `requestIdleCallback` pre-warms the top 4 heaviest asset view chunks (`PortfolioTable`, `FixedDepositView`, `SIPView`, `GoldHoldingView`) during device idle time for zero-skeleton tab switching.
-4. **Persistent Web Worker Singletons**: `WorkerPool.ts` and `xirr.worker.ts` maintain persistent background worker singletons for instant async Newton-Raphson solvers.
+4. **Persistent Web Worker Singleton**: `xirr.worker.ts` maintains a persistent background Web Worker instance for off-thread async Newton-Raphson XIRR solvers.
 5. **Render Memoization & Virtualization**: Registry tables utilize `react-window` virtualization and `React.memo` with strict equality comparators on card components.
 6. **PWA Auto-Update**: Workbox instant takeover (`skipWaiting: true`, `clientsClaim: true`) and document `visibilitychange` update listeners.
 
