@@ -20,6 +20,16 @@ export function formatINR(value: number): string {
   }).format(value);
 }
 
+export function formatFullINR(value: number, decimals = 0): string {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: decimals,
+    minimumFractionDigits: decimals,
+  }).format(value);
+}
+
+
 export function formatNumber(value: number, decimals = 2): string {
   return new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: decimals,

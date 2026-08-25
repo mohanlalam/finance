@@ -1,6 +1,6 @@
 import React from 'react';
 import { IndianRupee, BarChart2, TrendingUp, TrendingDown, Share2 } from './icons/AppIcons';
-import { formatINR, formatPercent } from '../utils/formatters';
+import { formatINR, formatFullINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { estimateTodayPnL } from '../utils/portfolioCalcs';
 import { NetWorthSnapshot } from '../hooks/usePortfolioData';
@@ -101,9 +101,16 @@ function SummaryCards({
               <p className={`text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] text-financial tnum tracking-tight transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
                 {renderValue(totalCurrentValue)}
               </p>
-              <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">
-                {isLoading ? 'Syncing prices...' : 'Current valuation'}
-              </p>
+              <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                <p className="text-supporting text-[11px] text-[var(--text-tertiary)]">
+                  {isLoading ? 'Syncing prices...' : 'Current valuation'}
+                </p>
+                {!isLoading && (
+                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] tnum">
+                    • {renderValue(totalCurrentValue, (v) => formatFullINR(v, 0))}
+                  </span>
+                )}
+              </div>
             </div>
             {sparklineData.length > 1 && (
               <div className="mb-1 ml-2 shrink-0">
@@ -112,9 +119,9 @@ function SummaryCards({
             )}
           </div>
 
-          {activePortfolio === null && portfolios && portfolios.length > 0 && (
+          {activePortfolio === null && sortedPortfolios && sortedPortfolios.length > 0 && (
             <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
-              {portfolios.map((p, idx) => {
+              {sortedPortfolios.map((p, idx) => {
                 const val = p.totalCurrentValue;
                 return (
                   <span key={p.id} className="flex items-center gap-1">
@@ -122,7 +129,7 @@ function SummaryCards({
                     <span className="text-[var(--text-primary)] font-bold tnum">
                       {renderValue(val)}
                     </span>
-                    {idx < portfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1">|</span>}
+                    {idx < sortedPortfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1">|</span>}
                   </span>
                 );
               })}

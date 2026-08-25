@@ -1,6 +1,6 @@
 import { memo, useMemo, useCallback } from 'react';
 import { TrendingUp, TrendingDown, Landmark, Coins, Building2, Shield, FolderOpen, AlertCircle, RefreshCw, ChevronRight, Clock } from './icons/AppIcons';
-import { formatINR, formatPercent } from '../utils/formatters';
+import { formatINR, formatFullINR, formatPercent } from '../utils/formatters';
 import { Portfolio } from '../types/portfolio';
 import { Alert } from '../hooks/useAlerts';
 import { estimateTodayPnL } from '../utils/portfolioCalcs';
@@ -8,6 +8,8 @@ import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { Sparkline } from './ui/Sparkline';
 import { AnimatedNumber } from './ui/AnimatedNumber';
 import { usePrivacy } from '../contexts/PrivacyContext';
+import { sortPortfolios } from '../domains/portfolio/calculations/portfolioOrdering';
+
 
 // Hoist static icon elements at module level — prevents new React element
 // objects from being allocated on every component render cycle.
@@ -90,7 +92,7 @@ function MobileHomeSummary({
   // Precalculate family member summaries to avoid un-memoized estimateTodayPnL in render loop
   const memberSummaries = useMemo(() => {
     if (!portfolios || portfolios.length === 0) return [];
-    return portfolios.map((p) => ({
+    return sortPortfolios(portfolios).map((p) => ({
       ...p,
       pTodayPnL: p.todayPnL ?? estimateTodayPnL(p, [p]),
     }));
@@ -253,6 +255,9 @@ function MobileHomeSummary({
           <div className="min-w-0 flex-1">
             <div className="text-2xl font-extrabold text-[var(--text-primary)] tnum leading-none tracking-tight truncate">
               {renderValue(summaryData.totalCurrentValue)}
+            </div>
+            <div className="text-[11px] font-semibold text-[var(--text-secondary)] tnum mt-0.5">
+              {renderValue(summaryData.totalCurrentValue, (v) => formatFullINR(v, 0))}
             </div>
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               <span className={`inline-flex items-center gap-1 text-xs font-bold tnum px-2 py-0.5 rounded-[var(--radius-pill)] ${
