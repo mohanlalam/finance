@@ -122,8 +122,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * **[healthScore.ts](src/domains/data-quality/healthScore.ts)**: Health scoring rules engine auditing missing maturity dates, zero valuations, overdue insurance renewals, and missing attachments.
   * **[types.ts](src/domains/data-quality/types.ts)**: Standardized issue types with severity tiers (`info`, `warning`, `critical`).
 * **AI Assistant Domain (`src/domains/ai/`)**:
-  * **[intentClassifier.ts](src/domains/ai/assistant/intentClassifier.ts)**: Deterministic intent classification across 14 financial intents (`NET_WORTH`, `ALLOCATION`, `STOCK_HOLDINGS`, `TOP_GAINERS`, `TOP_LOSERS`, `MATURITY_SCHEDULE`, `INSURANCE_RENEWAL`, `TAX_HARVESTING`, `GOLD_VALUATION`, `REAL_ESTATE`, `PERFORMANCE_XIRR`, `DATA_QUALITY`, `HELP`, `UNKNOWN`).
-  * **[portfolioTool.ts](src/domains/ai/tools/portfolioTool.ts)**, **[taxTool.ts](src/domains/ai/tools/taxTool.ts)**: Deterministic domain tools connecting NLP queries directly to pure financial calculations to guarantee zero hallucinated figures.
+  * **[assistantEngine.ts](src/domains/ai/assistant/assistantEngine.ts)** & **[index.ts](src/domains/ai/index.ts)**: Deterministic client-side NLP assistant engine parsing and evaluating 17 financial intents (`NET_WORTH`, `PERFORMERS`, `MATURITY_TIMELINE`, `ALLOCATION_SPLIT`, `SPECIFIC_GOLD`, `SPECIFIC_MUTUAL_FUNDS`, `SPECIFIC_STOCKS`, `SPECIFIC_FDS`, `INSURANCE_REMINDERS`, `FAMILY_BREAKDOWN`, `NEXT_SIP_DATE`, `EMERGENCY_FUND`, `RENTAL_YIELD`, `EXPIRED_DOCUMENTS`, `COMPREHENSIVE_SEARCH`, `UNKNOWN`, `HELP`) with matched asset badges and zero hallucinated numbers.
 * **Backup & Restore Domain (`src/domains/portfolio/backup/`)**:
   * **[backupSchema.ts](src/domains/portfolio/backup/backupSchema.ts)** & **[backupValidator.ts](src/domains/portfolio/backup/backupValidator.ts)**: Schema-enforcing backup and restore diagnostic engine with envelope validation and collision detection.
 
