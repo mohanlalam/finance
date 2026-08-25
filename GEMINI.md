@@ -181,10 +181,11 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * `AuthenticationError`: Emitted when PIN or session challenges fail.
 * **User-Facing Error Resolution**:
   * Handled uniformly via `toUserErrorMessage(error)`, mapping technical stack traces into friendly, actionable notifications.
-* **UI Error Surfacing**:
-  * Critical app-level crashes: Caught by [AppErrorBoundary.tsx](src/components/AppErrorBoundary.tsx).
-  * Section-level crashes: Isolated via [SectionErrorBoundary.tsx](src/components/SectionErrorBoundary.tsx).
-  * Transient mutation & network alerts: Dispatched cleanly via [ToastContext.tsx](src/contexts/ToastContext.tsx).
+* **UI Error Surfacing (Three-Tier Layered Architecture)**:
+  * **Root Shell Barrier** ([`ErrorBoundary.tsx`](src/components/ErrorBoundary.tsx)): Outermost fail-safe mounted in `src/main.tsx` catching early DOM mounting / initialization failures before context hydration.
+  * **Authenticated App Barrier** ([`AppErrorBoundary.tsx`](src/components/AppErrorBoundary.tsx)): Catches full-page application crashes inside `src/MainApp.tsx` with friendly retry actions and state recovery.
+  * **Isolated Widget Barrier** ([`SectionErrorBoundary.tsx`](src/components/SectionErrorBoundary.tsx)): Localized boundary isolating registry and widget crashes so an error in one card/tab never crashes sibling components.
+  * **Transient Mutation & Network Alerts**: Dispatched non-blockingly via [ToastContext.tsx](src/contexts/ToastContext.tsx).
 * **Observability & Logging (`src/infrastructure/logging/logger.ts`)**:
   * Structured logging with level filtering (`debug`, `info`, `warn`, `error`).
   * Automatic redaction of sensitive credentials (PINs, tokens, auth headers, secret keys).

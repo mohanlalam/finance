@@ -19,11 +19,17 @@ export interface GoldRates {
   source: string;
 }
 
+import {
+  DEFAULT_GOLD_RATE_24K,
+  getPurityMultiplier,
+  calculateGoldValuation as calcGoldValuationPure,
+} from '../domains/assets/gold/calculations/goldValuation';
+
+export { DEFAULT_GOLD_RATE_24K, getPurityMultiplier };
+
 // 15 Minutes in milliseconds for live rate refresh
 export const LIVE_SYNC_INTERVAL_MS = 15 * 60 * 1000;
 
-// Current baseline spot rate in INR (~ ₹15,840/g for 24K pure gold / ₹1,58,400 per 10g)
-export const DEFAULT_GOLD_RATE_24K = 15840;
 
 export interface GoldRateSnapshot {
   rate24k: number;
@@ -182,31 +188,16 @@ export function saveStoredGoldRate(rate24k: number): void {
 }
 
 /**
- * Normalizes purity string into multiplier factor
- * e.g., '24k' -> 1.0, '22k' -> 0.9167, '18k' -> 0.75, '14k' -> 0.5833
- */
-export function getPurityMultiplier(purityStr: string): number {
-  const clean = (purityStr || '').toLowerCase().trim();
-  if (clean.includes('24')) return 1.0;
-  if (clean.includes('22') || clean.includes('916')) return 22 / 24; // ~0.9167
-  if (clean.includes('18') || clean.includes('750')) return 18 / 24; // 0.75
-  if (clean.includes('14') || clean.includes('585')) return 14 / 24; // ~0.5833
-  return 22 / 24; // Default to 22K standard hallmark jewelry
-}
-
-/**
- * Calculates current market valuation for a gold holding
+ * Calculates current market valuation for a gold holding.
+ * Uses provided rate24k, or falls back to live/stored rate.
  */
 export function calculateGoldValuation(
   weightGrams: number,
   purity: string,
   rate24kPerGram?: number
 ): number {
-  const weight = Number(weightGrams) || 0;
-  if (weight <= 0) return 0;
-  const rate = rate24kPerGram ?? getStoredGoldRate();
-  const multiplier = getPurityMultiplier(purity);
-  return Math.round(weight * rate * multiplier);
+  const effectiveRate = rate24kPerGram ?? getStoredGoldRate();
+  return calcGoldValuationPure(weightGrams, purity, effectiveRate);
 }
 
 /**
