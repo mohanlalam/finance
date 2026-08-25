@@ -62,15 +62,8 @@ External APIs & Databases (PostgreSQL, Supabase Functions, Yahoo Finance, AMFI, 
 
 ### 2. Infrastructure & Repository Layer
 
-* **Repository Interfaces (`src/domains/*/repositories/`)**:
-  * **[IPortfolioRepository.ts](src/domains/portfolio/repositories/IPortfolioRepository.ts)**: Port contract for family portfolios and net worth history persistence.
-  * **[IFDRepository.ts](src/domains/assets/fd/repositories/IFDRepository.ts)**: Fixed Deposit persistence contract.
-  * **[IRDRepository.ts](src/domains/assets/rd/repositories/IRDRepository.ts)**: Recurring Deposit persistence contract.
-  * **[ISIPRepository.ts](src/domains/assets/sip/repositories/ISIPRepository.ts)**: SIP Mutual Fund persistence contract.
-  * **[IGoldRepository.ts](src/domains/assets/gold/repositories/IGoldRepository.ts)**: Gold bullion persistence contract.
-  * **[IRealEstateRepository.ts](src/domains/assets/realestate/repositories/IRealEstateRepository.ts)**: Real estate holding persistence contract.
-  * **[IInsuranceRepository.ts](src/domains/assets/insurance/repositories/IInsuranceRepository.ts)**: Insurance policy persistence contract.
-  * **[IDocumentRepository.ts](src/domains/documents/repositories/IDocumentRepository.ts)**: Document vault metadata and file storage contract.
+* **Repository Interfaces (`src/domains/portfolio/repositories/`)**:
+  * **[IPortfolioRepository.ts](src/domains/portfolio/repositories/IPortfolioRepository.ts)**: Port contract for family portfolios, all multi-asset categories (Stocks, FDs, RDs, SIPs, Gold, Real Estate, Insurances, Documents), and net worth history persistence.
 * **Supabase Repositories (`src/infrastructure/supabase/repositories/`)**:
   * **[SupabasePortfolioRepository.ts](src/infrastructure/supabase/repositories/SupabasePortfolioRepository.ts)**: Implements `IPortfolioRepository` for complete family portfolio data retrieval and CRUD mutations via Edge Functions.
 * **Cache Infrastructure (`src/infrastructure/cache/`)**:

@@ -18,7 +18,8 @@ describe('Gold Calculations', () => {
   });
 
   it('handles zero or negative weights cleanly', () => {
-    expect(calculateGoldValuation(0, '24K')).toBe(0);
-    expect(calculateGoldValuation(-5, '22K')).toBe(0);
+    expect(calculateGoldValuation(0, '24K', 15000)).toBe(0);
+    expect(calculateGoldValuation(-5, '22K', 15000)).toBe(0);
+    expect(calculateGoldValuation(10, '24K', 0)).toBe(0);
   });
 });

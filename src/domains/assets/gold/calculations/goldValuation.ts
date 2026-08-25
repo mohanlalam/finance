@@ -19,15 +19,17 @@ export function getPurityMultiplier(purityStr: string): number {
 
 /**
  * Calculates current market valuation for a gold holding based on weight, purity, and 24K spot rate.
+ * Pure calculation: requires explicit spot rate to prevent silent fallback to static hardcoded numbers.
  */
 export function calculateGoldValuation(
   weightGrams: number,
   purity: string,
-  rate24kPerGram: number = DEFAULT_GOLD_RATE_24K
+  rate24kPerGram: number
 ): number {
   const weight = Number(weightGrams) || 0;
   if (weight <= 0) return 0;
-  const rate = Number(rate24kPerGram) || DEFAULT_GOLD_RATE_24K;
+  const rate = Number(rate24kPerGram) || 0;
+  if (rate <= 0) return 0;
   const multiplier = getPurityMultiplier(purity);
   return Math.round(weight * rate * multiplier);
 }
