@@ -4,6 +4,8 @@
  * Enables passwordless 1-second biometric unlock while preserving the 4-digit PIN fallback.
  */
 
+import { logger } from '../infrastructure/logging/logger';
+
 const BIOMETRIC_ENROLLED_KEY = 'finance_biometric_enrolled';
 const BIOMETRIC_CREDENTIAL_ID_KEY = 'finance_biometric_cred_id';
 const BIOMETRIC_PIN_HASH_KEY = 'finance_biometric_pin_hash';
@@ -163,7 +165,7 @@ export async function registerBiometrics(pinHash: string): Promise<boolean> {
     return false;
   } catch (err: unknown) {
     // User cancelled or platform authenticator error
-    console.warn('Biometric registration was cancelled or failed:', err);
+    logger.warn('Biometric registration was cancelled or failed', { error: String(err) });
     return false;
   }
 }
@@ -204,13 +206,13 @@ export async function authenticateWithBiometrics(): Promise<string | null> {
   } catch (err: unknown) {
     const name = (err as DOMException)?.name;
     if (name === 'NotAllowedError') {
-      console.warn('Biometric authentication cancelled by user');
+      logger.warn('Biometric authentication cancelled by user');
     } else if (name === 'AbortError') {
-      console.warn('Biometric authentication aborted');
+      logger.warn('Biometric authentication aborted');
     } else if (name === 'SecurityError') {
-      console.warn('Biometric authentication security constraint (user gesture required on iOS WebKit)');
+      logger.warn('Biometric authentication security constraint (user gesture required on iOS WebKit)');
     } else {
-      console.warn('Biometric authentication transient error:', err);
+      logger.warn('Biometric authentication transient error', { error: String(err) });
     }
     return null;
   }

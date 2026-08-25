@@ -1,5 +1,6 @@
 import { fetchAMFIScheme } from './amfiClient';
 import * as idb from 'idb-keyval';
+import { logger } from '../infrastructure/logging/logger';
 
 export {
   getSIPInvestedAmount,
@@ -22,7 +23,7 @@ export async function saveNAVCacheToIDB(): Promise<void> {
   try {
     await idb.set('nav_cache', JSON.stringify(Array.from(navCache.entries())));
   } catch (err) {
-    console.warn('[sipUtils] Failed to save NAV cache to IDB:', err);
+    logger.warn('[sipUtils] Failed to save NAV cache to IDB', { error: String(err) });
   }
 }
 

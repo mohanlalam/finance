@@ -1,5 +1,6 @@
 import { Portfolio } from '../types/portfolio';
 import { formatINR } from './formatters';
+import { logger } from '../infrastructure/logging/logger';
 
 const NOTIFICATION_LOCK_PREFIX = 'finance_notif_sent_';
 
@@ -27,7 +28,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
     const perm = await Notification.requestPermission();
     return perm === 'granted';
   } catch (err) {
-    console.warn('[notifications] Failed to request permission:', err);
+    logger.warn('[notifications] Failed to request permission', { error: String(err) });
     return false;
   }
 }

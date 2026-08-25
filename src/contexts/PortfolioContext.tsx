@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Portfolio, PortfolioName, AssetPayload, RDPayload, SIPPayload } from '../types/portfolio';
 import { NetWorthSnapshot, usePortfolioData, LoadStatus } from '../hooks/usePortfolioData';
 import { invokeFunction } from '../utils/apiClient';
+import { logger } from '../infrastructure/logging/logger';
 
 
 export interface PortfolioEntitiesContextValue {
@@ -178,7 +179,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
           localStorage.setItem('finance_last_snapshot_date', todayStr);
         })
         .catch((err) => {
-          console.warn('[portfolio] failed to record daily net worth snapshot:', err);
+          logger.warn('[portfolio] failed to record daily net worth snapshot', { error: String(err) });
         });
     }
     return () => {

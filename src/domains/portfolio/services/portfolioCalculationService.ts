@@ -1,6 +1,6 @@
 import { Portfolio } from '../../../types/portfolio';
 import { calculateAggregatedPortfolioTotals } from '../calculations/portfolioTotals';
-import { getFDInvestedAmount, getFDEffectiveValue } from '../../../utils/formatters';
+import { getFDInvestedAmount, getFDEffectiveValue } from '../../assets/fd/calculations/fdCompounding';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../assets/rd/calculations/rdCompounding';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../assets/sip/calculations/sipValuation';
 

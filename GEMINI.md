@@ -27,7 +27,7 @@ External APIs & Databases (PostgreSQL, Supabase Functions, Yahoo Finance, AMFI, 
 ```
 
 ### Strict Boundary Rules
-1. **`src/shared/`**: Common utilities, error hierarchy ([`AppError.ts`](src/shared/errors/AppError.ts)), constants, and design primitives. Has ZERO dependencies on domain logic or infrastructure.
+1. **`src/shared/` & `src/utils/` (Pure Primitives)**: Common utilities, pure financial helpers ([`mathUtils.ts`](src/utils/mathUtils.ts), [`dateUtils.ts`](src/utils/dateUtils.ts)), error hierarchy ([`AppError.ts`](src/shared/errors/AppError.ts)), constants, and design primitives. Pure calculation helpers have ZERO dependencies on React, Supabase, or DOM APIs.
 2. **`src/domains/`**: Business entities, pure financial calculations, repository contracts, and domain services. Pure calculation functions have zero dependencies on React, Supabase, IndexedDB, or DOM APIs.
 3. **`src/infrastructure/`**: Concrete implementations of repository interfaces (Supabase, IndexedDB offline cache, SWR, Web Workers, Market Data providers).
 4. **`src/app/` / UI**: Presentation layer consuming domain state through domain hooks and triggering actions via domain services.
@@ -44,13 +44,13 @@ External APIs & Databases (PostgreSQL, Supabase Functions, Yahoo Finance, AMFI, 
   * **[usePortfolioQuery.ts](src/domains/portfolio/hooks/usePortfolioQuery.ts)**: SWR data loading + instant IndexedDB cache hydration.
   * **[usePortfolioMutation.ts](src/domains/portfolio/hooks/usePortfolioMutation.ts)**: Serialized CRUD mutations with automatic cache invalidation and error propagation.
   * **[usePortfolioRefresh.ts](src/domains/portfolio/hooks/usePortfolioRefresh.ts)**: Live quote polling and document `visibilitychange` resume triggers.
-  * **[usePortfolioSync.ts](src/domains/portfolio/hooks/usePortfolioSync.ts)**: Mutex-based concurrency guard preventing UI collisions during rapid user inputs.
+  * **[usePortfolioSync.ts](src/domains/portfolio/hooks/usePortfolioSync.ts)**: Reactive React state subscriber hook reading mutex mutation state.
   * **[usePortfolioState.ts](src/domains/portfolio/hooks/usePortfolioState.ts)**: Composite domain hook uniting query, mutation, refresh, and sync.
   * **[usePortfolioData.ts](src/hooks/usePortfolioData.ts)**: Backward-compatible facade delegating directly to `usePortfolioState.ts`.
 * **Domain Services (`src/domains/portfolio/services/`)**:
   * **[portfolioService.ts](src/domains/portfolio/services/portfolioService.ts)**: Handles high-level portfolio lifecycle, repository interactions, and offline cache synchronization.
   * **[portfolioCalculationService.ts](src/domains/portfolio/services/portfolioCalculationService.ts)**: Memoized recalculation of asset totals, live equity price updates, and AMFI mutual fund NAV ticks.
-  * **[portfolioSyncService.ts](src/domains/portfolio/services/portfolioSyncService.ts)**: Serialized mutation queue mutex.
+  * **[portfolioSyncService.ts](src/domains/portfolio/services/portfolioSyncService.ts)**: Serialized mutation queue mutex preventing concurrency collisions during rapid user inputs.
 * **Shared Interactive Hooks**:
   * **[useIsMobile.ts](src/hooks/useIsMobile.ts)**: Centralized reactive hook for mobile viewport checking (`window.matchMedia('(max-width: 767px)')`). Prevents layout thrashing by eliminating repeated `window.innerWidth` reads across components.
   * **[useAssetModal.ts](src/hooks/useAssetModal.ts)**: Generic reusable hook encapsulating modal visibility, editing item state (`editingItem`), delete confirmation target (`confirmDeleteItem`), and auto-open quick-add triggers.
@@ -197,8 +197,9 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 ## 🎨 Clean Data-First Design System Architecture (Zerodha Kite & Apple Hybrid)
 
-> **Single Source of Truth**: All design tokens, canonical hex values, typography scales, and accessibility requirements are authoritatively governed by [`UI.md`](UI.md) (specifically `UI.md §2` and `UI.md §11`) and implemented in `src/index.css`.
+> **Single Source of Truth**: All design tokens, canonical hex values, typography scales, and accessibility requirements are authoritatively governed by [`UI.md`](UI.md) (specifically `UI.md §2` and `UI.md §11`) and implemented via CSS custom properties in `src/index.css` alongside Tailwind CSS utility classes.
 
+* **Hybrid Styling Stack**: Tailwind CSS utility framework (`tailwind.config.js`) mapped to semantic CSS custom variables (`var(--surface)`, `var(--border-subtle)`, etc.) declared in `src/index.css`.
 * **Flat Neutral Canvas**: Standardized `#f8fafc` light / `#080c14` dark canvas background system.
 * **Zerodha Kite Signature Palette**: Canonical financial tokens: Kite Blue (`#387ed1`), clean profit green (`#00b074`), and clean loss red (`#df514c`).
 * **High-Density Holdings Ribbon**: Horizontal overview strip (*Holdings count, Total inv., Current val., Overall P&L, Day's P&L*) above asset tables.

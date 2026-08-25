@@ -25,6 +25,7 @@ import {
   calculateGoldValuation as calcGoldValuationPure,
 } from '../domains/assets/gold/calculations/goldValuation';
 import { mcxGoldDataProvider } from '../infrastructure/market-data/providers/mcxProvider';
+import { logger } from '../infrastructure/logging/logger';
 
 export { DEFAULT_GOLD_RATE_24K, getPurityMultiplier };
 
@@ -152,7 +153,7 @@ export async function fetchLiveGoldRates(forceRefresh = false): Promise<GoldRate
       return deriveGoldRates();
     }
   } catch (err) {
-    console.warn('[goldPricing] Live gold fetch warning:', err);
+    logger.warn('[goldPricing] Live gold fetch warning', { error: String(err) });
   }
 
   // Fallback to existing snapshot
