@@ -1,6 +1,8 @@
 # 💼 Family Portfolio Tracker — GEMINI.md (Project Architecture)
 
-This document provides a high-level overview of the folder structure, clean architecture boundaries, domain/infrastructure data flow, state management, database mappings, and performance optimizations of the Family Portfolio Tracker application. It is designed to help developers and AI agents navigate the codebase efficiently.
+_Last updated: 2026-08-25 — Architecture v2.0 (Clean Architecture & Modular Domains)_
+
+This document provides a high-level overview of the folder structure, clean architecture boundaries, domain/infrastructure data flow, state management, database mappings, error handling, testing strategies, and performance optimizations of the Family Portfolio Tracker application. It is designed to help developers and AI agents navigate the codebase efficiently.
 
 > ⚠️ **Design Token Rule**: [`UI.md`](UI.md) is the single authoritative source of truth for all visual tokens. Never introduce a new color hex, corner radius, shadow, or typography token in code or docs without first declaring it in `UI.md §2` and `src/index.css`.
 
@@ -24,8 +26,8 @@ Infrastructure Implementations (Supabase, SWR, IndexedDB, Web Workers, Market Da
 External APIs & Databases (PostgreSQL, Supabase Functions, Yahoo Finance, AMFI, MCX Bullion)
 ```
 
-### Strict Boundary Rules:
-1. **`src/shared/`**: Common utilities, error hierarchy (`AppError`), constants, and design primitives. Has ZERO dependencies on domain logic or infrastructure.
+### Strict Boundary Rules
+1. **`src/shared/`**: Common utilities, error hierarchy ([`AppError.ts`](src/shared/errors/AppError.ts)), constants, and design primitives. Has ZERO dependencies on domain logic or infrastructure.
 2. **`src/domains/`**: Business entities, pure financial calculations, repository contracts, and domain services. Pure calculation functions have zero dependencies on React, Supabase, IndexedDB, or DOM APIs.
 3. **`src/infrastructure/`**: Concrete implementations of repository interfaces (Supabase, IndexedDB offline cache, SWR, Web Workers, Market Data providers).
 4. **`src/app/` / UI**: Presentation layer consuming domain state through domain hooks and triggering actions via domain services.
@@ -60,60 +62,77 @@ External APIs & Databases (PostgreSQL, Supabase Functions, Yahoo Finance, AMFI, 
 
 ### 2. Infrastructure & Repository Layer
 
+* **Repository Interfaces (`src/domains/*/repositories/`)**:
+  * **[IPortfolioRepository.ts](src/domains/portfolio/repositories/IPortfolioRepository.ts)**: Port contract for family portfolios and net worth history persistence.
+  * **[IFDRepository.ts](src/domains/assets/fd/repositories/IFDRepository.ts)**: Fixed Deposit persistence contract.
+  * **[IRDRepository.ts](src/domains/assets/rd/repositories/IRDRepository.ts)**: Recurring Deposit persistence contract.
+  * **[ISIPRepository.ts](src/domains/assets/sip/repositories/ISIPRepository.ts)**: SIP Mutual Fund persistence contract.
+  * **[IGoldRepository.ts](src/domains/assets/gold/repositories/IGoldRepository.ts)**: Gold bullion persistence contract.
+  * **[IRealEstateRepository.ts](src/domains/assets/realestate/repositories/IRealEstateRepository.ts)**: Real estate holding persistence contract.
+  * **[IInsuranceRepository.ts](src/domains/assets/insurance/repositories/IInsuranceRepository.ts)**: Insurance policy persistence contract.
+  * **[IDocumentRepository.ts](src/domains/documents/repositories/IDocumentRepository.ts)**: Document vault metadata and file storage contract.
 * **Supabase Repositories (`src/infrastructure/supabase/repositories/`)**:
   * **[SupabasePortfolioRepository.ts](src/infrastructure/supabase/repositories/SupabasePortfolioRepository.ts)**: Implements `IPortfolioRepository` for complete family portfolio data retrieval and CRUD mutations via Edge Functions.
-  * Concrete repositories for FD, RD, SIP, Gold, Real Estate, Insurance, and Documents.
 * **Cache Infrastructure (`src/infrastructure/cache/`)**:
   * **[indexedDbCache.ts](src/infrastructure/cache/indexedDbCache.ts)**: Safe IndexedDB wrapper (`idb-keyval`) with memory fallback for non-browser/test environments.
   * **[portfolioCache.ts](src/infrastructure/cache/portfolioCache.ts)**: Offline portfolio payload cache persistence and cache invalidation.
   * **[swrConfig.ts](src/infrastructure/cache/swrConfig.ts)**: Global SWR deduplication and retry configurations.
 * **Market Data Infrastructure (`src/infrastructure/market-data/`)**:
-  * **[marketDataService.ts](src/infrastructure/market-data/marketDataService.ts)**: Unified facade coordinating multi-provider quote lookups, caching, and fallback resolution.
+  * **[marketDataService.ts](src/infrastructure/market-data/marketDataService.ts)**: Unified facade coordinating multi-provider quote lookups, in-flight deduplication, caching, and fallback resolution.
   * **[providers/yahooProvider.ts](src/infrastructure/market-data/providers/yahooProvider.ts)**: Yahoo Finance equity quote fetcher via Edge Function.
   * **[providers/amfiProvider.ts](src/infrastructure/market-data/providers/amfiProvider.ts)**: AMFI India mutual fund daily NAV fetcher.
   * **[providers/mcxProvider.ts](src/infrastructure/market-data/providers/mcxProvider.ts)**: Real-time MCX & IBJA bullion spot rate provider.
   * **[marketDataCache.ts](src/infrastructure/market-data/marketDataCache.ts)**: High-speed TTL in-memory market quote cache.
+  * **Market Quote Fallback Priority Chain**:
+    ```text
+    1. Active Live Request (Yahoo / AMFI / MCX)
+       ↓ (if in-flight request exists, reuse Promise)
+    2. In-Memory TTL Cache (marketDataCache.ts — 2 min TTL)
+       ↓ (if network fails / rate limited)
+    3. Last-Known Stale Quote / Snapshot from Database/IndexedDB
+    ```
 * **Workers & Storage**:
-  * **[src/infrastructure/workers/](src/infrastructure/workers/)**: `WorkerPool.ts` and `xirr.worker.ts` for off-thread Newton-Raphson cash flow calculations.
-  * **[src/infrastructure/storage/](src/infrastructure/storage/)**: Supabase Document Storage with client-side path traversal protection and secure Edge Function routing.
-  * **[src/infrastructure/logging/logger.ts](src/infrastructure/logging/logger.ts)**: Lightweight logger with automatic redaction of sensitive credentials (PINs, API keys, tokens).
+  * **[WorkerPool.ts](src/infrastructure/workers/WorkerPool.ts)** and **[xirr.worker.ts](src/infrastructure/workers/xirr.worker.ts)**: Background Web Worker singletons for off-thread Newton-Raphson cash flow calculations.
+  * **[SupabaseDocumentStorage.ts](src/infrastructure/storage/SupabaseDocumentStorage.ts)**: Supabase Document Storage with client-side path traversal protection and secure Edge Function routing.
+  * **[logger.ts](src/infrastructure/logging/logger.ts)**: Lightweight logger with automated regex-based redaction of sensitive credentials (PINs, API keys, tokens, auth headers).
 
 ---
 
 ### 3. Pure Calculation Modules
 
-All core financial calculations are pure functions with zero UI or database dependencies:
+All core financial calculations are pure functions with zero UI, React, or database dependencies:
 
-* **[src/domains/portfolio/calculations/](src/domains/portfolio/calculations/)**:
-  * `portfolioTotals.ts`: Single-pass portfolio totals aggregation and Method-B intraday delta calculations.
-  * `allocation.ts`: Asset class distribution and percentage breakdowns for visual widgets.
-  * `netWorth.ts`: Snapshot formatting and net worth timeline aggregations.
-* **[src/domains/performance/calculations/](src/domains/performance/calculations/)**:
-  * `xirr.ts`: Pure Newton-Raphson XIRR solver with TypedArray cash flows and bisection fallback.
-  * `cagr.ts`: Period-bounded Compound Annual Growth Rate calculator.
-  * `returns.ts`: Weighted-age portfolio annualized returns and cash flow extraction.
-  * `benchmark.ts`: Nifty 50, Nifty 500, and S&P 500 reference returns.
-* **[src/domains/taxation/calculations/](src/domains/taxation/calculations/)**:
-  * `taxHarvesting.ts`: Real-time tax loss harvesting opportunity finder distinguishing equity STCG (20%) / LTCG (12.5% over ₹1.25L) from slab-rate debt and gold bullion assets.
-  * `capitalGains.ts`: Indian Income Tax FY24-25 capital gains calculations.
-  * `financialYear.ts`: Indian fiscal year (Apr 1 - Mar 31) date classification.
-* **[src/domains/assets/](src/domains/assets/)**:
-  * `fd/calculations/fdCompounding.ts`: Half-yearly / quarterly compound interest maturity solver.
-  * `rd/calculations/rdCompounding.ts`: Indian Banking standard quarterly compounding RD valuation.
-  * `sip/calculations/sipValuation.ts`: Live AMFI NAV scheme price multiplication and accrued valuations.
-  * `gold/calculations/goldValuation.ts`: Bullion weight × 24K spot rate × hallmark purity multiplier (24K, 22K/916, 18K/750, 14K/585).
+* **Portfolio Calculations (`src/domains/portfolio/calculations/`)**:
+  * **[portfolioTotals.ts](src/domains/portfolio/calculations/portfolioTotals.ts)**: Single-pass portfolio totals aggregation and Method-B intraday delta calculations.
+  * **[allocation.ts](src/domains/portfolio/calculations/allocation.ts)**: Asset class distribution and percentage breakdowns for visual widgets.
+  * **[netWorth.ts](src/domains/portfolio/calculations/netWorth.ts)**: Snapshot formatting and net worth timeline aggregations.
+* **Performance Calculations (`src/domains/performance/calculations/`)**:
+  * **[xirr.ts](src/domains/performance/calculations/xirr.ts)**: Pure Newton-Raphson XIRR solver with TypedArray cash flows and bisection fallback.
+  * **[cagr.ts](src/domains/performance/calculations/cagr.ts)**: Period-bounded Compound Annual Growth Rate calculator.
+  * **[returns.ts](src/domains/performance/calculations/returns.ts)**: Weighted-age portfolio annualized returns and cash flow extraction.
+  * **[benchmark.ts](src/domains/performance/calculations/benchmark.ts)**: Nifty 50, Nifty 500, and S&P 500 reference returns.
+* **Taxation Calculations (`src/domains/taxation/calculations/`)**:
+  * **[taxHarvesting.ts](src/domains/taxation/calculations/taxHarvesting.ts)**: Real-time tax loss harvesting opportunity finder distinguishing equity STCG (20%) / LTCG (12.5% over ₹1.25L) from slab-rate debt and gold bullion assets.
+  * **[capitalGains.ts](src/domains/taxation/calculations/capitalGains.ts)**: Indian Income Tax FY24-25 capital gains calculations.
+  * **[financialYear.ts](src/domains/taxation/calculations/financialYear.ts)**: Indian fiscal year (Apr 1 - Mar 31) date classification.
+* **Asset Specific Calculations (`src/domains/assets/`)**:
+  * **[fdCompounding.ts](src/domains/assets/fd/calculations/fdCompounding.ts)**: Half-yearly / quarterly compound interest maturity solver.
+  * **[rdCompounding.ts](src/domains/assets/rd/calculations/rdCompounding.ts)**: Indian Banking standard quarterly compounding RD valuation.
+  * **[sipValuation.ts](src/domains/assets/sip/calculations/sipValuation.ts)**: Live AMFI NAV scheme price multiplication and accrued valuations.
+  * **[goldValuation.ts](src/domains/assets/gold/calculations/goldValuation.ts)**: Bullion weight × 24K spot rate × hallmark purity multiplier (24K, 22K/916, 18K/750, 14K/585).
 
 ---
 
 ### 4. Supporting Domains (AI, Data Quality, Backup/Restore)
 
-* **[src/domains/data-quality/](src/domains/data-quality/)**:
-  * `healthScore.ts`: Health scoring rules engine auditing missing maturity dates, zero valuations, overdue insurance renewals, and missing attachments.
-* **[src/domains/ai/](src/domains/ai/)**:
-  * `assistant/intentClassifier.ts`: Deterministic intent classification across financial queries.
-  * `tools/`: Deterministic domain tools (`portfolioTool`, `performanceTool`, `taxTool`) ensuring financial calculations are strictly reproducible and never hallucinated.
-* **[src/domains/portfolio/backup/](src/domains/portfolio/backup/)**:
-  * `backupSchema.ts` & `backupValidator.ts`: Schema-enforcing backup and restore diagnostic engine with envelope validation and collision detection.
+* **Data Quality Domain (`src/domains/data-quality/`)**:
+  * **[healthScore.ts](src/domains/data-quality/healthScore.ts)**: Health scoring rules engine auditing missing maturity dates, zero valuations, overdue insurance renewals, and missing attachments.
+  * **[types.ts](src/domains/data-quality/types.ts)**: Standardized issue types with severity tiers (`info`, `warning`, `critical`).
+* **AI Assistant Domain (`src/domains/ai/`)**:
+  * **[intentClassifier.ts](src/domains/ai/assistant/intentClassifier.ts)**: Deterministic intent classification across 14 financial intents (`NET_WORTH`, `ALLOCATION`, `STOCK_HOLDINGS`, `TOP_GAINERS`, `TOP_LOSERS`, `MATURITY_SCHEDULE`, `INSURANCE_RENEWAL`, `TAX_HARVESTING`, `GOLD_VALUATION`, `REAL_ESTATE`, `PERFORMANCE_XIRR`, `DATA_QUALITY`, `HELP`, `UNKNOWN`).
+  * **[portfolioTool.ts](src/domains/ai/tools/portfolioTool.ts)**, **[taxTool.ts](src/domains/ai/tools/taxTool.ts)**: Deterministic domain tools connecting NLP queries directly to pure financial calculations to guarantee zero hallucinated figures.
+* **Backup & Restore Domain (`src/domains/portfolio/backup/`)**:
+  * **[backupSchema.ts](src/domains/portfolio/backup/backupSchema.ts)** & **[backupValidator.ts](src/domains/portfolio/backup/backupValidator.ts)**: Schema-enforcing backup and restore diagnostic engine with envelope validation and collision detection.
 
 ---
 
@@ -128,15 +147,47 @@ All core financial calculations are pure functions with zero UI or database depe
 ### 6. Registry Component Routing & Modular Views
 * **[AssetTabContent.tsx](src/components/AssetTabContent.tsx)**: Orchestrator component rendering the active asset registry view with dynamic lazy loading (`React.lazy` and `React.Suspense`) for ALL registry views and tables (`FixedDepositView`, `RDView`, `SIPView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, `TaxHarvestingView`, `PortfolioTable`).
 * **Modular Domain Components**:
-  * `src/components/ui/AssetRegistryContainer.tsx`: Standardized shell for asset registry headers, add buttons, and loading fallbacks.
-  * `src/components/ui/DocumentAttachmentField.tsx`: Document uploader supporting taxonomy tags (`fd_advice`, `policy_schedule`, `title_deed`, `tax_receipt`, `invoice`, `gold_hallmark`, `account_statement`, `general`) with 10MB bounds.
-  * `src/components/ExportPanel.tsx`: Unified data export panel (JSON/CSV), schema-validated full restore engine, and print-optimized `@media print` A4 PDF statement generator.
-  * `src/components/gold/`: `GoldHoldingView.tsx`, `GoldHoldingCard.tsx`, and `GoldFormModal.tsx`.
-  * `src/components/realestate/`: `RealEstateView.tsx`, `RealEstateCard.tsx`, and `RealEstateFormModal.tsx`.
-  * `src/components/insurance/`: `InsuranceView.tsx`, `InsurancePolicyCard.tsx`, and `InsuranceFormModal.tsx`.
-  * `src/components/fd/`: `FixedDepositView.tsx`, `DepositDetailsCard.tsx`, and `FDFormModal.tsx`.
-  * `src/components/rd/`: `RDView.tsx`, `RDAccountCard.tsx`, and `RDFormModal.tsx`.
-  * `src/components/sip/`: `SIPView.tsx`, `SIPAccountCard.tsx`, and `SIPFormModal.tsx`.
+  * **[AssetRegistryContainer.tsx](src/components/ui/AssetRegistryContainer.tsx)**: Standardized shell for asset registry headers, add buttons, and loading fallbacks.
+  * **[DocumentAttachmentField.tsx](src/components/ui/DocumentAttachmentField.tsx)**: Document uploader supporting taxonomy tags (`fd_advice`, `policy_schedule`, `title_deed`, `tax_receipt`, `invoice`, `gold_hallmark`, `account_statement`, `general`) with 10MB bounds.
+  * **[ExportPanel.tsx](src/components/ExportPanel.tsx)**: Unified data export panel (JSON/CSV), schema-validated full restore engine, and print-optimized `@media print` A4 PDF statement generator.
+  * **[GoldHoldingView.tsx](src/components/gold/GoldHoldingView.tsx)**, **[GoldHoldingCard.tsx](src/components/gold/GoldHoldingCard.tsx)**, and **[GoldFormModal.tsx](src/components/gold/GoldFormModal.tsx)**.
+  * **[RealEstateView.tsx](src/components/realestate/RealEstateView.tsx)**, **[RealEstateCard.tsx](src/components/realestate/RealEstateCard.tsx)**, and **[RealEstateFormModal.tsx](src/components/realestate/RealEstateFormModal.tsx)**.
+  * **[InsuranceView.tsx](src/components/insurance/InsuranceView.tsx)**, **[InsurancePolicyCard.tsx](src/components/insurance/InsurancePolicyCard.tsx)**, and **[InsuranceFormModal.tsx](src/components/insurance/InsuranceFormModal.tsx)**.
+  * **[FixedDepositView.tsx](src/components/FixedDepositView.tsx)**, **[DepositDetailsCard.tsx](src/components/fd/DepositDetailsCard.tsx)**, and **[FDFormModal.tsx](src/components/fd/FDFormModal.tsx)**.
+  * **[RDView.tsx](src/components/rd/RDView.tsx)**, **[RDAccountCard.tsx](src/components/rd/RDAccountCard.tsx)**, and **[RDFormModal.tsx](src/components/rd/RDFormModal.tsx)**.
+  * **[SIPView.tsx](src/components/sip/SIPView.tsx)**, **[SIPAccountCard.tsx](src/components/sip/SIPAccountCard.tsx)**, and **[SIPFormModal.tsx](src/components/sip/SIPFormModal.tsx)**.
+
+---
+
+### 7. Testing Strategy
+* **Test Conventions & Locations**:
+  * Unit and pure calculation tests: located under `src/domains/__tests__/` (e.g., `portfolioTotals.test.ts`, `taxHarvesting.test.ts`, `goldValuation.test.ts`, `dataQuality.test.ts`, `backupValidator.test.ts`).
+  * Legacy component & formatter tests: located under `src/utils/__tests__/` and `src/utils/__tests/`.
+* **Mocking & Environment Isolation**:
+  * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
+* **Verification Pipeline**:
+  * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
+  * `npm test` (`vitest run`) executes the complete test suite across 28 test files and 140+ unit/integration test cases.
+
+---
+
+### 8. Error Handling & Observability
+* **Standardized Error Hierarchy (`src/shared/errors/AppError.ts`)**:
+  * `AppError`: Base application error with `code`, `severity` (`info`, `warning`, `error`, `critical`), and user-facing message mapping.
+  * `ValidationError`: Emitted when form inputs, payloads, or asset IDs fail schema constraints.
+  * `RepositoryError`: Emitted on database or network transport failures.
+  * `SyncError`: Emitted during concurrency mutex collisions or broker sync discrepancies.
+  * `MarketDataError`: Emitted when quote providers fail, automatically triggering fallback cache resolution.
+  * `AuthenticationError`: Emitted when PIN or session challenges fail.
+* **User-Facing Error Resolution**:
+  * Handled uniformly via `toUserErrorMessage(error)`, mapping technical stack traces into friendly, actionable notifications.
+* **UI Error Surfacing**:
+  * Critical app-level crashes: Caught by [AppErrorBoundary.tsx](src/components/AppErrorBoundary.tsx).
+  * Section-level crashes: Isolated via [SectionErrorBoundary.tsx](src/components/SectionErrorBoundary.tsx).
+  * Transient mutation & network alerts: Dispatched cleanly via [ToastContext.tsx](src/contexts/ToastContext.tsx).
+* **Observability & Logging (`src/infrastructure/logging/logger.ts`)**:
+  * Structured logging with level filtering (`debug`, `info`, `warn`, `error`).
+  * Automatic redaction of sensitive credentials (PINs, tokens, auth headers, secret keys).
 
 ---
 
@@ -167,6 +218,8 @@ All core financial calculations are pure functions with zero UI or database depe
 
 ## 💾 Database Schema & Table Mappings
 
+> *Note: Dedicated tabular mapping is maintained intentionally for high-density architectural scannability.*
+
 | Asset Tab / UI Mode | Supabase PostgreSQL Table | Core Compounding / Valuation Rule |
 | :--- | :--- | :--- |
 | **Fixed Deposit (FD)** | `fixed_deposits` | Half-yearly compounding (FD interest rates) |
@@ -185,6 +238,17 @@ All core financial calculations are pure functions with zero UI or database depe
 
 1. **Plan Node Default**: Enter plan mode for non-trivial tasks (3+ steps or architectural decisions).
 2. **Subagent Strategy**: Offload research and parallel analysis to subagents.
-3. **Self-Improvement Loop**: Update `tasks/lessons.md` after any user correction and review at session start.
+3. **Self-Improvement Loop**: Update [`tasks/lessons.md`](tasks/lessons.md) after any user correction and review at session start.
 4. **Verification Before Done**: Run `npm run verify` (`eslint`, `typecheck`, `build`) and `vitest run` before completing tasks.
 5. **Demand Elegance**: Avoid hacky fixes; ensure clean boundary adherence and type safety.
+
+---
+
+## 📜 Architecture Changelog
+
+| Date | Version | Key Changes & Milestones |
+| :--- | :--- | :--- |
+| **2026-08-25** | `v2.0` | Clean Architecture refactor: modularized `usePortfolioData.ts`, extracted pure calculation modules, introduced domain repository port contracts, added multi-provider market data service, standardized `AppError` hierarchy, and enhanced test suites. |
+| **2026-08-22** | `v1.5` | Fail-closed Edge Function security hardening, strict storage path allowlists, full-phase audit protocols. |
+| **2026-08-21** | `v1.4` | PWA background lifecycle update listeners and WebAuthn credential persistence safeguards. |
+| **2026-08-17** | `v1.3` | Mobile bottom sheet detail drawers, responsive chart height scaling, and design system unification with `UI.md`. |
