@@ -20,6 +20,8 @@ import { getFDInvestedAmount, getFDEffectiveValue } from '../../../utils/formatt
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../..//domains/assets/rd/calculations/rdCompounding';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../../domains/assets/sip/calculations/sipValuation';
 import { RepositoryError, ValidationError } from '../../../shared/errors/AppError';
+import { sortPortfolios } from '../../../domains/portfolio/calculations/portfolioOrdering';
+
 
 interface DBHolding {
   id: string;
@@ -342,17 +344,19 @@ export class SupabasePortfolioRepository implements IPortfolioRepository {
         docsByPid.set(d.portfolio_id, list);
       });
 
-      const portfolios: Portfolio[] = dbPortfolios.map((p) =>
-        buildPortfolio(
-          p,
-          holdingsByPid.get(p.id) || [],
-          fdsByPid.get(p.id) || [],
-          rdsByPid.get(p.id) || [],
-          sipsByPid.get(p.id) || [],
-          goldByPid.get(p.id) || [],
-          reByPid.get(p.id) || [],
-          insByPid.get(p.id) || [],
-          docsByPid.get(p.id) || []
+      const portfolios: Portfolio[] = sortPortfolios(
+        dbPortfolios.map((p) =>
+          buildPortfolio(
+            p,
+            holdingsByPid.get(p.id) || [],
+            fdsByPid.get(p.id) || [],
+            rdsByPid.get(p.id) || [],
+            sipsByPid.get(p.id) || [],
+            goldByPid.get(p.id) || [],
+            reByPid.get(p.id) || [],
+            insByPid.get(p.id) || [],
+            docsByPid.get(p.id) || []
+          )
         )
       );
 

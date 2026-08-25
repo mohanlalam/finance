@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, TrendingDown, Pencil, Trash2, Plus, Sparkles } from '../components/icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
+import { sortPortfolios } from '../domains/portfolio/calculations/portfolioOrdering';
 
 export interface DesktopSidebarProps {
   activeTab: string;
@@ -24,6 +26,8 @@ export default function DesktopSidebar({
   onOpenDelete,
   onOpenSmartImport,
 }: DesktopSidebarProps) {
+  const sortedPortfolios = useMemo(() => sortPortfolios(portfolios), [portfolios]);
+
   const getNavItemClass = (isActive: boolean) =>
     `flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-[var(--radius-small)] text-xs font-semibold ios-press transition-all outline-none ${
       isActive
@@ -59,7 +63,7 @@ export default function DesktopSidebar({
           >
             Family Overview
           </button>
-          {portfolios.map((p) => (
+          {sortedPortfolios.map((p) => (
             <div key={p.name} className="flex items-center group relative">
               <button
                 onClick={() => onSelectPortfolio(p.name)}

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import useSWR from 'swr';
 import { Portfolio } from '../../../types/portfolio';
 import { NetWorthSnapshot } from '../calculations/netWorth';
+import { sortPortfolios } from '../calculations/portfolioOrdering';
 import { portfolioService } from '../services/portfolioService';
 import { swrDefaultConfig } from '../../../infrastructure/cache/swrConfig';
 import { AppApiError } from '../../../utils/apiClient';
@@ -39,7 +40,7 @@ export function usePortfolioQuery(onAuthExpired?: () => void): UsePortfolioQuery
       try {
         const cached = await portfolioService.getOfflineCachedPortfolios();
         if (active && cached && !hasHydratedRef.current) {
-          setPortfolios(cached.portfolios);
+          setPortfolios(sortPortfolios(cached.portfolios));
           setNetWorthHistory(cached.netWorthHistory);
           setIsUsingCachedData(true);
           setCacheUpdatedAt(new Date(cached.cachedAt));
@@ -63,7 +64,7 @@ export function usePortfolioQuery(onAuthExpired?: () => void): UsePortfolioQuery
     ...swrDefaultConfig,
     onSuccess: (freshData) => {
       hasHydratedRef.current = true;
-      setPortfolios(freshData.portfolios);
+      setPortfolios(sortPortfolios(freshData.portfolios));
       setNetWorthHistory(freshData.netWorthHistory);
       setIsUsingCachedData(false);
       setLoadStatus('success');
@@ -87,7 +88,7 @@ export function usePortfolioQuery(onAuthExpired?: () => void): UsePortfolioQuery
     try {
       const fresh = await swrMutate();
       if (fresh) {
-        setPortfolios(fresh.portfolios);
+        setPortfolios(sortPortfolios(fresh.portfolios));
         setNetWorthHistory(fresh.netWorthHistory);
         setIsUsingCachedData(false);
         setLoadStatus('success');

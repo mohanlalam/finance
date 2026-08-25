@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { LayoutDashboard, Pencil, Trash2, UserPlus, User, Heart, Users, MoreVertical } from './icons/AppIcons';
 import { Portfolio, PortfolioName } from '../types/portfolio';
 import { formatPercent } from '../utils/formatters';
+import { sortPortfolios } from '../domains/portfolio/calculations/portfolioOrdering';
 
 interface FamilyTabBarProps {
   portfolios: Portfolio[];
@@ -46,6 +47,7 @@ export default React.memo(function FamilyTabBar({
   onRenameClick,
   onDeleteClick,
 }: FamilyTabBarProps) {
+  const sortedPortfolios = useMemo(() => sortPortfolios(portfolios), [portfolios]);
   const [menuTarget, setMenuTarget] = useState<{ id: string; name: string; label: string } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -95,7 +97,7 @@ export default React.memo(function FamilyTabBar({
         </button>
 
         {/* Member Tabs */}
-        {portfolios.map((p) => {
+        {sortedPortfolios.map((p) => {
           const isActive = activeTab === p.name;
           const iconConfig = getFamilyIconConfig(p.name);
           const isPositive = p.totalPnL >= 0;

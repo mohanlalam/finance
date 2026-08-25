@@ -9,6 +9,7 @@ import { AnimatedNumber } from './ui/AnimatedNumber';
 import { usePrivacy } from '../contexts/PrivacyContext';
 import { sharePortfolioSummary } from '../utils/shareUtils';
 import { useToastActions } from '../contexts/ToastContext';
+import { sortPortfolios } from '../domains/portfolio/calculations/portfolioOrdering';
 
 interface SummaryCardsProps {
   totalInvested: number;
@@ -41,14 +42,18 @@ function SummaryCards({
   const isGain = totalPnL >= 0;
   const isTodayGain = todayPnL !== undefined ? todayPnL >= 0 : true;
 
+  const sortedPortfolios = React.useMemo(() => {
+    return sortPortfolios(portfolios);
+  }, [portfolios]);
+
   const memberBreakdowns = React.useMemo(() => {
-    if (!portfolios || portfolios.length === 0) return [];
-    return portfolios.map((p) => ({
+    if (!sortedPortfolios || sortedPortfolios.length === 0) return [];
+    return sortedPortfolios.map((p) => ({
       id: p.id,
       label: p.label,
       todayPnL: p.todayPnL ?? estimateTodayPnL(p, [p]),
     }));
-  }, [portfolios]);
+  }, [sortedPortfolios]);
 
   const sparklineData = React.useMemo(() => {
     if (!netWorthHistory || netWorthHistory.length === 0) return [];
@@ -179,9 +184,9 @@ function SummaryCards({
             </p>
           </div>
 
-          {activePortfolio === null && portfolios && portfolios.length > 0 && (
+          {activePortfolio === null && sortedPortfolios && sortedPortfolios.length > 0 && (
             <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
-              {portfolios.map((p, idx) => {
+              {sortedPortfolios.map((p, idx) => {
                 const pnl = p.totalPnL;
                 const localGain = pnl >= 0;
                 return (
@@ -190,7 +195,7 @@ function SummaryCards({
                     <span className={`font-bold tnum ${localGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                       {isBalancesHidden ? '••••••' : <>{localGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
                     </span>
-                    {idx < portfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1">|</span>}
+                    {idx < sortedPortfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1">|</span>}
                   </span>
                 );
               })}
