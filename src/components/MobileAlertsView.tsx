@@ -98,7 +98,8 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] ios-press transition-colors"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] ios-press transition-colors touch-manipulation cursor-pointer"
+            aria-label="Close alerts"
           >
             <X size={16} />
           </button>
@@ -120,7 +121,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-[var(--radius-small)] text-xs font-bold transition-all shrink-0 ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-[var(--radius-small)] text-xs font-bold transition-all shrink-0 touch-manipulation ${
                   isActive
                     ? 'bg-[var(--accent-blue)] text-white shadow-xs'
                     : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'

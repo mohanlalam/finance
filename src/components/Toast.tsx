@@ -110,7 +110,7 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
       <p className="text-xs font-semibold tracking-tight text-[var(--text-primary)] flex-1">{toast.message}</p>
       <button
         onClick={handleClose}
-        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors p-1 rounded-[var(--radius-pill)] hover:bg-[var(--surface-secondary)] ios-press"
+        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors p-2.5 -mr-1.5 rounded-[var(--radius-pill)] hover:bg-[var(--surface-secondary)] ios-press min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation cursor-pointer"
         aria-label="Close notification"
       >
         <IconClose />

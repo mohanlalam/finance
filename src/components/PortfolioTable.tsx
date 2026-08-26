@@ -9,6 +9,7 @@ import ConfirmModal from './ConfirmModal';
 import EmptyState from './EmptyState';
 import EditStockModal from './EditStockModal';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { FixedSizeList as List } from 'react-window';
 import HoldingDetailDrawer from './HoldingDetailDrawer';
 import { calcHoldingTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
 
@@ -443,6 +444,34 @@ export default React.memo(function PortfolioTable({
                   description="Add your first stock or ETF to start tracking" 
                 />
               </div>
+            ) : sorted.length > 20 ? (
+              <List
+                height={Math.min(sorted.length * 115, 540)}
+                itemCount={sorted.length}
+                itemSize={115}
+                width="100%"
+              >
+                {({ index, style }) => {
+                  const h = sorted[index];
+                  return (
+                    <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0 px-1">
+                      <MobileStockRow
+                        key={`${h.ticker}-${h.sno}`}
+                        h={h}
+                        isDeleting={deletingId === h.id}
+                        isBalancesHidden={isBalancesHidden}
+                        onSelectDetail={setSelectedDetailHolding}
+                        onStartEdit={startEdit}
+                        onDelete={handleDelete}
+                        onShare={(h) => shareHolding(h, addToast)}
+                        canUpdate={!!onUpdate}
+                        canDelete={!!onDelete}
+                        renderValue={renderValue}
+                      />
+                    </div>
+                  );
+                }}
+              </List>
             ) : (
               sorted.map((h) => (
                 <MobileStockRow

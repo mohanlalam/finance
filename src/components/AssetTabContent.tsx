@@ -179,20 +179,26 @@ export default React.memo(function AssetTabContent({
 
         {activeAsset === 'rd' && (
           <RDView
+            rdAccounts={visiblePortfolio.rdAccounts}
             documents={visiblePortfolio.documents}
             portfolioName={visiblePortfolio.name}
             portfolioOptions={portfolioOptions}
+            onAdd={onAddAsset}
+            onUpdate={onUpdateAsset}
+            onDelete={onDeleteAsset}
             autoOpenAddModal={quickAddTarget === 'rd'}
           />
         )}
 
-
-
         {activeAsset === 'sip' && (
           <SIPView
+            sipAccounts={visiblePortfolio.sipAccounts}
             documents={visiblePortfolio.documents}
             portfolioName={visiblePortfolio.name}
             portfolioOptions={portfolioOptions}
+            onAdd={onAddAsset}
+            onUpdate={onUpdateAsset}
+            onDelete={onDeleteAsset}
             autoOpenAddModal={quickAddTarget === 'sip'}
           />
         )}

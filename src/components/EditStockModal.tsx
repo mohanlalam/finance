@@ -171,7 +171,7 @@ export default function EditStockModal({
                 key={delta}
                 type="button"
                 onClick={() => handleStepper(delta)}
-                className="px-2.5 py-1 rounded-[var(--radius-small)] text-xs font-extrabold bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:bg-[var(--accent-blue-soft)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] transition-all active:scale-95"
+                className="px-3 py-2 min-h-[44px] min-w-[44px] rounded-[var(--radius-small)] text-xs font-extrabold bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:bg-[var(--accent-blue-soft)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] transition-all active:scale-95 flex items-center justify-center touch-manipulation cursor-pointer"
               >
                 {delta > 0 ? `+${delta}` : delta}
               </button>
@@ -188,7 +188,7 @@ export default function EditStockModal({
             <button
               type="button"
               onClick={handleUseLtp}
-              className="text-[11px] font-bold text-[var(--accent-blue)] hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-[var(--accent-blue)] hover:underline flex items-center gap-1 py-2 px-1 min-h-[44px] touch-manipulation cursor-pointer"
             >
               Use LTP (₹{holding.ltp.toLocaleString('en-IN')})
             </button>

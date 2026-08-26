@@ -235,7 +235,7 @@ export default function DataQualityHealthModal({
                 <button
                   type="button"
                   onClick={() => handleAction(issue)}
-                  className="shrink-0 flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline px-2.5 py-1 rounded bg-blue-50 dark:bg-blue-950/50 group-hover:bg-blue-600 group-hover:text-white transition-all ios-press"
+                  className="shrink-0 flex items-center justify-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline px-3.5 py-2.5 min-h-[44px] min-w-[44px] rounded-[var(--radius-small)] bg-blue-50 dark:bg-blue-950/50 group-hover:bg-blue-600 group-hover:text-white transition-all ios-press touch-manipulation cursor-pointer"
                 >
                   <span>{issue.actionLabel || 'Fix'}</span>
                   <ChevronRight size={13} />
@@ -248,7 +248,7 @@ export default function DataQualityHealthModal({
         {/* Footer tip */}
         <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] text-[var(--text-tertiary)]">
           <span>Tip: Complete records and linked receipts protect your family's estate planning.</span>
-          <Button variant="secondary" onClick={onClose} className="text-xs py-1 px-3">
+          <Button variant="secondary" onClick={onClose} className="text-xs py-2.5 px-4 min-h-[44px]">
             Close
           </Button>
         </div>

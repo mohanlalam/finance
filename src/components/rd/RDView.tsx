@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { DocumentMetadata, RDAccount, PortfolioName } from '../../types/portfolio';
+import { DocumentMetadata, RDAccount, PortfolioName, RDPayload } from '../../types/portfolio';
 import ConfirmModal from '../ConfirmModal';
 import RDAccountCard from './RDAccountCard';
 import { RDFormModal } from './RDFormModal';
 import { useRDData } from '../../hooks/useRDData';
-import { usePortfolioStatus, usePortfolioEntities } from '../../contexts/PortfolioContext';
+import { usePortfolioStatus } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import { useAssetModal } from '../../hooks/useAssetModal';
@@ -17,29 +17,35 @@ interface PortfolioOption {
 }
 
 interface RDViewProps {
+  rdAccounts?: RDAccount[];
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onAdd?: (assetType: string, portfolioName: string, payload: any) => Promise<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onUpdate?: (assetType: string, id: string, payload: any) => Promise<void>;
+  onDelete?: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }
 
 export function RDView({
+  rdAccounts: propRdAccounts,
   documents,
   portfolioName,
   portfolioOptions,
+  onAdd,
+  onUpdate,
+  onDelete,
   autoOpenAddModal,
 }: RDViewProps) {
   const isMobile = useIsMobile();
-  const { portfolios } = usePortfolioEntities();
   const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
-  const {
-    rdAccounts,
-    loading,
-    addRDAccount,
-    updateRDAccount,
-    deleteRDAccount,
-  } = useRDData();
+
+  // Fallback to domain hook only if props not provided
+  const hookData = useRDData();
+  const rawAccounts = propRdAccounts ?? hookData.rdAccounts;
 
   const {
     showModal,
@@ -53,32 +59,61 @@ export function RDView({
 
   const [deleting, setDeleting] = useState(false);
 
-  const activePortfolio = useMemo(() => {
-    if (portfolioName === 'all') return null;
-    return portfolios.find((p) => p.name === portfolioName) ?? null;
-  }, [portfolios, portfolioName]);
-
   const filteredAccounts = useMemo(() => {
-    if (portfolioName === 'all') return rdAccounts;
-    if (!activePortfolio) return [];
-    return rdAccounts.filter((r) => r.portfolio_id === activePortfolio.id);
-  }, [rdAccounts, portfolioName, activePortfolio]);
+    return rawAccounts || [];
+  }, [rawAccounts]);
 
-  const handleDelete = useCallback(
-    async (id: string) => {
-      setDeleting(true);
+  const handleAddRD = useCallback(
+    async (targetPortfolioName: string, payload: RDPayload) => {
       try {
-        await deleteRDAccount(id);
-        addToast('Recurring Deposit deleted', 'success');
-        setConfirmDeleteItem(null);
+        if (onAdd) {
+          await onAdd('rd_account', targetPortfolioName, payload);
+        } else {
+          await hookData.addRDAccount(targetPortfolioName, payload);
+        }
+        addToast('Recurring Deposit created', 'success');
+        closeModal();
       } catch (err) {
-        addToast(err instanceof Error ? err.message : 'Failed to delete RD', 'error');
-      } finally {
-        setDeleting(false);
+        addToast(err instanceof Error ? err.message : 'Failed to add RD', 'error');
       }
     },
-    [deleteRDAccount, addToast, setConfirmDeleteItem]
+    [onAdd, hookData, addToast, closeModal]
   );
+
+  const handleUpdateRD = useCallback(
+    async (id: string, payload: Partial<RDPayload>) => {
+      try {
+        if (onUpdate) {
+          await onUpdate('rd_account', id, payload);
+        } else {
+          await hookData.updateRDAccount(id, payload);
+        }
+        addToast('Recurring Deposit updated', 'success');
+        closeModal();
+      } catch (err) {
+        addToast(err instanceof Error ? err.message : 'Failed to update RD', 'error');
+      }
+    },
+    [onUpdate, hookData, addToast, closeModal]
+  );
+
+  const handleDelete = useCallback(async () => {
+    if (!confirmDeleteItem) return;
+    setDeleting(true);
+    try {
+      if (onDelete) {
+        await onDelete('rd_account', confirmDeleteItem.id);
+      } else {
+        await hookData.deleteRDAccount(confirmDeleteItem.id);
+      }
+      addToast('Recurring Deposit deleted', 'success');
+      setConfirmDeleteItem(null);
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : 'Failed to delete RD', 'error');
+    } finally {
+      setDeleting(false);
+    }
+  }, [confirmDeleteItem, onDelete, hookData, addToast, setConfirmDeleteItem]);
 
   return (
     <div>
@@ -89,7 +124,7 @@ export function RDView({
         emptyType="rd"
         emptyTitle="No Recurring Deposits"
         emptyDescription="Track monthly systematic deposits across banks."
-        isLoading={loading || isMutating}
+        isLoading={isMutating}
         itemCount={filteredAccounts.length}
         onOpenAdd={openAdd}
       >
@@ -109,7 +144,7 @@ export function RDView({
                     documents={documents}
                     onOpenEdit={openEdit}
                     onConfirmDelete={setConfirmDeleteItem}
-                    onUpdate={updateRDAccount}
+                    onUpdate={handleUpdateRD}
                   />
                 </div>
               );
@@ -123,7 +158,7 @@ export function RDView({
               documents={documents}
               onOpenEdit={openEdit}
               onConfirmDelete={setConfirmDeleteItem}
-              onUpdate={updateRDAccount}
+              onUpdate={handleUpdateRD}
             />
           ))
         )}
@@ -135,14 +170,14 @@ export function RDView({
         editingAccount={editingItem}
         portfolioName={portfolioName}
         portfolioOptions={portfolioOptions}
-        onAdd={addRDAccount}
-        onUpdate={updateRDAccount}
+        onAdd={handleAddRD}
+        onUpdate={handleUpdateRD}
       />
 
       <ConfirmModal
         isOpen={!!confirmDeleteItem}
         onClose={() => setConfirmDeleteItem(null)}
-        onConfirm={() => { if (confirmDeleteItem) void handleDelete(confirmDeleteItem.id); }}
+        onConfirm={handleDelete}
         title="Delete Recurring Deposit"
         message={confirmDeleteItem ? `Are you sure you want to delete the Recurring Deposit at "${confirmDeleteItem.bank_name}"? This cannot be undone.` : ''}
         confirmLabel="Delete"

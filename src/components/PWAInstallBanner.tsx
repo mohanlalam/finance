@@ -116,14 +116,15 @@ export default function PWAInstallBanner() {
         <div className="flex items-center gap-2 shrink-0">
           <button 
             onClick={handleInstallClick}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm active:scale-95 transition-all"
+            className="px-4 py-2.5 min-h-[44px] min-w-[44px] bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm active:scale-95 transition-all flex items-center justify-center touch-manipulation cursor-pointer"
           >
             {isIOS ? 'Install' : 'Install'}
           </button>
           
           <button 
             onClick={handleDismiss}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors touch-manipulation cursor-pointer"
+            aria-label="Dismiss banner"
           >
             <X size={16} />
           </button>

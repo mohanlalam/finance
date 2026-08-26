@@ -465,7 +465,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
           <button
             type="button"
             onClick={handleForgotPin}
-            className="text-[10px] text-white/30 hover:text-white/60 tracking-wide transition-colors duration-200 underline underline-offset-2"
+            className="text-xs text-white/40 hover:text-white/70 tracking-wide transition-colors duration-200 underline underline-offset-2 py-3 px-4 min-h-[44px] flex items-center justify-center touch-manipulation cursor-pointer"
             aria-label="Reset custom PIN to master PIN"
           >
             Reset to master PIN

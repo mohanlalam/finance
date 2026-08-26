@@ -15,6 +15,8 @@ import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
 import { usePortfolioStatus } from '../contexts/PortfolioContext';
 import { useToastActions } from '../contexts/ToastContext';
+import { useIsMobile } from '../hooks/useIsMobile';
+import { FixedSizeList as List } from 'react-window';
 import AssetCardSkeleton from './AssetCardSkeleton';
 import EmptyState from './EmptyState';
 
@@ -56,6 +58,7 @@ export default React.memo(function DocumentVaultView({
   onDelete,
   autoOpenAddModal,
 }: DocumentVaultViewProps) {
+  const isMobile = useIsMobile();
   const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
 
@@ -339,6 +342,62 @@ export default React.memo(function DocumentVaultView({
               </label>
             }
           />
+        ) : folderDocs.length > 10 ? (
+          <List
+            height={Math.min(folderDocs.length * (isMobile ? 80 : 72), isMobile ? 420 : 540)}
+            itemCount={folderDocs.length}
+            itemSize={isMobile ? 80 : 72}
+            width="100%"
+          >
+            {({ index, style }) => {
+              const doc = folderDocs[index];
+              const linkedLabel = doc.asset_id ? assetLabelMap.get(doc.asset_id) || null : null;
+              return (
+                <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
+                  <div className="mobile-asset-card px-6 py-4 hover:bg-[var(--surface-secondary)]/50 transition-colors flex items-center justify-between gap-4 h-full">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
+                        <FileText size={18} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-[var(--text-primary)] truncate" title={doc.name}>{doc.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          {doc.file_type && (
+                            <span className="text-[10px] text-[var(--text-tertiary)] font-mono">{doc.file_type}</span>
+                          )}
+                          {linkedLabel && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border border-[var(--accent-blue)]/30 flex items-center gap-1">
+                              <Paperclip size={9} />
+                              {linkedLabel}
+                            </span>
+                          )}
+                          {renderExpiryBadge(doc.expiry_date)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => openSecureDocument(doc.file_path)}
+                        className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-[32px] sm:min-h-[32px] rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
+                        title="Open document"
+                        aria-label={`Open document: ${doc.name}`}
+                      >
+                        <ExternalLink size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(doc)}
+                        className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-[32px] sm:min-h-[32px] rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press"
+                        title="Delete"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            }}
+          </List>
         ) : (
           <div className="divide-y divide-[var(--border-subtle)]">
             {folderDocs.map((doc) => {

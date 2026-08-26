@@ -209,7 +209,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                 <button
                   onClick={() => setQuery('')}
                   aria-label="Clear query"
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] rounded-[var(--radius-pill)] hover:bg-[var(--surface-secondary)] ios-press"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-11 h-11 min-w-[44px] min-h-[44px] sm:w-8 sm:h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] rounded-[var(--radius-pill)] hover:bg-[var(--surface-secondary)] ios-press touch-manipulation cursor-pointer"
                 >
                   <X size={16} aria-hidden="true" />
                 </button>
@@ -227,7 +227,7 @@ function SearchBar({ portfolios, onNavigate }: SearchBarProps) {
                   onClick={() => { setActiveFilter(tab.key); setSelectedIdx(-1); }}
                   role="tab"
                   aria-selected={isActive}
-                  className={`px-3 py-1.5 rounded-[var(--radius-pill)] text-xs font-bold transition-all shrink-0 ios-press ${
+                  className={`px-3.5 py-2 min-h-[44px] rounded-[var(--radius-pill)] text-xs font-bold transition-all shrink-0 ios-press touch-manipulation flex items-center justify-center ${
                     isActive
                       ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs'
                       : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]'

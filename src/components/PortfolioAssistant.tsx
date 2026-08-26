@@ -32,11 +32,11 @@ function CopyButton({ text }: { text: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="absolute top-2.5 right-2.5 p-1.5 rounded-[6px] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] bg-[var(--surface)] border border-[var(--border-subtle)] shadow-xs opacity-70 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 hover:opacity-100 transition-all duration-150 z-20"
+      className="absolute top-2 right-2 p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[var(--radius-small)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] bg-[var(--surface)] border border-[var(--border-subtle)] shadow-xs opacity-80 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 hover:opacity-100 transition-all duration-150 z-20 touch-manipulation cursor-pointer"
       title="Copy answer to clipboard"
       aria-label="Copy answer"
     >
-      {copied ? <Check size={12} className="text-[var(--positive)]" /> : <Copy size={12} />}
+      {copied ? <Check size={14} className="text-[var(--positive)]" /> : <Copy size={14} />}
     </button>
   );
 }
@@ -404,10 +404,10 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
             <button
               type="button"
               onClick={() => setShowConfirmClear(true)}
-              className="flex items-center gap-1 text-[10px] font-semibold text-[var(--text-secondary)] hover:text-[var(--negative)] bg-[var(--surface-secondary)] hover:bg-[var(--surface)] px-2 py-1 rounded-[6px] border border-[var(--border-subtle)] transition-colors ios-press"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--negative)] bg-[var(--surface-secondary)] hover:bg-[var(--surface)] px-3 py-2 min-h-[44px] rounded-[var(--radius-small)] border border-[var(--border-subtle)] transition-colors ios-press touch-manipulation cursor-pointer"
               title="Reset conversation"
             >
-              <Trash2 size={11} />
+              <Trash2 size={13} />
               <span>Clear</span>
             </button>
           )}
@@ -444,9 +444,9 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
                 key={idx}
                 type="button"
                 onClick={() => triggerAssistant(s.label)}
-                className="inline-flex items-center gap-1 text-left text-xs text-[var(--accent-blue)] hover:text-[var(--accent-blue)] font-medium bg-[var(--accent-blue-soft)] hover:bg-[var(--accent-blue)]/15 border border-[var(--accent-blue)]/20 px-2.5 py-1.5 rounded-[8px] transition-all ios-press"
+                className="inline-flex items-center gap-1.5 text-left text-xs text-[var(--accent-blue)] hover:text-[var(--accent-blue)] font-medium bg-[var(--accent-blue-soft)] hover:bg-[var(--accent-blue)]/15 border border-[var(--accent-blue)]/20 px-3 py-2 min-h-[44px] rounded-[8px] transition-all ios-press touch-manipulation cursor-pointer"
               >
-                <span className="text-[11px] select-none">{s.icon}</span>
+                <span className="text-sm select-none">{s.icon}</span>
                 <span>{s.label}</span>
               </button>
             ))}
@@ -466,7 +466,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Ask a question about your portfolio..."
-            className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 rounded-[10px] pl-9 pr-12 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none transition-all shadow-xs"
+            className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 rounded-[10px] pl-9 pr-12 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none transition-all shadow-xs min-h-[44px]"
           />
           {!query && (
             <kbd className="hidden sm:inline-block absolute right-3 px-1.5 py-0.5 text-[9px] font-semibold text-[var(--text-tertiary)] bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[4px] select-none pointer-events-none">
@@ -477,10 +477,10 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
         <button
           type="submit"
           disabled={!query.trim() || isLoading}
-          className="h-[36px] px-3.5 rounded-[10px] bg-[var(--accent-blue)] hover:brightness-110 active:scale-95 flex items-center justify-center text-white transition-all ios-press shadow-xs disabled:opacity-40 disabled:hover:brightness-100 disabled:cursor-not-allowed cursor-pointer"
+          className="h-11 min-h-[44px] min-w-[44px] px-3.5 rounded-[10px] bg-[var(--accent-blue)] hover:brightness-110 active:scale-95 flex items-center justify-center text-white transition-all ios-press shadow-xs disabled:opacity-40 disabled:hover:brightness-100 disabled:cursor-not-allowed cursor-pointer touch-manipulation"
           aria-label="Send query"
         >
-          <Send size={13} />
+          <Send size={15} />
         </button>
       </form>
 
