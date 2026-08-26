@@ -20,6 +20,63 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
+// In-memory rate limiting store for failed PIN attempts (resets on cold start)
+const pinFailedAttempts: Map<string, { count: number; firstAttempt: number }> = new Map();
+const MAX_FAILED_ATTEMPTS = 5;
+const RATE_WINDOW_MS = 5 * 60 * 1000; // 5-minute window
+
+function getClientIp(req: Request): string {
+  // 1. Cloudflare Connecting IP (overwritten at edge by Cloudflare, cannot be spoofed by client)
+  const cfIp = req.headers.get("cf-connecting-ip")?.trim();
+  if (cfIp) return cfIp;
+
+  // 2. X-Real-IP (set by Supabase Kong API Gateway)
+  const realIp = req.headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
+
+  // 3. X-Forwarded-For: Take the LAST entry (appended by the closest trusted reverse proxy),
+  //    never the first entry which is attacker-controlled and easily spoofed.
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) {
+    const parts = xff.split(",").map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 0) {
+      return parts[parts.length - 1]; // Rightmost proxy-verified IP
+    }
+  }
+
+  return "unknown";
+}
+
+function checkRateLimit(ip: string): { allowed: boolean; retryAfterSeconds: number } {
+  const now = Date.now();
+  const record = pinFailedAttempts.get(ip);
+
+  if (!record || (now - record.firstAttempt) > RATE_WINDOW_MS) {
+    return { allowed: true, retryAfterSeconds: 0 };
+  }
+
+  if (record.count >= MAX_FAILED_ATTEMPTS) {
+    const retryAfterSeconds = Math.ceil((record.firstAttempt + RATE_WINDOW_MS - now) / 1000);
+    return { allowed: false, retryAfterSeconds };
+  }
+
+  return { allowed: true, retryAfterSeconds: 0 };
+}
+
+function recordFailedAttempt(ip: string): void {
+  const now = Date.now();
+  const record = pinFailedAttempts.get(ip);
+  if (!record || (now - record.firstAttempt) > RATE_WINDOW_MS) {
+    pinFailedAttempts.set(ip, { count: 1, firstAttempt: now });
+  } else {
+    record.count += 1;
+  }
+}
+
+function clearRateLimit(ip: string): void {
+  pinFailedAttempts.delete(ip);
+}
+
 Deno.serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
 
@@ -27,13 +84,32 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
 
-  // Server-side PIN verification (Fail Closed)
+  // Server-side PIN verification (Fail Closed) with rate-limiting
   const serverPinHash = Deno.env.get("APP_PIN_HASH");
   if (!serverPinHash) {
     return new Response(JSON.stringify({ error: "Server PIN configuration missing" }), {
       status: 503,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
+  }
+
+  const clientIp = getClientIp(req);
+  const rateCheck = checkRateLimit(clientIp);
+  if (!rateCheck.allowed) {
+    return new Response(
+      JSON.stringify({
+        error: `Too many failed attempts. Please try again in ${rateCheck.retryAfterSeconds} seconds.`,
+        retryAfterSeconds: rateCheck.retryAfterSeconds,
+      }),
+      {
+        status: 429,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          "Retry-After": String(rateCheck.retryAfterSeconds),
+        },
+      }
+    );
   }
 
   const clientPin = req.headers.get("X-App-Pin");
@@ -58,11 +134,15 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!isValid) {
+    recordFailedAttempt(clientIp);
     return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
+
+  // Valid PIN: clear failed attempts for this client IP
+  clearRateLimit(clientIp);
 
   try {
     const url = new URL(req.url);
@@ -536,6 +616,31 @@ Deno.serve(async (req: Request) => {
       const { data, error } = await supabase.storage.from(bucket).remove(cleanPaths);
       if (error) throw error;
       return new Response(JSON.stringify({ data, success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (req.method === "POST" && action === "get_document_url") {
+      const { bucket = "investment-documents", path: rawPath, expiresIn = 300 } = await req.json();
+      if (bucket !== "investment-documents") {
+        throw new Error("Invalid storage bucket. Only 'investment-documents' is allowed.");
+      }
+      const cleanPath = (rawPath || "")
+        .split("/")
+        .map((seg: string) => seg.trim().replace(/[^\w.-]/g, "_"))
+        .filter((seg: string) => seg.length > 0 && seg !== ".." && seg !== ".")
+        .join("/");
+      if (!cleanPath) {
+        throw new Error("Valid storage path is required");
+      }
+
+      const ttl = Math.min(Math.max(Number(expiresIn) || 300, 60), 3600);
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(cleanPath, ttl);
+
+      if (error) throw error;
+      return new Response(JSON.stringify({ signedUrl: data.signedUrl, expiresIn: ttl }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

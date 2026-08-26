@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { RealEstate, DocumentMetadata } from '../../types/portfolio';
-import { formatINR, formatPercent, pnlColor, getDocumentUrl } from '../../utils/formatters';
+import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
+import { openSecureDocument } from '../../utils/supabaseStorage';
 import { Edit2, Trash2, Home, MapPin, FileText, StickyNote, Paperclip } from '../icons/AppIcons';
 
 interface RealEstateCardProps {
@@ -89,17 +90,17 @@ export const RealEstateCard = React.memo(function RealEstateCard({
 
       <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--border-subtle)] text-xs">
         {docs.map((doc) => (
-          <a
+          <button
             key={doc.id}
-            href={getDocumentUrl(doc.file_path)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--positive-soft)] border border-[var(--positive)]/30 text-[var(--positive)] hover:underline font-medium text-[11px] max-w-[220px] truncate"
+            type="button"
+            onClick={() => openSecureDocument(doc.file_path)}
+            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--positive-soft)] border border-[var(--positive)]/30 text-[var(--positive)] hover:underline font-medium text-[11px] max-w-[220px] truncate cursor-pointer ios-press"
             title={`View ${doc.name}`}
+            aria-label={`Open document: ${doc.name}`}
           >
             <FileText size={11} className="shrink-0" />
             <span className="truncate">{doc.name}</span>
-          </a>
+          </button>
         ))}
         {docs.length === 0 && (
           <button

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
 import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
-import { uploadDocumentFile } from '../../utils/supabaseStorage';
+import { uploadDocumentFile, generateDocumentStoragePath } from '../../utils/supabaseStorage';
 
 interface PortfolioOption {
   name: string;
@@ -131,9 +131,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       // Upload and link all supporting documents
       if (pendingFiles.length > 0) {
         for (const doc of pendingFiles) {
-          const ts = Date.now();
-          const safeName = doc.file.name.replace(/[^\w.-]/g, '_');
-          const storagePath = `${targetPortfolio}/gold/${ts}_${safeName}`;
+          const storagePath = generateDocumentStoragePath(targetPortfolio, 'gold', doc.file.name);
           await uploadDocumentFile('investment-documents', storagePath, doc.file);
           await onAdd('document', targetPortfolio, {
             name: doc.name.trim() || doc.file.name,

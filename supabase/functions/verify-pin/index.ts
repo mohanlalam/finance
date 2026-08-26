@@ -20,8 +20,25 @@ const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 5 * 60 * 1000; // 5-minute window
 
 function getRateLimitKey(req: Request): string {
-  // Use X-Real-IP from API Gateway or fall back to X-Forwarded-For / generic key
-  return req.headers.get("x-real-ip")?.trim() || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  // 1. Cloudflare Connecting IP (overwritten at edge by Cloudflare, cannot be spoofed by client)
+  const cfIp = req.headers.get("cf-connecting-ip")?.trim();
+  if (cfIp) return cfIp;
+
+  // 2. X-Real-IP (set by Supabase Kong API Gateway)
+  const realIp = req.headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
+
+  // 3. X-Forwarded-For: Take the LAST entry (appended by closest trusted reverse proxy),
+  //    never the first entry which is attacker-controlled and easily spoofed.
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) {
+    const parts = xff.split(",").map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 0) {
+      return parts[parts.length - 1]; // Rightmost proxy-verified IP
+    }
+  }
+
+  return "unknown";
 }
 
 function checkRateLimit(key: string): { allowed: boolean; retryAfterSeconds: number } {

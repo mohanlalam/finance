@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Insurance, DocumentMetadata } from '../../types/portfolio';
-import { formatINR, getDocumentUrl } from '../../utils/formatters';
+import { formatINR } from '../../utils/formatters';
+import { openSecureDocument } from '../../utils/supabaseStorage';
 import { Edit2, Trash2, Shield, ShieldAlert, Calendar, FileText, StickyNote, Paperclip } from '../icons/AppIcons';
 
 interface InsurancePolicyCardProps {
@@ -113,17 +114,17 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
             </span>
           )}
           {docs.map((doc) => (
-            <a
+            <button
               key={doc.id}
-              href={getDocumentUrl(doc.file_path)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--negative-soft)] border border-[var(--negative)]/30 text-[var(--negative)] hover:underline font-medium text-[11px] max-w-[220px] truncate"
+              type="button"
+              onClick={() => openSecureDocument(doc.file_path)}
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--negative-soft)] border border-[var(--negative)]/30 text-[var(--negative)] hover:underline font-medium text-[11px] max-w-[220px] truncate cursor-pointer ios-press"
               title={`View ${doc.name}`}
+              aria-label={`Open document: ${doc.name}`}
             >
               <FileText size={11} className="shrink-0" />
               <span className="truncate">{doc.name}</span>
-            </a>
+            </button>
           ))}
           {docs.length === 0 && (
             <button

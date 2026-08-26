@@ -48,15 +48,6 @@ export function pnlBg(value: number): string {
   return value >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600';
 }
 
-export function getDocumentUrl(filePath: string): string {
-  if (!filePath) return '';
-  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
-    return filePath;
-  }
-  const base = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? '';
-  return `${base}/storage/v1/object/public/investment-documents/${filePath}`;
-}
-
 export {
   getFDInvestedAmount,
   getFDEffectiveValue,

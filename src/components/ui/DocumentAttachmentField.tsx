@@ -1,7 +1,7 @@
 import React, { useId, useState } from 'react';
 import { FileText, Upload, X, Trash2, Paperclip, ExternalLink, Calendar, Plus, AlertCircle } from '../icons/AppIcons';
 import { DocumentMetadata } from '../../types/portfolio';
-import { getDocumentUrl } from '../../utils/formatters';
+import { openSecureDocument } from '../../utils/supabaseStorage';
 
 export type DocumentCategory =
   | 'fd_advice'
@@ -186,17 +186,17 @@ export function DocumentAttachmentField({
                 key={doc.id}
                 className="flex items-center justify-between p-2.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-xs shadow-xs"
               >
-                <a
-                  href={getDocumentUrl(doc.file_path)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[var(--accent-blue)] hover:underline font-medium truncate max-w-[80%]"
+                <button
+                  type="button"
+                  onClick={() => openSecureDocument(doc.file_path)}
+                  className="flex items-center gap-2 text-[var(--accent-blue)] hover:underline font-medium truncate max-w-[80%] text-left cursor-pointer"
                   title="Open document"
+                  aria-label={`Open document: ${doc.name}`}
                 >
                   <FileText size={14} className="shrink-0 text-[var(--accent-blue)]" />
                   <span className="truncate">{doc.name}</span>
                   <ExternalLink size={11} className="shrink-0 opacity-70" />
-                </a>
+                </button>
                 {onDeleteExistingDoc && (
                   <button
                     type="button"

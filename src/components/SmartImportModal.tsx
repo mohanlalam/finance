@@ -3,7 +3,7 @@ import { Upload, Sparkles, CheckCircle, AlertCircle, FileText, Camera, Key } fro
 import Modal from './Modal';
 import { Button } from './ui/Button';
 import { extractAssetFromDocument, getGeminiApiKey, setStoredGeminiApiKey, ExtractedAssetResult } from '../utils/aiDocumentExtractor';
-import { uploadDocumentFile, removeDocumentFiles } from '../utils/supabaseStorage';
+import { uploadDocumentFile, removeDocumentFiles, generateDocumentStoragePath } from '../utils/supabaseStorage';
 import { usePortfolioActions, usePortfolioEntities } from '../contexts/PortfolioContext';
 
 interface SmartImportModalProps {
@@ -182,9 +182,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
       }
 
       // 2. Upload file to Supabase storage and link to Document Vault
-      const ts = Date.now();
-      const safeName = file.name.replace(/[^\w.-]/g, '_');
-      const storagePath = `${targetPortfolio}/${assetType}/${ts}_${safeName}`;
+      const storagePath = generateDocumentStoragePath(targetPortfolio, assetType, file.name);
       await uploadDocumentFile('investment-documents', storagePath, file);
 
       try {

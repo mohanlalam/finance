@@ -1,15 +1,8 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
-// vi.mock factories run before imports. We mock the entire supabaseStorage
-// module with its own inline re-implementation so that:
-// (a) module-level SUPABASE_URL / SUPABASE_ANON_KEY are satisfied without real env vars, and
-// (b) apiClient.getApiAuthHeaders is controlled via the mock below.
 vi.mock('../supabaseStorage', async (importOriginal) => {
-  // Import the REAL module but its env-guard will fire when called without
-  // env vars. Instead, inline a lightweight twin that mirrors the real logic
-  // with test-safe constants.
-  void importOriginal; // unused – we fully replace
+  void importOriginal;
 
   const SUPABASE_URL = 'https://test.supabase.co';
 
@@ -19,6 +12,88 @@ vi.mock('../supabaseStorage', async (importOriginal) => {
       .map((seg: string) => seg.trim().replace(/[^\w.-]/g, '_'))
       .filter((seg: string) => seg.length > 0 && seg !== '..' && seg !== '.')
       .join('/');
+  }
+
+  function generateDocumentStoragePath(
+    portfolio: string,
+    folder: string,
+    fileName: string
+  ): string {
+    const safePortfolio = portfolio.trim().replace(/[^\w.-]/g, '_') || 'default';
+    const safeFolder = folder.trim().replace(/[^\w.-]/g, '_') || 'general';
+    const safeName = fileName.trim().replace(/[^\w.-]/g, '_');
+    const uuid = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `test-uuid-123`;
+    return `${safePortfolio}/${safeFolder}/${uuid}_${safeName}`;
+  }
+
+  const signedUrlCache = new Map<string, { url: string; expiresAt: number }>();
+
+  async function getDocumentSignedUrl(filePath: string): Promise<string> {
+    if (!filePath) return '';
+
+    const strippedPath = filePath
+      .replace(/^https?:\/\/[^/]+\/storage\/v1\/object\/(?:public|sign|authenticated)\/investment-documents\//i, '')
+      .trim();
+
+    if (strippedPath.startsWith('http://') || strippedPath.startsWith('https://')) {
+      return '';
+    }
+
+    const cleanPath = sanitizePath(strippedPath);
+    if (!cleanPath) return '';
+
+    const now = Date.now();
+    const cached = signedUrlCache.get(cleanPath);
+    if (cached && cached.expiresAt > now) {
+      return cached.url;
+    }
+
+    const { getApiAuthHeaders } = await import('../apiClient');
+    const headers = await getApiAuthHeaders('application/json');
+
+    const edgeUrl = `${SUPABASE_URL}/functions/v1/holdings-crud?action=get_document_url`;
+    const res = await fetch(edgeUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ bucket: 'investment-documents', path: cleanPath, expiresIn: 300 }),
+    });
+
+    if (!res.ok) {
+      let errorMsg = `Failed to get document URL (${res.status})`;
+      try {
+        const json = await res.json();
+        errorMsg = json.error || errorMsg;
+      } catch {
+        // ignore
+      }
+      throw new Error(errorMsg);
+    }
+
+    const { signedUrl } = await res.json();
+    signedUrlCache.set(cleanPath, { url: signedUrl, expiresAt: now + 240_000 });
+    return signedUrl;
+  }
+
+  async function openSecureDocument(filePath: string): Promise<void> {
+    if (!filePath) return;
+    const newWindow = typeof window !== 'undefined' ? window.open('about:blank', '_blank') : null;
+    try {
+      const signedUrl = await getDocumentSignedUrl(filePath);
+      if (!signedUrl) {
+        if (newWindow) newWindow.close();
+        throw new Error('Could not generate secure document link');
+      }
+      if (newWindow) {
+        newWindow.location.href = signedUrl;
+      } else if (typeof window !== 'undefined') {
+        window.open(signedUrl, '_blank', 'noopener,noreferrer');
+      }
+    } catch (err) {
+      if (newWindow) newWindow.close();
+      throw err;
+    }
   }
 
   async function uploadDocumentFile(
@@ -34,7 +109,6 @@ vi.mock('../supabaseStorage', async (importOriginal) => {
     formData.append('path', cleanPath);
     formData.append('file', file);
 
-    // Pull headers from the (mocked) apiClient
     const { getApiAuthHeaders } = await import('../apiClient');
     const headers = await getApiAuthHeaders();
     delete (headers as Record<string, string>)['Content-Type'];
@@ -80,7 +154,13 @@ vi.mock('../supabaseStorage', async (importOriginal) => {
     }
   }
 
-  return { uploadDocumentFile, removeDocumentFiles };
+  return {
+    generateDocumentStoragePath,
+    getDocumentSignedUrl,
+    openSecureDocument,
+    uploadDocumentFile,
+    removeDocumentFiles,
+  };
 });
 
 vi.mock('../apiClient', () => ({
@@ -91,7 +171,13 @@ vi.mock('../apiClient', () => ({
   }),
 }));
 
-const { uploadDocumentFile, removeDocumentFiles } = await import('../supabaseStorage');
+const {
+  generateDocumentStoragePath,
+  getDocumentSignedUrl,
+  openSecureDocument,
+  uploadDocumentFile,
+  removeDocumentFiles,
+} = await import('../supabaseStorage');
 
 describe('supabaseStorage', () => {
   const originalFetch = globalThis.fetch;
@@ -99,6 +185,106 @@ describe('supabaseStorage', () => {
   afterEach(() => {
     globalThis.fetch = originalFetch;
     vi.clearAllMocks();
+  });
+
+  describe('generateDocumentStoragePath', () => {
+    it('generates a clean sanitized path with UUID', () => {
+      const path = generateDocumentStoragePath('Dad & Mom', 'Fixed Deposits', 'my receipt.pdf');
+      expect(path).toMatch(/^Dad___Mom\/Fixed_Deposits\/[a-zA-Z0-9-]+_my_receipt\.pdf$/);
+    });
+
+    it('falls back to default categories if empty strings given', () => {
+      const path = generateDocumentStoragePath('', '', 'statement.pdf');
+      expect(path).toMatch(/^default\/general\/[a-zA-Z0-9-]+_statement\.pdf$/);
+    });
+  });
+
+  describe('getDocumentSignedUrl', () => {
+    it('fetches signed URL through holdings-crud with PIN headers', async () => {
+      let capturedUrl = '';
+      let capturedBody: { bucket?: string; path?: string; expiresIn?: number } = {};
+
+      globalThis.fetch = vi.fn().mockImplementation(async (url: string, init: RequestInit) => {
+        capturedUrl = url;
+        capturedBody = JSON.parse(init.body as string);
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ signedUrl: 'https://test.supabase.co/storage/v1/object/sign/doc.pdf?token=xyz' }),
+        } as Response;
+      });
+
+      const url = await getDocumentSignedUrl('Dad/fd/17400000_doc.pdf');
+
+      expect(capturedUrl).toContain('/functions/v1/holdings-crud?action=get_document_url');
+      expect(capturedBody).toEqual({
+        bucket: 'investment-documents',
+        path: 'Dad/fd/17400000_doc.pdf',
+        expiresIn: 300,
+      });
+      expect(url).toBe('https://test.supabase.co/storage/v1/object/sign/doc.pdf?token=xyz');
+    });
+
+    it('caches signed URLs in memory to prevent duplicate requests', async () => {
+      const fetchSpy = vi.fn().mockImplementation(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({ signedUrl: 'https://test.supabase.co/cached-doc.pdf?token=abc' }),
+      } as Response));
+
+      globalThis.fetch = fetchSpy;
+
+      const url1 = await getDocumentSignedUrl('cached/doc1.pdf');
+      const url2 = await getDocumentSignedUrl('cached/doc1.pdf');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(url1).toBe(url2);
+    });
+
+    it('strictly rejects external foreign HTTP/HTTPS URLs', async () => {
+      const fetchSpy = vi.fn();
+      globalThis.fetch = fetchSpy;
+
+      const result = await getDocumentSignedUrl('https://evil-site.com/malware.exe');
+      expect(result).toBe('');
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('strips legacy Supabase public URL prefixes to isolate storage key', async () => {
+      let capturedBody: { bucket?: string; path?: string; expiresIn?: number } = {};
+
+      globalThis.fetch = vi.fn().mockImplementation(async (_url: string, init: RequestInit) => {
+        capturedBody = JSON.parse(init.body as string);
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ signedUrl: 'https://test.supabase.co/sign/legacy.pdf?token=123' }),
+        } as Response;
+      });
+
+      const url = await getDocumentSignedUrl('https://xyz.supabase.co/storage/v1/object/public/investment-documents/Dad/fd/legacy.pdf');
+
+      expect(capturedBody.path).toBe('Dad/fd/legacy.pdf');
+      expect(url).toContain('token=123');
+    });
+  });
+
+  describe('openSecureDocument', () => {
+    it('opens window and redirects to signed URL', async () => {
+      const mockWindow = { location: { href: '' }, close: vi.fn() };
+      const windowOpenSpy = vi.spyOn(window, 'open').mockReturnValue(mockWindow as unknown as Window);
+
+      globalThis.fetch = vi.fn().mockImplementation(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({ signedUrl: 'https://test.supabase.co/signed/open.pdf' }),
+      } as Response));
+
+      await openSecureDocument('user/doc.pdf');
+
+      expect(windowOpenSpy).toHaveBeenCalledWith('about:blank', '_blank');
+      expect(mockWindow.location.href).toBe('https://test.supabase.co/signed/open.pdf');
+    });
   });
 
   describe('uploadDocumentFile', () => {

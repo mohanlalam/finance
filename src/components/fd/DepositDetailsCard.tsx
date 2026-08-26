@@ -1,6 +1,7 @@
 import React from 'react';
 import { FixedDeposit, DocumentMetadata } from '../../types/portfolio';
-import { formatINR, getDocumentUrl, getFDEffectiveValue } from '../../utils/formatters';
+import { formatINR, getFDEffectiveValue } from '../../utils/formatters';
+import { openSecureDocument } from '../../utils/supabaseStorage';
 import { calculateDateDuration, formatDateDuration, toLocalDateString } from '../../utils/dateUtils';
 import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote, Share2 } from '../icons/AppIcons';
 import { useLongPress } from '../../hooks/useLongPress';
@@ -137,17 +138,16 @@ export function DepositDetailsCard({
           </div>
           <div className="col-span-2 sm:col-span-1 flex items-center justify-start md:justify-end gap-2">
             {fdDocs.map((doc) => (
-              <a
+              <button
                 key={doc.id}
-                href={getDocumentUrl(doc.file_path)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] ios-press transition-colors"
+                type="button"
+                onClick={() => openSecureDocument(doc.file_path)}
+                className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] ios-press transition-colors cursor-pointer"
                 title={doc.name}
                 aria-label={`Open document: ${doc.name}`}
               >
                 <FileText size={14} aria-hidden="true" />
-              </a>
+              </button>
             ))}
             <button
               onClick={() => onOpenEdit(fd)}

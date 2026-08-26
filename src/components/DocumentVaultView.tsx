@@ -9,9 +9,8 @@ import {
   Insurance,
   Holding,
 } from '../types/portfolio';
-import { uploadDocumentFile, removeDocumentFiles } from '../utils/supabaseStorage';
+import { uploadDocumentFile, removeDocumentFiles, openSecureDocument, generateDocumentStoragePath } from '../utils/supabaseStorage';
 import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X } from './icons/AppIcons';
-import { getDocumentUrl } from '../utils/formatters';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
 import { usePortfolioStatus } from '../contexts/PortfolioContext';
@@ -191,9 +190,7 @@ export default React.memo(function DocumentVaultView({
     setUploading(true);
     setUploadError('');
     try {
-      const ts = Date.now();
-      const safeName = pendingFile.name.replace(/[^\w.-]/g, '_');
-      const storagePath = `${formPortfolio}/${activeFolder}/${ts}_${safeName}`;
+      const storagePath = generateDocumentStoragePath(formPortfolio, activeFolder, pendingFile.name);
 
       await uploadDocumentFile('investment-documents', storagePath, pendingFile);
 
@@ -369,15 +366,15 @@ export default React.memo(function DocumentVaultView({
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <a
-                      href={getDocumentUrl(doc.file_path)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press"
-                      title="Open"
+                    <button
+                      type="button"
+                      onClick={() => openSecureDocument(doc.file_path)}
+                      className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
+                      title="Open document"
+                      aria-label={`Open document: ${doc.name}`}
                     >
                       <ExternalLink size={14} />
-                    </a>
+                    </button>
                     <button
                       onClick={() => handleDelete(doc)}
                       className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press"

@@ -1,6 +1,7 @@
 import React from 'react';
 import { SIPAccount, DocumentMetadata } from '../../types/portfolio';
-import { formatINR, getDocumentUrl, formatPercent } from '../../utils/formatters';
+import { formatINR, formatPercent } from '../../utils/formatters';
+import { openSecureDocument } from '../../utils/supabaseStorage';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../domains/assets/sip/calculations/sipValuation';
 
 import { FileText, Edit2, Trash2, StickyNote, Wifi, Share2 } from '../icons/AppIcons';
@@ -142,15 +143,15 @@ export function SIPAccountCard({
         {/* Right Side: Action Buttons & Attachments */}
         <div className="flex items-center gap-1.5 shrink-0">
           {linkedDocs.length > 0 && (
-            <a
-              href={getDocumentUrl(linkedDocs[0].file_path)}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => openSecureDocument(linkedDocs[0].file_path)}
               title={`View Attached Document: ${linkedDocs[0].name}`}
-              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press"
+              aria-label={`Open document: ${linkedDocs[0].name}`}
+              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press cursor-pointer"
             >
               <FileText size={15} />
-            </a>
+            </button>
           )}
           <button
             onClick={() => onOpenEdit(account)}
