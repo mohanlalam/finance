@@ -11,6 +11,3 @@ DROP POLICY IF EXISTS "Public Read Documents" ON storage.objects;
 DROP POLICY IF EXISTS "Public Insert Documents" ON storage.objects;
 DROP POLICY IF EXISTS "Public Update Documents" ON storage.objects;
 DROP POLICY IF EXISTS "Public Delete Documents" ON storage.objects;
-
--- 3. Confirm RLS is enabled on storage.objects
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
