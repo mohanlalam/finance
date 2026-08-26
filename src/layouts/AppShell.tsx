@@ -193,7 +193,7 @@ export default function AppShell() {
     const applyChange = () => {
       navigate(`/${family || 'all'}/${newAsset}`);
       if (isMobile) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo(0, 0);
       } else {
         scrollToAssetSection();
       }
@@ -272,8 +272,9 @@ export default function AppShell() {
   }, [swipeNav, ptr]);
 
   const handleCombinedTouchCancel = useCallback(() => {
+    swipeNav.handleTouchCancel();
     ptr.handleTouchCancel();
-  }, [ptr]);
+  }, [swipeNav, ptr]);
 
   const portfolio = activePortfolio;
   const todayPnL = useMemo(() => estimateTodayPnL(portfolio, portfolios), [portfolio, portfolios]);

@@ -1,4 +1,5 @@
 import { useRef, useCallback, useMemo } from 'react';
+import { triggerHaptic } from '../utils/haptics';
 
 type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
 
@@ -6,6 +7,19 @@ interface UseSwipeNavigationProps {
   activeAsset: AssetTab;
   setActiveAsset: (tab: AssetTab) => void;
 }
+
+const TAB_ORDER: AssetTab[] = [
+  'home',
+  'stocks',
+  'sip',
+  'fd',
+  'rd',
+  'gold',
+  'real_estate',
+  'insurance',
+  'documents',
+  'tax',
+];
 
 export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavigationProps) {
   const touchStart = useRef({ x: 0, y: 0, time: 0 });
@@ -70,32 +84,49 @@ export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavi
     const absY = Math.abs(diffY);
     const velocity = durationMs > 0 ? absX / durationMs : 0;
 
-    // Intentional swipe criteria:
-    // 1. Min horizontal distance: 130px
-    // 2. Max vertical drift: 45px
-    // 3. Dominant horizontal ratio: X movement >= 2.5x Y movement
-    // 4. Min velocity: 0.4 px/ms
-    if (absX > 130 && absY < 45 && absX > absY * 2.5 && velocity > 0.4) {
-      const tabOrder: AssetTab[] = ['home', 'stocks', 'fd', 'rd', 'sip', 'gold', 'real_estate', 'insurance', 'documents', 'tax'];
-      const currentIndex = tabOrder.indexOf(activeAsset);
+    // Fluid iOS-style swipe criteria:
+    // 1. Valid gesture window: 50ms - 650ms
+    // 2. Max vertical drift allowed: 90px (allows thumb arc)
+    // 3. Dominant horizontal movement: absX >= 1.2x absY
+    // 4. Threshold: distance >= 45px with velocity >= 0.18 px/ms OR distance >= 75px
+    const isIntentionalSwipe =
+      durationMs >= 50 &&
+      durationMs <= 650 &&
+      absY < 90 &&
+      absX > absY * 1.2 &&
+      ((absX >= 45 && velocity >= 0.18) || absX >= 75);
+
+    if (isIntentionalSwipe) {
+      const currentIndex = TAB_ORDER.indexOf(activeAsset);
 
       if (diffX > 0) {
-        if (currentIndex < tabOrder.length - 1) {
-          setActiveAsset(tabOrder[currentIndex + 1]);
+        // Swiping Left -> Navigate Forward to Next Tab
+        if (currentIndex !== -1 && currentIndex < TAB_ORDER.length - 1) {
+          triggerHaptic('light');
+          setActiveAsset(TAB_ORDER[currentIndex + 1]);
         }
       } else {
-        if (currentIndex > 0) {
-          setActiveAsset(tabOrder[currentIndex - 1]);
+        // Swiping Right -> Navigate Back to Previous Tab
+        if (currentIndex !== -1 && currentIndex > 0) {
+          triggerHaptic('light');
+          setActiveAsset(TAB_ORDER[currentIndex - 1]);
         }
       }
     }
   }, [activeAsset, setActiveAsset]);
 
+  const handleTouchCancel = useCallback(() => {
+    isMultiTouch.current = false;
+    touchStart.current = { x: 0, y: 0, time: 0 };
+    touchEnd.current = { x: 0, y: 0 };
+  }, []);
+
   return useMemo(() => ({
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
-  }), [handleTouchStart, handleTouchMove, handleTouchEnd]);
+    handleTouchCancel,
+  }), [handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel]);
 }
 
 export default useSwipeNavigation;
