@@ -5,9 +5,28 @@ import { getRDInvestedAmount, getElapsedMonthsStandard } from '../../assets/rd/c
 import { getSIPInvestedAmount } from '../../assets/sip/calculations/sipValuation';
 import { parseLocalDate, formatLocalDate, getDaysInMonth } from '../../../utils/dateUtils';
 
-// Fast in-memory cache for XIRR results
+// Fast in-memory LRU cache for XIRR results
 const xirrResultCache = new Map<string, number | null>();
 const MAX_XIRR_CACHE_SIZE = 50;
+
+function getFromXirrCache(key: string): number | null | undefined {
+  if (!xirrResultCache.has(key)) return undefined;
+  const val = xirrResultCache.get(key) ?? null;
+  // Refresh recency on access (move to end of Map insertion order)
+  xirrResultCache.delete(key);
+  xirrResultCache.set(key, val);
+  return val;
+}
+
+function setInXirrCache(key: string, val: number | null): void {
+  if (xirrResultCache.has(key)) {
+    xirrResultCache.delete(key);
+  } else if (xirrResultCache.size >= MAX_XIRR_CACHE_SIZE) {
+    const oldestKey = xirrResultCache.keys().next().value;
+    if (oldestKey) xirrResultCache.delete(oldestKey);
+  }
+  xirrResultCache.set(key, val);
+}
 
 function getPortfolioCacheKey(p: Portfolio): string {
   const holdingsCount = p.holdings?.length ?? 0;
@@ -243,14 +262,15 @@ export function calculatePortfolioXIRR(portfolio: Portfolio): number | null {
   if (!portfolio) return null;
 
   const cacheKey = getPortfolioCacheKey(portfolio);
-  if (xirrResultCache.has(cacheKey)) {
-    return xirrResultCache.get(cacheKey) ?? null;
+  const cached = getFromXirrCache(cacheKey);
+  if (cached !== undefined) {
+    return cached;
   }
 
   const cashflows = getPortfolioCashFlows(portfolio);
   const currentVal = Number(portfolio.totalCurrentValue);
   if (cashflows.length === 0 || isNaN(currentVal) || currentVal <= 0) {
-    xirrResultCache.set(cacheKey, null);
+    setInXirrCache(cacheKey, null);
     return null;
   }
 
@@ -261,12 +281,7 @@ export function calculatePortfolioXIRR(portfolio: Portfolio): number | null {
   const result = calculateXIRR(cashflows);
   const finalVal = typeof result === 'number' && !isNaN(result) ? result : null;
 
-  if (xirrResultCache.size >= MAX_XIRR_CACHE_SIZE) {
-    const firstKey = xirrResultCache.keys().next().value;
-    if (firstKey) xirrResultCache.delete(firstKey);
-  }
-  xirrResultCache.set(cacheKey, finalVal);
-
+  setInXirrCache(cacheKey, finalVal);
   return finalVal;
 }
 
@@ -274,8 +289,9 @@ export function calculateMultiplePortfoliosXIRR(portfolios: Portfolio[]): number
   if (!portfolios || portfolios.length === 0) return null;
 
   const multiKey = portfolios.map(getPortfolioCacheKey).join('::');
-  if (xirrResultCache.has(multiKey)) {
-    return xirrResultCache.get(multiKey) ?? null;
+  const cached = getFromXirrCache(multiKey);
+  if (cached !== undefined) {
+    return cached;
   }
 
   const cashflows: CashFlow[] = [];
@@ -290,7 +306,7 @@ export function calculateMultiplePortfoliosXIRR(portfolios: Portfolio[]): number
   }
 
   if (cashflows.length === 0 || totalCurrentValue <= 0) {
-    xirrResultCache.set(multiKey, null);
+    setInXirrCache(multiKey, null);
     return null;
   }
 
@@ -301,12 +317,7 @@ export function calculateMultiplePortfoliosXIRR(portfolios: Portfolio[]): number
   const result = calculateXIRR(cashflows);
   const finalVal = typeof result === 'number' && !isNaN(result) ? result : null;
 
-  if (xirrResultCache.size >= MAX_XIRR_CACHE_SIZE) {
-    const firstKey = xirrResultCache.keys().next().value;
-    if (firstKey) xirrResultCache.delete(firstKey);
-  }
-  xirrResultCache.set(multiKey, finalVal);
-
+  setInXirrCache(multiKey, finalVal);
   return finalVal;
 }
 
