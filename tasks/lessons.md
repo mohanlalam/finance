@@ -132,3 +132,12 @@ After **any correction** from the user, append a new entry here with the pattern
 **Root Cause**: Missing `else` branch on PIN checks; lack of server-side allowlists for storage operations; missing property in export serialization mapper; and executing state cleanup effects before remote data resolved into memory.
 **Fix**: (1) Forced fail-closed 503/401 responses when `APP_PIN_HASH` is missing across all Edge Functions. (2) Strictly whitelisted `investment-documents` bucket and sanitized storage paths against `..` traversal in `holdings-crud`. (3) Added `asset_id: d.asset_id` to document JSON export and preserved custom stock metrics on restore. (4) Guarded alert cleanup to abort if active alerts haven't finished loading.
 **Rule**: Always make server-side authentication fail-closed. Always enforce storage bucket allowlists and server-side path sanitization. Verify exact 1-to-1 field parity between export serialization and restore ingestion schemas. Never execute time-based cleanup operations on state references before initial data load completes.
+
+---
+
+### 2026-08-26 — Private Storage Bucket Policies, PIN-Gated Signed URLs & OneDrive Git Lock Handling
+**Mistake**: Storage bucket `investment-documents` was public with open read policies and predictable paths, allowing unauthenticated reads. In addition, OneDrive sync on Windows marked `.git/objects` loose files as ReadOnly, causing git push permission denial.
+**Root Cause**: Relying on static public URLs instead of service-role generated short-lived signed URLs (`createSignedUrl`). OneDrive automatically applying ReadOnly/ReparsePoint attributes to git loose objects during background sync.
+**Fix**: (1) Applied migration `20260826100000_make_documents_bucket_private.sql` setting `public = false` and dropping public policies. (2) Added `get_document_url` action to `holdings-crud` to generate 300s HMAC signed URLs with spoof-resistant rate limiting. (3) Added `crypto.randomUUID()` path randomization. (4) Replaced static `<a>` links across all UI views and modals with `openSecureDocument`. (5) Cleared ReadOnly attributes on `.git/objects` via PowerShell.
+**Rule**: Never serve user-uploaded documents via static unauthenticated URLs. Enforce private buckets with short-lived PIN-authenticated signed URLs. On Windows/OneDrive workspaces, clear file ReadOnly attributes on `.git/objects` if git push encounters permission denied on loose objects.
+
