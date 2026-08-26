@@ -62,8 +62,8 @@ export default defineConfig(({ command }): UserConfig => ({
         name: 'Family Wealth Tracker',
         short_name: 'WealthTracker',
         description: 'Secure and modern Family Portfolio Tracker and Wealth Dashboard.',
-        theme_color: '#3b82f6',
-        background_color: '#0f172a',
+        theme_color: '#080c14',
+        background_color: '#080c14',
         display: 'standalone',
         orientation: 'portrait',
         icons: [

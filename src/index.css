@@ -583,6 +583,21 @@ h3, .text-card-title {
   animation: tabFadeIn 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
+/* Native View Transitions API configuration (Safari 18+, Chrome 111+) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.18s;
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
 @keyframes scaleIn {
   from {
     opacity: 0;
@@ -607,6 +622,12 @@ h3, .text-card-title {
 
 
 /* -- Mobile Touch & Performance Optimizations -- */
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
 button,
 input,
 select,

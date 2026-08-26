@@ -10,6 +10,7 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const touchStartY = useRef(0);
+  const touchStartX = useRef(0);
   const isPulling = useRef(false);
   const pullDistanceRef = useRef(0);
   const rafId = useRef<number | null>(null);
@@ -29,37 +30,56 @@ export function usePullToRefresh({ onRefresh, disabled = false }: UsePullToRefre
   }, []);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (disabled || isRefreshing || window.scrollY > 0) return;
+    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    if (disabled || isRefreshing || scrollY > 0) return;
 
     // Prevent PTR if user is scrolling inside an internal sub-container with scrollTop > 0
     let target = e.target as HTMLElement | null;
     let depth = 0;
-    while (target && target !== document.body && depth < 6) {
+    while (target && target !== document.body && depth < 12) {
       if (target.scrollTop > 0) return;
+      if (target.getAttribute && target.getAttribute('role') === 'dialog') return;
       target = target.parentElement;
       depth++;
     }
 
     touchStartY.current = e.targetTouches[0].clientY;
+    touchStartX.current = e.targetTouches[0].clientX;
     isPulling.current = true;
     pullDistanceRef.current = 0;
   }, [disabled, isRefreshing]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isPulling.current || disabled || isRefreshing || window.scrollY > 0) return;
+    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    if (!isPulling.current || disabled || isRefreshing || scrollY > 0) {
+      if (isPulling.current) {
+        isPulling.current = false;
+        pullDistanceRef.current = 0;
+        setPullDistance(0);
+      }
+      return;
+    }
     
     const currentY = e.targetTouches[0].clientY;
+    const currentX = e.targetTouches[0].clientX;
     const diffY = currentY - touchStartY.current;
+    const diffX = Math.abs(currentX - touchStartX.current);
     
-    if (diffY > 0) {
-      const rawDistance = Math.min(100, Math.pow(diffY, 0.85) * 2.5);
-      pullDistanceRef.current = rawDistance;
-      if (rafId.current === null) {
-        rafId.current = requestAnimationFrame(() => {
-          setPullDistance(rawDistance);
-          rafId.current = null;
-        });
-      }
+    // Abort if gesture is horizontal or upward
+    if (diffX > diffY || diffY <= 0) {
+      isPulling.current = false;
+      pullDistanceRef.current = 0;
+      setPullDistance(0);
+      return;
+    }
+
+    const rawDistance = Math.min(100, Math.pow(diffY, 0.85) * 2.5);
+    pullDistanceRef.current = rawDistance;
+    if (rafId.current === null) {
+      rafId.current = requestAnimationFrame(() => {
+        setPullDistance(rawDistance);
+        rafId.current = null;
+      });
     }
   }, [disabled, isRefreshing]);
 

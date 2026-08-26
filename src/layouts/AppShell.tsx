@@ -190,11 +190,21 @@ export default function AppShell() {
   }, []);
 
   const setActiveAsset = useCallback((newAsset: AssetTab) => {
-    navigate(`/${family || 'all'}/${newAsset}`);
-    if (isMobile) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    const applyChange = () => {
+      navigate(`/${family || 'all'}/${newAsset}`);
+      if (isMobile) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        scrollToAssetSection();
+      }
+    };
+
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      (document as unknown as { startViewTransition: (cb: () => void) => void }).startViewTransition(() => {
+        applyChange();
+      });
     } else {
-      scrollToAssetSection();
+      applyChange();
     }
   }, [navigate, family, isMobile, scrollToAssetSection]);
   const {
@@ -510,7 +520,13 @@ export default function AppShell() {
   }, [renamePortfolio]);
 
   const handleTabChange = useCallback((tab: string) => {
-    setActiveTab(tab);
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      (document as unknown as { startViewTransition: (cb: () => void) => void }).startViewTransition(() => {
+        setActiveTab(tab);
+      });
+    } else {
+      setActiveTab(tab);
+    }
   }, [setActiveTab]);
 
   const handleAddFamilyClick = openAddFamily;
@@ -765,7 +781,7 @@ export default function AppShell() {
                   onTabChange={handleSidebarTabChange}
                   portfolios={portfolios}
                   selectedPortfolioId={activeTab}
-                  onSelectPortfolio={setActiveTab}
+                  onSelectPortfolio={handleTabChange}
                   onOpenAddFamily={openAddFamily}
                   onOpenRename={openRenameModal}
                   onOpenDelete={openDeleteModal}
@@ -798,7 +814,7 @@ export default function AppShell() {
                         return (
                           <div
                             key={p.name}
-                            onClick={() => setActiveTab(p.name)}
+                            onClick={() => handleTabChange(p.name)}
                             className="p-4 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 text-left transition-all duration-150 flex flex-col justify-between h-44 group cursor-pointer relative"
                           >
                             <div>
