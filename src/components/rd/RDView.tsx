@@ -8,6 +8,7 @@ import { usePortfolioStatus, usePortfolioEntities } from '../../contexts/Portfol
 import { useToastActions } from '../../contexts/ToastContext';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import { useAssetModal } from '../../hooks/useAssetModal';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
 
 interface PortfolioOption {
@@ -28,6 +29,7 @@ export function RDView({
   portfolioOptions,
   autoOpenAddModal,
 }: RDViewProps) {
+  const isMobile = useIsMobile();
   const { portfolios } = usePortfolioEntities();
   const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
@@ -91,11 +93,11 @@ export function RDView({
         itemCount={filteredAccounts.length}
         onOpenAdd={openAdd}
       >
-        {filteredAccounts.length > 25 ? (
+        {filteredAccounts.length > 10 ? (
           <List
-            height={500}
+            height={Math.min(filteredAccounts.length * (isMobile ? 165 : 135), isMobile ? 420 : 540)}
             itemCount={filteredAccounts.length}
-            itemSize={135}
+            itemSize={isMobile ? 165 : 135}
             width="100%"
           >
             {({ index, style }) => {

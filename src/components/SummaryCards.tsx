@@ -85,14 +85,14 @@ function SummaryCards({
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => sharePortfolioSummary({ name: label, totalValue: totalCurrentValue, totalPnL, totalPnLPercent }, addToast)}
-                className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center hover:opacity-80 transition-opacity ios-press"
+                className="w-11 h-11 sm:w-7 sm:h-7 min-w-[44px] min-h-[44px] sm:min-w-[28px] sm:min-h-[28px] rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center hover:opacity-80 transition-opacity ios-press touch-manipulation cursor-pointer"
                 title="Share Summary"
                 aria-label="Share Portfolio Summary"
               >
-                <Share2 size={13} />
+                <Share2 size={14} />
               </button>
-              <span className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center">
-                <IndianRupee size={13} className="text-[var(--text-secondary)]" />
+              <span className="w-11 h-11 sm:w-7 sm:h-7 min-w-[44px] min-h-[44px] sm:min-w-[28px] sm:min-h-[28px] rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center">
+                <IndianRupee size={14} className="text-[var(--text-secondary)]" />
               </span>
             </div>
           </div>

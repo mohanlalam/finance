@@ -242,7 +242,7 @@ function MobileHomeSummary({
           <button
             onClick={onRefresh}
             disabled={isLoadingPrices}
-            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[32px] rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-bold transition-all ios-press border border-[var(--border-subtle)] shrink-0"
+            className="flex items-center gap-1.5 px-3 py-2 min-h-[44px] min-w-[44px] rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-bold transition-all ios-press border border-[var(--border-subtle)] shrink-0 touch-manipulation"
             title="Refresh prices & valuations"
             aria-label="Refresh prices and valuations"
           >

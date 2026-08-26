@@ -40,6 +40,7 @@ const BarChart = React.lazy(() => import('../components/BarChart'));
 const PortfolioAssistant = React.lazy(() => import('../components/PortfolioAssistant'));
 // Lazy-loaded: only fetched when activeTab === 'all' renders it on screen
 const InsightsPanel = React.lazy(() => import('../components/InsightsPanel'));
+import { InsightsSkeleton } from '../components/ui/ChartSkeleton';
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { formatINR, formatPercent } from '../utils/formatters';
@@ -670,7 +671,17 @@ export default function AppShell() {
 
             {activeAsset === 'home' ? (
               <div className="space-y-4">
-                <Suspense fallback={null}>
+                <Suspense fallback={
+                  <div className="space-y-3 animate-pulse" aria-hidden="true">
+                    <div className="h-44 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)]" />
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="h-24 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)]" />
+                      <div className="h-24 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)]" />
+                      <div className="h-24 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)]" />
+                      <div className="h-24 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)]" />
+                    </div>
+                  </div>
+                }>
                   <MobileHomeSummary
                     summaryData={summaryData}
                     todayPnL={todayPnL}
@@ -693,7 +704,7 @@ export default function AppShell() {
                 {activeTab === 'all' && (
                   <div className="mobile-section">
                     <SectionErrorBoundary sectionName="Portfolio Insights">
-                      <Suspense fallback={<div className="h-40 bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                      <Suspense fallback={<InsightsSkeleton />}>
                         <InsightsPanel
                           insights={insights}
                           portfolios={portfolios}

@@ -114,7 +114,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-[var(--radius-small)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] transition-colors ios-press"
+            className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-[32px] sm:min-h-[32px] rounded-[var(--radius-small)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] transition-colors ios-press touch-manipulation cursor-pointer"
             aria-label="Close holding details drawer"
           >
             <X size={18} aria-hidden="true" />

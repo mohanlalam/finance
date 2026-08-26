@@ -278,7 +278,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
               className="border-2 border-dashed border-slate-200 dark:border-zinc-700 hover:border-blue-500 dark:hover:border-blue-400 rounded-[var(--radius-large)] p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors bg-slate-50/50 dark:bg-zinc-800/30 group"
             >
               {filePreview ? (
-                <img src={filePreview} alt="Preview" className="max-h-40 rounded-lg shadow-sm mb-3 object-contain" />
+                <img src={filePreview} alt="Preview" width={320} height={160} className="w-auto h-40 max-h-40 rounded-lg shadow-sm mb-3 object-contain" />
               ) : file ? (
                 <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-950/50 text-blue-600 flex items-center justify-center mb-3">
                   <FileText size={24} />

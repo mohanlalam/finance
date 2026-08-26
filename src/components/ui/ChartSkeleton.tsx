@@ -99,32 +99,48 @@ export function DonutChartSkeleton({ className = '' }: { className?: string }) {
  */
 export function InsightsSkeleton({ className = '' }: { className?: string }) {
   return (
-    <Card padding="md" className={`h-[320px] sm:h-[370px] flex flex-col justify-between ${className}`}>
-      <div className="flex items-center justify-between">
-        <Skeleton width="130px" height="18px" className="rounded-md" />
-        <Skeleton width="24px" height="24px" className="rounded-full" />
+    <div className={`space-y-6 ${className}`} aria-hidden="true">
+      {/* Header + Filter pills skeleton */}
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
+        <div className="flex items-center gap-2">
+          <Skeleton width="24px" height="24px" className="rounded-md" />
+          <Skeleton width="160px" height="16px" className="rounded-md" />
+        </div>
+        <div className="flex gap-1.5">
+          <Skeleton width="50px" height="22px" className="rounded-md" />
+          <Skeleton width="50px" height="22px" className="rounded-md" />
+          <Skeleton width="50px" height="22px" className="rounded-md" />
+        </div>
       </div>
 
-      {/* 4 insight item rows */}
-      <div className="space-y-3 my-auto">
+      {/* Health Check Strip skeleton */}
+      <div className="apple-card p-4 flex items-center justify-between gap-4 border border-[var(--border-subtle)]">
+        <div className="flex items-center gap-3.5 flex-1">
+          <Skeleton width="48px" height="48px" className="rounded-md shrink-0" />
+          <div className="space-y-1.5 flex-1 max-w-sm">
+            <Skeleton width="180px" height="14px" className="rounded-sm" />
+            <Skeleton width="260px" height="12px" className="rounded-sm" />
+          </div>
+        </div>
+        <Skeleton width="120px" height="36px" className="rounded-md shrink-0 hidden sm:block" />
+      </div>
+
+      {/* 2x2 Grid of Insight Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[1, 2, 3, 4].map((idx) => (
-          <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/40">
-            <div className="flex items-center gap-2.5">
-              <Skeleton width="28px" height="28px" className="rounded-md" />
-              <div className="space-y-1">
-                <Skeleton width="110px" height="13px" className="rounded-sm" />
-                <Skeleton width="70px" height="10px" className="rounded-sm" />
+          <div key={idx} className="apple-card p-4 space-y-3 border border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Skeleton width="20px" height="20px" className="rounded-md" />
+                <Skeleton width="120px" height="14px" className="rounded-sm" />
               </div>
+              <Skeleton width="45px" height="18px" className="rounded-md" />
             </div>
-            <Skeleton width="50px" height="16px" className="rounded-md" />
+            <Skeleton width="100%" height="32px" className="rounded-sm" />
+            <Skeleton width="70%" height="12px" className="rounded-sm" />
           </div>
         ))}
       </div>
-
-      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between">
-        <Skeleton width="100px" height="12px" className="rounded-sm" />
-        <Skeleton width="40px" height="12px" className="rounded-sm" />
-      </div>
-    </Card>
+    </div>
   );
 }

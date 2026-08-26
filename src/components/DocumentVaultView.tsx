@@ -369,7 +369,7 @@ export default React.memo(function DocumentVaultView({
                     <button
                       type="button"
                       onClick={() => openSecureDocument(doc.file_path)}
-                      className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
+                      className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-[32px] sm:min-h-[32px] rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
                       title="Open document"
                       aria-label={`Open document: ${doc.name}`}
                     >
@@ -377,7 +377,7 @@ export default React.memo(function DocumentVaultView({
                     </button>
                     <button
                       onClick={() => handleDelete(doc)}
-                      className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press"
+                      className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-[32px] sm:min-h-[32px] rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press"
                       title="Delete"
                     >
                       <Trash2 size={14} />

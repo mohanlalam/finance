@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { usePortfolioState, usePortfolioActions } from '../contexts/PortfolioContext';
+import { usePortfolioEntities, usePortfolioActions, usePortfolioStatus } from '../contexts/PortfolioContext';
 
 export function useSIPData() {
-  const { portfolios, loadStatus, loadError, isMutating } = usePortfolioState();
+  const { portfolios } = usePortfolioEntities();
+  const { loadStatus, loadError, isMutating } = usePortfolioStatus();
   const { load, addSIPAccount, updateSIPAccount, deleteSIPAccount } = usePortfolioActions();
 
   const sipAccounts = useMemo(() => {

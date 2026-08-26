@@ -7,6 +7,7 @@ import AssetRegistryContainer from './ui/AssetRegistryContainer';
 import { usePortfolioStatus } from '../contexts/PortfolioContext';
 import { useToastActions } from '../contexts/ToastContext';
 import { useAssetModal } from '../hooks/useAssetModal';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
 
 interface PortfolioOption {
@@ -37,6 +38,7 @@ export function RealEstateView({
   onDelete,
   autoOpenAddModal,
 }: RealEstateViewProps) {
+  const isMobile = useIsMobile();
   const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
   const {
@@ -51,37 +53,38 @@ export function RealEstateView({
 
   const [deleting, setDeleting] = useState(false);
 
-  const handleDelete = useCallback(async (id: string) => {
+  const handleDelete = useCallback(async () => {
+    if (!confirmDeleteItem) return;
     setDeleting(true);
     try {
-      await onDelete('real_estate', id);
-      addToast('Property deleted successfully', 'success');
+      await onDelete('real_estate', confirmDeleteItem.id);
+      addToast('Property removed', 'success');
       setConfirmDeleteItem(null);
-    } catch (err) {
+    } catch (err: unknown) {
       addToast(err instanceof Error ? err.message : 'Failed to delete property', 'error');
     } finally {
       setDeleting(false);
     }
-  }, [onDelete, addToast, setConfirmDeleteItem]);
+  }, [confirmDeleteItem, onDelete, addToast, setConfirmDeleteItem]);
 
   return (
     <div>
       <AssetRegistryContainer
-        title="Real Estate Properties"
+        title="Real Estate"
         createBtnLabel="Add Property"
-        themeColor="bg-emerald-600 hover:bg-emerald-700"
+        themeColor="bg-[var(--accent-blue)] hover:opacity-90"
         emptyType="real_estate"
-        emptyTitle="No Real Estate Added"
+        emptyTitle="No Properties Added"
         emptyDescription="Monitor land plots, residential apartments, houses, and commercial property valuations."
         isLoading={isMutating}
         itemCount={realEstate.length}
         onOpenAdd={openAdd}
       >
-        {realEstate.length > 25 ? (
+        {realEstate.length > 10 ? (
           <List
-            height={500}
+            height={Math.min(realEstate.length * (isMobile ? 165 : 130), isMobile ? 420 : 540)}
             itemCount={realEstate.length}
-            itemSize={130}
+            itemSize={isMobile ? 165 : 130}
             width="100%"
           >
             {({ index, style }) => {
@@ -126,7 +129,7 @@ export function RealEstateView({
       <ConfirmModal
         isOpen={!!confirmDeleteItem}
         onClose={() => setConfirmDeleteItem(null)}
-        onConfirm={() => { if (confirmDeleteItem) void handleDelete(confirmDeleteItem.id); }}
+        onConfirm={handleDelete}
         title="Delete Property"
         message={confirmDeleteItem ? `Are you sure you want to delete "${confirmDeleteItem.property_name}"? This cannot be undone.` : ''}
         confirmLabel="Delete"
