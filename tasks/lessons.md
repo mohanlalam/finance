@@ -135,9 +135,33 @@ After **any correction** from the user, append a new entry here with the pattern
 
 ---
 
-### 2026-08-26 — Private Storage Bucket Policies, PIN-Gated Signed URLs & OneDrive Git Lock Handling
-**Mistake**: Storage bucket `investment-documents` was public with open read policies and predictable paths, allowing unauthenticated reads. In addition, OneDrive sync on Windows marked `.git/objects` loose files as ReadOnly, causing git push permission denial.
-**Root Cause**: Relying on static public URLs instead of service-role generated short-lived signed URLs (`createSignedUrl`). OneDrive automatically applying ReadOnly/ReparsePoint attributes to git loose objects during background sync.
-**Fix**: (1) Applied migration `20260826100000_make_documents_bucket_private.sql` setting `public = false` and dropping public policies. (2) Added `get_document_url` action to `holdings-crud` to generate 300s HMAC signed URLs with spoof-resistant rate limiting. (3) Added `crypto.randomUUID()` path randomization. (4) Replaced static `<a>` links across all UI views and modals with `openSecureDocument`. (5) Cleared ReadOnly attributes on `.git/objects` via PowerShell.
-**Rule**: Never serve user-uploaded documents via static unauthenticated URLs. Enforce private buckets with short-lived PIN-authenticated signed URLs. On Windows/OneDrive workspaces, clear file ReadOnly attributes on `.git/objects` if git push encounters permission denied on loose objects.
+### 2026-08-26 — Supabase Storage: Default Public Bucket Exposure & Predictable Paths
+**Mistake**: The `investment-documents` bucket was `public = true` with open read policies (`Public Read Documents`), and documents were served via predictable paths (`${familyName}/${category}/${timestamp}_${fileName}`) over static public URLs (`/storage/v1/object/public/...`), allowing anyone to view/download private financial attachments without PIN or biometric authentication.
+**Root Cause**: Supabase Storage buckets default to `public = true` if not explicitly configured as private during creation. Client formatting helpers constructed public CDN URLs directly instead of requesting short-lived signed URLs.
+**Fix**: (1) Executed migration `20260826100000_make_documents_bucket_private.sql` setting `public = false` on `storage.buckets` and dropping all `Public *` policies on `storage.objects`. (2) Added `get_document_url` action to `holdings-crud` to generate 300s HMAC signed URLs (`createSignedUrl`) behind PIN authentication. (3) Replaced predictable timestamps with `crypto.randomUUID()` path randomization (`generateDocumentStoragePath`). (4) Replaced static `<a>` links across all UI views and modals with `openSecureDocument` (with synchronous tab opening to avoid popup blockers and 4-min client caching).
+**Rule**: Never rely on default Supabase bucket visibility. Always explicitly declare `public = false` for sensitive storage buckets, drop public RLS policies on `storage.objects`, randomize object paths with UUIDs, and gate file access through server-authenticated signed URLs.
+
+---
+
+### 2026-08-26 — Client-Spoofable IP Rate Limiting via `X-Forwarded-For` Leftmost Header
+**Mistake**: The anti-brute-force rate limiter on PIN verification used `req.headers.get("x-forwarded-for")?.split(",")[0]` as the client IP, which could be trivially bypassed by an attacker sending a new fake `X-Forwarded-For` header on each request.
+**Root Cause**: Standard `X-Forwarded-For` syntax is `client, proxy1, proxy2`. The leftmost entry is whatever the original client sends and is fully client-controlled. Upstream reverse proxies (Cloudflare, Supabase Edge runtime) append the actual connection IP to the *right* of the list or provide trusted single-value headers (`cf-connecting-ip`, `x-real-ip`).
+**Fix**: Replaced leftmost parsing with a spoof-resistant resolver prioritizing `cf-connecting-ip`, then `x-real-ip`, and falling back to the *rightmost* trimmed token of `x-forwarded-for` (`parts[parts.length - 1]`). Applied this resolver to both `verify-pin` and `holdings-crud` rate limiters.
+**Rule**: Never trust the first (leftmost) entry of `X-Forwarded-For` for security-critical rate limiting or access control. Always check trusted proxy headers (`CF-Connecting-IP`, `X-Real-IP`) first, or parse the last (rightmost) entry appended by your platform's trusted ingress hop.
+
+---
+
+### 2026-08-26 — Chrome DevTools Protocol (CDP) Throttling Bypassed by Loopback (`localhost`)
+**Mistake**: Performance audit TTFB metrics measured against `http://localhost:5173` under CDP Fast 3G / Slow 3G network throttling reported ~1-2ms responses and were mistaken for throttled network latency.
+**Root Cause**: Chromium / Chrome DevTools Protocol network throttling applies emulation layers only to remote socket traffic. Localhost loopback addresses (`127.0.0.1`, `::1`, `localhost`) completely bypass CDP network delay emulation in Chromium, resulting in near-instant loopback timings that do not reflect real-world network latency.
+**Fix**: Validated and reported performance numbers explicitly distinguishing local CPU execution / render timings from simulated remote network latency, and tested remote API fetch boundaries independently with actual round-trip delays.
+**Rule**: Never assume CDP or DevTools network throttling slows down `localhost` traffic. For accurate cold-cache network measurements, test against remote staging deployments or route local traffic through an external proxy that intercepts loopback sockets.
+
+---
+
+### 2026-08-26 — JavaScript `Map` Insertion Order: True LRU vs. FIFO-with-a-Cap
+**Mistake**: The in-memory calculation cache in `returns.ts` (`xirrResultCache`) was documented and assumed to be an LRU cache, but was actually a FIFO cache with a size cap.
+**Root Cause**: JavaScript `Map` preserves insertion order. Evicting `map.keys().next().value` drops the oldest *inserted* item (FIFO). When a cache hit occurred on `map.get(key)`, the key was read but not repositioned in the iteration order, so frequently accessed items were evicted prematurely when the 50-item cap was reached.
+**Fix**: Implemented `getFromXirrCache` and `setInXirrCache` helper functions that explicitly refresh key recency by deleting and re-setting the key (`map.delete(key); map.set(key, val)`) on every cache hit (`get`) and update (`set`), moving accessed items to the end of the Map.
+**Rule**: In JavaScript `Map`-based caches, simply deleting the first key on overflow is FIFO, not LRU. To achieve true $O(1)$ LRU behavior, always `delete()` and re-`set()` the key on every cache access to push it to the end of the insertion order.
 
