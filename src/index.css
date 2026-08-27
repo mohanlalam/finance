@@ -31,10 +31,11 @@
   --border-glass: rgba(255, 255, 255, 0.6);
   --backdrop-overlay: rgba(15, 23, 42, 0.35);
 
-  /* Radius Tokens - Tight 6-12px for crisp data-first UI */
+  /* Radius Tokens - Tight 6-14px for crisp data-first UI & 20px sheet */
   --radius-small: 6px;
   --radius-medium: 10px;
   --radius-large: 14px;
+  --radius-sheet: 20px;
   --radius-pill: 999px;
 
   /* Shadows - Layered, rich & ambient */
@@ -73,7 +74,7 @@
 
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
-  --text-tertiary: #64748b;
+  --text-tertiary: #8899aa;
 
   --accent-blue: #387ed1;
   --accent-blue-soft: rgba(56, 126, 209, 0.15);

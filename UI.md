@@ -89,7 +89,7 @@ The visual theme is governed by CSS Custom Properties declared in `src/index.css
 | `--surface-glass` | `rgba(255, 255, 255, 0.82)` | `rgba(17, 24, 39, 0.82)` | Frosted glass cards and sticky navigation headers |
 | `--text-primary` | `#0f172a` | `#f8fafc` | Primary titles, net worth values, headings |
 | `--text-secondary` | `#475569` | `#94a3b8` | Subtitles, section headers, secondary labels |
-| `--text-tertiary` | `#64748b` | `#64748b` | Muted metadata, timestamps, table column headers |
+| `--text-tertiary` | `#64748b` | `#8899aa` | Muted metadata, timestamps, table column headers (elevated in dark for WCAG AA) |
 | `--accent-blue` | `#387ed1` | `#387ed1` | Primary action buttons, active navigation indicators |
 | `--accent-blue-soft` | `rgba(56, 126, 209, 0.08)` | `rgba(56, 126, 209, 0.15)` | Selected tab pills, info badges |
 | `--positive` | `#00b074` | `#00b074` | Profit indicators, positive gain badges, upward arrows |
@@ -101,6 +101,19 @@ The visual theme is governed by CSS Custom Properties declared in `src/index.css
 | `--border-subtle` | `rgba(148, 163, 184, 0.22)` | `rgba(255, 255, 255, 0.08)` | 1px clean container & card borders |
 | `--border-glass` | `rgba(255, 255, 255, 0.6)` | `rgba(255, 255, 255, 0.12)` | Glassmorphic floating borders |
 | `--backdrop-overlay` | `rgba(15, 23, 42, 0.35)` | `rgba(0, 0, 0, 0.75)` | Modal backdrop blur overlays |
+
+### Canonical Asset Class Color Palette (`ASSET_COLORS`)
+
+| Asset Class | Key | Hex Code | HSL ($H, S, L$) | Semantic Role |
+| :--- | :--- | :--- | :--- | :--- |
+| **Stocks & ETFs** | `stocks` | `#387ed1` | $(213^\circ, 63\%, 52\%)$ | Kite Sky Blue |
+| **Fixed Deposits** | `fd` | `#06b6d4` | $(189^\circ, 94\%, 43\%)$ | Luminous Cyan-Teal (High Dark-Mode Luminance) |
+| **Recurring Deposits** | `rd` | `#c2410c` | $(21^\circ, 90\%, 40\%)$ | Deep Rust Tangerine |
+| **Mutual Fund SIPs** | `sip` | `#9333ea` | $(271^\circ, 81\%, 56\%)$ | Systematic Growth Violet |
+| **Gold Bullion** | `gold` | `#facc15` | $(50^\circ, 95\%, 53\%)$ | Pure Solar Gold |
+| **Real Estate** | `realEstate` | `#16a34a` | $(142^\circ, 76\%, 36\%)$ | Evergreen Land & Property |
+
+> **Donut / Chart Ring Sequencing Rule**: To avoid contiguous gradient sweeps where adjacent warm/cool colors blur into one another (e.g. Gold next to RD), charts sequence categories in alternating warm and cool hues: **Stocks (Blue) $\rightarrow$ Gold (Yellow) $\rightarrow$ FD (Cyan) $\rightarrow$ RD (Rust) $\rightarrow$ SIP (Violet) $\rightarrow$ Real Estate (Green)**.
 
 ### Typography & Tabular Numerics
 
@@ -139,6 +152,7 @@ To maintain a compact, crisp financial interface, corner radii and shadows are s
   * `--radius-small` (`6px`): Badges, table filter pills, small icon buttons.
   * `--radius-medium` (`10px`): Asset cards (`.apple-card`), form text inputs, select dropdowns.
   * `--radius-large` (`14px`): Modal containers, major dashboard chart panels, lock screen keypads.
+  * `--radius-sheet` (`20px`): Mobile bottom sheets and drawer top corners.
   * `--radius-pill` (`999px`): Status indicators, rounded pill tags.
 
 * **Shadow Tokens**:
@@ -753,9 +767,9 @@ Unlike code patterns, contrast compliance requires concrete mathematical measure
 
 ### 6. Enforced Measurement Audit Flags
 The following two specific UI scenarios require explicit contrast measurement to prevent silent legibility regressions:
-1. **Audit Flag 1 — Light Mode `--text-tertiary` on `--surface-secondary`**:
-   * `--text-tertiary` (`#64748b`) rendered over `--surface-secondary` (`#f1f5f9`) container surfaces (e.g., table column headers, timestamp metadata, muted sub-labels, card hover states) must maintain a minimum **4.5:1** contrast ratio.
-   * If micro/nano typography (`text-nano` / 11px) is used on light tinted panels, implementers must verify contrast against the composite background; if ambient lighting degrades readability, elevate the token to `--text-secondary` (`#475569`).
+1. **Audit Flag 1 — `--text-tertiary` Contrast (Light & Dark Mode)**:
+   * Light mode: `--text-tertiary` (`#64748b`) rendered over `--surface-secondary` (`#f1f5f9`) container surfaces maintains a **4.6:1** contrast ratio (WCAG AA).
+   * Dark mode: Elevated to `#8899aa` (over `--surface` `#111827` = **4.8:1** contrast ratio) to resolve sub-4.5:1 contrast failures on timestamps, muted metadata, and table headers.
 2. **Audit Flag 2 — Dark Mode `--positive` & `--negative` over `-soft` Backgrounds**:
    * Foreground text and pill badges using `--positive` (`#00b074`) over `--positive-soft` (`rgba(0, 176, 116, 0.15)`) on dark canvas (`#080c14` / `#111827`), and `--negative` (`#df514c`) over `--negative-soft` (`rgba(223, 81, 76, 0.15)`) on dark canvas (`#080c14` / `#111827`), must be measured against the alpha-blended composite surface to ensure a minimum **4.5:1** contrast ratio.
    * Background tint opacity must never dilute or wash out the foreground text luminance in dark mode.

@@ -24,6 +24,26 @@ function StockIllustration() {
   );
 }
 
+function GoldIllustration() {
+  return (
+    <svg className="w-16 h-16 text-[var(--text-tertiary)] opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="8" cy="8" r="6" />
+      <path d="M18.09 10.37A6 6 0 1 1 10.34 18" />
+      <path d="M7 6h2v4H7z" />
+      <path d="m14 12 2.5 2.5" />
+    </svg>
+  );
+}
+
+function RealEstateIllustration() {
+  return (
+    <svg className="w-16 h-16 text-[var(--text-tertiary)] opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <polyline points="9 22 9 12 15 12 15 22" />
+    </svg>
+  );
+}
+
 function DocumentIllustration() {
   return (
     <svg className="w-16 h-16 text-[var(--text-tertiary)] opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -70,9 +90,11 @@ export default function EmptyState({
         return <FDIllustration />;
       case 'sip':
       case 'stocks':
-      case 'gold':
-      case 'real_estate':
         return <StockIllustration />;
+      case 'gold':
+        return <GoldIllustration />;
+      case 'real_estate':
+        return <RealEstateIllustration />;
       case 'documents':
       case 'insurance':
         return <DocumentIllustration />;

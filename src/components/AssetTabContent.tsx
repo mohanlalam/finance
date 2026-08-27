@@ -120,9 +120,9 @@ export default React.memo(function AssetTabContent({
           <div>
             <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-slate-800 dark:text-slate-200">{visiblePortfolio.label}</h2>
+                <h2 className="text-base font-bold text-[var(--text-primary)]">{visiblePortfolio.label}</h2>
                 <span className={`flex items-center gap-1.5 text-xs font-bold ${pnlColor(visiblePortfolio.totalPnL)}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${visiblePortfolio.totalPnL >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${visiblePortfolio.totalPnL >= 0 ? 'bg-[var(--positive)]' : 'bg-[var(--negative)]'}`} />
                   {formatPercent(visiblePortfolio.totalPnLPercent, 2)} ({formatINR(visiblePortfolio.totalPnL)})
                 </span>
               </div>
@@ -271,7 +271,7 @@ export default React.memo(function AssetTabContent({
         {activeAsset === 'stocks' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-bold text-slate-700 dark:text-slate-200">All Stock Holdings</h2>
+            <h2 className="text-base font-bold text-[var(--text-primary)]">All Stock Holdings</h2>
             <button
               onClick={onAddHoldingClick}
               className="flex items-center gap-1.5 bg-[var(--accent-blue)] hover:brightness-110 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] transition-colors shadow-sm ios-press cursor-pointer"

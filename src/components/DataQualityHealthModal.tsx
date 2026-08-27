@@ -104,31 +104,31 @@ export default function DataQualityHealthModal({
         {/* Score & Summary Banner */}
         <div className={`p-4 rounded-[var(--radius-large)] border flex flex-col sm:flex-row items-center justify-between gap-4 ${getScoreColor(score)}`}>
           <div className="flex items-center gap-3.5">
-            <div className="w-14 h-14 rounded-2xl bg-white dark:bg-zinc-900 shadow-sm flex flex-col items-center justify-center border border-inherit shrink-0">
-              <span className="text-xl font-black leading-none">{score}</span>
-              <span className="text-[10px] font-bold opacity-70">/ 100</span>
+            <div className="w-14 h-14 rounded-[var(--radius-large)] bg-[var(--surface)] shadow-xs flex flex-col items-center justify-center border border-inherit shrink-0">
+              <span className="text-xl font-black leading-none text-[var(--text-primary)] tnum">{score}</span>
+              <span className="text-[10px] font-bold text-[var(--text-tertiary)] opacity-80">/ 100</span>
             </div>
             <div>
               <div className="flex items-center gap-1.5 font-bold text-sm">
                 {badge.icon}
-                <span>{badge.label} (Grade {badge.grade})</span>
+                <span className="text-[var(--text-primary)]">{badge.label} (Grade {badge.grade})</span>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                 {passedChecks} of {totalChecks} data integrity checks passed across all portfolios.
               </p>
               {lastSnapshot && (
-                <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-2 mt-1 text-[11px] text-[var(--text-tertiary)] flex-wrap">
                   <span className="flex items-center gap-1">
-                    <Activity size={12} className="text-blue-500" />
+                    <Activity size={12} className="text-[var(--accent-blue)]" />
                     Last audit: {new Date(lastSnapshot.timestamp).toLocaleDateString()}
                   </span>
                   {scoreDiff !== 0 && (
-                    <span className={`font-bold ${scoreDiff > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
+                    <span className={`font-bold tnum ${scoreDiff > 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                       ({scoreDiff > 0 ? `+${scoreDiff}` : scoreDiff} pts vs previous)
                     </span>
                   )}
                   {resolvedThisMonth > 0 && (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                    <span className="text-[var(--positive)] font-medium">
                       • {resolvedThisMonth} fixed this month
                     </span>
                   )}
@@ -154,17 +154,17 @@ export default function DataQualityHealthModal({
 
         {/* Severity Metrics Strip */}
         <div className="grid grid-cols-3 gap-2 text-center text-xs">
-          <div className="p-2.5 bg-red-50/60 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40 rounded-[var(--radius-medium)]">
-            <span className="text-red-600 dark:text-red-400 font-bold text-base block">{criticalCount}</span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">Critical Issues</span>
+          <div className="p-2.5 bg-[var(--negative-soft)] border border-[var(--negative)]/30 rounded-[var(--radius-medium)]">
+            <span className="text-[var(--negative)] font-bold text-base block tnum">{criticalCount}</span>
+            <span className="text-[11px] text-[var(--text-secondary)] font-medium">Critical Issues</span>
           </div>
-          <div className="p-2.5 bg-amber-50/60 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 rounded-[var(--radius-medium)]">
-            <span className="text-amber-600 dark:text-amber-400 font-bold text-base block">{warningCount}</span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">Warnings</span>
+          <div className="p-2.5 bg-[var(--warning-soft)] border border-[var(--warning)]/30 rounded-[var(--radius-medium)]">
+            <span className="text-[var(--warning)] font-bold text-base block tnum">{warningCount}</span>
+            <span className="text-[11px] text-[var(--text-secondary)] font-medium">Warnings</span>
           </div>
-          <div className="p-2.5 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 rounded-[var(--radius-medium)]">
-            <span className="text-blue-600 dark:text-blue-400 font-bold text-base block">{infoCount}</span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">Missing Docs / Info</span>
+          <div className="p-2.5 bg-[var(--accent-blue-soft)] border border-[var(--accent-blue)]/30 rounded-[var(--radius-medium)]">
+            <span className="text-[var(--accent-blue)] font-bold text-base block tnum">{infoCount}</span>
+            <span className="text-[11px] text-[var(--text-secondary)] font-medium">Missing Docs / Info</span>
           </div>
         </div>
 
@@ -181,10 +181,10 @@ export default function DataQualityHealthModal({
               key={f.id}
               type="button"
               onClick={() => setActiveFilter(f.id as HealthFilter)}
-              className={`shrink-0 px-3 py-1.5 rounded-[var(--radius-medium)] font-bold text-[11px] transition-all ios-press ${
+              className={`shrink-0 px-3 py-1.5 rounded-[var(--radius-medium)] font-bold text-[11px] transition-all ios-press cursor-pointer ${
                 activeFilter === f.id
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-700'
+                  ? 'bg-[var(--accent-blue)] text-white shadow-xs'
+                  : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:bg-[var(--surface-tertiary)]'
               }`}
             >
               {f.label}
@@ -195,8 +195,8 @@ export default function DataQualityHealthModal({
         {/* Issues List */}
         <div className="space-y-2.5 max-h-[340px] overflow-y-auto pr-1">
           {filteredIssues.length === 0 ? (
-            <div className="p-8 text-center bg-slate-50 dark:bg-zinc-800/40 border border-slate-200/60 dark:border-zinc-700/50 rounded-[var(--radius-large)] space-y-2">
-              <CheckCircle2 size={32} className="text-emerald-500 mx-auto" />
+            <div className="p-8 text-center bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] space-y-2">
+              <CheckCircle2 size={32} className="text-[var(--positive)] mx-auto" />
               <h5 className="text-sm font-bold text-[var(--text-primary)]">Everything Looks Clean!</h5>
               <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto">
                 No issues detected in this category. Your portfolio records, valuations, and linked vault documents are in great shape.
@@ -206,23 +206,23 @@ export default function DataQualityHealthModal({
             filteredIssues.map(issue => (
               <div
                 key={issue.id}
-                className="p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] hover:border-blue-400 dark:hover:border-blue-600 rounded-[var(--radius-medium)] flex items-start justify-between gap-3 transition-colors group"
+                className="p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] hover:border-[var(--accent-blue)]/50 rounded-[var(--radius-medium)] flex items-start justify-between gap-3 transition-colors group"
               >
                 <div className="flex items-start gap-2.5 min-w-0">
                   <span className="mt-0.5 shrink-0">
-                    {issue.severity === 'critical' && <AlertCircle size={16} className="text-red-500" />}
-                    {issue.severity === 'warning' && <AlertTriangle size={16} className="text-amber-500" />}
-                    {issue.severity === 'info' && (issue.category === 'document' ? <FileCheck size={16} className="text-blue-500" /> : <Info size={16} className="text-blue-400" />)}
+                    {issue.severity === 'critical' && <AlertCircle size={16} className="text-[var(--negative)]" />}
+                    {issue.severity === 'warning' && <AlertTriangle size={16} className="text-[var(--warning)]" />}
+                    {issue.severity === 'info' && (issue.category === 'document' ? <FileCheck size={16} className="text-[var(--accent-blue)]" /> : <Info size={16} className="text-[var(--accent-blue)]" />)}
                   </span>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-bold text-[var(--text-primary)]">{issue.title}</span>
                       {issue.portfolioLabel && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 font-medium">
+                        <span className="px-1.5 py-0.5 rounded-[var(--radius-small)] text-[10px] bg-[var(--surface-secondary)] text-[var(--text-secondary)] font-medium">
                           {issue.portfolioLabel}
                         </span>
                       )}
-                      <span className="px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
+                      <span className="px-1.5 py-0.5 rounded-[var(--radius-small)] text-[9px] uppercase font-bold tracking-wider bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]">
                         {issue.assetTab}
                       </span>
                     </div>
@@ -235,7 +235,7 @@ export default function DataQualityHealthModal({
                 <button
                   type="button"
                   onClick={() => handleAction(issue)}
-                  className="shrink-0 flex items-center justify-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline px-3.5 py-2.5 min-h-[44px] min-w-[44px] rounded-[var(--radius-small)] bg-blue-50 dark:bg-blue-950/50 group-hover:bg-blue-600 group-hover:text-white transition-all ios-press touch-manipulation cursor-pointer"
+                  className="shrink-0 flex items-center justify-center gap-1 text-xs font-bold text-[var(--accent-blue)] hover:underline px-3.5 py-2.5 min-h-[44px] min-w-[44px] rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] group-hover:bg-[var(--accent-blue)] group-hover:text-white transition-all ios-press touch-manipulation cursor-pointer"
                 >
                   <span>{issue.actionLabel || 'Fix'}</span>
                   <ChevronRight size={13} />
@@ -248,9 +248,7 @@ export default function DataQualityHealthModal({
         {/* Footer tip */}
         <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] text-[var(--text-tertiary)]">
           <span>Tip: Complete records and linked receipts protect your family's estate planning.</span>
-          <Button variant="secondary" onClick={onClose} className="text-xs py-2.5 px-4 min-h-[44px]">
-            Close
-          </Button>
+          <span className="font-semibold text-[var(--text-secondary)]">Audit Status: Healthy</span>
         </div>
       </div>
     </Modal>

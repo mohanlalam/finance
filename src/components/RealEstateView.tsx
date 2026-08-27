@@ -90,7 +90,7 @@ export function RealEstateView({
             {({ index, style }) => {
               const property = realEstate[index];
               return (
-                <div style={style} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
                   <RealEstateCard
                     property={property}
                     documents={documents}

@@ -2,78 +2,82 @@ import React from 'react';
 import { TrendingUp } from './icons/AppIcons';
 
 function SkeletonBlock({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-slate-200/80 dark:bg-slate-700 ${className}`} />;
+  return <div className={`shimmer-bar rounded-[var(--radius-small)] ${className}`} />;
 }
 
 function DashboardLoading() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900" role="status" aria-label="Loading dashboard">
-      <header className="bg-slate-900 text-white">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-[var(--app-background)]" role="status" aria-label="Loading dashboard">
+      <header className="sticky top-0 z-30 bg-[var(--surface-glass)] backdrop-blur-md border-b border-[var(--border-subtle)]">
+        <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-500 flex items-center justify-center">
-              <TrendingUp size={20} />
+            <div className="w-8 h-8 rounded-lg bg-[var(--accent-blue)] text-white flex items-center justify-center shadow-xs">
+              <TrendingUp size={18} />
             </div>
             <div>
-              <p className="text-base font-bold leading-tight">Family Portfolio</p>
-              <p className="text-xs text-slate-400">Loading dashboard</p>
+              <p className="text-sm font-extrabold text-[var(--text-primary)] leading-tight">Family Wealth</p>
+              <p className="text-xs text-[var(--text-tertiary)]">Loading portfolio...</p>
             </div>
           </div>
-          <div className="hidden sm:block text-right">
-            <div className="h-3 w-24 bg-slate-700 rounded mb-2" />
-            <div className="h-5 w-36 bg-slate-700 rounded" />
+          <div className="hidden sm:flex items-center gap-3">
+            <SkeletonBlock className="h-8 w-28 rounded-[var(--radius-medium)]" />
+            <SkeletonBlock className="h-8 w-20 rounded-[var(--radius-medium)]" />
           </div>
         </div>
       </header>
 
-      <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Family tabs skeleton */}
         <div className="flex flex-wrap gap-2">
           {[1, 2, 3, 4].map((item) => (
-            <SkeletonBlock key={item} className="h-10 w-36" />
+            <SkeletonBlock key={item} className="h-9 w-28 rounded-[var(--radius-pill)]" />
           ))}
         </div>
 
+        {/* Summary metric cards skeleton */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((item) => (
-            <div key={item} className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg p-5 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <SkeletonBlock className="h-3 w-28" />
-                <SkeletonBlock className="h-8 w-8 rounded-lg" />
+            <div key={item} className="apple-card p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <SkeletonBlock className="h-3.5 w-24" />
+                <SkeletonBlock className="h-7 w-7 rounded-[var(--radius-small)]" />
               </div>
-              <SkeletonBlock className="h-7 w-40 mb-3" />
-              <SkeletonBlock className="h-3 w-32" />
+              <SkeletonBlock className="h-7 w-36" />
+              <SkeletonBlock className="h-3 w-28" />
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-          <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg p-5 shadow-sm">
-            <SkeletonBlock className="h-4 w-44 mb-6" />
+        {/* 2x2 widget skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="apple-card p-5 space-y-4">
+            <SkeletonBlock className="h-4 w-44" />
             <div className="flex items-center justify-center py-8">
-              <SkeletonBlock className="h-48 w-48 rounded-full" />
+              <SkeletonBlock className="h-44 w-44 rounded-full" />
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg p-5 shadow-sm">
-            <SkeletonBlock className="h-4 w-40 mb-6" />
-            <div className="space-y-4">
+          <div className="apple-card p-5 space-y-4">
+            <SkeletonBlock className="h-4 w-40" />
+            <div className="space-y-4 pt-2">
               {[1, 2, 3, 4].map((item) => (
                 <div key={item} className="flex items-center gap-3">
-                  <SkeletonBlock className="h-3 w-20" />
-                  <SkeletonBlock className="h-7 flex-1" />
+                  <SkeletonBlock className="h-3.5 w-20" />
+                  <SkeletonBlock className="h-6 flex-1 rounded-[var(--radius-small)]" />
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex justify-between">
+        {/* Asset table skeleton */}
+        <div className="apple-card overflow-hidden">
+          <div className="px-5 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center">
             <SkeletonBlock className="h-4 w-36" />
-            <SkeletonBlock className="h-8 w-28" />
+            <SkeletonBlock className="h-8 w-28 rounded-[var(--radius-medium)]" />
           </div>
-          <div className="divide-y divide-slate-100 dark:divide-slate-700">
+          <div className="divide-y divide-[var(--border-subtle)]">
             {[1, 2, 3, 4, 5].map((item) => (
-              <div key={item} className="grid grid-cols-5 gap-4 px-4 py-4">
+              <div key={item} className="grid grid-cols-5 gap-4 px-5 py-4">
                 <SkeletonBlock className="h-4 w-full" />
                 <SkeletonBlock className="h-4 w-full" />
                 <SkeletonBlock className="h-4 w-full" />

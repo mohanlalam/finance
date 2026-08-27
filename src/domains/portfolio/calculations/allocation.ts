@@ -57,6 +57,8 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
 /**
  * Calculates allocation percentages for donut and pie charts.
  */
+import { ASSET_COLORS } from '../../../utils/assetColors';
+
 export function calculateAssetAllocations(breakdown: AssetClassBreakdown): AssetAllocationItem[] {
   const total =
     breakdown.stocks +
@@ -69,12 +71,12 @@ export function calculateAssetAllocations(breakdown: AssetClassBreakdown): Asset
   if (total <= 0) return [];
 
   const raw = [
-    { key: 'stocks', label: 'Stocks', value: breakdown.stocks, color: '#387ed1' },
-    { key: 'fd', label: 'Fixed Deposits', value: breakdown.fd, color: '#00b074' },
-    { key: 'rd', label: 'Recurring Deposits', value: breakdown.rd, color: '#ff9800' },
-    { key: 'sip', label: 'Mutual Funds / SIP', value: breakdown.sip, color: '#8b5cf6' },
-    { key: 'gold', label: 'Gold Bullion', value: breakdown.gold, color: '#f59e0b' },
-    { key: 'realEstate', label: 'Real Estate', value: breakdown.realEstate, color: '#10b981' },
+    { key: 'stocks', label: 'Stocks', value: breakdown.stocks, color: ASSET_COLORS.stocks },
+    { key: 'gold', label: 'Gold Bullion', value: breakdown.gold, color: ASSET_COLORS.gold },
+    { key: 'fd', label: 'Fixed Deposits', value: breakdown.fd, color: ASSET_COLORS.fd },
+    { key: 'rd', label: 'Recurring Deposits', value: breakdown.rd, color: ASSET_COLORS.rd },
+    { key: 'sip', label: 'Mutual Funds / SIP', value: breakdown.sip, color: ASSET_COLORS.sip },
+    { key: 'realEstate', label: 'Real Estate', value: breakdown.realEstate, color: ASSET_COLORS.realEstate },
   ];
 
   return raw
