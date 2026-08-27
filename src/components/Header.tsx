@@ -1,5 +1,5 @@
-import React, { useState, useEffect, Suspense } from 'react';
-import { TrendingUp, RefreshCw, Bell, X, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff, FileText, CheckCircle2 } from './icons/AppIcons';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { TrendingUp, RefreshCw, Bell, X, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff, FileText, CheckCircle2, MoreHorizontal } from './icons/AppIcons';
 import { FetchStatus } from '../types/portfolio';
 import { Portfolio } from '../types/portfolio';
 import type { ImportRow } from './ExportPanel';
@@ -85,9 +85,11 @@ function Header({
 }: HeaderProps) {
   const isLoading = status === 'loading';
   const [openAlerts, setOpenAlerts] = useState(false);
+  const [openMobileMenu, setOpenMobileMenu] = useState(false);
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
   const { toggleHideBalances, isBalancesHidden } = usePrivacy();
   const isMobile = useIsMobile();
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -110,6 +112,16 @@ function Header({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [openAlerts]);
 
+  // Close mobile menu on Escape
+  useEffect(() => {
+    if (!openMobileMenu) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenMobileMenu(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [openMobileMenu]);
+
   const visibleAlerts = alerts;
 
   const handleAlertsClick = () => {
@@ -124,6 +136,7 @@ function Header({
     <header className="sticky top-0 z-[var(--z-header)] bg-[var(--surface-header)] backdrop-blur-md border-b border-[var(--border-subtle)] transition-colors pt-[env(safe-area-inset-top,0px)]">
       <div className="max-w-[1720px] mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
+
           {/* Logo & title */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-[var(--radius-medium)] bg-[var(--accent-blue)] flex items-center justify-center text-white shadow-sm ring-1 ring-[var(--border-subtle)] shrink-0">
@@ -149,10 +162,10 @@ function Header({
             </div>
           </div>
 
-          {/* Quick stats & action buttons */}
+          {/* Action buttons — right side */}
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            {/* Controls */}
-            {/* Sync Status / Refresh button */}
+
+            {/* Sync / Refresh — always visible */}
             <IconButton
               icon={<RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />}
               title={isLoading ? 'Fetching prices...' : lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : 'Sync prices'}
@@ -160,7 +173,7 @@ function Header({
               disabled={isLoading}
             />
 
-            {/* Export Panel (Desktop) */}
+            {/* Export Panel — desktop only */}
             <div className="hidden sm:block">
               <Suspense fallback={<div className="w-8 h-8 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] animate-pulse" />}>
                 <ExportPanel
@@ -171,140 +184,214 @@ function Header({
               </Suspense>
             </div>
 
-            {/* Change PIN (Available on Mobile & Desktop) */}
-            {onChangePinClick && (
-              <IconButton
-                icon={<LockKeyhole size={14} />}
-                title="Change PIN"
-                onClick={onChangePinClick}
-              />
-            )}
-
-              {/* Privacy Toggle */}
+            {/* ── Desktop: individual icon buttons ── */}
+            <div className="hidden sm:flex items-center gap-1.5">
+              {onChangePinClick && (
+                <IconButton
+                  icon={<LockKeyhole size={14} />}
+                  title="Change PIN"
+                  onClick={onChangePinClick}
+                />
+              )}
               <IconButton
                 icon={isBalancesHidden ? <EyeOff size={14} /> : <Eye size={14} />}
-                title={isBalancesHidden ? "Show Balances" : "Hide Balances"}
+                title={isBalancesHidden ? 'Show Balances' : 'Hide Balances'}
                 onClick={toggleHideBalances}
               />
-
-              {/* Theme Toggle */}
               <IconButton
                 icon={darkMode ? <Sun size={14} /> : <Moon size={14} />}
                 title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
                 onClick={onToggleDarkMode}
               />
+            </div>
 
-              {/* Alerts bell */}
-              <div className="relative">
+            {/* ── Mobile: ⋯ overflow popup ── */}
+            {isMobile && (
+              <div className="relative sm:hidden" ref={mobileMenuRef}>
                 <IconButton
-                  icon={<Bell size={14} />}
-                  title={`Notifications (${visibleAlerts.length})`}
-                  onClick={handleAlertsClick}
-                  className={openAlerts ? 'bg-[var(--surface-secondary)] text-[var(--accent-blue)]' : ''}
+                  icon={<MoreHorizontal size={14} />}
+                  title="More options"
+                  onClick={() => setOpenMobileMenu((prev) => !prev)}
+                  className={openMobileMenu ? 'bg-[var(--surface-secondary)] text-[var(--accent-blue)]' : ''}
                 />
-                {visibleAlerts.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--negative)] rounded-full ring-2 ring-[var(--surface)]" />
-                )}
 
-                {openAlerts && !isMobile && (
+                {openMobileMenu && (
                   <>
-                    {/* Backdrop to dismiss alerts panel */}
+                    {/* Tap-outside backdrop */}
                     <div
                       className="fixed inset-0 z-[var(--z-overlay)]"
-                      onClick={() => setOpenAlerts(false)}
+                      onClick={() => setOpenMobileMenu(false)}
                       aria-hidden="true"
                     />
-                    <div
-                      role="region"
-                      aria-label="Notifications panel"
-                      className="absolute right-0 top-full mt-2 w-96 max-w-[calc(100vw-2rem)] bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-floating)] z-[var(--z-modal)] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
-                    >
-                      {/* Header */}
-                      <div className="px-4 py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
-                            Notifications
-                          </span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]">
-                            {visibleAlerts.length}
-                          </span>
-                        </div>
-                        {visibleAlerts.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDismissAll();
-                            }}
-                            className="text-label-micro font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
-                          >
-                            Clear All
-                          </button>
-                        )}
-                      </div>
 
-                      {/* Alerts list */}
-                      <div className="max-h-[380px] overflow-y-auto divide-y divide-[var(--border-subtle)]">
-                        {visibleAlerts.length === 0 ? (
-                          <div className="py-8 px-4 text-center flex flex-col items-center justify-center gap-2">
-                            <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                              <CheckCircle2 size={20} />
-                            </div>
-                            <span className="text-xs font-bold text-[var(--text-primary)]">All Caught Up!</span>
-                            <span className="text-[11px] text-[var(--text-tertiary)] max-w-[220px]">No active notifications. You're completely up to date.</span>
-                          </div>
-                        ) : (
-                          visibleAlerts.map((alert) => {
-                            const cfg = ALERTS_TYPE_CONFIG[alert.type] ?? {
-                              icon: <Bell size={14} />,
-                              color: 'text-[var(--text-secondary)]',
-                              bg: 'bg-[var(--surface-secondary)]',
-                              border: 'border-[var(--border-subtle)]',
-                            };
-                            return (
-                              <div
-                                key={alert.id}
-                                className="p-3.5 hover:bg-[var(--surface-secondary)] transition-colors flex items-start gap-3 group"
-                              >
-                                <div className={`p-1.5 rounded-[var(--radius-small)] ${cfg.bg} ${cfg.color} shrink-0 mt-0.5 border ${cfg.border}`}>
-                                  {cfg.icon}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <p className="text-xs font-bold text-[var(--text-primary)] leading-tight">{alert.title}</p>
-                                    {alert.portfolioLabel && (
-                                      <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-[var(--surface-secondary)] text-[var(--text-tertiary)] border border-[var(--border-subtle)]">
-                                        {alert.portfolioLabel}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed mt-1">{alert.message}</p>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onDismissAlert(alert.id);
-                                  }}
-                                  className="w-6 h-6 flex items-center justify-center rounded-[var(--radius-small)] text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--surface)] transition-colors cursor-pointer shrink-0 opacity-70 group-hover:opacity-100"
-                                  aria-label="Dismiss alert"
-                                  title="Dismiss alert"
-                                >
-                                  <X size={12} />
-                                </button>
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
+                    {/* Dropdown panel */}
+                    <div
+                      role="menu"
+                      aria-label="More options"
+                      className="absolute right-0 top-full mt-2 w-52 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-floating)] z-[var(--z-modal)] overflow-hidden animate-in fade-in zoom-in-95 duration-150 origin-top-right"
+                    >
+                      {/* Change PIN */}
+                      {onChangePinClick && (
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => { setOpenMobileMenu(false); onChangePinClick(); }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] active:bg-[var(--surface-secondary)] transition-colors cursor-pointer border-b border-[var(--border-subtle)]"
+                        >
+                          <span className="w-7 h-7 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center shrink-0">
+                            <LockKeyhole size={14} className="text-[var(--text-secondary)]" />
+                          </span>
+                          <span className="font-medium">Change PIN</span>
+                        </button>
+                      )}
+
+                      {/* Privacy toggle */}
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => { setOpenMobileMenu(false); toggleHideBalances(); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] active:bg-[var(--surface-secondary)] transition-colors cursor-pointer border-b border-[var(--border-subtle)]"
+                      >
+                        <span className="w-7 h-7 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center shrink-0">
+                          {isBalancesHidden
+                            ? <EyeOff size={14} className="text-[var(--text-secondary)]" />
+                            : <Eye size={14} className="text-[var(--text-secondary)]" />}
+                        </span>
+                        <span className="font-medium">{isBalancesHidden ? 'Show Balances' : 'Hide Balances'}</span>
+                      </button>
+
+                      {/* Theme toggle */}
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => { setOpenMobileMenu(false); onToggleDarkMode(); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] active:bg-[var(--surface-secondary)] transition-colors cursor-pointer"
+                      >
+                        <span className="w-7 h-7 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center shrink-0">
+                          {darkMode
+                            ? <Sun size={14} className="text-[var(--text-secondary)]" />
+                            : <Moon size={14} className="text-[var(--text-secondary)]" />}
+                        </span>
+                        <span className="font-medium">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                      </button>
                     </div>
                   </>
                 )}
               </div>
+            )}
+
+            {/* Alerts Bell — always visible */}
+            <div className="relative">
+              <IconButton
+                icon={<Bell size={14} />}
+                title={`Notifications (${visibleAlerts.length})`}
+                onClick={handleAlertsClick}
+                className={openAlerts ? 'bg-[var(--surface-secondary)] text-[var(--accent-blue)]' : ''}
+              />
+              {visibleAlerts.length > 0 && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--negative)] rounded-full ring-2 ring-[var(--surface)]" />
+              )}
+
+              {openAlerts && !isMobile && (
+                <>
+                  {/* Backdrop to dismiss alerts panel */}
+                  <div
+                    className="fixed inset-0 z-[var(--z-overlay)]"
+                    onClick={() => setOpenAlerts(false)}
+                    aria-hidden="true"
+                  />
+                  <div
+                    role="region"
+                    aria-label="Notifications panel"
+                    className="absolute right-0 top-full mt-2 w-96 max-w-[calc(100vw-2rem)] bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-floating)] z-[var(--z-modal)] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+                  >
+                    {/* Panel header */}
+                    <div className="px-4 py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                          Notifications
+                        </span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]">
+                          {visibleAlerts.length}
+                        </span>
+                      </div>
+                      {visibleAlerts.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDismissAll();
+                          }}
+                          className="text-label-micro font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                        >
+                          Clear All
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Alerts list */}
+                    <div className="max-h-[380px] overflow-y-auto divide-y divide-[var(--border-subtle)]">
+                      {visibleAlerts.length === 0 ? (
+                        <div className="py-8 px-4 text-center flex flex-col items-center justify-center gap-2">
+                          <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                            <CheckCircle2 size={20} />
+                          </div>
+                          <span className="text-xs font-bold text-[var(--text-primary)]">All Caught Up!</span>
+                          <span className="text-[11px] text-[var(--text-tertiary)] max-w-[220px]">No active notifications. You're completely up to date.</span>
+                        </div>
+                      ) : (
+                        visibleAlerts.map((alert) => {
+                          const cfg = ALERTS_TYPE_CONFIG[alert.type] ?? {
+                            icon: <Bell size={14} />,
+                            color: 'text-[var(--text-secondary)]',
+                            bg: 'bg-[var(--surface-secondary)]',
+                            border: 'border-[var(--border-subtle)]',
+                          };
+                          return (
+                            <div
+                              key={alert.id}
+                              className="p-3.5 hover:bg-[var(--surface-secondary)] transition-colors flex items-start gap-3 group"
+                            >
+                              <div className={`p-1.5 rounded-[var(--radius-small)] ${cfg.bg} ${cfg.color} shrink-0 mt-0.5 border ${cfg.border}`}>
+                                {cfg.icon}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <p className="text-xs font-bold text-[var(--text-primary)] leading-tight">{alert.title}</p>
+                                  {alert.portfolioLabel && (
+                                    <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-[var(--surface-secondary)] text-[var(--text-tertiary)] border border-[var(--border-subtle)]">
+                                      {alert.portfolioLabel}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed mt-1">{alert.message}</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onDismissAlert(alert.id);
+                                }}
+                                className="w-6 h-6 flex items-center justify-center rounded-[var(--radius-small)] text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--surface)] transition-colors cursor-pointer shrink-0 opacity-70 group-hover:opacity-100"
+                                aria-label="Dismiss alert"
+                                title="Dismiss alert"
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
+
           </div>
         </div>
-      </header>
+      </div>
+    </header>
   );
 }
 
