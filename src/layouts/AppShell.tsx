@@ -570,13 +570,13 @@ export default function AppShell() {
       onTouchCancel={handleCombinedTouchCancel}
       className="min-h-screen bg-[var(--app-background)] pb-safe-content md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden"
     >
-      {/* Pull to refresh indicator */}
+      {/* Pull to refresh indicator — positioned below sticky header so it never clips */}
       {(ptr.pullDistance > 0 || ptr.isRefreshing) && (
-        <div className="absolute top-4 left-0 right-0 flex justify-center z-50 pointer-events-none">
+        <div className="fixed top-16 left-0 right-0 flex justify-center z-[var(--z-overlay)] pointer-events-none">
           <div 
-            className="w-9 h-9 rounded-full glass-panel flex items-center justify-center shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur"
+            className="w-10 h-10 rounded-full flex items-center justify-center shadow-[var(--shadow-floating)] bg-[var(--surface)] border border-[var(--border-subtle)] backdrop-blur-md"
             style={{ 
-              transform: ptr.isRefreshing ? 'translateY(20px)' : `translateY(${Math.min(ptr.pullDistance, 60)}px)`,
+              transform: ptr.isRefreshing ? 'translateY(12px)' : `translateY(${Math.min(ptr.pullDistance, 48)}px)`,
               transition: ptr.isRefreshing ? 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
             }}
           >
