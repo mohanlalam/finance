@@ -45,6 +45,7 @@
   /* Z-index hierarchy */
   --z-base: 1;
   --z-dropdown: 100;
+  --z-header: 200;
   --z-sticky: 200;
   --z-overlay: 300;
   --z-modal: 400;

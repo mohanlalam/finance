@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { TrendingUp, RefreshCw, Bell, X, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff, FileText, CheckCircle2, MoreHorizontal } from './icons/AppIcons';
+import { TrendingUp, RefreshCw, Bell, X, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff, FileText, CheckCircle2, MoreHorizontal, ChevronRight } from './icons/AppIcons';
 import { FetchStatus } from '../types/portfolio';
 import { Portfolio } from '../types/portfolio';
 import type { ImportRow } from './ExportPanel';
 import { Alert } from '../hooks/useAlerts';
 import { IconButton } from './ui/IconButton';
 import { useIsMobile } from '../hooks/useIsMobile';
-
 import { usePrivacy } from '../contexts/PrivacyContext';
 
 const ExportPanel = React.lazy(() => import('./ExportPanel'));
@@ -112,7 +111,7 @@ function Header({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [openAlerts]);
 
-  // Close mobile menu on Escape
+  // Close mobile menu on Escape key
   useEffect(() => {
     if (!openMobileMenu) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -129,6 +128,35 @@ function Header({
       onOpenMobileAlerts();
     } else {
       setOpenAlerts((prev) => !prev);
+    }
+  };
+
+  const handleMobileRefresh = () => {
+    setOpenMobileMenu(false);
+    onRefresh();
+  };
+
+  const handleMobileAlerts = () => {
+    setOpenMobileMenu(false);
+    if (onOpenMobileAlerts) {
+      onOpenMobileAlerts();
+    }
+  };
+
+  const handleMobilePrivacy = () => {
+    setOpenMobileMenu(false);
+    toggleHideBalances();
+  };
+
+  const handleMobileTheme = () => {
+    setOpenMobileMenu(false);
+    onToggleDarkMode();
+  };
+
+  const handleMobilePin = () => {
+    setOpenMobileMenu(false);
+    if (onChangePinClick) {
+      onChangePinClick();
     }
   };
 
@@ -162,10 +190,9 @@ function Header({
             </div>
           </div>
 
-          {/* Action buttons — right side */}
-          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-
-            {/* Sync / Refresh — always visible */}
+          {/* ── Desktop action icons (hidden on mobile) ── */}
+          <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+            {/* Refresh */}
             <IconButton
               icon={<RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />}
               title={isLoading ? 'Fetching prices...' : lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : 'Sync prices'}
@@ -173,114 +200,39 @@ function Header({
               disabled={isLoading}
             />
 
-            {/* Export Panel — desktop only */}
-            <div className="hidden sm:block">
-              <Suspense fallback={<div className="w-8 h-8 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] animate-pulse" />}>
-                <ExportPanel
-                  portfolios={portfolios}
-                  onImportCSV={onImportCSV}
-                  portfolioOptions={portfolioOptions}
-                />
-              </Suspense>
-            </div>
-
-            {/* ── Desktop: individual icon buttons ── */}
-            <div className="hidden sm:flex items-center gap-1.5">
-              {onChangePinClick && (
-                <IconButton
-                  icon={<LockKeyhole size={14} />}
-                  title="Change PIN"
-                  onClick={onChangePinClick}
-                />
-              )}
-              <IconButton
-                icon={isBalancesHidden ? <EyeOff size={14} /> : <Eye size={14} />}
-                title={isBalancesHidden ? 'Show Balances' : 'Hide Balances'}
-                onClick={toggleHideBalances}
+            {/* Export Panel */}
+            <Suspense fallback={<div className="w-8 h-8 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] animate-pulse" />}>
+              <ExportPanel
+                portfolios={portfolios}
+                onImportCSV={onImportCSV}
+                portfolioOptions={portfolioOptions}
               />
+            </Suspense>
+
+            {/* Change PIN */}
+            {onChangePinClick && (
               <IconButton
-                icon={darkMode ? <Sun size={14} /> : <Moon size={14} />}
-                title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-                onClick={onToggleDarkMode}
+                icon={<LockKeyhole size={14} />}
+                title="Change PIN"
+                onClick={onChangePinClick}
               />
-            </div>
-
-            {/* ── Mobile: ⋯ overflow popup ── */}
-            {isMobile && (
-              <div className="relative sm:hidden" ref={mobileMenuRef}>
-                <IconButton
-                  icon={<MoreHorizontal size={14} />}
-                  title="More options"
-                  onClick={() => setOpenMobileMenu((prev) => !prev)}
-                  className={openMobileMenu ? 'bg-[var(--surface-secondary)] text-[var(--accent-blue)]' : ''}
-                />
-
-                {openMobileMenu && (
-                  <>
-                    {/* Tap-outside backdrop */}
-                    <div
-                      className="fixed inset-0 z-[var(--z-overlay)]"
-                      onClick={() => setOpenMobileMenu(false)}
-                      aria-hidden="true"
-                    />
-
-                    {/* Dropdown panel */}
-                    <div
-                      role="menu"
-                      aria-label="More options"
-                      className="absolute right-0 top-full mt-2 w-52 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-floating)] z-[var(--z-modal)] overflow-hidden animate-in fade-in zoom-in-95 duration-150 origin-top-right"
-                    >
-                      {/* Change PIN */}
-                      {onChangePinClick && (
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => { setOpenMobileMenu(false); onChangePinClick(); }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] active:bg-[var(--surface-secondary)] transition-colors cursor-pointer border-b border-[var(--border-subtle)]"
-                        >
-                          <span className="w-7 h-7 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center shrink-0">
-                            <LockKeyhole size={14} className="text-[var(--text-secondary)]" />
-                          </span>
-                          <span className="font-medium">Change PIN</span>
-                        </button>
-                      )}
-
-                      {/* Privacy toggle */}
-                      <button
-                        type="button"
-                        role="menuitem"
-                        onClick={() => { setOpenMobileMenu(false); toggleHideBalances(); }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] active:bg-[var(--surface-secondary)] transition-colors cursor-pointer border-b border-[var(--border-subtle)]"
-                      >
-                        <span className="w-7 h-7 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center shrink-0">
-                          {isBalancesHidden
-                            ? <EyeOff size={14} className="text-[var(--text-secondary)]" />
-                            : <Eye size={14} className="text-[var(--text-secondary)]" />}
-                        </span>
-                        <span className="font-medium">{isBalancesHidden ? 'Show Balances' : 'Hide Balances'}</span>
-                      </button>
-
-                      {/* Theme toggle */}
-                      <button
-                        type="button"
-                        role="menuitem"
-                        onClick={() => { setOpenMobileMenu(false); onToggleDarkMode(); }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] active:bg-[var(--surface-secondary)] transition-colors cursor-pointer"
-                      >
-                        <span className="w-7 h-7 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center shrink-0">
-                          {darkMode
-                            ? <Sun size={14} className="text-[var(--text-secondary)]" />
-                            : <Moon size={14} className="text-[var(--text-secondary)]" />}
-                        </span>
-                        <span className="font-medium">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
             )}
 
-            {/* Alerts Bell — always visible */}
+            {/* Privacy toggle */}
+            <IconButton
+              icon={isBalancesHidden ? <EyeOff size={14} /> : <Eye size={14} />}
+              title={isBalancesHidden ? 'Show Balances' : 'Hide Balances'}
+              onClick={toggleHideBalances}
+            />
+
+            {/* Theme toggle */}
+            <IconButton
+              icon={darkMode ? <Sun size={14} /> : <Moon size={14} />}
+              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              onClick={onToggleDarkMode}
+            />
+
+            {/* Alerts Bell */}
             <div className="relative">
               <IconButton
                 icon={<Bell size={14} />}
@@ -294,7 +246,6 @@ function Header({
 
               {openAlerts && !isMobile && (
                 <>
-                  {/* Backdrop to dismiss alerts panel */}
                   <div
                     className="fixed inset-0 z-[var(--z-overlay)]"
                     onClick={() => setOpenAlerts(false)}
@@ -305,7 +256,6 @@ function Header({
                     aria-label="Notifications panel"
                     className="absolute right-0 top-full mt-2 w-96 max-w-[calc(100vw-2rem)] bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-floating)] z-[var(--z-modal)] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
                   >
-                    {/* Panel header */}
                     <div className="px-4 py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
@@ -329,7 +279,6 @@ function Header({
                       )}
                     </div>
 
-                    {/* Alerts list */}
                     <div className="max-h-[380px] overflow-y-auto divide-y divide-[var(--border-subtle)]">
                       {visibleAlerts.length === 0 ? (
                         <div className="py-8 px-4 text-center flex flex-col items-center justify-center gap-2">
@@ -387,8 +336,168 @@ function Header({
                 </>
               )}
             </div>
-
           </div>
+
+          {/* ── Mobile top-right menu trigger (ONLY ONE button in mobile top-right) ── */}
+          <div className="relative sm:hidden shrink-0" ref={mobileMenuRef}>
+            <button
+              type="button"
+              onClick={() => setOpenMobileMenu((prev) => !prev)}
+              aria-label="Open menu"
+              aria-expanded={openMobileMenu}
+              className={`relative w-9 h-9 flex items-center justify-center rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] active:scale-95 transition-all duration-150 cursor-pointer ${
+                openMobileMenu ? 'ring-2 ring-[var(--accent-blue)] text-[var(--accent-blue)] bg-[var(--surface)]' : ''
+              }`}
+            >
+              <MoreHorizontal size={18} />
+              {visibleAlerts.length > 0 && (
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[var(--negative)] rounded-full ring-2 ring-[var(--surface)] animate-pulse" />
+              )}
+            </button>
+
+            {/* Mobile All-in-One Popup Menu */}
+            {openMobileMenu && (
+              <>
+                {/* Backdrop */}
+                <div
+                  className="fixed inset-0 z-[var(--z-overlay)] bg-black/20 backdrop-blur-[2px] animate-in fade-in duration-150"
+                  onClick={() => setOpenMobileMenu(false)}
+                  aria-hidden="true"
+                />
+
+                {/* Popup Menu Card */}
+                <div
+                  role="menu"
+                  aria-label="Header options"
+                  className="fixed right-3 top-16 w-64 max-w-[calc(100vw-1.5rem)] bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-floating)] z-[var(--z-modal)] p-1.5 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-150 origin-top-right"
+                >
+                  {/* 1. Sync Prices */}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleMobileRefresh}
+                    disabled={isLoading}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-[var(--radius-medium)] text-left hover:bg-[var(--surface-secondary)] active:bg-[var(--surface-secondary)] transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
+                        <RefreshCw size={15} className={isLoading ? 'animate-spin' : ''} />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-[var(--text-primary)] leading-tight">
+                          {isLoading ? 'Syncing...' : 'Sync Prices'}
+                        </p>
+                        <p className="text-[10px] text-[var(--text-tertiary)] truncate mt-0.5">
+                          {isLoading
+                            ? 'Fetching quotes...'
+                            : lastUpdated
+                            ? `Updated ${lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                            : 'Fetch live quotes'}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* 2. Notifications & Alerts */}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleMobileAlerts}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-[var(--radius-medium)] text-left hover:bg-[var(--surface-secondary)] active:bg-[var(--surface-secondary)] transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 border border-[var(--border-subtle)]">
+                        <Bell size={15} />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-[var(--text-primary)] leading-tight">Notifications</p>
+                        <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
+                          {visibleAlerts.length > 0 ? `${visibleAlerts.length} pending alert${visibleAlerts.length > 1 ? 's' : ''}` : 'No active alerts'}
+                        </p>
+                      </div>
+                    </div>
+                    {visibleAlerts.length > 0 ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--negative)] text-white shrink-0">
+                        {visibleAlerts.length}
+                      </span>
+                    ) : (
+                      <ChevronRight size={14} className="text-[var(--text-tertiary)] shrink-0" />
+                    )}
+                  </button>
+
+                  {/* 3. Hide / Show Balances (Privacy) */}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleMobilePrivacy}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-[var(--radius-medium)] text-left hover:bg-[var(--surface-secondary)] active:bg-[var(--surface-secondary)] transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 border border-[var(--border-subtle)]">
+                        {isBalancesHidden ? <EyeOff size={15} /> : <Eye size={15} />}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-[var(--text-primary)] leading-tight">
+                          {isBalancesHidden ? 'Show Balances' : 'Hide Balances'}
+                        </p>
+                        <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
+                          {isBalancesHidden ? 'Values are masked' : 'Values are visible'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)] shrink-0">
+                      {isBalancesHidden ? 'Hidden' : 'Visible'}
+                    </span>
+                  </button>
+
+                  {/* 4. Theme Toggle */}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleMobileTheme}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-[var(--radius-medium)] text-left hover:bg-[var(--surface-secondary)] active:bg-[var(--surface-secondary)] transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 border border-[var(--border-subtle)]">
+                        {darkMode ? <Sun size={15} /> : <Moon size={15} />}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-[var(--text-primary)] leading-tight">Theme</p>
+                        <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
+                          {darkMode ? 'Dark theme active' : 'Light theme active'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)] shrink-0">
+                      {darkMode ? 'Dark' : 'Light'}
+                    </span>
+                  </button>
+
+                  {/* 5. Change PIN */}
+                  {onChangePinClick && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={handleMobilePin}
+                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-[var(--radius-medium)] text-left hover:bg-[var(--surface-secondary)] active:bg-[var(--surface-secondary)] transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 border border-[var(--border-subtle)]">
+                          <LockKeyhole size={15} />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-[var(--text-primary)] leading-tight">Security</p>
+                          <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">Change 4-digit PIN</p>
+                        </div>
+                      </div>
+                      <ChevronRight size={14} className="text-[var(--text-tertiary)] shrink-0" />
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+
         </div>
       </div>
     </header>
