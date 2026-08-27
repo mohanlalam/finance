@@ -166,26 +166,42 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [portfolioKeys]);
 
-  // Daily net worth snapshot trigger
+  // Daily net worth snapshot — fires once per calendar day, but only after
+  // loadStatus reaches 'success' so the PIN hash is warm and data is fresh.
+  const snapshotFiredRef = useRef(false);
   useEffect(() => {
-    let isMounted = true;
+    // Only proceed once data has fully loaded (auth + PIN hash are warm by then)
+    if (loadStatus !== 'success') return;
+    // Only fire once per session (prevents re-firing on every SWR revalidation)
+    if (snapshotFiredRef.current) return;
+
     const now = new Date();
     const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const lastSnapshot = localStorage.getItem('finance_last_snapshot_date');
-    if (lastSnapshot !== todayStr) {
+    if (lastSnapshot === todayStr) {
+      // Already snapshotted today in a previous session — mark fired and skip
+      snapshotFiredRef.current = true;
+      return;
+    }
+
+    snapshotFiredRef.current = true;
+    // Small delay to ensure PIN hash is fully cached after first successful load
+    const timer = setTimeout(() => {
       invokeFunction('snapshot-net-worth', { method: 'POST' })
         .then(() => {
-          if (!isMounted) return;
           localStorage.setItem('finance_last_snapshot_date', todayStr);
+          logger.info('[portfolio] daily net worth snapshot recorded', { date: todayStr });
         })
         .catch((err) => {
+          // Reset so it can retry on next page load
+          snapshotFiredRef.current = false;
           logger.warn('[portfolio] failed to record daily net worth snapshot', { error: String(err) });
         });
-    }
-    return () => {
-      isMounted = false;
-    };
-  }, [loadStatus, load]);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [loadStatus]);
+
 
   const addRDAccount = useCallback(async (portfolioName: string, payload: RDPayload) => {
     await addAsset('rd_account', portfolioName, payload);
