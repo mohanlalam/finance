@@ -89,7 +89,7 @@ The visual theme is governed by CSS Custom Properties declared in `src/index.css
 | `--surface-glass` | `rgba(255, 255, 255, 0.82)` | `rgba(17, 24, 39, 0.82)` | Frosted glass cards and sticky navigation headers |
 | `--text-primary` | `#0f172a` | `#f8fafc` | Primary titles, net worth values, headings |
 | `--text-secondary` | `#475569` | `#94a3b8` | Subtitles, section headers, secondary labels |
-| `--text-tertiary` | `#64748b` | `#8899aa` | Muted metadata, timestamps, table column headers (elevated in dark for WCAG AA) |
+| `--text-tertiary` | `#596780` | `#8899aa` | Muted metadata, timestamps, table column headers (elevated for WCAG AA in both modes) |
 | `--accent-blue` | `#387ed1` | `#387ed1` | Primary action buttons, active navigation indicators |
 | `--accent-blue-soft` | `rgba(56, 126, 209, 0.08)` | `rgba(56, 126, 209, 0.15)` | Selected tab pills, info badges |
 | `--positive` | `#00b074` | `#00b074` | Profit indicators, positive gain badges, upward arrows |
