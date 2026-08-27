@@ -121,7 +121,7 @@ export function SIPAccountCard({
             <p className="text-xs font-extrabold text-[var(--accent-blue)] tnum">+{account.expected_cagr}%</p>
             {invested > 0 && (
               <p className={`text-[10px] font-bold tnum ${isProfit ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-                {formatPercent(plPercent, 1)} act
+                {isProfit ? '+' : ''}{formatPercent(plPercent, 1)} act
               </p>
             )}
           </div>

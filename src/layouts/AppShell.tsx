@@ -633,17 +633,17 @@ export default function AppShell() {
 
       <div className="max-w-[1720px] mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-6 space-y-3.5 sm:space-y-6 pb-[calc(env(safe-area-inset-bottom,0px)+5.5rem)] sm:pb-8">
         {isUsingCachedData && (
-          <div className="flex flex-col gap-1 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/20 px-4 py-3 text-sm text-blue-900 dark:text-blue-300 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <WifiOff size={16} className="mt-0.5 shrink-0 text-blue-600 dark:text-blue-400" />
-              <span>
-                Showing saved portfolio data because the latest database request did not complete.
-                {cacheUpdatedAt ? ` Saved at ${cacheUpdatedAt.toLocaleString('en-IN')}.` : ''}
+          <div className="flex flex-col gap-2 rounded-[var(--radius-medium)] border border-[var(--accent-blue)]/30 bg-[var(--accent-blue-soft)] px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-[var(--accent-blue)] sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <WifiOff size={15} className="shrink-0 text-[var(--accent-blue)]" />
+              <span className="leading-snug truncate sm:whitespace-normal">
+                Showing saved data (offline cache).
+                {cacheUpdatedAt ? ` Saved at ${cacheUpdatedAt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}.` : ''}
               </span>
             </div>
             <button
               onClick={load}
-              className="self-start rounded-lg border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-slate-700 transition-colors sm:self-auto"
+              className="self-start sm:self-auto rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press shrink-0"
             >
               Retry sync
             </button>
@@ -651,24 +651,24 @@ export default function AppShell() {
         )}
 
         {priceStatus === 'error' && (
-          <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-400 rounded-lg px-4 py-3 text-sm">
-            <AlertCircle size={16} className="shrink-0 text-amber-600 dark:text-amber-400" />
-            <span>Could not reach Yahoo Finance. Showing last known data. Check your connection and try refreshing.</span>
+          <div className="flex items-center gap-2.5 bg-[var(--warning-soft)] border border-[var(--warning)]/30 text-[var(--warning)] rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm">
+            <AlertCircle size={15} className="shrink-0 text-[var(--warning)]" />
+            <span className="leading-snug">Could not reach quote provider. Showing last known market data.</span>
           </div>
         )}
 
         {isPriceStale && priceStatus !== 'error' && (
-          <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-400 rounded-lg px-4 py-3 text-sm">
-            <AlertCircle size={16} className="shrink-0 text-amber-600 dark:text-amber-400" />
-            <span>Stock prices may be outdated. Press Ctrl+Shift+R to refresh.</span>
+          <div className="flex items-center gap-2.5 bg-[var(--warning-soft)] border border-[var(--warning)]/30 text-[var(--warning)] rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm">
+            <AlertCircle size={15} className="shrink-0 text-[var(--warning)]" />
+            <span className="leading-snug">Stock prices may be outdated. Press Ctrl+Shift+R to refresh.</span>
           </div>
         )}
 
         {priceStatus === 'success' && failedSymbols.length > 0 && (
-          <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-lg px-4 py-3 text-sm">
-            <AlertCircle size={16} className="shrink-0 text-slate-400 dark:text-slate-500" />
-            <span>
-              Some symbols did not resolve on Yahoo Finance and show avg price instead:{' '}
+          <div className="flex items-center gap-2.5 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm">
+            <AlertCircle size={15} className="shrink-0 text-[var(--text-tertiary)]" />
+            <span className="leading-snug">
+              Some symbols did not resolve on quote provider and show avg price instead:{' '}
               <span className="font-semibold">{failedSymbols.join(', ')}</span>
             </span>
           </div>
