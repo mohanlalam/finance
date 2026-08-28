@@ -15,7 +15,7 @@
     "mobile:run": "npm run build && cd ../android/mobile && npx cap sync android && npx cap run android --target=emulator-5554"
   },
   "dependencies": {
-    "idb-keyval": "^6.2.5",
+    "idb-keyval": "^6.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.17.0",
