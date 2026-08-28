@@ -105,32 +105,37 @@ project antigravity/
 │   ├── components/
 │   │   ├── icons/
 │   │   │   └── AppIcons.tsx      # Inline SVG icon library replacing lucide-react on critical rendering paths
-│   │   ├── fd/                   # Fixed Deposit cards and forms
+│   │   ├── documents/            # Document Vault registry and secure attachment cards
+│   │   │   └── DocumentVaultView.tsx
+│   │   ├── fd/                   # Fixed Deposit cards, forms, and registry view
 │   │   │   ├── DepositDetailsCard.tsx
 │   │   │   ├── FDFormModal.tsx
+│   │   │   ├── FixedDepositView.tsx
 │   │   │   └── StandardFormFields.tsx
-│   │   ├── gold/                 # Gold bullion cards and forms
+│   │   ├── gold/                 # Gold bullion cards, forms, and registry view
 │   │   │   ├── GoldFormModal.tsx
 │   │   │   ├── GoldHoldingCard.tsx
 │   │   │   └── GoldHoldingView.tsx
-│   │   ├── insurance/            # Insurance policy cards and forms
+│   │   ├── insurance/            # Insurance policy cards, forms, and registry view
 │   │   │   ├── InsuranceFormModal.tsx
 │   │   │   ├── InsurancePolicyCard.tsx
 │   │   │   └── InsuranceView.tsx
-│   │   ├── rd/                   # Recurring Deposit cards and forms
+│   │   ├── rd/                   # Recurring Deposit cards, forms, and registry view
 │   │   │   ├── RDAccountCard.tsx
 │   │   │   ├── RDFormModal.tsx
 │   │   │   ├── RDInstallmentSchedule.tsx
 │   │   │   └── RDView.tsx
-│   │   ├── realestate/           # Real Estate cards and forms
+│   │   ├── realestate/           # Real Estate cards, forms, and registry view
 │   │   │   ├── RealEstateCard.tsx
 │   │   │   ├── RealEstateFormModal.tsx
 │   │   │   └── RealEstateView.tsx
-│   │   ├── sip/                  # Mutual Fund SIP cards and forms
+│   │   ├── sip/                  # Mutual Fund SIP cards, forms, and registry view
 │   │   │   ├── SIPAccountCard.tsx
 │   │   │   ├── SIPFormFields.tsx
 │   │   │   ├── SIPFormModal.tsx
 │   │   │   └── SIPView.tsx
+│   │   ├── tax/                  # Tax harvesting analyzer view
+│   │   │   └── TaxHarvestingView.tsx
 │   │   ├── ui/                   # Shared UI primitives (Buttons, Modals, Sparklines, ContextMenu)
 │   │   ├── AddFamilyModal.tsx    # Modal form to add new family members
 │   │   ├── AddHoldingModal.tsx   # Modal form to add new stock holdings
@@ -145,19 +150,15 @@ project antigravity/
 │   │   ├── DashboardLoading.tsx  # Skeleton loader states for dashboard fetch
 │   │   ├── DashboardWidgets.tsx  # Summary widgets container
 │   │   ├── DataQualityHealthModal.tsx # Data quality audit modal with resolution tracking
-│   │   ├── DocumentVaultView.tsx # Document vault view with expiry fields and sorted indicators
 │   │   ├── EditStockModal.tsx    # Stock holding edit modal
 │   │   ├── EmptyState.tsx        # Styled empty state placeholder with CTA
 │   │   ├── ErrorBoundary.tsx     # Generic component-level error boundary
 │   │   ├── ExportPanel.tsx       # Export (CSV, PDF, JSON) and schema-validated restore engine
 │   │   ├── FamilyTabBar.tsx      # Top tab bar switcher for family member portfolios
-│   │   ├── FixedDepositView.tsx  # FD management — list, add, edit, delete
 │   │   ├── FloatingAddMenu.tsx   # Quick floating menu to add assets
-│   │   ├── GoldHoldingView.tsx   # Gold holdings management view with live MCX ticker
 │   │   ├── Header.tsx            # Top bar — total value, P&L, refresh controls, Import/Export trigger
 │   │   ├── HoldingDetailDrawer.tsx # Apple-style responsive holding detail drawer
 │   │   ├── InsightsPanel.tsx     # Detailed drift, gainer, loser, and performer panels
-│   │   ├── InsuranceView.tsx     # Insurance policy management view
 │   │   ├── MobileAlertsView.tsx  # Mobile view display for dismissed/active portfolio alerts
 │   │   ├── MobileBottomNav.tsx   # Sticky mobile tabs navigation bar with alert badge count
 │   │   ├── MobileHomeSummary.tsx # Mobile view dashboard summary
@@ -169,13 +170,11 @@ project antigravity/
 │   │   ├── PinLockScreen.tsx     # Secure session-based PIN lock keypad gate screen
 │   │   ├── PortfolioAssistant.tsx # Conversational AI portfolio assistant
 │   │   ├── PortfolioTable.tsx    # Sortable holdings table with preset selectors & allocation column
-│   │   ├── RealEstateView.tsx    # Real estate property management view
 │   │   ├── RenamePortfolioModal.tsx # Modal form to rename family member portfolios
 │   │   ├── SearchBar.tsx         # Fuzzy global search palette (Cmd/Ctrl + K)
 │   │   ├── SectionErrorBoundary.tsx # Nested React error boundary for asset-specific dashboard components
 │   │   ├── SmartImportModal.tsx  # AI document & CSV smart extraction modal
 │   │   ├── SummaryCards.tsx      # KPI cards — invested, current, P&L, today
-│   │   ├── TaxHarvestingView.tsx # Real-time tax loss harvesting opportunity finder
 │   │   └── Toast.tsx             # Global non-blocking notification toast component
 │   ├── domains/                  # Clean Architecture domain models, calculations, services, and repositories
 │   │   ├── ai/                   # AI assistant intent classifier and deterministic tools
@@ -210,11 +209,10 @@ project antigravity/
 │   │   ├── usePortfolioData.ts   # Backward-compatible portfolio state facade
 │   │   ├── usePortfolioInsights.ts # Computes allocation, performer, and reminder insights
 │   │   ├── usePullToRefresh.ts   # Tactile mobile pull-to-refresh hook
-│   │   ├── useRDData.ts          # Thin hook wrapper pulling Recurring Deposits CRUD from context
-│   │   ├── useSIPData.ts         # Thin hook wrapper pulling Mutual Fund SIPs CRUD from context
 │   │   └── useSwipeNavigation.ts # Touch swipe gesture tracking for mobile tab layout
 │   ├── workers/
-│   │   └── xirr.worker.ts        # Background Web Worker for Newton-Raphson XIRR cash flow calculation
+│   │   ├── xirr.worker.ts        # Background Web Worker for Newton-Raphson XIRR cash flow calculation
+│   │   └── xirrClient.ts         # Asynchronous Promise client with sync fallback
 │   ├── types/
 │   │   └── portfolio.ts          # Core TypeScript interfaces (Holding, NetWorthSnapshot, etc.)
 │   ├── utils/

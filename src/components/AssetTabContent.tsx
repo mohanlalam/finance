@@ -10,14 +10,14 @@ import { pnlColor, formatPercent, formatINR } from '../utils/formatters';
 
 // Lazy-loaded: only fetched when the user navigates to that tab
 const PortfolioTable    = React.lazy(() => import('./PortfolioTable'));
-const GoldHoldingView   = React.lazy(() => import('./GoldHoldingView'));
-const RealEstateView    = React.lazy(() => import('./RealEstateView'));
-const InsuranceView     = React.lazy(() => import('./InsuranceView'));
-const DocumentVaultView = React.lazy(() => import('./DocumentVaultView'));
-const FixedDepositView  = React.lazy(() => import('./FixedDepositView'));
+const GoldHoldingView   = React.lazy(() => import('./gold/GoldHoldingView'));
+const RealEstateView    = React.lazy(() => import('./realestate/RealEstateView'));
+const InsuranceView     = React.lazy(() => import('./insurance/InsuranceView'));
+const DocumentVaultView = React.lazy(() => import('./documents/DocumentVaultView'));
+const FixedDepositView  = React.lazy(() => import('./fd/FixedDepositView'));
 const RDView            = React.lazy(() => import('./rd/RDView'));
 const SIPView           = React.lazy(() => import('./sip/SIPView'));
-const TaxHarvestingView = React.lazy(() => import('./TaxHarvestingView'));
+const TaxHarvestingView = React.lazy(() => import('./tax/TaxHarvestingView'));
 
 type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
 

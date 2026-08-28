@@ -1,13 +1,13 @@
 import React, { useState, useCallback } from 'react';
-import { FixedDeposit, DocumentMetadata, PortfolioName } from '../types/portfolio';
-import ConfirmModal from './ConfirmModal';
-import DepositDetailsCard from './fd/DepositDetailsCard';
-import FDFormModal from './fd/FDFormModal';
-import AssetRegistryContainer from './ui/AssetRegistryContainer';
-import { usePortfolioStatus } from '../contexts/PortfolioContext';
-import { useToastActions } from '../contexts/ToastContext';
-import { useAssetModal } from '../hooks/useAssetModal';
-import { useIsMobile } from '../hooks/useIsMobile';
+import { FixedDeposit, DocumentMetadata, PortfolioName } from '../../types/portfolio';
+import ConfirmModal from '../ConfirmModal';
+import DepositDetailsCard from './DepositDetailsCard';
+import FDFormModal from './FDFormModal';
+import AssetRegistryContainer from '../ui/AssetRegistryContainer';
+import { usePortfolioStatus } from '../../contexts/PortfolioContext';
+import { useToastActions } from '../../contexts/ToastContext';
+import { useAssetModal } from '../../hooks/useAssetModal';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
 
 interface PortfolioOption {

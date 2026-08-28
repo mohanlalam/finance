@@ -1,13 +1,13 @@
 import React, { useState, useCallback } from 'react';
-import { Insurance, DocumentMetadata, PortfolioName } from '../types/portfolio';
-import ConfirmModal from './ConfirmModal';
-import InsurancePolicyCard from './insurance/InsurancePolicyCard';
-import InsuranceFormModal from './insurance/InsuranceFormModal';
-import AssetRegistryContainer from './ui/AssetRegistryContainer';
-import { usePortfolioStatus } from '../contexts/PortfolioContext';
-import { useToastActions } from '../contexts/ToastContext';
-import { useAssetModal } from '../hooks/useAssetModal';
-import { useIsMobile } from '../hooks/useIsMobile';
+import { Insurance, DocumentMetadata, PortfolioName } from '../../types/portfolio';
+import ConfirmModal from '../ConfirmModal';
+import InsurancePolicyCard from './InsurancePolicyCard';
+import InsuranceFormModal from './InsuranceFormModal';
+import AssetRegistryContainer from '../ui/AssetRegistryContainer';
+import { usePortfolioStatus } from '../../contexts/PortfolioContext';
+import { useToastActions } from '../../contexts/ToastContext';
+import { useAssetModal } from '../../hooks/useAssetModal';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
 
 interface PortfolioOption {

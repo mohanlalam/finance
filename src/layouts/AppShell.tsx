@@ -225,9 +225,9 @@ export default function AppShell() {
     if (typeof window === 'undefined') return;
     const prefetchViews = () => {
       import('../components/PortfolioTable');
-      import('../components/FixedDepositView');
+      import('../components/fd/FixedDepositView');
       import('../components/sip/SIPView');
-      import('../components/GoldHoldingView');
+      import('../components/gold/GoldHoldingView');
     };
     if ('requestIdleCallback' in window) {
       const handle = (window as unknown as { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(prefetchViews);

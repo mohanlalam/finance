@@ -1,23 +1,23 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { GoldHolding, DocumentMetadata, PortfolioName } from '../types/portfolio';
-import ConfirmModal from './ConfirmModal';
-import Modal from './Modal';
-import GoldHoldingCard from './gold/GoldHoldingCard';
-import GoldFormModal from './gold/GoldFormModal';
-import AssetRegistryContainer from './ui/AssetRegistryContainer';
-import { usePortfolioStatus } from '../contexts/PortfolioContext';
-import { useToastActions } from '../contexts/ToastContext';
-import { useAssetModal } from '../hooks/useAssetModal';
-import { useIsMobile } from '../hooks/useIsMobile';
+import { GoldHolding, DocumentMetadata, PortfolioName } from '../../types/portfolio';
+import ConfirmModal from '../ConfirmModal';
+import Modal from '../Modal';
+import GoldHoldingCard from './GoldHoldingCard';
+import GoldFormModal from './GoldFormModal';
+import AssetRegistryContainer from '../ui/AssetRegistryContainer';
+import { usePortfolioStatus } from '../../contexts/PortfolioContext';
+import { useToastActions } from '../../contexts/ToastContext';
+import { useAssetModal } from '../../hooks/useAssetModal';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
-import { RotateCw, TrendingUp, TrendingDown, Scale, Coins, Check } from './icons/AppIcons';
+import { RotateCw, TrendingUp, TrendingDown, Scale, Coins, Check } from '../icons/AppIcons';
 import { 
   deriveGoldRates, 
   saveStoredGoldRate, 
   fetchLiveGoldRates, 
   clearCustomGoldRate 
-} from '../utils/goldPricing';
-import { formatINR, formatPercent, pnlColor } from '../utils/formatters';
+} from '../../utils/goldPricing';
+import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 
 interface PortfolioOption {
   name: string;

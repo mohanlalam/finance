@@ -8,17 +8,17 @@ import {
   RealEstate,
   Insurance,
   Holding,
-} from '../types/portfolio';
-import { uploadDocumentFile, removeDocumentFiles, openSecureDocument, generateDocumentStoragePath } from '../utils/supabaseStorage';
-import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X } from './icons/AppIcons';
-import Modal from './Modal';
-import ConfirmModal from './ConfirmModal';
-import { usePortfolioStatus } from '../contexts/PortfolioContext';
-import { useToastActions } from '../contexts/ToastContext';
-import { useIsMobile } from '../hooks/useIsMobile';
+} from '../../types/portfolio';
+import { uploadDocumentFile, removeDocumentFiles, openSecureDocument, generateDocumentStoragePath } from '../../utils/supabaseStorage';
+import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X } from '../icons/AppIcons';
+import Modal from '../Modal';
+import ConfirmModal from '../ConfirmModal';
+import { usePortfolioStatus } from '../../contexts/PortfolioContext';
+import { useToastActions } from '../../contexts/ToastContext';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
-import AssetCardSkeleton from './AssetCardSkeleton';
-import EmptyState from './EmptyState';
+import AssetCardSkeleton from '../AssetCardSkeleton';
+import EmptyState from '../EmptyState';
 
 type AssetType = 'general' | 'stock' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance';
 

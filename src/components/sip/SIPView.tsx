@@ -3,8 +3,7 @@ import { DocumentMetadata, SIPAccount, PortfolioName, SIPPayload } from '../../t
 import ConfirmModal from '../ConfirmModal';
 import SIPAccountCard from './SIPAccountCard';
 import { SIPFormModal } from './SIPFormModal';
-import { useSIPData } from '../../hooks/useSIPData';
-import { usePortfolioStatus } from '../../contexts/PortfolioContext';
+import { usePortfolioStatus, usePortfolioActions } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import { useAssetModal } from '../../hooks/useAssetModal';
@@ -30,7 +29,7 @@ interface SIPViewProps {
 }
 
 export function SIPView({
-  sipAccounts: propSipAccounts,
+  sipAccounts: propSipAccounts = [],
   documents,
   portfolioName,
   portfolioOptions,
@@ -42,10 +41,9 @@ export function SIPView({
   const isMobile = useIsMobile();
   const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
+  const { addSIPAccount, updateSIPAccount, deleteSIPAccount } = usePortfolioActions();
 
-  // Fallback to domain hook only if props not provided
-  const hookData = useSIPData();
-  const rawAccounts = propSipAccounts ?? hookData.sipAccounts;
+  const rawAccounts = propSipAccounts;
 
   const {
     showModal,
@@ -69,7 +67,7 @@ export function SIPView({
         if (onAdd) {
           await onAdd('sip_account', targetPortfolioName, payload);
         } else {
-          await hookData.addSIPAccount(targetPortfolioName, payload);
+          await addSIPAccount(targetPortfolioName, payload);
         }
         addToast('Mutual Fund / SIP created', 'success');
         closeModal();
@@ -77,7 +75,7 @@ export function SIPView({
         addToast(err instanceof Error ? err.message : 'Failed to add SIP', 'error');
       }
     },
-    [onAdd, hookData, addToast, closeModal]
+    [onAdd, addSIPAccount, addToast, closeModal]
   );
 
   const handleUpdateSIP = useCallback(
@@ -86,7 +84,7 @@ export function SIPView({
         if (onUpdate) {
           await onUpdate('sip_account', id, payload);
         } else {
-          await hookData.updateSIPAccount(id, payload);
+          await updateSIPAccount(id, payload);
         }
         addToast('Mutual Fund / SIP updated', 'success');
         closeModal();
@@ -94,7 +92,7 @@ export function SIPView({
         addToast(err instanceof Error ? err.message : 'Failed to update SIP', 'error');
       }
     },
-    [onUpdate, hookData, addToast, closeModal]
+    [onUpdate, updateSIPAccount, addToast, closeModal]
   );
 
   const handleDelete = useCallback(async () => {
@@ -104,7 +102,7 @@ export function SIPView({
       if (onDelete) {
         await onDelete('sip_account', confirmDeleteItem.id);
       } else {
-        await hookData.deleteSIPAccount(confirmDeleteItem.id);
+        await deleteSIPAccount(confirmDeleteItem.id);
       }
       addToast('Mutual Fund / SIP deleted', 'success');
       setConfirmDeleteItem(null);
@@ -113,7 +111,7 @@ export function SIPView({
     } finally {
       setDeleting(false);
     }
-  }, [confirmDeleteItem, onDelete, hookData, addToast, setConfirmDeleteItem]);
+  }, [confirmDeleteItem, onDelete, deleteSIPAccount, addToast, setConfirmDeleteItem]);
 
   return (
     <div>

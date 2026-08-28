@@ -3,8 +3,7 @@ import { DocumentMetadata, RDAccount, PortfolioName, RDPayload } from '../../typ
 import ConfirmModal from '../ConfirmModal';
 import RDAccountCard from './RDAccountCard';
 import { RDFormModal } from './RDFormModal';
-import { useRDData } from '../../hooks/useRDData';
-import { usePortfolioStatus } from '../../contexts/PortfolioContext';
+import { usePortfolioStatus, usePortfolioActions } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import { useAssetModal } from '../../hooks/useAssetModal';
@@ -30,7 +29,7 @@ interface RDViewProps {
 }
 
 export function RDView({
-  rdAccounts: propRdAccounts,
+  rdAccounts: propRdAccounts = [],
   documents,
   portfolioName,
   portfolioOptions,
@@ -42,10 +41,9 @@ export function RDView({
   const isMobile = useIsMobile();
   const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
+  const { addRDAccount, updateRDAccount, deleteRDAccount } = usePortfolioActions();
 
-  // Fallback to domain hook only if props not provided
-  const hookData = useRDData();
-  const rawAccounts = propRdAccounts ?? hookData.rdAccounts;
+  const rawAccounts = propRdAccounts;
 
   const {
     showModal,
@@ -69,7 +67,7 @@ export function RDView({
         if (onAdd) {
           await onAdd('rd_account', targetPortfolioName, payload);
         } else {
-          await hookData.addRDAccount(targetPortfolioName, payload);
+          await addRDAccount(targetPortfolioName, payload);
         }
         addToast('Recurring Deposit created', 'success');
         closeModal();
@@ -77,7 +75,7 @@ export function RDView({
         addToast(err instanceof Error ? err.message : 'Failed to add RD', 'error');
       }
     },
-    [onAdd, hookData, addToast, closeModal]
+    [onAdd, addRDAccount, addToast, closeModal]
   );
 
   const handleUpdateRD = useCallback(
@@ -86,7 +84,7 @@ export function RDView({
         if (onUpdate) {
           await onUpdate('rd_account', id, payload);
         } else {
-          await hookData.updateRDAccount(id, payload);
+          await updateRDAccount(id, payload);
         }
         addToast('Recurring Deposit updated', 'success');
         closeModal();
@@ -94,7 +92,7 @@ export function RDView({
         addToast(err instanceof Error ? err.message : 'Failed to update RD', 'error');
       }
     },
-    [onUpdate, hookData, addToast, closeModal]
+    [onUpdate, updateRDAccount, addToast, closeModal]
   );
 
   const handleDelete = useCallback(async () => {
@@ -104,7 +102,7 @@ export function RDView({
       if (onDelete) {
         await onDelete('rd_account', confirmDeleteItem.id);
       } else {
-        await hookData.deleteRDAccount(confirmDeleteItem.id);
+        await deleteRDAccount(confirmDeleteItem.id);
       }
       addToast('Recurring Deposit deleted', 'success');
       setConfirmDeleteItem(null);
@@ -113,7 +111,7 @@ export function RDView({
     } finally {
       setDeleting(false);
     }
-  }, [confirmDeleteItem, onDelete, hookData, addToast, setConfirmDeleteItem]);
+  }, [confirmDeleteItem, onDelete, deleteRDAccount, addToast, setConfirmDeleteItem]);
 
   return (
     <div>
