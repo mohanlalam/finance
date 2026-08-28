@@ -294,16 +294,41 @@ npm run dev
 ```
 The app will be available at `http://localhost:5173`.
 
-### 6. Code Quality & Verification
-To verify that the code passes linting rules and TypeScript compilation check, run:
+### 6. Testing & Quality Verification
+The codebase contains a comprehensive automated test suite across pure calculation domains, component interactions, and security checks:
 ```bash
-npm run verify
+npm test          # Run Vitest test suite (30 test files, 165+ tests)
+npm run test:ui   # Interactive test runner UI with watch mode
+npm run verify    # Run lint + typecheck + build in sequence
 ```
-This runs lint, typecheck, and a production build in sequence. You can also run individual checks:
-```bash
-npm run lint
-npm run typecheck
-```
+
+---
+
+## 🛡️ Security Architecture & Threat Model
+
+1. **Server-Side PIN Authentication (Fail-Closed)**:
+   - Client-side PIN entries are hashed with SHA-256 (`crypto.subtle.digest`) and sent via the `X-App-Pin` header.
+   - Supabase Edge Functions (`holdings-crud`, `verify-pin`, `snapshot-net-worth`) validate this header directly against the server-side `APP_PIN_HASH` environment secret.
+   - If the server PIN secret is missing or unconfigured, functions **Fail Closed (HTTP 503)** immediately.
+2. **Brute-Force & Rate-Limiting Protection**:
+   - IP-based sliding window rate limiter (`MAX_FAILED_ATTEMPTS = 5`, `RATE_WINDOW_MS = 5 min`) protects all PIN-locked endpoints.
+   - Exceeding attempts returns **HTTP 429 (Too Many Requests)** with standard `Retry-After` headers.
+3. **Private Document Storage with Time-Limited Signed URLs**:
+   - The `investment-documents` bucket is strictly **private (`public = false`)** with all direct public read/write policies dropped.
+   - Attachments are accessed via short-lived signed URLs (60-second expiration) issued by PIN-authenticated Edge Functions.
+   - Client-side storage path generators enforce UUID path randomization and sanitization against directory traversal (`../`).
+4. **Biometric Hardware-Backed Authentication**:
+   - WebAuthn platform authenticators enable 1-second FaceID, TouchID, and Windows Hello unlocking without transmitting credentials over the wire.
+
+---
+
+## 💾 Data Resilience & Disaster Recovery
+
+1. **Schema-Validated Full Backup & Restore**:
+   - Unified export in JSON, CSV, and printable PDF statements.
+   - The backup restore engine (`backupValidator.ts`) enforces envelope integrity, schema structure, and duplicate collision detection before applying restorations to the database.
+2. **Automated Daily Net Worth Snapshots**:
+   - The `snapshot-net-worth` Edge Function runs daily, computing exact consolidated valuations across all asset classes and logging historical timeline snapshots into `net_worth_history`.
 
 ---
 
@@ -312,6 +337,7 @@ npm run typecheck
 | Script | Command | Description |
 |---|---|---|
 | **Dev Server** | `npm run dev` | Start Vite dev server with HMR |
+| **Test Suite** | `npm test` | Run Vitest unit & integration tests (165+ tests) |
 | **Build** | `npm run build` | Production build to `dist/` |
 | **Preview** | `npm run preview` | Preview the production build locally |
 | **Lint** | `npm run lint` | Run ESLint checks |
@@ -324,7 +350,7 @@ npm run typecheck
 
 ## 🌐 Deployment
 
-A GitHub Actions workflow is pre-configured in `.github/workflows/deploy.yml` to automatically build and deploy the app to GitHub Pages when commits are pushed to the `main` branch.
+A GitHub Actions workflow is pre-configured in `.github/workflows/deploy.yml` to automatically run linters, strict TypeScript checks, Vitest test suites, and production builds before deploying to GitHub Pages when commits are pushed to the `main` branch.
 
 To enable this:
 1. Go to your repository settings on GitHub: **Settings → Pages**.
@@ -332,6 +358,8 @@ To enable this:
 3. Configure the required secrets under **Settings → Secrets and variables → Actions** with your production environment variables:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_APP_PIN`
+   - `VITE_GEMINI_API_KEY`
 
 ---
 

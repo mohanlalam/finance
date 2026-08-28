@@ -21,9 +21,9 @@ export function generateDocumentStoragePath(
   folder: string,
   fileName: string
 ): string {
-  const safePortfolio = portfolio.trim().replace(/[^\w.-]/g, '_') || 'default';
-  const safeFolder = folder.trim().replace(/[^\w.-]/g, '_') || 'general';
-  const safeName = fileName.trim().replace(/[^\w.-]/g, '_');
+  const safePortfolio = portfolio.trim().replace(/\.\.+/g, '_').replace(/[^\w.-]/g, '_') || 'default';
+  const safeFolder = folder.trim().replace(/\.\.+/g, '_').replace(/[^\w.-]/g, '_') || 'general';
+  const safeName = fileName.trim().replace(/\.\.+/g, '_').replace(/[^\w.-]/g, '_');
   const uuid = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
     ? crypto.randomUUID()
     : `${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
