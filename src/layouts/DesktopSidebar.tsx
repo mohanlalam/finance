@@ -53,9 +53,9 @@ export default function DesktopSidebar({
 
       {/* Portfolios Section */}
       <div className="mb-5">
-        <h3 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-3">
+        <h2 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-3">
           Family Members
-        </h3>
+        </h2>
         <div className="space-y-0.5">
           <button
             type="button"
@@ -116,9 +116,9 @@ export default function DesktopSidebar({
 
       {/* Assets Section */}
       <div className="mb-5">
-        <h3 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-3">
+        <h2 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-3">
           Assets &amp; Holdings
-        </h3>
+        </h2>
         <div className="space-y-0.5">
           {([
             { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={14} /> },
@@ -148,9 +148,9 @@ export default function DesktopSidebar({
 
       {/* Tools Section */}
       <div>
-        <h3 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-3">
+        <h2 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-3">
           Tools &amp; Vault
-        </h3>
+        </h2>
         <div className="space-y-0.5">
           {([
             { id: 'documents', label: 'Document Vault', icon: <FolderOpen size={14} /> },

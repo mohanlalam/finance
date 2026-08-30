@@ -218,6 +218,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                   )}
                   {tab.id === 'home' && alertCount > 0 && (
                     <span 
+                      role="status"
                       className="absolute -top-1 -right-1 min-w-[15px] h-[15px] rounded-full bg-[var(--negative)] text-white text-[9px] font-extrabold flex items-center justify-center px-1 leading-none shadow-xs"
                       aria-label={`${alertCount} notifications`}
                     >

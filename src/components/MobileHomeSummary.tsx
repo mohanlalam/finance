@@ -76,7 +76,7 @@ function MobileHomeSummary({
   const { isBalancesHidden } = usePrivacy();
 
   const renderValue = useCallback((val: number, formatter = formatINR) => {
-    if (isBalancesHidden) return <span aria-label="Amount hidden">••••••</span>;
+    if (isBalancesHidden) return <span role="text" aria-label="Amount hidden" title="Amount hidden">••••••</span>;
     return <AnimatedNumber value={val} formatter={formatter} />;
   }, [isBalancesHidden]);
 

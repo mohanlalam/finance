@@ -69,8 +69,8 @@ function SummaryCards({
   const { isBalancesHidden } = usePrivacy();
   const { addToast } = useToastActions();
 
-  const renderValue = (val: number, formatter = formatINR) => {
-    if (isBalancesHidden) return <span aria-label="Amount hidden">••••••</span>;
+  const renderValue = (val: number, formatter: (n: number) => string = formatINR) => {
+    if (isBalancesHidden) return <span role="text" aria-label="Amount hidden" title="Amount hidden">••••••</span>;
     return <AnimatedNumber value={val} formatter={formatter} />;
   };
 

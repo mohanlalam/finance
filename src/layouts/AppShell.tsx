@@ -778,7 +778,7 @@ export default function AppShell() {
           <>
             {/* Desktop layout: sidebar + main content area */}
             <div className="flex gap-0">
-              <Suspense fallback={null}>
+              <Suspense fallback={<div className="hidden md:block w-60 shrink-0 pr-4 mr-4" aria-hidden="true" />}>
                 <DesktopSidebar
                   activeTab={effectiveAsset}
                   onTabChange={handleSidebarTabChange}
