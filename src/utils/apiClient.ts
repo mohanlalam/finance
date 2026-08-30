@@ -124,7 +124,7 @@ export async function invokeFunction<T>(pathAndQuery: string, options: FunctionR
 
   const promise = (async () => {
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs ?? REQUEST_TIMEOUT_MS);
+    const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? REQUEST_TIMEOUT_MS);
 
     try {
       const defaultHeaders = await buildHeaders();
@@ -166,13 +166,13 @@ export async function invokeFunction<T>(pathAndQuery: string, options: FunctionR
         rawMessage: err instanceof Error ? err.message : String(err),
       });
     } finally {
-      window.clearTimeout(timeout);
+      clearTimeout(timeout);
     }
   })();
 
   if (isGetLike) {
     inflightRequests.set(cacheKey, promise);
-    promise.finally(() => inflightRequests.delete(cacheKey));
+    promise.catch(() => {}).finally(() => inflightRequests.delete(cacheKey));
   }
 
   return promise;

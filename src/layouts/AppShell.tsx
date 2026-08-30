@@ -228,6 +228,10 @@ export default function AppShell() {
       import('../components/fd/FixedDepositView');
       import('../components/sip/SIPView');
       import('../components/gold/GoldHoldingView');
+      import('../components/realestate/RealEstateView');
+      import('../components/insurance/InsuranceView');
+      import('../components/documents/DocumentVaultView');
+      import('../components/tax/TaxHarvestingView');
     };
     if ('requestIdleCallback' in window) {
       const handle = (window as unknown as { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(prefetchViews);

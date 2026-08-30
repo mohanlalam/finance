@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { portfolioService } from '../services/portfolioService';
+import { offlineOutboxService } from '../services/offlineOutboxService';
 import { AssetPayload } from '../../../types/portfolio';
 import { AppApiError } from '../../../utils/apiClient';
 
@@ -8,7 +9,24 @@ interface UsePortfolioMutationOptions {
   onAuthExpired?: () => void;
 }
 
+function isNetworkError(err: unknown): boolean {
+  if (typeof navigator !== 'undefined' && !navigator.onLine) return true;
+  if (err instanceof AppApiError && (err.code === 'network' || err.code === 'timeout')) {
+    return true;
+  }
+  if (err instanceof TypeError && err.message.toLowerCase().includes('failed to fetch')) {
+    return true;
+  }
+  return false;
+}
+
 export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMutationOptions) {
+  // Initialize auto-sync listener
+  useEffect(() => {
+    const cleanup = offlineOutboxService.initAutoSync(onReload);
+    return cleanup;
+  }, [onReload]);
+
   const addPortfolio = useCallback(
     async (name: string, label: string) => {
       try {
@@ -17,6 +35,11 @@ export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMu
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') {
           onAuthExpired?.();
+          throw err;
+        }
+        if (isNetworkError(err)) {
+          await offlineOutboxService.enqueue('ADD_PORTFOLIO', { name, label });
+          return;
         }
         throw err;
       }
@@ -32,6 +55,11 @@ export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMu
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') {
           onAuthExpired?.();
+          throw err;
+        }
+        if (isNetworkError(err)) {
+          await offlineOutboxService.enqueue('RENAME_PORTFOLIO', { id, newLabel });
+          return;
         }
         throw err;
       }
@@ -47,6 +75,11 @@ export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMu
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') {
           onAuthExpired?.();
+          throw err;
+        }
+        if (isNetworkError(err)) {
+          await offlineOutboxService.enqueue('DELETE_PORTFOLIO', { id });
+          return;
         }
         throw err;
       }
@@ -70,6 +103,11 @@ export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMu
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') {
           onAuthExpired?.();
+          throw err;
+        }
+        if (isNetworkError(err)) {
+          await offlineOutboxService.enqueue('ADD_ASSET', { assetType, portfolioName, payload });
+          return { id: `offline_${Date.now()}` };
         }
         throw err;
       }
@@ -85,6 +123,11 @@ export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMu
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') {
           onAuthExpired?.();
+          throw err;
+        }
+        if (isNetworkError(err)) {
+          await offlineOutboxService.enqueue('UPDATE_ASSET', { assetType, id, payload });
+          return;
         }
         throw err;
       }
@@ -100,6 +143,11 @@ export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMu
       } catch (err) {
         if (err instanceof AppApiError && err.code === 'auth') {
           onAuthExpired?.();
+          throw err;
+        }
+        if (isNetworkError(err)) {
+          await offlineOutboxService.enqueue('DELETE_ASSET', { assetType, id });
+          return;
         }
         throw err;
       }
@@ -114,5 +162,6 @@ export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMu
     addAsset,
     updateAsset,
     deleteAsset,
+    drainOutbox: offlineOutboxService.drain.bind(offlineOutboxService),
   };
 }
