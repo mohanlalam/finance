@@ -217,7 +217,7 @@ export function RDFormModal({
           </div>
 
           {/* Monthly Deposit & Interest Rate */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Monthly Deposit (₹)</label>
               <input
@@ -246,7 +246,7 @@ export function RDFormModal({
           </div>
 
           {/* Start Date & Maturity Date */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Start Date</label>
               <input
@@ -270,7 +270,7 @@ export function RDFormModal({
           </div>
 
           {/* Maturity Amount & Status */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Est. Maturity Amount (₹)</label>
               <input

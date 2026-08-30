@@ -188,7 +188,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
               Policy Type
@@ -217,7 +217,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
               Policy Number
@@ -247,7 +247,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
               Premium Amount (₹)

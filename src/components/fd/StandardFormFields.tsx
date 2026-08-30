@@ -56,7 +56,7 @@ export function StandardFormFields({
         </datalist>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Principal Amount (₹)</label>
           <input
@@ -84,7 +84,7 @@ export function StandardFormFields({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Start Date</label>
           <input
@@ -106,14 +106,14 @@ export function StandardFormFields({
           />
         </div>
         {startDate && maturityDate && (
-          <div className="col-span-2 text-xs text-indigo-600 dark:text-indigo-400 font-medium -mt-1 flex items-center gap-1">
+          <div className="sm:col-span-2 text-xs text-indigo-600 dark:text-indigo-400 font-medium -mt-1 flex items-center gap-1">
             <span>Duration:</span>
             <strong className="font-bold">{formatDateDuration(startDate, maturityDate)}</strong>
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Maturity Amount (₹)</label>
           <input
