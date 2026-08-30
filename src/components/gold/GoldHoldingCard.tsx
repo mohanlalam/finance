@@ -71,9 +71,12 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
           </div>
         </div>
 
-        <div className="flex items-center justify-between sm:justify-end gap-4">
-          <div className="text-right">
-            <p className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(currentValuation)}</p>
+        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
+          <div className="text-left sm:text-right">
+            <span className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block sm:hidden">
+              Current Value
+            </span>
+            <p className="text-sm font-black text-[var(--text-primary)] text-financial tnum">{formatINR(currentValuation)}</p>
             <p className={`text-xs font-semibold tnum ${pnlColor(pnl)}`}>
               {pnl >= 0 ? '+' : ''}{formatINR(pnl)} ({formatPercent(pnlPct)})
             </p>

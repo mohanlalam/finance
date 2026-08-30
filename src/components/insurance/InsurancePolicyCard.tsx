@@ -69,11 +69,14 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
           </div>
         </div>
 
-        <div className="flex items-center justify-between sm:justify-end gap-4">
-          <div className="text-right">
-            <p className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(policy.sum_assured)}</p>
+        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
+          <div className="text-left sm:text-right">
+            <span className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block sm:hidden">
+              Sum Assured
+            </span>
+            <p className="text-sm font-black text-[var(--text-primary)] text-financial tnum">{formatINR(policy.sum_assured)}</p>
             <p className="text-xs text-[var(--text-tertiary)] tnum">
-              Prem: {formatINR(policy.premium_amount)}
+              Prem: {formatINR(policy.premium_amount)}/yr
             </p>
           </div>
 

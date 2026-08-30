@@ -128,7 +128,7 @@ export function RDAccountCard({
         </div>
 
         {/* Center: Balances & Math */}
-        <div className="flex items-center gap-6 sm:gap-8 text-right flex-wrap sm:flex-nowrap shrink-0">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 sm:gap-8 text-left sm:text-right w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--border-subtle)] shrink-0">
           <div>
             <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Monthly Deposit</p>
             <p className="text-xs font-bold text-[var(--text-secondary)] tnum">{formatINR(account.monthly_deposit)}</p>
@@ -143,7 +143,7 @@ export function RDAccountCard({
           </div>
           <div>
             <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Current Value</p>
-            <p className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(currentVal)}</p>
+            <p className="text-sm font-black text-[var(--text-primary)] text-financial tnum">{formatINR(currentVal)}</p>
             {interestEarned > 0 && (
               <p className="text-[10px] font-bold text-[var(--positive)] mt-0.5 tnum">
                 +{formatINR(interestEarned)} interest

@@ -133,7 +133,7 @@ export default function FloatingAddMenu({
             role="dialog"
             aria-modal="true"
             aria-label="Quick Add Asset Menu"
-            className="pointer-events-auto w-full sm:w-80 max-h-[75vh] overflow-y-auto bg-[var(--surface)] border border-[var(--border-subtle)] rounded-t-[var(--radius-large)] sm:rounded-[var(--radius-large)] shadow-2xl p-4 mb-2 space-y-3 pb-safe sm:pb-4 apple-card animate-slide-up"
+            className="pointer-events-auto w-[calc(100vw-1.5rem)] max-w-sm sm:w-80 max-h-[75vh] overflow-y-auto bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-2xl p-4 mb-2 space-y-3 pb-safe sm:pb-4 apple-card animate-slide-up"
           >
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)] gap-2">
               <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
