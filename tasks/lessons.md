@@ -201,13 +201,26 @@ After **any correction** from the user, append a new entry here with the pattern
 4. **Financial Calculation Correctness**: Mathematical invariants, single-pass aggregations, float rounding with `Number.EPSILON`, XIRR worker-to-sync parity, and Indian IT Act FY24-25 STCG/LTCG set-off logic.
 ---
 
-### 2026-08-30 — Mobile Responsive Form Grids and Horizontal Scroll Tab Navigation
-**Mistake**: Date picker and amount fields collided or wrapped awkwardly when using `grid-cols-2` inside modals on mobile screens (< 400px), and `grid-cols-2` on family tabs squeezed member names down to ~45px with severe truncation.
-**Root Cause**: Native HTML date pickers (`type="date"`) and unit inputs require a minimum width of ~160px for comfortable touch interaction and full date format (`DD/MM/YYYY`). In 2-column modal layouts on 375px viewports (which only provide ~130px per column after padding), inputs collide. Similarly, segmented tab grids on mobile force vertical stacking and horizontal cramping.
-**Fix**:
-1. Converted all modal date and amount input grids to responsive `grid grid-cols-1 sm:grid-cols-2 gap-3` across all asset modals (`StandardFormFields.tsx`, `RDFormModal.tsx`, `SIPFormFields.tsx`, `GoldFormModal.tsx`, `RealEstateFormModal.tsx`, `InsuranceFormModal.tsx`).
-2. Converted `FamilyTabBar` on mobile to a smooth horizontal scrolling pill track (`flex items-center gap-1.5 overflow-x-auto scrollbar-none`) with unclipped labels and trailing action buttons.
-**Rule**: Never force paired date pickers or multi-unit financial inputs into 2 columns on mobile screens (`grid-cols-2`). Always use responsive classes (`grid-cols-1 sm:grid-cols-2`). For navigation tabs with dynamic member lists, always use horizontal scrolling pill tracks (`overflow-x-auto scrollbar-none`) rather than rigid multi-column grids.
+### 2026-08-30 — Global Mobile Date Input Intrinsic Width Overflow in 2-Column Grids & Cancel Button Border Standardization
+**Mistake**: Native date picker inputs (`input[type="date"]`) collided with adjacent fields in 2-column modal layouts on mobile browsers despite having `min-w-0` on inputs, and modal Cancel buttons lacked crisp high-contrast borders.  
+**Root Cause**: Mobile browsers (WebKit/iOS Safari and Chromium mobile) assign native date/time inputs an intrinsic minimum content width (`min-content`) that resists shrink-wrapping in CSS grid columns. Without explicit `min-width: 0 !important`, `max-width: 100%`, and `appearance: none` in CSS alongside `overflow-hidden` on parent grid cells, the date picker expands outside its 50% grid column and causes overlap.  
+**Fix**: 
+1. Added a global CSS reset rule in `src/index.css`:
+   ```css
+   input[type="date"],
+   input[type="datetime-local"],
+   input[type="time"],
+   input[type="month"],
+   input[type="week"] {
+     min-width: 0 !important;
+     max-width: 100%;
+     overflow: hidden;
+     appearance: none;
+   }
+   ```
+2. Added `min-w-0 overflow-hidden` to parent column wrapper `<div>`s across all modals (`StandardFormFields.tsx`, `RDFormModal.tsx`, `SIPFormFields.tsx`, `InsuranceFormModal.tsx`).
+3. Standardized all form input heights to uniform `h-10` (40px) and added visible, high-contrast borders (`border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200`) across all modal Cancel buttons.  
+**Rule**: Always apply global CSS constraints (`min-width: 0 !important; max-width: 100%; appearance: none;`) to all date/time input types and wrap them in `min-w-0 overflow-hidden` containers when used in CSS grid or multi-column layouts to completely prevent mobile browser intrinsic width expansion. Always ensure modal Cancel buttons have distinct high-contrast borders and matching uniform heights.
 
 
 
