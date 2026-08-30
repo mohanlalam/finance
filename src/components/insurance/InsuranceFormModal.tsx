@@ -247,31 +247,33 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-            Premium Amount (₹)
-          </label>
-          <input
-            type="number"
-            inputMode="decimal"
-            step="0.01"
-            placeholder="e.g. 24000"
-            value={premiumAmount}
-            onChange={(e) => setPremiumAmount(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
-          />
-        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="min-w-0">
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 truncate">
+              Premium Amount (₹)
+            </label>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              placeholder="e.g. 24000"
+              value={premiumAmount}
+              onChange={(e) => setPremiumAmount(e.target.value)}
+              className="w-full h-10 border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+            />
+          </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-            Renewal Date
-          </label>
-          <input
-            type="date"
-            value={renewalDate}
-            onChange={(e) => setRenewalDate(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
-          />
+          <div className="min-w-0">
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 truncate">
+              Renewal Date
+            </label>
+            <input
+              type="date"
+              value={renewalDate}
+              onChange={(e) => setRenewalDate(e.target.value)}
+              className="w-full h-10 min-w-0 border border-slate-200 dark:border-slate-700 rounded-[14px] px-2.5 sm:px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+            />
+          </div>
         </div>
 
         <div>
@@ -280,7 +282,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
           </label>
           <textarea
             rows={2}
-            placeholder="e.g. Includes maternity & room-rent cap rider"
+            placeholder="e.g. TPA details, cashless card number, claim helpline"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 resize-none"
@@ -309,14 +311,14 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            className="flex-1 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm rounded-[14px] h-11 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-xs ios-press transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-rose-600 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-rose-700 transition-colors disabled:opacity-50"
+            className="flex-1 bg-rose-600 text-white font-semibold text-sm rounded-[14px] h-11 py-2.5 hover:bg-rose-700 transition-colors disabled:opacity-50 ios-press shadow-xs cursor-pointer"
           >
             {loading ? 'Saving...' : editingPolicy ? 'Save Changes' : 'Add Policy'}
           </button>

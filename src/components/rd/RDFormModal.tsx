@@ -217,9 +217,9 @@ export function RDFormModal({
           </div>
 
           {/* Monthly Deposit & Interest Rate */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Monthly Deposit (₹)</label>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="min-w-0">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 truncate">Monthly Deposit (₹)</label>
               <input
                 type="number"
                 inputMode="decimal"
@@ -227,11 +227,11 @@ export function RDFormModal({
                 value={monthlyDeposit}
                 onChange={(e) => setMonthlyDeposit(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Interest Rate (% p.a.)</label>
+            <div className="min-w-0">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 truncate">Interest Rate (% p.a.)</label>
               <input
                 type="number"
                 inputMode="decimal"
@@ -240,53 +240,53 @@ export function RDFormModal({
                 value={interestRate}
                 onChange={(e) => setInterestRate(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
           </div>
 
           {/* Start Date & Maturity Date */}
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Start Date</label>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="min-w-0">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 truncate">Start Date</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2.5 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full h-10 min-w-0 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-2.5 sm:px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Maturity Date</label>
+            <div className="min-w-0">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 truncate">Maturity Date</label>
               <input
                 type="date"
                 value={maturityDate}
                 onChange={(e) => setMaturityDate(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2.5 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full h-10 min-w-0 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-2.5 sm:px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
           </div>
 
           {/* Maturity Amount & Status */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Est. Maturity Amount (₹)</label>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="min-w-0">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 truncate">Est. Maturity Amount (₹)</label>
               <input
                 type="number"
                 placeholder="Auto-computed"
                 value={maturityAmount}
                 onChange={(e) => setMaturityAmount(e.target.value)}
-                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Status</label>
+            <div className="min-w-0">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 truncate">Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as 'active' | 'matured')}
-                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               >
                 <option value="active">Active</option>
                 <option value="matured">Matured</option>
@@ -318,14 +318,14 @@ export function RDFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold text-sm rounded-[var(--radius-medium)] py-2.5 hover:bg-[var(--surface-secondary)] transition-colors ios-press"
+              className="flex-1 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-xs ios-press transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-[var(--accent-blue)] text-white font-semibold text-sm rounded-[var(--radius-medium)] py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50 ios-press shadow-xs"
+              className="flex-1 bg-[var(--accent-blue)] text-white font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50 ios-press shadow-xs cursor-pointer"
             >
               {loading ? 'Saving...' : editingAccount ? 'Save Changes' : 'Create RD'}
             </button>

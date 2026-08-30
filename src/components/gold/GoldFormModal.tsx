@@ -316,14 +316,14 @@ export const GoldFormModal = React.memo(function GoldFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            className="flex-1 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm rounded-[14px] h-11 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-xs ios-press transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-amber-600 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-amber-700 transition-colors disabled:opacity-50"
+            className="flex-1 bg-amber-600 text-white font-semibold text-sm rounded-[14px] h-11 py-2.5 hover:bg-amber-700 transition-colors disabled:opacity-50 ios-press shadow-xs cursor-pointer"
           >
             {loading ? 'Saving...' : editingHolding ? 'Save Changes' : 'Add Gold'}
           </button>

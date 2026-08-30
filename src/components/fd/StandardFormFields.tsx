@@ -47,7 +47,7 @@ export function StandardFormFields({
           placeholder="e.g. HDFC Bank, SBI, Post Office"
           value={bankName}
           onChange={(e) => setBankName(e.target.value)}
-          className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+          className="w-full h-10 border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
         />
         <datalist id="indian-bank-suggestions">
           {INDIAN_BANKS_LIST.map((b) => (
@@ -56,9 +56,9 @@ export function StandardFormFields({
         </datalist>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Principal Amount (₹)</label>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="min-w-0">
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 truncate">Principal Amount (₹)</label>
           <input
             type="number"
             inputMode="decimal"
@@ -66,11 +66,11 @@ export function StandardFormFields({
             value={principalAmount}
             onChange={(e) => setPrincipalAmount(e.target.value)}
             onBlur={calculateMaturity}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+            className="w-full h-10 border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
           />
         </div>
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Interest Rate (% p.a.)</label>
+        <div className="min-w-0">
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 truncate">Interest Rate (% p.a.)</label>
           <input
             type="number"
             inputMode="decimal"
@@ -79,58 +79,58 @@ export function StandardFormFields({
             value={interestRate}
             onChange={(e) => setInterestRate(e.target.value)}
             onBlur={calculateMaturity}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+            className="w-full h-10 border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
           />
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Start Date</label>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="min-w-0">
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 truncate">Start Date</label>
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             onBlur={calculateMaturity}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+            className="w-full h-10 min-w-0 border border-slate-200 dark:border-slate-700 rounded-[14px] px-2.5 sm:px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
           />
         </div>
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Maturity Date</label>
+        <div className="min-w-0">
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 truncate">Maturity Date</label>
           <input
             type="date"
             value={maturityDate}
             onChange={(e) => setMaturityDate(e.target.value)}
             onBlur={calculateMaturity}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+            className="w-full h-10 min-w-0 border border-slate-200 dark:border-slate-700 rounded-[14px] px-2.5 sm:px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
           />
         </div>
         {startDate && maturityDate && (
-          <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium -mt-1 flex items-center gap-1">
+          <div className="col-span-2 text-xs text-indigo-600 dark:text-indigo-400 font-medium -mt-1 flex items-center gap-1">
             <span>Duration:</span>
             <strong className="font-bold">{formatDateDuration(startDate, maturityDate)}</strong>
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Maturity Amount (₹)</label>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="min-w-0">
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 truncate">Maturity Amount (₹)</label>
           <input
             type="number"
             inputMode="decimal"
             placeholder="Auto-computed"
             value={maturityAmount}
             onChange={(e) => setMaturityAmount(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+            className="w-full h-10 border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
           />
         </div>
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Status</label>
+        <div className="min-w-0">
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 truncate">Status</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as 'active' | 'matured')}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+            className="w-full h-10 border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
           >
             <option value="active">Active</option>
             <option value="matured">Matured</option>
