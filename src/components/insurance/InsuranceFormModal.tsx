@@ -247,32 +247,31 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-              Premium Amount (₹)
-            </label>
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              placeholder="e.g. 24000"
-              value={premiumAmount}
-              onChange={(e) => setPremiumAmount(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-              Renewal Date
-            </label>
-            <input
-              type="date"
-              value={renewalDate}
-              onChange={(e) => setRenewalDate(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
-            />
-          </div>
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+            Premium Amount (₹)
+          </label>
+          <input
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            placeholder="e.g. 24000"
+            value={premiumAmount}
+            onChange={(e) => setPremiumAmount(e.target.value)}
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+            Renewal Date
+          </label>
+          <input
+            type="date"
+            value={renewalDate}
+            onChange={(e) => setRenewalDate(e.target.value)}
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+          />
         </div>
 
         <div>

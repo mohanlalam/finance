@@ -246,7 +246,7 @@ export function RDFormModal({
           </div>
 
           {/* Start Date & Maturity Date */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-3">
             <div>
               <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Start Date</label>
               <input
@@ -254,7 +254,7 @@ export function RDFormModal({
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2.5 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
             <div>
@@ -264,7 +264,7 @@ export function RDFormModal({
                 value={maturityDate}
                 onChange={(e) => setMaturityDate(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2.5 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
           </div>

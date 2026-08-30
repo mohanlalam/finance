@@ -56,7 +56,7 @@ export function StandardFormFields({
         </datalist>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Principal Amount (₹)</label>
           <input
@@ -84,7 +84,7 @@ export function StandardFormFields({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="space-y-3">
         <div>
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Start Date</label>
           <input
@@ -92,7 +92,7 @@ export function StandardFormFields({
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             onBlur={calculateMaturity}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
           />
         </div>
         <div>
@@ -102,18 +102,18 @@ export function StandardFormFields({
             value={maturityDate}
             onChange={(e) => setMaturityDate(e.target.value)}
             onBlur={calculateMaturity}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
           />
         </div>
         {startDate && maturityDate && (
-          <div className="sm:col-span-2 text-xs text-indigo-600 dark:text-indigo-400 font-medium -mt-1 flex items-center gap-1">
+          <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium -mt-1 flex items-center gap-1">
             <span>Duration:</span>
             <strong className="font-bold">{formatDateDuration(startDate, maturityDate)}</strong>
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Maturity Amount (₹)</label>
           <input
