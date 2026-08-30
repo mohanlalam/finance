@@ -129,7 +129,7 @@ export function SIPFormFields({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 overflow-hidden">
           <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 truncate">Start Date</label>
           <input
             type="date"
@@ -138,7 +138,7 @@ export function SIPFormFields({
             className="w-full h-10 min-w-0 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-2.5 sm:px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
           />
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 overflow-hidden">
           <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 truncate">
             Next SIP Date
           </label>

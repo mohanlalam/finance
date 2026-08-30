@@ -370,6 +370,20 @@ button, input, select, textarea, a, .ios-press, .mobile-asset-card {
   touch-action: manipulation;
 }
 
+/* Force date/time inputs to respect grid/flex container boundaries on all mobile browsers */
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input[type="month"],
+input[type="week"] {
+  min-width: 0 !important;
+  max-width: 100%;
+  overflow: hidden;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
 .mobile-hardware-layer {
   transform: translateZ(0);
   backface-visibility: hidden;

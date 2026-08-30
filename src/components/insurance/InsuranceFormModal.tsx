@@ -263,7 +263,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
             />
           </div>
 
-          <div className="min-w-0">
+          <div className="min-w-0 overflow-hidden">
             <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 truncate">
               Renewal Date
             </label>

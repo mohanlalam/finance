@@ -85,7 +85,7 @@ export function StandardFormFields({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 overflow-hidden">
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 truncate">Start Date</label>
           <input
             type="date"
@@ -95,7 +95,7 @@ export function StandardFormFields({
             className="w-full h-10 min-w-0 border border-slate-200 dark:border-slate-700 rounded-[14px] px-2.5 sm:px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
           />
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 overflow-hidden">
           <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 truncate">Maturity Date</label>
           <input
             type="date"
