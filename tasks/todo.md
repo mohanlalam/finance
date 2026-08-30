@@ -22,6 +22,16 @@
   - [x] `portfolioBenchmark.test.ts`: Validated 1,000+ multi-asset calculation engine in ~0.8ms (budget < 15ms)
   - [x] `offlineHydration.test.ts`: Instant IndexedDB offline cache hydration on boot before network fetch
   - [x] Off-thread Web Worker infrastructure (`xirr.worker.ts`)
+- [x] **Antigravity Cyber-Zen UI Redesign & Aesthetics**
+  - [x] Cosmic obsidian background (`#040711`) with multi-layered ambient radial nebula meshes (cyan, violet, emerald)
+  - [x] Translucent glassmorphism (`backdrop-blur-2xl`) with specular top border reflections
+  - [x] Cyber-Zen wide-tracked typography (`tracking-wider`/`tracking-widest`)
+  - [x] Neon glowing metrics (`.neon-glow-positive`, `.neon-glow-negative`, `.neon-glow-gold`)
+  - [x] Floating Dynamic Island header and floating mobile bottom dock
+  - [x] Standardized `<Button>` component fixed height, whitespace wrapping, and horizontal icon alignment
+- [x] **Automated Screenshot Suite & Stitch Design Kit**
+  - [x] Protocol-level Chrome DevTools Protocol network mock interceptor (`scripts/capture_all_screenshots.mjs`)
+  - [x] Automated capture of all 28 views across Desktop & Mobile, Dark & Light modes
 - [x] **Verification & Test Coverage**
   - [x] Run `npm run verify` (`eslint`, strict `tsc --noEmit`, and `vite build`) — 0 errors / 0 warnings
   - [x] Run `npm test` — 33 test files / 188 unit & integration tests passing (100%)

@@ -1,10 +1,16 @@
-# 💼 Family Portfolio Tracker
+# 🌌 Family Portfolio Vault
 
-A high-performance, privacy-first multi-asset portfolio tracker designed to manage consolidated family wealth. Built with Clean Architecture v2.0, zero-dependency SVG iconography, sub-second instant loads, and multi-provider market quote integration.
+A high-performance, privacy-first multi-asset portfolio tracker designed to manage consolidated family wealth. Elevated with the **Antigravity Cyber-Zen Design Aesthetic** (weightless suspension, deep cosmic obsidian canvas `#040711`, frosted glassmorphism `backdrop-blur-2xl`, glowing neon metrics, and floating dock navigation), Clean Architecture v2.0, zero-dependency SVG iconography, sub-second instant loads, and multi-provider market quote integration.
 
 ---
 
 ## ✨ Key Features
+
+### 🌌 Antigravity Cyber-Zen UI & Visual Experience
+- **Weightless Suspension & Zero-G Atmosphere** — Replaces grounded footers with atmospheric suspension over a deep cosmic void (`#040711`) layered with multi-point ambient radial nebula meshes (cyan `#06b6d4`, celestial violet `#a855f7`, and emerald aura `#10b981`).
+- **Glassmorphic Floating Surfaces** — Translucent cards with `backdrop-blur-2xl`, 1px luminous edge highlights, and zero-G hover ascension.
+- **Cyber-Zen Wide-Tracked Typography & Glowing Metrics** — Wide-tracked category micro-tags with luminous glowing profit (+emerald), loss (-rose), and bullion (amber) indicators.
+- **Floating Island Navigation** — Dynamic Island frosted header and floating mobile bottom dock with spring physics.
 
 ### 📊 Financial Analytics & Visualizations
 - **Consolidated Net Worth Timeline** — Responsive SVG area chart with interactive hover cards plotting historical wealth appreciation and daily snapshots.

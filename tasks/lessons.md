@@ -199,9 +199,14 @@ After **any correction** from the user, append a new entry here with the pattern
 2. **Architecture Layer Violations**: Checking strict Clean Architecture boundaries (UI → Domain Hooks → Domain Services → Repositories → Infrastructure), circular dependency graphs, and repository interface bypasses.
 3. **Security Audit**: Edge Function PIN fail-closed HTTP 503 verification, server-side reverse-proxy rate limiting, bundle secret inspection (`VITE_*`), private storage bucket policies & signed URL expiry, and RLS validation across all tables.
 4. **Financial Calculation Correctness**: Mathematical invariants, single-pass aggregations, float rounding with `Number.EPSILON`, XIRR worker-to-sync parity, and Indian IT Act FY24-25 STCG/LTCG set-off logic.
-5. **Unused Code & Dead Files**: Graph-based dependency analysis for orphaned components, unused custom hooks, barrel indexes, and dead files.
-6. **React & State Quality**: SWR cache invalidation on mutations, 3-tier Context split memoization, error boundary crash handling, and IndexedDB offline hydration.
-7. **Structured Output Format**: Summary (Top 5 critical), Critical Bugs Table, Security Findings, Unused Code Table, Architecture Violations, and Prioritized Next Steps.
-**Rule**: Whenever the user says "audit the project" (or similar), ALWAYS execute this exact 7-section protocol using concurrent specialized subagents, run actual tooling (no guesswork), and present the standardized structured report.
+---
+
+### 2026-08-30 — Button Text/Icon Wrapping and Modal Action Button Height Mismatch
+**Mistake**: In `AddHoldingModal.tsx`, passing both `<Plus size={14} />` and `'Add Holding'` directly inside the `children` prop of `<Button>` caused the `+` icon and text to wrap onto two lines, increasing button height to ~56px while the adjacent "Cancel" button remained ~40px.
+**Root Cause**: `<Button>` rendered `children` inside a `<span className="truncate">`, and did not enforce `whitespace-nowrap leading-none` or fixed height classes across button sizes. When an SVG icon was placed as a sibling of text within `children` without dedicated alignment spans, flex wrapping occurred.
+**Fix**:
+1. Added `whitespace-nowrap leading-none` and explicit height classes (`h-9` sm, `h-10` md, `h-12` lg) in `src/components/ui/Button.tsx`.
+2. Wrapped button contents in `inline-flex items-center justify-center gap-1.5` and routed action icons through the dedicated `leftIcon` prop (`leftIcon={<Plus size={14} />}`) instead of inline child nodes.
+**Rule**: Always use the `leftIcon` prop on `<Button>` for leading icons rather than embedding SVGs in `children`. Ensure `<Button>` styles include `whitespace-nowrap` and explicit height classes so paired action buttons (e.g. Cancel vs. Submit) always maintain perfectly matched geometry.
 
 

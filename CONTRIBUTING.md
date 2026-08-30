@@ -42,7 +42,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 Always run the full verification suite before submitting pull requests or committing code:
 
 ```bash
-# Run full verification (Lint + Typecheck + Production Build)
+# Run full verification (Lint + Typecheck + Unit Tests + Production Build)
 npm run verify
 ```
 
@@ -53,6 +53,9 @@ npm run lint
 
 # Run TypeScript compiler checks (no emit)
 npm run typecheck
+
+# Run full Vitest unit & integration test suite
+npm test
 
 # Run production build
 npm run build
@@ -66,14 +69,14 @@ npm run build
 - **Split Context Pattern**: Always consume `usePortfolioState()` for data reading and `usePortfolioActions()` for CRUD triggers separately. Never recreate a unified combined hook that triggers unnecessary re-renders across modals or form controls.
 - **SWR & IndexedDB Caching**: Remote portfolio and market data fetching must use `SWR` with SWR keys. Local caching is strictly offloaded to IndexedDB (`idb-keyval`) to avoid `localStorage` size limits.
 
-### 2. Styling & Dark Mode
-- **Design System Tokens**: All design tokens, canonical hex values, and typography scales are governed by `UI.md` and `src/index.css`. Use canonical financial tokens: `--positive` (`#00b074`), `--negative` (`#df514c`), and `--accent-blue` (`#387ed1`). Never use hardcoded light-only colors without providing corresponding `dark:` variants.
-- **Consistent Dark Scale**: Always use the `slate` scale for dark mode neutrals (e.g. `dark:bg-slate-800`, `dark:border-slate-700`). Never mix `zinc` into dark variants.
-- **Valid Tailwind Classes**: Only use standard Tailwind color stops (`50`, `100`, `200`, ..., `900`, `950`). Invalid stops like `text-blue-650` or `text-slate-350` produce no CSS output.
+### 2. Styling & Antigravity Aesthetic Tokens
+- **Design System Tokens**: All design tokens, canonical hex values, and typography scales are governed by `UI.md` and `src/index.css`. Use canonical financial tokens: `--positive` (`#10b981`), `--negative` (`#f43f5e`), and `--accent-blue` (`#38bdf8` / `#0284c7`). Never use hardcoded light-only colors without providing corresponding `dark:` variants.
+- **Consistent Glassmorphic Scale**: Always use `.apple-card` or `.antigravity-card` with `var(--surface)` and `var(--border-subtle)`.
+- **Button Standards**: Use the `<Button>` component (`src/components/ui/Button.tsx`) which enforces `whitespace-nowrap`, fixed heights (`h-9` sm, `h-10` md, `h-12` lg), and aligned icon spans.
 - **Tabular Numerals & Typography**: Apply the `.tnum` or `.ios-number` class to financial numbers and percentages for consistent monospace alignment and tabular display.
 - **Animated Numbers**: Use the `<AnimatedNumber>` component from `src/components/ui/AnimatedNumber.tsx` for all dashboard financial metrics (Net Worth, P&L, Invested). Never display raw jumping number changes.
-- **Spring Animations & Press Feedback**: Apply `.ios-press` (`scale(0.97)` active state) and spring transition curves (`cubic-bezier(0.34, 1.56, 0.64, 1)`) for buttons and cards.
-- **Theme-Aware Widgets**: Widget and card components must respect the global light/dark theme. Never force a fixed dark background (`bg-slate-900`) regardless of mode.
+- **Spring Animations & Press Feedback**: Apply `.ios-press` (`scale(0.965)` active state) and spring transition curves (`cubic-bezier(0.16, 1, 0.3, 1)`) for buttons and cards.
+- **Theme-Aware Widgets**: Widget and card components must respect the global light/dark theme. Never force a fixed dark background regardless of mode.
 
 ### 3. Date Arithmetic & Calculations
 - **Month Rollover Clamping**: When generating monthly cash-flow dates, always clamp the day of the month to the last valid day of the target month (`new Date(year, month + 1, 0).getDate()`) to prevent JavaScript date-rollover bugs (e.g., Jan 31 rolling into March 3).

@@ -197,17 +197,17 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 ---
 
-## 🎨 Clean Data-First Design System Architecture (Zerodha Kite & Apple Hybrid)
+## 🎨 Clean Data-First Design System Architecture (Antigravity Aesthetic)
 
 > **Single Source of Truth**: All design tokens, canonical hex values, typography scales, and accessibility requirements are authoritatively governed by [`UI.md`](UI.md) (specifically `UI.md §2` and `UI.md §11`) and implemented via CSS custom properties in `src/index.css` alongside Tailwind CSS utility classes.
 
 * **Hybrid Styling Stack**: Tailwind CSS utility framework (`tailwind.config.js`) mapped to semantic CSS custom variables (`var(--surface)`, `var(--border-subtle)`, etc.) declared in `src/index.css`.
-* **Flat Neutral Canvas**: Standardized `#f8fafc` light / `#080c14` dark canvas background system.
-* **Zerodha Kite Signature Palette**: Canonical financial tokens: Kite Blue (`#387ed1`), clean profit green (`#00b074`), and clean loss red (`#df514c`).
+* **Cosmic Canvas**: Deep `#040711` obsidian background with multi-point atmospheric ambient radial nebula meshes (cyan `#06b6d4`, violet `#a855f7`, emerald `#10b981`) in dark mode, and `#f8fafc` crystalline prism canvas in light mode.
+* **Translucent Glassmorphic Surfaces (`.apple-card`, `.antigravity-card`)**: Solid/frosted surfaces (`var(--surface)`), 1px crisp luminous specular borders (`var(--border-subtle)`), and weightless ambient levitation shadows (`var(--shadow-card)`).
+* **Cyber-Zen Wide-Tracked Typography & Glowing Accents**: Wide-tracked micro labels (`tracking-wider`/`tracking-widest`), glowing profit green (`.neon-glow-positive`), loss rose (`.neon-glow-negative`), and gold amber (`.neon-glow-gold`).
 * **High-Density Holdings Ribbon**: Horizontal overview strip (*Holdings count, Total inv., Current val., Overall P&L, Day's P&L*) above asset tables.
-* **Hover-Activated Action Dock**: Row action buttons quietly hidden at rest and revealed on desktop hover (`group-hover:opacity-100`).
-* **Single Card Surface (`.apple-card`)**: Solid surface (`var(--surface)`), 1px crisp border (`var(--border-subtle)`), and quiet static shadows (`var(--shadow-card)`).
-* **Tactile Spring Feedback**: Unified `.ios-press` tactile transition scaling triggers (`active:scale(0.97)`).
+* **Floating Island Navigation**: Dynamic Island header and floating mobile bottom dock with spring physics.
+* **Tactile Spring Feedback**: Unified `.ios-press` tactile transition scaling triggers (`active:scale(0.965)`).
 * **Accessibility & Measurement Standards**: Enforces WCAG 2.1 contrast ratios (4.5:1 text, 3.0:1 UI) per `UI.md §11`.
 
 ---
@@ -244,6 +244,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 | Date | Version | Key Changes & Milestones |
 | :--- | :--- | :--- |
+| **2026-08-30** | `v2.3` | Antigravity Cyber-Zen Redesign & Polish: Implemented weightless suspension, cosmic ambient nebula canvas, translucent glassmorphism (`backdrop-blur-2xl`), glowing neon financial indicators, floating mobile bottom dock, fixed button height & whitespace wrapping consistency, verified 33 test files / 188 tests passing (100%). |
 | **2026-08-29** | `v2.2` | Core Pillars & Benchmarking: Implemented Smart AI Import Quarantine & Review side-by-side workflow, added Indian Banking & AMFI MF scheme autocomplete presets, stress-benchmarked 1,000+ assets in <1ms, hardened PWA offline cache zero-skeleton hydration, added Mathematical Invariant test suite, verified 33 test files / 188 tests passing (100%). |
 | **2026-08-25** | `v2.0` | Clean Architecture refactor: modularized `usePortfolioData.ts`, extracted pure calculation modules, introduced domain repository port contracts, added multi-provider market data service, standardized `AppError` hierarchy, and enhanced test suites. |
 | **2026-08-22** | `v1.5` | Fail-closed Edge Function security hardening, strict storage path allowlists, full-phase audit protocols. |
