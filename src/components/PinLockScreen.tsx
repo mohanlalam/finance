@@ -399,7 +399,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-5 mb-4">
+          <div className="grid grid-cols-3 gap-5 mb-4" role="group" aria-label="Passcode keypad">
             {keypadLayout.map(({ num, letters }) => (
               <button
                 key={num}
@@ -411,7 +411,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
               >
                 <span className="ios-number text-[30px] leading-none mb-0.5 drop-shadow-sm font-semibold">{num}</span>
                 {letters && (
-                  <span className="text-[9px] text-white/60 tracking-[2px] uppercase font-bold leading-none">{letters}</span>
+                  <span className="text-[9px] text-white/80 tracking-[2px] uppercase font-bold leading-none">{letters}</span>
                 )}
               </button>
             ))}
@@ -429,7 +429,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
                 <Fingerprint size={28} className={isBiometricPrompting ? 'animate-pulse text-[var(--positive,#00b074)]' : ''} />
               </button>
             ) : (
-              <div className="w-[75px] h-[75px]" />
+              <div className="w-[75px] h-[75px]" aria-hidden="true" />
             )}
             
             <button
@@ -444,10 +444,12 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             
             <button
               type="button"
-              className={`w-[75px] h-[75px] flex items-center justify-center rounded-full active:bg-white/15 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer ${lockoutSeconds > 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+              className={`w-[75px] h-[75px] flex items-center justify-center rounded-full active:bg-white/15 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent cursor-pointer ${lockoutSeconds > 0 ? 'opacity-40 cursor-not-allowed' : ''} ${pin.length === 0 ? 'invisible pointer-events-none' : ''}`}
               onClick={handleBackspace}
               disabled={success || pin.length === 0 || lockoutSeconds > 0}
               aria-label="Delete last digit"
+              aria-hidden={pin.length === 0 ? 'true' : undefined}
+              tabIndex={pin.length === 0 ? -1 : 0}
             >
               {pin.length > 0 && <IconDelete size={22} />}
             </button>
@@ -458,14 +460,14 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
 
       {/* iOS Lock Screen Footer Badge */}
       <footer className="relative z-10 text-center flex flex-col items-center gap-3">
-        <p className="text-[11px] font-medium text-white/50 tracking-wider uppercase">
+        <p className="text-[11px] font-semibold text-white/70 tracking-wider uppercase">
           Family Wealth Office • Encrypted Storage
         </p>
         {!success && (
           <button
             type="button"
             onClick={handleForgotPin}
-            className="text-xs text-white/40 hover:text-white/70 tracking-wide transition-colors duration-200 underline underline-offset-2 py-3 px-4 min-h-[44px] flex items-center justify-center touch-manipulation cursor-pointer"
+            className="text-xs text-white/70 hover:text-white font-medium tracking-wide transition-colors duration-200 underline underline-offset-2 py-3 px-4 min-h-[44px] flex items-center justify-center touch-manipulation cursor-pointer"
             aria-label="Reset custom PIN to master PIN"
           >
             Reset to master PIN
