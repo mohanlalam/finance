@@ -1,11 +1,11 @@
 import { useState, useEffect, Suspense, lazy, useCallback } from 'react';
-import { isPinConfigured, isSessionVerified, clearSessionVerification } from './utils/auth';
+import { isSessionVerified, clearSessionVerification } from './utils/auth';
 import PinLockScreen from './components/PinLockScreen';
 import { useAutoLock } from './hooks/useAutoLock';
 const MainApp = lazy(() => import('./MainApp'));
 
 export default function App() {
-  const [pinVerified, setPinVerified] = useState(() => !isPinConfigured() || isSessionVerified());
+  const [pinVerified, setPinVerified] = useState(() => isSessionVerified());
   const handleLock = useCallback(() => {
     clearSessionVerification();
     setPinVerified(false);
