@@ -4,6 +4,17 @@ const SESSION_KEY = 'finance_pin_verified';
 const HASH_KEY = 'finance_hashed_pin';
 const CUSTOM_HASH_KEY = 'custom_app_pin_hash';
 const CUSTOM_LENGTH_KEY = 'custom_app_pin_length';
+const LAST_KNOWN_PIN_HASH_KEY = 'last_known_pin_hash';
+
+export function getCachedValidPinHash(): string | null {
+  if (typeof localStorage === 'undefined') return null;
+  return localStorage.getItem(LAST_KNOWN_PIN_HASH_KEY);
+}
+
+export function setCachedValidPinHash(hash: string): void {
+  if (typeof localStorage === 'undefined') return;
+  localStorage.setItem(LAST_KNOWN_PIN_HASH_KEY, hash);
+}
 
 export function isPinConfigured(): boolean {
   if (typeof localStorage === 'undefined') return false;
@@ -32,6 +43,7 @@ export function markSessionVerified(hashedPin?: string): void {
   sessionStorage.setItem(SESSION_KEY, 'true');
   if (hashedPin) {
     sessionStorage.setItem(HASH_KEY, hashedPin);
+    setCachedValidPinHash(hashedPin);
   }
 }
 

@@ -293,7 +293,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
         const errCode = err && typeof err === 'object' && 'code' in err
           ? (err as { code: string }).code
           : '';
-        const isConnectivityError = errCode === 'network' || errCode === 'timeout' || errCode === 'config';
+        const isConnectivityError = errCode === 'network' || errCode === 'timeout' || errCode === 'config' || errCode === 'server';
 
         triggerHaptic('error');
         setShake(true);

@@ -10,6 +10,7 @@ import {
   ensureHashedPin,
   clearCustomPin,
   setCustomPin,
+  getCachedValidPinHash,
 } from './sessionStore';
 
 export {
@@ -80,15 +81,28 @@ export async function verifyPin(pin: string): Promise<boolean> {
         if (fallbackErr instanceof AppApiError && fallbackErr.status === 401) {
           return false; // Valid request, but wrong PIN
         }
+        // If server 500 or network error, check last known valid PIN hash for offline unlocking
+        const cachedHash = getCachedValidPinHash();
+        if (cachedHash && cachedHash === inputHash) {
+          markSessionVerified(inputHash);
+          return true;
+        }
         throw fallbackErr;
       }
     }
 
-    // Re-throw config/network/timeout errors so PinLockScreen can show
+    // Check cached hash if server threw before fallback
+    const cachedHash = getCachedValidPinHash();
+    if (cachedHash && cachedHash === inputHash) {
+      markSessionVerified(inputHash);
+      return true;
+    }
+
+    // Re-throw config/network/timeout/server errors so PinLockScreen can show
     // a helpful message and NOT count this as a failed PIN attempt.
     if (err && typeof err === 'object' && 'code' in err) {
       const code = (err as { code: string }).code;
-      if (code === 'config' || code === 'network' || code === 'timeout') {
+      if (code === 'config' || code === 'network' || code === 'timeout' || code === 'server') {
         throw err;
       }
     }
