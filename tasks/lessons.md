@@ -201,12 +201,13 @@ After **any correction** from the user, append a new entry here with the pattern
 4. **Financial Calculation Correctness**: Mathematical invariants, single-pass aggregations, float rounding with `Number.EPSILON`, XIRR worker-to-sync parity, and Indian IT Act FY24-25 STCG/LTCG set-off logic.
 ---
 
-### 2026-08-30 — Button Text/Icon Wrapping and Modal Action Button Height Mismatch
-**Mistake**: In `AddHoldingModal.tsx`, passing both `<Plus size={14} />` and `'Add Holding'` directly inside the `children` prop of `<Button>` caused the `+` icon and text to wrap onto two lines, increasing button height to ~56px while the adjacent "Cancel" button remained ~40px.
-**Root Cause**: `<Button>` rendered `children` inside a `<span className="truncate">`, and did not enforce `whitespace-nowrap leading-none` or fixed height classes across button sizes. When an SVG icon was placed as a sibling of text within `children` without dedicated alignment spans, flex wrapping occurred.
+### 2026-08-30 — Mobile Responsive Form Grids and Horizontal Scroll Tab Navigation
+**Mistake**: Date picker and amount fields collided or wrapped awkwardly when using `grid-cols-2` inside modals on mobile screens (< 400px), and `grid-cols-2` on family tabs squeezed member names down to ~45px with severe truncation.
+**Root Cause**: Native HTML date pickers (`type="date"`) and unit inputs require a minimum width of ~160px for comfortable touch interaction and full date format (`DD/MM/YYYY`). In 2-column modal layouts on 375px viewports (which only provide ~130px per column after padding), inputs collide. Similarly, segmented tab grids on mobile force vertical stacking and horizontal cramping.
 **Fix**:
-1. Added `whitespace-nowrap leading-none` and explicit height classes (`h-9` sm, `h-10` md, `h-12` lg) in `src/components/ui/Button.tsx`.
-2. Wrapped button contents in `inline-flex items-center justify-center gap-1.5` and routed action icons through the dedicated `leftIcon` prop (`leftIcon={<Plus size={14} />}`) instead of inline child nodes.
-**Rule**: Always use the `leftIcon` prop on `<Button>` for leading icons rather than embedding SVGs in `children`. Ensure `<Button>` styles include `whitespace-nowrap` and explicit height classes so paired action buttons (e.g. Cancel vs. Submit) always maintain perfectly matched geometry.
+1. Converted all modal date and amount input grids to responsive `grid grid-cols-1 sm:grid-cols-2 gap-3` across all asset modals (`StandardFormFields.tsx`, `RDFormModal.tsx`, `SIPFormFields.tsx`, `GoldFormModal.tsx`, `RealEstateFormModal.tsx`, `InsuranceFormModal.tsx`).
+2. Converted `FamilyTabBar` on mobile to a smooth horizontal scrolling pill track (`flex items-center gap-1.5 overflow-x-auto scrollbar-none`) with unclipped labels and trailing action buttons.
+**Rule**: Never force paired date pickers or multi-unit financial inputs into 2 columns on mobile screens (`grid-cols-2`). Always use responsive classes (`grid-cols-1 sm:grid-cols-2`). For navigation tabs with dynamic member lists, always use horizontal scrolling pill tracks (`overflow-x-auto scrollbar-none`) rather than rigid multi-column grids.
+
 
 

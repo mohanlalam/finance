@@ -56,7 +56,7 @@ export const AssetRegistryContainer = React.memo(function AssetRegistryContainer
               <button
                 type="button"
                 onClick={onOpenAdd}
-                className={`inline-flex items-center gap-2 text-white text-sm font-semibold px-5 py-2.5 rounded-[14px] transition-colors shadow-sm ${themeColor}`}
+                className={`inline-flex items-center gap-2 text-white text-sm font-semibold px-5 py-2.5 rounded-[var(--radius-medium)] transition-colors shadow-sm ios-press ${themeColor}`}
               >
                 <Plus size={15} aria-hidden="true" />
                 {createBtnLabel}
@@ -65,7 +65,7 @@ export const AssetRegistryContainer = React.memo(function AssetRegistryContainer
           />
         </div>
       ) : (
-        <div className="divide-y divide-slate-100 dark:divide-slate-700/50" role="list">
+        <div className="divide-y divide-[var(--border-subtle)]" role="list">
           {children}
         </div>
       )}
