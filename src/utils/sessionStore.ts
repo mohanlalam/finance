@@ -11,9 +11,14 @@ export function isPinConfigured(): boolean {
 }
 
 export function getPinLength(): number {
-  if (typeof localStorage === 'undefined') return 4;
-  const customLength = localStorage.getItem(CUSTOM_LENGTH_KEY);
-  if (customLength) return parseInt(customLength, 10);
+  if (typeof localStorage !== 'undefined') {
+    const customLength = localStorage.getItem(CUSTOM_LENGTH_KEY);
+    if (customLength) return parseInt(customLength, 10);
+  }
+  const envPin = typeof import.meta !== 'undefined' && import.meta.env?.VITE_APP_PIN
+    ? String(import.meta.env.VITE_APP_PIN).trim()
+    : '';
+  if (envPin) return envPin.length;
   return 4;
 }
 
@@ -54,12 +59,25 @@ export async function ensureHashedPin(): Promise<string> {
   if (sessionHash) return sessionHash;
 
   const customHash = typeof localStorage !== 'undefined' ? localStorage.getItem(CUSTOM_HASH_KEY) : null;
-  const hash = customHash || '';
-
-  if (hash && isSessionVerified() && typeof sessionStorage !== 'undefined') {
-    sessionStorage.setItem(HASH_KEY, hash);
+  if (customHash) {
+    if (isSessionVerified() && typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem(HASH_KEY, customHash);
+    }
+    return customHash;
   }
-  return hash;
+
+  const envPin = typeof import.meta !== 'undefined' && import.meta.env?.VITE_APP_PIN
+    ? String(import.meta.env.VITE_APP_PIN).trim()
+    : '';
+  if (envPin) {
+    const hash = await hashPin(envPin);
+    if (isSessionVerified() && typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem(HASH_KEY, hash);
+    }
+    return hash;
+  }
+
+  return '';
 }
 
 /** Reset any user-defined custom PIN */

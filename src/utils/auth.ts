@@ -1,4 +1,4 @@
-import { invokeFunction } from './apiClient';
+import { invokeFunction, AppApiError } from './apiClient';
 import {
   isPinConfigured,
   getPinLength,
@@ -26,6 +26,9 @@ export {
 };
 
 const CUSTOM_HASH_KEY = 'custom_app_pin_hash';
+const ENV_PIN = typeof import.meta !== 'undefined' && import.meta.env?.VITE_APP_PIN
+  ? String(import.meta.env.VITE_APP_PIN).trim()
+  : '';
 
 export async function verifyPin(pin: string): Promise<boolean> {
   const inputHash = await hashPin(pin);
@@ -41,7 +44,17 @@ export async function verifyPin(pin: string): Promise<boolean> {
     return false;
   }
 
-  // 2. Authoritative backend Edge Function check (fail-closed)
+  // 2. Client environment master PIN match (if configured via VITE_APP_PIN)
+  if (ENV_PIN) {
+    const envHash = await hashPin(ENV_PIN);
+    if (envHash === inputHash) {
+      markSessionVerified(inputHash);
+      return true;
+    }
+    return false;
+  }
+
+  // 3. Authoritative backend Edge Function check (fail-closed)
   try {
     const result = await invokeFunction<{ verified: boolean }>('verify-pin', {
       method: 'POST',
@@ -53,6 +66,24 @@ export async function verifyPin(pin: string): Promise<boolean> {
     }
     return false;
   } catch (err) {
+    // If verify-pin is not found (404 / server / network error due to undeployed function),
+    // fallback to verifying against the live holdings-crud endpoint
+    if (err instanceof AppApiError && (err.status === 404 || err.code === 'server' || err.code === 'network')) {
+      try {
+        await invokeFunction('holdings-crud?action=list', {
+          method: 'GET',
+          headers: { 'X-App-Pin': inputHash },
+        });
+        markSessionVerified(inputHash);
+        return true;
+      } catch (fallbackErr) {
+        if (fallbackErr instanceof AppApiError && fallbackErr.status === 401) {
+          return false; // Valid request, but wrong PIN
+        }
+        throw fallbackErr;
+      }
+    }
+
     // Re-throw config/network/timeout errors so PinLockScreen can show
     // a helpful message and NOT count this as a failed PIN attempt.
     if (err && typeof err === 'object' && 'code' in err) {

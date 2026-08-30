@@ -27,8 +27,9 @@ export class AppApiError extends Error {
   }
 }
 
-interface FunctionRequestOptions extends Omit<RequestInit, 'headers' | 'body'> {
+interface FunctionRequestOptions extends Omit<RequestInit, 'body' | 'headers'> {
   body?: unknown;
+  headers?: Record<string, string>;
   timeoutMs?: number;
 }
 
@@ -126,9 +127,10 @@ export async function invokeFunction<T>(pathAndQuery: string, options: FunctionR
     const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs ?? REQUEST_TIMEOUT_MS);
 
     try {
+      const defaultHeaders = await buildHeaders();
       const res = await fetch(`${SUPABASE_URL}/functions/v1/${pathAndQuery}`, {
         ...options,
-        headers: await buildHeaders(),
+        headers: { ...defaultHeaders, ...(options.headers ?? {}) },
         body: options.body === undefined ? undefined : JSON.stringify(options.body),
         signal: controller.signal,
       });
