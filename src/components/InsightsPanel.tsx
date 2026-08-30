@@ -76,7 +76,7 @@ const TopHoldings = React.memo(function TopHoldings({ items, totalStockValue }: 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-bold text-[var(--text-primary)] truncate">{item.holding.ticker}</span>
-                <span className="text-label-micro text-[var(--text-tertiary)] truncate hidden sm:inline">{item.portfolioLabel}</span>
+                <span className="text-[10px] font-medium text-[var(--text-tertiary)] truncate hidden sm:inline">{item.portfolioLabel}</span>
               </div>
               <div className="w-full bg-[var(--surface-secondary)] h-1 rounded-full overflow-hidden mt-1">
                 <div className="bg-[var(--accent-blue)] h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(alloc, 100)}%` }} />
@@ -106,7 +106,7 @@ const GainersList = React.memo(function GainersList({ items, type }: { items: Ho
             </div>
             <div className="min-w-0">
               <span className="text-xs font-bold text-[var(--text-primary)] truncate block">{item.holding.ticker}</span>
-              <span className="text-label-micro text-[var(--text-tertiary)] truncate block">{item.portfolioLabel}</span>
+              <span className="text-[10px] font-medium text-[var(--text-tertiary)] truncate block">{item.portfolioLabel}</span>
             </div>
           </div>
           <div className="text-right shrink-0">
@@ -135,7 +135,7 @@ const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: Ho
               </div>
               <div className="min-w-0">
                 <span className="text-xs font-bold text-[var(--text-primary)] truncate block">{m.holding.ticker}</span>
-                <span className="text-label-micro text-[var(--text-tertiary)] truncate block">{m.portfolioLabel}</span>
+                <span className="text-[10px] font-medium text-[var(--text-tertiary)] truncate block">{m.portfolioLabel}</span>
               </div>
             </div>
             <div className="text-right shrink-0">
@@ -208,7 +208,7 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
     <div className="space-y-3">
       {valid.map((pw, i) => (
         <div key={i}>
-          <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">{pw.portfolioLabel}</p>
+          <p className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5">{pw.portfolioLabel}</p>
           <div className={`grid gap-1.5 sm:gap-2 ${pw.best && pw.worst ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
             {pw.best && (
               <div className={`flex items-center gap-1.5 rounded-[var(--radius-medium)] px-2 py-1.5 min-w-0 ${

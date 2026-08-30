@@ -121,7 +121,7 @@ function SummaryCards({
           </div>
 
           {activePortfolio === null && sortedPortfolios && sortedPortfolios.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
+            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-[11px] font-medium text-[var(--text-secondary)]">
               {sortedPortfolios.map((p, idx) => {
                 const val = p.totalCurrentValue;
                 return (
@@ -155,7 +155,7 @@ function SummaryCards({
           </div>
 
           {activePortfolio === null && portfolios && portfolios.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
+            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-[11px] font-medium text-[var(--text-secondary)]">
               {portfolios.map((p, idx) => {
                 const val = p.totalInvested;
                 return (
@@ -193,7 +193,7 @@ function SummaryCards({
           </div>
 
           {activePortfolio === null && sortedPortfolios && sortedPortfolios.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
+            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-[11px] font-medium text-[var(--text-secondary)]">
               {sortedPortfolios.map((p, idx) => {
                 const pnl = p.totalPnL;
                 const localGain = pnl >= 0;
@@ -241,7 +241,7 @@ function SummaryCards({
           </div>
 
           {activePortfolio === null && portfolios && portfolios.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-label-micro font-medium text-[var(--text-secondary)]">
+            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-2 gap-y-1 text-[11px] font-medium text-[var(--text-secondary)]">
               {memberBreakdowns.map((p, idx) => {
                 const localTodayGain = p.todayPnL >= 0;
                 return (
