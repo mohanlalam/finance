@@ -36,7 +36,7 @@ export default function DesktopSidebar({
     }`;
 
   return (
-    <div role="tablist" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-60 self-start sticky top-20 max-h-[calc(100vh-5.5rem)] overflow-y-auto">
+    <nav aria-label="Sidebar navigation" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-60 self-start sticky top-20 max-h-[calc(100vh-5.5rem)] overflow-y-auto">
       {/* AI Smart Import Button */}
       {onOpenSmartImport && (
         <div className="mb-4">
@@ -58,6 +58,7 @@ export default function DesktopSidebar({
         </h3>
         <div className="space-y-0.5">
           <button
+            type="button"
             onClick={() => onSelectPortfolio('all')}
             className={getNavItemClass(selectedPortfolioId === 'all')}
           >
@@ -66,6 +67,7 @@ export default function DesktopSidebar({
           {sortedPortfolios.map((p) => (
             <div key={p.name} className="flex items-center group relative">
               <button
+                type="button"
                 onClick={() => onSelectPortfolio(p.name)}
                 className={`flex-1 ${getNavItemClass(selectedPortfolioId === p.name)}`}
               >
@@ -102,6 +104,7 @@ export default function DesktopSidebar({
             </div>
           ))}
           <button
+            type="button"
             onClick={onOpenAddFamily}
             className="flex items-center gap-1.5 w-full text-left px-3 py-1.5 rounded-[var(--radius-small)] text-xs font-semibold text-[var(--accent-blue)] hover:bg-[var(--accent-blue-soft)] transition-colors mt-1 cursor-pointer"
           >
@@ -130,8 +133,8 @@ export default function DesktopSidebar({
             return (
               <button
                 key={tab.id}
-                role="tab"
-                aria-selected={isActive}
+                type="button"
+                aria-current={isActive ? 'page' : undefined}
                 onClick={() => onTabChange(tab.id)}
                 className={getNavItemClass(isActive)}
               >
@@ -157,8 +160,8 @@ export default function DesktopSidebar({
             return (
               <button
                 key={tab.id}
-                role="tab"
-                aria-selected={isActive}
+                type="button"
+                aria-current={isActive ? 'page' : undefined}
                 onClick={() => onTabChange(tab.id)}
                 className={getNavItemClass(isActive)}
               >
@@ -169,6 +172,6 @@ export default function DesktopSidebar({
           })}
         </div>
       </div>
-    </div>
+    </nav>
   );
 }
