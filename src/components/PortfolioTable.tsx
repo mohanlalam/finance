@@ -118,12 +118,12 @@ const MobileStockRow = React.memo(function MobileStockRow({
 }: MobileStockRowProps) {
   return (
     <div
-      className={`py-3 flex flex-col gap-2 transition-opacity mobile-asset-card ${isDeleting ? 'opacity-40' : ''}`}
+      className={`py-3 px-1 flex flex-col gap-2 transition-opacity mobile-asset-card ${isDeleting ? 'opacity-40' : ''}`}
     >
       <div className="flex justify-between items-start gap-2.5">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-extrabold text-xs flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-extrabold text-xs flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
               {h.ticker.slice(0, 2)}
             </div>
             <div className="min-w-0 flex-1">
@@ -134,26 +134,29 @@ const MobileStockRow = React.memo(function MobileStockRow({
               >
                 {h.ticker}
               </button>
-              <span className="text-[10px] text-[var(--text-tertiary)] block -mt-0.5 truncate max-w-full">
+              <span className="text-[10.5px] text-[var(--text-tertiary)] block -mt-0.5 truncate max-w-full font-medium">
                 {h.stockName}
               </span>
             </div>
           </div>
-          <p className="text-[10px] text-[var(--text-secondary)] mt-1.5 truncate">
-            {isBalancesHidden ? '••••••' : <>{formatNumber(h.qty, 0)} shares @ ₹{formatNumber(h.avgPrice)}</>} · LTP: ₹{formatNumber(h.ltp)}
+          <p className="text-[11px] text-[var(--text-secondary)] mt-1.5 truncate font-medium">
+            {isBalancesHidden ? '••••••' : <>{formatNumber(h.qty, 0)} shares @ ₹{formatNumber(h.avgPrice)}</>} · LTP: <span className="font-bold text-[var(--text-primary)] tnum">₹{formatNumber(h.ltp)}</span>
           </p>
         </div>
 
-        <div className="text-right shrink-0 flex flex-col items-end">
-          <p className="text-xs font-extrabold text-[var(--text-primary)] tnum">
+        <div className="text-right shrink-0 flex flex-col items-end min-w-[100px]">
+          <span className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">
+            Current Value
+          </span>
+          <p className="text-sm font-black text-[var(--text-primary)] text-financial tnum mt-0.5">
             {renderValue(h.currentValue)}
           </p>
           <div className="flex items-center gap-1 justify-end mt-0.5 flex-wrap">
             <span className={`text-[10px] font-bold whitespace-nowrap tnum ${h.unrealizedPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
               {isBalancesHidden ? '••••••' : <>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</>}
             </span>
-            <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-[var(--radius-pill)] whitespace-nowrap tnum ${h.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
-              <span className="text-[9px] font-extrabold" aria-hidden="true">{h.pnlPercent >= 0 ? '↗' : '↘'}</span>
+            <span className={`inline-flex items-center gap-0.5 text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-[var(--radius-pill)] whitespace-nowrap tnum ${h.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
+              <span className="text-[9px] font-black" aria-hidden="true">{h.pnlPercent >= 0 ? '↗' : '↘'}</span>
               {isBalancesHidden ? '••••••' : formatPercent(h.pnlPercent)}
             </span>
           </div>
@@ -352,44 +355,41 @@ export default React.memo(function PortfolioTable({
   return (
     <div className="apple-card overflow-hidden">
       {/* Zerodha Kite Holdings Overview Ribbon */}
-      <div className="px-3 sm:px-4 py-2 sm:py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3 text-xs">
-        <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4 flex-wrap">
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="font-bold text-[var(--text-primary)]">Holdings</span>
+      <div className="px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)]">
+        <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-2.5 sm:gap-4 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-[var(--text-primary)] text-xs">Holdings</span>
             <span className="px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] text-[11px] font-extrabold tnum">
               {holdings.length}
             </span>
           </div>
-          <div className="hidden sm:block h-3.5 w-px bg-[var(--border-subtle)]" />
-          <div className="flex items-center gap-1 text-[11px] sm:text-xs">
+
+          <div className="flex items-center gap-1.5 text-xs">
             <span className="text-[var(--text-tertiary)]">Invested:</span>
             <span className="font-bold text-[var(--text-primary)] tnum">{renderValue(totalInvested)}</span>
           </div>
-          <div className="hidden sm:block h-3.5 w-px bg-[var(--border-subtle)]" />
-          <div className="flex items-center gap-1 text-[11px] sm:text-xs">
-            <span className="text-[var(--text-tertiary)]">Current:</span>
-            <span className="font-bold text-[var(--text-primary)] tnum">{renderValue(totalCurrentValue)}</span>
-          </div>
-        </div>
 
-        <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 pt-1 sm:pt-0 border-t sm:border-t-0 border-[var(--border-subtle)]/60">
-          <div className="flex items-center gap-1 text-[11px] sm:text-xs">
-            <span className="text-[var(--text-tertiary)]">Stock P&amp;L:</span>
-            <span className={`font-extrabold tnum ${totalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-              {isBalancesHidden ? '••••••' : <>{totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)} ({formatPercent(totalPnLPercent)})</>}
-            </span>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-[var(--text-tertiary)]">Current:</span>
+            <span className="font-black text-[var(--text-primary)] text-financial tnum">{renderValue(totalCurrentValue)}</span>
           </div>
-          {todayTotalPnL !== 0 && (
-            <>
-              <div className="hidden sm:block h-3.5 w-px bg-[var(--border-subtle)]" />
-              <div className="flex items-center gap-1 text-[11px] sm:text-xs">
+
+          <div className="flex items-center gap-1.5 text-xs col-span-2 sm:col-span-1 justify-between sm:justify-end border-t sm:border-t-0 pt-1.5 sm:pt-0 border-[var(--border-subtle)]/60">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[var(--text-tertiary)]">Stock P&amp;L:</span>
+              <span className={`font-black tnum ${totalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                {isBalancesHidden ? '••••••' : <>{totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)} ({formatPercent(totalPnLPercent)})</>}
+              </span>
+            </div>
+            {todayTotalPnL !== 0 && (
+              <div className="flex items-center gap-1 text-[11px]">
                 <span className="text-[var(--text-tertiary)]">Day:</span>
                 <span className={`font-bold tnum ${todayTotalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                   {isBalancesHidden ? '••••••' : <>{todayTotalPnL >= 0 ? '+' : ''}{formatINR(todayTotalPnL)} ({formatPercent(todayTotalPnLPercent)})</>}
                 </span>
               </div>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
