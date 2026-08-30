@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { TrendingUp, RefreshCw, Bell, X, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff, FileText, CheckCircle2, MoreHorizontal, ChevronRight } from './icons/AppIcons';
+import { TrendingUp, RefreshCw, Bell, X, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff, FileText, CheckCircle2, Settings, ChevronRight } from './icons/AppIcons';
 import { FetchStatus } from '../types/portfolio';
 import { Portfolio } from '../types/portfolio';
 import type { ImportRow } from './ExportPanel';
@@ -341,13 +341,13 @@ function Header({
               <button
                 type="button"
                 onClick={() => setOpenMobileMenu((prev) => !prev)}
-                aria-label="More options"
+                aria-label="Settings"
                 aria-expanded={openMobileMenu}
                 className={`relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] active:scale-95 transition-all duration-150 cursor-pointer ${
                   openMobileMenu ? 'ring-2 ring-[var(--accent-blue)] text-[var(--accent-blue)] bg-[var(--surface)]' : ''
                 }`}
               >
-                <MoreHorizontal size={16} />
+                <Settings size={16} />
                 {visibleAlerts.length > 0 && (
                   <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-[var(--negative)] rounded-full ring-2 ring-[var(--surface)] animate-pulse" />
                 )}

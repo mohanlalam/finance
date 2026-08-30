@@ -69,7 +69,7 @@ describe('Header Component', () => {
   describe('Mobile Menu Popup', () => {
     it('opens mobile menu popup when more options button is clicked', () => {
       renderHeader({}, true);
-      const menuBtn = screen.getByLabelText('More options');
+      const menuBtn = screen.getByLabelText('Settings');
       expect(menuBtn).toBeDefined();
 
       // Click to open
@@ -85,7 +85,7 @@ describe('Header Component', () => {
       const onToggleDarkMode = vi.fn();
       renderHeader({ onToggleDarkMode }, true);
       
-      const menuBtn = screen.getByLabelText('More options');
+      const menuBtn = screen.getByLabelText('Settings');
       fireEvent.click(menuBtn);
 
       const themeItem = screen.getByText('Theme');
@@ -99,7 +99,7 @@ describe('Header Component', () => {
       const onChangePinClick = vi.fn();
       renderHeader({ onChangePinClick }, true);
       
-      const menuBtn = screen.getByLabelText('More options');
+      const menuBtn = screen.getByLabelText('Settings');
       fireEvent.click(menuBtn);
 
       const pinItem = screen.getByText('Security');
@@ -113,7 +113,7 @@ describe('Header Component', () => {
       const onOpenMobileAlerts = vi.fn();
       renderHeader({ onOpenMobileAlerts }, true);
       
-      const menuBtn = screen.getByLabelText('More options');
+      const menuBtn = screen.getByLabelText('Settings');
       fireEvent.click(menuBtn);
 
       const notifItem = screen.getByText('Notifications');
