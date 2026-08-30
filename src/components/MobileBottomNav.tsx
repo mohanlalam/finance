@@ -180,15 +180,15 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
         </div>
       </div>
 
-      {/* Persistent Floating Bottom Dock */}
+      {/* Persistent Docked Bottom Bar */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-3 left-3 right-3 z-50 bg-[var(--surface-glass)] backdrop-blur-2xl border border-[var(--border-glass)] rounded-2xl shadow-[var(--shadow-floating)] md:hidden select-none will-change-transform transform-gpu"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--surface)]/95 backdrop-blur-xl border-t border-[var(--border-subtle)] md:hidden select-none will-change-transform transform-gpu shadow-[0_-4px_24px_rgba(0,0,0,0.18)]"
         style={{
-          marginBottom: 'max(env(safe-area-inset-bottom, 0px), 0px)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
-        <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-2">
+        <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-1">
           {mainTabs.map((tab) => {
             const isActive = activeAsset === tab.id;
             return (
@@ -201,13 +201,13 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                   setIsDrawerOpen(false);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`relative flex-1 flex flex-col items-center justify-center h-11 rounded-xl touch-manipulation transition-all duration-200 outline-none cursor-pointer active:scale-95 ${
+                className={`relative flex-1 flex flex-col items-center justify-center h-12 py-1 rounded-xl touch-manipulation transition-all duration-150 outline-none cursor-pointer active:scale-95 ${
                   isActive
-                    ? 'text-[var(--accent-blue)] font-bold bg-[var(--accent-blue-soft)] shadow-xs'
+                    ? 'text-[var(--accent-blue)] font-bold'
                     : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
                 }`}
               >
-                <div className="relative flex items-center justify-center mb-0.5">
+                <div className={`relative flex items-center justify-center px-3 py-1 rounded-full transition-all duration-200 ${isActive ? 'bg-[var(--accent-blue-soft)]' : ''}`}>
                   {tab.id === 'home' ? (
                     <HomeNavIcon isActive={isActive} />
                   ) : tab.id === 'stocks' ? (
@@ -219,14 +219,14 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                   )}
                   {tab.id === 'home' && alertCount > 0 && (
                     <span 
-                      className="absolute -top-1 -right-2 min-w-[15px] h-[15px] rounded-full bg-[var(--negative)] text-white text-[9px] font-extrabold flex items-center justify-center px-1 leading-none shadow-xs"
+                      className="absolute -top-1 -right-1 min-w-[15px] h-[15px] rounded-full bg-[var(--negative)] text-white text-[9px] font-extrabold flex items-center justify-center px-1 leading-none shadow-xs"
                       aria-label={`${alertCount} notifications`}
                     >
                       {alertCount > 9 ? '9+' : alertCount}
                     </span>
                   )}
                 </div>
-                <span className={`text-[11px] tracking-tight leading-tight max-w-full truncate px-0.5 ${isActive ? 'font-bold text-[var(--accent-blue)]' : 'font-medium text-[var(--text-secondary)]'}`}>
+                <span className={`text-[10px] tracking-tight leading-tight max-w-full truncate px-0.5 mt-0.5 ${isActive ? 'font-bold text-[var(--accent-blue)]' : 'font-medium text-[var(--text-secondary)]'}`}>
                   {tab.label}
                 </span>
               </button>
@@ -241,16 +241,16 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
               setIsDrawerOpen(!isDrawerOpen);
             }}
             aria-expanded={isDrawerOpen}
-            className={`relative flex-1 flex flex-col items-center justify-center h-full py-1 min-h-[48px] touch-manipulation transition-all duration-150 outline-none cursor-pointer active:scale-95 ${
+            className={`relative flex-1 flex flex-col items-center justify-center h-12 py-1 rounded-xl touch-manipulation transition-all duration-150 outline-none cursor-pointer active:scale-95 ${
               isMoreActive || isDrawerOpen
-                ? 'text-[var(--accent-blue)]'
+                ? 'text-[var(--accent-blue)] font-bold'
                 : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
             }`}
           >
-            <div className="relative flex items-center justify-center mb-0.5">
+            <div className={`relative flex items-center justify-center px-3 py-1 rounded-full transition-all duration-200 ${isMoreActive || isDrawerOpen ? 'bg-[var(--accent-blue-soft)]' : ''}`}>
               <Menu size={20} aria-hidden="true" />
             </div>
-            <span className={`text-[11px] tracking-tight leading-tight max-w-full truncate px-0.5 ${isMoreActive || isDrawerOpen ? 'font-bold text-[var(--accent-blue)]' : 'font-medium text-[var(--text-secondary)]'}`}>
+            <span className={`text-[10px] tracking-tight leading-tight max-w-full truncate px-0.5 mt-0.5 ${isMoreActive || isDrawerOpen ? 'font-bold text-[var(--accent-blue)]' : 'font-medium text-[var(--text-secondary)]'}`}>
               More
             </span>
           </button>
