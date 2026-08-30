@@ -677,7 +677,7 @@ export default function AppShell() {
         )}
 
         {isMobile ? (
-          <div className="space-y-4">
+          <main id="main-content" className="space-y-4">
             {/* Family Tabs Row on Mobile */}
             <FamilyTabBar
               portfolios={portfolios}
@@ -773,11 +773,11 @@ export default function AppShell() {
                 </SectionErrorBoundary>
               </div>
             )}
-          </div>
+          </main>
         ) : (
           <>
             {/* Desktop layout: sidebar + main content area */}
-            <div role="tabpanel" className="flex gap-0">
+            <div className="flex gap-0">
               <Suspense fallback={null}>
                 <DesktopSidebar
                   activeTab={effectiveAsset}
@@ -793,7 +793,7 @@ export default function AppShell() {
               </Suspense>
 
               {/* Main content area */}
-              <div className="flex-1 min-w-0 space-y-6">
+              <main id="main-content" className="flex-1 min-w-0 space-y-6">
                 {/* Summary metrics */}
                 <SummaryCards
                   totalInvested={summaryData.totalInvested}
@@ -966,7 +966,7 @@ export default function AppShell() {
                     />
                   </SectionErrorBoundary>
                 </div>
-              </div>
+              </main>
             </div>
           </>
         )}

@@ -104,7 +104,7 @@ export default React.memo(function FamilyTabBar({
           const isMenuOpen = menuTarget?.id === p.id;
 
           return (
-            <div key={p.name} className="relative group flex items-center shrink-0">
+            <div key={p.name} role="presentation" className="relative group flex items-center shrink-0">
               <button
                 role="tab"
                 aria-selected={isActive}
