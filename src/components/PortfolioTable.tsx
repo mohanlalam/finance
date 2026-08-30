@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Trash2, Pencil, SlidersHorizontal, Share2 } from './icons/AppIcons';
+import { Trash2, Pencil, SlidersHorizontal, Share2, Search, X } from './icons/AppIcons';
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent } from '../utils/formatters';
 import { usePrivacy } from '../contexts/PrivacyContext';
@@ -210,6 +210,7 @@ export default React.memo(function PortfolioTable({
   onDelete,
   onUpdate,
 }: PortfolioTableProps) {
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [sortKey, setSortKey] = useState<SortKey>('currentValue');
   const [sortAsc, setSortAsc] = useState(false);
@@ -254,7 +255,13 @@ export default React.memo(function PortfolioTable({
   }, [holdingsWithAlloc]);
 
   const filteredHoldings = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
     return holdingsWithAlloc.filter(h => {
+      if (query) {
+        const tickerMatch = h.ticker.toLowerCase().includes(query);
+        const nameMatch = (h.stockName || '').toLowerCase().includes(query);
+        if (!tickerMatch && !nameMatch) return false;
+      }
       if (activeFilter === 'gainers') return h.unrealizedPnL > 0;
       if (activeFilter === 'losers') return h.unrealizedPnL < 0;
       if (activeFilter === 'etfs') {
@@ -265,7 +272,7 @@ export default React.memo(function PortfolioTable({
       }
       return true;
     });
-  }, [holdingsWithAlloc, activeFilter]);
+  }, [holdingsWithAlloc, activeFilter, searchQuery]);
 
   const sorted = useMemo(() => {
     return [...filteredHoldings].sort((a, b) => {
@@ -386,41 +393,67 @@ export default React.memo(function PortfolioTable({
         </div>
       </div>
 
-      {/* Quick Filters */}
-      <div className="px-4 py-2.5 flex items-center justify-between gap-2 overflow-x-auto border-b border-[var(--border-subtle)]">
-        <div className="flex items-center gap-1.5">
-          {[
-            { id: 'all', label: 'All', count: counts.all },
-            { id: 'gainers', label: 'Gainers', count: counts.gainers },
-            { id: 'losers', label: 'Losers', count: counts.losers },
-            { id: 'etfs', label: 'ETFs', count: counts.etfs },
-          ].map((filter) => {
-            const isActive = activeFilter === filter.id;
-            return (
+      {/* Search & Quick Filters Bar */}
+      <div className="px-3 sm:px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-2.5 border-b border-[var(--border-subtle)] bg-[var(--surface)]">
+        <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
+          {/* Quick Search Input */}
+          <div className="relative flex items-center w-full sm:w-56 shrink-0">
+            <Search size={13} className="absolute left-2.5 text-[var(--text-tertiary)] pointer-events-none" aria-hidden="true" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search stocks & ETFs..."
+              className="w-full pl-8 pr-7 py-1.5 text-xs rounded-[var(--radius-small)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] focus:border-[var(--accent-blue)] transition-all"
+              aria-label="Filter stocks table"
+            />
+            {searchQuery && (
               <button
-                key={filter.id}
-                onClick={() => setActiveFilter(filter.id as FilterType)}
-                className={`px-2.5 py-1 rounded-[var(--radius-small)] text-xs font-semibold transition-all whitespace-nowrap ios-press ${
-                  isActive
-                    ? 'bg-[var(--accent-blue)] text-white shadow-xs'
-                    : 'bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--surface-secondary)]'
-                }`}
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors p-0.5"
+                aria-label="Clear search"
               >
-                {filter.label} <span className="opacity-75 text-[10px] ml-0.5">({filter.count})</span>
+                <X size={12} aria-hidden="true" />
               </button>
-            );
-          })}
+            )}
+          </div>
+
+          {/* Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+            {[
+              { id: 'all', label: 'All', count: counts.all },
+              { id: 'gainers', label: 'Gainers', count: counts.gainers },
+              { id: 'losers', label: 'Losers', count: counts.losers },
+              { id: 'etfs', label: 'ETFs', count: counts.etfs },
+            ].map((filter) => {
+              const isActive = activeFilter === filter.id;
+              return (
+                <button
+                  key={filter.id}
+                  onClick={() => setActiveFilter(filter.id as FilterType)}
+                  className={`px-2.5 py-1 rounded-[var(--radius-small)] text-xs font-semibold transition-all whitespace-nowrap ios-press ${
+                    isActive
+                      ? 'bg-[var(--accent-blue)] text-white shadow-xs'
+                      : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--surface-tertiary)]'
+                  }`}
+                >
+                  {filter.label} <span className="opacity-75 text-[10px] ml-0.5">({filter.count})</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Sorting presets */}
-        <div className="flex items-center gap-1.5 overflow-x-auto">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0 self-end md:self-auto">
           <SlidersHorizontal size={12} className="text-[var(--text-tertiary)] shrink-0" aria-hidden="true" />
           <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider shrink-0 hidden sm:inline">Sort:</span>
           {SORT_PRESETS.map((preset) => (
             <button
               key={preset.id}
               onClick={() => handlePreset(preset.id)}
-              className={`px-2 py-0.5 rounded-[var(--radius-small)] text-[10.5px] font-semibold transition-all whitespace-nowrap ios-press ${
+              className={`px-2 py-1 rounded-[var(--radius-small)] text-[10.5px] font-semibold transition-all whitespace-nowrap ios-press ${
                 activePreset === preset.id
                   ? 'bg-[var(--text-primary)] text-[var(--surface)] shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]'

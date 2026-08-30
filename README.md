@@ -13,21 +13,16 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 - **Tax Loss Harvesting Opportunity Finder** — Indian Income Tax FY24-25 analyzer distinguishing equity STCG (20%) / LTCG (12.5% over ₹1.25L) from debt and gold slab rates.
 
 ### 💼 Multi-Asset Registry Suite
-- **Fixed Deposits (FD)** — Compounded interest calculations (Indian banking half-yearly/quarterly standards), maturity date timeline progress bars, and linked deposit receipts.
-- **Recurring Deposits (RD)** — Multi-month installment tracking with interactive month-by-month grid, paid vs. overdue status tracking, and one-click installment recording.
-- **Mutual Fund SIPs** — Real-time scheme tracking via AMFI India NAV automation and unit holdings valuation.
-- **Gold Holdings & Bullion** — Weight tracking, hallmark purity multipliers (24K, 22K/916, 18K/750, 14K/585), and live spot rate appreciation.
+- **Fixed Deposits (FD)** — Compounded interest calculations (Indian banking half-yearly/quarterly standards), auto-suggestions for all major Indian banks, maturity date timeline progress bars, and linked deposit receipts.
+- **Recurring Deposits (RD)** — Multi-month installment tracking with Indian bank datalists, paid vs. overdue status tracking, and one-click installment recording.
+- **Mutual Fund SIPs** — Real-time scheme tracking via AMFI India NAV automation, top Indian scheme presets (Parag Parikh, Quant, Mirae, etc.), and unit holdings valuation.
+- **Gold Holdings & Bullion** — Weight tracking, hallmark purity multipliers (24K, 22K/916, 18K/750, 14K/585), live MCX spot rate appreciation, and 1-tap auto-valuation.
 - **Real Estate** — Property acquisition cost basis, current valuations, and annual rental income yield percentages.
 - **Insurances** — Term, health, life, and motor policy registries with premium renewal timers and overdue status warnings.
 - **Document Vault** — Secure attachment manager linked by asset class with expiry date tracking and upcoming deadline alerts.
 
-### 📱 Modern Mobile Experience & Gestures
-- **Header Action Bar** — Standalone high-priority **Sync Prices (🔄)** button paired with a unified **More Options (⋯)** menu containing Privacy (Hide/Show Balances), Theme toggle, Notifications, and Security settings.
-- **Pull-to-Refresh & Gesture Navigation** — Fluid tactile pull-to-refresh with floating status indicators, horizontal swipe tab navigation, and long-press card interaction.
-- **Mobile Bottom Navigation Bar** — Fixed navigation bar with unread notification badge counters for rapid one-handed navigation.
-- **Offline Hydration** — Instant load from IndexedDB local cache on mobile networks with automatic SWR background revalidation.
-
-### 🤖 AI Portfolio Assistant
+### 🤖 AI Document Import & Assistant
+- **Smart AI Import (Quarantine & Review Workflow)** — Zero silent database writes. Scans broker statements, FD certificates, or insurance receipts using Gemini Flash 1.5 into a quarantined side-by-side verification modal with inline field editing before saving.
 - **Deterministic Intent Classifier** — Client-side NLP engine parsing 17 financial intents (`NET_WORTH`, `PERFORMERS`, `MATURITY_TIMELINE`, `ALLOCATION_SPLIT`, `SPECIFIC_GOLD`, `SPECIFIC_FDS`, `INSURANCE_REMINDERS`, `FAMILY_BREAKDOWN`, etc.) with matched asset badge tags and zero hallucinated numbers.
 
 ---
@@ -132,7 +127,6 @@ project antigravity/
 │   │   ├── ui/                   # Shared UI primitives (Buttons, Modals, Sparklines, ContextMenu)
 │   │   ├── AddFamilyModal.tsx    # Modal form to add new family members
 │   │   ├── AddHoldingModal.tsx   # Modal form to add new stock holdings
-│   │   ├── AlertsBanner.tsx      # Warning alerts for 52w high/low, FD maturities, overdue renewals
 │   │   ├── AppErrorBoundary.tsx  # Authenticated app-level crash recovery boundary
 │   │   ├── AssetCardSkeleton.tsx # Reusable pulsing shimmer card wireframe for all registry views
 │   │   ├── AssetTabContent.tsx   # Orchestrator component rendering the active asset registry view
@@ -221,7 +215,7 @@ project antigravity/
 The repository enforces strict verification before deployment:
 
 ```bash
-# Run Vitest test suite across 30 test files and 165+ tests
+# Run Vitest test suite across 33 test files and 188+ tests (100% passing)
 npm test
 
 # Run interactive Vitest UI with watch mode
@@ -247,13 +241,17 @@ cd finance
 npm install
 ```
 
-### 3. Environment Variables
+### 3. Environment Variables & Secrets
 Create a `.env` file in the root directory:
 ```env
 VITE_SUPABASE_URL=https://your-supabase-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
-VITE_APP_PIN=3463
 VITE_GEMINI_API_KEY=your-gemini-api-key # Optional for AI Assistant
+```
+
+Set the server-side PIN secret in Supabase:
+```bash
+npx supabase secrets set APP_PIN_HASH="<sha256_hash_of_pin>"
 ```
 
 ### 4. Database Setup & Edge Functions

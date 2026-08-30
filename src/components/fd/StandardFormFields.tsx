@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatDateDuration } from '../../utils/dateUtils';
+import { INDIAN_BANKS_LIST } from '../../utils/indianFinancialPresets';
 
 interface StandardFormFieldsProps {
   bankName: string;
@@ -42,11 +43,17 @@ export function StandardFormFields({
         <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Bank / Issuer Name</label>
         <input
           type="text"
-          placeholder="e.g. SBI Bank, Post Office"
+          list="indian-bank-suggestions"
+          placeholder="e.g. HDFC Bank, SBI, Post Office"
           value={bankName}
           onChange={(e) => setBankName(e.target.value)}
           className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
         />
+        <datalist id="indian-bank-suggestions">
+          {INDIAN_BANKS_LIST.map((b) => (
+            <option key={b} value={b} />
+          ))}
+        </datalist>
       </div>
 
       <div className="grid grid-cols-2 gap-3">

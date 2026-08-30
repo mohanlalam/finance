@@ -72,7 +72,7 @@ export default React.memo(function FamilyTabBar({
       <div
         role="tablist"
         aria-label="Family members portfolios"
-        className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 sm:gap-1 bg-[var(--surface-secondary)] p-1.5 sm:p-1 rounded-[var(--radius-large)] sm:rounded-[var(--radius-medium)] border border-[var(--border-subtle)] w-full sm:w-auto"
+        className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 sm:gap-1 bg-[var(--surface-secondary)]/60 backdrop-blur-xl p-1.5 sm:p-1 rounded-[var(--radius-large)] sm:rounded-[var(--radius-medium)] border border-[var(--border-subtle)] w-full sm:w-auto shadow-[var(--shadow-card)]"
       >
         {/* Overview Tab */}
         <button
@@ -84,10 +84,10 @@ export default React.memo(function FamilyTabBar({
             setMenuTarget(null);
             onTabChange('all');
           }}
-          className={`flex items-center gap-2 h-9 sm:h-8 px-2.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none min-w-0 ${
+          className={`flex items-center gap-2 h-9 sm:h-8 px-3 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none min-w-0 ${
             activeTab === 'all'
-              ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-xs border border-[var(--border-subtle)]'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-card)] border border-[var(--border-luminous)] ring-1 ring-[var(--accent-blue)]/20'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]/50'
           }`}
         >
           <div className="w-4 h-4 rounded bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
@@ -114,10 +114,10 @@ export default React.memo(function FamilyTabBar({
                   setMenuTarget(null);
                   onTabChange(p.name);
                 }}
-                className={`flex items-center justify-between gap-1 h-9 sm:h-8 px-2 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none w-full min-w-0 ${
+                className={`flex items-center justify-between gap-1 h-9 sm:h-8 px-2.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none w-full min-w-0 ${
                   isActive
-                    ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-xs border border-[var(--border-subtle)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-card)] border border-[var(--border-luminous)] ring-1 ring-[var(--accent-blue)]/20'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]/50'
                 }`}
               >
                 <div className="flex items-center gap-1.5 min-w-0 truncate">

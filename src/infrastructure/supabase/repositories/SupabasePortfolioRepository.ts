@@ -495,6 +495,15 @@ export class SupabasePortfolioRepository implements IPortfolioRepository {
       throw new RepositoryError(`Failed to delete ${assetType}`, err);
     }
   }
+
+  async triggerNetWorthSnapshot(): Promise<void> {
+    try {
+      await invokeFunction<unknown>('snapshot-net-worth', { method: 'POST' });
+    } catch (err) {
+      if (err instanceof AppApiError) throw err;
+      throw new RepositoryError('Failed to trigger daily net worth snapshot', err);
+    }
+  }
 }
 
 export const supabasePortfolioRepository = new SupabasePortfolioRepository();

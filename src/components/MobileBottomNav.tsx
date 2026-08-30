@@ -1,5 +1,19 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Home as HomeIcon, TrendingUp, Landmark, Wallet, Menu, Coins, Building2, Shield, FolderOpen, Clock, ChevronRight, X, Sparkles } from './icons/AppIcons';
+import { 
+  Home as HomeIcon, 
+  TrendingUp, 
+  Landmark, 
+  Wallet, 
+  Menu, 
+  Coins, 
+  Building2, 
+  Shield, 
+  FolderOpen, 
+  Clock, 
+  ChevronRight, 
+  X, 
+  Sparkles 
+} from './icons/AppIcons';
 import { triggerHaptic } from '../utils/haptics';
 
 type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
@@ -9,6 +23,8 @@ interface MobileBottomNavProps {
   onChangeAsset: (tab: AssetTab) => void;
   alertCount?: number;
   onOpenSmartImport?: () => void;
+  onAddStock?: () => void;
+  onAddAsset?: (type: 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
 }
 
 const ICON_STOCKS = <TrendingUp size={20} aria-hidden="true" />;
@@ -37,9 +53,6 @@ const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.Reac
 
 function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSmartImport }: MobileBottomNavProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  // Keep a ref in sync with state so the Escape keydown handler can read the
-  // current value without being listed as a dependency (avoids re-attaching
-  // the event listener every time the drawer opens or closes).
   const isDrawerOpenRef = useRef(isDrawerOpen);
   useEffect(() => { isDrawerOpenRef.current = isDrawerOpen; }, [isDrawerOpen]);
 
@@ -48,7 +61,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
     setIsDrawerOpen(false);
   }, [activeAsset]);
 
-  // Trap Escape key for accessibility — stable listener, reads state via ref
+  // Trap Escape key for accessibility
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isDrawerOpenRef.current) {
@@ -57,11 +70,10 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []); // empty deps: listener is attached once and reads state via ref
+  }, []);
 
-  // Stable handler for More Drawer tab items — avoids new inline arrow
-  // functions per list item per render, which would bust React.memo on buttons.
   const handleMoreTabClick = useCallback((tabId: typeof moreTabs[number]['id']) => {
+    triggerHaptic('selection');
     onChangeAsset(tabId);
     setIsDrawerOpen(false);
   }, [onChangeAsset]);
@@ -168,15 +180,15 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
         </div>
       </div>
 
-      {/* Persistent Bottom Bar */}
+      {/* Persistent Floating Bottom Dock */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--surface)] border-t border-[var(--border-subtle)] md:hidden shadow-[0_-2px_10px_rgba(0,0,0,0.05)] select-none will-change-transform transform-gpu"
+        className="fixed bottom-3 left-3 right-3 z-50 bg-[var(--surface-glass)] backdrop-blur-2xl border border-[var(--border-glass)] rounded-2xl shadow-[var(--shadow-floating)] md:hidden select-none will-change-transform transform-gpu"
         style={{
-          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 0px)',
+          marginBottom: 'max(env(safe-area-inset-bottom, 0px), 0px)',
         }}
       >
-        <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-1">
+        <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-2">
           {mainTabs.map((tab) => {
             const isActive = activeAsset === tab.id;
             return (
@@ -189,9 +201,9 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                   setIsDrawerOpen(false);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`relative flex-1 flex flex-col items-center justify-center h-full py-1 min-h-[48px] touch-manipulation transition-all duration-150 outline-none cursor-pointer active:scale-95 ${
+                className={`relative flex-1 flex flex-col items-center justify-center h-11 rounded-xl touch-manipulation transition-all duration-200 outline-none cursor-pointer active:scale-95 ${
                   isActive
-                    ? 'text-[var(--accent-blue)]'
+                    ? 'text-[var(--accent-blue)] font-bold bg-[var(--accent-blue-soft)] shadow-xs'
                     : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
                 }`}
               >
@@ -249,3 +261,4 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
 }
 
 export default React.memo(MobileBottomNav);
+

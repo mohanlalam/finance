@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getFDEffectiveValue, formatINR, formatPercent } from '../formatters';
+import { getFDEffectiveValue, formatINR, formatPercent, formatDeltaINR } from '../formatters';
 import { FixedDeposit } from '../../types/portfolio';
 
 describe('formatINR', () => {
@@ -13,6 +13,22 @@ describe('formatINR', () => {
 
   it('formats crores correctly', () => {
     expect(formatINR(25000000)).toBe('₹2.50Cr');
+  });
+});
+
+describe('formatDeltaINR', () => {
+  it('formats positive numbers with plus sign', () => {
+    expect(formatDeltaINR(231200)).toBe('+₹2.31L');
+    expect(formatDeltaINR(5000)).toBe('+₹5,000');
+  });
+
+  it('formats negative numbers with minus sign', () => {
+    expect(formatDeltaINR(-23400)).toBe('-₹23,400');
+    expect(formatDeltaINR(-1200000)).toBe('-₹12.00L');
+  });
+
+  it('formats zero without sign', () => {
+    expect(formatDeltaINR(0)).toBe('₹0');
   });
 });
 

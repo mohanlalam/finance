@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, Loader2 } from './icons/AppIcons';
+import { X, Plus } from './icons/AppIcons';
 import Modal from './Modal';
 import { Button } from './ui/Button';
 import { IconButton } from './ui/IconButton';
@@ -278,9 +278,10 @@ export default React.memo(function AddHoldingModal({ onClose, onAdd, portfolioOp
             type="submit"
             variant="primary"
             disabled={saving}
+            isLoading={saving}
+            leftIcon={!saving ? <Plus size={14} /> : undefined}
             className="flex-1"
           >
-            {saving ? <Loader2 size={14} className="animate-spin mr-1.5" /> : <Plus size={14} className="mr-1.5" />}
             {saving ? 'Adding...' : 'Add Holding'}
           </Button>
         </div>

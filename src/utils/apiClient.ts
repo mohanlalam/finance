@@ -1,4 +1,4 @@
-import { clearSessionVerification, ensureHashedPin } from './auth';
+import { clearSessionVerification, ensureHashedPin } from './sessionStore';
 
 function sanitizeEnv(val: string | undefined): string {
   if (!val) return '';

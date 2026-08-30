@@ -62,15 +62,15 @@ This document provides a comprehensive, exhaustive overview of the **User Interf
 
 ---
 
-## 1. 🎯 Design Philosophy & Core Aesthetics
+## 1. 🎯 Design Philosophy & Core Aesthetics: The Antigravity Aesthetic
 
-The application enforces a **calm, professional, data-first financial design system** (Zerodha Kite and Apple iOS hybrid) engineered for maximum readability, instant scannability, and high density without visual noise.
+The application embraces the **Antigravity Design Aesthetic** (Cyber-Zen, weightless suspension, and translucent glassmorphism) paired with precision financial data density:
 
-* **Flat Canvas & Solid Surfaces**: Standardized `#f8fafc` light / `#080c14` dark canvas background. Solid card surfaces (`var(--surface)`) with crisp 1px borders (`var(--border-subtle)`). Completely avoids distracting rainbow gradients or glowing neons in financial data views.
-* **Zerodha Kite Signature Palette**: Non-glaring, professional financial tokens: Kite Blue (`#387ed1`), clean profit green (`#00b074`), and clean loss red (`#df514c`).
-* **Compact Financial Geometry**: Tight corner radii (6px – 14px) paired with tabular numeric alignment guarantee that complex financial figures line up with mathematical precision across all columns.
-* **Apple & iOS Inspired Tactile Feedback**: Combines spring animations (`cubic-bezier(0.34, 1.56, 0.64, 1)`), tactile button scaling (`scale(0.975)` on active press), and glassmorphic backdrops for modals and lock screens.
-* **Functional Color Coding**: Colors are used strictly for financial semantics: System Green for profits/gains, Amber for warnings/stale pricing/upcoming maturities, System Red for losses/unfavorable returns, and Crisp Blue for active states and primary actions.
+* **Weightless Suspension & Zero-G Atmosphere**: Instead of a heavy grounded footer, elements float naturally above a deep cosmic void (`#040711` dark mode) accented with subtle atmospheric ambient nebula glows (cyan, purple, emerald) and crystalline prism backdrops in light mode.
+* **Glassmorphic Floating Surfaces (`.apple-card`, `.antigravity-card`)**: Surfaces use `backdrop-filter: blur(24px) saturate(180%)`, frosted translucency (`rgba(15, 23, 42, 0.65)`), and 1px luminous edge highlights (`rgba(255, 255, 255, 0.09)`) with ambient specular reflections.
+* **Cyber-Zen Wide-Tracked Typography & Glowing Financial Accents**: Section tags, category badges, and column headers use wide tracking (`tracking-wider` / `tracking-widest`). Key financial numbers radiate subtle neon glows (`.neon-glow-positive` with `#10b981`, `.neon-glow-negative` with `#f43f5e`, `.neon-glow-gold` with `#f59e0b`).
+* **Floating Island Navigation**: Dynamic Island frosted header, floating pill family selector with glowing capsules, and a floating glass mobile bottom dock.
+* **Tactile Spring Physics**: Spring physics transitions (`cubic-bezier(0.16, 1, 0.3, 1)`), tactile micro-scaling (`scale(0.965)`), and gentle zero-G hovering ascension.
 
 ---
 
@@ -82,25 +82,26 @@ The visual theme is governed by CSS Custom Properties declared in `src/index.css
 
 | Token Name | Light Mode | Dark Mode | Usage Scope |
 | :--- | :--- | :--- | :--- |
-| `--app-background` | `#f8fafc` | `#080c14` | Main viewport canvas background |
-| `--surface` | `#ffffff` | `#111827` | Primary card background (`.apple-card`) |
-| `--surface-secondary` | `#f1f5f9` | `#1a2234` | Form fields, subtle card headers, table hover |
-| `--surface-tertiary` | `#e2e8f0` | `#283548` | Scrollbar thumb, disabled controls, dividers |
-| `--surface-glass` | `rgba(255, 255, 255, 0.82)` | `rgba(17, 24, 39, 0.82)` | Frosted glass cards and sticky navigation headers |
+| `--app-background` | `#f8fafc` | `#040711` | Main viewport cosmic canvas background |
+| `--surface` | `rgba(255, 255, 255, 0.78)` | `rgba(15, 23, 42, 0.65)` | Primary floating glass card (`.apple-card`, `.antigravity-card`) |
+| `--surface-secondary` | `rgba(241, 245, 249, 0.85)` | `rgba(30, 41, 59, 0.7)` | Form fields, card headers, hover states |
+| `--surface-tertiary` | `rgba(226, 232, 240, 0.9)` | `rgba(51, 65, 85, 0.7)` | Scrollbar thumb, disabled controls, dividers |
+| `--surface-glass` | `rgba(255, 255, 255, 0.75)` | `rgba(15, 23, 42, 0.7)` | Frosted glass floating navigation and modal headers |
 | `--text-primary` | `#0f172a` | `#f8fafc` | Primary titles, net worth values, headings |
 | `--text-secondary` | `#475569` | `#94a3b8` | Subtitles, section headers, secondary labels |
-| `--text-tertiary` | `#596780` | `#8899aa` | Muted metadata, timestamps, table column headers (elevated for WCAG AA in both modes) |
-| `--accent-blue` | `#387ed1` | `#387ed1` | Primary action buttons, active navigation indicators |
-| `--accent-blue-soft` | `rgba(56, 126, 209, 0.08)` | `rgba(56, 126, 209, 0.15)` | Selected tab pills, info badges |
-| `--positive` | `#00b074` | `#00b074` | Profit indicators, positive gain badges, upward arrows |
-| `--positive-soft` | `rgba(0, 176, 116, 0.08)` | `rgba(0, 176, 116, 0.15)` | Positive summary card accent background |
-| `--negative` | `#df514c` | `#df514c` | Loss indicators, negative return badges, downward arrows |
-| `--negative-soft` | `rgba(223, 81, 76, 0.08)` | `rgba(223, 81, 76, 0.15)` | Loss summary card accent background |
-| `--warning` | `#f59e0b` | `#f59e0b` | Stale price alerts, upcoming maturity/renewal warnings |
-| `--warning-soft` | `rgba(245, 158, 11, 0.08)` | `rgba(245, 158, 11, 0.15)` | Caution banner backgrounds |
-| `--border-subtle` | `rgba(148, 163, 184, 0.22)` | `rgba(255, 255, 255, 0.08)` | 1px clean container & card borders |
-| `--border-glass` | `rgba(255, 255, 255, 0.6)` | `rgba(255, 255, 255, 0.12)` | Glassmorphic floating borders |
-| `--backdrop-overlay` | `rgba(15, 23, 42, 0.35)` | `rgba(0, 0, 0, 0.75)` | Modal backdrop blur overlays |
+| `--text-tertiary` | `#64748b` | `#64748b` | Muted metadata, timestamps, table column headers |
+| `--accent-blue` | `#0284c7` | `#38bdf8` | Primary action buttons, active navigation indicators, cyan highlights |
+| `--accent-blue-soft` | `rgba(2, 132, 199, 0.08)` | `rgba(56, 189, 248, 0.14)` | Selected tab pills, info badges |
+| `--positive` | `#059669` | `#10b981` | Profit indicators, glowing positive gain badges |
+| `--positive-soft` | `rgba(16, 185, 129, 0.1)` | `rgba(16, 185, 129, 0.16)` | Positive summary card accent background |
+| `--negative` | `#e11d48` | `#f43f5e` | Loss indicators, glowing negative return badges |
+| `--negative-soft` | `rgba(225, 29, 72, 0.1)` | `rgba(244, 63, 94, 0.16)` | Loss summary card accent background |
+| `--warning` | `#d97706` | `#f59e0b` | Stale price alerts, upcoming maturity/renewal warnings |
+| `--warning-soft` | `rgba(245, 158, 11, 0.1)` | `rgba(245, 158, 11, 0.16)` | Caution banner backgrounds |
+| `--border-subtle` | `rgba(203, 213, 225, 0.6)` | `rgba(255, 255, 255, 0.09)` | 1px clean container & card borders |
+| `--border-glass` | `rgba(255, 255, 255, 0.9)` | `rgba(255, 255, 255, 0.14)` | Glassmorphic floating borders |
+| `--border-luminous` | `rgba(2, 132, 199, 0.25)` | `rgba(56, 189, 248, 0.3)` | Luminous focus and active container borders |
+| `--backdrop-overlay` | `rgba(15, 23, 42, 0.35)` | `rgba(2, 6, 23, 0.8)` | Modal backdrop blur overlays |
 
 ### Canonical Asset Class Color Palette (`ASSET_COLORS`)
 
@@ -601,23 +602,24 @@ All modal dialogs across the application share a single, unified draggable modal
 
 * **`AddHoldingModal.tsx`**: Add/Edit Stock & ETF holdings (Ticker lookup, quantity, buy price, date, portfolio context).
 * **`EditStockModal.tsx`**: Quick quantity and buy price editor.
-* **`FDFormModal.tsx`**: Fixed Deposit inputs (Bank name, principal, rate %, start date, maturity date).
-* **`RDFormModal.tsx`**: Recurring Deposit inputs (Bank, monthly installment, interest rate %, tenure months).
-* **`SIPFormModal.tsx`**: Mutual Fund SIP inputs (Fund scheme lookup, monthly SIP amount, SIP day).
-* **`GoldFormModal.tsx`**: Gold holding inputs (Sub-type, grams weight, purchase rate, benchmark).
+* **`FDFormModal.tsx`**: Fixed Deposit inputs (Major Indian bank presets datalist, principal, rate %, start date, maturity date, real-time auto-compounding computation).
+* **`RDFormModal.tsx`**: Recurring Deposit inputs (Bank datalist, monthly installment, interest rate %, tenure months, quarterly compound solver).
+* **`SIPFormModal.tsx`**: Mutual Fund SIP inputs (Top Indian mutual fund scheme datalist with AMFI code & CAGR auto-fill, monthly SIP amount, units owned, fallback valuation).
+* **`GoldFormModal.tsx`**: Gold holding inputs (Sub-type, grams weight, hallmark purity chips [24K, 22K/916, 18K, 14K], 1-tap spot rate auto-compute valuation, benchmark).
 * **`RealEstateFormModal.tsx`**: Property inputs (Type, valuation, purchase cost, monthly rental).
 * **`InsuranceFormModal.tsx`**: Policy inputs (Type, sum assured, premium amount, due date).
 * **`AddFamilyModal.tsx`**: Add new family member portfolio (Member name, relationship tag).
 * **`RenamePortfolioModal.tsx`**: Rename portfolio alias.
 * **`ChangePinModal.tsx`**: Update 4-digit security PIN.
 
-### Smart CAS / Excel Portfolio Import Modal
+### Smart AI Import — Quarantined Review & Verification Modal
 
 * Component: `SmartImportModal.tsx`
 * Features:
-  * Drag-and-drop parser for NSDL/CDSL CAS PDFs, CAMS/Karvy Mutual Fund statements, and Excel/CSV spreadsheets.
-  * Automatic scheme/ticker reconciliation with live pricing databases.
-  * Duplicate detection preview table allowing users to cherry-pick holdings before importing.
+  * Drag-and-drop parser for PDF statements (NSDL/CDSL CAS, FD certificates, insurance schedules), images, and spreadsheets.
+  * Side-by-side Quarantined Review (stacked on mobile): Shows extracted JSON fields alongside the visual document preview before committing to the database.
+  * Interactive category switcher and inline field editor covering all 7 asset classes (FD, RD, SIP, Gold, Real Estate, Insurance, Stocks).
+  * Target portfolio owner selector with atomic commit and automated document storage rollback if metadata persistence fails.
 
 ### Data Quality Health Diagnostic Modal
 

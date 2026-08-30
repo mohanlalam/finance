@@ -80,6 +80,10 @@ export class PortfolioService {
       await invalidatePortfolioCache();
     });
   }
+
+  async triggerNetWorthSnapshot(): Promise<void> {
+    return this.repository.triggerNetWorthSnapshot();
+  }
 }
 
 export const portfolioService = new PortfolioService();

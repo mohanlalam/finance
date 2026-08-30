@@ -39,3 +39,13 @@ Thumbs.db
 
 # Supabase local state
 supabase/.temp/
+
+# Scratch & Temporary testing scripts
+scratch/
+
+# Browser test profiles
+.chrome_full_profile/
+.chrome_profile/
+.chrome_test_profile/
+*.profile/
+

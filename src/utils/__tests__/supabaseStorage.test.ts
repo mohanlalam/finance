@@ -57,7 +57,7 @@ vi.mock('../supabaseStorage', async (importOriginal) => {
     const res = await fetch(edgeUrl, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ bucket: 'investment-documents', path: cleanPath, expiresIn: 300 }),
+      body: JSON.stringify({ bucket: 'investment-documents', path: cleanPath, expiresIn: 60 }),
     });
 
     if (!res.ok) {
@@ -72,7 +72,7 @@ vi.mock('../supabaseStorage', async (importOriginal) => {
     }
 
     const { signedUrl } = await res.json();
-    signedUrlCache.set(cleanPath, { url: signedUrl, expiresAt: now + 240_000 });
+    signedUrlCache.set(cleanPath, { url: signedUrl, expiresAt: now + 50_000 });
     return signedUrl;
   }
 
@@ -220,7 +220,7 @@ describe('supabaseStorage', () => {
       expect(capturedBody).toEqual({
         bucket: 'investment-documents',
         path: 'Dad/fd/17400000_doc.pdf',
-        expiresIn: 300,
+        expiresIn: 60,
       });
       expect(url).toBe('https://test.supabase.co/storage/v1/object/sign/doc.pdf?token=xyz');
     });

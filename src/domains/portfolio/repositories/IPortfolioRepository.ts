@@ -27,4 +27,7 @@ export interface IPortfolioRepository {
 
   /** Delete an existing asset */
   deleteAsset(assetType: string, id: string): Promise<void>;
+
+  /** Record / trigger daily net worth snapshot calculation */
+  triggerNetWorthSnapshot(): Promise<void>;
 }

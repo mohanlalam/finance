@@ -5,7 +5,7 @@ import { PortfolioProvider, usePortfolioState, usePortfolioActions } from './con
 import { ToastProvider } from './contexts/ToastContext';
 import { MobileProvider } from './contexts/MobileContext';
 import ToastContainer from './components/Toast';
-import ErrorBoundary from './components/ErrorBoundary';
+import AppErrorBoundary from './components/AppErrorBoundary';
 import DashboardLoading from './components/DashboardLoading';
 import DashboardError from './components/DashboardError';
 import { PrivacyProvider } from './contexts/PrivacyContext';
@@ -33,7 +33,7 @@ export default function MainApp({ onAuthExpired }: MainAppProps) {
 
   return (
     <HashRouter>
-      <ErrorBoundary>
+      <AppErrorBoundary>
         <ToastProvider>
           <MobileProvider>
             <ThemeProvider>
@@ -50,7 +50,7 @@ export default function MainApp({ onAuthExpired }: MainAppProps) {
             </ThemeProvider>
           </MobileProvider>
         </ToastProvider>
-      </ErrorBoundary>
+      </AppErrorBoundary>
     </HashRouter>
   );
 }
@@ -78,9 +78,9 @@ function LoadGate({ onUnlock }: { onUnlock: () => void }) {
 
   return (
     <Suspense fallback={<DashboardLoading />}>
-      <ErrorBoundary>
+      <AppErrorBoundary>
         <AppShell />
-      </ErrorBoundary>
+      </AppErrorBoundary>
     </Suspense>
   );
 }

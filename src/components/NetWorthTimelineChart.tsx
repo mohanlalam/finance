@@ -12,7 +12,7 @@ interface NetWorthTimelineChartProps {
   currentFD?: number;
 }
 
-type DateRange = '1M' | '3M' | '6M' | '1Y' | 'ALL';
+type DateRange = '1M' | '3M' | '6M' | '1Y' | '3Y' | 'ALL';
 type SeriesMode = 'total' | 'both' | 'stocks' | 'fd';
 
 // Smooth Bezier Curve Path Builder
@@ -155,6 +155,7 @@ export default function NetWorthTimelineChart({
     else if (range === '3M') days = 90;
     else if (range === '6M') days = 180;
     else if (range === '1Y') days = 365;
+    else if (range === '3Y') days = 1095;
 
     const cutoff = new Date();
     cutoff.setDate(now.getDate() - days);
@@ -419,6 +420,7 @@ export default function NetWorthTimelineChart({
               { id: '3M', label: '3M' },
               { id: '6M', label: '6M' },
               { id: '1Y', label: '1Y' },
+              { id: '3Y', label: '3Y' },
               { id: 'ALL', label: 'All' },
             ] as const}
             value={range}

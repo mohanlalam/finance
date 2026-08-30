@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useCallback, useRef, useMemo, Rea
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Portfolio, PortfolioName, AssetPayload, RDPayload, SIPPayload } from '../types/portfolio';
 import { NetWorthSnapshot, usePortfolioData, LoadStatus } from '../hooks/usePortfolioData';
-import { invokeFunction } from '../utils/apiClient';
+import { portfolioService } from '../domains/portfolio/services/portfolioService';
 import { logger } from '../infrastructure/logging/logger';
 
 
@@ -187,7 +187,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     snapshotFiredRef.current = true;
     // Small delay to ensure PIN hash is fully cached after first successful load
     const timer = setTimeout(() => {
-      invokeFunction('snapshot-net-worth', { method: 'POST' })
+      portfolioService.triggerNetWorthSnapshot()
         .then(() => {
           localStorage.setItem('finance_last_snapshot_date', todayStr);
           logger.info('[portfolio] daily net worth snapshot recorded', { date: todayStr });

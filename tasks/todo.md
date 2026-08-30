@@ -1,25 +1,30 @@
-# 📋 Performance Optimization Tasks
+# 📋 Project Roadmap & Task Status
 
-- [x] **Phase 1: React Runtime & Calculation Performance**
-  - [x] `SummaryCards.tsx`: Use precomputed `p.todayPnL` in `memberBreakdowns`
-  - [x] `MobileHomeSummary.tsx`: Use precomputed `p.todayPnL` in member breakdown tiles
-  - [x] `useAutoLock.ts`: Ref-stabilize `onLock` callback to eliminate global event listener re-binding
-  - [x] `useKeyboardShortcuts.ts`: Ref-stabilize `onRefresh` callback
-  - [x] `usePullToRefresh.ts`: Add unmount cleanup effect for `rafId`
-- [x] **Phase 2: Storage, Network & Bullion/AMFI Caching Engine**
-  - [x] `goldPricing.ts`: Add in-memory singleton cache `_memoryGoldSnapshot` to eliminate synchronous `localStorage` stalls
-  - [x] `sipUtils.ts`: Implement in-flight request deduplication map and debounced IDB sync for fetched AMFI NAVs
-  - [x] `vite.config.ts`: Add `api.gold-api.com` runtime caching and fix `amfi-api-cache` `maxEntries: 100`
-  - [x] `index.html`: Add `<link rel="preconnect" href="https://api.gold-api.com" crossorigin />` and preconnect `api.mfapi.in`
-  - [x] `usePortfolioData.ts`: Enhance SWR live price key with composite holding count to trigger instant refresh on additions/deletions
-- [x] **Phase 3: UI Smoothness, SVG Charts & GPU Acceleration**
-  - [x] `NetWorthTimelineChart.tsx`: Clamp `setDimensions` against same-width thrashing
-  - [x] `PieChart.tsx`: Use CSS hover scale transitions instead of JS-driven trigonometric path re-stringification on mouse move
-  - [x] `index.css`: Add `contain: layout style;` to `.apple-card` for desktop paint isolation
-- [x] **Phase 4: Verification & Production Build**
-  - [x] Run `npx tsc --noEmit` (Passed with 0 errors)
-  - [x] Run `npm run lint` (Passed with 0 errors/warnings)
-  - [x] Run `npm test` (All 16 test suites, 93 tests passed)
-  - [x] Run `npm run build` (Passed, PWA precache & brotli/gzip assets generated)
+- [x] **Pillar 1: Absolute Financial Data Integrity & Privacy**
+  - [x] Pure financial math invariants test suite (`financialMathInvariants.test.ts`)
+  - [x] Floating-point precision helper `roundToDecimals` with `Number.EPSILON` guard
+  - [x] Net Worth consolidation and asset category sum validation
+  - [x] Bullion hallmark purity multiplier calculations (24K, 22K/916, 18K, 14K)
+  - [x] Indian FY24-25 Capital Gains tax calculations (20% STCG, 12.5% LTCG > ₹1.25L)
+  - [x] Fail-closed server-side PIN authentication and spoof-resistant IP rate limiting
+  - [x] Private Supabase Storage bucket with 300s HMAC signed URLs
+- [x] **Pillar 2: Frictionless Multi-Asset Tracking & Indian Financial Presets**
+  - [x] `indianFinancialPresets.ts`: Top Indian banks and popular AMFI mutual fund schemes
+  - [x] `FDFormModal.tsx` & `RDFormModal.tsx`: Bank autocompletes and instant compounding calculators
+  - [x] `GoldFormModal.tsx`: 1-tap "Auto-compute" valuation from grams, purity, and live 24K spot rate
+  - [x] `SIPFormFields.tsx`: Mutual Fund scheme datalist with AMFI code & CAGR auto-population
+- [x] **Smart AI Import — Quarantined Review & Verification Workflow**
+  - [x] Drag-and-drop parser for PDF broker statements, FD certificates, and insurance policies
+  - [x] Side-by-side quarantine review interface before committing to database
+  - [x] Inline field editor and category switcher across all 7 asset classes
+  - [x] Atomic persistence with automatic storage cleanup on metadata failure
+- [x] **Large Portfolio Stress Benchmarking & PWA Offline Resilience**
+  - [x] `portfolioBenchmark.test.ts`: Validated 1,000+ multi-asset calculation engine in ~0.8ms (budget < 15ms)
+  - [x] `offlineHydration.test.ts`: Instant IndexedDB offline cache hydration on boot before network fetch
+  - [x] Off-thread Web Worker infrastructure (`xirr.worker.ts`)
+- [x] **Verification & Test Coverage**
+  - [x] Run `npm run verify` (`eslint`, strict `tsc --noEmit`, and `vite build`) — 0 errors / 0 warnings
+  - [x] Run `npm test` — 33 test files / 188 unit & integration tests passing (100%)
+
 
 

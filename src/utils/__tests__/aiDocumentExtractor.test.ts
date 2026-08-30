@@ -14,8 +14,8 @@ describe('aiDocumentExtractor', () => {
   });
 
   it('stores and retrieves custom Gemini API key', () => {
-    setStoredGeminiApiKey('AIzaSyCustomKey123');
-    expect(getGeminiApiKey()).toBe('AIzaSyCustomKey123');
+    setStoredGeminiApiKey('test-custom-gemini-key-123');
+    expect(getGeminiApiKey()).toBe('test-custom-gemini-key-123');
     setStoredGeminiApiKey('');
   });
 
@@ -72,5 +72,45 @@ describe('aiDocumentExtractor', () => {
     expect(result.data.bankName).toBe('HDFC Bank');
     expect(result.data.principalAmount).toBe(250000);
     expect(result.data.interestRate).toBe(7.25);
+  });
+
+  it('successfully extracts gold and insurance data types', async () => {
+    const mockGoldResponse = {
+      candidates: [
+        {
+          content: {
+            parts: [
+              {
+                text: JSON.stringify({
+                  assetType: 'gold',
+                  confidence: 0.95,
+                  title: 'Tanishq 24K Gold Bar',
+                  data: {
+                    itemName: '24K Gold Bar',
+                    purity: '24K',
+                    weightGrams: 20,
+                    purchasePrice: 145000,
+                  },
+                }),
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockGoldResponse,
+    } as unknown as Response);
+
+    const file = new File(['gold receipt'], 'gold_receipt.jpg', { type: 'image/jpeg' });
+    const result = await extractAssetFromDocument(file, 'mock_key');
+
+    expect(result.assetType).toBe('gold');
+    expect(result.confidence).toBe(0.95);
+    expect(result.data.itemName).toBe('24K Gold Bar');
+    expect(result.data.weightGrams).toBe(20);
+    expect(result.data.purchasePrice).toBe(145000);
   });
 });

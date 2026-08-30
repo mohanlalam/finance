@@ -7,6 +7,7 @@ import {
   toLocalDateString,
   calculateDateDuration,
   formatDateDuration,
+  formatRelativeTime,
 } from '../dateUtils';
 
 describe('dateUtils', () => {
@@ -83,6 +84,33 @@ describe('dateUtils', () => {
       const res = calculateDateDuration('2020-01-01');
       expect(res).not.toBeNull();
       expect(res!.years).toBeGreaterThan(0);
+    });
+  });
+
+  describe('formatRelativeTime', () => {
+    it('returns "never" when date is null or undefined', () => {
+      expect(formatRelativeTime(null)).toBe('never');
+      expect(formatRelativeTime(undefined)).toBe('never');
+    });
+
+    it('returns "just now" for dates within 30 seconds', () => {
+      const now = new Date();
+      expect(formatRelativeTime(now)).toBe('just now');
+    });
+
+    it('returns seconds ago for dates between 30 and 59 seconds', () => {
+      const past = new Date(Date.now() - 45 * 1000);
+      expect(formatRelativeTime(past)).toBe('45s ago');
+    });
+
+    it('returns minutes ago for dates under 1 hour', () => {
+      const past = new Date(Date.now() - 15 * 60 * 1000);
+      expect(formatRelativeTime(past)).toBe('15m ago');
+    });
+
+    it('returns hours ago for dates under 24 hours', () => {
+      const past = new Date(Date.now() - 3 * 3600 * 1000);
+      expect(formatRelativeTime(past)).toBe('3h ago');
     });
   });
 });

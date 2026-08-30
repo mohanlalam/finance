@@ -197,11 +197,23 @@ export function RDFormModal({
             <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Bank / Post Office Name</label>
             <input
               type="text"
-              placeholder="e.g. SBI, Post Office"
+              list="indian-bank-rd-suggestions"
+              placeholder="e.g. HDFC Bank, SBI, Post Office"
               value={bankName}
               onChange={(e) => setBankName(e.target.value)}
               className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             />
+            <datalist id="indian-bank-rd-suggestions">
+              <option value="State Bank of India" />
+              <option value="HDFC Bank" />
+              <option value="ICICI Bank" />
+              <option value="Axis Bank" />
+              <option value="Kotak Mahindra Bank" />
+              <option value="Bank of Baroda" />
+              <option value="Punjab National Bank" />
+              <option value="Canara Bank" />
+              <option value="Post Office Recurring Deposit" />
+            </datalist>
           </div>
 
           {/* Monthly Deposit & Interest Rate */}

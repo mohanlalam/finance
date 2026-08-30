@@ -25,3 +25,13 @@ export function compoundValue(
   const result = p * Math.pow(base, n * t);
   return isNaN(result) ? p : result;
 }
+
+/**
+ * Rounds a floating point number to a given precision avoiding binary float errors.
+ */
+export function roundToDecimals(val: number, decimals: number = 2): number {
+  if (isNaN(val)) return 0;
+  const factor = Math.pow(10, decimals);
+  return Math.round((val + Number.EPSILON) * factor) / factor;
+}
+

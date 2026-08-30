@@ -570,6 +570,8 @@ export default function AppShell() {
       onTouchCancel={handleCombinedTouchCancel}
       className="min-h-screen bg-[var(--app-background)] pb-safe-content md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden"
     >
+      {/* 🌌 Antigravity Cosmic Ambient Atmosphere */}
+      <div className="antigravity-bg" aria-hidden="true" />
       {/* Pull to refresh indicator — positioned below sticky header so it never clips */}
       {(ptr.pullDistance > 0 || ptr.isRefreshing) && (
         <div className="fixed top-16 left-0 right-0 flex justify-center z-[var(--z-overlay)] pointer-events-none">
@@ -997,6 +999,8 @@ export default function AppShell() {
         onChangeAsset={setActiveAsset}
         alertCount={visibleAlerts.length}
         onOpenSmartImport={openSmartImport}
+        onAddStock={openAddModal}
+        onAddAsset={handleFloatingAddAsset}
       />
 
       {/* Floating Add Menu (FAB) */}

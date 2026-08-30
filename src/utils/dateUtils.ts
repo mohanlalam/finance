@@ -135,3 +135,19 @@ export function formatDateDuration(
   const result = calculateDateDuration(startDateStr, endDateStr);
   return result?.formatted || '';
 }
+
+/**
+ * Format relative time elapsed (e.g. "just now", "2m ago", "1h ago").
+ */
+export function formatRelativeTime(date: Date | null | undefined): string {
+  if (!date) return 'never';
+  const elapsedSec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (elapsedSec < 30) return 'just now';
+  if (elapsedSec < 60) return `${elapsedSec}s ago`;
+  const elapsedMin = Math.floor(elapsedSec / 60);
+  if (elapsedMin < 60) return `${elapsedMin}m ago`;
+  const elapsedHr = Math.floor(elapsedMin / 60);
+  if (elapsedHr < 24) return `${elapsedHr}h ago`;
+  return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+

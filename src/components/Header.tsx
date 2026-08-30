@@ -156,13 +156,13 @@ function Header({
   };
 
   return (
-    <header className="sticky top-0 z-[var(--z-header)] bg-[var(--surface-header)] backdrop-blur-md border-b border-[var(--border-subtle)] transition-colors pt-[env(safe-area-inset-top,0px)]">
+    <header className="sticky top-0 z-[var(--z-header)] bg-[var(--surface-glass)] backdrop-blur-2xl border-b border-[var(--border-subtle)] transition-colors pt-[env(safe-area-inset-top,0px)] shadow-[0_4px_24px_rgba(0,0,0,0.12)]">
       <div className="max-w-[1720px] mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
 
           {/* Logo & title */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-[var(--radius-medium)] bg-[var(--accent-blue)] flex items-center justify-center text-white shadow-sm ring-1 ring-[var(--border-subtle)] shrink-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-[var(--radius-medium)] bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-1 ring-white/20 shrink-0">
               <TrendingUp size={16} className="sm:w-[18px] sm:h-[18px]" />
             </div>
             <div className="min-w-0">

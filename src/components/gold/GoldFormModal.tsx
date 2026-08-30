@@ -3,6 +3,7 @@ import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
 import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
 import { uploadDocumentFile, generateDocumentStoragePath } from '../../utils/supabaseStorage';
+import { calculateGoldValuation, DEFAULT_GOLD_RATE_24K } from '../../domains/assets/gold/calculations/goldValuation';
 
 interface PortfolioOption {
   name: string;
@@ -239,9 +240,24 @@ export const GoldFormModal = React.memo(function GoldFormModal({
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-              Current Valuation (₹)
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Current Valuation (₹)
+              </label>
+              {weightGrams && parseFloat(weightGrams) > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const grams = parseFloat(weightGrams) || 0;
+                    const autoVal = calculateGoldValuation(grams, purity || '24K', DEFAULT_GOLD_RATE_24K);
+                    setCurrentValuation(String(autoVal));
+                  }}
+                  className="text-[10px] text-amber-600 dark:text-amber-400 hover:underline font-bold"
+                >
+                  Auto-compute (~₹{DEFAULT_GOLD_RATE_24K}/g)
+                </button>
+              )}
+            </div>
             <input
               type="number"
               inputMode="decimal"

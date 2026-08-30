@@ -29,10 +29,10 @@ export default function DesktopSidebar({
   const sortedPortfolios = useMemo(() => sortPortfolios(portfolios), [portfolios]);
 
   const getNavItemClass = (isActive: boolean) =>
-    `flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-[var(--radius-small)] text-xs font-semibold ios-press transition-all outline-none ${
+    `flex items-center gap-2.5 w-full text-left px-3.5 py-2.5 rounded-[var(--radius-medium)] text-xs font-semibold ios-press transition-all outline-none ${
       isActive
-        ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border-l-2 border-[var(--accent-blue)] shadow-[var(--shadow-card)]'
-        : 'text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] border-l-2 border-transparent'
+        ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border border-[var(--accent-blue)]/30 shadow-[var(--shadow-card)] font-bold'
+        : 'text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] border border-transparent'
     }`;
 
   return (
@@ -43,9 +43,9 @@ export default function DesktopSidebar({
           <button
             type="button"
             onClick={onOpenSmartImport}
-            className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-[var(--radius-medium)] text-xs font-bold text-[var(--accent-blue)] bg-[var(--accent-blue-soft)] hover:bg-[var(--accent-blue)] hover:text-white border border-[var(--accent-blue)]/30 shadow-[var(--shadow-card)] transition-all ios-press active:scale-95 cursor-pointer group"
+            className="flex items-center justify-center gap-2 w-full px-3.5 py-2.5 rounded-[var(--radius-medium)] text-xs font-bold text-[var(--accent-blue)] bg-gradient-to-r from-cyan-500/15 via-blue-500/15 to-purple-500/15 hover:from-cyan-500/25 hover:to-purple-500/25 border border-[var(--accent-blue)]/30 shadow-[var(--shadow-card)] transition-all ios-press active:scale-95 cursor-pointer group"
           >
-            <Sparkles size={14} />
+            <Sparkles size={14} className="text-[var(--accent-blue)] animate-pulse" />
             <span>✨ Smart AI Import</span>
           </button>
         </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { POPULAR_INDIAN_MF_SCHEMES } from '../../utils/indianFinancialPresets';
 
 interface SIPFormFieldsProps {
   mfSchemeCode: string;
@@ -41,6 +42,15 @@ export function SIPFormFields({
   isValidatingScheme,
   onValidateScheme,
 }: SIPFormFieldsProps) {
+  const handleSelectScheme = (name: string) => {
+    setFundName(name);
+    const match = POPULAR_INDIAN_MF_SCHEMES.find((s) => s.name.toLowerCase() === name.toLowerCase());
+    if (match) {
+      if (!mfSchemeCode) setMfSchemeCode(match.code);
+      if (!expectedCagr || expectedCagr === '12.00') setExpectedCagr(match.cagr);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -48,7 +58,7 @@ export function SIPFormFields({
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="e.g. 102867"
+            placeholder="e.g. 122639"
             value={mfSchemeCode}
             onChange={(e) => setMfSchemeCode(e.target.value)}
             className="flex-1 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
@@ -57,7 +67,7 @@ export function SIPFormFields({
             type="button"
             onClick={onValidateScheme}
             disabled={isValidatingScheme}
-            className="bg-[var(--accent-blue)] hover:opacity-90 text-white text-xs font-semibold px-4 py-2 rounded-[var(--radius-medium)] transition-all disabled:opacity-50 shrink-0 ios-press shadow-xs"
+            className="bg-[var(--accent-blue)] hover:opacity-90 text-white text-xs font-semibold px-4 py-2 rounded-[var(--radius-medium)] transition-all disabled:opacity-50 shrink-0 ios-press shadow-xs cursor-pointer"
           >
             {isValidatingScheme ? 'Validating...' : 'Fetch Fund'}
           </button>
@@ -67,11 +77,17 @@ export function SIPFormFields({
         <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Mutual Fund Name</label>
         <input
           type="text"
-          placeholder="e.g. HDFC Top 100 Mutual Fund"
+          list="indian-mf-schemes"
+          placeholder="e.g. Parag Parikh Flexi Cap Fund"
           value={fundName}
-          onChange={(e) => setFundName(e.target.value)}
+          onChange={(e) => handleSelectScheme(e.target.value)}
           className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
         />
+        <datalist id="indian-mf-schemes">
+          {POPULAR_INDIAN_MF_SCHEMES.map((s) => (
+            <option key={s.code} value={s.name}>{`${s.name} (${s.cagr}% avg)`}</option>
+          ))}
+        </datalist>
       </div>
 
       <div className="grid grid-cols-3 gap-3">

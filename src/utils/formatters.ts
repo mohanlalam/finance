@@ -63,3 +63,21 @@ export function formatINRCompact(value: number): string {
   return `${sign}₹${Math.round(absVal).toLocaleString('en-IN')}`;
 }
 
+export function formatDeltaINR(value: number): string {
+  const sign = value > 0 ? '+' : value < 0 ? '-' : '';
+  const absVal = Math.abs(value);
+  if (absVal >= 10000000) {
+    return `${sign}₹${(absVal / 10000000).toFixed(2)}Cr`;
+  }
+  if (absVal >= 100000) {
+    return `${sign}₹${(absVal / 100000).toFixed(2)}L`;
+  }
+  const formatted = new Intl.NumberFormat('en-IN', {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+  }).format(absVal);
+  return `${sign}₹${formatted}`;
+}
+
+
+

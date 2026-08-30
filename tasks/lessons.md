@@ -165,3 +165,43 @@ After **any correction** from the user, append a new entry here with the pattern
 **Fix**: Implemented `getFromXirrCache` and `setInXirrCache` helper functions that explicitly refresh key recency by deleting and re-setting the key (`map.delete(key); map.set(key, val)`) on every cache hit (`get`) and update (`set`), moving accessed items to the end of the Map.
 **Rule**: In JavaScript `Map`-based caches, simply deleting the first key on overflow is FIFO, not LRU. To achieve true $O(1)$ LRU behavior, always `delete()` and re-`set()` the key on every cache access to push it to the end of the insertion order.
 
+---
+
+### 2026-08-29 — Fast Refresh Component Purity (`react-refresh/only-export-components`)
+**Mistake**: Exporting static arrays/constants directly from React component files (`StandardFormFields.tsx`, `SIPFormFields.tsx`) triggered ESLint warnings: `"Fast refresh only works when a file only exports components"`.
+**Root Cause**: React Fast Refresh requires `.tsx` files exporting UI components to export *only* React components so Vite can safely hot-reload them without full page teardown.
+**Fix**: Extracted all shared constants and presets into a dedicated utility file `src/utils/indianFinancialPresets.ts`.
+**Rule**: Never export non-component constants or arrays from `.tsx` component files. Always locate shared datasets and constants in `src/utils/` or domain-specific constant files.
+
+---
+
+### 2026-08-29 — Floating-Point Precision & Financial Mathematical Invariants
+**Mistake**: JavaScript IEEE 754 float multiplication/subtraction on fractional share prices (e.g. `2450.75 * 15`) can produce minor micro-cent binary anomalies (`36761.25000000001`).
+**Root Cause**: Standard JavaScript `Number` uses 64-bit binary floats which cannot represent all base-10 decimals exactly.
+**Fix**: Added a pure, high-precision `roundToDecimals(val, decimals)` helper in `src/utils/mathUtils.ts` incorporating `Number.EPSILON` rounding, and validated all invariant relationships (Net Worth sum, P&L delta, Hallmark gold multipliers, FD compound curves, STCG/LTCG taxes) in `financialMathInvariants.test.ts`.
+**Rule**: Always wrap derived currency differences and tax calculations in `roundToDecimals` before asserting mathematical equality in tests or presenting final amounts in reports.
+
+---
+
+### 2026-08-29 — Multi-Agent Parallel Audit Strategy for Comprehensive Reviews
+**Mistake**: Auditing a full-stack project across security, clean architecture boundaries, dead code, financial math, and database policies sequentially in a single agent context.
+**Root Cause**: Full-repository audits span multiple independent domains (Edge Functions & auth security, React state & component tree, math & financial invariants, and database migrations/RLS) that benefit significantly from parallel multi-agent analysis.
+**Fix**: Recorded the multi-agent audit strategy in the self-improvement log to ensure parallel subagents are spawned for specialized audit facets in future comprehensive reviews.
+**Rule**: For future comprehensive codebase audits, ALWAYS invoke multiple specialized subagents concurrently (e.g., Security Auditor, Architecture & Dead Code Inspector, Financial Math & Invariants Verifier) to maximize audit depth, parallelize search and analysis, and synthesize findings into the final report.
+
+---
+
+### 2026-08-29 — Standard Comprehensive Codebase Audit Protocol (Multi-Agent & 7-Section Architecture)
+**Mistake**: Risk of inconsistent audit depth or omitting critical facets (such as dead code trees, circular dependencies, edge function fail-closed security, or floating-point invariants) on future "audit the project" prompts.
+**Root Cause**: Need a fixed, standardized comprehensive audit protocol with multi-agent orchestration whenever the user requests a project audit.
+**Fix**: Formalized the canonical 7-section audit template and multi-agent workflow:
+1. **Verification Pipeline First**: Actual execution of `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, and cross-checking documentation claims.
+2. **Architecture Layer Violations**: Checking strict Clean Architecture boundaries (UI → Domain Hooks → Domain Services → Repositories → Infrastructure), circular dependency graphs, and repository interface bypasses.
+3. **Security Audit**: Edge Function PIN fail-closed HTTP 503 verification, server-side reverse-proxy rate limiting, bundle secret inspection (`VITE_*`), private storage bucket policies & signed URL expiry, and RLS validation across all tables.
+4. **Financial Calculation Correctness**: Mathematical invariants, single-pass aggregations, float rounding with `Number.EPSILON`, XIRR worker-to-sync parity, and Indian IT Act FY24-25 STCG/LTCG set-off logic.
+5. **Unused Code & Dead Files**: Graph-based dependency analysis for orphaned components, unused custom hooks, barrel indexes, and dead files.
+6. **React & State Quality**: SWR cache invalidation on mutations, 3-tier Context split memoization, error boundary crash handling, and IndexedDB offline hydration.
+7. **Structured Output Format**: Summary (Top 5 critical), Critical Bugs Table, Security Findings, Unused Code Table, Architecture Violations, and Prioritized Next Steps.
+**Rule**: Whenever the user says "audit the project" (or similar), ALWAYS execute this exact 7-section protocol using concurrent specialized subagents, run actual tooling (no guesswork), and present the standardized structured report.
+
+

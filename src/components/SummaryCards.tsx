@@ -184,7 +184,7 @@ function SummaryCards({
           </div>
 
           <div className="mt-1">
-            <p className={`text-2xl sm:text-3xl font-extrabold text-financial tnum tracking-tight ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+            <p className={`text-2xl sm:text-3xl font-extrabold text-financial tnum tracking-tight ${isGain ? 'neon-glow-positive' : 'neon-glow-negative'}`}>
               {isBalancesHidden ? '••••••' : <>{isGain ? '+' : ''}<AnimatedNumber value={totalPnL} formatter={formatINR} /></>}
             </p>
             <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">
@@ -225,7 +225,7 @@ function SummaryCards({
           <div className="mt-1">
             {todayPnL !== undefined ? (
               <>
-                <p className={`text-2xl sm:text-3xl font-extrabold text-financial tnum tracking-tight ${isTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                <p className={`text-2xl sm:text-3xl font-extrabold text-financial tnum tracking-tight ${isTodayGain ? 'neon-glow-positive' : 'neon-glow-negative'}`}>
                   {isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
                 </p>
                 <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">
