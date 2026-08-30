@@ -8,17 +8,11 @@ interface UseSwipeNavigationProps {
   setActiveAsset: (tab: AssetTab) => void;
 }
 
-const TAB_ORDER: AssetTab[] = [
+const MAIN_TABS: AssetTab[] = [
   'home',
   'stocks',
   'sip',
   'fd',
-  'rd',
-  'gold',
-  'real_estate',
-  'insurance',
-  'documents',
-  'tax',
 ];
 
 export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavigationProps) {
@@ -97,19 +91,23 @@ export function useSwipeNavigation({ activeAsset, setActiveAsset }: UseSwipeNavi
       ((absX >= 45 && velocity >= 0.18) || absX >= 75);
 
     if (isIntentionalSwipe) {
-      const currentIndex = TAB_ORDER.indexOf(activeAsset);
+      const currentIndex = MAIN_TABS.indexOf(activeAsset);
 
       if (diffX > 0) {
-        // Swiping Left -> Navigate Forward to Next Tab
-        if (currentIndex !== -1 && currentIndex < TAB_ORDER.length - 1) {
+        // Swiping Left -> Navigate Forward to Next Main Tab
+        if (currentIndex !== -1 && currentIndex < MAIN_TABS.length - 1) {
           triggerHaptic('light');
-          setActiveAsset(TAB_ORDER[currentIndex + 1]);
+          setActiveAsset(MAIN_TABS[currentIndex + 1]);
         }
       } else {
-        // Swiping Right -> Navigate Back to Previous Tab
-        if (currentIndex !== -1 && currentIndex > 0) {
+        // Swiping Right -> Navigate Back to Previous Main Tab
+        if (currentIndex > 0) {
           triggerHaptic('light');
-          setActiveAsset(TAB_ORDER[currentIndex - 1]);
+          setActiveAsset(MAIN_TABS[currentIndex - 1]);
+        } else if (currentIndex === -1) {
+          // If on a secondary tab (from More menu), swiping right returns to Deposits
+          triggerHaptic('light');
+          setActiveAsset('fd');
         }
       }
     }
