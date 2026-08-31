@@ -48,6 +48,23 @@ export function clearApiSessionCache(): void {
   inflightRequests.clear();
 }
 
+/**
+ * Pre-warm the API session cache with a known-good PIN hash and kick off a
+ * background data prefetch so the SWR in-flight deduplication can serve the
+ * result instantly when the PortfolioProvider mounts after unlock.
+ *
+ * Safe to call speculatively: errors are silently swallowed and the in-flight
+ * deduplication map ensures no duplicate network requests are fired.
+ */
+export function prewarmApiCache(pinHash: string): void {
+  if (!pinHash) return;
+  _cachedPinHash = pinHash;
+  // Fire background prefetch — silently ignore errors.
+  // invokeFunction's inflightRequests map deduplicates this against the
+  // identical SWR fetch that arrives after unlock, so zero extra network cost.
+  invokeFunction('holdings-crud?action=list', { method: 'GET' }).catch(() => {});
+}
+
 export async function getApiAuthHeaders(contentType?: string): Promise<Record<string, string>> {
   if (!_cachedPinHash) {
     _cachedPinHash = await ensureHashedPin();

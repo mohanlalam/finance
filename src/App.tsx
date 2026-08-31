@@ -1,7 +1,9 @@
 import { useState, useEffect, Suspense, lazy, useCallback } from 'react';
-import { isSessionVerified, clearSessionVerification } from './utils/auth';
+import { isSessionVerified, clearSessionVerification, ensureHashedPin } from './utils/auth';
 import PinLockScreen from './components/PinLockScreen';
+import DashboardLoading from './components/DashboardLoading';
 import { useAutoLock } from './hooks/useAutoLock';
+import { prewarmApiCache } from './utils/apiClient';
 const MainApp = lazy(() => import('./MainApp'));
 
 export default function App() {
@@ -14,15 +16,32 @@ export default function App() {
   useAutoLock(pinVerified ? handleLock : () => {}, 300000);
 
   useEffect(() => {
-    // Eagerly prefetch MainApp chunk while user is viewing PIN screen
+    // Eagerly prefetch MainApp chunk + portfolio data while user is viewing PIN screen
     if (!pinVerified) {
-      const prefetch = () => {
+      const prefetch = async () => {
+        // 1. Pre-warm MainApp JS chunk
         import('./MainApp').catch(() => {});
+
+        // 2. Pre-warm portfolio data fetch using the cached PIN hash from the last session.
+        //    ensureHashedPin() reads from sessionStorage/localStorage — zero network cost.
+        //    If there is a valid hash, kick off the data fetch so SWR cache is warm
+        //    by the time the user finishes PIN entry.
+        try {
+          const cachedHash = await ensureHashedPin();
+          if (cachedHash) {
+            prewarmApiCache(cachedHash);
+          }
+        } catch {
+          // No cached hash available — user must verify PIN first
+        }
       };
+
       if ('requestIdleCallback' in window) {
-        (window as unknown as { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(prefetch);
+        (window as unknown as { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(() => {
+          prefetch();
+        });
       } else {
-        setTimeout(prefetch, 200);
+        setTimeout(prefetch, 300);
       }
     }
   }, [pinVerified]);
@@ -52,7 +71,7 @@ export default function App() {
   }
 
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center font-sans">Loading Vault...</div>}>
+    <Suspense fallback={<DashboardLoading />}>
       <MainApp onAuthExpired={() => setPinVerified(false)} />
     </Suspense>
   );
