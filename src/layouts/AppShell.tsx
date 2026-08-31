@@ -190,21 +190,11 @@ export default function AppShell() {
   }, []);
 
   const setActiveAsset = useCallback((newAsset: AssetTab) => {
-    const applyChange = () => {
-      navigate(`/${family || 'all'}/${newAsset}`);
-      if (isMobile) {
-        window.scrollTo(0, 0);
-      } else {
-        scrollToAssetSection();
-      }
-    };
-
-    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
-      (document as unknown as { startViewTransition: (cb: () => void) => void }).startViewTransition(() => {
-        applyChange();
-      });
+    navigate(`/${family || 'all'}/${newAsset}`);
+    if (isMobile) {
+      window.scrollTo(0, 0);
     } else {
-      applyChange();
+      scrollToAssetSection();
     }
   }, [navigate, family, isMobile, scrollToAssetSection]);
   const {
@@ -526,13 +516,7 @@ export default function AppShell() {
   }, [renamePortfolio]);
 
   const handleTabChange = useCallback((tab: string) => {
-    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
-      (document as unknown as { startViewTransition: (cb: () => void) => void }).startViewTransition(() => {
-        setActiveTab(tab);
-      });
-    } else {
-      setActiveTab(tab);
-    }
+    setActiveTab(tab);
   }, [setActiveTab]);
 
   const handleAddFamilyClick = openAddFamily;

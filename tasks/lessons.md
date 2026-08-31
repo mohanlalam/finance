@@ -246,3 +246,11 @@ After **any correction** from the user, append a new entry here with the pattern
 2. Elevated backdrop to `z-[60]` with `backdrop-blur-sm` and the bottom sheet drawer to `z-[70]`.
 3. Connected `onDrawerStateChange` in `MobileBottomNav` to hide the FAB via `isHidden={isAnyModalOpen || isMoreDrawerOpen}` and lock body scroll with `document.body.style.overflow = 'hidden'`.  
 **Rule**: Always use `bg-[var(--surface-solid)]` on full-screen and bottom sheet modals to guarantee 100% opacity against underlying page text. Always place modal sheets and backdrops at higher z-index tiers (`z-[60]`/`z-[70]`) than persistent floating controls (`z-50`), and hide floating controls while any sheet is open.
+
+---
+
+### 2026-08-31 — Browser View Transitions API (`startViewTransition`) Ghost Snapshot Artifacts
+**Mistake**: When switching between mobile tabs (e.g. Home → Stocks or between asset views), old scrolled page content (like bottom family breakdown cards) briefly appeared floating/ghosted over the new tab before disappearing after 300-500ms.  
+**Root Cause**: Calling `document.startViewTransition()` in `setActiveAsset` and `handleTabChange` instructed the browser to take a full-viewport screenshot (`::view-transition-old(root)`) and cross-fade it with the incoming page. Because `window.scrollTo(0, 0)` occurred simultaneously with the route change, the browser rendered the old scrolled viewport screenshot as a semi-transparent floating overlay during the cross-fade animation.  
+**Fix**: Removed `startViewTransition()` wrappers from `setActiveAsset` and `handleTabChange` in `AppShell.tsx`. Tab switching and route changes now execute cleanly and immediately without browser snapshot ghosting.  
+**Rule**: Never wrap component/tab state switches or scroll-resetting view transitions in `document.startViewTransition()` unless custom per-element transition names (`view-transition-name`) are explicitly mapped. Default root transitions capture the entire scrolled viewport and create severe ghost overlays.
