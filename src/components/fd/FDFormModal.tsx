@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FixedDeposit } from '../../types/portfolio';
 import Modal from '../Modal';
-import StandardFormFields from './StandardFormFields';
+import FDFormFields from './FDFormFields';
 
 interface PortfolioOption {
   name: string;
@@ -166,7 +166,7 @@ export const FDFormModal = React.memo(function FDFormModal({
           </div>
         )}
 
-        <StandardFormFields
+        <FDFormFields
           bankName={bankName}
           setBankName={setBankName}
           principalAmount={principal}
