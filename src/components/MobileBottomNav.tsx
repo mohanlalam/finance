@@ -25,6 +25,7 @@ interface MobileBottomNavProps {
   onOpenSmartImport?: () => void;
   onAddStock?: () => void;
   onAddAsset?: (type: 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
+  onDrawerStateChange?: (isOpen: boolean) => void;
 }
 
 const ICON_STOCKS = <TrendingUp size={20} aria-hidden="true" />;
@@ -51,10 +52,23 @@ const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.Reac
   { id: 'tax', label: 'Tax Harvesting', subtext: 'LTCG / STCG tax optimization', icon: <TrendingUp size={18} /> },
 ];
 
-function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSmartImport }: MobileBottomNavProps) {
+function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSmartImport, onDrawerStateChange }: MobileBottomNavProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isDrawerOpenRef = useRef(isDrawerOpen);
   useEffect(() => { isDrawerOpenRef.current = isDrawerOpen; }, [isDrawerOpen]);
+
+  // Notify parent and lock body scroll when drawer is open
+  useEffect(() => {
+    onDrawerStateChange?.(isDrawerOpen);
+    if (isDrawerOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isDrawerOpen, onDrawerStateChange]);
 
   // Close drawer when active asset changes
   useEffect(() => {
@@ -85,19 +99,19 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
       {/* Backdrop for More Drawer */}
       {isDrawerOpen && (
         <div
-          className="fixed inset-0 z-50 transition-opacity duration-200 md:hidden bg-black/60 backdrop-blur-xs"
+          className="fixed inset-0 z-[60] transition-opacity duration-200 md:hidden bg-black/60 backdrop-blur-sm"
           onClick={() => setIsDrawerOpen(false)}
           aria-hidden="true"
         />
       )}
 
-      {/* More Drawer - Bottom Sheet */}
+      {/* More Drawer - Bottom Sheet with Solid Opaque Background */}
       {isDrawerOpen && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label="All Asset Categories"
-          className="fixed left-0 right-0 bottom-0 z-50 bg-[var(--surface)] border-t border-[var(--border-subtle)] rounded-t-3xl shadow-2xl p-4 md:hidden animate-slide-up max-w-lg mx-auto will-change-transform transform-gpu pb-[calc(1rem+env(safe-area-inset-bottom,0px))]"
+          className="fixed left-0 right-0 bottom-0 z-[70] bg-[var(--surface-solid)] border-t border-[var(--border-subtle)] rounded-t-3xl shadow-2xl p-4 md:hidden animate-slide-up max-w-lg mx-auto will-change-transform transform-gpu pb-[calc(1rem+env(safe-area-inset-bottom,0px))]"
           style={{
             maxHeight: '80vh',
           }}

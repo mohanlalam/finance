@@ -233,3 +233,16 @@ After **any correction** from the user, append a new entry here with the pattern
 1. Removed `self-end` on mobile from the sort container in `PortfolioTable.tsx` (restored `md:self-auto` for desktop) and added `pl-0.5 pr-1` padding so the first pill always has left breathing room at x=0.
 2. Added `overflow-hidden` to both the mobile `<main id="main-content">` container and the asset content wrapper `<div>` in `AppShell.tsx`.  
 **Rule**: On mobile scrollable pill rows (`overflow-x-auto`), never apply cross-axis alignment (`self-end`/`items-end`) that can force child overflow off the left viewport edge. Always enforce `overflow-hidden` on top-level mobile tab transition containers to prevent momentary bleed or ghosting during navigation gestures.
+
+---
+
+### 2026-08-31 — Mobile Bottom Sheet Solid Opacity & Floating Action Button Z-Index Isolation
+**Mistake**: The "More Asset Classes" mobile bottom sheet was translucent with background text/cards bleeding through, and the floating `+` action button (FAB) overlapped the drawer items.  
+**Root Cause**:
+1. The bottom sheet used `bg-[var(--surface)]` which is `rgba(..., 0.78)` (78% opacity). Without a 100% solid opaque background, underlying page content remained visible through the drawer body.
+2. The bottom sheet and backdrop used `z-50`, the same z-index as `FloatingAddMenu`. Because the FAB was rendered downstream in `AppShell`, its button sat on top of the drawer sheet items.  
+**Fix**:
+1. Replaced `bg-[var(--surface)]` on the More Drawer with `bg-[var(--surface-solid)]` (`#ffffff` in light mode, `#0f172a` in dark mode) for 100% solid opacity.
+2. Elevated backdrop to `z-[60]` with `backdrop-blur-sm` and the bottom sheet drawer to `z-[70]`.
+3. Connected `onDrawerStateChange` in `MobileBottomNav` to hide the FAB via `isHidden={isAnyModalOpen || isMoreDrawerOpen}` and lock body scroll with `document.body.style.overflow = 'hidden'`.  
+**Rule**: Always use `bg-[var(--surface-solid)]` on full-screen and bottom sheet modals to guarantee 100% opacity against underlying page text. Always place modal sheets and backdrops at higher z-index tiers (`z-[60]`/`z-[70]`) than persistent floating controls (`z-50`), and hide floating controls while any sheet is open.

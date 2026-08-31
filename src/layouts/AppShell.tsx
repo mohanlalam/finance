@@ -219,6 +219,7 @@ export default function AppShell() {
     showSmartImport, openSmartImport, closeSmartImport,
     isAnyModalOpen,
   } = useModalState();
+  const [isMoreDrawerOpen, setIsMoreDrawerOpen] = useState(false);
 
   // Idle prefetch primary registry view chunks to eliminate loading skeletons on tab switch
   useEffect(() => {
@@ -1005,11 +1006,12 @@ export default function AppShell() {
         onOpenSmartImport={openSmartImport}
         onAddStock={openAddModal}
         onAddAsset={handleFloatingAddAsset}
+        onDrawerStateChange={setIsMoreDrawerOpen}
       />
 
       {/* Floating Add Menu (FAB) */}
       <FloatingAddMenu
-        isHidden={isAnyModalOpen}
+        isHidden={isAnyModalOpen || isMoreDrawerOpen}
         onAddStock={openAddModal}
         onAddAsset={handleFloatingAddAsset}
         onOpenSmartImport={openSmartImport}
