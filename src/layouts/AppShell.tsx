@@ -681,7 +681,7 @@ export default function AppShell() {
         )}
 
         {isMobile ? (
-          <main id="main-content" className="space-y-4">
+          <main id="main-content" className="space-y-4 overflow-hidden">
             {/* Family Tabs Row on Mobile */}
             <FamilyTabBar
               portfolios={portfolios}
@@ -749,7 +749,7 @@ export default function AppShell() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 overflow-hidden">
                 {/* Sticky Mini Refresh Status Bar */}
                 <MobileStatusBar
                   priceStatus={priceStatus}

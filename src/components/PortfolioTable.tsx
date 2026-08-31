@@ -453,7 +453,7 @@ export default React.memo(function PortfolioTable({
         </div>
 
         {/* Sorting presets */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0 self-end md:self-auto">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar md:shrink-0 md:self-auto pl-0.5 pr-1">
           <SlidersHorizontal size={12} className="text-[var(--text-tertiary)] shrink-0" aria-hidden="true" />
           <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider shrink-0 hidden sm:inline">Sort:</span>
           {SORT_PRESETS.map((preset) => (
