@@ -1,14 +1,18 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { RealEstate, DocumentMetadata, PortfolioName } from '../../types/portfolio';
 import ConfirmModal from '../ConfirmModal';
 import RealEstateCard from './RealEstateCard';
 import RealEstateFormModal from './RealEstateFormModal';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
+import RegistryToolbar, { SortOption } from '../ui/RegistryToolbar';
 import { usePortfolioStatus } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
+import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
+import { calculateRealEstateTotals } from '../../utils/realEstateUtils';
+import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 
 interface PortfolioOption {
   name: string;
@@ -27,6 +31,14 @@ interface RealEstateViewProps {
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }
+
+type RealEstateSortField = 'current_valuation' | 'purchase_price' | 'property_name';
+
+const SORT_OPTIONS: SortOption<RealEstateSortField>[] = [
+  { field: 'current_valuation', label: 'Value' },
+  { field: 'purchase_price', label: 'Invested' },
+  { field: 'property_name', label: 'Name' },
+];
 
 export function RealEstateView({
   realEstate,
@@ -53,6 +65,31 @@ export function RealEstateView({
 
   const [deleting, setDeleting] = useState(false);
 
+  // Search & Sorting hook
+  const {
+    items: filteredProperties,
+    searchQuery,
+    setSearchQuery,
+    sortField,
+    sortOrder,
+    toggleSort,
+    filteredCount,
+    totalCount,
+  } = useAssetFilterSort<RealEstate, RealEstateSortField>(realEstate, {
+    searchFields: ['property_name', 'location', 'property_type'],
+    initialSortField: 'current_valuation',
+    initialSortOrder: 'desc',
+    sortComparators: {
+      current_valuation: (a, b) => (Number(a.current_valuation) || 0) - (Number(b.current_valuation) || 0),
+      purchase_price: (a, b) => (Number(a.purchase_price) || 0) - (Number(b.purchase_price) || 0),
+      property_name: (a, b) => (a.property_name || '').localeCompare(b.property_name || ''),
+    },
+    debounceMs: 150,
+  });
+
+  // Summary Totals
+  const totals = useMemo(() => calculateRealEstateTotals(realEstate), [realEstate]);
+
   const handleDelete = useCallback(async () => {
     if (!confirmDeleteItem) return;
     setDeleting(true);
@@ -67,6 +104,32 @@ export function RealEstateView({
     }
   }, [confirmDeleteItem, onDelete, addToast, setConfirmDeleteItem]);
 
+  // Stats ribbon UI
+  const statsRibbon = (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 px-4 sm:px-6 py-3 text-xs">
+      <div>
+        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Total Invested</span>
+        <span className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(totals.totalInvested)}</span>
+      </div>
+      <div>
+        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Current Valuation</span>
+        <span className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(totals.totalValuation)}</span>
+      </div>
+      <div>
+        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Total Gain / Loss</span>
+        <span className={`text-sm font-bold tnum ${pnlColor(totals.totalPnL)}`}>
+          {totals.totalPnL >= 0 ? '+' : ''}{formatINR(totals.totalPnL)} ({formatPercent(totals.totalPnLPct)})
+        </span>
+      </div>
+      <div>
+        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Annual Rent / Yield</span>
+        <span className="text-sm font-bold text-[var(--positive)] tnum">
+          {totals.totalAnnualRent > 0 ? `${formatINR(totals.totalAnnualRent)} (${formatPercent(totals.overallRentalYieldPct)})` : 'None'}
+        </span>
+      </div>
+    </div>
+  );
+
   return (
     <div>
       <AssetRegistryContainer
@@ -79,16 +142,32 @@ export function RealEstateView({
         isLoading={isMutating}
         itemCount={realEstate.length}
         onOpenAdd={openAdd}
+        stats={realEstate.length > 0 ? statsRibbon : undefined}
+        toolbar={
+          realEstate.length > 0 ? (
+            <RegistryToolbar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              searchPlaceholder="Search properties by name, location, type..."
+              sortOptions={SORT_OPTIONS}
+              currentSortField={sortField}
+              currentSortOrder={sortOrder}
+              onToggleSort={toggleSort}
+              filteredCount={filteredCount}
+              totalCount={totalCount}
+            />
+          ) : undefined
+        }
       >
-        {realEstate.length > 10 ? (
+        {filteredProperties.length > 10 ? (
           <List
-            height={Math.min(realEstate.length * (isMobile ? 165 : 130), isMobile ? 420 : 540)}
-            itemCount={realEstate.length}
-            itemSize={isMobile ? 165 : 130}
+            height={Math.min(filteredProperties.length * (isMobile ? 180 : 140), isMobile ? 420 : 540)}
+            itemCount={filteredProperties.length}
+            itemSize={isMobile ? 180 : 140}
             width="100%"
           >
             {({ index, style }) => {
-              const property = realEstate[index];
+              const property = filteredProperties[index];
               return (
                 <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
                   <RealEstateCard
@@ -102,7 +181,7 @@ export function RealEstateView({
             }}
           </List>
         ) : (
-          realEstate.map((property) => (
+          filteredProperties.map((property) => (
             <RealEstateCard
               key={property.id}
               property={property}

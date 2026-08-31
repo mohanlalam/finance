@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Insurance, DocumentMetadata } from '../../types/portfolio';
 import { formatINR } from '../../utils/formatters';
+import { getPolicyRenewalStatus } from '../../utils/insuranceUtils';
 import { openSecureDocument } from '../../utils/supabaseStorage';
 import { Edit2, Trash2, Shield, ShieldAlert, Calendar, FileText, StickyNote, Paperclip } from '../icons/AppIcons';
 
@@ -30,15 +31,10 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
   const style = TYPE_STYLES[policy.insurance_type] || TYPE_STYLES.other;
   const docs = documents.filter((d) => d.asset_type === 'insurance' && d.asset_id === policy.id);
 
-  // Expiry / Renewal alert logic (30 days threshold)
-  let isExpiringSoon = false;
-  let daysRemaining: number | null = null;
-  if (policy.renewal_date) {
-    const renewalTime = new Date(policy.renewal_date).getTime();
-    const nowTime = new Date().getTime();
-    daysRemaining = Math.ceil((renewalTime - nowTime) / (1000 * 60 * 60 * 24));
-    isExpiringSoon = daysRemaining <= 30;
-  }
+  const renewalStatus = getPolicyRenewalStatus(policy);
+  const isExpiringSoon = renewalStatus.isDueSoon || renewalStatus.isOverdue;
+  const isOverdue = renewalStatus.isOverdue;
+  const daysRemaining = renewalStatus.daysRemaining !== Infinity ? renewalStatus.daysRemaining : null;
 
   return (
     <div className="p-4 sm:p-5 hover:bg-[var(--surface-secondary)]/50 transition-colors mobile-asset-card">
@@ -109,9 +105,9 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
             <span className={`inline-flex items-center gap-1 font-medium mr-1 ${isExpiringSoon ? 'text-[var(--negative)] font-bold' : 'text-[var(--text-secondary)]'}`}>
               <Calendar size={12} />
               Renewal: {new Date(policy.renewal_date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
-              {daysRemaining !== null && daysRemaining <= 60 && (
-                <span className={`ml-1 text-[10px] px-1.5 py-0.5 rounded-[var(--radius-pill)] ${daysRemaining <= 0 ? 'bg-[var(--negative-soft)] text-[var(--negative)]' : 'bg-[var(--warning-soft)] text-[var(--warning)]'}`}>
-                  {daysRemaining <= 0 ? 'Expired' : `${daysRemaining}d left`}
+              {daysRemaining !== null && (isExpiringSoon || daysRemaining <= 60) && (
+                <span className={`ml-1 text-[10px] px-1.5 py-0.5 rounded-[var(--radius-pill)] ${isOverdue ? 'bg-[var(--negative-soft)] text-[var(--negative)]' : 'bg-[var(--warning-soft)] text-[var(--warning)]'}`}>
+                  {renewalStatus.statusText}
                 </span>
               )}
             </span>

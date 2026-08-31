@@ -901,5 +901,24 @@ export function Settings({ size = 24, className = '' }: IconProps) {
   );
 }
 
+export function ArrowUp({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <line x1="12" y1="19" x2="12" y2="5" />
+      <polyline points="5 12 12 5 19 12" />
+    </svg>
+  );
+}
+
+export function ArrowDown({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <polyline points="19 12 12 19 5 12" />
+    </svg>
+  );
+}
+
+
 
 

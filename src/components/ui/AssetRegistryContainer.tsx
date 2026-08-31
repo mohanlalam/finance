@@ -13,6 +13,8 @@ interface AssetRegistryContainerProps {
   isLoading: boolean;
   itemCount: number;
   onOpenAdd: () => void;
+  stats?: React.ReactNode;
+  toolbar?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -26,10 +28,13 @@ export const AssetRegistryContainer = React.memo(function AssetRegistryContainer
   isLoading,
   itemCount,
   onOpenAdd,
+  stats,
+  toolbar,
   children,
 }: AssetRegistryContainerProps) {
   return (
     <div className="apple-card overflow-hidden">
+      {/* Header Bar */}
       <div className="px-5 py-3.5 sm:px-6 sm:py-4 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]/50 flex items-center justify-between">
         <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider">{title}</h3>
         <button
@@ -41,6 +46,20 @@ export const AssetRegistryContainer = React.memo(function AssetRegistryContainer
           {createBtnLabel}
         </button>
       </div>
+
+      {/* Optional Stats Ribbon */}
+      {stats && (
+        <div className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]/30">
+          {stats}
+        </div>
+      )}
+
+      {/* Optional Search & Sort Toolbar */}
+      {toolbar && (
+        <div>
+          {toolbar}
+        </div>
+      )}
 
       {isLoading ? (
         <div className="p-4">

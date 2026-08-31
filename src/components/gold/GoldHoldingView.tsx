@@ -5,9 +5,11 @@ import Modal from '../Modal';
 import GoldHoldingCard from './GoldHoldingCard';
 import GoldFormModal from './GoldFormModal';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
+import RegistryToolbar, { SortOption } from '../ui/RegistryToolbar';
 import { usePortfolioStatus } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
+import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
 import { RotateCw, TrendingUp, TrendingDown, Scale, Coins, Check } from '../icons/AppIcons';
@@ -37,6 +39,15 @@ interface GoldHoldingViewProps {
   autoOpenAddModal?: boolean;
 }
 
+type GoldSortField = 'current_valuation' | 'weight_grams' | 'purchase_price' | 'item_name';
+
+const GOLD_SORT_OPTIONS: SortOption<GoldSortField>[] = [
+  { field: 'current_valuation', label: 'Value' },
+  { field: 'weight_grams', label: 'Weight' },
+  { field: 'purchase_price', label: 'Cost' },
+  { field: 'item_name', label: 'Name' },
+];
+
 export function GoldHoldingView({
   goldHoldings,
   documents,
@@ -62,6 +73,29 @@ export function GoldHoldingView({
 
   const [deleting, setDeleting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  // Search & Sorting Hook
+  const {
+    items: filteredHoldings,
+    searchQuery,
+    setSearchQuery,
+    sortField,
+    sortOrder,
+    toggleSort,
+    filteredCount,
+    totalCount,
+  } = useAssetFilterSort<GoldHolding, GoldSortField>(goldHoldings, {
+    searchFields: ['item_name', 'purity'],
+    initialSortField: 'current_valuation',
+    initialSortOrder: 'desc',
+    sortComparators: {
+      current_valuation: (a, b) => (Number(a.current_valuation) || 0) - (Number(b.current_valuation) || 0),
+      weight_grams: (a, b) => (Number(a.weight_grams) || 0) - (Number(b.weight_grams) || 0),
+      purchase_price: (a, b) => (Number(a.purchase_price) || 0) - (Number(b.purchase_price) || 0),
+      item_name: (a, b) => (a.item_name || '').localeCompare(b.item_name || ''),
+    },
+    debounceMs: 150,
+  });
 
   const handleDelete = useCallback(async (id: string) => {
     setDeleting(true);
@@ -376,16 +410,31 @@ export function GoldHoldingView({
         isLoading={isMutating}
         itemCount={goldHoldings.length}
         onOpenAdd={openAdd}
+        toolbar={
+          goldHoldings.length > 0 ? (
+            <RegistryToolbar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              searchPlaceholder="Search gold holdings by name, purity, location..."
+              sortOptions={GOLD_SORT_OPTIONS}
+              currentSortField={sortField}
+              currentSortOrder={sortOrder}
+              onToggleSort={toggleSort}
+              filteredCount={filteredCount}
+              totalCount={totalCount}
+            />
+          ) : undefined
+        }
       >
-        {goldHoldings.length > 10 ? (
+        {filteredHoldings.length > 10 ? (
           <List
-            height={Math.min(goldHoldings.length * (isMobile ? 165 : 130), isMobile ? 420 : 540)}
-            itemCount={goldHoldings.length}
+            height={Math.min(filteredHoldings.length * (isMobile ? 165 : 130), isMobile ? 420 : 540)}
+            itemCount={filteredHoldings.length}
             itemSize={isMobile ? 165 : 130}
             width="100%"
           >
             {({ index, style }) => {
-              const holding = goldHoldings[index];
+              const holding = filteredHoldings[index];
               return (
                 <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
                   <GoldHoldingCard
@@ -400,7 +449,7 @@ export function GoldHoldingView({
           </List>
         ) : (
           <div className="divide-y divide-[var(--border-subtle)]">
-            {goldHoldings.map((holding) => (
+            {filteredHoldings.map((holding) => (
               <GoldHoldingCard
                 key={holding.id}
                 holding={holding}

@@ -1,14 +1,18 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { FixedDeposit, DocumentMetadata, PortfolioName } from '../../types/portfolio';
 import ConfirmModal from '../ConfirmModal';
 import DepositDetailsCard from './DepositDetailsCard';
 import FDFormModal from './FDFormModal';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
+import RegistryToolbar, { SortOption, FilterPillOption } from '../ui/RegistryToolbar';
 import { usePortfolioStatus } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
+import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
+import { getFDInvestedAmount, getFDEffectiveValue } from '../../domains/assets/fd/calculations/fdCompounding';
+import { formatINR } from '../../utils/formatters';
 
 interface PortfolioOption {
   name: string;
@@ -27,6 +31,15 @@ interface FixedDepositViewProps {
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }
+
+type FDSortField = 'principal_amount' | 'interest_rate' | 'maturity_date' | 'bank_name';
+
+const SORT_OPTIONS: SortOption<FDSortField>[] = [
+  { field: 'principal_amount', label: 'Amount' },
+  { field: 'interest_rate', label: 'Rate' },
+  { field: 'maturity_date', label: 'Maturity' },
+  { field: 'bank_name', label: 'Bank' },
+];
 
 export function FixedDepositView({
   fixedDeposits,
@@ -52,6 +65,70 @@ export function FixedDepositView({
   } = useAssetModal<FixedDeposit>(autoOpenAddModal);
 
   const [deleting, setDeleting] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<string>('all');
+
+  // Search & Filter Hook
+  const {
+    items: filteredDeposits,
+    searchQuery,
+    setSearchQuery,
+    sortField,
+    sortOrder,
+    toggleSort,
+    filteredCount,
+    totalCount,
+  } = useAssetFilterSort<FixedDeposit, FDSortField>(fixedDeposits, {
+    searchFields: ['bank_name', 'status'],
+    initialSortField: 'maturity_date',
+    initialSortOrder: 'asc',
+    customFilter: (item, query) => {
+      const matchesFilter =
+        activeFilter === 'all' ||
+        (activeFilter === 'active' && item.status !== 'matured') ||
+        (activeFilter === 'matured' && item.status === 'matured');
+      if (!matchesFilter) return false;
+      if (!query) return true;
+      const q = query.toLowerCase();
+      return (
+        item.bank_name.toLowerCase().includes(q) ||
+        (item.status || '').toLowerCase().includes(q) ||
+        String(item.principal_amount).includes(q)
+      );
+    },
+    sortComparators: {
+      principal_amount: (a, b) => (Number(a.principal_amount) || 0) - (Number(b.principal_amount) || 0),
+      interest_rate: (a, b) => (Number(a.interest_rate) || 0) - (Number(b.interest_rate) || 0),
+      maturity_date: (a, b) => (a.maturity_date ?? '').localeCompare(b.maturity_date ?? ''),
+      bank_name: (a, b) => (a.bank_name || '').localeCompare(b.bank_name || ''),
+    },
+    debounceMs: 150,
+  });
+
+  // Calculate totals
+  const totals = useMemo(() => {
+    let totalInvested = 0;
+    let totalCurrent = 0;
+    let activeCount = 0;
+    let maturedCount = 0;
+
+    for (const fd of fixedDeposits) {
+      totalInvested += getFDInvestedAmount(fd);
+      totalCurrent += getFDEffectiveValue(fd);
+      if (fd.status === 'matured') {
+        maturedCount++;
+      } else {
+        activeCount++;
+      }
+    }
+
+    return { totalInvested, totalCurrent, activeCount, maturedCount };
+  }, [fixedDeposits]);
+
+  const filterPills: FilterPillOption[] = useMemo(() => [
+    { id: 'all', label: 'All', count: fixedDeposits.length },
+    { id: 'active', label: 'Active', count: totals.activeCount },
+    { id: 'matured', label: 'Matured', count: totals.maturedCount },
+  ], [fixedDeposits.length, totals.activeCount, totals.maturedCount]);
 
   const handleDelete = useCallback(async (id: string) => {
     setDeleting(true);
@@ -66,6 +143,30 @@ export function FixedDepositView({
     }
   }, [onDelete, addToast, setConfirmDeleteItem]);
 
+  // Stats ribbon
+  const statsRibbon = (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 px-4 sm:px-6 py-3 text-xs">
+      <div>
+        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Principal Invested</span>
+        <span className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(totals.totalInvested)}</span>
+      </div>
+      <div>
+        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Current / Maturity Value</span>
+        <span className="text-sm font-bold text-[var(--positive)] tnum">{formatINR(totals.totalCurrent)}</span>
+      </div>
+      <div>
+        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Accrued Interest</span>
+        <span className="text-sm font-bold text-[var(--positive)] tnum">
+          +{formatINR(Math.max(0, totals.totalCurrent - totals.totalInvested))}
+        </span>
+      </div>
+      <div>
+        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Active Deposits</span>
+        <span className="text-sm font-bold text-[var(--text-primary)] tnum">{totals.activeCount} Active ({totals.maturedCount} Matured)</span>
+      </div>
+    </div>
+  );
+
   return (
     <div>
       <AssetRegistryContainer
@@ -78,16 +179,35 @@ export function FixedDepositView({
         isLoading={isMutating}
         itemCount={fixedDeposits.length}
         onOpenAdd={openAdd}
+        stats={fixedDeposits.length > 0 ? statsRibbon : undefined}
+        toolbar={
+          fixedDeposits.length > 0 ? (
+            <RegistryToolbar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              searchPlaceholder="Search by bank name or amount..."
+              sortOptions={SORT_OPTIONS}
+              currentSortField={sortField}
+              currentSortOrder={sortOrder}
+              onToggleSort={toggleSort}
+              filterOptions={filterPills}
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+              filteredCount={filteredCount}
+              totalCount={totalCount}
+            />
+          ) : undefined
+        }
       >
-        {fixedDeposits.length > 10 ? (
+        {filteredDeposits.length > 10 ? (
           <List
-            height={Math.min(fixedDeposits.length * (isMobile ? 165 : 135), isMobile ? 420 : 540)}
-            itemCount={fixedDeposits.length}
-            itemSize={isMobile ? 165 : 135}
+            height={Math.min(filteredDeposits.length * (isMobile ? 180 : 140), isMobile ? 420 : 540)}
+            itemCount={filteredDeposits.length}
+            itemSize={isMobile ? 180 : 140}
             width="100%"
           >
             {({ index, style }) => {
-              const deposit = fixedDeposits[index];
+              const deposit = filteredDeposits[index];
               return (
                 <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
                   <DepositDetailsCard
@@ -101,7 +221,7 @@ export function FixedDepositView({
             }}
           </List>
         ) : (
-          fixedDeposits.map((deposit) => (
+          filteredDeposits.map((deposit) => (
             <DepositDetailsCard
               key={deposit.id}
               deposit={deposit}

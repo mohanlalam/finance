@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { RealEstate, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
+import { calculateRentalYield } from '../../utils/realEstateUtils';
 import { openSecureDocument } from '../../utils/supabaseStorage';
 import { Edit2, Trash2, Home, MapPin, FileText, StickyNote, Paperclip } from '../icons/AppIcons';
 
@@ -23,6 +24,8 @@ export const RealEstateCard = React.memo(function RealEstateCard({
   const currentValuation = property.current_valuation || 0;
   const pnl = currentValuation - purchasePrice;
   const pnlPct = purchasePrice > 0 ? (pnl / purchasePrice) * 100 : 0;
+  const rentalYieldPct = calculateRentalYield(property);
+  const monthlyRent = Number(property.monthly_rent) || 0;
   const docs = documents.filter((d) => d.asset_type === 'real_estate' && d.asset_id === property.id);
 
   return (
@@ -52,6 +55,14 @@ export const RealEstateCard = React.memo(function RealEstateCard({
               <p className="text-xs text-[var(--text-tertiary)] flex items-center gap-1 mt-0.5">
                 <MapPin size={12} className="text-[var(--text-tertiary)]" />
                 {property.location}
+              </p>
+            )}
+            {monthlyRent > 0 && (
+              <p className="text-[11px] font-semibold text-[var(--positive)] flex items-center gap-1 mt-0.5">
+                <span>🏠 Rent: {formatINR(monthlyRent)}/mo</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[var(--positive-soft)] border border-[var(--positive)]/30">
+                  {formatPercent(rentalYieldPct)} yield
+                </span>
               </p>
             )}
           </div>
