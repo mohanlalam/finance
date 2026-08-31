@@ -398,21 +398,21 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 ### Mobile Bottom Navigation Bar
 
 * Component: `MobileBottomNav.tsx`
-* Fixed Position: `fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-[var(--border-subtle)]`.
-* Safe Area: Utilizes `.pb-safe` (`padding-bottom: env(safe-area-inset-bottom, 8px)`) to accommodate iOS home indicator bars.
+* Fixed Position: `fixed bottom-0 left-0 right-0 z-50 bg-[var(--surface)]/95 backdrop-blur-xl border-t border-[var(--border-subtle)] shadow-[0_-4px_24px_rgba(0,0,0,0.18)]`.
+* Safe Area: Utilizes `.pb-safe` (`padding-bottom: env(safe-area-inset-bottom, 0px)`) to accommodate iOS home indicator bars.
 * Nav Items:
-  1. **Home**: Directs to overall mobile summary view.
+  1. **Home**: Directs to overall mobile summary view with unread alert badge counter.
   2. **Stocks**: Directly switches to Stocks & ETF holdings.
   3. **SIP & MF**: Directly switches to Mutual Fund SIP accounts.
   4. **Deposits**: Directly switches to Fixed Deposits registry.
-  5. **More (Drawer)**: Opens bottom sheet to access Recurring Deposits, Gold, Real Estate, Insurance Policies, Document Vault, and Tax Harvesting.
+  5. **More (Drawer)**: Opens slide-up bottom sheet with **100% solid opaque background** (`bg-[var(--surface-solid)]`, `#ffffff` light / `#0f172a` dark), `z-[70]` tier, backdrop blur (`z-[60] bg-black/60 backdrop-blur-sm`), and automatic body scroll locking (`document.body.style.overflow = 'hidden'`) to access Recurring Deposits, Gold Holdings, Real Estate, Insurance Policies, Document Vault, and Tax Harvesting without background text bleed-through.
 
 ### Mobile Floating Add Menu (FAB & Action Sheet)
 
 * Component: `FloatingAddMenu.tsx`
-* Layout: Triggered via the mobile FAB button. Pops up a glassmorphic action sheet presenting all asset entry types (Stock, Fixed Deposit, RD, Mutual Fund SIP, Gold, Real Estate, Insurance Policy, Document).
+* Layout: Triggered via the mobile FAB button (`z-50`). Pops up a glassmorphic action sheet presenting all asset entry types (Stock, Fixed Deposit, RD, Mutual Fund SIP, Gold, Real Estate, Insurance Policy, Document).
 * Position Customization: Features customizable button positioning (`'right'` | `'center'` | `'left'`) with persistent `localStorage` storage (`finance_fab_position`). Defaulted to **Right side** (`right-2 items-end`) to prevent blocking center card titles and values. Includes an interactive position switcher pill (`[ Left ↙ | Center ⬇ | Right ↘ ]`) inside the menu header bar for instant toggling.
-* State Visibility: Automatically hidden when `isAnyModalOpen` is true (managed via `useModalState.ts`).
+* State Visibility: Automatically hidden when any modal or the More drawer is open (`isHidden={isAnyModalOpen || isMoreDrawerOpen}`).
 
 ### Holding Detail Drawer & Responsive Bottom Sheet
 

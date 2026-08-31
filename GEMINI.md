@@ -159,7 +159,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 33 test files and 188 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 35 test files and 194 unit/integration test cases (100% passing).
 
 ---
 
@@ -244,6 +244,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 | Date | Version | Key Changes & Milestones |
 | :--- | :--- | :--- |
+| **2026-08-31** | `v2.4` | Mobile UI, Drawer & Navigation Hardening: Removed `startViewTransition` snapshot ghosting for instant crisp tab transitions, upgraded More Drawer to 100% solid opacity (`bg-[var(--surface-solid)]`) with body scroll locking and FAB z-index isolation, added global CSS date input constraints, fixed sort presets left clipping, verified 35 test files / 194 tests passing (100%). |
 | **2026-08-30** | `v2.3` | Antigravity Cyber-Zen Redesign & Polish: Implemented weightless suspension, cosmic ambient nebula canvas, translucent glassmorphism (`backdrop-blur-2xl`), glowing neon financial indicators, floating mobile bottom dock, fixed button height & whitespace wrapping consistency, verified 33 test files / 188 tests passing (100%). |
 | **2026-08-29** | `v2.2` | Core Pillars & Benchmarking: Implemented Smart AI Import Quarantine & Review side-by-side workflow, added Indian Banking & AMFI MF scheme autocomplete presets, stress-benchmarked 1,000+ assets in <1ms, hardened PWA offline cache zero-skeleton hydration, added Mathematical Invariant test suite, verified 33 test files / 188 tests passing (100%). |
 | **2026-08-25** | `v2.0` | Clean Architecture refactor: modularized `usePortfolioData.ts`, extracted pure calculation modules, introduced domain repository port contracts, added multi-provider market data service, standardized `AppError` hierarchy, and enhanced test suites. |

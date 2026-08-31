@@ -221,7 +221,7 @@ project antigravity/
 The repository enforces strict verification before deployment:
 
 ```bash
-# Run Vitest test suite across 33 test files and 188+ tests (100% passing)
+# Run Vitest test suite across 35 test files and 194 tests (100% passing)
 npm test
 
 # Run interactive Vitest UI with watch mode
@@ -285,7 +285,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | Script | Command | Description |
 |---|---|---|
 | **Dev Server** | `npm run dev` | Start Vite dev server with HMR |
-| **Test Suite** | `npm test` | Run Vitest unit & integration tests (165+ tests) |
+| **Test Suite** | `npm test` | Run Vitest unit & integration tests (35 test files / 194 tests) |
 | **Build** | `npm run build` | Production build to `dist/` |
 | **Preview** | `npm run preview` | Preview the production build locally |
 | **Lint** | `npm run lint` | Run ESLint checks |

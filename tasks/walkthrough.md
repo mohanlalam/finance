@@ -54,12 +54,21 @@ All requested core pillars and architectural enhancements have been implemented,
 
 ---
 
+### 6. 📱 Mobile Navigation, Drawer Opacity & Input Hardening
+- **Zero-Ghosting Instant Tab Switching**: Removed `startViewTransition` snapshot captures in [`AppShell.tsx`](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/layouts/AppShell.tsx) so tab switching between Home, Stocks, SIP & MF, and Deposits executes crisply without lingering snapshot overlays.
+- **Solid Bottom Sheet Background**: Upgraded [`MobileBottomNav.tsx`](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/MobileBottomNav.tsx) More Drawer to `bg-[var(--surface-solid)]` (`#ffffff` light / `#0f172a` dark) with `z-[70]` tier, `z-[60]` backdrop blur, and body scroll locking (`document.body.style.overflow = 'hidden'`) to completely prevent underlying card text bleed-through.
+- **FAB Z-Index & Visibility Isolation**: Tied `isMoreDrawerOpen` into `FloatingAddMenu`'s `isHidden` condition to prevent floating action buttons from overlapping drawer items.
+- **Global Date Input Constraint Reset**: Added global CSS rules in [`src/index.css`](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/index.css) (`min-width: 0 !important; max-width: 100%; appearance: none;`) to prevent mobile browsers from expanding date pickers outside 2-column grid containers.
+- **Unclipped Sort Presets**: Reconfigured sort pill container in [`PortfolioTable.tsx`](file:///c:/Users/Ram%20Mohan/OneDrive/Desktop/project%20antigravity/src/components/PortfolioTable.tsx) to full-width with `pl-0.5 pr-1` padding so the active "Current Value" pill is never clipped at the left edge.
+
+---
+
 ## 🧪 Verification Results
 
 | Check | Command | Result |
 | :--- | :--- | :--- |
-| **Unit & Integration Tests** | `npm test` (`vitest run`) | ✅ **33 / 33 Test Files (188 Tests Passed, 100%)** |
+| **Unit & Integration Tests** | `npm test` (`vitest run`) | ✅ **35 / 35 Test Files (194 Tests Passed, 100%)** |
 | **TypeScript Strict Checking** | `tsc --noEmit` | ✅ **0 Errors** |
 | **ESLint Quality Checks** | `eslint .` | ✅ **0 Errors, 0 Warnings** |
-| **Production Bundle & PWA** | `vite build` | ✅ **Succeeded with 64 precache assets generated** |
+| **Production Bundle & PWA** | `vite build` | ✅ **Succeeded with 69 precache assets generated** |
 

@@ -32,9 +32,16 @@
 - [x] **Automated Screenshot Suite & Stitch Design Kit**
   - [x] Protocol-level Chrome DevTools Protocol network mock interceptor (`scripts/capture_all_screenshots.mjs`)
   - [x] Automated capture of all 28 views across Desktop & Mobile, Dark & Light modes
+- [x] **Mobile Navigation & Bottom Sheet Polish**
+  - [x] Elimination of `startViewTransition` snapshot ghosting for instant, crisp mobile tab transitions
+  - [x] More Asset Classes bottom sheet upgraded to 100% solid opaque background (`bg-[var(--surface-solid)]`)
+  - [x] FAB (`FloatingAddMenu`) z-index isolation and auto-hiding during drawer/modal states
+  - [x] Background body scroll locking (`document.body.style.overflow = 'hidden'`) while More drawer is open
+  - [x] Global date/time input constraint reset in `src/index.css` preventing mobile browser width expansion
+  - [x] Unclipped full-width sort presets bar with `pl-0.5 pr-1` in `PortfolioTable.tsx`
 - [x] **Verification & Test Coverage**
   - [x] Run `npm run verify` (`eslint`, strict `tsc --noEmit`, and `vite build`) — 0 errors / 0 warnings
-  - [x] Run `npm test` — 33 test files / 188 unit & integration tests passing (100%)
+  - [x] Run `npm test` — 35 test files / 194 unit & integration tests passing (100%)
 
 
 
