@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { offlineOutboxService } from '../portfolio/services/offlineOutboxService';
+import { offlineOutboxService } from '../offlineOutboxService';
 
 describe('OfflineOutboxService', () => {
   beforeEach(async () => {

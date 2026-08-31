@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useAssetFilterSort } from '../useAssetFilterSort';
 
@@ -83,5 +83,34 @@ describe('useAssetFilterSort', () => {
 
     expect(result.current.items).toHaveLength(2);
     expect(result.current.items.map((i) => i.id)).toEqual(['1', '2']);
+  });
+
+  it('supports debounced filtering when debounceMs is specified', () => {
+    vi.useFakeTimers();
+
+    const { result } = renderHook(() =>
+      useAssetFilterSort(mockData, {
+        searchFields: ['name'],
+        debounceMs: 50,
+      })
+    );
+
+    act(() => {
+      result.current.setSearchQuery('ICICI');
+    });
+
+    // Before debounce timer finishes
+    expect(result.current.searchQuery).toBe('ICICI');
+    expect(result.current.items).toHaveLength(3);
+
+    // Fast-forward debounce timer
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+
+    expect(result.current.items).toHaveLength(1);
+    expect(result.current.items[0].name).toBe('ICICI RD');
+
+    vi.useRealTimers();
   });
 });

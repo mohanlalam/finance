@@ -3,6 +3,7 @@ import { calculateAggregatedPortfolioTotals } from '../calculations/portfolioTot
 import { getFDInvestedAmount, getFDEffectiveValue } from '../../assets/fd/calculations/fdCompounding';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../assets/rd/calculations/rdCompounding';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../assets/sip/calculations/sipValuation';
+import { calculateRealEstateInvested, calculateRealEstateValuation } from '../../assets/real-estate/calculations/realEstateValuation';
 
 export class PortfolioCalculationService {
   recalculateSinglePortfolio(portfolio: Portfolio): Portfolio {
@@ -56,8 +57,8 @@ export class PortfolioCalculationService {
     const re = portfolio.realEstate || [];
     for (let i = 0; i < re.length; i++) {
       const r = re[i];
-      reInvested += Number(r.purchase_price) || 0;
-      reCurrent += Number(r.current_valuation) || 0;
+      reInvested += calculateRealEstateInvested(r);
+      reCurrent += calculateRealEstateValuation(r);
     }
 
     const totalInvested =

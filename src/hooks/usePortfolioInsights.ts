@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Portfolio, Holding, FixedDeposit, Insurance } from '../types/portfolio';
 import { FD_MATURITY_WARNING_DAYS, INSURANCE_RENEWAL_WARNING_DAYS } from '../utils/constants';
+import { getPolicyRenewalStatus } from '../domains/assets/insurance/calculations/insuranceValuation';
 
 /* ── Alert / Insight types ── */
 
@@ -107,14 +108,15 @@ export function usePortfolioInsights(portfolios: Portfolio[]): PortfolioInsights
 
     // ── Insurance renewal alerts (60 days + overdue) ──
     const insuranceRenewalAlerts: InsuranceRenewalAlert[] = [];
+    const nowDate = new Date(nowMs);
     for (let i = 0; i < portfolios.length; i++) {
       const p = portfolios[i];
       if (!p || !p.insurances) continue;
       for (let j = 0; j < p.insurances.length; j++) {
         const ins = p.insurances[j];
-        const days = daysUntil(ins.renewal_date, nowMs);
-        if (days !== null && days <= INSURANCE_RENEWAL_WARNING_DAYS && days >= -365) {
-          insuranceRenewalAlerts.push({ insurance: ins, daysLeft: days, portfolioLabel: p.label });
+        const renewal = getPolicyRenewalStatus(ins, nowDate);
+        if (renewal.daysRemaining !== Infinity && renewal.daysRemaining <= INSURANCE_RENEWAL_WARNING_DAYS && renewal.daysRemaining >= -365) {
+          insuranceRenewalAlerts.push({ insurance: ins, daysLeft: renewal.daysRemaining, portfolioLabel: p.label });
         }
       }
     }

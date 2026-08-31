@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useDebounce } from './useDebounce';
 
 export type SortOrder = 'asc' | 'desc';
 
@@ -8,6 +9,7 @@ export interface UseAssetFilterSortOptions<T, F extends string = string> {
   initialSortOrder?: SortOrder;
   sortComparators?: { [K in F]?: (a: T, b: T) => number };
   customFilter?: (item: T, search: string) => boolean;
+  debounceMs?: number;
 }
 
 export interface UseAssetFilterSortResult<T, F extends string = string> {
@@ -36,9 +38,13 @@ export function useAssetFilterSort<T, F extends string = string>(
     initialSortOrder = 'desc',
     sortComparators,
     customFilter,
+    debounceMs = 0,
   } = options;
 
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, debounceMs);
+  const activeQuery = debounceMs > 0 ? debouncedSearch : searchQuery;
+
   const [sortField, setSortField] = useState<F | undefined>(initialSortField);
   const [sortOrder, setSortOrder] = useState<SortOrder>(initialSortOrder);
 
@@ -53,7 +59,7 @@ export function useAssetFilterSort<T, F extends string = string>(
 
   const items = useMemo(() => {
     let result = Array.isArray(rawItems) ? [...rawItems] : [];
-    const query = searchQuery.trim().toLowerCase();
+    const query = activeQuery.trim().toLowerCase();
 
     // 1. Filtering
     if (query) {
@@ -91,7 +97,7 @@ export function useAssetFilterSort<T, F extends string = string>(
     }
 
     return result;
-  }, [rawItems, searchQuery, sortField, sortOrder, searchFields, sortComparators, customFilter]);
+  }, [rawItems, activeQuery, sortField, sortOrder, searchFields, sortComparators, customFilter]);
 
   return {
     items,
