@@ -222,5 +222,14 @@ After **any correction** from the user, append a new entry here with the pattern
 3. Standardized all form input heights to uniform `h-10` (40px) and added visible, high-contrast borders (`border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200`) across all modal Cancel buttons.  
 **Rule**: Always apply global CSS constraints (`min-width: 0 !important; max-width: 100%; appearance: none;`) to all date/time input types and wrap them in `min-w-0 overflow-hidden` containers when used in CSS grid or multi-column layouts to completely prevent mobile browser intrinsic width expansion. Always ensure modal Cancel buttons have distinct high-contrast borders and matching uniform heights.
 
+---
 
-
+### 2026-08-31 — Mobile Sort Pill Left-Edge Clipping & Tab Transition Ghosting
+**Mistake**: The first sort preset pill ("Current Value") was partially clipped ("t Value") on narrow mobile viewports, and during swipe navigation between asset tabs (Stocks / SIP & MF / Deposits), adjacent view content momentarily flashed or bled into view.  
+**Root Cause**:
+1. The sort preset container used `self-end` inside a `flex flex-col` header layout on mobile, causing the `overflow-x-auto` container to right-align and start its scroll position with the left edge of the active first pill clipped against the parent padding boundaries.
+2. The mobile `<main id="main-content">` and asset tab content wrapper lacked `overflow-hidden`, allowing the previous tab's DOM tree to briefly bleed horizontally during React's commit/suspense transition phase before the new tab fully hydrated.  
+**Fix**:
+1. Removed `self-end` on mobile from the sort container in `PortfolioTable.tsx` (restored `md:self-auto` for desktop) and added `pl-0.5 pr-1` padding so the first pill always has left breathing room at x=0.
+2. Added `overflow-hidden` to both the mobile `<main id="main-content">` container and the asset content wrapper `<div>` in `AppShell.tsx`.  
+**Rule**: On mobile scrollable pill rows (`overflow-x-auto`), never apply cross-axis alignment (`self-end`/`items-end`) that can force child overflow off the left viewport edge. Always enforce `overflow-hidden` on top-level mobile tab transition containers to prevent momentary bleed or ghosting during navigation gestures.
