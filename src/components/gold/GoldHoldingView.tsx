@@ -282,42 +282,42 @@ export function GoldHoldingView({
         </div>
       </div>
 
-      {/* Gold Portfolio Aggregate Summary Ribbon */}
+      {/* Gold Standalone Aggregate Valuation Ribbon */}
       {goldHoldings.length > 0 && (
         <div className="apple-card p-3.5 sm:p-4 grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[var(--surface)] border border-[var(--border-subtle)]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--warning-soft)] text-[var(--warning)] flex items-center justify-center shrink-0">
-              <Scale size={16} />
-            </div>
-            <div>
-              <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)]">Total Gold Weight</p>
-              <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5">
-                {totals.totalGrams.toFixed(2)} <span className="text-[10px] font-normal">grams</span>
-              </p>
-            </div>
+          <div>
+            <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Total Investment</p>
+            <p className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5">
+              {formatINR(totals.totalInvested)}
+            </p>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
               <Coins size={16} />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)]">Current Valuation</p>
+              <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Total Value as of Date</p>
               <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5">
                 {formatINR(totals.totalCurrent)}
               </p>
             </div>
           </div>
 
-          <div>
-            <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)]">Invested Capital</p>
-            <p className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5">
-              {formatINR(totals.totalInvested)}
-            </p>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--warning-soft)] text-[var(--warning)] flex items-center justify-center shrink-0">
+              <Scale size={16} />
+            </div>
+            <div>
+              <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Total Weight</p>
+              <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5">
+                {totals.totalGrams.toFixed(2)} <span className="text-[10px] font-normal text-[var(--text-tertiary)]">g</span>
+              </p>
+            </div>
           </div>
 
           <div>
-            <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)]">Total Return</p>
+            <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Total Return</p>
             <p className={`text-xs sm:text-sm font-bold tnum mt-0.5 ${pnlColor(totals.totalGain)}`}>
               {totals.totalGain >= 0 ? '+' : ''}{formatINR(totals.totalGain)} ({formatPercent(totals.gainPct)})
             </p>

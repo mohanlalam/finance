@@ -3,7 +3,7 @@ import { calculateAggregatedPortfolioTotals } from '../calculations/portfolioTot
 import { getFDInvestedAmount, getFDEffectiveValue } from '../../assets/fd/calculations/fdCompounding';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../assets/rd/calculations/rdCompounding';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../assets/sip/calculations/sipValuation';
-import { calculateRealEstateInvested, calculateRealEstateValuation } from '../../assets/real-estate/calculations/realEstateValuation';
+import { calculateRealEstateValuation } from '../../assets/real-estate/calculations/realEstateValuation';
 
 export class PortfolioCalculationService {
   recalculateSinglePortfolio(portfolio: Portfolio): Portfolio {
@@ -43,28 +43,25 @@ export class PortfolioCalculationService {
       sipCurrent += getSIPEffectiveValue(s);
     }
 
-    let goldInvested = 0;
     let goldCurrent = 0;
     const gold = portfolio.goldHoldings || [];
     for (let i = 0; i < gold.length; i++) {
       const g = gold[i];
-      goldInvested += Number(g.purchase_price) || 0;
       goldCurrent += Number(g.current_valuation) || 0;
     }
 
-    let reInvested = 0;
     let reCurrent = 0;
     const re = portfolio.realEstate || [];
     for (let i = 0; i < re.length; i++) {
       const r = re[i];
-      reInvested += calculateRealEstateInvested(r);
       reCurrent += calculateRealEstateValuation(r);
     }
 
-    const totalInvested =
-      stockInvested + fdInvested + rdInvested + sipInvested + goldInvested + reInvested;
-    const totalCurrentValue =
-      stockCurrent + fdCurrent + rdCurrent + sipCurrent + goldCurrent + reCurrent;
+    // Financial Net Worth calculates purely from financial & deposit holdings:
+    // Stocks + Fixed Deposits + Recurring Deposits + SIP / Mutual Funds.
+    // Gold & Real Estate are tracked separately on their dedicated asset pages.
+    const totalInvested = stockInvested + fdInvested + rdInvested + sipInvested;
+    const totalCurrentValue = stockCurrent + fdCurrent + rdCurrent + sipCurrent;
     const totalPnL = totalCurrentValue - totalInvested;
     const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
 

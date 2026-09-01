@@ -170,26 +170,25 @@ function recalcPortfolioTotals(
     sipCurrent += getSIPEffectiveValue(s);
   }
 
-  let goldInvested = 0;
   let goldCurrent = 0;
   for (let i = 0; i < gold.length; i++) {
     const g = gold[i];
-    goldInvested += Number(g.purchase_price) || 0;
     goldCurrent += Number(g.current_valuation) || 0;
   }
 
-  let reInvested = 0;
   let reCurrent = 0;
   for (let i = 0; i < realEstate.length; i++) {
     const r = realEstate[i];
-    reInvested += Number(r.purchase_price) || 0;
     reCurrent += Number(r.current_valuation) || 0;
   }
 
+  // Financial Net Worth calculates purely from financial & deposit holdings:
+  // Stocks + Fixed Deposits + Recurring Deposits + SIP / Mutual Funds.
+  // Gold & Real Estate are tracked separately on their dedicated asset pages.
   const totalInvested =
-    stockInvested + fdInvested + rdInvested + sipInvested + goldInvested + reInvested;
+    stockInvested + fdInvested + rdInvested + sipInvested;
   const totalCurrentValue =
-    stockCurrent + fdCurrent + rdCurrent + sipCurrent + goldCurrent + reCurrent;
+    stockCurrent + fdCurrent + rdCurrent + sipCurrent;
   const totalPnL = totalCurrentValue - totalInvested;
   const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
 

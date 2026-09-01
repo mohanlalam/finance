@@ -51,7 +51,7 @@ describe('Pillar 1: Financial Math Invariants & Floating-Point Precision', () =>
     expect(roundToDecimals(totals.totalCurrentValue - totals.totalInvested, 2)).toBe(roundToDecimals(totals.totalPnL, 2));
   });
 
-  it('Invariant 2: Net Worth strictly equals the sum of all individual asset classes', () => {
+  it('Invariant 2: Net Worth strictly equals the sum of financial & deposit asset classes', () => {
     const portfolio: Portfolio = {
       id: 'p-1',
       name: 'family-1',
@@ -70,16 +70,18 @@ describe('Pillar 1: Financial Math Invariants & Floating-Point Precision', () =>
       sipValue: 180000,
       goldValue: 150000,
       realEstateValue: 2500000,
-      totalInvested: 2800000,
-      totalCurrentValue: 450000 + 200000 + 75000 + 180000 + 150000 + 2500000,
-      totalPnL: (450000 + 200000 + 75000 + 180000 + 150000 + 2500000) - 2800000,
+      totalInvested: 800000,
+      totalCurrentValue: 450000 + 200000 + 75000 + 180000,
+      totalPnL: (450000 + 200000 + 75000 + 180000) - 800000,
       totalPnLPercent: 0,
     };
 
     const totals = calculateAggregatedPortfolioTotals([portfolio]);
-    const manualSum = totals.stocksValue + totals.fdValue + totals.rdValue + totals.sipValue + totals.goldValue + totals.realEstateValue;
+    const financialSum = totals.stocksValue + totals.fdValue + totals.rdValue + totals.sipValue;
 
-    expect(totals.totalCurrentValue).toBe(manualSum);
+    expect(totals.totalCurrentValue).toBe(financialSum);
+    expect(totals.goldValue).toBe(150000);
+    expect(totals.realEstateValue).toBe(2500000);
     expect(totals.totalPnL).toBe(totals.totalCurrentValue - totals.totalInvested);
   });
 

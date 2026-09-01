@@ -1,4 +1,4 @@
-import { useState, useRef, DragEvent } from 'react';
+import { useState, useEffect, useRef, DragEvent } from 'react';
 import { 
   Upload, 
   Sparkles, 
@@ -14,6 +14,7 @@ import { Button } from './ui/Button';
 import { extractAssetFromDocument, getGeminiApiKey, setStoredGeminiApiKey, normalizeToIsoDate, ExtractedAssetResult } from '../utils/aiDocumentExtractor';
 import { uploadDocumentFile, generateDocumentStoragePath } from '../utils/supabaseStorage';
 import { usePortfolioActions, usePortfolioEntities } from '../contexts/PortfolioContext';
+import { useToastActions } from '../contexts/ToastContext';
 
 interface SmartImportModalProps {
   isOpen: boolean;
@@ -100,6 +101,7 @@ const defaultFormData: EditableFormData = {
 export default function SmartImportModal({ isOpen, onClose }: SmartImportModalProps) {
   const { portfolios, activeTab } = usePortfolioEntities();
   const { addAsset } = usePortfolioActions();
+  const { addToast } = useToastActions();
 
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
@@ -116,6 +118,17 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
     return validPortfolio ? validPortfolio.name : (portfolios[0]?.name ?? 'personal');
   });
   const [isSaving, setIsSaving] = useState(false);
+
+  // Sync target portfolio and reset states when modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      const validPortfolio = portfolios.find((p) => p.name === activeTab);
+      setTargetPortfolio(validPortfolio ? validPortfolio.name : (portfolios[0]?.name ?? 'personal'));
+      setError(null);
+      setIsSaving(false);
+      setIsProcessing(false);
+    }
+  }, [isOpen, activeTab, portfolios]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -414,8 +427,13 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
         }
       }
 
+      addToast(
+        `Successfully saved ${formData.itemName || formData.bankName || formData.policyName || formData.propertyName || 'holding'}!`,
+        'success'
+      );
       onClose();
     } catch (err: unknown) {
+      console.error('[smart-import] Save failed:', err);
       setError(err instanceof Error ? err.message : 'Failed to save asset and document.');
     } finally {
       setIsSaving(false);
