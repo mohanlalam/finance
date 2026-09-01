@@ -224,4 +224,20 @@ describe('aiDocumentExtractor', () => {
     expect(models).not.toContain('text-embedding-004');
     expect(models[0]).toBe('gemini-3.5-flash-lite');
   });
+
+  it('successfully extracts data when Gemini wraps response in markdown code fences', async () => {
+    const rawMarkdownJson = '```json\n{"assetType":"insurance","confidence":0.99,"title":"LIC Policy","data":{"policyName":"LIC Jeevan Labh","provider":"LIC","sumAssured":500000}}\n```';
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        candidates: [{ content: { parts: [{ text: rawMarkdownJson }] } }],
+      }),
+    } as unknown as Response);
+
+    const file = new File(['lic doc'], 'lic.jpg', { type: 'image/jpeg' });
+    const result = await extractAssetFromDocument(file, 'mock_key');
+    expect(result.assetType).toBe('insurance');
+    expect(result.data.policyName).toBe('LIC Jeevan Labh');
+    expect(result.data.sumAssured).toBe(500000);
+  });
 });

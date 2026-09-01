@@ -310,7 +310,12 @@ export async function extractAssetFromDocument(
   }
 
   try {
-    const parsed = JSON.parse(rawText) as ExtractedAssetResult;
+    let cleanJson = rawText.trim();
+    if (cleanJson.startsWith('```')) {
+      cleanJson = cleanJson.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+    }
+
+    const parsed = JSON.parse(cleanJson) as ExtractedAssetResult;
     if (!parsed.assetType || !parsed.data) {
       throw new Error('Incomplete data parsed from document.');
     }
