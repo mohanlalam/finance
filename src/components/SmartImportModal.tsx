@@ -403,7 +403,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
         ) : (
           <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 px-1">
             <span className="flex items-center gap-1">
-              <Sparkles size={13} className="text-amber-500" /> Powered by Free Gemini Flash 1.5
+              <Sparkles size={13} className="text-amber-500" /> Powered by Free Gemini AI
             </span>
             <button
               type="button"

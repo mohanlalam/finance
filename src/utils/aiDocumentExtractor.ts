@@ -131,6 +131,14 @@ Respond ONLY with valid, minified JSON matching this exact structure:
 }
 `;
 
+export const GEMINI_CANDIDATE_MODELS = [
+  'gemini-2.0-flash',
+  'gemini-2.5-flash',
+  'gemini-1.5-flash-latest',
+  'gemini-1.5-flash',
+  'gemini-2.0-flash-lite',
+];
+
 export async function extractAssetFromDocument(
   file: File,
   apiKeyOverride?: string
@@ -144,9 +152,7 @@ export async function extractAssetFromDocument(
   }
 
   const base64Data = await fileToBase64(file);
-  const mimeType = file.type || 'image/jpeg';
-
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const mimeType = file.type || (file.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
 
   const payload = {
     contents: [
@@ -168,27 +174,56 @@ export async function extractAssetFromDocument(
     },
   };
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  let lastError: Error | null = null;
+  let rawText = '';
 
-  if (!response.ok) {
-    const errorBody = await response.json().catch(() => ({}));
-    const message =
-      errorBody?.error?.message || `Gemini API returned HTTP status ${response.status}`;
-    if (response.status === 400 || response.status === 403) {
-      throw new Error(`Invalid Gemini API Key or permissions issue: ${message}`);
+  for (const model of GEMINI_CANDIDATE_MODELS) {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        rawText = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (rawText) {
+          lastError = null;
+          break;
+        }
+      } else {
+        const errorBody = await response.json().catch(() => ({}));
+        const message =
+          errorBody?.error?.message || `Gemini API returned HTTP status ${response.status}`;
+
+        if (
+          response.status === 400 &&
+          (message.toLowerCase().includes('api_key_invalid') || message.toLowerCase().includes('api key not valid'))
+        ) {
+          throw new Error(`Invalid Gemini API Key: ${message}`);
+        }
+        if (response.status === 403) {
+          throw new Error(`Invalid Gemini API Key or permissions issue: ${message}`);
+        }
+
+        lastError = new Error(`AI Extraction failed (${model}): ${message}`);
+      }
+    } catch (err: unknown) {
+      if (
+        err instanceof Error &&
+        (err.message.includes('Invalid Gemini API Key') || err.message.includes('permissions issue'))
+      ) {
+        throw err;
+      }
+      lastError = err instanceof Error ? err : new Error(String(err));
     }
-    throw new Error(`AI Extraction failed: ${message}`);
   }
 
-  const result = await response.json();
-  const rawText =
-    result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
   if (!rawText) {
+    if (lastError) throw lastError;
     throw new Error('AI could not extract text from this document. Please try a clearer photo or file.');
   }
 

@@ -113,4 +113,70 @@ describe('aiDocumentExtractor', () => {
     expect(result.data.weightGrams).toBe(20);
     expect(result.data.purchasePrice).toBe(145000);
   });
+
+  it('falls back to next model when the first model returns 404', async () => {
+    const mockSuccessResponse = {
+      candidates: [
+        {
+          content: {
+            parts: [
+              {
+                text: JSON.stringify({
+                  assetType: 'fd',
+                  confidence: 0.9,
+                  title: 'Fallback FD',
+                  data: {
+                    bankName: 'ICICI Bank',
+                    principalAmount: 100000,
+                  },
+                }),
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    let callCount = 0;
+    globalThis.fetch = vi.fn().mockImplementation(async () => {
+      callCount++;
+      if (callCount === 1) {
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            error: {
+              message: 'models/gemini-2.0-flash is not found for API version v1beta',
+            },
+          }),
+        } as unknown as Response;
+      }
+      return {
+        ok: true,
+        json: async () => mockSuccessResponse,
+      } as unknown as Response;
+    });
+
+    const file = new File(['sample'], 'doc.pdf', { type: 'application/pdf' });
+    const result = await extractAssetFromDocument(file, 'mock_key');
+
+    expect(callCount).toBe(2);
+    expect(result.assetType).toBe('fd');
+    expect(result.data.bankName).toBe('ICICI Bank');
+  });
+
+  it('throws immediately on invalid API key', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: async () => ({
+        error: {
+          message: 'API_KEY_INVALID: API key not valid. Please pass a valid API key.',
+        },
+      }),
+    } as unknown as Response);
+
+    const file = new File(['sample'], 'doc.png', { type: 'image/png' });
+    await expect(extractAssetFromDocument(file, 'bad_key')).rejects.toThrow(/Invalid Gemini API Key/);
+  });
 });
