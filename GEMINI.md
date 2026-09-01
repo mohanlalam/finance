@@ -96,9 +96,9 @@ External APIs & Databases (PostgreSQL, Supabase Functions, Yahoo Finance, AMFI, 
 All core financial calculations are pure functions with zero UI, React, or database dependencies:
 
 * **Portfolio Calculations (`src/domains/portfolio/calculations/`)**:
-  * **[portfolioTotals.ts](src/domains/portfolio/calculations/portfolioTotals.ts)**: Single-pass portfolio totals aggregation and Method-B intraday delta calculations.
+  * **[portfolioTotals.ts](src/domains/portfolio/calculations/portfolioTotals.ts)**: Single-pass financial portfolio totals aggregation (Stocks + FDs + RDs + SIPs) and Method-B intraday delta calculations, with standalone Gold and Real Estate properties.
   * **[allocation.ts](src/domains/portfolio/calculations/allocation.ts)**: Asset class distribution and percentage breakdowns for visual widgets.
-  * **[netWorth.ts](src/domains/portfolio/calculations/netWorth.ts)**: Snapshot formatting and net worth timeline aggregations.
+  * **[netWorth.ts](src/domains/portfolio/calculations/netWorth.ts)**: Snapshot formatting and financial net worth timeline aggregations.
 * **Performance Calculations (`src/domains/performance/calculations/`)**:
   * **[xirr.ts](src/domains/performance/calculations/xirr.ts)**: Pure Newton-Raphson XIRR solver with TypedArray cash flows and bisection fallback.
   * **[cagr.ts](src/domains/performance/calculations/cagr.ts)**: Period-bounded Compound Annual Growth Rate calculator.
@@ -159,7 +159,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 35 test files and 194 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 40 test files and 222 unit/integration test cases (100% passing).
 
 ---
 
@@ -244,6 +244,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 | Date | Version | Key Changes & Milestones |
 | :--- | :--- | :--- |
+| **2026-09-01** | `v2.5` | Family Net Worth & Asset Valuation Decoupling: Decoupled Gold and Real Estate from Family Net Worth totals (now strictly computing from financial & deposit holdings: Stocks + FDs + RDs + SIPs) with standalone Total Investment and Live Valuation as of date metrics on their dedicated asset pages; added Edge Function CI/CD auto-deploy with `--project-ref` and graceful secret handling; verified 40 test files / 222 tests passing (100%). |
 | **2026-08-31** | `v2.4` | Mobile UI, Drawer & Navigation Hardening: Removed `startViewTransition` snapshot ghosting for instant crisp tab transitions, upgraded More Drawer to 100% solid opacity (`bg-[var(--surface-solid)]`) with body scroll locking and FAB z-index isolation, added global CSS date input constraints, fixed sort presets left clipping, verified 35 test files / 194 tests passing (100%). |
 | **2026-08-30** | `v2.3` | Antigravity Cyber-Zen Redesign & Polish: Implemented weightless suspension, cosmic ambient nebula canvas, translucent glassmorphism (`backdrop-blur-2xl`), glowing neon financial indicators, floating mobile bottom dock, fixed button height & whitespace wrapping consistency, verified 33 test files / 188 tests passing (100%). |
 | **2026-08-29** | `v2.2` | Core Pillars & Benchmarking: Implemented Smart AI Import Quarantine & Review side-by-side workflow, added Indian Banking & AMFI MF scheme autocomplete presets, stress-benchmarked 1,000+ assets in <1ms, hardened PWA offline cache zero-skeleton hydration, added Mathematical Invariant test suite, verified 33 test files / 188 tests passing (100%). |
@@ -251,4 +252,5 @@ All core financial calculations are pure functions with zero UI, React, or datab
 | **2026-08-22** | `v1.5` | Fail-closed Edge Function security hardening, strict storage path allowlists, full-phase audit protocols. |
 | **2026-08-21** | `v1.4` | PWA background lifecycle update listeners and WebAuthn credential persistence safeguards. |
 | **2026-08-17** | `v1.3` | Mobile bottom sheet detail drawers, responsive chart height scaling, and design system unification with `UI.md`. |
+
 

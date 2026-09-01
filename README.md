@@ -13,7 +13,7 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 - **Floating Island Navigation** — Dynamic Island frosted header and floating mobile bottom dock with spring physics.
 
 ### 📊 Financial Analytics & Visualizations
-- **Consolidated Net Worth Timeline** — Responsive SVG area chart with interactive hover cards plotting historical wealth appreciation and daily snapshots.
+- **Consolidated Financial Net Worth Timeline** — Responsive SVG area chart with interactive hover cards plotting liquid/deposit historical wealth appreciation across Stocks, Fixed Deposits, RDs, and Mutual Funds.
 - **Asset Allocation Donut** — Multi-category distribution chart across Stocks, Fixed Deposits, RDs, Mutual Funds, Gold Bullion, and Real Estate.
 - **Live Market Data Hub** — Multi-provider quotes coordinator with automated background polling, in-memory TTL caching, and offline fallback (Yahoo Finance for equities, AMFI India for Mutual Fund NAVs, and MCX/IBJA for bullion).
 - **Tax Loss Harvesting Opportunity Finder** — Indian Income Tax FY24-25 analyzer distinguishing equity STCG (20%) / LTCG (12.5% over ₹1.25L) from debt and gold slab rates.
@@ -22,8 +22,8 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 - **Fixed Deposits (FD)** — Compounded interest calculations (Indian banking half-yearly/quarterly standards), auto-suggestions for all major Indian banks, maturity date timeline progress bars, and linked deposit receipts.
 - **Recurring Deposits (RD)** — Multi-month installment tracking with Indian bank datalists, paid vs. overdue status tracking, and one-click installment recording.
 - **Mutual Fund SIPs** — Real-time scheme tracking via AMFI India NAV automation, top Indian scheme presets (Parag Parikh, Quant, Mirae, etc.), and unit holdings valuation.
-- **Gold Holdings & Bullion** — Weight tracking, hallmark purity multipliers (24K, 22K/916, 18K/750, 14K/585), live MCX spot rate appreciation, and 1-tap auto-valuation.
-- **Real Estate** — Property acquisition cost basis, current valuations, and annual rental income yield percentages.
+- **Gold Holdings & Bullion (Standalone Valuation)** — Weight tracking, hallmark purity multipliers (24K, 22K/916, 18K/750, 14K/585), live MCX spot rate appreciation, and standalone Total Investment & Value as of date metrics.
+- **Real Estate (Standalone Valuation)** — Property acquisition cost basis, current valuations as of date, and annual rental income yield percentages tracked independently from liquid family net worth.
 - **Insurances** — Term, health, life, and motor policy registries with premium renewal timers and overdue status warnings.
 - **Document Vault** — Secure attachment manager linked by asset class with expiry date tracking and upcoming deadline alerts.
 
@@ -221,7 +221,7 @@ project antigravity/
 The repository enforces strict verification before deployment:
 
 ```bash
-# Run Vitest test suite across 35 test files and 194 tests (100% passing)
+# Run Vitest test suite across 40 test files and 222 tests (100% passing)
 npm test
 
 # Run interactive Vitest UI with watch mode
@@ -266,10 +266,7 @@ npx supabase secrets set APP_PIN_HASH="<sha256_hash_of_pin>"
 npx supabase db push
 
 # Deploy Deno Edge Functions
-npx supabase functions deploy holdings-crud --no-verify-jwt --use-api
-npx supabase functions deploy market-data --no-verify-jwt --use-api
-npx supabase functions deploy snapshot-net-worth --no-verify-jwt --use-api
-npx supabase functions deploy verify-pin --no-verify-jwt --use-api
+npx supabase functions deploy --project-ref <project-ref> --no-verify-jwt
 ```
 
 ### 5. Run Locally
@@ -285,7 +282,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | Script | Command | Description |
 |---|---|---|
 | **Dev Server** | `npm run dev` | Start Vite dev server with HMR |
-| **Test Suite** | `npm test` | Run Vitest unit & integration tests (35 test files / 194 tests) |
+| **Test Suite** | `npm test` | Run Vitest unit & integration tests (40 test files / 222 tests) |
 | **Build** | `npm run build` | Production build to `dist/` |
 | **Preview** | `npm run preview` | Preview the production build locally |
 | **Lint** | `npm run lint` | Run ESLint checks |
