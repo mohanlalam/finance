@@ -15,6 +15,7 @@ import { extractAssetFromDocument, getGeminiApiKey, setStoredGeminiApiKey, norma
 import { uploadDocumentFile, generateDocumentStoragePath } from '../utils/supabaseStorage';
 import { usePortfolioActions, usePortfolioEntities } from '../contexts/PortfolioContext';
 import { useToastActions } from '../contexts/ToastContext';
+import { portfolioSyncService } from '../domains/portfolio/services/portfolioSyncService';
 
 interface SmartImportModalProps {
   isOpen: boolean;
@@ -119,14 +120,18 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
   });
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync target portfolio and reset states when modal is opened
+  // Sync target portfolio and reset ALL states when modal is opened
   useEffect(() => {
     if (isOpen) {
       const validPortfolio = portfolios.find((p) => p.name === activeTab);
       setTargetPortfolio(validPortfolio ? validPortfolio.name : (portfolios[0]?.name ?? 'personal'));
       setError(null);
+      // Hard-reset saving state — clears any zombie state from a previous stuck save
       setIsSaving(false);
       setIsProcessing(false);
+      setProgressStep('');
+      // Reset the mutation queue in case a previous attempt left it deadlocked
+      portfolioSyncService.reset();
     }
   }, [isOpen, activeTab, portfolios]);
 

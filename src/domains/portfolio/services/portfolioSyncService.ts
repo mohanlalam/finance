@@ -20,15 +20,34 @@ export class PortfolioSyncService {
     return this.isMutating;
   }
 
-  async runMutation<T>(fn: () => Promise<T>): Promise<T> {
+  /** Reset any stuck mutation queue — call this if a previous mutation timed out. */
+  reset(): void {
+    this.mutationQueue = Promise.resolve();
+    this.isMutating = false;
+    this.notify();
+  }
+
+  async runMutation<T>(fn: () => Promise<T>, timeoutMs = 20000): Promise<T> {
     const nextPromise = new Promise<T>((resolve, reject) => {
       const execute = async () => {
         this.isMutating = true;
         this.notify();
+
+        // Hard timeout so a stuck upstream promise never permanently blocks the queue
+        const timer = setTimeout(() => {
+          reject(new Error('Mutation timed out. Please try again.'));
+          this.isMutating = false;
+          this.notify();
+          // Reset queue so future mutations are not blocked
+          this.mutationQueue = Promise.resolve();
+        }, timeoutMs);
+
         try {
           const res = await fn();
+          clearTimeout(timer);
           resolve(res);
         } catch (err) {
+          clearTimeout(timer);
           reject(err);
         } finally {
           this.isMutating = false;
