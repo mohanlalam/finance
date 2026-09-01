@@ -131,13 +131,94 @@ Respond ONLY with valid, minified JSON matching this exact structure:
 }
 `;
 
-export const GEMINI_CANDIDATE_MODELS = [
-  'gemini-2.0-flash',
+export const STATIC_FALLBACK_MODELS = [
+  'gemini-3.5-flash-lite',
+  'gemini-3.5-flash',
   'gemini-2.5-flash',
+  'gemini-2.5-pro',
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-lite',
   'gemini-1.5-flash-latest',
   'gemini-1.5-flash',
-  'gemini-2.0-flash-lite',
 ];
+
+interface GeminiModelItem {
+  name: string;
+  supportedGenerationMethods?: string[];
+  displayName?: string;
+}
+
+let discoveredModelsCache: { apiKey: string; models: string[]; timestamp: number } | null = null;
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+export function clearDiscoveredModelsCache(): void {
+  discoveredModelsCache = null;
+}
+
+export function getModelPreferenceScore(modelName: string): number {
+  const name = modelName.toLowerCase();
+  let score = 0;
+
+  // Prefer fast/multimodal flash & lite models for document extraction
+  if (name.includes('flash')) score += 100;
+  if (name.includes('lite')) score += 10;
+
+  // Prefer newer versions
+  if (name.includes('3.5')) score += 50;
+  else if (name.includes('3.0') || name.includes('3-')) score += 40;
+  else if (name.includes('2.5')) score += 30;
+  else if (name.includes('2.0') || name.includes('2-')) score += 20;
+  else if (name.includes('1.5')) score += 10;
+
+  // Deprioritize non-general / embedding / audio-only models
+  if (name.includes('embedding') || name.includes('aqa') || name.includes('imagen') || name.includes('tts')) {
+    score -= 1000;
+  }
+
+  return score;
+}
+
+export async function fetchAvailableGeminiModels(apiKey: string): Promise<string[]> {
+  if (
+    discoveredModelsCache &&
+    discoveredModelsCache.apiKey === apiKey &&
+    Date.now() - discoveredModelsCache.timestamp < CACHE_TTL_MS &&
+    discoveredModelsCache.models.length > 0
+  ) {
+    return discoveredModelsCache.models;
+  }
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (res.ok) {
+      const data = (await res.json()) as { models?: GeminiModelItem[] };
+      if (Array.isArray(data.models) && data.models.length > 0) {
+        const validModels = data.models
+          .filter(
+            (m) =>
+              !m.supportedGenerationMethods ||
+              m.supportedGenerationMethods.includes('generateContent')
+          )
+          .map((m) => m.name.replace(/^models\//, ''));
+
+        const ranked = validModels.sort((a, b) => getModelPreferenceScore(b) - getModelPreferenceScore(a));
+
+        if (ranked.length > 0) {
+          discoveredModelsCache = {
+            apiKey,
+            models: ranked,
+            timestamp: Date.now(),
+          };
+          return ranked;
+        }
+      }
+    }
+  } catch {
+    // If dynamic discovery fails, use static fallback
+  }
+
+  return STATIC_FALLBACK_MODELS;
+}
 
 export async function extractAssetFromDocument(
   file: File,
@@ -174,10 +255,11 @@ export async function extractAssetFromDocument(
     },
   };
 
+  const candidateModels = await fetchAvailableGeminiModels(apiKey);
   let lastError: Error | null = null;
   let rawText = '';
 
-  for (const model of GEMINI_CANDIDATE_MODELS) {
+  for (const model of candidateModels) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     try {

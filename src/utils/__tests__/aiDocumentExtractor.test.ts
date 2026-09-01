@@ -1,6 +1,14 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { getGeminiApiKey, setStoredGeminiApiKey, fileToBase64, extractAssetFromDocument } from '../aiDocumentExtractor';
+import {
+  getGeminiApiKey,
+  setStoredGeminiApiKey,
+  fileToBase64,
+  extractAssetFromDocument,
+  getModelPreferenceScore,
+  fetchAvailableGeminiModels,
+  clearDiscoveredModelsCache,
+} from '../aiDocumentExtractor';
 
 describe('aiDocumentExtractor', () => {
   beforeEach(() => {
@@ -178,5 +186,42 @@ describe('aiDocumentExtractor', () => {
 
     const file = new File(['sample'], 'doc.png', { type: 'image/png' });
     await expect(extractAssetFromDocument(file, 'bad_key')).rejects.toThrow(/Invalid Gemini API Key/);
+  });
+
+  it('correctly scores model preference (flash > pro, 3.5 > 1.5)', () => {
+    const score35Flash = getModelPreferenceScore('gemini-3.5-flash');
+    const score35FlashLite = getModelPreferenceScore('gemini-3.5-flash-lite');
+    const score25Flash = getModelPreferenceScore('gemini-2.5-flash');
+    const score15Flash = getModelPreferenceScore('gemini-1.5-flash');
+    const scoreEmbedding = getModelPreferenceScore('text-embedding-004');
+
+    expect(score35FlashLite).toBeGreaterThan(score35Flash); // lite + flash
+    expect(score35Flash).toBeGreaterThan(score25Flash);
+    expect(score25Flash).toBeGreaterThan(score15Flash);
+    expect(score15Flash).toBeGreaterThan(scoreEmbedding);
+  });
+
+  it('dynamically queries Gemini models API and ranks models', async () => {
+    clearDiscoveredModelsCache();
+    const mockModelsResponse = {
+      models: [
+        { name: 'models/gemini-1.5-pro', supportedGenerationMethods: ['generateContent'] },
+        { name: 'models/gemini-3.5-flash-lite', supportedGenerationMethods: ['generateContent'] },
+        { name: 'models/text-embedding-004', supportedGenerationMethods: ['embedContent'] },
+        { name: 'models/gemini-2.5-flash', supportedGenerationMethods: ['generateContent'] },
+      ],
+    };
+
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockModelsResponse,
+    } as unknown as Response);
+
+    const models = await fetchAvailableGeminiModels('test_key');
+    expect(models).toContain('gemini-3.5-flash-lite');
+    expect(models).toContain('gemini-2.5-flash');
+    expect(models).toContain('gemini-1.5-pro');
+    expect(models).not.toContain('text-embedding-004');
+    expect(models[0]).toBe('gemini-3.5-flash-lite');
   });
 });
