@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
 import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
@@ -56,16 +56,16 @@ export const GoldFormModal = React.memo(function GoldFormModal({
 
   const createdAssetIdRef = useRef<string | null>(null);
 
-  // Derive live market rates
+  // Derive live market rates for purity
   const liveRates = deriveGoldRates();
-  const liveRatePerGram =
-    purity === '22K'
-      ? liveRates.rate22kPerGram
-      : purity === '18K'
-      ? liveRates.rate18kPerGram
-      : purity === '14K'
-      ? Math.round(liveRates.rate24kPerGram * 0.585)
-      : liveRates.rate24kPerGram;
+  const getRateForPurity = useCallback((p: string) => {
+    if (p === '22K') return liveRates.rate22kPerGram;
+    if (p === '18K') return liveRates.rate18kPerGram;
+    if (p === '14K') return Math.round(liveRates.rate24kPerGram * 0.585);
+    return liveRates.rate24kPerGram;
+  }, [liveRates]);
+
+  const liveRatePerGram = getRateForPurity(purity);
 
   useEffect(() => {
     createdAssetIdRef.current = null;
@@ -82,13 +82,19 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       }
 
       setItemName(editingHolding.item_name || '');
-      setPurity(editingHolding.purity || '24K');
+      const hPurity = editingHolding.purity || '24K';
+      setPurity(hPurity);
       setWeightGrams(editingHolding.weight_grams ? String(editingHolding.weight_grams) : '');
       
+      const holdingRate = getRateForPurity(hPurity);
       const rawVal = Number(editingHolding.current_valuation) || 0;
+      // If stored valuation was raw buy rate / outdated or user opening to edit, sync to live valuation
       if (rawVal > 1000 && rawVal <= 40000 && g > 1 && (rawVal / g) < 500) {
-        const estVal = Math.round(g * liveRatePerGram);
+        const estVal = Math.round(g * holdingRate);
         setCurrentValuation(String(estVal));
+      } else if (g > 0) {
+        const liveVal = Math.round(g * holdingRate);
+        setCurrentValuation(String(liveVal || rawVal));
       } else {
         setCurrentValuation(rawVal ? String(rawVal) : '');
       }
@@ -109,9 +115,19 @@ export const GoldFormModal = React.memo(function GoldFormModal({
     }
     setPendingFiles([]);
     setError(null);
-  }, [editingHolding, portfolioName, isOpen, liveRatePerGram]);
+  }, [editingHolding, portfolioName, isOpen, getRateForPurity]);
 
-  // Handle weight change and auto-update prices
+  // Handle purity change and automatically recompute live market valuation
+  const handlePurityChange = (newPurity: GoldHolding['purity']) => {
+    setPurity(newPurity);
+    const newRate = getRateForPurity(newPurity);
+    const grams = parseFloat(weightGrams);
+    if (!isNaN(grams) && grams > 0) {
+      setCurrentValuation(String(Math.round(grams * newRate)));
+    }
+  };
+
+  // Handle weight change and automatically recompute prices and market valuation
   const handleWeightChange = (val: string) => {
     setWeightGrams(val);
     const grams = parseFloat(val);
@@ -120,9 +136,8 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       if (!isNaN(rate) && rate > 0) {
         setPurchasePrice(String(Math.round(grams * rate)));
       }
-      if (!currentValuation || editingHolding === null) {
-        setCurrentValuation(String(Math.round(grams * liveRatePerGram)));
-      }
+      // Always auto-compute market valuation from live rate
+      setCurrentValuation(String(Math.round(grams * liveRatePerGram)));
     }
   };
 
@@ -283,7 +298,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
             </label>
             <select
               value={purity}
-              onChange={(e) => setPurity(e.target.value)}
+              onChange={(e) => handlePurityChange(e.target.value as GoldHolding['purity'])}
               className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
             >
               {PURITY_OPTIONS.map((p) => (
@@ -303,7 +318,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
               placeholder="e.g. 55.33"
               value={weightGrams}
               onChange={(e) => handleWeightChange(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-medium"
             />
           </div>
         </div>
@@ -366,9 +381,9 @@ export const GoldFormModal = React.memo(function GoldFormModal({
                   const autoVal = Math.round(grams * liveRatePerGram);
                   setCurrentValuation(String(autoVal));
                 }}
-                className="text-[10.5px] text-amber-600 dark:text-amber-400 hover:underline font-bold"
+                className="text-[10.5px] text-amber-600 dark:text-amber-400 hover:underline font-bold flex items-center gap-1 cursor-pointer"
               >
-                Auto-compute (Live: {formatINR(liveRatePerGram)}/g ➔ {formatINR(Math.round(parseFloat(weightGrams) * liveRatePerGram))})
+                <span>⚡ Auto-compute (Live: {formatINR(liveRatePerGram)}/g ➔ {formatINR(Math.round(parseFloat(weightGrams) * liveRatePerGram))})</span>
               </button>
             )}
           </div>
