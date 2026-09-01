@@ -241,6 +241,21 @@ export function useSmartImportPipeline({
     }
   };
 
+  // Handle Target Portfolio change with real-time duplicate re-scan
+  const handleTargetPortfolioChange = useCallback((newPortfolio: string) => {
+    setTargetPortfolio(newPortfolio);
+    setDismissedDuplicate(false);
+    if (extractedResult) {
+      const duplicate = checkForDuplicateAsset(
+        extractedResult.assetType,
+        newPortfolio,
+        formData,
+        portfolios
+      );
+      setDuplicateMatch(duplicate);
+    }
+  }, [extractedResult, formData, portfolios]);
+
   // Execute Save Pipeline
   const handleSave = async () => {
     if (!extractedResult) return;
@@ -285,7 +300,7 @@ export function useSmartImportPipeline({
     formData,
     setFormData,
     targetPortfolio,
-    setTargetPortfolio,
+    setTargetPortfolio: handleTargetPortfolioChange,
     duplicateMatch: dismissedDuplicate ? null : duplicateMatch,
     dismissDuplicate: () => setDismissedDuplicate(true),
     saveStep,
