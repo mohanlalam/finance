@@ -3,8 +3,9 @@ import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
 import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
 import { uploadDocumentFile, generateDocumentStoragePath } from '../../utils/supabaseStorage';
-import { calculateGoldValuation, DEFAULT_GOLD_RATE_24K } from '../../domains/assets/gold/calculations/goldValuation';
 import { normalizeToIsoDate } from '../../utils/aiDocumentExtractor';
+import { deriveGoldRates } from '../../utils/goldPricing';
+import { formatINR } from '../../utils/formatters';
 
 interface PortfolioOption {
   name: string;
@@ -39,6 +40,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
   const [itemName, setItemName] = useState('');
   const [purity, setPurity] = useState<GoldHolding['purity']>('24K');
   const [weightGrams, setWeightGrams] = useState('');
+  const [ratePerGram, setRatePerGram] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [currentValuation, setCurrentValuation] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
@@ -54,14 +56,43 @@ export const GoldFormModal = React.memo(function GoldFormModal({
 
   const createdAssetIdRef = useRef<string | null>(null);
 
+  // Derive live market rates
+  const liveRates = deriveGoldRates();
+  const liveRatePerGram =
+    purity === '22K'
+      ? liveRates.rate22kPerGram
+      : purity === '18K'
+      ? liveRates.rate18kPerGram
+      : purity === '14K'
+      ? Math.round(liveRates.rate24kPerGram * 0.585)
+      : liveRates.rate24kPerGram;
+
   useEffect(() => {
     createdAssetIdRef.current = null;
     if (editingHolding) {
+      const g = Number(editingHolding.weight_grams) || 0;
+      const rawBuy = Number(editingHolding.purchase_price) || 0;
+      // If previously stored as per-gram rate (e.g. 5200) instead of total cost
+      if (rawBuy > 1000 && rawBuy <= 40000 && g > 1 && (rawBuy / g) < 500) {
+        setRatePerGram(String(rawBuy));
+        setPurchasePrice(String(Math.round(rawBuy * g)));
+      } else {
+        setPurchasePrice(rawBuy ? String(rawBuy) : '');
+        setRatePerGram(rawBuy && g > 0 ? String(Math.round(rawBuy / g)) : '');
+      }
+
       setItemName(editingHolding.item_name || '');
       setPurity(editingHolding.purity || '24K');
       setWeightGrams(editingHolding.weight_grams ? String(editingHolding.weight_grams) : '');
-      setPurchasePrice(editingHolding.purchase_price ? String(editingHolding.purchase_price) : '');
-      setCurrentValuation(editingHolding.current_valuation ? String(editingHolding.current_valuation) : '');
+      
+      const rawVal = Number(editingHolding.current_valuation) || 0;
+      if (rawVal > 1000 && rawVal <= 40000 && g > 1 && (rawVal / g) < 500) {
+        const estVal = Math.round(g * liveRatePerGram);
+        setCurrentValuation(String(estVal));
+      } else {
+        setCurrentValuation(rawVal ? String(rawVal) : '');
+      }
+
       setPurchaseDate(editingHolding.purchase_date || '');
       setNotes(editingHolding.notes || '');
       setTargetPortfolio(portfolioName);
@@ -69,6 +100,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       setItemName('');
       setPurity('24K');
       setWeightGrams('');
+      setRatePerGram('');
       setPurchasePrice('');
       setCurrentValuation('');
       setPurchaseDate('');
@@ -77,7 +109,42 @@ export const GoldFormModal = React.memo(function GoldFormModal({
     }
     setPendingFiles([]);
     setError(null);
-  }, [editingHolding, portfolioName, isOpen]);
+  }, [editingHolding, portfolioName, isOpen, liveRatePerGram]);
+
+  // Handle weight change and auto-update prices
+  const handleWeightChange = (val: string) => {
+    setWeightGrams(val);
+    const grams = parseFloat(val);
+    if (!isNaN(grams) && grams > 0) {
+      const rate = parseFloat(ratePerGram);
+      if (!isNaN(rate) && rate > 0) {
+        setPurchasePrice(String(Math.round(grams * rate)));
+      }
+      if (!currentValuation || editingHolding === null) {
+        setCurrentValuation(String(Math.round(grams * liveRatePerGram)));
+      }
+    }
+  };
+
+  // Handle rate per gram change
+  const handleRatePerGramChange = (val: string) => {
+    setRatePerGram(val);
+    const rate = parseFloat(val);
+    const grams = parseFloat(weightGrams);
+    if (!isNaN(rate) && !isNaN(grams) && grams > 0) {
+      setPurchasePrice(String(Math.round(grams * rate)));
+    }
+  };
+
+  // Handle total purchase price change
+  const handlePurchasePriceChange = (val: string) => {
+    setPurchasePrice(val);
+    const total = parseFloat(val);
+    const grams = parseFloat(weightGrams);
+    if (!isNaN(total) && !isNaN(grams) && grams > 0) {
+      setRatePerGram(String(Math.round(total / grams)));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,16 +158,26 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       return;
     }
 
-    const buyPrice = purchasePrice ? parseFloat(purchasePrice) : undefined;
+    let buyPrice = purchasePrice ? parseFloat(purchasePrice) : undefined;
     if (buyPrice !== undefined && (isNaN(buyPrice) || buyPrice < 0 || buyPrice > 1_000_000_000)) {
       setError('Purchase price must be up to ₹100 Crore');
       return;
     }
 
-    const currVal = currentValuation ? parseFloat(currentValuation) : undefined;
+    // Heuristic correction: if user entered per-gram rate into purchase price (e.g. 5200)
+    if (buyPrice !== undefined && buyPrice > 1000 && buyPrice <= 40000 && grams > 1 && (buyPrice / grams) < 500) {
+      buyPrice = Math.round(buyPrice * grams);
+    }
+
+    let currVal = currentValuation ? parseFloat(currentValuation) : undefined;
     if (currVal !== undefined && (isNaN(currVal) || currVal < 0 || currVal > 1_000_000_000)) {
       setError('Current valuation must be up to ₹100 Crore');
       return;
+    }
+
+    // If currentValuation is empty or was entered as per-gram rate
+    if (currVal === undefined || currVal === 0 || (currVal > 1000 && currVal <= 40000 && grams > 1 && (currVal / grams) < 500)) {
+      currVal = Math.round(grams * liveRatePerGram);
     }
 
     setLoading(true);
@@ -116,8 +193,8 @@ export const GoldFormModal = React.memo(function GoldFormModal({
         weightGrams: grams,
         purchase_price: buyPrice,
         purchasePrice: buyPrice,
-        current_valuation: currVal ?? buyPrice,
-        currentValuation: currVal ?? buyPrice,
+        current_valuation: currVal,
+        currentValuation: currVal,
         purchase_date: cleanDate,
         purchaseDate: cleanDate,
         notes: notes.trim() || undefined,
@@ -223,9 +300,9 @@ export const GoldFormModal = React.memo(function GoldFormModal({
               inputMode="decimal"
               step="0.01"
               required
-              placeholder="e.g. 10.5"
+              placeholder="e.g. 55.33"
               value={weightGrams}
-              onChange={(e) => setWeightGrams(e.target.value)}
+              onChange={(e) => handleWeightChange(e.target.value)}
               className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
             />
           </div>
@@ -233,48 +310,77 @@ export const GoldFormModal = React.memo(function GoldFormModal({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-              Purchase Price (₹)
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Buy Rate / Gram (₹/g)
+              </label>
+              {ratePerGram && (
+                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">
+                  {formatINR(Number(ratePerGram))}/g
+                </span>
+              )}
+            </div>
             <input
               type="number"
               inputMode="decimal"
-              step="0.01"
-              placeholder="e.g. 60000"
-              value={purchasePrice}
-              onChange={(e) => setPurchasePrice(e.target.value)}
+              step="1"
+              placeholder="e.g. 5200"
+              value={ratePerGram}
+              onChange={(e) => handleRatePerGramChange(e.target.value)}
               className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
             />
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
-                Current Valuation (₹)
+                Total Purchase Cost (₹)
               </label>
-              {weightGrams && parseFloat(weightGrams) > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const grams = parseFloat(weightGrams) || 0;
-                    const autoVal = calculateGoldValuation(grams, purity || '24K', DEFAULT_GOLD_RATE_24K);
-                    setCurrentValuation(String(autoVal));
-                  }}
-                  className="text-[10px] text-amber-600 dark:text-amber-400 hover:underline font-bold"
-                >
-                  Auto-compute (~₹{DEFAULT_GOLD_RATE_24K}/g)
-                </button>
+              {purchasePrice && Number(purchasePrice) > 0 && (
+                <span className="text-[10px] text-slate-500 font-semibold">
+                  {formatINR(Number(purchasePrice))}
+                </span>
               )}
             </div>
             <input
               type="number"
               inputMode="decimal"
-              step="0.01"
-              placeholder="e.g. 72000"
-              value={currentValuation}
-              onChange={(e) => setCurrentValuation(e.target.value)}
+              step="1"
+              placeholder="e.g. 287716"
+              value={purchasePrice}
+              onChange={(e) => handlePurchasePriceChange(e.target.value)}
               className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
             />
           </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+              Current Market Valuation (₹)
+            </label>
+            {weightGrams && parseFloat(weightGrams) > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const grams = parseFloat(weightGrams) || 0;
+                  const autoVal = Math.round(grams * liveRatePerGram);
+                  setCurrentValuation(String(autoVal));
+                }}
+                className="text-[10.5px] text-amber-600 dark:text-amber-400 hover:underline font-bold"
+              >
+                Auto-compute (Live: {formatINR(liveRatePerGram)}/g ➔ {formatINR(Math.round(parseFloat(weightGrams) * liveRatePerGram))})
+              </button>
+            )}
+          </div>
+          <input
+            type="number"
+            inputMode="decimal"
+            step="1"
+            placeholder="e.g. 781148"
+            value={currentValuation}
+            onChange={(e) => setCurrentValuation(e.target.value)}
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-semibold"
+          />
         </div>
 
         <div>
