@@ -263,3 +263,28 @@ After **any correction** from the user, append a new entry here with the pattern
 **Fix**: Updated `holdings-crud/index.ts` in both `add` and `update` handlers to extract snake_case properties with camelCase fallbacks (`payload.sum_assured ?? payload.sumAssured`), and guarded numeric conversions against `null`/`undefined` before calling `Number()`.  
 **Rule**: Always maintain dual compatibility (snake_case with camelCase fallback) in Edge Function request handlers. Never pass unguarded `Number(payload.field)` directly to database insert/update queries without verifying `val !== undefined && val !== null` to prevent `NaN` values from crashing PostgreSQL operations with HTTP 500 errors.
 
+---
+
+### 2026-09-01 — Edge Function CI/CD Deployment Synchronization
+**Mistake**: Code fixes committed to `supabase/functions/holdings-crud/index.ts` in the git repository were not reflected on the live Supabase server, causing server-side casing mismatches to persist.  
+**Root Cause**: The GitHub Actions CI/CD workflow (`deploy.yml`) only built and deployed the Vite frontend bundle to GitHub Pages — it lacked an automated step to deploy Supabase Edge Functions.  
+**Fix**: Added a dedicated `deploy-edge-functions` job in `.github/workflows/deploy.yml` utilizing `supabase/setup-cli@v1` and `supabase functions deploy holdings-crud --no-verify-jwt` configured with `SUPABASE_ACCESS_TOKEN`.  
+**Rule**: Never assume pushing backend code to git automatically updates live serverless/edge runtimes. Always wire automated Edge Function deployment steps into CI/CD workflows, and ensure client-side modals emit dual-cased payloads (`snake_case` and `camelCase`) so mutations succeed gracefully across all backend versions.
+
+---
+
+### 2026-09-01 — Unbounded Storage File Uploads Blocking UI & Hanging Modals
+**Mistake**: Clicking "Confirm & Save to Portfolio" in Smart AI Import hung indefinitely on *"Saving & Linking..."*.  
+**Root Cause**: (1) Secondary file uploads to the storage bucket lacked an `AbortController` timeout on `fetch`, causing the promise to hang permanently on mobile networks or server worker stalls. (2) Document attachment creation was executed sequentially in the same blocking UI path without a timeout fallback.  
+**Fix**: (1) Added an 8-second `AbortController` timeout to `uploadDocumentFile` in `SupabaseDocumentStorageRepository.ts`. (2) Encapsulated secondary document linking in a non-blocking `Promise.race([uploadPromise, 3500ms])` in `SmartImportModal.tsx` and passed `{ reload: false }` so the primary financial holding is committed immediately and the modal closes without freezing.  
+**Rule**: Never block primary entity creation on optional attachment uploads. Always enforce bounded client-side timeouts (`AbortController` / `Promise.race`) on all binary storage uploads, and allow UI transitions to complete smoothly even if secondary attachment indexing is delayed.
+
+---
+
+### 2026-09-01 — PostgreSQL Date Formatting Syntax & Client Dual-Casing
+**Mistake**: Saving gold holdings or AI-extracted assets failed with `null value in column "weight_grams"` or date syntax errors (`invalid input syntax for type date: "26 Aug 2022"`).  
+**Root Cause**: Frontend forms permitted raw textual date formats (`26 Aug 2022`, `27/08/2022`) and sent single-cased keys, while PostgreSQL strictly requires ISO `YYYY-MM-DD` and non-null numeric values.  
+**Fix**: (1) Added `normalizeToIsoDate` across all form modals and AI extractor handlers to guarantee `YYYY-MM-DD` format. (2) Updated `GoldFormModal.tsx` and `SmartImportModal.tsx` to send dual-cased payloads (`weight_grams` and `weightGrams`, `item_name` and `itemName`, `purchase_price` and `purchasePrice`, `purchase_date` and `purchaseDate`).  
+**Rule**: Always normalize all date inputs to strict ISO `YYYY-MM-DD` before database mutations. Always emit dual-cased payload keys (`snake_case` and `camelCase`) from frontend form handlers and accept both in backend handlers to ensure complete backwards and forwards compatibility.
+
+
