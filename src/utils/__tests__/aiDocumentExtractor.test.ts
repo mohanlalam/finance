@@ -8,6 +8,9 @@ import {
   getModelPreferenceScore,
   fetchAvailableGeminiModels,
   clearDiscoveredModelsCache,
+  normalizeToIsoDate,
+  parseCleanNumber,
+  normalizeExtractedResult,
 } from '../aiDocumentExtractor';
 
 describe('aiDocumentExtractor', () => {
@@ -239,5 +242,79 @@ describe('aiDocumentExtractor', () => {
     expect(result.assetType).toBe('insurance');
     expect(result.data.policyName).toBe('LIC Jeevan Labh');
     expect(result.data.sumAssured).toBe(500000);
+  });
+
+  describe('normalizeToIsoDate', () => {
+    it('converts Indian DD/MM/YYYY dates to ISO YYYY-MM-DD', () => {
+      expect(normalizeToIsoDate('17/10/2026')).toBe('2026-10-17');
+      expect(normalizeToIsoDate('05/01/2025')).toBe('2025-01-05');
+      expect(normalizeToIsoDate('17-10-2026')).toBe('2026-10-17');
+    });
+
+    it('handles already ISO dates', () => {
+      expect(normalizeToIsoDate('2026-10-17')).toBe('2026-10-17');
+      expect(normalizeToIsoDate('2026/10/17')).toBe('2026-10-17');
+    });
+
+    it('returns empty string for null or empty input', () => {
+      expect(normalizeToIsoDate('')).toBe('');
+      expect(normalizeToIsoDate(null)).toBe('');
+      expect(normalizeToIsoDate(undefined)).toBe('');
+    });
+  });
+
+  describe('parseCleanNumber', () => {
+    it('cleans currency symbols, commas and decimals', () => {
+      expect(parseCleanNumber('₹ 1,13,045.00')).toBe(113045);
+      expect(parseCleanNumber('₹ 25,00,000')).toBe(2500000);
+      expect(parseCleanNumber('1,00,000')).toBe(100000);
+      expect(parseCleanNumber(2500000)).toBe(2500000);
+    });
+
+    it('returns undefined for invalid inputs', () => {
+      expect(parseCleanNumber(undefined)).toBeUndefined();
+      expect(parseCleanNumber(null)).toBeUndefined();
+      expect(parseCleanNumber('')).toBeUndefined();
+      expect(parseCleanNumber('N/A')).toBeUndefined();
+    });
+  });
+
+  describe('normalizeExtractedResult for LIC policy documents', () => {
+    it('accurately normalizes LIC Jeevan Labh status report with synonyms', () => {
+      const rawLICPayload = {
+        assetType: 'insurance',
+        confidence: 0.98,
+        title: "LIC's Jeevan Labh",
+        data: {
+          insurer: 'Life Insurance Corporation of India',
+          planName: "LIC's Jeevan Labh",
+          policyNo: '619453640',
+          sumAssured: '₹ 25,00,000',
+          instalmentPremium: '₹ 1,13,045.00',
+          premiumDueFrom: '17/10/2026',
+          commencementDate: '17/10/2019',
+          dateOfMaturity: '17/10/2044',
+          nomineeName: 'L KONDA BABU',
+          nomineeRelation: 'FATHER',
+          policyTerm: 25,
+          premiumPayingTerm: 16,
+          bonus: '₹ 705000.0',
+        },
+      };
+
+      const result = normalizeExtractedResult(rawLICPayload);
+
+      expect(result.assetType).toBe('insurance');
+      expect(result.data.provider).toBe('Life Insurance Corporation of India');
+      expect(result.data.policyName).toBe("LIC's Jeevan Labh");
+      expect(result.data.policyNumber).toBe('619453640');
+      expect(result.data.sumAssured).toBe(2500000);
+      expect(result.data.premiumAmount).toBe(113045);
+      expect(result.data.renewalDate).toBe('2026-10-17');
+      expect(result.data.insuranceType).toBe('life');
+      expect(result.data.notes).toContain('Nominee: L KONDA BABU (FATHER)');
+      expect(result.data.notes).toContain('Policy Term: 25 yrs');
+      expect(result.data.notes).toContain('PPT: 16 yrs');
+    });
   });
 });

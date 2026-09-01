@@ -99,34 +99,110 @@ export async function fileToBase64(file: File): Promise<string> {
   });
 }
 
+/** Converts various Indian and International date formats (DD/MM/YYYY, DD-MM-YYYY, DD MMM YYYY, etc.) to standard ISO YYYY-MM-DD */
+export function normalizeToIsoDate(rawDate?: string | null): string {
+  if (!rawDate || typeof rawDate !== 'string') return '';
+  const trimmed = rawDate.trim();
+  if (!trimmed) return '';
+
+  // Already standard ISO YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+
+  // YYYY/MM/DD
+  if (/^\d{4}\/\d{2}\/\d{2}$/.test(trimmed)) {
+    return trimmed.replace(/\//g, '-');
+  }
+
+  // DD/MM/YYYY or DD-MM-YYYY (e.g. 17/10/2026 or 17-10-2026)
+  const dmyMatch = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (dmyMatch) {
+    const day = dmyMatch[1].padStart(2, '0');
+    const month = dmyMatch[2].padStart(2, '0');
+    const year = dmyMatch[3];
+    return `${year}-${month}-${day}`;
+  }
+
+  // DD/MM/YY or DD-MM-YY (e.g. 17/10/26)
+  const dmyShortMatch = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2})$/);
+  if (dmyShortMatch) {
+    const day = dmyShortMatch[1].padStart(2, '0');
+    const month = dmyShortMatch[2].padStart(2, '0');
+    const shortYear = parseInt(dmyShortMatch[3], 10);
+    const fullYear = shortYear > 50 ? 1900 + shortYear : 2000 + shortYear;
+    return `${fullYear}-${month}-${day}`;
+  }
+
+  // Textual date parsing (e.g. "17 Oct 2026" or "October 17, 2026")
+  const parsed = new Date(trimmed);
+  if (!isNaN(parsed.getTime())) {
+    const y = parsed.getFullYear();
+    const m = String(parsed.getMonth() + 1).padStart(2, '0');
+    const d = String(parsed.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  return '';
+}
+
+/** Cleans currency symbols, commas, spaces and returns clean float number */
+export function parseCleanNumber(val: unknown): number | undefined {
+  if (val === undefined || val === null || val === '') return undefined;
+  if (typeof val === 'number') return isNaN(val) ? undefined : val;
+  if (typeof val === 'string') {
+    const cleaned = val.replace(/[₹$,\s]/g, '').trim();
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? undefined : num;
+  }
+  return undefined;
+}
+
 const EXTRACTION_SYSTEM_PROMPT = `
-You are an expert Indian financial document extraction assistant. 
-Analyze the provided document image or text (which may be a Fixed Deposit Certificate, Recurring Deposit statement, Gold Jewellery Invoice/Receipt, Insurance Policy Document, Mutual Fund/SIP Statement, Stock Contract Note, or Property Sale Deed).
+You are a senior expert Indian financial document extraction assistant.
+Analyze the provided document image or text (which may be a Life/Health/Term Insurance Status Report or Policy Document, Fixed Deposit Certificate, Recurring Deposit Statement, Gold Jewellery Receipt/Invoice, Mutual Fund/SIP Statement, Stock Contract Note, or Property Document).
 
 Identify the financial asset type and extract all relevant structured parameters into clean JSON.
-The "assetType" must be one of: "fd", "rd", "sip", "gold", "real_estate", "insurance", "stocks".
+The "assetType" must be one of: "insurance", "fd", "rd", "sip", "gold", "real_estate", "stocks".
 
-Rules:
-1. All dates must be in standard ISO "YYYY-MM-DD" format.
-2. All financial amounts (Principal, Buy Price, Valuation, Premium, Sum Assured) must be numbers in INR without commas.
-3. For Gold: Extract purity (e.g. "24K", "22K", "18K"), weight in grams, and total price paid.
-4. For Fixed Deposit (FD): Extract bank name, principal amount, interest rate percentage (e.g. 7.1), start date, maturity date, and maturity amount.
-5. For Insurance: Extract policy name, insurance type ("life" | "term" | "health" | "motor" | "home" | "travel"), insurer name, policy number, sum assured, premium, and next renewal date.
-6. Provide a confidence rating between 0.0 and 1.0.
+CRITICAL EXTRACTION RULES:
+1. Dates: Convert ALL Indian date formats (DD/MM/YYYY, DD-MM-YYYY, e.g. "17/10/2026") into ISO format "YYYY-MM-DD" (e.g. "2026-10-17").
+2. Amounts: Extract financial amounts as clean pure numbers in INR without commas, currency symbols (₹), or strings (e.g. "₹ 1,13,045.00" -> 113045, "₹ 25,00,000" -> 2500000).
+3. For Insurance Policies (LIC, HDFC Life, SBI Life, Max Life, ICICI Pru, Star Health, etc.):
+   - "provider": Name of insurance company (e.g. "Life Insurance Corporation of India (LIC)", "HDFC Life", "Star Health Insurance"). Look at the header, logo, or footer.
+   - "policyName": Name of the insurance plan (e.g. "LIC's Jeevan Labh", "HDFC Click 2 Protect").
+   - "insuranceType": One of "life" (Endowment/Money-back/ULIP), "term" (Pure Term Life), "health" (Mediclaim), "motor", or "other".
+   - "policyNumber": The unique policy number (e.g. "619453640").
+   - "sumAssured": Total sum assured/coverage in INR (e.g. 2500000).
+   - "premiumAmount": Annual or instalment premium amount in INR (e.g. 113045). Look for "Instalment Premium", "Amount Due", or "Premium Amount".
+   - "renewalDate": Next premium due date / renewal date in "YYYY-MM-DD" (e.g. "Premium due from: 17/10/2026" -> "2026-10-17").
+   - "notes": Extra details such as Nominee, Policy Term, Premium Paying Term, Maturity Date, Guaranteed Additions (e.g. "Nominee: L KONDA BABU (Father 100%) | Maturity: 2044-10-17 | Policy Term: 25 yrs | PPT: 16 yrs").
+4. For Fixed Deposits (FD):
+   - "bankName": Bank/Institution name (e.g. "State Bank of India", "HDFC Bank").
+   - "principalAmount": Principal deposited in INR.
+   - "interestRate": Annual interest rate percentage (e.g. 7.1).
+   - "startDate": Start/commencement date in "YYYY-MM-DD".
+   - "maturityDate": Maturity date in "YYYY-MM-DD".
+   - "maturityAmount": Total maturity value in INR.
+5. For Gold & Jewellery:
+   - "itemName": Description (e.g. "24K Gold Bar", "22K Gold Necklace").
+   - "purity": "24K", "22K", "18K", or "14K".
+   - "weightGrams": Net weight in grams (e.g. 15.5).
+   - "purchasePrice": Total invoice price in INR.
+   - "purchaseDate": Invoice date in "YYYY-MM-DD".
 
-Respond ONLY with valid, minified JSON matching this exact structure:
+Respond ONLY with valid, minified JSON matching this schema:
 {
-  "assetType": "fd",
-  "confidence": 0.95,
-  "title": "SBI Term Deposit",
+  "assetType": "insurance",
+  "confidence": 0.98,
+  "title": "LIC Jeevan Labh Policy",
   "data": {
-    "bankName": "State Bank of India",
-    "principalAmount": 100000,
-    "interestRate": 7.1,
-    "startDate": "2024-01-15",
-    "maturityDate": "2025-01-15",
-    "maturityAmount": 107293,
-    "notes": "Extracted from SBI FD Receipt"
+    "provider": "Life Insurance Corporation of India (LIC)",
+    "policyName": "LIC's Jeevan Labh",
+    "insuranceType": "life",
+    "policyNumber": "619453640",
+    "sumAssured": 2500000,
+    "premiumAmount": 113045,
+    "renewalDate": "2026-10-17",
+    "notes": "Nominee: L KONDA BABU (Father 100%) | Maturity: 2044-10-17 | Policy Term: 25 yrs | PPT: 16 yrs"
   }
 }
 `;
@@ -218,6 +294,179 @@ export async function fetchAvailableGeminiModels(apiKey: string): Promise<string
   }
 
   return STATIC_FALLBACK_MODELS;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function normalizeExtractedResult(raw: any): ExtractedAssetResult {
+  const assetType: ExtractedAssetResult['assetType'] = [
+    'fd', 'rd', 'sip', 'gold', 'real_estate', 'insurance', 'stocks'
+  ].includes(String(raw.assetType || raw.asset_type || '').toLowerCase())
+    ? (String(raw.assetType || raw.asset_type).toLowerCase() as ExtractedAssetResult['assetType'])
+    : 'fd';
+
+  const rawData = raw.data || raw;
+  const data: ExtractedAssetResult['data'] = {};
+
+  // Bank & Provider normalizations
+  const provider = rawData.provider || rawData.insurer || rawData.insurerName || rawData.insuranceProvider || rawData.insuranceCompany || rawData.company || rawData.institution;
+  if (provider) {
+    data.provider = String(provider).trim();
+  } else if (assetType === 'insurance') {
+    const combined = `${raw.title || ''} ${rawData.policyName || ''} ${rawData.planName || ''}`.toLowerCase();
+    if (combined.includes('lic') || combined.includes('life insurance corporation') || combined.includes('jeevan')) {
+      data.provider = 'Life Insurance Corporation of India (LIC)';
+    }
+  }
+
+  const bankName = rawData.bankName || rawData.bank || rawData.bank_name || rawData.institution || rawData.branchName;
+  if (bankName) data.bankName = String(bankName).trim();
+
+  // Policy & Holding names
+  const policyName = rawData.policyName || rawData.planName || rawData.policy_name || rawData.plan_name || rawData.schemeName || raw.title;
+  if (policyName) data.policyName = String(policyName).trim();
+
+  const policyNumber = rawData.policyNumber || rawData.policyNo || rawData.policy_number || rawData.policy_no || rawData.accountNumber;
+  if (policyNumber) data.policyNumber = String(policyNumber).trim();
+
+  // Insurance type normalization
+  const insType = String(rawData.insuranceType || rawData.insurance_type || rawData.policyType || rawData.type || '').toLowerCase();
+  if (insType) {
+    if (insType.includes('term')) data.insuranceType = 'term';
+    else if (insType.includes('health') || insType.includes('mediclaim')) data.insuranceType = 'health';
+    else if (insType.includes('life') || insType.includes('endowment') || insType.includes('ulip') || insType.includes('jeevan')) data.insuranceType = 'life';
+    else if (insType.includes('motor') || insType.includes('car') || insType.includes('bike') || insType.includes('vehicle')) data.insuranceType = 'motor';
+    else data.insuranceType = 'other';
+  } else if (assetType === 'insurance') {
+    const combined = `${data.policyName || ''} ${data.provider || ''}`.toLowerCase();
+    if (combined.includes('jeevan') || combined.includes('lic') || combined.includes('endowment') || combined.includes('ulip')) {
+      data.insuranceType = 'life';
+    }
+  }
+
+  // Insurance amounts & dates
+  const sumAssured = parseCleanNumber(rawData.sumAssured ?? rawData.sum_assured ?? rawData.sumInsured ?? rawData.coverageAmount ?? rawData.lifeCover);
+  if (sumAssured !== undefined) data.sumAssured = sumAssured;
+
+  const premium = parseCleanNumber(
+    rawData.premiumAmount ?? rawData.premium_amount ?? rawData.premium ?? rawData.instalmentPremium ?? rawData.installmentPremium ?? rawData.annualPremium ?? rawData.amountDue ?? rawData.amount_due
+  );
+  if (premium !== undefined) data.premiumAmount = premium;
+
+  const renewalDate = normalizeToIsoDate(rawData.renewalDate || rawData.renewal_date || rawData.nextRenewalDate || rawData.next_renewal_date || rawData.premiumDueDate || rawData.premiumDueFrom || rawData.premium_due_from || rawData.dueDate);
+  if (renewalDate) data.renewalDate = renewalDate;
+
+  // FD & RD amounts & dates
+  const principal = parseCleanNumber(rawData.principalAmount ?? rawData.principal_amount ?? rawData.principal ?? rawData.depositAmount ?? rawData.amount);
+  if (principal !== undefined) data.principalAmount = principal;
+
+  const monthlyDeposit = parseCleanNumber(rawData.monthlyDeposit ?? rawData.monthly_deposit ?? rawData.monthlyInstallment ?? rawData.installmentAmount);
+  if (monthlyDeposit !== undefined) data.monthlyDeposit = monthlyDeposit;
+
+  const interestRate = parseCleanNumber(rawData.interestRate ?? rawData.interest_rate ?? rawData.rate ?? rawData.roi ?? rawData.interest);
+  if (interestRate !== undefined) data.interestRate = interestRate;
+
+  const maturityAmount = parseCleanNumber(rawData.maturityAmount ?? rawData.maturity_amount ?? rawData.maturityValue ?? rawData.maturity_value);
+  if (maturityAmount !== undefined) data.maturityAmount = maturityAmount;
+
+  const startDate = normalizeToIsoDate(rawData.startDate || rawData.start_date || rawData.commencementDate || rawData.commencement_date || rawData.issueDate || rawData.openDate);
+  if (startDate) data.startDate = startDate;
+
+  const maturityDate = normalizeToIsoDate(rawData.maturityDate || rawData.maturity_date || rawData.dateOfMaturity || rawData.date_of_maturity || rawData.expiryDate);
+  if (maturityDate) data.maturityDate = maturityDate;
+
+  // Gold fields
+  const itemName = rawData.itemName || rawData.item_name || rawData.item || rawData.description || rawData.jewelleryType;
+  if (itemName) data.itemName = String(itemName).trim();
+
+  const purity = rawData.purity || rawData.karat || rawData.goldPurity;
+  if (purity) data.purity = String(purity).trim();
+
+  const weight = parseCleanNumber(rawData.weightGrams ?? rawData.weight_grams ?? rawData.weightInGrams ?? rawData.weight ?? rawData.grams ?? rawData.netWeight);
+  if (weight !== undefined) data.weightGrams = weight;
+
+  const purchasePrice = parseCleanNumber(rawData.purchasePrice ?? rawData.purchase_price ?? rawData.totalAmount ?? rawData.invoiceAmount ?? rawData.price);
+  if (purchasePrice !== undefined) data.purchasePrice = purchasePrice;
+
+  const purchaseDate = normalizeToIsoDate(rawData.purchaseDate || rawData.purchase_date || rawData.invoiceDate || rawData.date);
+  if (purchaseDate) data.purchaseDate = purchaseDate;
+
+  // Real Estate fields
+  const propertyName = rawData.propertyName || rawData.property_name || rawData.property || raw.title;
+  if (propertyName) data.propertyName = String(propertyName).trim();
+  const location = rawData.location || rawData.address || rawData.city;
+  if (location) data.location = String(location).trim();
+  const propType = String(rawData.propertyType || rawData.property_type || '').toLowerCase();
+  if (propType) {
+    if (propType.includes('villa') || propType.includes('house')) data.propertyType = 'villa';
+    else if (propType.includes('plot') || propType.includes('land')) data.propertyType = 'plot';
+    else if (propType.includes('commercial')) data.propertyType = 'commercial';
+    else data.propertyType = 'apartment';
+  }
+
+  // Mutual Fund / Stocks fields
+  const fundName = rawData.fundName || rawData.fund_name || rawData.schemeName || rawData.scheme;
+  if (fundName) data.fundName = String(fundName).trim();
+
+  const stockName = rawData.stockName || rawData.stock_name || rawData.companyName || rawData.securityName;
+  if (stockName) data.stockName = String(stockName).trim();
+
+  const ticker = rawData.ticker || rawData.symbol;
+  if (ticker) data.ticker = String(ticker).trim();
+
+  const qty = parseCleanNumber(rawData.qty ?? rawData.quantity ?? rawData.units ?? rawData.shares);
+  if (qty !== undefined) data.qty = qty;
+
+  const avgPrice = parseCleanNumber(rawData.avgPrice ?? rawData.avg_price ?? rawData.buyPrice ?? rawData.nav);
+  if (avgPrice !== undefined) data.avgPrice = avgPrice;
+
+  const monthlySip = parseCleanNumber(rawData.monthlySip ?? rawData.monthly_sip ?? rawData.sipAmount);
+  if (monthlySip !== undefined) data.monthlySip = monthlySip;
+
+  // Notes & extra details synthesis
+  const notesList: string[] = [];
+  if (rawData.notes) notesList.push(String(rawData.notes));
+  if (rawData.nominee || rawData.nomineeName) {
+    const nom = rawData.nominee || rawData.nomineeName;
+    const rel = rawData.nomineeRelation || rawData.relation ? ` (${rawData.nomineeRelation || rawData.relation})` : '';
+    notesList.push(`Nominee: ${nom}${rel}`);
+  }
+  if (rawData.policyTerm || rawData.policy_term) {
+    notesList.push(`Policy Term: ${rawData.policyTerm || rawData.policy_term} yrs`);
+  }
+  if (rawData.premiumPayingTerm || rawData.premium_paying_term) {
+    notesList.push(`PPT: ${rawData.premiumPayingTerm || rawData.premium_paying_term} yrs`);
+  }
+  if (rawData.bonus || rawData.guaranteedAddition) {
+    notesList.push(`Bonus/Addition: ${rawData.bonus || rawData.guaranteedAddition}`);
+  }
+  if (notesList.length > 0) {
+    data.notes = notesList.join(' | ');
+  }
+
+  // Bounds clamping
+  if (data.principalAmount !== undefined) data.principalAmount = Math.max(0, Math.min(data.principalAmount, 100_000_000));
+  if (data.monthlyDeposit !== undefined) data.monthlyDeposit = Math.max(0, Math.min(data.monthlyDeposit, 10_000_000));
+  if (data.interestRate !== undefined) data.interestRate = Math.max(0, Math.min(data.interestRate, 50));
+  if (data.maturityAmount !== undefined) data.maturityAmount = Math.max(0, Math.min(data.maturityAmount, 200_000_000));
+  if (data.weightGrams !== undefined) data.weightGrams = Math.max(0, Math.min(data.weightGrams, 50_000));
+  if (data.purchasePrice !== undefined) data.purchasePrice = Math.max(0, Math.min(data.purchasePrice, 1_000_000_000));
+  if (data.currentValuation !== undefined) data.currentValuation = Math.max(0, Math.min(data.currentValuation, 1_000_000_000));
+  if (data.sumAssured !== undefined) data.sumAssured = Math.max(0, Math.min(data.sumAssured, 500_000_000));
+  if (data.premiumAmount !== undefined) data.premiumAmount = Math.max(0, Math.min(data.premiumAmount, 10_000_000));
+  if (data.qty !== undefined) data.qty = Math.max(0, Math.min(data.qty, 10_000_000));
+  if (data.avgPrice !== undefined) data.avgPrice = Math.max(0, Math.min(data.avgPrice, 100_000_000));
+  if (data.monthlySip !== undefined) data.monthlySip = Math.max(0, Math.min(data.monthlySip, 10_000_000));
+  if (data.expectedCagr !== undefined) data.expectedCagr = Math.max(0, Math.min(data.expectedCagr, 100));
+
+  const confidence = typeof raw.confidence === 'number' ? Math.max(0, Math.min(raw.confidence, 1)) : 0.95;
+  const title = raw.title || data.policyName || data.bankName || data.itemName || data.fundName || data.stockName || 'Imported Asset';
+
+  return {
+    assetType,
+    confidence,
+    title,
+    data,
+  };
 }
 
 export async function extractAssetFromDocument(
@@ -315,28 +564,8 @@ export async function extractAssetFromDocument(
       cleanJson = cleanJson.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
     }
 
-    const parsed = JSON.parse(cleanJson) as ExtractedAssetResult;
-    if (!parsed.assetType || !parsed.data) {
-      throw new Error('Incomplete data parsed from document.');
-    }
-
-    // Bounds clamping and numeric validation
-    const d = parsed.data;
-    if (d.principalAmount !== undefined) d.principalAmount = Math.max(0, Math.min(Number(d.principalAmount) || 0, 100_000_000));
-    if (d.monthlyDeposit !== undefined) d.monthlyDeposit = Math.max(0, Math.min(Number(d.monthlyDeposit) || 0, 10_000_000));
-    if (d.interestRate !== undefined) d.interestRate = Math.max(0, Math.min(Number(d.interestRate) || 0, 50));
-    if (d.maturityAmount !== undefined) d.maturityAmount = Math.max(0, Math.min(Number(d.maturityAmount) || 0, 200_000_000));
-    if (d.weightGrams !== undefined) d.weightGrams = Math.max(0, Math.min(Number(d.weightGrams) || 0, 50_000));
-    if (d.purchasePrice !== undefined) d.purchasePrice = Math.max(0, Math.min(Number(d.purchasePrice) || 0, 1_000_000_000));
-    if (d.currentValuation !== undefined) d.currentValuation = Math.max(0, Math.min(Number(d.currentValuation) || 0, 1_000_000_000));
-    if (d.sumAssured !== undefined) d.sumAssured = Math.max(0, Math.min(Number(d.sumAssured) || 0, 500_000_000));
-    if (d.premiumAmount !== undefined) d.premiumAmount = Math.max(0, Math.min(Number(d.premiumAmount) || 0, 10_000_000));
-    if (d.qty !== undefined) d.qty = Math.max(0, Math.min(Number(d.qty) || 0, 10_000_000));
-    if (d.avgPrice !== undefined) d.avgPrice = Math.max(0, Math.min(Number(d.avgPrice) || 0, 100_000_000));
-    if (d.monthlySip !== undefined) d.monthlySip = Math.max(0, Math.min(Number(d.monthlySip) || 0, 10_000_000));
-    if (d.expectedCagr !== undefined) d.expectedCagr = Math.max(0, Math.min(Number(d.expectedCagr) || 0, 100));
-
-    return parsed;
+    const rawParsed = JSON.parse(cleanJson);
+    return normalizeExtractedResult(rawParsed);
   } catch {
     throw new Error('Failed to parse AI extraction output. Please verify the document is legible.');
   }
