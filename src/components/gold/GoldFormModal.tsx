@@ -4,6 +4,7 @@ import Modal from '../Modal';
 import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
 import { uploadDocumentFile, generateDocumentStoragePath } from '../../utils/supabaseStorage';
 import { calculateGoldValuation, DEFAULT_GOLD_RATE_24K } from '../../domains/assets/gold/calculations/goldValuation';
+import { normalizeToIsoDate } from '../../utils/aiDocumentExtractor';
 
 interface PortfolioOption {
   name: string;
@@ -106,13 +107,19 @@ export const GoldFormModal = React.memo(function GoldFormModal({
     setError(null);
     try {
       let assetId: string | undefined;
+      const cleanDate = normalizeToIsoDate(purchaseDate) || undefined;
       const payload = {
         item_name: itemName.trim(),
+        itemName: itemName.trim(),
         purity,
         weight_grams: grams,
-        purchase_price: purchasePrice ? parseFloat(purchasePrice) : undefined,
-        current_valuation: currentValuation ? parseFloat(currentValuation) : undefined,
-        purchase_date: purchaseDate || undefined,
+        weightGrams: grams,
+        purchase_price: buyPrice,
+        purchasePrice: buyPrice,
+        current_valuation: currVal ?? buyPrice,
+        currentValuation: currVal ?? buyPrice,
+        purchase_date: cleanDate,
+        purchaseDate: cleanDate,
         notes: notes.trim() || undefined,
       };
 

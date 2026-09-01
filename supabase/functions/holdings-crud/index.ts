@@ -334,16 +334,22 @@ Deno.serve(async (req: Request) => {
         insertData = res.data;
         insertError = res.error;
       } else if (asset_type === "gold" || asset_type === "gold_holding") {
+        const item_name = payload.item_name ?? payload.itemName ?? '';
+        const weight_grams = payload.weight_grams ?? payload.weightGrams;
+        const purchase_price = payload.purchase_price ?? payload.purchasePrice;
+        const current_valuation = payload.current_valuation ?? payload.currentValuation ?? purchase_price;
+        const purchase_date = payload.purchase_date ?? payload.purchaseDate;
+
         const res = await supabase
           .from("gold_holdings")
           .insert({
             portfolio_id: portfolio.id,
-            item_name: String(payload.itemName || '').slice(0, 150),
-            purity: payload.purity,
-            weight_grams: Number(payload.weightGrams),
-            purchase_price: Number(payload.purchasePrice),
-            current_valuation: Number(payload.currentValuation ?? payload.purchasePrice),
-            purchase_date: payload.purchaseDate,
+            item_name: String(item_name).slice(0, 150),
+            purity: payload.purity || "24K",
+            weight_grams: Number(weight_grams) || 0,
+            purchase_price: purchase_price !== undefined && purchase_price !== null ? Number(purchase_price) : 0,
+            current_valuation: current_valuation !== undefined && current_valuation !== null ? Number(current_valuation) : (Number(purchase_price) || 0),
+            purchase_date: purchase_date || null,
             notes: payload.notes ? String(payload.notes).slice(0, 1000) : null,
           })
           .select()
@@ -475,12 +481,17 @@ Deno.serve(async (req: Request) => {
         if (payload.notes !== undefined) updates.notes = payload.notes;
       } else if (asset_type === "gold" || asset_type === "gold_holding") {
         table = "gold_holdings";
-        if (payload.itemName !== undefined) updates.item_name = payload.itemName;
+        const upd_name = payload.item_name ?? payload.itemName;
+        const upd_grams = payload.weight_grams ?? payload.weightGrams;
+        const upd_price = payload.purchase_price ?? payload.purchasePrice;
+        const upd_val = payload.current_valuation ?? payload.currentValuation;
+        const upd_date = payload.purchase_date ?? payload.purchaseDate;
+        if (upd_name !== undefined) updates.item_name = upd_name;
         if (payload.purity !== undefined) updates.purity = payload.purity;
-        if (payload.weightGrams !== undefined) updates.weight_grams = Number(payload.weightGrams);
-        if (payload.purchasePrice !== undefined) updates.purchase_price = Number(payload.purchasePrice);
-        if (payload.currentValuation !== undefined) updates.current_valuation = Number(payload.currentValuation);
-        if (payload.purchaseDate !== undefined) updates.purchase_date = payload.purchaseDate;
+        if (upd_grams !== undefined) updates.weight_grams = Number(upd_grams);
+        if (upd_price !== undefined) updates.purchase_price = Number(upd_price);
+        if (upd_val !== undefined) updates.current_valuation = Number(upd_val);
+        if (upd_date !== undefined) updates.purchase_date = upd_date;
         if (payload.notes !== undefined) updates.notes = payload.notes;
       } else if (asset_type === "real_estate") {
         table = "real_estate";
