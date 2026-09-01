@@ -73,11 +73,16 @@ jobs:
           version: latest
 
       - name: Deploy Edge Functions
-        run: supabase functions deploy holdings-crud --no-verify-jwt
+        if: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' }}
+        run: |
+          supabase functions deploy holdings-crud --project-ref fkiqpjvzydmqdsuufdpc --no-verify-jwt
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          PROJECT_REF: fkiqpjvzydmqdsuufdpc
+
+      - name: Notify if SUPABASE_ACCESS_TOKEN missing
+        if: ${{ secrets.SUPABASE_ACCESS_TOKEN == '' }}
+        run: |
+          echo "::warning::SUPABASE_ACCESS_TOKEN secret is not set in GitHub repository secrets. Edge functions were not deployed automatically. To enable auto-deploy, add SUPABASE_ACCESS_TOKEN in GitHub Repo Settings -> Secrets and variables -> Actions."
 
   deploy:
     environment:
