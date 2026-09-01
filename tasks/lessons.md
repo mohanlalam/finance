@@ -265,11 +265,11 @@ After **any correction** from the user, append a new entry here with the pattern
 
 ---
 
-### 2026-09-01 — Edge Function CI/CD Deployment Synchronization
-**Mistake**: Code fixes committed to `supabase/functions/holdings-crud/index.ts` in the git repository were not reflected on the live Supabase server, causing server-side casing mismatches to persist.  
-**Root Cause**: The GitHub Actions CI/CD workflow (`deploy.yml`) only built and deployed the Vite frontend bundle to GitHub Pages — it lacked an automated step to deploy Supabase Edge Functions.  
-**Fix**: Added a dedicated `deploy-edge-functions` job in `.github/workflows/deploy.yml` utilizing `supabase/setup-cli@v1` and `supabase functions deploy holdings-crud --no-verify-jwt` configured with `SUPABASE_ACCESS_TOKEN`.  
-**Rule**: Never assume pushing backend code to git automatically updates live serverless/edge runtimes. Always wire automated Edge Function deployment steps into CI/CD workflows, and ensure client-side modals emit dual-cased payloads (`snake_case` and `camelCase`) so mutations succeed gracefully across all backend versions.
+### 2026-09-01 — Edge Function CI/CD Deployment Synchronization & GitHub Actions Secret Scope
+**Mistake**: (1) Edge Function fixes committed to the repository were not reflected on the live Supabase server because `deploy.yml` only built the frontend. (2) Adding `if: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' }}` at the job level failed with `Unrecognized named-value: 'secrets'`.  
+**Root Cause**: (1) The CI/CD workflow lacked an Edge Function deployment step. (2) GitHub Actions does not expose the `secrets` context to job-level `if:` expressions for security reasons (it is only available within `steps` and environment blocks).  
+**Fix**: Added `deploy-edge-functions` to `.github/workflows/deploy.yml` using `supabase functions deploy --project-ref fkiqpjvzydmqdsuufdpc --no-verify-jwt` with `continue-on-error: true`, and safely checked `[ -z "$SUPABASE_ACCESS_TOKEN" ]` inside the bash step script.  
+**Rule**: Never use `${{ secrets.* }}` in job-level `if:` conditions in GitHub Actions workflows. Always perform secret presence checks inside step scripts or step-level `if:` conditions. Always wire automated Edge Function deployments with fallback resilience so optional infrastructure syncs never break frontend build pipelines.
 
 ---
 
