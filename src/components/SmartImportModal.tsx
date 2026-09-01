@@ -47,7 +47,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ isOpen, onCl
   } = useSmartImportPipeline({
     isOpen,
     onClose,
-    activePortfolio: activePortfolio?.name || 'Personal',
+    activePortfolio: activePortfolio?.name || (portfolios[0]?.name || ''),
     portfolios,
     addAsset,
     loadPortfolios: load,

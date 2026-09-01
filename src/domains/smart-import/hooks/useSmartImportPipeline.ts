@@ -86,7 +86,15 @@ export function useSmartImportPipeline({
 
   const [extractedResult, setExtractedResult] = useState<SmartImportExtractionResult | null>(null);
   const [formData, setFormData] = useState<SmartImportFormData>(INITIAL_FORM_DATA);
-  const [targetPortfolio, setTargetPortfolio] = useState<string>(activePortfolio || 'Personal');
+
+  const resolveValidPortfolio = useCallback((): string => {
+    if (activePortfolio && activePortfolio !== 'all' && portfolios.some((p) => p.name === activePortfolio)) {
+      return activePortfolio;
+    }
+    return portfolios.length > 0 ? portfolios[0].name : 'Personal';
+  }, [activePortfolio, portfolios]);
+
+  const [targetPortfolio, setTargetPortfolio] = useState<string>(() => resolveValidPortfolio());
   const [duplicateMatch, setDuplicateMatch] = useState<DuplicateMatch | null>(null);
   const [dismissedDuplicate, setDismissedDuplicate] = useState(false);
 
@@ -108,15 +116,16 @@ export function useSmartImportPipeline({
     setDismissedDuplicate(false);
     setSaveStep('IDLE');
     setSaveMessage('');
+    setTargetPortfolio(resolveValidPortfolio());
     portfolioSyncService.reset();
-  }, []);
+  }, [resolveValidPortfolio]);
 
   useEffect(() => {
     if (isOpen) {
       resetAllState();
-      setTargetPortfolio(activePortfolio && activePortfolio !== 'all' ? activePortfolio : 'Personal');
+      setTargetPortfolio(resolveValidPortfolio());
     }
-  }, [isOpen, activePortfolio, resetAllState]);
+  }, [isOpen, resolveValidPortfolio, resetAllState]);
 
   // Live spot rates
   const goldRates = useMemo(() => deriveGoldRates(), []);
