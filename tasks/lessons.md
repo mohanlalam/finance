@@ -287,4 +287,12 @@ After **any correction** from the user, append a new entry here with the pattern
 **Fix**: (1) Added `normalizeToIsoDate` across all form modals and AI extractor handlers to guarantee `YYYY-MM-DD` format. (2) Updated `GoldFormModal.tsx` and `SmartImportModal.tsx` to send dual-cased payloads (`weight_grams` and `weightGrams`, `item_name` and `itemName`, `purchase_price` and `purchasePrice`, `purchase_date` and `purchaseDate`).  
 **Rule**: Always normalize all date inputs to strict ISO `YYYY-MM-DD` before database mutations. Always emit dual-cased payload keys (`snake_case` and `camelCase`) from frontend form handlers and accept both in backend handlers to ensure complete backwards and forwards compatibility.
 
+---
+
+### 2026-09-01 — Synchronous Data Mutation Reload Blocking Modal Dismissal
+**Mistake**: Smart AI Import modal remained stuck showing "Saving & Linking..." even after asset insert succeeded on Supabase.  
+**Root Cause**: `usePortfolioMutation`'s `addAsset` defaulted to awaiting a full portfolio reload (`await onReload()`) which triggered a full SWR `load()` / `holdings-crud?action=list` network query. While awaiting the 3–15 second network query, `isSaving` stayed `true`, preventing the modal from closing and making the UI appear completely frozen.  
+**Fix**: Added `{ reload: false }` option to `addAsset` calls inside `SmartImportModal.tsx` so the modal dismisses immediately with a success toast upon mutation completion, and fires background synchronization (`void load()`) non-blockingly afterwards.  
+**Rule**: Never await full data re-fetch/list queries inside interactive modal submit handlers when local state or toasts can confirm immediate success. Always pass `{ reload: false }` or trigger background query revalidation (`void load()`) to keep UI interactions instant and non-blocking.
+
 
