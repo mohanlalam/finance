@@ -3,6 +3,7 @@ import { SmartImportFormData, SmartImportExtractionResult, DuplicateMatch } from
 import { ImportConfidenceBadge } from './ImportConfidenceBadge';
 import { DuplicateWarningBanner } from './DuplicateWarningBanner';
 import { formatINR } from '../../utils/formatters';
+import { Sparkles } from '../icons/AppIcons';
 
 interface ImportReviewFormProps {
   assetType: string;
@@ -252,6 +253,64 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
               />
             </div>
           </div>
+
+          {/* One-Tap Ambiguity Quick Selector */}
+          {formData.weightGrams && parseFloat(formData.weightGrams) > 1 && formData.purchasePrice && parseFloat(formData.purchasePrice) > 1000 && parseFloat(formData.purchasePrice) <= 40000 && (
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 space-y-2 animate-fade-in">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400">
+                <Sparkles size={14} />
+                <span>Price Ambiguity Detected for ₹{parseFloat(formData.purchasePrice).toLocaleString('en-IN')}</span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                Is ₹{parseFloat(formData.purchasePrice).toLocaleString('en-IN')} the price per gram, or the total purchase cost?
+              </p>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const g = parseFloat(formData.weightGrams) || 1;
+                    const rate = parseFloat(formData.purchasePrice) || 0;
+                    const total = Math.round(rate * g);
+                    onFormChange((prev) => ({
+                      ...prev,
+                      purchasePrice: String(total),
+                      purchasePriceType: 'per_gram',
+                    }));
+                  }}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all text-left ${
+                    formData.purchasePriceType === 'per_gram'
+                      ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
+                      : 'bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-300 border-amber-500/30 hover:bg-amber-50 dark:hover:bg-amber-950/30'
+                  }`}
+                >
+                  <div className="font-bold">🔘 ₹{parseFloat(formData.purchasePrice).toLocaleString('en-IN')}/g Rate</div>
+                  <div className="text-[10px] opacity-80">
+                    Total: ₹{Math.round((parseFloat(formData.purchasePrice) || 0) * (parseFloat(formData.weightGrams) || 1)).toLocaleString('en-IN')}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onFormChange((prev) => ({
+                      ...prev,
+                      purchasePriceType: 'total',
+                    }));
+                  }}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all text-left ${
+                    formData.purchasePriceType === 'total'
+                      ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
+                      : 'bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-300 border-amber-500/30 hover:bg-amber-50 dark:hover:bg-amber-950/30'
+                  }`}
+                >
+                  <div className="font-bold">🔘 ₹{parseFloat(formData.purchasePrice).toLocaleString('en-IN')} Total Cost</div>
+                  <div className="text-[10px] opacity-80">
+                    Rate: ₹{Math.round((parseFloat(formData.purchasePrice) || 0) / (parseFloat(formData.weightGrams) || 1)).toLocaleString('en-IN')}/g
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
