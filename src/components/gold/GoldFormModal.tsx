@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
 import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
@@ -56,8 +56,8 @@ export const GoldFormModal = React.memo(function GoldFormModal({
 
   const createdAssetIdRef = useRef<string | null>(null);
 
-  // Derive live market rates for purity
-  const liveRates = deriveGoldRates();
+  // Derive live market rates for purity (memoized to prevent re-render loops)
+  const liveRates = useMemo(() => deriveGoldRates(), []);
   const getRateForPurity = useCallback((p: string) => {
     if (p === '22K') return liveRates.rate22kPerGram;
     if (p === '18K') return liveRates.rate18kPerGram;
@@ -68,6 +68,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
   const liveRatePerGram = getRateForPurity(purity);
 
   useEffect(() => {
+    if (!isOpen) return;
     createdAssetIdRef.current = null;
     if (editingHolding) {
       const g = Number(editingHolding.weight_grams) || 0;
@@ -115,7 +116,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
     }
     setPendingFiles([]);
     setError(null);
-  }, [editingHolding, portfolioName, isOpen, getRateForPurity]);
+  }, [isOpen, editingHolding, portfolioName, getRateForPurity]);
 
   // Handle purity change and automatically recompute live market valuation
   const handlePurityChange = (newPurity: GoldHolding['purity']) => {
@@ -173,7 +174,8 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       return;
     }
 
-    let buyPrice = purchasePrice ? parseFloat(purchasePrice) : undefined;
+    const rateGram = parseFloat(ratePerGram);
+    let buyPrice = purchasePrice ? parseFloat(purchasePrice) : (!isNaN(rateGram) && rateGram > 0 ? Math.round(rateGram * grams) : undefined);
     if (buyPrice !== undefined && (isNaN(buyPrice) || buyPrice < 0 || buyPrice > 1_000_000_000)) {
       setError('Purchase price must be up to ₹100 Crore');
       return;
