@@ -369,17 +369,25 @@ Deno.serve(async (req: Request) => {
         insertData = res.data;
         insertError = res.error;
       } else if (asset_type === "insurance") {
+        // Client sends snake_case keys; support both for backward compat
+        const ins_type = payload.insurance_type ?? payload.insuranceType;
+        const ins_provider = payload.provider;
+        const ins_policy_name = payload.policy_name ?? payload.policyName;
+        const ins_policy_number = payload.policy_number ?? payload.policyNumber;
+        const ins_sum_assured = payload.sum_assured ?? payload.sumAssured;
+        const ins_premium_amount = payload.premium_amount ?? payload.premiumAmount;
+        const ins_renewal_date = payload.renewal_date ?? payload.renewalDate;
         const res = await supabase
           .from("insurances")
           .insert({
             portfolio_id: portfolio.id,
-            insurance_type: payload.insuranceType,
-            provider: String(payload.provider || '').slice(0, 100),
-            policy_name: String(payload.policyName || '').slice(0, 150),
-            policy_number: String(payload.policyNumber || '').slice(0, 80),
-            sum_assured: Number(payload.sumAssured),
-            premium_amount: Number(payload.premiumAmount),
-            renewal_date: payload.renewalDate,
+            insurance_type: ins_type,
+            provider: String(ins_provider || '').slice(0, 100),
+            policy_name: String(ins_policy_name || '').slice(0, 150),
+            policy_number: String(ins_policy_number || '').slice(0, 80),
+            sum_assured: ins_sum_assured !== undefined && ins_sum_assured !== null ? Number(ins_sum_assured) : null,
+            premium_amount: ins_premium_amount !== undefined && ins_premium_amount !== null ? Number(ins_premium_amount) : null,
+            renewal_date: ins_renewal_date || null,
             notes: payload.notes ? String(payload.notes).slice(0, 1000) : null,
           })
           .select()
@@ -486,13 +494,20 @@ Deno.serve(async (req: Request) => {
         if (payload.notes !== undefined) updates.notes = payload.notes;
       } else if (asset_type === "insurance") {
         table = "insurances";
-        if (payload.insuranceType !== undefined) updates.insurance_type = payload.insuranceType;
+        // Client sends snake_case; support both for backward compat
+        const upd_type = payload.insurance_type ?? payload.insuranceType;
+        const upd_policyName = payload.policy_name ?? payload.policyName;
+        const upd_policyNumber = payload.policy_number ?? payload.policyNumber;
+        const upd_sumAssured = payload.sum_assured ?? payload.sumAssured;
+        const upd_premiumAmount = payload.premium_amount ?? payload.premiumAmount;
+        const upd_renewalDate = payload.renewal_date ?? payload.renewalDate;
+        if (upd_type !== undefined) updates.insurance_type = upd_type;
         if (payload.provider !== undefined) updates.provider = payload.provider;
-        if (payload.policyName !== undefined) updates.policy_name = payload.policyName;
-        if (payload.policyNumber !== undefined) updates.policy_number = payload.policyNumber;
-        if (payload.sumAssured !== undefined) updates.sum_assured = Number(payload.sumAssured);
-        if (payload.premiumAmount !== undefined) updates.premium_amount = Number(payload.premiumAmount);
-        if (payload.renewalDate !== undefined) updates.renewal_date = payload.renewalDate;
+        if (upd_policyName !== undefined) updates.policy_name = upd_policyName;
+        if (upd_policyNumber !== undefined) updates.policy_number = upd_policyNumber;
+        if (upd_sumAssured !== undefined) updates.sum_assured = Number(upd_sumAssured);
+        if (upd_premiumAmount !== undefined) updates.premium_amount = Number(upd_premiumAmount);
+        if (upd_renewalDate !== undefined) updates.renewal_date = upd_renewalDate;
         if (payload.notes !== undefined) updates.notes = payload.notes;
       } else if (asset_type === "document") {
         table = "documents";
