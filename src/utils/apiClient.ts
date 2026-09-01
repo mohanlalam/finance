@@ -112,7 +112,11 @@ function friendlyError(status: number, fallback: string): AppApiError {
   }
 
   if (status >= 500) {
-    return new AppApiError('Database service is temporarily unavailable. Please try again.', 'server', {
+    const errorMsg =
+      fallback && fallback !== 'Internal Server Error' && !fallback.includes('<!DOCTYPE') && !fallback.includes('<html')
+        ? fallback
+        : 'Database service is temporarily unavailable. Please try again.';
+    return new AppApiError(errorMsg, 'server', {
       status,
       rawMessage: fallback,
     });

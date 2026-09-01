@@ -11,8 +11,8 @@ import {
 } from './icons/AppIcons';
 import Modal from './Modal';
 import { Button } from './ui/Button';
-import { extractAssetFromDocument, getGeminiApiKey, setStoredGeminiApiKey, ExtractedAssetResult } from '../utils/aiDocumentExtractor';
-import { uploadDocumentFile, removeDocumentFiles, generateDocumentStoragePath } from '../utils/supabaseStorage';
+import { extractAssetFromDocument, getGeminiApiKey, setStoredGeminiApiKey, normalizeToIsoDate, ExtractedAssetResult } from '../utils/aiDocumentExtractor';
+import { uploadDocumentFile, generateDocumentStoragePath } from '../utils/supabaseStorage';
 import { usePortfolioActions, usePortfolioEntities } from '../contexts/PortfolioContext';
 
 interface SmartImportModalProps {
@@ -243,8 +243,8 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           bank_name: formData.bankName.trim() || 'Unknown Bank',
           principal_amount: principal,
           interest_rate: rate,
-          start_date: formData.startDate || new Date().toISOString().split('T')[0],
-          maturity_date: formData.maturityDate || null,
+          start_date: normalizeToIsoDate(formData.startDate) || new Date().toISOString().split('T')[0],
+          maturity_date: normalizeToIsoDate(formData.maturityDate) || null,
           maturity_amount: maturityAmt,
           status: 'active',
           notes: formData.notes,
@@ -257,8 +257,8 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           bank_name: formData.bankName.trim() || 'Unknown Bank',
           monthly_deposit: monthly,
           interest_rate: rate,
-          start_date: formData.startDate || new Date().toISOString().split('T')[0],
-          maturity_date: formData.maturityDate || formData.startDate || new Date().toISOString().split('T')[0],
+          start_date: normalizeToIsoDate(formData.startDate) || new Date().toISOString().split('T')[0],
+          maturity_date: normalizeToIsoDate(formData.maturityDate) || normalizeToIsoDate(formData.startDate) || new Date().toISOString().split('T')[0],
           maturity_amount: Number(formData.maturityAmount) || monthly * 12,
           status: 'active',
           notes: formData.notes,
@@ -272,7 +272,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           weight_grams: Number(formData.weightGrams) || 0,
           purchase_price: pPrice,
           current_valuation: Number(formData.currentValuation) || pPrice,
-          purchase_date: formData.purchaseDate,
+          purchase_date: normalizeToIsoDate(formData.purchaseDate) || new Date().toISOString().split('T')[0],
           notes: formData.notes,
         });
         createdAssetId = res?.id;
@@ -284,7 +284,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           policy_number: formData.policyNumber.trim() || undefined,
           sum_assured: Number(formData.sumAssured) || 0,
           premium_amount: Number(formData.premiumAmount) || 0,
-          renewal_date: formData.renewalDate || undefined,
+          renewal_date: normalizeToIsoDate(formData.renewalDate) || undefined,
           notes: formData.notes,
         });
         createdAssetId = res?.id;
@@ -296,7 +296,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           location: formData.location.trim() || undefined,
           purchase_price: pPrice,
           current_valuation: Number(formData.currentValuation) || pPrice,
-          purchase_date: formData.startDate || formData.purchaseDate,
+          purchase_date: normalizeToIsoDate(formData.startDate || formData.purchaseDate) || new Date().toISOString().split('T')[0],
           monthly_rent: 0,
           notes: formData.notes,
         });
@@ -308,7 +308,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           monthly_sip: monthlySip,
           expected_cagr: Number(formData.expectedCagr) || 12,
           units: 0,
-          start_date: formData.startDate || new Date().toISOString().split('T')[0],
+          start_date: normalizeToIsoDate(formData.startDate) || new Date().toISOString().split('T')[0],
           fallback_valuation: monthlySip * 12,
           notes: formData.notes,
         });
@@ -328,23 +328,22 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
         createdAssetId = res?.id;
       }
 
-      // 2. Upload file to Supabase storage and link to Document Vault
-      const storagePath = generateDocumentStoragePath(targetPortfolio, assetType, file.name);
-      await uploadDocumentFile('investment-documents', storagePath, file);
-
-      try {
-        await addAsset('document', targetPortfolio, {
-          name: `${formData.bankName || formData.policyName || formData.propertyName || formData.itemName || file.name}`,
-          filePath: storagePath,
-          fileType: file.type || 'application/pdf',
-          linkedAssetType: assetType,
-          linkedAssetId: createdAssetId || null,
-          expiryDate: formData.maturityDate || formData.renewalDate || null,
-        });
-      } catch (docErr) {
-        // Rollback: remove physical file from storage so it doesn't get orphaned
-        await removeDocumentFiles('investment-documents', [storagePath]).catch(() => {});
-        throw docErr;
+      // 2. Upload file to Supabase storage and link to Document Vault (graceful fallback)
+      if (file) {
+        try {
+          const storagePath = generateDocumentStoragePath(targetPortfolio, assetType, file.name);
+          await uploadDocumentFile('investment-documents', storagePath, file);
+          await addAsset('document', targetPortfolio, {
+            name: `${formData.bankName || formData.policyName || formData.propertyName || formData.itemName || file.name}`,
+            filePath: storagePath,
+            fileType: file.type || 'application/pdf',
+            linkedAssetType: assetType,
+            linkedAssetId: createdAssetId || null,
+            expiryDate: normalizeToIsoDate(formData.maturityDate || formData.renewalDate) || null,
+          });
+        } catch (storageErr) {
+          console.warn('[smart-import] Document file upload skipped/failed:', storageErr);
+        }
       }
 
       onClose();
