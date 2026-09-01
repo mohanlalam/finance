@@ -239,79 +239,130 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
         const principal = Number(formData.principalAmount) || 0;
         const rate = Number(formData.interestRate) || 0;
         const maturityAmt = Number(formData.maturityAmount) || principal * (1 + (rate * 0.01));
+        const sDate = normalizeToIsoDate(formData.startDate) || new Date().toISOString().split('T')[0];
+        const mDate = normalizeToIsoDate(formData.maturityDate) || null;
         const res = await addAsset('fd', targetPortfolio, {
           bank_name: formData.bankName.trim() || 'Unknown Bank',
+          bankName: formData.bankName.trim() || 'Unknown Bank',
           principal_amount: principal,
+          principalAmount: principal,
           interest_rate: rate,
-          start_date: normalizeToIsoDate(formData.startDate) || new Date().toISOString().split('T')[0],
-          maturity_date: normalizeToIsoDate(formData.maturityDate) || null,
+          interestRate: rate,
+          start_date: sDate,
+          startDate: sDate,
+          maturity_date: mDate,
+          maturityDate: mDate,
           maturity_amount: maturityAmt,
+          maturityAmount: maturityAmt,
           status: 'active',
           notes: formData.notes,
-        });
+        } as unknown as import('../types/portfolio').AssetPayload);
         createdAssetId = res?.id;
       } else if (assetType === 'rd') {
         const monthly = Number(formData.monthlyDeposit) || 0;
         const rate = Number(formData.interestRate) || 0;
+        const sDate = normalizeToIsoDate(formData.startDate) || new Date().toISOString().split('T')[0];
+        const mDate = normalizeToIsoDate(formData.maturityDate) || sDate;
         const res = await addAsset('rd', targetPortfolio, {
           bank_name: formData.bankName.trim() || 'Unknown Bank',
+          bankName: formData.bankName.trim() || 'Unknown Bank',
           monthly_deposit: monthly,
+          monthlyDeposit: monthly,
           interest_rate: rate,
-          start_date: normalizeToIsoDate(formData.startDate) || new Date().toISOString().split('T')[0],
-          maturity_date: normalizeToIsoDate(formData.maturityDate) || normalizeToIsoDate(formData.startDate) || new Date().toISOString().split('T')[0],
+          interestRate: rate,
+          start_date: sDate,
+          startDate: sDate,
+          maturity_date: mDate,
+          maturityDate: mDate,
           maturity_amount: Number(formData.maturityAmount) || monthly * 12,
+          maturityAmount: Number(formData.maturityAmount) || monthly * 12,
           status: 'active',
           notes: formData.notes,
-        });
+        } as unknown as import('../types/portfolio').AssetPayload);
         createdAssetId = res?.id;
       } else if (assetType === 'gold') {
-        const pPrice = Number(formData.purchasePrice) || 0;
+        const grams = Number(formData.weightGrams) || 0;
+        let pPrice = Number(formData.purchasePrice) || 0;
+        // If user entered per-gram rate (e.g. 5200) instead of total cost (e.g. 287716)
+        if (pPrice > 1000 && pPrice <= 40000 && grams > 1 && (pPrice / grams) < 500) {
+          pPrice = Math.round(pPrice * grams);
+        }
+        let curVal = Number(formData.currentValuation) || pPrice;
+        if (curVal > 1000 && curVal <= 40000 && grams > 1 && (curVal / grams) < 500) {
+          curVal = Math.round(grams * 14118);
+        }
+        const pDate = normalizeToIsoDate(formData.purchaseDate) || new Date().toISOString().split('T')[0];
         const res = await addAsset('gold', targetPortfolio, {
           item_name: formData.itemName.trim() || 'Gold Holding',
+          itemName: formData.itemName.trim() || 'Gold Holding',
           purity: formData.purity || '24K',
-          weight_grams: Number(formData.weightGrams) || 0,
+          weight_grams: grams,
+          weightGrams: grams,
           purchase_price: pPrice,
-          current_valuation: Number(formData.currentValuation) || pPrice,
-          purchase_date: normalizeToIsoDate(formData.purchaseDate) || new Date().toISOString().split('T')[0],
+          purchasePrice: pPrice,
+          current_valuation: curVal,
+          currentValuation: curVal,
+          purchase_date: pDate,
+          purchaseDate: pDate,
           notes: formData.notes,
-        });
+        } as unknown as import('../types/portfolio').AssetPayload);
         createdAssetId = res?.id;
       } else if (assetType === 'insurance') {
+        const rDate = normalizeToIsoDate(formData.renewalDate) || undefined;
         const res = await addAsset('insurance', targetPortfolio, {
           policy_name: formData.policyName.trim() || 'Insurance Policy',
+          policyName: formData.policyName.trim() || 'Insurance Policy',
           insurance_type: formData.insuranceType,
+          insuranceType: formData.insuranceType,
           provider: formData.provider.trim() || 'Unknown Provider',
           policy_number: formData.policyNumber.trim() || undefined,
+          policyNumber: formData.policyNumber.trim() || undefined,
           sum_assured: Number(formData.sumAssured) || 0,
+          sumAssured: Number(formData.sumAssured) || 0,
           premium_amount: Number(formData.premiumAmount) || 0,
-          renewal_date: normalizeToIsoDate(formData.renewalDate) || undefined,
+          premiumAmount: Number(formData.premiumAmount) || 0,
+          renewal_date: rDate,
+          renewalDate: rDate,
           notes: formData.notes,
-        });
+        } as unknown as import('../types/portfolio').AssetPayload);
         createdAssetId = res?.id;
       } else if (assetType === 'real_estate') {
         const pPrice = Number(formData.purchasePrice) || 0;
+        const pDate = normalizeToIsoDate(formData.startDate || formData.purchaseDate) || new Date().toISOString().split('T')[0];
         const res = await addAsset('real_estate', targetPortfolio, {
           property_name: formData.propertyName.trim() || 'Real Estate Property',
+          propertyName: formData.propertyName.trim() || 'Real Estate Property',
           property_type: formData.propertyType,
+          propertyType: formData.propertyType,
           location: formData.location.trim() || undefined,
           purchase_price: pPrice,
+          purchasePrice: pPrice,
           current_valuation: Number(formData.currentValuation) || pPrice,
-          purchase_date: normalizeToIsoDate(formData.startDate || formData.purchaseDate) || new Date().toISOString().split('T')[0],
+          currentValuation: Number(formData.currentValuation) || pPrice,
+          purchase_date: pDate,
+          purchaseDate: pDate,
           monthly_rent: 0,
+          monthlyRent: 0,
           notes: formData.notes,
-        });
+        } as unknown as import('../types/portfolio').AssetPayload);
         createdAssetId = res?.id;
       } else if (assetType === 'sip') {
         const monthlySip = Number(formData.monthlySip) || 0;
+        const sDate = normalizeToIsoDate(formData.startDate) || new Date().toISOString().split('T')[0];
         const res = await addAsset('sip', targetPortfolio, {
           fund_name: formData.fundName.trim() || 'Mutual Fund SIP',
+          fundName: formData.fundName.trim() || 'Mutual Fund SIP',
           monthly_sip: monthlySip,
+          monthlySip: monthlySip,
           expected_cagr: Number(formData.expectedCagr) || 12,
+          expectedCagr: Number(formData.expectedCagr) || 12,
           units: 0,
-          start_date: normalizeToIsoDate(formData.startDate) || new Date().toISOString().split('T')[0],
+          start_date: sDate,
+          startDate: sDate,
           fallback_valuation: monthlySip * 12,
+          fallbackValuation: monthlySip * 12,
           notes: formData.notes,
-        });
+        } as unknown as import('../types/portfolio').AssetPayload);
         createdAssetId = res?.id;
       } else if (assetType === 'stocks') {
         const qty = Number(formData.qty) || 0;
@@ -340,11 +391,16 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
               {
                 name: `${formData.bankName || formData.policyName || formData.propertyName || formData.itemName || file.name}`,
                 filePath: storagePath,
+                file_path: storagePath,
                 fileType: file.type || 'application/pdf',
+                file_type: file.type || 'application/pdf',
                 linkedAssetType: assetType,
+                asset_type: assetType,
                 linkedAssetId: createdAssetId || null,
+                asset_id: createdAssetId || null,
                 expiryDate: normalizeToIsoDate(formData.maturityDate || formData.renewalDate) || null,
-              },
+                expiry_date: normalizeToIsoDate(formData.maturityDate || formData.renewalDate) || null,
+              } as unknown as import('../types/portfolio').AssetPayload,
               { reload: false }
             );
           })();
