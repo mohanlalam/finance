@@ -91,7 +91,7 @@ export function useSmartImportPipeline({
     if (activePortfolio && activePortfolio !== 'all' && portfolios.some((p) => p.name === activePortfolio)) {
       return activePortfolio;
     }
-    return portfolios.length > 0 ? portfolios[0].name : 'Personal';
+    return portfolios.length > 0 ? portfolios[0].name : 'rammohan';
   }, [activePortfolio, portfolios]);
 
   const [targetPortfolio, setTargetPortfolio] = useState<string>(() => resolveValidPortfolio());

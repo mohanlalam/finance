@@ -6,8 +6,8 @@ import { SmartImportFormData } from '../types';
 const MOCK_PORTFOLIOS: Portfolio[] = [
   {
     id: 'p-1',
-    name: 'Personal',
-    label: 'Personal',
+    name: 'rammohan',
+    label: 'rammohan',
     holdings: [
       { id: 'h-1', sno: 1, ticker: 'RELIANCE.NS', yahooSymbol: 'RELIANCE.NS', stockName: 'Reliance Industries', qty: 100, avgPrice: 1400, ltp: 1500, amountInvested: 140000, currentValue: 150000, unrealizedPnL: 10000, pnlPercent: 7.14, todayPnLPercent: 0.67 },
     ],
@@ -73,7 +73,7 @@ const BASE_FORM_DATA: SmartImportFormData = {
 
 describe('duplicateDetectionService', () => {
   it('detects duplicate Fixed Deposit accurately', () => {
-    const duplicate = checkForDuplicateAsset('fd', 'Personal', {
+    const duplicate = checkForDuplicateAsset('fd', 'rammohan', {
       ...BASE_FORM_DATA,
       institutionName: 'HDFC Bank',
       principalAmount: '500000',
@@ -86,7 +86,7 @@ describe('duplicateDetectionService', () => {
   });
 
   it('detects duplicate Insurance policy by policy number', () => {
-    const duplicate = checkForDuplicateAsset('insurance', 'Personal', {
+    const duplicate = checkForDuplicateAsset('insurance', 'rammohan', {
       ...BASE_FORM_DATA,
       policyNumber: '123456789',
     }, MOCK_PORTFOLIOS);
@@ -97,7 +97,7 @@ describe('duplicateDetectionService', () => {
   });
 
   it('detects duplicate Gold item by name and weight', () => {
-    const duplicate = checkForDuplicateAsset('gold', 'Personal', {
+    const duplicate = checkForDuplicateAsset('gold', 'rammohan', {
       ...BASE_FORM_DATA,
       itemName: 'Gold Bangle',
       weightGrams: '50',
@@ -109,7 +109,7 @@ describe('duplicateDetectionService', () => {
   });
 
   it('returns null when no duplicate exists', () => {
-    const duplicate = checkForDuplicateAsset('fd', 'Personal', {
+    const duplicate = checkForDuplicateAsset('fd', 'rammohan', {
       ...BASE_FORM_DATA,
       institutionName: 'State Bank of India',
       principalAmount: '100000',

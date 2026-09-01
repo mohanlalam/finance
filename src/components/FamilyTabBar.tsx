@@ -14,17 +14,22 @@ interface FamilyTabBarProps {
 }
 
 const familyIconConfigs: Record<string, { icon: React.ReactNode; bg: string; text: string }> = {
-  personal: {
+  rammohan: {
     icon: <User size={13} />,
     bg: 'bg-blue-500/15 dark:bg-blue-400/20',
     text: 'text-blue-600 dark:text-blue-400',
   },
-  mother: {
+  padmavathi: {
     icon: <Heart size={13} />,
     bg: 'bg-rose-500/15 dark:bg-rose-400/20',
     text: 'text-rose-600 dark:text-rose-400',
   },
-  wife: {
+  sai_laxmi: {
+    icon: <Users size={13} />,
+    bg: 'bg-purple-500/15 dark:bg-purple-400/20',
+    text: 'text-purple-600 dark:text-purple-400',
+  },
+  sailaxmi: {
     icon: <Users size={13} />,
     bg: 'bg-purple-500/15 dark:bg-purple-400/20',
     text: 'text-purple-600 dark:text-purple-400',
@@ -32,7 +37,17 @@ const familyIconConfigs: Record<string, { icon: React.ReactNode; bg: string; tex
 };
 
 function getFamilyIconConfig(name: string) {
-  return familyIconConfigs[name] ?? {
+  const normalized = (name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (normalized.includes('rammohan') || normalized.includes('ram')) {
+    return familyIconConfigs.rammohan;
+  }
+  if (normalized.includes('padmavathi')) {
+    return familyIconConfigs.padmavathi;
+  }
+  if (normalized.includes('sailaxmi') || normalized.includes('sai')) {
+    return familyIconConfigs.sai_laxmi;
+  }
+  return familyIconConfigs[normalized] ?? {
     icon: <User size={13} />,
     bg: 'bg-teal-500/15 dark:bg-teal-400/20',
     text: 'text-teal-600 dark:text-teal-400',
