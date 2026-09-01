@@ -254,3 +254,12 @@ After **any correction** from the user, append a new entry here with the pattern
 **Root Cause**: Calling `document.startViewTransition()` in `setActiveAsset` and `handleTabChange` instructed the browser to take a full-viewport screenshot (`::view-transition-old(root)`) and cross-fade it with the incoming page. Because `window.scrollTo(0, 0)` occurred simultaneously with the route change, the browser rendered the old scrolled viewport screenshot as a semi-transparent floating overlay during the cross-fade animation.  
 **Fix**: Removed `startViewTransition()` wrappers from `setActiveAsset` and `handleTabChange` in `AppShell.tsx`. Tab switching and route changes now execute cleanly and immediately without browser snapshot ghosting.  
 **Rule**: Never wrap component/tab state switches or scroll-resetting view transitions in `document.startViewTransition()` unless custom per-element transition names (`view-transition-name`) are explicitly mapped. Default root transitions capture the entire scrolled viewport and create severe ghost overlays.
+
+---
+
+### 2026-09-01 — Edge Function CRUD Payload Field Casing Mismatch (camelCase vs snake_case) & NaN Coercion
+**Mistake**: Submitting the "Add Insurance Policy" (or other asset forms) failed with HTTP 500 and showed `"Database service is temporarily unavailable. Please try again."`.  
+**Root Cause**: The client-side form modal (`InsuranceFormModal.tsx`) sent snake_case payload fields (`insurance_type`, `policy_name`, `policy_number`, `sum_assured`, `premium_amount`, `renewal_date`), while the backend Edge Function (`holdings-crud/index.ts`) extracted camelCase properties (`payload.insuranceType`, `payload.sumAssured`, etc.). Because the extracted properties were `undefined`, executing `Number(undefined)` evaluated to `NaN`. When passed to PostgreSQL numeric/not-null columns, Postgres threw an unhandled query rejection resulting in an HTTP 500 server error.  
+**Fix**: Updated `holdings-crud/index.ts` in both `add` and `update` handlers to extract snake_case properties with camelCase fallbacks (`payload.sum_assured ?? payload.sumAssured`), and guarded numeric conversions against `null`/`undefined` before calling `Number()`.  
+**Rule**: Always maintain dual compatibility (snake_case with camelCase fallback) in Edge Function request handlers. Never pass unguarded `Number(payload.field)` directly to database insert/update queries without verifying `val !== undefined && val !== null` to prevent `NaN` values from crashing PostgreSQL operations with HTTP 500 errors.
+
