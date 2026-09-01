@@ -22,13 +22,13 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 - **Fixed Deposits (FD)** — Compounded interest calculations (Indian banking half-yearly/quarterly standards), auto-suggestions for all major Indian banks, maturity date timeline progress bars, and linked deposit receipts.
 - **Recurring Deposits (RD)** — Multi-month installment tracking with Indian bank datalists, paid vs. overdue status tracking, and one-click installment recording.
 - **Mutual Fund SIPs** — Real-time scheme tracking via AMFI India NAV automation, top Indian scheme presets (Parag Parikh, Quant, Mirae, etc.), and unit holdings valuation.
-- **Gold Holdings & Bullion (Standalone Valuation)** — Weight tracking, hallmark purity multipliers (24K, 22K/916, 18K/750, 14K/585), live MCX spot rate appreciation, and standalone Total Investment & Value as of date metrics.
+- **Gold Holdings & Bullion (Real-Time Live Valuation)** — Two-way Buy Rate / gram ↔ Total Purchase Cost calculator, hallmark purity multipliers (24K, 22K/916, 18K/750, 14K/585), real-time auto-computed Current Market Valuation on weight and purity changes, live MCX spot rate appreciation, and standalone Total Investment & Value as of date metrics.
 - **Real Estate (Standalone Valuation)** — Property acquisition cost basis, current valuations as of date, and annual rental income yield percentages tracked independently from liquid family net worth.
 - **Insurances** — Term, health, life, and motor policy registries with premium renewal timers and overdue status warnings.
 - **Document Vault** — Secure attachment manager linked by asset class with expiry date tracking and upcoming deadline alerts.
 
 ### 🤖 AI Document Import & Assistant
-- **Smart AI Import (Quarantine & Review Workflow)** — Zero silent database writes. Scans broker statements, FD certificates, or insurance receipts using Gemini Flash 1.5 into a quarantined side-by-side verification modal with inline field editing before saving.
+- **Smart AI Import (Quarantine & Review Workflow)** — Zero silent database writes. Scans broker statements, gold invoices, FD certificates, or insurance receipts using multi-model Gemini Vision into a quarantined side-by-side verification modal with inline field editing, instant non-blocking saves, and document vault linking.
 - **Deterministic Intent Classifier** — Client-side NLP engine parsing 17 financial intents (`NET_WORTH`, `PERFORMERS`, `MATURITY_TIMELINE`, `ALLOCATION_SPLIT`, `SPECIFIC_GOLD`, `SPECIFIC_FDS`, `INSURANCE_REMINDERS`, `FAMILY_BREAKDOWN`, etc.) with matched asset badge tags and zero hallucinated numbers.
 
 ---

@@ -295,4 +295,20 @@ After **any correction** from the user, append a new entry here with the pattern
 **Fix**: Added `{ reload: false }` option to `addAsset` calls inside `SmartImportModal.tsx` so the modal dismisses immediately with a success toast upon mutation completion, and fires background synchronization (`void load()`) non-blockingly afterwards.  
 **Rule**: Never await full data re-fetch/list queries inside interactive modal submit handlers when local state or toasts can confirm immediate success. Always pass `{ reload: false }` or trigger background query revalidation (`void load()`) to keep UI interactions instant and non-blocking.
 
+---
+
+### 2026-09-01 — Module-Level Singleton Concurrency Mutex Queue Deadlock
+**Mistake**: After a single network stall or aborted save, subsequent saves across all modal re-opens were permanently blocked and hung indefinitely on *"Saving & Linking..."*.  
+**Root Cause**: `portfolioSyncService` is a module-level singleton maintaining a serialized `mutationQueue: Promise<unknown>` chain (`this.mutationQueue = this.mutationQueue.then(...)`). If a previous mutation Promise never settled (e.g. stalled network or unhandled rejection), all subsequent operations chained behind the unresolved Promise and waited forever.  
+**Fix**: (1) Added a 20-second hard timeout inside `portfolioSyncService.runMutation` that rejects and auto-clears the queue. (2) Added `portfolioSyncService.reset()` and wired it into `SmartImportModal.tsx`'s open `useEffect` to clear any deadlocked queue upon modal re-entry.  
+**Rule**: Always provide a bounded hard timeout on serialized Promise queues in singleton services. Always provide and invoke a `reset()` escape hatch when interactive modals mount or re-open to prevent stalled previous mutations from deadlocking user interactions.
+
+---
+
+### 2026-09-01 — API Client In-Flight Request Deduplication Header Collision on PIN Lock Screen
+**Mistake**: Entering the correct PIN on the lock screen was rejected with *"Incorrect PIN"*.  
+**Root Cause**: (1) When the lock screen mounted, a pre-warm background call fired `holdings-crud?action=list` with an empty session header, which returned an expected HTTP 401 error. (2) `apiClient.ts`'s `inflightRequests` deduplication map keyed requests solely by `${method}:${pathAndQuery}:${body}` without considering authentication headers (`X-App-Pin`). (3) When the user subsequently entered their valid PIN, `invokeFunction` detected the matching URL in `inflightRequests` and immediately returned the pre-warm call's cached HTTP 401 rejection without sending the PIN to the server.  
+**Fix**: (1) Incorporated the `X-App-Pin` header directly into `apiClient.ts`'s deduplication `cacheKey`. (2) Added a `skipCache?: boolean` option to `FunctionRequestOptions` and passed `skipCache: true` on all `verifyPin` calls in `auth.ts`. (3) Added `VITE_APP_PIN: ${{ secrets.VITE_APP_PIN }}` to all GitHub Actions CI/CD build steps in `.github/workflows/deploy.yml`.  
+**Rule**: Never omit authentication and authorization headers from in-flight request deduplication cache keys. Always use `skipCache: true` for security authentication and PIN verification challenges so they are guaranteed to execute as live network checks.
+
 
