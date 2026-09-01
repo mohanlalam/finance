@@ -100,7 +100,7 @@ const defaultFormData: EditableFormData = {
 
 export default function SmartImportModal({ isOpen, onClose }: SmartImportModalProps) {
   const { portfolios, activeTab } = usePortfolioEntities();
-  const { addAsset } = usePortfolioActions();
+  const { addAsset, load } = usePortfolioActions();
   const { addToast } = useToastActions();
 
   const [file, setFile] = useState<File | null>(null);
@@ -247,7 +247,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
       const { assetType } = formData;
       let createdAssetId: string | undefined;
 
-      // 1. Create the financial holding with user-reviewed values
+      // 1. Create the financial holding — skip SWR reload here so we can close immediately
       if (assetType === 'fd') {
         const principal = Number(formData.principalAmount) || 0;
         const rate = Number(formData.interestRate) || 0;
@@ -269,7 +269,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           maturityAmount: maturityAmt,
           status: 'active',
           notes: formData.notes,
-        } as unknown as import('../types/portfolio').AssetPayload);
+        } as unknown as import('../types/portfolio').AssetPayload, { reload: false });
         createdAssetId = res?.id;
       } else if (assetType === 'rd') {
         const monthly = Number(formData.monthlyDeposit) || 0;
@@ -291,7 +291,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           maturityAmount: Number(formData.maturityAmount) || monthly * 12,
           status: 'active',
           notes: formData.notes,
-        } as unknown as import('../types/portfolio').AssetPayload);
+        } as unknown as import('../types/portfolio').AssetPayload, { reload: false });
         createdAssetId = res?.id;
       } else if (assetType === 'gold') {
         const grams = Number(formData.weightGrams) || 0;
@@ -318,7 +318,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           purchase_date: pDate,
           purchaseDate: pDate,
           notes: formData.notes,
-        } as unknown as import('../types/portfolio').AssetPayload);
+        } as unknown as import('../types/portfolio').AssetPayload, { reload: false });
         createdAssetId = res?.id;
       } else if (assetType === 'insurance') {
         const rDate = normalizeToIsoDate(formData.renewalDate) || undefined;
@@ -337,7 +337,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           renewal_date: rDate,
           renewalDate: rDate,
           notes: formData.notes,
-        } as unknown as import('../types/portfolio').AssetPayload);
+        } as unknown as import('../types/portfolio').AssetPayload, { reload: false });
         createdAssetId = res?.id;
       } else if (assetType === 'real_estate') {
         const pPrice = Number(formData.purchasePrice) || 0;
@@ -357,7 +357,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           monthly_rent: 0,
           monthlyRent: 0,
           notes: formData.notes,
-        } as unknown as import('../types/portfolio').AssetPayload);
+        } as unknown as import('../types/portfolio').AssetPayload, { reload: false });
         createdAssetId = res?.id;
       } else if (assetType === 'sip') {
         const monthlySip = Number(formData.monthlySip) || 0;
@@ -375,7 +375,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           fallback_valuation: monthlySip * 12,
           fallbackValuation: monthlySip * 12,
           notes: formData.notes,
-        } as unknown as import('../types/portfolio').AssetPayload);
+        } as unknown as import('../types/portfolio').AssetPayload, { reload: false });
         createdAssetId = res?.id;
       } else if (assetType === 'stocks') {
         const qty = Number(formData.qty) || 0;
@@ -388,7 +388,7 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
           qty: qty,
           avgPrice: avgPrice,
           amountInvested: qty * avgPrice,
-        });
+        }, { reload: false });
         createdAssetId = res?.id;
       }
 
@@ -432,6 +432,8 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
         'success'
       );
       onClose();
+      // Refresh portfolio data in background — don't block or await
+      void load();
     } catch (err: unknown) {
       console.error('[smart-import] Save failed:', err);
       setError(err instanceof Error ? err.message : 'Failed to save asset and document.');
