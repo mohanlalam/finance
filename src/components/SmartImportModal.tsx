@@ -332,15 +332,27 @@ export default function SmartImportModal({ isOpen, onClose }: SmartImportModalPr
       if (file) {
         try {
           const storagePath = generateDocumentStoragePath(targetPortfolio, assetType, file.name);
-          await uploadDocumentFile('investment-documents', storagePath, file);
-          await addAsset('document', targetPortfolio, {
-            name: `${formData.bankName || formData.policyName || formData.propertyName || formData.itemName || file.name}`,
-            filePath: storagePath,
-            fileType: file.type || 'application/pdf',
-            linkedAssetType: assetType,
-            linkedAssetId: createdAssetId || null,
-            expiryDate: normalizeToIsoDate(formData.maturityDate || formData.renewalDate) || null,
-          });
+          const uploadPromise = (async () => {
+            await uploadDocumentFile('investment-documents', storagePath, file);
+            await addAsset(
+              'document',
+              targetPortfolio,
+              {
+                name: `${formData.bankName || formData.policyName || formData.propertyName || formData.itemName || file.name}`,
+                filePath: storagePath,
+                fileType: file.type || 'application/pdf',
+                linkedAssetType: assetType,
+                linkedAssetId: createdAssetId || null,
+                expiryDate: normalizeToIsoDate(formData.maturityDate || formData.renewalDate) || null,
+              },
+              { reload: false }
+            );
+          })();
+
+          await Promise.race([
+            uploadPromise,
+            new Promise((resolve) => setTimeout(resolve, 3500)),
+          ]);
         } catch (storageErr) {
           console.warn('[smart-import] Document file upload skipped/failed:', storageErr);
         }

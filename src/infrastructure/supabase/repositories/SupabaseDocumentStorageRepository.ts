@@ -157,24 +157,32 @@ export class SupabaseDocumentStorageRepository implements IDocumentStorageReposi
     delete headers['Content-Type']; // Let browser set multipart boundary
 
     const edgeUrl = `${SUPABASE_URL}/functions/v1/holdings-crud?action=upload_file`;
-    const res = await fetch(edgeUrl, {
-      method: 'POST',
-      headers,
-      body: formData,
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
 
-    if (!res.ok) {
-      let errorMsg = `Upload failed with status ${res.status}`;
-      try {
-        const json = await res.json();
-        errorMsg = json.error || json.message || errorMsg;
-      } catch {
-        // ignore
+    try {
+      const res = await fetch(edgeUrl, {
+        method: 'POST',
+        headers,
+        body: formData,
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        let errorMsg = `Upload failed with status ${res.status}`;
+        try {
+          const json = await res.json();
+          errorMsg = json.error || json.message || errorMsg;
+        } catch {
+          // ignore
+        }
+        throw new Error(errorMsg);
       }
-      throw new Error(errorMsg);
-    }
 
-    return { path: cleanPath };
+      return { path: cleanPath };
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   /**
