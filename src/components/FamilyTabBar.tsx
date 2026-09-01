@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { LayoutDashboard, Pencil, Trash2, UserPlus, User, Heart, Users, MoreVertical } from './icons/AppIcons';
+import { LayoutDashboard, Pencil, Trash2, UserPlus, User, Users, MoreVertical } from './icons/AppIcons';
 import { Portfolio, PortfolioName } from '../types/portfolio';
 import { formatPercent } from '../utils/formatters';
 import { sortPortfolios } from '../domains/portfolio/calculations/portfolioOrdering';
@@ -20,9 +20,9 @@ const familyIconConfigs: Record<string, { icon: React.ReactNode; bg: string; tex
     text: 'text-blue-600 dark:text-blue-400',
   },
   padmavathi: {
-    icon: <Heart size={13} />,
-    bg: 'bg-rose-500/15 dark:bg-rose-400/20',
-    text: 'text-rose-600 dark:text-rose-400',
+    icon: <User size={13} />,
+    bg: 'bg-emerald-500/15 dark:bg-emerald-400/20',
+    text: 'text-emerald-600 dark:text-emerald-400',
   },
   sai_laxmi: {
     icon: <Users size={13} />,
