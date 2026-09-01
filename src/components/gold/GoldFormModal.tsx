@@ -55,6 +55,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
     : [];
 
   const createdAssetIdRef = useRef<string | null>(null);
+  const hasInitializedRef = useRef(false);
 
   // Derive live market rates for purity (memoized to prevent re-render loops)
   const liveRates = useMemo(() => deriveGoldRates(), []);
@@ -68,19 +69,38 @@ export const GoldFormModal = React.memo(function GoldFormModal({
   const liveRatePerGram = getRateForPurity(purity);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      hasInitializedRef.current = false;
+      return;
+    }
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
+
     createdAssetIdRef.current = null;
     if (editingHolding) {
       const g = Number(editingHolding.weight_grams) || 0;
-      const rawBuy = Number(editingHolding.purchase_price) || 0;
-      // If previously stored as per-gram rate (e.g. 5200) instead of total cost
-      if (rawBuy > 1000 && rawBuy <= 40000 && g > 1 && (rawBuy / g) < 500) {
-        setRatePerGram(String(rawBuy));
-        setPurchasePrice(String(Math.round(rawBuy * g)));
-      } else {
-        setPurchasePrice(rawBuy ? String(rawBuy) : '');
-        setRatePerGram(rawBuy && g > 0 ? String(Math.round(rawBuy / g)) : '');
+      let buy = Number(editingHolding.purchase_price) || 0;
+      let rate = 0;
+
+      if (g > 0 && buy > 0) {
+        // Case 1: Corrupted double-multiplication (e.g. 1.59 Crore for 55g bangle where actual total was 2.87 Lakhs)
+        if (buy > 100_000 && (buy / g) > 40_000 && (buy / (g * g)) >= 1_000 && (buy / (g * g)) <= 40_000) {
+          buy = Math.round(buy / g);
+          rate = Math.round(buy / g);
+        }
+        // Case 2: Stored as per-gram rate (e.g. 5200) instead of total cost
+        else if (buy >= 1_000 && buy <= 40_000 && g > 1 && (buy / g) < 500) {
+          rate = buy;
+          buy = Math.round(buy * g);
+        }
+        // Case 3: Normal total price
+        else {
+          rate = Math.round(buy / g);
+        }
       }
+
+      setPurchasePrice(buy ? String(buy) : '');
+      setRatePerGram(rate ? String(rate) : '');
 
       setItemName(editingHolding.item_name || '');
       const hPurity = editingHolding.purity || '24K';
@@ -89,11 +109,8 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       
       const holdingRate = getRateForPurity(hPurity);
       const rawVal = Number(editingHolding.current_valuation) || 0;
-      // If stored valuation was raw buy rate / outdated or user opening to edit, sync to live valuation
-      if (rawVal > 1000 && rawVal <= 40000 && g > 1 && (rawVal / g) < 500) {
-        const estVal = Math.round(g * holdingRate);
-        setCurrentValuation(String(estVal));
-      } else if (g > 0) {
+      // Auto-compute live valuation
+      if (g > 0) {
         const liveVal = Math.round(g * holdingRate);
         setCurrentValuation(String(liveVal || rawVal));
       } else {
