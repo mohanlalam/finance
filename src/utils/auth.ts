@@ -74,6 +74,7 @@ export async function verifyPin(pin: string): Promise<boolean> {
         await invokeFunction('holdings-crud?action=list', {
           method: 'GET',
           headers: { 'X-App-Pin': inputHash },
+          skipCache: true,
         });
         markSessionVerified(inputHash);
         return true;

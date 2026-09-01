@@ -31,6 +31,7 @@ interface FunctionRequestOptions extends Omit<RequestInit, 'body' | 'headers'> {
   body?: unknown;
   headers?: Record<string, string>;
   timeoutMs?: number;
+  skipCache?: boolean;
 }
 
 export function getEnvironmentIssue(): string {
@@ -136,8 +137,9 @@ export async function invokeFunction<T>(pathAndQuery: string, options: FunctionR
     throw new AppApiError(envIssue, 'config');
   }
 
-  const isGetLike = !options.method || options.method.toUpperCase() === 'GET' || (options.method.toUpperCase() === 'POST' && pathAndQuery.includes('market-data'));
-  const cacheKey = `${options.method || 'GET'}:${pathAndQuery}:${options.body ? JSON.stringify(options.body) : ''}`;
+  const isGetLike = !options.skipCache && (!options.method || options.method.toUpperCase() === 'GET' || (options.method.toUpperCase() === 'POST' && pathAndQuery.includes('market-data')));
+  const customPin = options.headers?.['X-App-Pin'] || options.headers?.['x-app-pin'] || '';
+  const cacheKey = `${options.method || 'GET'}:${pathAndQuery}:${customPin}:${options.body ? JSON.stringify(options.body) : ''}`;
   
   if (isGetLike && inflightRequests.has(cacheKey)) {
     return inflightRequests.get(cacheKey) as Promise<T>;
