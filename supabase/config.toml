@@ -3,3 +3,9 @@ verify_jwt = false
 
 [functions.market-data]
 verify_jwt = false
+
+[functions.verify-pin]
+verify_jwt = false
+
+[functions.snapshot-net-worth]
+verify_jwt = false

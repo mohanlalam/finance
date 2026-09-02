@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { estimateTodayPnL } from '../portfolioCalcs';
+import { estimateTodayPnL } from '../../domains/portfolio/calculations/portfolioTotals';
 import { Portfolio } from '../../types/portfolio';
 
 describe('estimateTodayPnL', () => {

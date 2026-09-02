@@ -14,13 +14,23 @@ const SENSITIVE_KEY_PATTERNS = [
   /api_key/i,
   /authorization/i,
   /bearer/i,
+  /account/i,
+  /account_no/i,
+  /account_number/i,
+  /policy/i,
+  /policy_no/i,
+  /policy_number/i,
+  /folio/i,
 ];
 
 function sanitizeValue(key: string, value: unknown): unknown {
   if (SENSITIVE_KEY_PATTERNS.some((p) => p.test(key))) {
     return '[REDACTED]';
   }
-  if (value && typeof value === 'object' && !Array.isArray(value)) {
+  if (Array.isArray(value)) {
+    return value.map((item, idx) => sanitizeValue(String(idx), item));
+  }
+  if (value && typeof value === 'object') {
     const sanitizedObj: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
       sanitizedObj[k] = sanitizeValue(k, v);

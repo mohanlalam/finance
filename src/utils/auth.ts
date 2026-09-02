@@ -27,9 +27,6 @@ export {
 };
 
 const CUSTOM_HASH_KEY = 'custom_app_pin_hash';
-const ENV_PIN = typeof import.meta !== 'undefined' && import.meta.env?.VITE_APP_PIN
-  ? String(import.meta.env.VITE_APP_PIN).trim()
-  : '';
 
 export async function verifyPin(pin: string): Promise<boolean> {
   const inputHash = await hashPin(pin);
@@ -45,17 +42,7 @@ export async function verifyPin(pin: string): Promise<boolean> {
     return false;
   }
 
-  // 2. Client environment master PIN match (if configured via VITE_APP_PIN)
-  if (ENV_PIN) {
-    const envHash = await hashPin(ENV_PIN);
-    if (envHash === inputHash) {
-      markSessionVerified(inputHash);
-      return true;
-    }
-    return false;
-  }
-
-  // 3. Authoritative backend Edge Function check (fail-closed)
+  // 2. Authoritative backend Edge Function check (fail-closed)
   try {
     const result = await invokeFunction<{ verified: boolean }>('verify-pin', {
       method: 'POST',

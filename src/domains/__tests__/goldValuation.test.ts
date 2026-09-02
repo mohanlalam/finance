@@ -3,6 +3,8 @@ import { calculateGoldValuation, getPurityMultiplier } from '../assets/gold/calc
 
 describe('Gold Calculations', () => {
   it('correctly calculates multipliers for different purities', () => {
+    expect(getPurityMultiplier('999 Gold Coin')).toBe(0.999);
+    expect(getPurityMultiplier('995 Bullion Bar')).toBe(0.995);
     expect(getPurityMultiplier('24k')).toBe(1.0);
     expect(getPurityMultiplier('22k (916)')).toBeCloseTo(22 / 24, 4);
     expect(getPurityMultiplier('18k')).toBe(18 / 24);

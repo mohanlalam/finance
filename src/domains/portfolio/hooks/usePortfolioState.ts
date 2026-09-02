@@ -21,9 +21,10 @@ export function usePortfolioState({ onAuthExpired }: UsePortfolioStateOptions = 
   });
   const sync = usePortfolioSync();
 
+  const queryLoad = query.load;
   const refreshSnapshot = useCallback(async () => {
-    await query.load();
-  }, [query]);
+    await queryLoad();
+  }, [queryLoad]);
 
   return useMemo(
     () => ({

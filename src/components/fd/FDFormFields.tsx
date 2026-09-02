@@ -99,13 +99,14 @@ export function FDFormFields({
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Maturity Date</label>
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
+            Maturity Date <span className="font-normal text-slate-400">(Optional)</span>
+          </label>
           <input
             type="date"
             value={maturityDate}
             onChange={(e) => setMaturityDate(e.target.value)}
             className="w-full h-10 border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
-            required
           />
         </div>
       </div>

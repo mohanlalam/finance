@@ -352,7 +352,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
   const dots = Array.from({ length: getPinLength() });
 
   return (
-    <div className="pin-lock-root min-h-screen text-white flex flex-col items-center justify-between py-10 font-sans select-none overflow-hidden">
+    <div className="pin-lock-root min-h-screen text-white flex flex-col items-center justify-between py-10 font-sans select-none overflow-y-auto overscroll-contain">
       {/* Animated aurora gradient background */}
       <div className="pin-lock-bg" aria-hidden="true" />
       <div className="pin-lock-stars" aria-hidden="true" />

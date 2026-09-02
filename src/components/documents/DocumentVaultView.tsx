@@ -9,7 +9,7 @@ import {
   Insurance,
   Holding,
 } from '../../types/portfolio';
-import { uploadDocumentFile, removeDocumentFiles, openSecureDocument, generateDocumentStoragePath } from '../../utils/supabaseStorage';
+import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X } from '../icons/AppIcons';
 import Modal from '../Modal';
 import ConfirmModal from '../ConfirmModal';
@@ -61,6 +61,12 @@ export default React.memo(function DocumentVaultView({
   const isMobile = useIsMobile();
   const { isMutating } = usePortfolioStatus();
   const { addToast } = useToastActions();
+  const {
+    uploadFile: uploadDocumentFile,
+    removeFiles: removeDocumentFiles,
+    openDocument: openSecureDocument,
+    generateStoragePath: generateDocumentStoragePath,
+  } = useDocumentStorage();
 
   const assetLabelMap = useMemo(() => {
     const map = new Map<string, string>();

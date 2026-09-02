@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateTaxHarvesting } from '../taxUtils';
+import { calculateTaxHarvesting } from '../../domains/taxation/calculations/taxHarvesting';
 import { Holding } from '../../types/portfolio';
 
 describe('calculateTaxHarvesting', () => {

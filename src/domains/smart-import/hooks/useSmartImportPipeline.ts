@@ -289,6 +289,8 @@ export function useSmartImportPipeline({
     }
   };
 
+  const isSaving = saveStep !== 'IDLE' && saveStep !== 'SUCCESS' && saveStep !== 'ERROR';
+
   return {
     file,
     filePreview,
@@ -305,6 +307,7 @@ export function useSmartImportPipeline({
     dismissDuplicate: () => setDismissedDuplicate(true),
     saveStep,
     saveMessage,
+    isSaving,
     currentLiveGoldRate,
     handleFileSelect,
     handleSave,

@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { calculateCAGR, calculateXIRR, calculateWeightedAge, getBenchmarkReturns, CashFlow, getPortfolioAnnualizedReturn } from '../performance';
+import { calculateCAGR } from '../../domains/performance/calculations/cagr';
+import { calculateXIRR, CashFlow } from '../../domains/performance/calculations/xirr';
+import { calculateWeightedAge, getPortfolioAnnualizedReturn } from '../../domains/performance/calculations/returns';
+import { getBenchmarkReturns } from '../../domains/performance/calculations/benchmark';
 import { Portfolio } from '../../types/portfolio';
 
 describe('calculateCAGR', () => {
@@ -57,6 +60,20 @@ describe('calculateXIRR', () => {
     ];
     const xirr = calculateXIRR(cashflows);
     expect(xirr).toBeCloseTo(0.10, 2);
+  });
+
+  it('converges properly via bisection fallback on irregular cashflows', () => {
+    // Irregular multi-period cashflows with intermediate negative flows
+    const cashflows: CashFlow[] = [
+      { date: '2020-01-01', amount: -100000 },
+      { date: '2021-01-01', amount: 20000 },
+      { date: '2022-01-01', amount: -10000 },
+      { date: '2023-01-01', amount: 15000 },
+      { date: '2024-01-01', amount: 120000 },
+    ];
+    const xirr = calculateXIRR(cashflows);
+    expect(xirr).toBeGreaterThan(0.05);
+    expect(xirr).toBeLessThan(0.20);
   });
 });
 

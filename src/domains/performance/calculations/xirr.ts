@@ -82,20 +82,22 @@ export function calculateXIRR(cashflows: CashFlow[]): number {
 
   let low = -0.98;
   let high = 3.0;
-  const yLow = f(low);
+  let curYLow = f(low);
   const yHigh = f(high);
 
-  if (!isNaN(yLow) && !isNaN(yHigh) && yLow * yHigh < 0) {
+  if (!isNaN(curYLow) && !isNaN(yHigh) && curYLow * yHigh < 0) {
     for (let i = 0; i < 100; i++) {
       const mid = (low + high) / 2;
       const yMid = f(mid);
       if (isNaN(yMid) || Math.abs(yMid) < epsilon) return mid;
-      if (yMid * yLow < 0) {
+      if (yMid * curYLow < 0) {
         high = mid;
       } else {
         low = mid;
+        curYLow = yMid;
       }
     }
+    return (low + high) / 2;
   }
 
   return 0;

@@ -8,7 +8,8 @@ import { parseLocalDate } from '../../../../utils/dateUtils';
  */
 export function calculateFDEffectiveValue(
   fd: FixedDeposit,
-  asOfDate: Date = new Date()
+  asOfDate: Date = new Date(),
+  compoundingFrequency: number = 2
 ): number {
   if (!fd) return 0;
   const principal = Number(fd.principal_amount);
@@ -34,8 +35,8 @@ export function calculateFDEffectiveValue(
   const years = (effectiveEndTs - startTs) / (365.25 * 24 * 3600 * 1000);
   if (years <= 0) return principal;
 
-  // Compounding frequency: 2 for half-yearly (standard FD)
-  return compoundValue(principal, rate, 2, years);
+  const frequency = Number((fd as unknown as Record<string, unknown>)?.compounding_frequency) || compoundingFrequency || 2;
+  return compoundValue(principal, rate, frequency, years);
 }
 
 /**
@@ -45,7 +46,8 @@ export function calculateFDMaturityValue(
   principal: number,
   annualRatePct: number,
   startDateStr: string,
-  maturityDateStr: string
+  maturityDateStr: string,
+  compoundingFrequency: number = 2
 ): number {
   const p = Number(principal);
   const r = Number(annualRatePct);
@@ -57,7 +59,7 @@ export function calculateFDMaturityValue(
   if (isNaN(startTs) || isNaN(matTs) || matTs <= startTs) return p;
 
   const years = (matTs - startTs) / (365.25 * 24 * 3600 * 1000);
-  return compoundValue(p, r, 2, years);
+  return compoundValue(p, r, compoundingFrequency, years);
 }
 
 export function getFDInvestedAmount(f: FixedDeposit): number {

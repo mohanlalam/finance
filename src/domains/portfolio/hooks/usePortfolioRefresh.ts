@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { Portfolio } from '../../../types/portfolio';
 import { marketDataService } from '../../../infrastructure/market-data/marketDataService';
 import { portfolioCalculationService } from '../services/portfolioCalculationService';
-import { STOCK_PRICE_CACHE_TTL, VISIBILITY_REFRESH_COOLDOWN } from '../../../utils/constants';
+import { STOCK_PRICE_CACHE_TTL, VISIBILITY_REFRESH_COOLDOWN, AUTO_REFRESH_INTERVAL } from '../../../utils/constants';
 
 interface UsePortfolioRefreshOptions {
   portfolios: Portfolio[];
@@ -39,9 +39,14 @@ export function usePortfolioRefresh({
     ? Date.now() - lastPriceFetch.getTime() > STOCK_PRICE_CACHE_TTL
     : true;
 
+  const portfoliosRef = useRef(portfolios);
+  useEffect(() => {
+    portfoliosRef.current = portfolios;
+  }, [portfolios]);
+
   const refreshPrices = useCallback(
     async (targetPortfolios?: Portfolio[]) => {
-      const currentList = targetPortfolios || portfolios;
+      const currentList = targetPortfolios || portfoliosRef.current;
       const allHoldings = currentList.flatMap((p) => p.holdings || []);
       if (allHoldings.length === 0) return;
 
@@ -62,7 +67,7 @@ export function usePortfolioRefresh({
         setPriceStatus('error');
       }
     },
-    [portfolios, setPortfolios, setLastPriceFetch]
+    [setPortfolios, setLastPriceFetch]
   );
 
   // Background refresh on visibility resume
@@ -86,6 +91,22 @@ export function usePortfolioRefresh({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [onReload, isPriceStale, refreshPrices]);
+
+  // ── Automatic 1-hour background refresh ──────────────────────────────────
+  // Fires every hour regardless of tab focus: reloads portfolio data from
+  // Supabase AND fetches fresh live prices for all holdings.
+  const refreshPricesRef = useRef(refreshPrices);
+  const onReloadRef = useRef(onReload);
+  useEffect(() => { refreshPricesRef.current = refreshPrices; }, [refreshPrices]);
+  useEffect(() => { onReloadRef.current = onReload; }, [onReload]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      onReloadRef.current().catch(() => {});
+      refreshPricesRef.current().catch(() => {});
+    }, AUTO_REFRESH_INTERVAL);
+    return () => clearInterval(timer);
+  }, []); // empty deps — timer is stable, refs always hold latest callbacks
 
   return {
     priceStatus,

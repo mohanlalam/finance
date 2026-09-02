@@ -238,6 +238,12 @@ export default function AppShell() {
     try { localStorage.setItem('finance_last_asset_tab', activeAsset); } catch { /* ignore */ }
   }, [activeAsset]);
 
+  // Full refresh: reload Supabase data + live stock prices
+  const handleFullRefresh = useCallback(() => {
+    load().catch(() => {});
+    refreshPrices().catch(() => {});
+  }, [load, refreshPrices]);
+
   // Keyboard shortcuts
   useKeyboardShortcuts(useCallback(() => refreshPrices(), [refreshPrices]));
 
@@ -605,7 +611,7 @@ export default function AppShell() {
         totalPnL={summaryData.totalPnL}
         status={priceStatus}
         lastUpdated={lastUpdated}
-        onRefresh={refreshPrices}
+        onRefresh={handleFullRefresh}
         portfolios={portfolios}
         onImportCSV={handleImportCSV}
         portfolioOptions={portfolioOptionsForModal}

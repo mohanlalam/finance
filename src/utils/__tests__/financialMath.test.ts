@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { calculateXIRR, calculateCAGR } from '../performance';
+import { calculateXIRR } from '../../domains/performance/calculations/xirr';
+import { calculateCAGR } from '../../domains/performance/calculations/cagr';
 import { compoundValue } from '../mathUtils';
 
 describe('Financial Math Unit Tests', () => {

@@ -136,6 +136,14 @@ export function GoldHoldingView({
     syncRates(false);
   }, [syncRates]);
 
+  // Auto-sync gold rates every 1 hour in the background
+  useEffect(() => {
+    const timer = setInterval(() => {
+      syncRates(false);
+    }, 3_600_000); // 1 hour
+    return () => clearInterval(timer);
+  }, [syncRates]);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const rates = useMemo(() => deriveGoldRates(), [rateTick]);
 
@@ -427,26 +435,30 @@ export function GoldHoldingView({
         }
       >
         {filteredHoldings.length > 10 ? (
-          <List
-            height={Math.min(filteredHoldings.length * (isMobile ? 165 : 130), isMobile ? 420 : 540)}
-            itemCount={filteredHoldings.length}
-            itemSize={isMobile ? 165 : 130}
-            width="100%"
-          >
-            {({ index, style }) => {
-              const holding = filteredHoldings[index];
-              return (
-                <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
-                  <GoldHoldingCard
-                    holding={holding}
-                    documents={documents}
-                    onOpenEdit={openEdit}
-                    onConfirmDelete={setConfirmDeleteItem}
-                  />
-                </div>
-              );
-            }}
-          </List>
+          <div style={{ overflow: 'hidden' }}>
+            <List
+              key={`gold-list-${filteredHoldings.length}`}
+              height={Math.min(filteredHoldings.length * (isMobile ? 165 : 130), isMobile ? 420 : 540)}
+              itemCount={filteredHoldings.length}
+              itemSize={isMobile ? 165 : 130}
+              width="100%"
+              style={{ overflowX: 'hidden', overflowY: 'auto' }}
+            >
+              {({ index, style }) => {
+                const holding = filteredHoldings[index];
+                return (
+                  <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
+                    <GoldHoldingCard
+                      holding={holding}
+                      documents={documents}
+                      onOpenEdit={openEdit}
+                      onConfirmDelete={setConfirmDeleteItem}
+                    />
+                  </div>
+                );
+              }}
+            </List>
+          </div>
         ) : (
           <div className="divide-y divide-[var(--border-subtle)]">
             {filteredHoldings.map((holding) => (

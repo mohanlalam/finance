@@ -13,7 +13,10 @@ export default function App() {
     setPinVerified(false);
   }, []);
 
-  useAutoLock(pinVerified ? handleLock : () => {}, 300000);
+  // Adaptive auto-lock timeout: 5 minutes on mobile PWA, 15 minutes on desktop web
+  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+  const autoLockTimeout = isMobile ? 300000 : 900000;
+  useAutoLock(pinVerified ? handleLock : () => {}, autoLockTimeout);
 
   useEffect(() => {
     // Eagerly prefetch MainApp chunk + portfolio data while user is viewing PIN screen

@@ -1,15 +1,10 @@
 /**
  * supabaseStorage.ts — Backward-compatible facade for Document Storage operations.
- * Delegates to the clean architectural repository (SupabaseDocumentStorageRepository)
- * and domain service (DocumentStorageService).
+ * Delegates to the clean architectural domain service (DocumentStorageService).
  */
 
-import {
-  supabaseDocumentStorageRepository,
-} from '../infrastructure/supabase/repositories/SupabaseDocumentStorageRepository';
-import {
-  StorageUploadResult,
-} from '../domains/portfolio/repositories/IDocumentStorageRepository';
+import { documentStorageService } from '../domains/portfolio/services/documentStorageService';
+import { StorageUploadResult } from '../domains/portfolio/repositories/IDocumentStorageRepository';
 
 export type { StorageUploadResult };
 
@@ -18,7 +13,7 @@ export function generateDocumentStoragePath(
   folder: string,
   fileName: string
 ): string {
-  return supabaseDocumentStorageRepository.generateDocumentStoragePath(
+  return documentStorageService.generateStoragePath(
     portfolio,
     folder,
     fileName
@@ -26,11 +21,11 @@ export function generateDocumentStoragePath(
 }
 
 export async function getDocumentSignedUrl(filePath: string): Promise<string> {
-  return supabaseDocumentStorageRepository.getDocumentSignedUrl(filePath);
+  return documentStorageService.getDocumentSignedUrl(filePath);
 }
 
 export async function openSecureDocument(filePath: string): Promise<void> {
-  return supabaseDocumentStorageRepository.openSecureDocument(filePath);
+  return documentStorageService.openSecureDocument(filePath);
 }
 
 export async function uploadDocumentFile(
@@ -38,7 +33,7 @@ export async function uploadDocumentFile(
   storagePath: string,
   file: File | Blob
 ): Promise<StorageUploadResult> {
-  return supabaseDocumentStorageRepository.uploadDocumentFile(
+  return documentStorageService.uploadDocument(
     bucket,
     storagePath,
     file
@@ -49,5 +44,5 @@ export async function removeDocumentFiles(
   bucket: string,
   paths: string[]
 ): Promise<void> {
-  return supabaseDocumentStorageRepository.removeDocumentFiles(bucket, paths);
+  return documentStorageService.removeDocuments(bucket, paths);
 }

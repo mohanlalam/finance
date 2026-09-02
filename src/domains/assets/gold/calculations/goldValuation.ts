@@ -10,6 +10,8 @@ export const DEFAULT_GOLD_RATE_24K = 15840;
  */
 export function getPurityMultiplier(purityStr: string): number {
   const clean = (purityStr || '').toLowerCase().trim();
+  if (clean.includes('999')) return 0.999;
+  if (clean.includes('995')) return 0.995;
   if (clean.includes('24')) return 1.0;
   if (clean.includes('22') || clean.includes('916')) return 22 / 24; // ~0.9167
   if (clean.includes('18') || clean.includes('750')) return 18 / 24; // 0.75

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import useSWR from 'swr';
 import { Portfolio } from '../../../types/portfolio';
 import { NetWorthSnapshot } from '../calculations/netWorth';
@@ -83,6 +83,11 @@ export function usePortfolioQuery(onAuthExpired?: () => void): UsePortfolioQuery
     },
   });
 
+  const portfoliosLenRef = useRef(portfolios.length);
+  useEffect(() => {
+    portfoliosLenRef.current = portfolios.length;
+  }, [portfolios.length]);
+
   const load = useCallback(async () => {
     setLoadStatus('loading');
     try {
@@ -99,23 +104,37 @@ export function usePortfolioQuery(onAuthExpired?: () => void): UsePortfolioQuery
         onAuthExpired?.();
       }
       setLoadError(err instanceof Error ? err.message : 'Failed to reload');
-      if (portfolios.length === 0) {
+      if (portfoliosLenRef.current === 0) {
         setLoadStatus('error');
       }
     }
-  }, [swrMutate, onAuthExpired, portfolios.length]);
+  }, [swrMutate, onAuthExpired]);
 
-  return {
+  const resolvedLoadStatus = isLoading && portfolios.length === 0 ? 'loading' : loadStatus;
+  const resolvedLoadError = error ? (error instanceof Error ? error.message : String(error)) : loadError;
+
+  return useMemo(() => ({
     portfolios,
     setPortfolios,
     netWorthHistory,
     setNetWorthHistory,
-    loadStatus: isLoading && portfolios.length === 0 ? 'loading' : loadStatus,
-    loadError: error ? (error instanceof Error ? error.message : String(error)) : loadError,
+    loadStatus: resolvedLoadStatus,
+    loadError: resolvedLoadError,
     isUsingCachedData,
     cacheUpdatedAt,
     lastUpdated,
     load,
     mutate: load,
-  };
+  }), [
+    portfolios,
+    setPortfolios,
+    netWorthHistory,
+    setNetWorthHistory,
+    resolvedLoadStatus,
+    resolvedLoadError,
+    isUsingCachedData,
+    cacheUpdatedAt,
+    lastUpdated,
+    load,
+  ]);
 }

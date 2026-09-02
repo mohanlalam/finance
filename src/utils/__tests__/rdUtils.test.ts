@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { RDAccount } from '../../types/portfolio';
-import { getRDInvestedAmount, getRDEffectiveValue, getRDMaturityValue } from '../rdUtils';
+import { getRDInvestedAmount, getRDEffectiveValue, getRDMaturityValue } from '../../domains/assets/rd/calculations/rdCompounding';
 
 describe('rdUtils', () => {
   const mockRD: RDAccount = {

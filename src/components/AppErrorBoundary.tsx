@@ -33,8 +33,12 @@ export default class AppErrorBoundary extends Component<AppErrorBoundaryProps, A
       error.message.includes('loading chunk') ||
       error.message.includes('Importing a module script failed') ||
       error.message.includes('module script failed');
+
+    const isStaleCache =
+      error instanceof ReferenceError &&
+      error.message.includes('is not defined');
       
-    if (isChunkError) {
+    if (isChunkError || isStaleCache) {
       const chunkErrorKey = 'finance_chunk_error_reload';
       const lastReload = sessionStorage.getItem(chunkErrorKey);
       const now = Date.now();

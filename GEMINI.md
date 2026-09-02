@@ -159,7 +159,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 40 test files and 222 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 44 test files and 235 unit/integration test cases (100% passing).
 
 ---
 
@@ -244,6 +244,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 | Date | Version | Key Changes & Milestones |
 | :--- | :--- | :--- |
+| **2026-09-02** | `v2.7` | **Comprehensive Security, Mathematical & Clean Architecture Hardening**: (1) Purged `VITE_APP_PIN` from build pipelines and client-side fallbacks; (2) Corrected XIRR bisection fallback convergence bracketing; (3) Added 999 & 995 bullion purity multipliers; (4) Stabilized `PortfolioActionContext` memoization barrier across price ticks; (5) Removed orphaned proxy files and debug scripts; (6) Fortified privacy logger with financial identifier regexes and recursive array traversal; (7) Verified 43 test files / 232 tests passing (100%). |
 | **2026-09-01** | `v2.6` | **Mobile UX, Security & Real-Time Valuation Hardening**: (1) Upgraded Quick Add Asset menu to a native bottom sheet modal docked cleanly at the bottom edge with backdrop blur and drag handle; (2) Added real-time auto-computation of Gold Market Valuation on weight & purity changes with two-way Buy Rate / gram ↔ Total Cost calculator; (3) Hardened PIN authentication with request dedupe cache isolation (`skipCache: true`, `X-App-Pin` header keying) and added `VITE_APP_PIN` to CI/CD build steps; (4) Added 20s hard timeout and automatic queue reset to `portfolioSyncService` to prevent mutex deadlocks; (5) Verified 40 test files / 222 tests passing (100%). |
 | **2026-09-01** | `v2.5` | Family Net Worth & Asset Valuation Decoupling: Decoupled Gold and Real Estate from Family Net Worth totals (now strictly computing from financial & deposit holdings: Stocks + FDs + RDs + SIPs) with standalone Total Investment and Live Valuation as of date metrics on their dedicated asset pages; added Edge Function CI/CD auto-deploy with `--project-ref` and graceful secret handling; verified 40 test files / 222 tests passing (100%). |
 | **2026-08-31** | `v2.4` | Mobile UI, Drawer & Navigation Hardening: Removed `startViewTransition` snapshot ghosting for instant crisp tab transitions, upgraded More Drawer to 100% solid opacity (`bg-[var(--surface-solid)]`) with body scroll locking and FAB z-index isolation, added global CSS date input constraints, fixed sort presets left clipping, verified 35 test files / 194 tests passing (100%). |

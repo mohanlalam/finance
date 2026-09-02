@@ -1,4 +1,4 @@
-import { uploadDocumentFile, generateDocumentStoragePath } from '../../../utils/supabaseStorage';
+import { documentStorageService } from '../../portfolio/services/documentStorageService';
 import { normalizeToIsoDate } from '../../../utils/aiDocumentExtractor';
 import { deriveGoldRates } from '../../../utils/goldPricing';
 import { SmartImportFormData, ImportSaveStep } from '../types';
@@ -200,10 +200,10 @@ export async function executeImportPersistence(
     let documentLinked = false;
     if (file) {
       onStepChange('UPLOADING_DOCUMENT', 'Uploading supporting document to secure vault...');
-      const storagePath = generateDocumentStoragePath(targetPortfolio, assetType, file.name);
+      const storagePath = documentStorageService.generateStoragePath(targetPortfolio, assetType, file.name);
       
       try {
-        await uploadDocumentFile('investment-documents', storagePath, file);
+        await documentStorageService.uploadDocument('investment-documents', storagePath, file);
         
         // 4. Linking Document Record
         onStepChange('LINKING_DOCUMENT', 'Linking document to asset...');
