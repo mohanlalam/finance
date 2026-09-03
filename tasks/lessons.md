@@ -311,4 +311,25 @@ After **any correction** from the user, append a new entry here with the pattern
 **Fix**: (1) Incorporated the `X-App-Pin` header directly into `apiClient.ts`'s deduplication `cacheKey`. (2) Added a `skipCache?: boolean` option to `FunctionRequestOptions` and passed `skipCache: true` on all `verifyPin` calls in `auth.ts`. (3) Added `VITE_APP_PIN: ${{ secrets.VITE_APP_PIN }}` to all GitHub Actions CI/CD build steps in `.github/workflows/deploy.yml`.  
 **Rule**: Never omit authentication and authorization headers from in-flight request deduplication cache keys. Always use `skipCache: true` for security authentication and PIN verification challenges so they are guaranteed to execute as live network checks.
 
+---
+
+### 2026-09-03 — Unified Single Top Banners vs. Per-Member Duplication Across Asset Classes
+**Mistake**: When viewing non-stock asset classes (FD, RD, SIP, Gold, Real Estate, Insurance, Vault), rendering repeated top summary banners or looping the entire view for each family member created visual bloat, uneven UI metrics, and redundant banner elements.  
+**Root Cause**: Earlier implementation looped the entire view per family member in `AssetTabContent.tsx`, creating 3 duplicate instances of top banners and controls on the screen instead of aggregating family-wide items into a single unified top banner with a member-grouped list below.  
+**Fix**: Replaced the 3x member loop in `AssetTabContent.tsx` with aggregated arrays (`allFixedDeposits`, `allRDAccounts`, `allSIPAccounts`, `allRealEstate`, `allInsurances`, `allDocuments`) passing all family holdings into a single unified view instance. Created `src/utils/familyMemberConfig.tsx` to standardize avatar icons and colors for Rammohan, Padmavathi, and Sai Laxmi. Structured every asset class identically: (1) Unified Family Banner at top with domain-essential summary metrics and interactive 1-click member breakdown filters; (2) Holdings List grouped by family member below.  
+**Rule**: Never duplicate top summary banners per family member across asset tabs. Always render exactly ONE unified family banner at the top of the asset view, provide domain-essential metrics and 1-click member filter pills in that banner, and display holdings grouped cleanly by member below.
+
+---
+
+### 2026-09-03 — Mobile View Compactness & 3-Column Member Breakdown Grid
+**Mistake**: On mobile screens (`< 768px`), member breakdown cards stacked into 3 tall vertical rows (`grid-cols-1 sm:grid-cols-3`), metric tiles occupied excessive height, and badges wrapped unevenly, pushing the actual asset holdings offscreen.  
+**Root Cause**: Desktop-first padding (`p-3 sm:p-3.5`), default column wrapping without `flex-1 sm:flex-initial` balance, and full-width card stacking on mobile.  
+**Fix**: 
+1. Transformed member breakdown into a compact 3-column row on mobile (`grid-cols-3 gap-1 sm:gap-1.5`) with `flex-col` content (16px avatar, bold name, primary value, secondary label) expanding to `sm:flex-row sm:items-center sm:justify-between` on desktop, saving ~65% vertical space.
+2. Compacted metric ribbons with `p-1.5 sm:p-2`, `gap-1.5 sm:gap-2`, and truncated wide-tracked micro-labels (`text-[9px] uppercase tracking-wider`).
+3. Balanced top badges with `flex-1 sm:flex-initial` for equal 50/50 distribution on mobile.
+4. In Gold Holdings, added canonical Tola weight ($1\text{ tola} = 11.6638\text{ g}$) as the 5th summary metric.  
+**Rule**: On mobile financial dashboards, always design member breakdown ribbons as compact side-by-side multi-column grids (`grid-cols-3 gap-1`) rather than stacking full-width cards vertically. Ensure top badge pairs use `flex-1 sm:flex-initial` to share mobile width equally without clipping or uneven wrapping.
+
+
 

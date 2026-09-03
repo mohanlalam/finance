@@ -442,14 +442,41 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 
 ## 5. 🧩 Asset Class Registry Views & Component Specs
 
-### Standardized Asset Registry Shell
+### Standardized Asset Registry Shell & Unified Single-Banner Architecture
 
-* Component: `src/components/ui/AssetRegistryContainer.tsx`
-* Used across all asset tabs (FD, RD, SIP, Gold, Real Estate, Insurance, Vault) to eliminate UI boilerplate:
-  * Standard header with category icon, title, asset count badge, and "+ Add" action button.
-  * Dynamic skeleton fallback (`<AssetCardSkeleton>`) during data load ticks.
-  * Clean `<EmptyState>` rendering when zero assets are present.
-  * Tab transition animations (`.tab-transition`).
+All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `Mutual Funds & SIPs`, `Real Estate`, `Insurance`, and `Document Vault`) strictly follow the **Unified Single-Banner Architecture**. Rather than repeating banners per member or looping entire views, each asset class renders exactly ONE top banner aggregating all family holdings, followed by the holdings list grouped cleanly by family member (`Rammohan`, `Padmavathi`, and `Sai Laxmi`).
+
+```
++-----------------------------------------------------------------------------------------------+
+| UNIFIED FAMILY ASSET BANNER (.apple-card p-2.5 sm:p-3.5)                                      |
+|                                                                                               |
+| ROW 1: [Icon] Total Family [Asset] [Combined Pill]                [Badge 1]    [Badge 2]     |
+|        Aggregated description across family portfolios            (Principal)  (Maturity)     |
+|                                                                                               |
+| ROW 2: SUMMARY METRICS RIBBON (grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2)             |
+|        [ Metric 1 ]        [ Metric 2 ]        [ Metric 3 ]        [ Metric 4 ] (or 5)        |
+|                                                                                               |
+| ROW 3: FAMILY MEMBERS BREAKDOWN (grid grid-cols-3 gap-1 sm:gap-1.5)                           |
+|        [ Rammohan Card ]         [ Padmavathi Card ]        [ Sai Laxmi Card ]                |
+|        Avatar + Value            Avatar + Value             Avatar + Value                    |
++-----------------------------------------------------------------------------------------------+
+| HOLDINGS REGISTRY (Grouped by Member with sticky section headers)                             |
+|  ▼ 👤 Rammohan Holdings (Count & Total Value)                                                 |
+|     [ Holding Card 1 ]  [ Holding Card 2 ] ...                                                |
+|  ▼ 👤 Padmavathi Holdings (Count & Total Value)                                               |
+|     [ Holding Card 1 ]  [ Holding Card 2 ] ...                                                |
+|  ▼ 👤 Sai Laxmi Holdings (Count & Total Value)                                                |
+|     [ Holding Card 1 ]  [ Holding Card 2 ] ...                                                |
++-----------------------------------------------------------------------------------------------+
+```
+
+#### Mobile Compactness & Clean UI Standards
+1. **Row 1 Badges**: On mobile (`< 768px`), top metric badges use `flex-1 sm:flex-initial` to share screen width equally (50/50) in a clean compact row with `px-2 py-0.5`, preventing awkward wrapping or text clipping.
+2. **Row 2 Metric Ribbon**: Mobile padding is tightly tuned to `p-1.5 sm:p-2` with `gap-1.5 sm:gap-2`. Labels use `text-[9px] uppercase tracking-wider truncate` and values use `text-xs sm:text-sm font-bold tnum truncate`.
+3. **Row 3 Member Breakdown (3-Col Grid)**: Uses `grid-cols-3 gap-1 sm:gap-1.5` instead of vertical stacking. On mobile, cards render in a clean vertical flex stack (`flex-col items-start min-w-0 p-1.5`) featuring a 16px avatar, bold name, and truncated value/weight, expanding smoothly to `sm:flex-row sm:items-center sm:justify-between p-2` on desktop. Saves **~65% vertical viewport space** on mobile devices.
+4. **1-Click Interactive Filtering**: Clicking any family member's card in Row 3 isolates their holdings below with an active highlight ring (`ring-1 ring-[color]/30`) and reveals an instant *"View All"* button.
+
+---
 
 ### Stock & ETF Holdings Table
 
@@ -478,10 +505,14 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 ### Fixed Deposits (FD) View & Details Cards
 
 * Component: `FixedDepositView.tsx` & `DepositDetailsCard.tsx`
-* Cards Specs:
+* **Unified Banner Structure**:
+  * **Row 1**: Landmark icon, title, `Combined` badge, Total Principal & Total Maturity badges.
+  * **Row 2 (4 Metrics)**: Principal Invested, Current/Maturity Value, Accrued Interest, Active Deposits count.
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) with Rammohan, Padmavathi, and Sai Laxmi principal and maturity totals.
+* **Card Specs**:
   * Bank Name & Logo Badge (e.g., HDFC, ICICI, SBI).
   * Principal Amount vs Projected Maturity Amount split.
-  * Interest Rate Pill (`% p.a.`) and Tenor Duration.
+  * Interest Rate Pill (`% p.a.`) and strictly Half-Yearly compounding ($n=2$).
   * Progress Bar: Visual bar showing elapsed tenure percentage toward maturity.
   * Document Attachment Badge: Displays linked FD advice certificate with one-click view trigger.
   * Maturity Alert: Highlights in amber when within 30 days of maturity.
@@ -490,7 +521,11 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 ### Recurring Deposits (RD) View & Installments
 
 * Component: `RDView.tsx`, `RDAccountCard.tsx`, & `RDInstallmentSchedule.tsx`
-* Visual Specs:
+* **Unified Banner Structure**:
+  * **Row 1**: Clock icon, title, `Combined` badge, Total Monthly SIP & Current Value badges.
+  * **Row 2 (4 Metrics)**: Total Invested, Current Valuation, Accrued Interest, Monthly Deposit.
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) showing monthly SIP and current balance per member.
+* **Visual Specs**:
   * Monthly Commitment Indicator: Shows monthly deposit requirement and execution date.
   * Accumulated Balance Tracker.
   * Installment Schedule Matrix: Interactive calendar list checking off paid monthly installments vs pending future deposits.
@@ -499,26 +534,42 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 ### Mutual Fund SIP View & Live NAV Tracker
 
 * Component: `SIPView.tsx`, `SIPAccountCard.tsx`, `SIPFormModal.tsx`, `SIPFormFields.tsx`
-* Features:
+* **Unified Banner Structure**:
+  * **Row 1**: TrendingUp icon, title, `Combined` badge, Monthly Inflow & Current Valuation badges.
+  * **Row 2 (4 Metrics)**: Total Invested, Current Valuation, Monthly SIP, Overall Return (P&L and %).
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) showing monthly SIP and current valuation per member.
+* **Features**:
   * Direct integration with AMFI Live Mutual Fund NAV schemes.
   * Displays Scheme Category (Equity, Debt, Hybrid, Index), Monthly SIP Date, and Total Amount Invested.
-  * XIRR Returns Badge: Calculated annualized internal rate of return.
   * Active / Paused status pill toggle.
   * Document Attachment Badge: Links fund statement or CAS summary.
 
 ### Physical & Digital Gold View
 
 * Component: `GoldHoldingView.tsx`, `GoldHoldingCard.tsx`, `GoldFormModal.tsx`
-* Specifications:
+* **Unified Banner Structure**:
+  * **Row 1**: Bullion icon, title, `Combined` badge, Live 24K & 22K spot rates with inline calibration trigger (✎), Sync trigger, Total Weight (g), and Total Valuation.
+  * **Row 2 (5 Summary Metrics Ribbon)**:
+    1. `Family Invested`
+    2. `Current Value`
+    3. `Family Weight (g)`
+    4. `Weight in Tola` (Canonical conversion: $1\text{ tola} = 11.6638\text{ g}$)
+    5. `Overall Return` (Monetary gain + percentage return)
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) showing weight in grams, weight in tola, and valuation per member.
+* **Holding Card Specifications**:
   * Supports 3 Sub-types: Sovereign Gold Bonds (SGB), Digital Gold, and Physical Bullion/Jewelry.
-  * Tracks Weight in Grams, Purchase Rate per Gram, and Live Benchmark Rate (24K Gold per Gram).
+  * Tracks Weight in Grams, Weight in Tola, Purchase Rate per Gram, and Live Benchmark Rate (24K Gold per Gram).
   * SGB Interest Earnings Tracker (2.5% p.a. semi-annual payout indicator).
   * Hallmark Certification Badge: One-click preview of hallmark certificate.
 
 ### Real Estate Asset Cards
 
 * Component: `RealEstateView.tsx`, `RealEstateCard.tsx`, `RealEstateFormModal.tsx`
-* Visual Attributes:
+* **Unified Banner Structure**:
+  * **Row 1**: Building2 icon, title, `Combined` badge, Total Invested & Current Valuation badges.
+  * **Row 2 (4 Metrics)**: Total Investment, Current Valuation, Total Properties count, Overall Appreciation.
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) showing property valuation and invested cost per member.
+* **Visual Attributes**:
   * Property Type Tags: Residential, Commercial, Land / Plot.
   * Purchase Value vs Current Estimated Market Valuation.
   * Rental Income Yield: Monthly rental collection metric and annualized yield %.
@@ -527,7 +578,11 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 ### Insurance Policies View & Renewal Urgency
 
 * Component: `InsuranceView.tsx`, `InsurancePolicyCard.tsx`, `InsuranceFormModal.tsx`
-* Features:
+* **Unified Banner Structure**:
+  * **Row 1**: Shield icon, title, `Combined` badge, Total Sum Assured & Annual Premium badges.
+  * **Row 2 (4 Metrics)**: Total Sum Assured, Annual Premium Outflow, Active Policies count, Renewals Alert (Due Soon warning).
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) showing sum assured and annual premium per member.
+* **Features**:
   * Policy Types: Term Life, Health Insurance, Vehicle Insurance, ULIP / Investment.
   * Sum Assured Coverage Amount vs Annual Premium Cost.
   * Expiry / Premium Due Date: Features urgency badges (Rose tag when due within 60 days).
@@ -536,7 +591,11 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 ### Document Vault View & Taxonomy Attachment
 
 * Component: `DocumentVaultView.tsx` & `DocumentAttachmentField.tsx`
-* Structure:
+* **Unified Banner Structure**:
+  * **Row 1**: FileText icon, title, `Combined` badge, Total Files & Categories count badges.
+  * **Row 2 (4 Metrics)**: Total Documents, Attached to Assets, General Records, Expiring/Due Soon.
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) showing document counts per member.
+* **Structure**:
   * Taxonomy Categories: `fd_advice`, `policy_schedule`, `title_deed`, `tax_receipt`, `invoice`, `gold_hallmark`, `account_statement`, `general`.
   * Expiration Warning Pills: Highlights identity documents or policies nearing expiration.
   * Secure Download / View action triggers with thumbnail previews.

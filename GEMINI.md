@@ -57,6 +57,7 @@ External APIs & Databases (PostgreSQL, Supabase Functions, Yahoo Finance, AMFI, 
   * **[useAssetFilterSort.ts](src/hooks/useAssetFilterSort.ts)**: Standardized client-side filtering and multi-field sorting hook for asset registries.
   * **[useModalState.ts](src/hooks/useModalState.ts)**: Custom hook encapsulating modal visibility state (`quickAddTarget`, `showAddModal`, `showAddFamily`, `renameTarget`, `deleteTarget`, etc.) and computing `isAnyModalOpen` to control floating action buttons.
   * **[useLongPress.ts](src/hooks/useLongPress.ts)**, **[useSwipeNavigation.ts](src/hooks/useSwipeNavigation.ts)**, **[usePullToRefresh.ts](src/hooks/usePullToRefresh.ts)**: Mobile gesture and tactile interaction suite.
+  * **[familyMemberConfig.tsx](src/utils/familyMemberConfig.tsx)**: Centralized configuration provider mapping family members (`Rammohan`, `Padmavathi`, `Sai Laxmi`) to canonical avatar icons, high-contrast badge colors, and background theme tokens across all registry views.
 
 ---
 
@@ -137,7 +138,12 @@ All core financial calculations are pure functions with zero UI, React, or datab
 ---
 
 ### 6. Registry Component Routing & Modular Views
-* **[AssetTabContent.tsx](src/components/AssetTabContent.tsx)**: Orchestrator component rendering the active asset registry view with dynamic lazy loading (`React.lazy` and `React.Suspense`) for ALL registry views and tables (`FixedDepositView`, `RDView`, `SIPView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, `TaxHarvestingView`, `PortfolioTable`).
+* **[AssetTabContent.tsx](src/components/AssetTabContent.tsx)**: Orchestrator component rendering the active asset registry view with dynamic lazy loading (`React.lazy` and `React.Suspense`) for ALL registry views and tables (`FixedDepositView`, `RDView`, `SIPView`, `GoldHoldingView`, `RealEstateView`, `InsuranceView`, `DocumentVaultView`, `TaxHarvestingView`, `PortfolioTable`). Aggregates all family assets into a single unified top banner view per asset class rather than repeating banners per member.
+* **Unified Single-Banner Architecture (All 7 Asset Classes)**:
+  * **Row 1**: Category identity, title, `Combined` badge, subtitle, and primary aggregate badges (with live spot calibration for Bullion).
+  * **Row 2**: High-density 4-to-5 summary metrics ribbon matching Stocks & FD formatting.
+  * **Row 3**: 3-column interactive Family Members Breakdown cards (`grid-cols-3`) with 1-click filtering for Rammohan, Padmavathi, and Sai Laxmi.
+  * **Holdings Registry**: Rendered cleanly below the banner grouped by family member with dedicated section headers.
 * **Modular Domain Components**:
   * **[AssetRegistryContainer.tsx](src/components/ui/AssetRegistryContainer.tsx)**: Standardized shell for asset registry headers, add buttons, and loading fallbacks.
   * **[DocumentAttachmentField.tsx](src/components/ui/DocumentAttachmentField.tsx)**: Document uploader supporting taxonomy tags (`fd_advice`, `policy_schedule`, `title_deed`, `tax_receipt`, `invoice`, `gold_hallmark`, `account_statement`, `general`) with 10MB bounds.
@@ -148,6 +154,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * **[FixedDepositView.tsx](src/components/FixedDepositView.tsx)**, **[DepositDetailsCard.tsx](src/components/fd/DepositDetailsCard.tsx)**, and **[FDFormModal.tsx](src/components/fd/FDFormModal.tsx)**.
   * **[RDView.tsx](src/components/rd/RDView.tsx)**, **[RDAccountCard.tsx](src/components/rd/RDAccountCard.tsx)**, and **[RDFormModal.tsx](src/components/rd/RDFormModal.tsx)**.
   * **[SIPView.tsx](src/components/sip/SIPView.tsx)**, **[SIPAccountCard.tsx](src/components/sip/SIPAccountCard.tsx)**, and **[SIPFormModal.tsx](src/components/sip/SIPFormModal.tsx)**.
+  * **[DocumentVaultView.tsx](src/components/documents/DocumentVaultView.tsx)** and **[TaxHarvestingView.tsx](src/components/tax/TaxHarvestingView.tsx)**.
 
 ---
 
@@ -244,6 +251,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 | Date | Version | Key Changes & Milestones |
 | :--- | :--- | :--- |
+| **2026-09-03** | `v2.8` | **Unified Single-Banner Asset Architecture & Ultra-Compact Mobile Layout**: (1) Unified all 7 asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `Mutual Funds & SIPs`, `Real Estate`, `Insurance`, `Document Vault`) with exactly ONE single top family banner and member-grouped holdings list below; (2) Standardized `familyMemberConfig.tsx` for consistent avatar icons, color badges, and themes for Rammohan, Padmavathi, and Sai Laxmi; (3) Added canonical Tola weight ($1\text{ tola} = 11.6638\text{ g}$) as the 5th summary metric for Gold Holdings; (4) Compacted mobile layouts with a side-by-side 3-column member breakdown (`grid-cols-3 gap-1`), 2x2 metric ribbons (`p-1.5`), and balanced 50/50 top badges (`flex-1 sm:flex-initial`), saving ~65% vertical screen space; (5) Verified 45 test files / 241 tests passing (100%). |
 | **2026-09-02** | `v2.7` | **Comprehensive Security, Mathematical & Clean Architecture Hardening**: (1) Purged `VITE_APP_PIN` from build pipelines and client-side fallbacks; (2) Corrected XIRR bisection fallback convergence bracketing; (3) Added 999 & 995 bullion purity multipliers; (4) Stabilized `PortfolioActionContext` memoization barrier across price ticks; (5) Removed orphaned proxy files and debug scripts; (6) Fortified privacy logger with financial identifier regexes and recursive array traversal; (7) Verified 43 test files / 232 tests passing (100%). |
 | **2026-09-01** | `v2.6` | **Mobile UX, Security & Real-Time Valuation Hardening**: (1) Upgraded Quick Add Asset menu to a native bottom sheet modal docked cleanly at the bottom edge with backdrop blur and drag handle; (2) Added real-time auto-computation of Gold Market Valuation on weight & purity changes with two-way Buy Rate / gram ↔ Total Cost calculator; (3) Hardened PIN authentication with request dedupe cache isolation (`skipCache: true`, `X-App-Pin` header keying) and added `VITE_APP_PIN` to CI/CD build steps; (4) Added 20s hard timeout and automatic queue reset to `portfolioSyncService` to prevent mutex deadlocks; (5) Verified 40 test files / 222 tests passing (100%). |
 | **2026-09-01** | `v2.5` | Family Net Worth & Asset Valuation Decoupling: Decoupled Gold and Real Estate from Family Net Worth totals (now strictly computing from financial & deposit holdings: Stocks + FDs + RDs + SIPs) with standalone Total Investment and Live Valuation as of date metrics on their dedicated asset pages; added Edge Function CI/CD auto-deploy with `--project-ref` and graceful secret handling; verified 40 test files / 222 tests passing (100%). |

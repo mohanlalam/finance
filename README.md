@@ -18,11 +18,13 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 - **Live Market Data Hub** — Multi-provider quotes coordinator with automated background polling, in-memory TTL caching, and offline fallback (Yahoo Finance for equities, AMFI India for Mutual Fund NAVs, and MCX/IBJA for bullion).
 - **Tax Loss Harvesting Opportunity Finder** — Indian Income Tax FY24-25 analyzer distinguishing equity STCG (20%) / LTCG (12.5% over ₹1.25L) from debt and gold slab rates.
 
-### 💼 Multi-Asset Registry Suite
-- **Fixed Deposits (FD)** — Compounded interest calculations (Indian banking half-yearly/quarterly standards), auto-suggestions for all major Indian banks, maturity date timeline progress bars, and linked deposit receipts.
+### 💼 Multi-Asset Registry Suite (Unified Single-Banner Architecture)
+- **Unified Single-Banner Architecture** — All non-stock asset classes render exactly ONE top banner aggregating all family holdings with domain-essential metrics and interactive 1-click member filters (`Rammohan`, `Padmavathi`, `Sai Laxmi`), followed by holdings grouped cleanly by family member below.
+- **Ultra-Compact Mobile Layout** — Tuned for mobile screens (`< 768px`) with a side-by-side 3-column member breakdown (`grid-cols-3 gap-1`), high-density 2x2 metric ribbons (`p-1.5`), and 50/50 balanced top badges (`flex-1 sm:flex-initial`), saving **~65% vertical screen space**.
+- **Fixed Deposits (FD)** — Compounded interest calculations (strictly Indian banking half-yearly compounding $n=2$), auto-suggestions for all major Indian banks, maturity date timeline progress bars, and linked deposit receipts.
 - **Recurring Deposits (RD)** — Multi-month installment tracking with Indian bank datalists, paid vs. overdue status tracking, and one-click installment recording.
 - **Mutual Fund SIPs** — Real-time scheme tracking via AMFI India NAV automation, top Indian scheme presets (Parag Parikh, Quant, Mirae, etc.), and unit holdings valuation.
-- **Gold Holdings & Bullion (Real-Time Live Valuation)** — Two-way Buy Rate / gram ↔ Total Purchase Cost calculator, hallmark purity multipliers (24K, 22K/916, 18K/750, 14K/585), real-time auto-computed Current Market Valuation on weight and purity changes, live MCX spot rate appreciation, and standalone Total Investment & Value as of date metrics.
+- **Gold Holdings & Bullion (Real-Time Live Valuation)** — Two-way Buy Rate / gram ↔ Total Purchase Cost calculator, hallmark purity multipliers (24K, 22K/916, 18K/750, 14K/585), real-time auto-computed Current Market Valuation on weight and purity changes, live MCX spot rate appreciation, 5 summary metrics including canonical **Weight in Tola ($1\text{ tola} = 11.6638\text{ g}$)**, and standalone Total Investment & Value as of date metrics.
 - **Real Estate (Standalone Valuation)** — Property acquisition cost basis, current valuations as of date, and annual rental income yield percentages tracked independently from liquid family net worth.
 - **Insurances** — Term, health, life, and motor policy registries with premium renewal timers and overdue status warnings.
 - **Document Vault** — Secure attachment manager linked by asset class with expiry date tracking and upcoming deadline alerts.
@@ -208,7 +210,7 @@ project antigravity/
 │   │   └── xirrClient.ts         # Asynchronous Promise client with sync fallback
 │   ├── types/
 │   │   └── portfolio.ts          # Core TypeScript interfaces (Holding, NetWorthSnapshot, etc.)
-│   └── utils/                    # Shared pure utility modules (math, dates, formatters, storage)
+│   └── utils/                    # Shared pure utility modules (math, dates, formatters, storage, familyMemberConfig)
 ├── supabase/
 │   ├── functions/                # Deno Edge Functions (holdings-crud, market-data, snapshot-net-worth, verify-pin)
 │   └── migrations/               # PostgreSQL schema migrations, indexes, and RLS policies
