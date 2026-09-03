@@ -1,4 +1,3 @@
-import { Card } from './Card';
 import { Skeleton } from './Skeleton';
 
 /**
@@ -6,7 +5,7 @@ import { Skeleton } from './Skeleton';
  */
 export function AreaChartSkeleton({ className = '' }: { className?: string }) {
   return (
-    <Card padding="md" className={`h-[320px] sm:h-[370px] flex flex-col justify-between overflow-hidden ${className}`}>
+    <div className={`apple-card p-5 h-[320px] sm:h-[370px] flex flex-col justify-between overflow-hidden ${className}`}>
       {/* Header controls skeleton */}
       <div className="flex items-center justify-between">
         <div className="space-y-1.5">
@@ -55,7 +54,7 @@ export function AreaChartSkeleton({ className = '' }: { className?: string }) {
         <Skeleton width="100px" height="14px" className="rounded-sm" />
         <Skeleton width="80px" height="14px" className="rounded-sm" />
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -64,7 +63,7 @@ export function AreaChartSkeleton({ className = '' }: { className?: string }) {
  */
 export function DonutChartSkeleton({ className = '' }: { className?: string }) {
   return (
-    <Card padding="md" className={`h-[320px] sm:h-[370px] flex flex-col justify-between ${className}`}>
+    <div className={`apple-card p-5 h-[320px] sm:h-[370px] flex flex-col justify-between ${className}`}>
       <div className="flex items-center justify-between">
         <Skeleton width="120px" height="18px" className="rounded-md" />
         <Skeleton width="60px" height="24px" className="rounded-md" />
@@ -90,7 +89,7 @@ export function DonutChartSkeleton({ className = '' }: { className?: string }) {
         <Skeleton width="80px" height="12px" className="rounded-sm" />
         <Skeleton width="60px" height="12px" className="rounded-sm" />
       </div>
-    </Card>
+    </div>
   );
 }
 

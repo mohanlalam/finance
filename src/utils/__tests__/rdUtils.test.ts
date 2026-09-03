@@ -23,8 +23,11 @@ describe('rdUtils', () => {
     expect(getRDInvestedAmount(mockRD)).toBe(20000);
   });
 
-  it('calculates invested amount as 0 when no contributions', () => {
-    expect(getRDInvestedAmount({ ...mockRD, contributions: [] })).toBe(0);
+  it('calculates invested amount for untracked RD with empty contributions array based on elapsed months', () => {
+    // 3 months elapsed from 2026-01-01 to 2026-03-15: 3 * 10000 = 30000
+    expect(getRDInvestedAmount({ ...mockRD, contributions: [] }, new Date('2026-03-15'))).toBe(30000);
+    // Future RD returns 0
+    expect(getRDInvestedAmount({ ...mockRD, start_date: '2028-01-01', contributions: [] }, new Date('2026-03-15'))).toBe(0);
   });
 
   it('returns maturity amount if status is matured', () => {

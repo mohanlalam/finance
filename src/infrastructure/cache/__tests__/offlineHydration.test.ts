@@ -50,6 +50,7 @@ describe('PWA Offline Cache & Instant Hydration Engine', () => {
     expect(isValidCachedData(null)).toBe(false);
     expect(isValidCachedData({})).toBe(false);
     expect(isValidCachedData({ portfolios: 'not-an-array' })).toBe(false);
+    expect(isValidCachedData({ portfolios: samplePortfolios, version: 999 })).toBe(false);
     expect(isValidCachedData({ portfolios: samplePortfolios })).toBe(true);
   });
 

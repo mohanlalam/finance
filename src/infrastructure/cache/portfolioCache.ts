@@ -15,6 +15,7 @@ export interface CachedPortfolioPayload {
 export function isValidCachedData(data: unknown): data is CachedPortfolioPayload {
   if (data == null || typeof data !== 'object') return false;
   const obj = data as Record<string, unknown>;
+  if (obj.version !== undefined && obj.version !== PORTFOLIO_CACHE_VERSION) return false;
   return Array.isArray(obj.portfolios);
 }
 

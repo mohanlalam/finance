@@ -25,7 +25,7 @@ export function getElapsedMonthsStandard(startDate: Date, endDate: Date = new Da
 
 export function getRDInvestedAmount(account: RDAccount, now: Date = new Date()): number {
   if (!account) return 0;
-  if (Array.isArray(account.contributions)) {
+  if (account.contributions && account.contributions.length > 0) {
     let sum = 0;
     const len = account.contributions.length;
     const nowMs = now.getTime();

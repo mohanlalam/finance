@@ -1,4 +1,5 @@
 import { Portfolio } from '../../../types/portfolio';
+import { ASSET_COLORS } from '../../../utils/assetColors';
 
 export interface AssetAllocationItem {
   key: string;
@@ -57,8 +58,6 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
 /**
  * Calculates allocation percentages for donut and pie charts.
  */
-import { ASSET_COLORS } from '../../../utils/assetColors';
-
 export function calculateAssetAllocations(breakdown: AssetClassBreakdown): AssetAllocationItem[] {
   const total =
     breakdown.stocks +

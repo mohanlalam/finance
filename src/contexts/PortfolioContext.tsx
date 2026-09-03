@@ -71,7 +71,7 @@ export function usePortfolioState(): PortfolioDataContextValue {
   const entities = useContext(PortfolioEntitiesContext);
   const status = useContext(PortfolioStatusContext);
   if (!entities || !status) throw new Error('usePortfolioState must be used within PortfolioProvider');
-  return { ...entities, ...status };
+  return useMemo(() => ({ ...entities, ...status }), [entities, status]);
 }
 
 export function usePortfolioActions(): PortfolioActionContextValue {

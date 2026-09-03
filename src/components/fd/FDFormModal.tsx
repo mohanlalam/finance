@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FixedDeposit } from '../../types/portfolio';
+import { calculateFDMaturityValue } from '../../domains/assets/fd/calculations/fdCompounding';
 import Modal from '../Modal';
 import FDFormFields from './FDFormFields';
 
@@ -69,15 +70,11 @@ export const FDFormModal = React.memo(function FDFormModal({
     const r = parseFloat(interestRate);
     if (isNaN(p) || isNaN(r) || p <= 0 || r <= 0 || !startDate || !maturityDate) return;
     
-    const start = new Date(startDate);
-    const end = new Date(maturityDate);
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const years = diffTime / (1000 * 60 * 60 * 24 * 365.25);
-    if (years <= 0) return;
-    
-    // Half-yearly compounding for FDs
-    const matAmt = p * Math.pow(1 + r / 200, 2 * years);
-    setMaturityAmount(matAmt.toFixed(2));
+    // Half-yearly compounding for FDs (frequency = 2)
+    const matAmt = calculateFDMaturityValue(p, r, startDate, maturityDate, 2);
+    if (matAmt > 0) {
+      setMaturityAmount(matAmt.toFixed(2));
+    }
   }, [principal, interestRate, startDate, maturityDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {

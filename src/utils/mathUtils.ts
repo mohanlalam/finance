@@ -32,6 +32,7 @@ export function compoundValue(
 export function roundToDecimals(val: number, decimals: number = 2): number {
   if (isNaN(val)) return 0;
   const factor = Math.pow(10, decimals);
-  return Math.round((val + Number.EPSILON) * factor) / factor;
+  const eps = Math.abs(val) * Number.EPSILON;
+  return Math.round((val + (val >= 0 ? eps : -eps)) * factor) / factor;
 }
 
