@@ -19,8 +19,19 @@ export interface ExtractedField<T = string | number> {
   value: T;
   confidence: number; // 0.0 - 1.0
   source?: string;
+  snippet?: string; // verbatim source snippet from document
+  boundingBox?: [number, number, number, number]; // [ymin, xmin, ymax, xmax] coordinates
+  pageIndex?: number; // 1-indexed document page
   status: FieldStatus;
   warning?: string;
+}
+
+export interface DisambiguationResult {
+  portfolioName: string; // 'rammohan' | 'padmavathi' | 'sailaxmi'
+  memberLabel: string;   // 'Rammohan' | 'Padmavathi' | 'Sai Laxmi'
+  matchType: 'pan' | 'name' | 'folio' | 'default';
+  confidence: number;    // 0.0 - 1.0
+  details: string;       // e.g. "Matched PAN: ABCDE1234F"
 }
 
 export interface SmartImportExtractionResult {
@@ -33,6 +44,20 @@ export interface SmartImportExtractionResult {
   missingFields: string[];
   rawText?: string;
   sourcePages?: number;
+  disambiguation?: DisambiguationResult;
+}
+
+export interface BatchImportItem {
+  id: string;
+  file: File;
+  filePreview: string | null;
+  status: 'pending' | 'processing' | 'ready' | 'error' | 'saved';
+  error?: string;
+  extractedResult: SmartImportExtractionResult | null;
+  formData: SmartImportFormData;
+  targetPortfolio: string;
+  disambiguation: DisambiguationResult;
+  duplicateMatch?: DuplicateMatch | null;
 }
 
 export type ImportSaveStep =

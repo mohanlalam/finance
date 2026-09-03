@@ -125,6 +125,10 @@ All core financial calculations are pure functions with zero UI, React, or datab
 * **AI Assistant Domain (`src/domains/ai/`)**:
   * **[assistantEngine.ts](src/domains/ai/assistant/assistantEngine.ts)** & **[index.ts](src/domains/ai/index.ts)**: Deterministic client-side NLP assistant engine parsing and evaluating 17 financial intents (`NET_WORTH`, `PERFORMERS`, `MATURITY_TIMELINE`, `ALLOCATION_SPLIT`, `SPECIFIC_GOLD`, `SPECIFIC_MUTUAL_FUNDS`, `SPECIFIC_STOCKS`, `SPECIFIC_FDS`, `INSURANCE_REMINDERS`, `FAMILY_BREAKDOWN`, `NEXT_SIP_DATE`, `EMERGENCY_FUND`, `RENTAL_YIELD`, `EXPIRED_DOCUMENTS`, `COMPREHENSIVE_SEARCH`, `UNKNOWN`, `HELP`) with matched asset badges and zero hallucinated numbers.
   * **[wealthStrategistEngine.ts](src/domains/ai/assistant/wealthStrategistEngine.ts)**: Multi-Agent Conversational Wealth Strategist decomposing compound multi-clause financial reasoning queries into deterministic pure math domain tool calls (`findTaxHarvestingOpportunities`, `checkInsuranceCommitments`, `auditFixedDepositLock`, `cashFlowDeltaSolver`) with verified executive advisory reports and interactive simulation action chips.
+* **Smart Import & Family Vault Agent Domain (`src/domains/smart-import/`)**:
+  * **[entityDisambiguationService.ts](src/domains/smart-import/services/entityDisambiguationService.ts)**: Cross-Asset Entity Disambiguation automatically pre-sorting documents into Rammohan, Padmavathi, or Sai Laxmi registries based on PAN patterns, folios, and name hints.
+  * **[evidenceHeatmapService.ts](src/domains/smart-import/services/evidenceHeatmapService.ts)**: Visual Hallucination Safeguard computing confidence ratings, exact source text snippets, and document coordinates for parsed financial figures.
+  * **[BatchQuarantineReview.tsx](src/components/smart-import/BatchQuarantineReview.tsx)**: Batch multi-statement synthesis quarantine review staging UI supporting parallel multi-document drops and 1-click batch approvals.
 * **Backup & Restore Domain (`src/domains/portfolio/backup/`)**:
   * **[backupSchema.ts](src/domains/portfolio/backup/backupSchema.ts)** & **[backupValidator.ts](src/domains/portfolio/backup/backupValidator.ts)**: Schema-enforcing backup and restore diagnostic engine with envelope validation and collision detection.
 
@@ -161,13 +165,13 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 ### 7. Testing Strategy
 * **Test Conventions & Locations**:
-  * Unit and pure calculation tests: located under `src/domains/__tests__/` (e.g., `portfolioTotals.test.ts`, `taxHarvesting.test.ts`, `goldValuation.test.ts`, `dataQuality.test.ts`, `backupValidator.test.ts`, `wealthStrategist.test.ts`).
+  * Unit and pure calculation tests: located under `src/domains/__tests__/` (e.g., `portfolioTotals.test.ts`, `taxHarvesting.test.ts`, `goldValuation.test.ts`, `dataQuality.test.ts`, `backupValidator.test.ts`, `wealthStrategist.test.ts`, `entityDisambiguationService.test.ts`, `evidenceHeatmapService.test.ts`).
   * Component & formatter tests: located under `src/utils/__tests__/` and `src/hooks/__tests__/`.
 * **Mocking & Environment Isolation**:
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 47 test files and 250 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 49 test files and 256 unit/integration test cases (100% passing).
 
 ---
 

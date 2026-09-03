@@ -1,14 +1,16 @@
 import React, { useRef } from 'react';
-import { Upload, Camera } from '../icons/AppIcons';
+import { Upload, Camera, Sparkles } from '../icons/AppIcons';
 
 interface ImportDropZoneProps {
   onFileSelect: (file: File) => void;
+  onFilesSelect?: (files: File[]) => void;
   isProcessing: boolean;
   onOpenManualApiKeyModal?: () => void;
 }
 
 export const ImportDropZone: React.FC<ImportDropZoneProps> = ({
   onFileSelect,
+  onFilesSelect,
   isProcessing,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -18,31 +20,37 @@ export const ImportDropZone: React.FC<ImportDropZoneProps> = ({
     e.preventDefault();
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (isProcessing) return;
-    const droppedFile = e.dataTransfer.files?.[0];
-    if (droppedFile) {
-      onFileSelect(droppedFile);
+  const handleFiles = (files: FileList | null) => {
+    if (!files || files.length === 0 || isProcessing) return;
+    const fileArray = Array.from(files);
+    if (fileArray.length > 1 && onFilesSelect) {
+      onFilesSelect(fileArray);
+    } else if (fileArray.length === 1 && onFilesSelect) {
+      onFilesSelect(fileArray);
+    } else {
+      onFileSelect(fileArray[0]);
     }
   };
 
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    handleFiles(e.dataTransfer.files);
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      onFileSelect(selectedFile);
-    }
+    handleFiles(e.target.files);
   };
 
   return (
     <div
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-500/60 dark:hover:border-amber-500/60 rounded-2xl p-8 text-center transition-all bg-slate-50/50 dark:bg-slate-900/30 group"
+      className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-500/60 dark:hover:border-amber-500/60 rounded-2xl p-8 text-center transition-all bg-slate-50/50 dark:bg-slate-900/30 group relative overflow-hidden"
     >
       <input
         ref={fileInputRef}
         type="file"
+        multiple
         accept="image/*,application/pdf"
         className="hidden"
         onChange={handleChange}
@@ -62,11 +70,16 @@ export const ImportDropZone: React.FC<ImportDropZoneProps> = ({
         <Upload size={28} />
       </div>
 
+      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px] font-bold tracking-wide uppercase mb-2">
+        <Sparkles size={11} />
+        Multi-Document Batch Synthesis
+      </div>
+
       <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">
-        Upload Investment Document
+        Drop Investment Statements or Receipts
       </h4>
-      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-        Drop your Fixed Deposit advice, Gold bill, Mutual Fund statement, or Insurance receipt (PDF, JPG, PNG)
+      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
+        Drop multiple files together (Zerodha CAS, HDFC FD advice, SBI RD slip, Tanishq gold invoice, or Insurance policies). AI will extract and pre-sort by family member.
       </p>
 
       <div className="mt-5 flex items-center justify-center gap-3">
@@ -76,7 +89,7 @@ export const ImportDropZone: React.FC<ImportDropZoneProps> = ({
           disabled={isProcessing}
           className="px-4 py-2 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-secondary)]/80 text-xs font-bold text-[var(--text-primary)] border border-[var(--border-subtle)] transition-all cursor-pointer ios-press"
         >
-          Browse Files
+          Browse Files (Batch Supported)
         </button>
         <button
           type="button"

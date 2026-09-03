@@ -36,6 +36,21 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
     onFormChange((prev) => ({ ...prev, [key]: value }));
   };
 
+  const renderConfidenceBadge = (fieldKey: string, label: string) => {
+    const f = fields[fieldKey];
+    return (
+      <ImportConfidenceBadge
+        confidence={f?.confidence}
+        status={f?.status}
+        source={f?.source}
+        snippet={f?.snippet}
+        boundingBox={f?.boundingBox}
+        pageIndex={f?.pageIndex}
+        fieldLabel={label}
+      />
+    );
+  };
+
   return (
     <div className="space-y-4">
       {/* Duplicate Warning */}
@@ -74,7 +89,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
               <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                 Bank / Institution *
               </label>
-              <ImportConfidenceBadge confidence={fields.institutionName?.confidence} />
+              {renderConfidenceBadge('institutionName', 'Bank / Institution')}
             </div>
             <input
               type="text"
@@ -91,7 +106,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Principal Amount (₹) *
                 </label>
-                <ImportConfidenceBadge confidence={fields.principalAmount?.confidence} />
+                {renderConfidenceBadge('principalAmount', 'Principal Amount')}
               </div>
               <input
                 type="number"
@@ -105,7 +120,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Interest Rate (% p.a.) *
                 </label>
-                <ImportConfidenceBadge confidence={fields.interestRate?.confidence} />
+                {renderConfidenceBadge('interestRate', 'Interest Rate (% p.a.)')}
               </div>
               <input
                 type="number"
@@ -123,7 +138,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Start Date *
                 </label>
-                <ImportConfidenceBadge confidence={fields.startDate?.confidence} />
+                {renderConfidenceBadge('startDate', 'Start Date')}
               </div>
               <input
                 type="date"
@@ -137,7 +152,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Maturity Date *
                 </label>
-                <ImportConfidenceBadge confidence={fields.maturityDate?.confidence} />
+                {renderConfidenceBadge('maturityDate', 'Maturity Date')}
               </div>
               <input
                 type="date"
@@ -153,7 +168,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
               <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                 Maturity Amount (₹)
               </label>
-              <ImportConfidenceBadge confidence={fields.maturityAmount?.confidence} />
+              {renderConfidenceBadge('maturityAmount', 'Maturity Amount')}
             </div>
             <input
               type="number"
@@ -173,7 +188,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
               <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                 Item Description *
               </label>
-              <ImportConfidenceBadge confidence={fields.itemName?.confidence} />
+              {renderConfidenceBadge('itemName', 'Item Description')}
             </div>
             <input
               type="text"
@@ -205,7 +220,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Weight (grams) *
                 </label>
-                <ImportConfidenceBadge confidence={fields.weightGrams?.confidence} />
+                {renderConfidenceBadge('weightGrams', 'Weight (grams)')}
               </div>
               <input
                 type="number"
@@ -223,7 +238,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Total Purchase Price (₹)
                 </label>
-                <ImportConfidenceBadge confidence={fields.purchasePrice?.confidence} />
+                {renderConfidenceBadge('purchasePrice', 'Purchase Price')}
               </div>
               <input
                 type="number"
@@ -392,7 +407,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
               <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                 Policy Name / Provider *
               </label>
-              <ImportConfidenceBadge confidence={fields.policyName?.confidence} />
+              {renderConfidenceBadge('policyName', 'Policy Name / Provider')}
             </div>
             <input
               type="text"
@@ -409,7 +424,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Policy Number
                 </label>
-                <ImportConfidenceBadge confidence={fields.policyNumber?.confidence} />
+                {renderConfidenceBadge('policyNumber', 'Policy Number')}
               </div>
               <input
                 type="text"
@@ -423,7 +438,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Sum Assured (₹) *
                 </label>
-                <ImportConfidenceBadge confidence={fields.sumAssured?.confidence} />
+                {renderConfidenceBadge('sumAssured', 'Sum Assured')}
               </div>
               <input
                 type="number"
@@ -440,7 +455,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Annual Premium (₹) *
                 </label>
-                <ImportConfidenceBadge confidence={fields.premiumAmount?.confidence} />
+                {renderConfidenceBadge('premiumAmount', 'Annual Premium')}
               </div>
               <input
                 type="number"
@@ -454,7 +469,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Renewal Date *
                 </label>
-                <ImportConfidenceBadge confidence={fields.renewalDate?.confidence} />
+                {renderConfidenceBadge('renewalDate', 'Renewal Date')}
               </div>
               <input
                 type="date"

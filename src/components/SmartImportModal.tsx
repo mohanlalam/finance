@@ -6,6 +6,7 @@ import {
   AlertCircle,
   RefreshCw,
   ArrowLeft,
+  CheckCircle2,
 } from './icons/AppIcons';
 import { usePortfolioActions, usePortfolioEntities } from '../contexts/PortfolioContext';
 import { useToastActions } from '../contexts/ToastContext';
@@ -13,6 +14,7 @@ import { useSmartImportPipeline } from '../domains/smart-import/hooks/useSmartIm
 import { ImportDropZone } from './smart-import/ImportDropZone';
 import { ImportReviewForm } from './smart-import/ImportReviewForm';
 import { ImportSaveProgress } from './smart-import/ImportSaveProgress';
+import { BatchQuarantineReview } from './smart-import/BatchQuarantineReview';
 
 interface SmartImportModalProps {
   isOpen: boolean;
@@ -33,6 +35,9 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ isOpen, onCl
     processingProgress,
     processingStatus,
     error,
+    batchItems,
+    activeBatchIndex,
+    isBatchMode,
     extractedResult,
     formData,
     setFormData,
@@ -45,7 +50,11 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ isOpen, onCl
     isSaving,
     currentLiveGoldRate,
     handleFileSelect,
+    handleFilesSelect,
+    handleSelectBatchIndex,
+    handleRemoveBatchItem,
     handleSave,
+    handleSaveAll,
     resetAllState,
   } = useSmartImportPipeline({
     isOpen,
@@ -84,23 +93,35 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ isOpen, onCl
     ? 'review'
     : 'upload';
 
+  const modalTitle = isBatchMode
+    ? `✨ Multi-Document Family Vault Agent (${batchItems.length} statements)`
+    : '✨ Smart AI Document Import';
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={handleCloseModal}
       preventClose={isSaving}
-      title="✨ Smart AI Document Import"
+      title={modalTitle}
       maxWidth="max-w-4xl"
     >
       <div className="space-y-5">
         {/* Header Description */}
-        <div className="pb-3 border-b border-slate-200 dark:border-slate-800">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            AI Quarantine & Review Pipeline
-          </h4>
-          <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-            Upload your financial document. Review and verify extracted fields before saving to your portfolio.
-          </p>
+        <div className="pb-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              AI Quarantine &amp; Entity Disambiguation Pipeline
+            </h4>
+            <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+              Multi-document synthesis with visual hallucination safeguards &amp; automatic family member assignment.
+            </p>
+          </div>
+          {isBatchMode && (
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 text-xs font-bold border border-blue-500/25">
+              <Sparkles size={12} />
+              Batch Mode Active
+            </span>
+          )}
         </div>
 
         {/* Error Banner */}
@@ -122,13 +143,13 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ isOpen, onCl
             </div>
             <div>
               <h5 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                Analyzing Document with Multi-Model Gemini Vision
+                Multi-Document Quarantine &amp; Entity Disambiguation
               </h5>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
                 {processingStatus}
               </p>
             </div>
-            <div className="w-48 mx-auto bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+            <div className="w-56 mx-auto bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
               <div
                 className="bg-amber-500 h-full transition-all duration-300 rounded-full"
                 style={{ width: `${processingProgress}%` }}
@@ -146,6 +167,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ isOpen, onCl
         {currentStep === 'upload' && (
           <ImportDropZone
             onFileSelect={handleFileSelect}
+            onFilesSelect={handleFilesSelect}
             isProcessing={isProcessing}
           />
         )}
@@ -153,7 +175,19 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ isOpen, onCl
         {/* Step: Review and Edit Form */}
         {(currentStep === 'review' || (currentStep === 'saving' && extractedResult)) && extractedResult && (
           <div className="space-y-5 animate-fade-in">
-            <div className="flex items-center justify-between">
+            {/* Batch Quarantine Table & Controls (When multiple items exist) */}
+            {isBatchMode && (
+              <BatchQuarantineReview
+                batchItems={batchItems}
+                activeIndex={activeBatchIndex}
+                onSelectIndex={handleSelectBatchIndex}
+                onRemoveItem={handleRemoveBatchItem}
+                onSaveAll={handleSaveAll}
+                isSaving={isSaving}
+              />
+            )}
+
+            <div className="flex items-center justify-between pt-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
                   {extractedResult.assetType.toUpperCase()}
@@ -161,16 +195,21 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ isOpen, onCl
                 <span className="text-xs text-slate-500 dark:text-slate-400">
                   {extractedResult.documentType.replace(/_/g, ' ').toUpperCase()}
                 </span>
+                {extractedResult.disambiguation && (
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20" title={extractedResult.disambiguation.details}>
+                    👤 {extractedResult.disambiguation.memberLabel} ({extractedResult.disambiguation.matchType})
+                  </span>
+                )}
               </div>
               <button
                 type="button"
                 onClick={resetAllState}
                 disabled={isSaving}
-                aria-label="Choose another file"
+                aria-label="Upload different document"
                 className="text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <ArrowLeft size={13} />
-                Choose another file
+                Upload different file(s)
               </button>
             </div>
 
@@ -217,7 +256,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ isOpen, onCl
             </div>
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800">
               <Button
                 variant="ghost"
                 onClick={handleCloseModal}
@@ -225,16 +264,32 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ isOpen, onCl
               >
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                onClick={handleSave}
-                isLoading={isSaving}
-                disabled={isSaving}
-                className="bg-amber-600 hover:bg-amber-500 text-white font-bold"
-              >
-                <Sparkles size={14} className="mr-1.5" />
-                Confirm & Save to Portfolio
-              </Button>
+
+              <div className="flex items-center gap-2">
+                {isBatchMode && (
+                  <Button
+                    variant="secondary"
+                    onClick={handleSaveAll}
+                    isLoading={isSaving}
+                    disabled={isSaving}
+                    className="text-xs font-bold"
+                  >
+                    <CheckCircle2 size={13} className="mr-1" />
+                    Save All ({batchItems.filter((i) => i.status === 'ready').length})
+                  </Button>
+                )}
+
+                <Button
+                  variant="primary"
+                  onClick={handleSave}
+                  isLoading={isSaving}
+                  disabled={isSaving}
+                  className="bg-amber-600 hover:bg-amber-500 text-white font-bold"
+                >
+                  <Sparkles size={14} className="mr-1.5" />
+                  {isBatchMode ? 'Save This Item' : 'Confirm & Save to Portfolio'}
+                </Button>
+              </div>
             </div>
           </div>
         )}
