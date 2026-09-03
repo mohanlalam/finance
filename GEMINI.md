@@ -127,6 +127,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * **[types.ts](src/domains/data-quality/types.ts)**: Standardized issue types with severity tiers (`info`, `warning`, `critical`).
 * **AI Assistant Domain (`src/domains/ai/`)**:
   * **[assistantEngine.ts](src/domains/ai/assistant/assistantEngine.ts)** & **[index.ts](src/domains/ai/index.ts)**: Deterministic client-side NLP assistant engine parsing and evaluating 17 financial intents (`NET_WORTH`, `PERFORMERS`, `MATURITY_TIMELINE`, `ALLOCATION_SPLIT`, `SPECIFIC_GOLD`, `SPECIFIC_MUTUAL_FUNDS`, `SPECIFIC_STOCKS`, `SPECIFIC_FDS`, `INSURANCE_REMINDERS`, `FAMILY_BREAKDOWN`, `NEXT_SIP_DATE`, `EMERGENCY_FUND`, `RENTAL_YIELD`, `EXPIRED_DOCUMENTS`, `COMPREHENSIVE_SEARCH`, `UNKNOWN`, `HELP`) with matched asset badges and zero hallucinated numbers.
+  * **[wealthStrategistEngine.ts](src/domains/ai/assistant/wealthStrategistEngine.ts)**: Multi-Agent Conversational Wealth Strategist decomposing compound multi-clause financial reasoning queries into deterministic pure math domain tool calls (`findTaxHarvestingOpportunities`, `checkInsuranceCommitments`, `auditFixedDepositLock`, `cashFlowDeltaSolver`) with verified executive advisory reports and interactive simulation action chips.
 * **Backup & Restore Domain (`src/domains/portfolio/backup/`)**:
   * **[backupSchema.ts](src/domains/portfolio/backup/backupSchema.ts)** & **[backupValidator.ts](src/domains/portfolio/backup/backupValidator.ts)**: Schema-enforcing backup and restore diagnostic engine with envelope validation and collision detection.
 
@@ -170,7 +171,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 48 test files and 254 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 49 test files and 257 unit/integration test cases (100% passing).
 
 ---
 

@@ -6,6 +6,7 @@ import ConfirmModal from './ConfirmModal';
 
 interface PortfolioAssistantProps {
   portfolios: Portfolio[];
+  onSelectAsset?: (tab: string) => void;
 }
 
 interface ChatMessage {
@@ -239,14 +240,24 @@ function getDynamicSuggestions(portfolios: Portfolio[]): SuggestionItem[] {
     suggestions.push({ icon: '🛡️', label: 'Upcoming insurance renewals' });
   }
 
+  suggestions.push({
+    icon: '🧠',
+    label: "Sell loss stocks to fund ₹50k insurance without breaking FDs?",
+  });
   suggestions.push({ icon: '📊', label: 'What is my total asset allocation split?' });
   suggestions.push({ icon: '🏆', label: 'Which asset gave the highest return?' });
   suggestions.push({ icon: '💼', label: 'Show me my emergency fund coverage' });
 
-  return suggestions.slice(0, 3);
+  return suggestions.slice(0, 4);
 }
 
-const ChatMessageItem = React.memo(function ChatMessageItem({ msg }: { msg: ChatMessage }) {
+const ChatMessageItem = React.memo(function ChatMessageItem({
+  msg,
+  onSelectAsset,
+}: {
+  msg: ChatMessage;
+  onSelectAsset?: (tab: string) => void;
+}) {
   const renderedContent = useMemo(() => renderMarkdown(msg.text), [msg.text]);
 
   return (
@@ -266,8 +277,49 @@ const ChatMessageItem = React.memo(function ChatMessageItem({ msg }: { msg: Chat
             <div className="w-6 h-6 rounded-full bg-[var(--accent-blue-soft)] border border-[var(--accent-blue)]/20 flex items-center justify-center text-[var(--accent-blue)] shrink-0 mt-0.5 shadow-xs">
               <Bot size={13} />
             </div>
-            <div className="flex-1 space-y-1 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-[14px] rounded-tl-[4px] px-4 py-3 shadow-xs relative group">
+            <div className="flex-1 space-y-2 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-[14px] rounded-tl-[4px] px-4 py-3 shadow-xs relative group">
+              {/* Tool Execution Traces Badge */}
+              {msg.response?.toolsUsed && msg.response.toolsUsed.length > 0 && (
+                <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface)] border border-blue-500/25 space-y-1.5 mb-2">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--accent-blue)] uppercase tracking-wider">
+                    <Sparkles size={11} className="text-blue-500" />
+                    <span>Deterministic Financial Tools Invoked ({msg.response.toolsUsed.length})</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {msg.response.toolsUsed.map((tool, tIdx) => (
+                      <span
+                        key={tIdx}
+                        className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[var(--surface-secondary)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-medium"
+                        title={tool.summary}
+                      >
+                        🔧 {tool.toolName}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {renderedContent}
+
+              {/* Interactive Simulation Action Chips */}
+              {msg.response?.actionChips && msg.response.actionChips.length > 0 && (
+                <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[9.5px] font-bold uppercase text-[var(--text-tertiary)] tracking-wider">
+                    Simulate &amp; Review:
+                  </span>
+                  {msg.response.actionChips.map((chip, cIdx) => (
+                    <button
+                      key={cIdx}
+                      type="button"
+                      onClick={() => onSelectAsset?.(chip.tab)}
+                      className="text-[10px] font-bold px-2.5 py-1 rounded-[var(--radius-pill)] bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/30 hover:bg-blue-500/25 transition-all cursor-pointer ios-press"
+                    >
+                      ⚡ {chip.label} &rarr;
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {msg.id !== 'welcome' && <CopyButton text={msg.text} />}
             </div>
           </div>
@@ -293,7 +345,7 @@ const ChatMessageItem = React.memo(function ChatMessageItem({ msg }: { msg: Chat
   );
 });
 
-export default function PortfolioAssistant({ portfolios }: PortfolioAssistantProps) {
+export default function PortfolioAssistant({ portfolios, onSelectAsset }: PortfolioAssistantProps) {
   const welcomeMessage = useMemo<ChatMessage>(() => ({
     id: 'welcome',
     role: 'assistant',
@@ -417,7 +469,7 @@ export default function PortfolioAssistant({ portfolios }: PortfolioAssistantPro
       {/* Chat Messages Log */}
       <div className="flex-1 overflow-y-auto pr-1 space-y-3.5 mb-2.5 scrollbar-thin scrollbar-thumb-[var(--border-subtle)] scrollbar-track-transparent min-h-0">
         {messages.map((msg) => (
-          <ChatMessageItem key={msg.id} msg={msg} />
+          <ChatMessageItem key={msg.id} msg={msg} onSelectAsset={onSelectAsset} />
         ))}
         {isLoading && (
           <div className="flex gap-2.5 items-start w-full animate-pulse">

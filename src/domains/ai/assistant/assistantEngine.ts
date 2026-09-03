@@ -4,9 +4,19 @@ import { getFDInvestedAmount, getFDEffectiveValue } from '../../assets/fd/calcul
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../assets/rd/calculations/rdCompounding';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../assets/sip/calculations/sipValuation';
 
+import { isCompoundWealthQuery, planAndExecuteWealthStrategy } from './wealthStrategistEngine';
+
+export interface ActionChip {
+  label: string;
+  tab: string;
+}
+
 export interface AssistantResponse {
   answer: string;
   matchedAssets: { name: string; type: string; details: string }[];
+  toolsUsed?: { toolName: string; description: string; summary: string }[];
+  actionChips?: ActionChip[];
+  verdictHeadline?: string;
 }
 
 /**
@@ -259,6 +269,22 @@ function formatGainINR(value: number): string {
  * Parses queries and executes rules client-side over portfolio data
  */
 export function askAssistant(query: string, portfolios: Portfolio[]): AssistantResponse {
+  // Check for Compound Wealth Reasoning first
+  if (isCompoundWealthQuery(query)) {
+    const compoundResult = planAndExecuteWealthStrategy(query, portfolios);
+    return {
+      answer: compoundResult.executiveReport,
+      matchedAssets: compoundResult.matchedAssets,
+      toolsUsed: compoundResult.toolTraces.map((t) => ({
+        toolName: t.toolName,
+        description: t.toolDescription,
+        summary: t.outputSummary,
+      })),
+      actionChips: compoundResult.actionChips,
+      verdictHeadline: compoundResult.verdictHeadline,
+    };
+  }
+
   const q = query.toLowerCase().trim();
   const matchedAssets: AssistantResponse['matchedAssets'] = [];
   const intent = detectIntent(q, portfolios);

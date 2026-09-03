@@ -417,7 +417,7 @@ export default function AppShell() {
       <SectionErrorBoundary sectionName="AI Portfolio Assistant">
         <LazyViewport placeholderHeight={300}>
           <Suspense fallback={<div className="h-[300px] sm:h-[370px] apple-card rounded-xl animate-pulse" />}>
-            <PortfolioAssistant portfolios={portfolios} />
+            <PortfolioAssistant portfolios={portfolios} onSelectAsset={handleSidebarTabChange} />
           </Suspense>
         </LazyViewport>
       </SectionErrorBoundary>
@@ -440,7 +440,7 @@ export default function AppShell() {
         </LazyViewport>
       </SectionErrorBoundary>
     </div>
-  ), [netWorthHistory, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick]);
+  ), [netWorthHistory, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick, handleSidebarTabChange]);
 
   const desktopDashboardWidgets = useMemo(() => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -460,7 +460,7 @@ export default function AppShell() {
       <SectionErrorBoundary sectionName="AI Portfolio Assistant">
         <LazyViewport placeholderHeight={370}>
           <Suspense fallback={<div className="h-[300px] sm:h-[370px] apple-card rounded-xl animate-pulse" />}>
-            <PortfolioAssistant portfolios={portfolios} />
+            <PortfolioAssistant portfolios={portfolios} onSelectAsset={handleSidebarTabChange} />
           </Suspense>
         </LazyViewport>
       </SectionErrorBoundary>
@@ -483,7 +483,7 @@ export default function AppShell() {
         </LazyViewport>
       </SectionErrorBoundary>
     </div>
-  ), [netWorthHistory, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick]);
+  ), [netWorthHistory, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick, handleSidebarTabChange]);
 
 
   const handleImportCSV = useCallback(async (rows: ImportRow[], portfolioName: string) => {
