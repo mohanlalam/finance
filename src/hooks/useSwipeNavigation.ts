@@ -1,7 +1,7 @@
 import { useRef, useCallback, useMemo } from 'react';
 import { triggerHaptic } from '../utils/haptics';
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax' | 'cashflow';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
 
 interface UseSwipeNavigationProps {
   activeAsset: AssetTab;

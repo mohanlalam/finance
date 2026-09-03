@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, TrendingDown, Pencil, Trash2, Plus, Sparkles, Calendar } from '../components/icons/AppIcons';
+import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, TrendingDown, Pencil, Trash2, Plus, Sparkles } from '../components/icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
 import { sortPortfolios } from '../domains/portfolio/calculations/portfolioOrdering';
 
@@ -155,7 +155,6 @@ export default function DesktopSidebar({
           {([
             { id: 'documents', label: 'Document Vault', icon: <FolderOpen size={14} /> },
             { id: 'tax', label: 'Tax Harvesting', icon: <TrendingDown size={14} /> },
-            { id: 'cashflow', label: 'Cash Flow & Reinvest', icon: <Calendar size={14} /> },
           ] as const).map((tab) => {
             const isActive = activeTab === tab.id;
             return (

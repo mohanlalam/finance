@@ -382,7 +382,7 @@ export function planAndExecuteWealthStrategy(
   const actionChips: { label: string; tab: string }[] = [
     { label: 'Harvest Tax Losses', tab: 'tax' },
     { label: 'Review Insurance', tab: 'insurance' },
-    { label: 'Inspect Cash Flow Matrix', tab: 'cashflow' },
+    { label: 'Fixed Deposits', tab: 'fd' },
   ];
 
   return {

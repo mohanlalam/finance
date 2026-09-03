@@ -12,12 +12,11 @@ import {
   Clock, 
   ChevronRight, 
   X, 
-  Sparkles,
-  Calendar
+  Sparkles 
 } from './icons/AppIcons';
 import { triggerHaptic } from '../utils/haptics';
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax' | 'cashflow';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
 
 interface MobileBottomNavProps {
   activeAsset: AssetTab;
@@ -51,7 +50,6 @@ const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.Reac
   { id: 'insurance', label: 'Insurance Policies', subtext: 'Life, health & vehicle policies', icon: <Shield size={18} /> },
   { id: 'documents', label: 'Document Vault', subtext: 'Digital receipts & policy bonds', icon: <FolderOpen size={18} /> },
   { id: 'tax', label: 'Tax Harvesting', subtext: 'LTCG / STCG tax optimization', icon: <TrendingUp size={18} /> },
-  { id: 'cashflow', label: 'Cash Flow & Reinvest', subtext: '12M timeline & maturity playbook', icon: <Calendar size={18} /> },
 ];
 
 function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSmartImport, onDrawerStateChange }: MobileBottomNavProps) {
