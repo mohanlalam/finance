@@ -12,7 +12,7 @@ import { useAssetModal } from '../../hooks/useAssetModal';
 import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
-import { RotateCw, TrendingUp, TrendingDown, Scale, Coins, Check, User, Users } from '../icons/AppIcons';
+import { RotateCw, Scale, Coins, Check, User, Users } from '../icons/AppIcons';
 import { 
   deriveGoldRates, 
   saveStoredGoldRate, 
@@ -281,113 +281,11 @@ export function GoldHoldingView({
 
   return (
     <div className="space-y-4">
-      {/* Live MCX & NSE Bullion Benchmark Ribbon */}
-      <div className="apple-card p-3.5 sm:p-4 bg-gradient-to-r from-amber-500/10 via-[var(--surface)] to-transparent border border-amber-500/25">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
-          
-          {/* Header & Market Status Badge */}
-          <div className="flex items-center justify-between lg:justify-start gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-[var(--radius-medium)] bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center font-black text-sm shrink-0">
-                Au
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
-                    MCX & NSE Live Bullion Rates
-                  </h3>
-                  <span className={`text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-[var(--radius-small)] flex items-center gap-1 border ${
-                    rates.isCustom
-                      ? 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/30'
-                      : 'bg-[var(--positive-soft)] text-[var(--positive)] border-[var(--positive)]/30'
-                  }`}>
-                    {!rates.isCustom && <span className="w-1.5 h-1.5 rounded-full bg-[var(--positive)] animate-pulse" />}
-                    {rates.isCustom ? 'Custom Override' : '🟢 MCX Live'}
-                  </span>
-                </div>
-                <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5 flex items-center gap-2">
-                  <span>{rates.source}</span>
-                  {rates.changeINR !== 0 && !rates.isCustom && (
-                    <span className={`font-semibold flex items-center gap-0.5 ${rates.changeINR >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-                      {rates.changeINR >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                      {rates.changeINR >= 0 ? '+' : ''}{formatINR(rates.changeINR)}/g ({formatPercent(rates.changePercent)}) today
-                    </span>
-                  )}
-                </p>
-              </div>
-            </div>
-
-            {/* Quick Action Refresh Button (Mobile) */}
-            <div className="flex lg:hidden items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => syncRates(true)}
-                disabled={isSyncing}
-                className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] ios-press cursor-pointer"
-                title="Refresh Live Bullion Rates"
-                aria-label="Refresh Live Rates"
-              >
-                <RotateCw size={14} className={isSyncing ? 'animate-spin text-amber-500' : ''} />
-              </button>
-            </div>
-          </div>
-
-          {/* Rate Pills (24K, 22K, 18K) & Desktop Actions */}
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5">
-            
-            {/* 24K Pure Gold */}
-            <button
-              type="button"
-              onClick={() => {
-                setTempRateInput(String(rates.rate24kPerGram));
-                setIsEditingRate(true);
-              }}
-              title="Click to calibrate 24K spot rate"
-              className="flex-1 sm:flex-initial flex flex-col justify-center px-3 py-1.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-amber-500/30 hover:border-amber-500/60 transition-colors cursor-pointer text-left ios-press"
-            >
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400">24K (99.9%)</span>
-                <span className="text-[9px] text-[var(--text-tertiary)]">✎</span>
-              </div>
-              <p className="text-xs font-bold text-[var(--text-primary)] tnum mt-0.5">
-                {formatINR(rates.rate24kPerGram)}<span className="text-[10px] font-normal text-[var(--text-tertiary)]">/g</span>
-              </p>
-              <p className="text-[9.5px] text-[var(--text-tertiary)] tnum">
-                {formatINR(rates.rate24kPer10g)}/10g
-              </p>
-            </button>
-
-            {/* 22K Hallmark Gold */}
-            <div className="flex-1 sm:flex-initial flex flex-col justify-center px-3 py-1.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)] text-left">
-              <span className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">22K (91.6%)</span>
-              <p className="text-xs font-bold text-[var(--text-primary)] tnum mt-0.5">
-                {formatINR(rates.rate22kPerGram)}<span className="text-[10px] font-normal text-[var(--text-tertiary)]">/g</span>
-              </p>
-              <p className="text-[9.5px] text-[var(--text-tertiary)] tnum">
-                {formatINR(rates.rate22kPer10g)}/10g
-              </p>
-            </div>
-
-            {/* Sync Now Button (Desktop) */}
-            <button
-              type="button"
-              onClick={() => syncRates(true)}
-              disabled={isSyncing}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)] hover:bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors ios-press cursor-pointer shrink-0"
-              title="Refresh Live Bullion Rates"
-            >
-              <RotateCw size={13} className={isSyncing ? 'animate-spin text-amber-500' : ''} />
-              <span>{isSyncing ? 'Syncing...' : 'Sync'}</span>
-            </button>
-
-          </div>
-        </div>
-      </div>
-
-      {/* Total Family Members Gold Holdings Banner */}
+      {/* Unified Family Gold & Live Bullion Banner */}
       <div className="apple-card p-3 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[var(--border-subtle)] pb-2.5">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-2.5">
+          {/* Left: Title & Subtitle */}
+          <div className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 rounded-[var(--radius-small)] bg-amber-500/20 text-amber-500 border border-amber-500/30 flex items-center justify-center shrink-0">
               <Users size={16} />
             </div>
@@ -406,8 +304,57 @@ export function GoldHoldingView({
             </div>
           </div>
 
-          {/* Metric Badges */}
+          {/* Center (Green marked area): Live Bullion Rates (24K, 22K, Sync) */}
           <div className="flex items-center gap-2 flex-wrap">
+            {/* 24K Pure Gold */}
+            <button
+              type="button"
+              onClick={() => {
+                setTempRateInput(String(rates.rate24kPerGram));
+                setIsEditingRate(true);
+              }}
+              title="Click to calibrate 24K spot rate"
+              className="flex flex-col justify-center px-2.5 py-1 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] border border-amber-500/30 hover:border-amber-500/60 transition-colors cursor-pointer text-left ios-press"
+            >
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[9.5px] uppercase font-bold text-amber-600 dark:text-amber-400">24K (99.9%)</span>
+                <span className="text-[8.5px] text-[var(--text-tertiary)]">✎</span>
+              </div>
+              <p className="text-xs font-bold text-[var(--text-primary)] tnum mt-0.5">
+                {formatINR(rates.rate24kPerGram)}<span className="text-[9.5px] font-normal text-[var(--text-tertiary)]">/g</span>
+              </p>
+              <p className="text-[9px] text-[var(--text-tertiary)] tnum">
+                {formatINR(rates.rate24kPer10g)}/10g
+              </p>
+            </button>
+
+            {/* 22K Hallmark Gold */}
+            <div className="flex flex-col justify-center px-2.5 py-1 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-left">
+              <span className="text-[9.5px] uppercase font-bold text-[var(--text-secondary)]">22K (91.6%)</span>
+              <p className="text-xs font-bold text-[var(--text-primary)] tnum mt-0.5">
+                {formatINR(rates.rate22kPerGram)}<span className="text-[9.5px] font-normal text-[var(--text-tertiary)]">/g</span>
+              </p>
+              <p className="text-[9px] text-[var(--text-tertiary)] tnum">
+                {formatINR(rates.rate22kPer10g)}/10g
+              </p>
+            </div>
+
+            {/* Sync Now Button */}
+            <button
+              type="button"
+              onClick={() => syncRates(true)}
+              disabled={isSyncing}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--surface)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors ios-press cursor-pointer shrink-0"
+              title="Refresh Live Bullion Rates"
+              aria-label="Refresh Live Rates"
+            >
+              <RotateCw size={12} className={isSyncing ? 'animate-spin text-amber-500' : ''} />
+              <span>{isSyncing ? 'Syncing...' : 'Sync'}</span>
+            </button>
+          </div>
+
+          {/* Right: Metric Badges (Total Weight & Total Valuation) */}
+          <div className="flex items-center gap-2 shrink-0">
             <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-amber-500/30 text-right">
               <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Weight</span>
               <span className="text-xs sm:text-sm font-bold text-amber-500 tnum">
