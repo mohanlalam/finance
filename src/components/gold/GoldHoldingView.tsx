@@ -352,20 +352,6 @@ export function GoldHoldingView({
               <RotateCw size={11} className={isSyncing ? 'animate-spin text-amber-500' : ''} />
               <span className="hidden xs:inline">{isSyncing ? 'Syncing...' : 'Sync'}</span>
             </button>
-
-            {/* Right: Metric Badges (Total Weight & Total Valuation) */}
-            <div className="flex-1 sm:flex-initial bg-[var(--surface-secondary)] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[var(--radius-small)] border border-amber-500/30 text-right">
-              <span className="text-[8.5px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Weight</span>
-              <span className="text-xs sm:text-sm font-bold text-amber-500 tnum">
-                {familyGoldSummary.totalGrams.toFixed(1)} <span className="text-[9.5px] sm:text-[11px] font-normal text-[var(--text-secondary)]">g</span>
-              </span>
-            </div>
-            <div className="flex-1 sm:flex-initial bg-[var(--surface-secondary)] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[var(--radius-small)] border border-[var(--border-subtle)] text-right">
-              <span className="text-[8.5px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Valuation</span>
-              <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum">
-                {formatINR(familyGoldSummary.totalValue)}
-              </span>
-            </div>
           </div>
         </div>
 

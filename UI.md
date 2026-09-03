@@ -548,7 +548,7 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
 
 * Component: `GoldHoldingView.tsx`, `GoldHoldingCard.tsx`, `GoldFormModal.tsx`
 * **Unified Banner Structure**:
-  * **Row 1**: Bullion icon, title, `Combined` badge, Live 24K & 22K spot rates with inline calibration trigger (✎), Sync trigger, Total Weight (g), and Total Valuation.
+  * **Row 1**: Bullion icon, title, `Combined` badge, and Live 24K & 22K spot rates with inline calibration trigger (✎) and Sync trigger (redundant weight and valuation badges omitted to optimize mobile layout and eliminate duplication with Row 2).
   * **Row 2 (5 Summary Metrics Ribbon)**:
     1. `Family Invested`
     2. `Current Value`
