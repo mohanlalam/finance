@@ -88,11 +88,45 @@ export default React.memo(function AssetTabContent({
     return map;
   }, [portfolios]);
 
-  const allGoldHoldings = React.useMemo(() => {
-    return portfolios.flatMap((p) => p.goldHoldings || []);
+  const allFixedDeposits = React.useMemo(() => {
+    return portfolios.flatMap((p) =>
+      (p.fixedDeposits || [])
+        .filter((f) => f.fd_type === 'regular' || !f.fd_type)
+        .map((f) => ({ ...f, portfolio_id: f.portfolio_id || p.id }))
+    );
   }, [portfolios]);
 
-  const allGoldDocuments = React.useMemo(() => {
+  const allRDAccounts = React.useMemo(() => {
+    return portfolios.flatMap((p) =>
+      (p.rdAccounts || []).map((rd) => ({ ...rd, portfolio_id: rd.portfolio_id || p.id }))
+    );
+  }, [portfolios]);
+
+  const allSIPAccounts = React.useMemo(() => {
+    return portfolios.flatMap((p) =>
+      (p.sipAccounts || []).map((sip) => ({ ...sip, portfolio_id: sip.portfolio_id || p.id }))
+    );
+  }, [portfolios]);
+
+  const allGoldHoldings = React.useMemo(() => {
+    return portfolios.flatMap((p) =>
+      (p.goldHoldings || []).map((g) => ({ ...g, portfolio_id: g.portfolio_id || p.id }))
+    );
+  }, [portfolios]);
+
+  const allRealEstate = React.useMemo(() => {
+    return portfolios.flatMap((p) =>
+      (p.realEstate || []).map((re) => ({ ...re, portfolio_id: re.portfolio_id || p.id }))
+    );
+  }, [portfolios]);
+
+  const allInsurances = React.useMemo(() => {
+    return portfolios.flatMap((p) =>
+      (p.insurances || []).map((ins) => ({ ...ins, portfolio_id: ins.portfolio_id || p.id }))
+    );
+  }, [portfolios]);
+
+  const allDocuments = React.useMemo(() => {
     return portfolios.flatMap((p) => p.documents || []);
   }, [portfolios]);
   
@@ -336,72 +370,48 @@ export default React.memo(function AssetTabContent({
       )}
 
       {activeAsset === 'fd' && (
-        <div className="space-y-8">
-          {portfolios.map((p, index) => (
-            <div key={p.name}>
-              <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
-                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
-              </div>
-              <FixedDepositView
-                fixedDeposits={p.fixedDeposits.filter(f => f.fd_type === 'regular' || !f.fd_type)}
-                documents={p.documents}
-                portfolioName={p.name}
-                portfolioOptions={portfolioOptions}
-                onAdd={onAddAsset}
-                onUpdate={onUpdateAsset}
-                onDelete={onDeleteAsset}
-                autoOpenAddModal={index === 0 && quickAddTarget === 'fd'}
-              />
-            </div>
-          ))}
-        </div>
+        <FixedDepositView
+          fixedDeposits={allFixedDeposits}
+          documents={allDocuments}
+          portfolioName="all"
+          portfolioOptions={portfolioOptions}
+          onAdd={onAddAsset}
+          onUpdate={onUpdateAsset}
+          onDelete={onDeleteAsset}
+          autoOpenAddModal={quickAddTarget === 'fd'}
+        />
       )}
 
       {activeAsset === 'rd' && (
-        <div className="space-y-8">
-          {portfolios.map((p, index) => (
-            <div key={p.name}>
-              <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
-                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
-              </div>
-              <RDView
-                documents={p.documents}
-                portfolioName={p.name}
-                portfolioOptions={portfolioOptions}
-                autoOpenAddModal={index === 0 && quickAddTarget === 'rd'}
-              />
-            </div>
-          ))}
-        </div>
+        <RDView
+          rdAccounts={allRDAccounts}
+          documents={allDocuments}
+          portfolioName="all"
+          portfolioOptions={portfolioOptions}
+          onAdd={onAddAsset}
+          onUpdate={onUpdateAsset}
+          onDelete={onDeleteAsset}
+          autoOpenAddModal={quickAddTarget === 'rd'}
+        />
       )}
 
-
-
       {activeAsset === 'sip' && (
-        <div className="space-y-8">
-          {portfolios.map((p, index) => (
-            <div key={p.name}>
-              <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
-                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
-              </div>
-              <SIPView
-                documents={p.documents}
-                portfolioName={p.name}
-                portfolioOptions={portfolioOptions}
-                autoOpenAddModal={index === 0 && quickAddTarget === 'sip'}
-              />
-            </div>
-          ))}
-        </div>
+        <SIPView
+          sipAccounts={allSIPAccounts}
+          documents={allDocuments}
+          portfolioName="all"
+          portfolioOptions={portfolioOptions}
+          onAdd={onAddAsset}
+          onUpdate={onUpdateAsset}
+          onDelete={onDeleteAsset}
+          autoOpenAddModal={quickAddTarget === 'sip'}
+        />
       )}
 
       {activeAsset === 'gold' && (
         <GoldHoldingView
           goldHoldings={allGoldHoldings}
-          documents={allGoldDocuments}
+          documents={allDocuments}
           portfolioName="all"
           portfolioOptions={portfolioOptions}
           onAdd={onAddAsset}
@@ -412,71 +422,41 @@ export default React.memo(function AssetTabContent({
       )}
 
       {activeAsset === 'real_estate' && (
-        <div className="space-y-8">
-          {portfolios.map((p, index) => (
-            <div key={p.name}>
-              <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
-                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
-              </div>
-              <RealEstateView
-                realEstate={p.realEstate}
-                documents={p.documents}
-                portfolioName={p.name}
-                portfolioOptions={portfolioOptions}
-                onAdd={onAddAsset}
-                onUpdate={onUpdateAsset}
-                onDelete={onDeleteAsset}
-                autoOpenAddModal={index === 0 && quickAddTarget === 'real_estate'}
-              />
-            </div>
-          ))}
-        </div>
+        <RealEstateView
+          realEstate={allRealEstate}
+          documents={allDocuments}
+          portfolioName="all"
+          portfolioOptions={portfolioOptions}
+          onAdd={onAddAsset}
+          onUpdate={onUpdateAsset}
+          onDelete={onDeleteAsset}
+          autoOpenAddModal={quickAddTarget === 'real_estate'}
+        />
       )}
 
       {activeAsset === 'insurance' && (
-        <div className="space-y-8">
-          {portfolios.map((p, index) => (
-            <div key={p.name}>
-              <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
-                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
-              </div>
-              <InsuranceView
-                insurances={p.insurances}
-                documents={p.documents}
-                portfolioName={p.name}
-                portfolioOptions={portfolioOptions}
-                onAdd={onAddAsset}
-                onUpdate={onUpdateAsset}
-                onDelete={onDeleteAsset}
-                autoOpenAddModal={index === 0 && quickAddTarget === 'insurance'}
-              />
-            </div>
-          ))}
-        </div>
+        <InsuranceView
+          insurances={allInsurances}
+          documents={allDocuments}
+          portfolioName="all"
+          portfolioOptions={portfolioOptions}
+          onAdd={onAddAsset}
+          onUpdate={onUpdateAsset}
+          onDelete={onDeleteAsset}
+          autoOpenAddModal={quickAddTarget === 'insurance'}
+        />
       )}
 
       {activeAsset === 'documents' && (
-        <div className="space-y-8">
-          {portfolios.map((p, index) => (
-            <div key={p.name}>
-              <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
-                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
-              </div>
-              <DocumentVaultView
-                portfolio={p}
-                portfolioName={p.name}
-                portfolioOptions={portfolioOptions}
-                portfolios={portfolios}
-                onAdd={onAddAsset}
-                onDelete={onDeleteAsset}
-                autoOpenAddModal={index === 0 && quickAddTarget === 'documents'}
-              />
-            </div>
-          ))}
-        </div>
+        <DocumentVaultView
+          portfolio={visiblePortfolio || portfolios[0]}
+          portfolioName="all"
+          portfolioOptions={portfolioOptions}
+          portfolios={portfolios}
+          onAdd={onAddAsset}
+          onDelete={onDeleteAsset}
+          autoOpenAddModal={quickAddTarget === 'documents'}
+        />
       )}
       </React.Suspense>
     </div>

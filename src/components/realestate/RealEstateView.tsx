@@ -1,18 +1,18 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { RealEstate, DocumentMetadata, PortfolioName } from '../../types/portfolio';
 import ConfirmModal from '../ConfirmModal';
 import RealEstateCard from './RealEstateCard';
 import RealEstateFormModal from './RealEstateFormModal';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import RegistryToolbar, { SortOption } from '../ui/RegistryToolbar';
-import { useIsMutating } from '../../contexts/PortfolioContext';
+import { useIsMutating, usePortfolioEntities } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
 import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
-import { useIsMobile } from '../../hooks/useIsMobile';
-import { FixedSizeList as List } from 'react-window';
-import { calculateRealEstateTotals } from '../../utils/realEstateUtils';
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
+import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
+import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
+import { Building2 } from '../icons/AppIcons';
 
 interface PortfolioOption {
   name: string;
@@ -50,9 +50,64 @@ export function RealEstateView({
   onDelete,
   autoOpenAddModal,
 }: RealEstateViewProps) {
-  const isMobile = useIsMobile();
   const isMutating = useIsMutating();
   const { addToast } = useToastActions();
+  const { portfolios } = usePortfolioEntities();
+
+  const [selectedMember, setSelectedMember] = useState<string>(portfolioName || 'all');
+
+  useEffect(() => {
+    setSelectedMember(portfolioName || 'all');
+  }, [portfolioName]);
+
+  // Aggregate Family Real Estate totals across all family members
+  const familyRealEstateSummary = useMemo(() => {
+    let totalInvested = 0;
+    let totalValuation = 0;
+    let totalProperties = 0;
+
+    const ordered = sortPortfolios(portfolios || []);
+    const memberBreakdown = ordered.map((p) => {
+      let memberInvested = 0;
+      let memberValuation = 0;
+
+      const properties = p.realEstate || [];
+      for (const re of properties) {
+        memberInvested += Number(re.purchase_price) || 0;
+        memberValuation += Number(re.current_valuation) || 0;
+      }
+
+      totalInvested += memberInvested;
+      totalValuation += memberValuation;
+      totalProperties += properties.length;
+
+      const memberPnL = memberValuation - memberInvested;
+      const memberPnLPct = memberInvested > 0 ? (memberPnL / memberInvested) * 100 : 0;
+
+      return {
+        name: p.name,
+        label: p.label || p.name,
+        invested: memberInvested,
+        valuation: memberValuation,
+        pnl: memberPnL,
+        pnlPct: memberPnLPct,
+        count: properties.length,
+      };
+    });
+
+    const totalPnL = totalValuation - totalInvested;
+    const totalPnLPct = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
+
+    return {
+      totalInvested,
+      totalValuation,
+      totalPnL,
+      totalPnLPct,
+      totalProperties,
+      memberBreakdown,
+    };
+  }, [portfolios]);
+
   const {
     showModal,
     editingItem,
@@ -87,8 +142,29 @@ export function RealEstateView({
     debounceMs: 150,
   });
 
-  // Summary Totals
-  const totals = useMemo(() => calculateRealEstateTotals(realEstate), [realEstate]);
+  const displayPropertiesByMember = useMemo(() => {
+    const ordered = sortPortfolios(portfolios || []);
+    return ordered.map((p) => {
+      const pId = p.id;
+      const memberProperties = filteredProperties.filter(
+        (re) => re.portfolio_id === pId || (!re.portfolio_id && p.name === (portfolioName === 'all' ? p.name : portfolioName))
+      );
+      const memberInvested = memberProperties.reduce((sum, re) => sum + (Number(re.purchase_price) || 0), 0);
+      const memberValuation = memberProperties.reduce((sum, re) => sum + (Number(re.current_valuation) || 0), 0);
+      return {
+        portfolio: p,
+        properties: memberProperties,
+        invested: memberInvested,
+        valuation: memberValuation,
+      };
+    });
+  }, [portfolios, filteredProperties, portfolioName]);
+
+  const activePropertiesForMember = useMemo(() => {
+    if (selectedMember === 'all') return filteredProperties;
+    const found = displayPropertiesByMember.find((item) => item.portfolio.name === selectedMember);
+    return found ? found.properties : filteredProperties;
+  }, [selectedMember, filteredProperties, displayPropertiesByMember]);
 
   const handleDelete = useCallback(async () => {
     if (!confirmDeleteItem) return;
@@ -104,45 +180,164 @@ export function RealEstateView({
     }
   }, [confirmDeleteItem, onDelete, addToast, setConfirmDeleteItem]);
 
-  // Stats ribbon UI
-  const statsRibbon = (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs">
-      <div>
-        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Total Investment</span>
-        <span className="text-sm font-bold text-[var(--text-secondary)] tnum">{formatINR(totals.totalInvested)}</span>
-      </div>
-      <div>
-        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Total Value as of Date</span>
-        <span className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(totals.totalValuation)}</span>
-      </div>
-      <div>
-        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Total Gain / Loss</span>
-        <span className={`text-sm font-bold tnum ${pnlColor(totals.totalPnL)}`}>
-          {totals.totalPnL >= 0 ? '+' : ''}{formatINR(totals.totalPnL)} ({formatPercent(totals.totalPnLPct)})
-        </span>
-      </div>
-      <div>
-        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Annual Rent / Yield</span>
-        <span className="text-sm font-bold text-[var(--positive)] tnum">
-          {totals.totalAnnualRent > 0 ? `${formatINR(totals.totalAnnualRent)} (${formatPercent(totals.overallRentalYieldPct)})` : 'None'}
-        </span>
-      </div>
-    </div>
-  );
-
   return (
-    <div>
+    <div className="space-y-4">
+      {/* Unified Family Real Estate Banner */}
+      <div className="apple-card p-3 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-2.5">
+          {/* Left: Title & Subtitle */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 flex items-center justify-center shrink-0">
+              <Building2 size={16} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
+                  Total Family Real Estate
+                </h3>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[var(--radius-pill)] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">
+                  Combined
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--text-tertiary)]">
+                Aggregated land, residential &amp; commercial properties
+              </p>
+            </div>
+          </div>
+
+          {/* Right: Metric Badges */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-emerald-500/30 text-right">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Invested</span>
+              <span className="text-xs sm:text-sm font-bold text-emerald-500 tnum">
+                {formatINR(familyRealEstateSummary.totalInvested)}
+              </span>
+            </div>
+            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-[var(--border-subtle)] text-right">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Current Valuation</span>
+              <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum">
+                {formatINR(familyRealEstateSummary.totalValuation)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2: 4 Summary Metrics Ribbon */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Total Investment</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5 block">
+              {formatINR(familyRealEstateSummary.totalInvested)}
+            </span>
+          </div>
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Current Valuation</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
+              {formatINR(familyRealEstateSummary.totalValuation)}
+            </span>
+          </div>
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Total Properties</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
+              {familyRealEstateSummary.totalProperties} Properties
+            </span>
+          </div>
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Overall Appreciation</span>
+            <span className={`text-xs sm:text-sm font-bold tnum mt-0.5 block ${pnlColor(familyRealEstateSummary.totalPnL)}`}>
+              {familyRealEstateSummary.totalPnL >= 0 ? '+' : ''}{formatINR(familyRealEstateSummary.totalPnL)} ({formatPercent(familyRealEstateSummary.totalPnLPct)})
+            </span>
+          </div>
+        </div>
+
+        {/* Row 3: Family Members Breakdown */}
+        {familyRealEstateSummary.memberBreakdown.length > 0 && (
+          <div className="pt-2 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
+                Family Members Breakdown
+              </span>
+              <div className="flex items-center gap-2">
+                {selectedMember !== 'all' && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMember('all')}
+                    className="text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                  >
+                    View All
+                  </button>
+                )}
+                <span className="text-[10px] text-[var(--text-tertiary)]">
+                  {familyRealEstateSummary.totalProperties} Total Properties
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+              {familyRealEstateSummary.memberBreakdown.map((m) => {
+                const config = getFamilyMemberConfig(m.name);
+                const isSelected = selectedMember === m.name;
+                return (
+                  <button
+                    key={m.name}
+                    type="button"
+                    onClick={() => setSelectedMember((prev) => (prev === m.name ? 'all' : m.name))}
+                    className={`flex items-center justify-between p-2 rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press ${
+                      isSelected
+                        ? 'bg-[var(--surface-secondary)] border-emerald-500 ring-1 ring-emerald-500/30 shadow-xs'
+                        : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-emerald-500/40'
+                    }`}
+                    title={`Click to filter ${m.label}'s properties`}
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
+                        {config.icon}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                            {m.label}
+                          </p>
+                          {isSelected && (
+                            <span className="text-[8.5px] font-bold px-1 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-[var(--text-tertiary)]">
+                          {m.count} propert{m.count === 1 ? 'y' : 'ies'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-bold text-emerald-500 tnum">
+                        {formatINR(m.valuation)}
+                      </p>
+                      <p className="text-[10px] font-semibold text-[var(--text-secondary)] tnum">
+                        Inv: {formatINR(m.invested)}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Main Real Estate Registry Container */}
       <AssetRegistryContainer
         title="Real Estate"
         createBtnLabel="Add Property"
-        themeColor="bg-[var(--accent-blue)] hover:opacity-90"
+        themeColor="bg-emerald-600 hover:bg-emerald-700"
         emptyType="real_estate"
         emptyTitle="No Properties Added"
         emptyDescription="Monitor land plots, residential apartments, houses, and commercial property valuations."
         isLoading={isMutating}
         itemCount={realEstate.length}
         onOpenAdd={openAdd}
-        stats={realEstate.length > 0 ? statsRibbon : undefined}
         toolbar={
           realEstate.length > 0 ? (
             <RegistryToolbar
@@ -159,37 +354,85 @@ export function RealEstateView({
           ) : undefined
         }
       >
-        {filteredProperties.length > 10 ? (
-          <List
-            height={Math.min(filteredProperties.length * (isMobile ? 180 : 140), isMobile ? 420 : 540)}
-            itemCount={filteredProperties.length}
-            itemSize={isMobile ? 180 : 140}
-            width="100%"
-          >
-            {({ index, style }) => {
-              const property = filteredProperties[index];
-              return (
-                <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
+        {selectedMember !== 'all' ? (
+          <div>
+            <div className="px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/60 flex items-center justify-between border-b border-[var(--border-subtle)]">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-[var(--text-primary)]">
+                  {portfolioOptions.find((p) => p.name === selectedMember)?.label || selectedMember}&apos;s Properties
+                </span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                  {activePropertiesForMember.length}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedMember('all')}
+                className="text-xs text-[var(--accent-blue)] hover:underline font-semibold cursor-pointer"
+              >
+                Show All Family
+              </button>
+            </div>
+            {activePropertiesForMember.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[var(--text-tertiary)] italic">
+                No real estate properties recorded for this member.
+              </div>
+            ) : (
+              <div className="divide-y divide-[var(--border-subtle)]">
+                {activePropertiesForMember.map((prop) => (
                   <RealEstateCard
-                    property={property}
+                    key={prop.id}
+                    property={prop}
                     documents={documents}
                     onOpenEdit={openEdit}
-                    onConfirmDelete={setConfirmDeleteItem}
+                    onConfirmDelete={() => setConfirmDeleteItem(prop)}
                   />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="divide-y divide-[var(--border-subtle)]">
+            {displayPropertiesByMember.map((item) => {
+              const config = getFamilyMemberConfig(item.portfolio.name);
+              return (
+                <div key={item.portfolio.name} className="border-b border-[var(--border-subtle)] last:border-b-0">
+                  <div className="px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/60 flex items-center justify-between border-b border-[var(--border-subtle)]">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
+                        {config.icon}
+                      </div>
+                      <span className="text-xs font-bold text-[var(--text-primary)]">{item.portfolio.label}&apos;s Real Estate</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                        {item.properties.length}
+                      </span>
+                    </div>
+                    <span className="text-xs font-bold text-emerald-500 tnum">
+                      {formatINR(item.valuation)} {item.invested > 0 ? `(Inv: ${formatINR(item.invested)})` : ''}
+                    </span>
+                  </div>
+
+                  {item.properties.length === 0 ? (
+                    <div className="px-4 py-3 text-xs text-[var(--text-tertiary)] italic">
+                      No real estate properties recorded for {item.portfolio.label}
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-[var(--border-subtle)]">
+                      {item.properties.map((prop) => (
+                        <RealEstateCard
+                          key={prop.id}
+                          property={prop}
+                          documents={documents}
+                          onOpenEdit={openEdit}
+                          onConfirmDelete={() => setConfirmDeleteItem(prop)}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
-            }}
-          </List>
-        ) : (
-          filteredProperties.map((property) => (
-            <RealEstateCard
-              key={property.id}
-              property={property}
-              documents={documents}
-              onOpenEdit={openEdit}
-              onConfirmDelete={setConfirmDeleteItem}
-            />
-          ))
+            })}
+          </div>
         )}
       </AssetRegistryContainer>
 
@@ -197,12 +440,10 @@ export function RealEstateView({
         isOpen={showModal}
         onClose={closeModal}
         editingProperty={editingItem}
-        portfolioName={portfolioName}
+        portfolioName={selectedMember !== 'all' ? selectedMember : (portfolioName !== 'all' ? portfolioName : (portfolios?.[0]?.name || 'personal'))}
         portfolioOptions={portfolioOptions}
-        documents={documents}
         onAdd={onAdd}
         onUpdate={onUpdate}
-        onDeleteDoc={onDelete}
       />
 
       <ConfirmModal
@@ -210,7 +451,11 @@ export function RealEstateView({
         onClose={() => setConfirmDeleteItem(null)}
         onConfirm={handleDelete}
         title="Delete Property"
-        message={confirmDeleteItem ? `Are you sure you want to delete "${confirmDeleteItem.property_name}"? This cannot be undone.` : ''}
+        message={
+          confirmDeleteItem
+            ? `Are you sure you want to delete the property "${confirmDeleteItem.property_name}"? This action cannot be undone.`
+            : ''
+        }
         confirmLabel="Delete"
         variant="danger"
         isLoading={deleting}

@@ -1,18 +1,19 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Insurance, DocumentMetadata, PortfolioName } from '../../types/portfolio';
 import ConfirmModal from '../ConfirmModal';
 import InsurancePolicyCard from './InsurancePolicyCard';
 import InsuranceFormModal from './InsuranceFormModal';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import RegistryToolbar, { SortOption, FilterPillOption } from '../ui/RegistryToolbar';
-import { useIsMutating } from '../../contexts/PortfolioContext';
+import { useIsMutating, usePortfolioEntities } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
 import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
-import { useIsMobile } from '../../hooks/useIsMobile';
-import { FixedSizeList as List } from 'react-window';
 import { calculateInsuranceTotals } from '../../utils/insuranceUtils';
 import { formatINR } from '../../utils/formatters';
+import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
+import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
+import { Shield } from '../icons/AppIcons';
 
 interface PortfolioOption {
   name: string;
@@ -51,9 +52,54 @@ export function InsuranceView({
   onDelete,
   autoOpenAddModal,
 }: InsuranceViewProps) {
-  const isMobile = useIsMobile();
   const isMutating = useIsMutating();
   const { addToast } = useToastActions();
+  const { portfolios } = usePortfolioEntities();
+
+  const [selectedMember, setSelectedMember] = useState<string>(portfolioName || 'all');
+
+  useEffect(() => {
+    setSelectedMember(portfolioName || 'all');
+  }, [portfolioName]);
+
+  // Aggregate Family Insurance totals across all family members
+  const familyInsuranceSummary = useMemo(() => {
+    let totalSumAssured = 0;
+    let totalAnnualPremium = 0;
+    let activeCount = 0;
+    let expiringSoonCount = 0;
+
+    const ordered = sortPortfolios(portfolios || []);
+    const memberBreakdown = ordered.map((p) => {
+      const policies = p.insurances || [];
+      const memberTotals = calculateInsuranceTotals(policies);
+
+      totalSumAssured += memberTotals.totalSumAssured;
+      totalAnnualPremium += memberTotals.totalAnnualPremium;
+      activeCount += memberTotals.activeCount;
+      expiringSoonCount += memberTotals.expiringSoonCount;
+
+      return {
+        name: p.name,
+        label: p.label || p.name,
+        sumAssured: memberTotals.totalSumAssured,
+        annualPremium: memberTotals.totalAnnualPremium,
+        activeCount: memberTotals.activeCount,
+        expiringSoonCount: memberTotals.expiringSoonCount,
+        count: policies.length,
+      };
+    });
+
+    return {
+      totalSumAssured,
+      totalAnnualPremium,
+      activeCount,
+      expiringSoonCount,
+      totalCount: insurances.length,
+      memberBreakdown,
+    };
+  }, [portfolios, insurances.length]);
+
   const {
     showModal,
     editingItem,
@@ -101,8 +147,29 @@ export function InsuranceView({
     debounceMs: 150,
   });
 
-  // Summary Totals
-  const totals = useMemo(() => calculateInsuranceTotals(insurances), [insurances]);
+  const displayPoliciesByMember = useMemo(() => {
+    const ordered = sortPortfolios(portfolios || []);
+    return ordered.map((p) => {
+      const pId = p.id;
+      const memberPolicies = filteredPolicies.filter(
+        (ins) => ins.portfolio_id === pId || (!ins.portfolio_id && p.name === (portfolioName === 'all' ? p.name : portfolioName))
+      );
+      const memberSum = memberPolicies.reduce((sum, ins) => sum + (Number(ins.sum_assured) || 0), 0);
+      const memberPrem = memberPolicies.reduce((sum, ins) => sum + (Number(ins.premium_amount) || 0), 0);
+      return {
+        portfolio: p,
+        policies: memberPolicies,
+        sumAssured: memberSum,
+        annualPremium: memberPrem,
+      };
+    });
+  }, [portfolios, filteredPolicies, portfolioName]);
+
+  const activePoliciesForMember = useMemo(() => {
+    if (selectedMember === 'all') return filteredPolicies;
+    const found = displayPoliciesByMember.find((item) => item.portfolio.name === selectedMember);
+    return found ? found.policies : filteredPolicies;
+  }, [selectedMember, filteredPolicies, displayPoliciesByMember]);
 
   // Category counts for pills
   const filterPills: FilterPillOption[] = useMemo(() => {
@@ -134,32 +201,154 @@ export function InsuranceView({
     }
   }, [onDelete, addToast, setConfirmDeleteItem]);
 
-  // Stats ribbon UI
-  const statsRibbon = (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs">
-      <div>
-        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Total Sum Assured</span>
-        <span className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(totals.totalSumAssured)}</span>
-      </div>
-      <div>
-        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Annual Premium Outflow</span>
-        <span className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(totals.totalAnnualPremium)}/yr</span>
-      </div>
-      <div>
-        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Active Policies</span>
-        <span className="text-sm font-bold text-[var(--text-primary)] tnum">{totals.activeCount} Covered</span>
-      </div>
-      <div>
-        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Renewals Alert</span>
-        <span className={`text-sm font-bold tnum ${totals.expiringSoonCount > 0 ? 'text-[var(--negative)]' : 'text-[var(--positive)]'}`}>
-          {totals.expiringSoonCount > 0 ? `⚠️ ${totals.expiringSoonCount} Due Soon` : '✓ All Up to date'}
-        </span>
-      </div>
-    </div>
-  );
-
   return (
-    <div>
+    <div className="space-y-4">
+      {/* Unified Family Insurance Policies Banner */}
+      <div className="apple-card p-3 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-2.5">
+          {/* Left: Title & Subtitle */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-rose-500/20 text-rose-500 border border-rose-500/30 flex items-center justify-center shrink-0">
+              <Shield size={16} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
+                  Total Family Insurance Policies
+                </h3>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[var(--radius-pill)] bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 uppercase tracking-wider">
+                  Combined
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--text-tertiary)]">
+                Aggregated life, health &amp; general coverage across family vaults
+              </p>
+            </div>
+          </div>
+
+          {/* Right: Metric Badges */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-rose-500/30 text-right">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Sum Assured</span>
+              <span className="text-xs sm:text-sm font-bold text-rose-500 tnum">
+                {formatINR(familyInsuranceSummary.totalSumAssured)}
+              </span>
+            </div>
+            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-[var(--border-subtle)] text-right">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Annual Premium</span>
+              <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum">
+                {formatINR(familyInsuranceSummary.totalAnnualPremium)}/yr
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2: 4 Summary Metrics Ribbon */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Total Sum Assured</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
+              {formatINR(familyInsuranceSummary.totalSumAssured)}
+            </span>
+          </div>
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Annual Premium Outflow</span>
+            <span className="text-xs sm:text-sm font-bold text-rose-500 tnum mt-0.5 block">
+              {formatINR(familyInsuranceSummary.totalAnnualPremium)}/yr
+            </span>
+          </div>
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Active Policies</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
+              {familyInsuranceSummary.activeCount} Covered
+            </span>
+          </div>
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Renewals Alert</span>
+            <span className={`text-xs sm:text-sm font-bold tnum mt-0.5 block ${familyInsuranceSummary.expiringSoonCount > 0 ? 'text-[var(--negative)]' : 'text-[var(--positive)]'}`}>
+              {familyInsuranceSummary.expiringSoonCount > 0 ? `⚠️ ${familyInsuranceSummary.expiringSoonCount} Due Soon` : '✓ All Up to date'}
+            </span>
+          </div>
+        </div>
+
+        {/* Row 3: Family Members Breakdown */}
+        {familyInsuranceSummary.memberBreakdown.length > 0 && (
+          <div className="pt-2 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
+                Family Members Breakdown
+              </span>
+              <div className="flex items-center gap-2">
+                {selectedMember !== 'all' && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMember('all')}
+                    className="text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                  >
+                    View All
+                  </button>
+                )}
+                <span className="text-[10px] text-[var(--text-tertiary)]">
+                  {familyInsuranceSummary.totalCount} Total Policies
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+              {familyInsuranceSummary.memberBreakdown.map((m) => {
+                const config = getFamilyMemberConfig(m.name);
+                const isSelected = selectedMember === m.name;
+                return (
+                  <button
+                    key={m.name}
+                    type="button"
+                    onClick={() => setSelectedMember((prev) => (prev === m.name ? 'all' : m.name))}
+                    className={`flex items-center justify-between p-2 rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press ${
+                      isSelected
+                        ? 'bg-[var(--surface-secondary)] border-rose-500 ring-1 ring-rose-500/30 shadow-xs'
+                        : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-rose-500/40'
+                    }`}
+                    title={`Click to filter ${m.label}'s insurance policies`}
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
+                        {config.icon}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                            {m.label}
+                          </p>
+                          {isSelected && (
+                            <span className="text-[8.5px] font-bold px-1 rounded bg-rose-500/20 text-rose-600 dark:text-rose-400">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-[var(--text-tertiary)]">
+                          {m.count} polic{m.count === 1 ? 'y' : 'ies'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-bold text-rose-500 tnum">
+                        {formatINR(m.sumAssured)}
+                      </p>
+                      <p className="text-[10px] font-semibold text-[var(--text-secondary)] tnum">
+                        {formatINR(m.annualPremium)}/yr
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Main Insurance Registry Container */}
       <AssetRegistryContainer
         title="Insurance Policies"
         createBtnLabel="Add Policy"
@@ -170,13 +359,12 @@ export function InsuranceView({
         isLoading={isMutating}
         itemCount={insurances.length}
         onOpenAdd={openAdd}
-        stats={insurances.length > 0 ? statsRibbon : undefined}
         toolbar={
           insurances.length > 0 ? (
             <RegistryToolbar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
-              searchPlaceholder="Search policies by name, insurer, type..."
+              searchPlaceholder="Search policies by name, provider, type..."
               sortOptions={SORT_OPTIONS}
               currentSortField={sortField}
               currentSortOrder={sortOrder}
@@ -190,37 +378,85 @@ export function InsuranceView({
           ) : undefined
         }
       >
-        {filteredPolicies.length > 10 ? (
-          <List
-            height={Math.min(filteredPolicies.length * (isMobile ? 180 : 140), isMobile ? 420 : 540)}
-            itemCount={filteredPolicies.length}
-            itemSize={isMobile ? 180 : 140}
-            width="100%"
-          >
-            {({ index, style }) => {
-              const policy = filteredPolicies[index];
-              return (
-                <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
+        {selectedMember !== 'all' ? (
+          <div>
+            <div className="px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/60 flex items-center justify-between border-b border-[var(--border-subtle)]">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-[var(--text-primary)]">
+                  {portfolioOptions.find((p) => p.name === selectedMember)?.label || selectedMember}&apos;s Policies
+                </span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                  {activePoliciesForMember.length}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedMember('all')}
+                className="text-xs text-[var(--accent-blue)] hover:underline font-semibold cursor-pointer"
+              >
+                Show All Family
+              </button>
+            </div>
+            {activePoliciesForMember.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[var(--text-tertiary)] italic">
+                No insurance policies recorded for this member.
+              </div>
+            ) : (
+              <div className="divide-y divide-[var(--border-subtle)]">
+                {activePoliciesForMember.map((insurance) => (
                   <InsurancePolicyCard
-                    policy={policy}
+                    key={insurance.id}
+                    policy={insurance}
                     documents={documents}
                     onOpenEdit={openEdit}
                     onConfirmDelete={setConfirmDeleteItem}
                   />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="divide-y divide-[var(--border-subtle)]">
+            {displayPoliciesByMember.map((item) => {
+              const config = getFamilyMemberConfig(item.portfolio.name);
+              return (
+                <div key={item.portfolio.name} className="border-b border-[var(--border-subtle)] last:border-b-0">
+                  <div className="px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/60 flex items-center justify-between border-b border-[var(--border-subtle)]">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
+                        {config.icon}
+                      </div>
+                      <span className="text-xs font-bold text-[var(--text-primary)]">{item.portfolio.label}&apos;s Policies</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                        {item.policies.length}
+                      </span>
+                    </div>
+                    <span className="text-xs font-bold text-rose-500 tnum">
+                      Cover: {formatINR(item.sumAssured)} {item.annualPremium > 0 ? `(Prem: ${formatINR(item.annualPremium)}/yr)` : ''}
+                    </span>
+                  </div>
+
+                  {item.policies.length === 0 ? (
+                    <div className="px-4 py-3 text-xs text-[var(--text-tertiary)] italic">
+                      No insurance policies recorded for {item.portfolio.label}
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-[var(--border-subtle)]">
+                      {item.policies.map((insurance) => (
+                        <InsurancePolicyCard
+                          key={insurance.id}
+                          policy={insurance}
+                          documents={documents}
+                          onOpenEdit={openEdit}
+                          onConfirmDelete={setConfirmDeleteItem}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
-            }}
-          </List>
-        ) : (
-          filteredPolicies.map((policy) => (
-            <InsurancePolicyCard
-              key={policy.id}
-              policy={policy}
-              documents={documents}
-              onOpenEdit={openEdit}
-              onConfirmDelete={setConfirmDeleteItem}
-            />
-          ))
+            })}
+          </div>
         )}
       </AssetRegistryContainer>
 
@@ -228,12 +464,10 @@ export function InsuranceView({
         isOpen={showModal}
         onClose={closeModal}
         editingPolicy={editingItem}
-        portfolioName={portfolioName}
+        portfolioName={selectedMember !== 'all' ? selectedMember : (portfolioName !== 'all' ? portfolioName : (portfolios?.[0]?.name || 'personal'))}
         portfolioOptions={portfolioOptions}
-        documents={documents}
         onAdd={onAdd}
         onUpdate={onUpdate}
-        onDeleteDoc={onDelete}
       />
 
       <ConfirmModal
@@ -241,7 +475,7 @@ export function InsuranceView({
         onClose={() => setConfirmDeleteItem(null)}
         onConfirm={() => { if (confirmDeleteItem) void handleDelete(confirmDeleteItem.id); }}
         title="Delete Insurance Policy"
-        message={confirmDeleteItem ? `Are you sure you want to delete "${confirmDeleteItem.policy_name}"? This cannot be undone.` : ''}
+        message={confirmDeleteItem ? `Are you sure you want to delete the policy "${confirmDeleteItem.policy_name}"? This cannot be undone.` : ''}
         confirmLabel="Delete"
         variant="danger"
         isLoading={deleting}

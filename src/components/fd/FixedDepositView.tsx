@@ -1,18 +1,19 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { FixedDeposit, DocumentMetadata, PortfolioName } from '../../types/portfolio';
 import ConfirmModal from '../ConfirmModal';
 import DepositDetailsCard from './DepositDetailsCard';
 import FDFormModal from './FDFormModal';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import RegistryToolbar, { SortOption, FilterPillOption } from '../ui/RegistryToolbar';
-import { useIsMutating } from '../../contexts/PortfolioContext';
+import { useIsMutating, usePortfolioEntities } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
 import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
-import { useIsMobile } from '../../hooks/useIsMobile';
-import { FixedSizeList as List } from 'react-window';
 import { getFDInvestedAmount, getFDEffectiveValue } from '../../domains/assets/fd/calculations/fdCompounding';
 import { formatINR } from '../../utils/formatters';
+import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
+import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
+import { Landmark } from '../icons/AppIcons';
 
 interface PortfolioOption {
   name: string;
@@ -51,9 +52,72 @@ export function FixedDepositView({
   onDelete,
   autoOpenAddModal,
 }: FixedDepositViewProps) {
-  const isMobile = useIsMobile();
   const isMutating = useIsMutating();
   const { addToast } = useToastActions();
+  const { portfolios } = usePortfolioEntities();
+
+  const [selectedMember, setSelectedMember] = useState<string>(portfolioName || 'all');
+
+  useEffect(() => {
+    setSelectedMember(portfolioName || 'all');
+  }, [portfolioName]);
+
+  // Aggregate Family FD totals across all family members
+  const familyFDSummary = useMemo(() => {
+    let totalPrincipal = 0;
+    let totalCurrent = 0;
+    let activeCount = 0;
+    let maturedCount = 0;
+
+    const ordered = sortPortfolios(portfolios || []);
+    const memberBreakdown = ordered.map((p) => {
+      let memberPrincipal = 0;
+      let memberCurrent = 0;
+      let memberActive = 0;
+      let memberMatured = 0;
+
+      const fds = (p.fixedDeposits || []).filter((f) => f.fd_type === 'regular' || !f.fd_type);
+      for (const fd of fds) {
+        const principal = getFDInvestedAmount(fd);
+        const current = getFDEffectiveValue(fd);
+        memberPrincipal += principal;
+        memberCurrent += current;
+        if (fd.status === 'matured') {
+          memberMatured++;
+        } else {
+          memberActive++;
+        }
+      }
+
+      totalPrincipal += memberPrincipal;
+      totalCurrent += memberCurrent;
+      activeCount += memberActive;
+      maturedCount += memberMatured;
+
+      return {
+        name: p.name,
+        label: p.label || p.name,
+        principal: memberPrincipal,
+        current: memberCurrent,
+        activeCount: memberActive,
+        maturedCount: memberMatured,
+        count: fds.length,
+      };
+    });
+
+    const accruedInterest = Math.max(0, totalCurrent - totalPrincipal);
+
+    return {
+      totalPrincipal,
+      totalCurrent,
+      accruedInterest,
+      activeCount,
+      maturedCount,
+      totalCount: activeCount + maturedCount,
+      memberBreakdown,
+    };
+  }, [portfolios]);
+
   const {
     showModal,
     editingItem,
@@ -104,31 +168,35 @@ export function FixedDepositView({
     debounceMs: 150,
   });
 
-  // Calculate totals
-  const totals = useMemo(() => {
-    let totalInvested = 0;
-    let totalCurrent = 0;
-    let activeCount = 0;
-    let maturedCount = 0;
+  const displayDepositsByMember = useMemo(() => {
+    const ordered = sortPortfolios(portfolios || []);
+    return ordered.map((p) => {
+      const pId = p.id;
+      const memberDeposits = filteredDeposits.filter(
+        (fd) => fd.portfolio_id === pId || (!fd.portfolio_id && p.name === (portfolioName === 'all' ? p.name : portfolioName))
+      );
+      const memberPrincipal = memberDeposits.reduce((sum, fd) => sum + getFDInvestedAmount(fd), 0);
+      const memberCurrent = memberDeposits.reduce((sum, fd) => sum + getFDEffectiveValue(fd), 0);
+      return {
+        portfolio: p,
+        deposits: memberDeposits,
+        principal: memberPrincipal,
+        current: memberCurrent,
+      };
+    });
+  }, [portfolios, filteredDeposits, portfolioName]);
 
-    for (const fd of fixedDeposits) {
-      totalInvested += getFDInvestedAmount(fd);
-      totalCurrent += getFDEffectiveValue(fd);
-      if (fd.status === 'matured') {
-        maturedCount++;
-      } else {
-        activeCount++;
-      }
-    }
-
-    return { totalInvested, totalCurrent, activeCount, maturedCount };
-  }, [fixedDeposits]);
+  const activeDepositsForMember = useMemo(() => {
+    if (selectedMember === 'all') return filteredDeposits;
+    const found = displayDepositsByMember.find((item) => item.portfolio.name === selectedMember);
+    return found ? found.deposits : filteredDeposits;
+  }, [selectedMember, filteredDeposits, displayDepositsByMember]);
 
   const filterPills: FilterPillOption[] = useMemo(() => [
     { id: 'all', label: 'All', count: fixedDeposits.length },
-    { id: 'active', label: 'Active', count: totals.activeCount },
-    { id: 'matured', label: 'Matured', count: totals.maturedCount },
-  ], [fixedDeposits.length, totals.activeCount, totals.maturedCount]);
+    { id: 'active', label: 'Active', count: familyFDSummary.activeCount },
+    { id: 'matured', label: 'Matured', count: familyFDSummary.maturedCount },
+  ], [fixedDeposits.length, familyFDSummary.activeCount, familyFDSummary.maturedCount]);
 
   const handleDelete = useCallback(async (id: string) => {
     setDeleting(true);
@@ -143,32 +211,154 @@ export function FixedDepositView({
     }
   }, [onDelete, addToast, setConfirmDeleteItem]);
 
-  // Stats ribbon
-  const statsRibbon = (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs">
-      <div>
-        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Principal Invested</span>
-        <span className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(totals.totalInvested)}</span>
-      </div>
-      <div>
-        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Current / Maturity Value</span>
-        <span className="text-sm font-bold text-[var(--positive)] tnum">{formatINR(totals.totalCurrent)}</span>
-      </div>
-      <div>
-        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Accrued Interest</span>
-        <span className="text-sm font-bold text-[var(--positive)] tnum">
-          +{formatINR(Math.max(0, totals.totalCurrent - totals.totalInvested))}
-        </span>
-      </div>
-      <div>
-        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Active Deposits</span>
-        <span className="text-sm font-bold text-[var(--text-primary)] tnum">{totals.activeCount} Active ({totals.maturedCount} Matured)</span>
-      </div>
-    </div>
-  );
-
   return (
-    <div>
+    <div className="space-y-4">
+      {/* Unified Family Fixed Deposits Banner */}
+      <div className="apple-card p-3 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-2.5">
+          {/* Left: Title & Subtitle */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-indigo-500/20 text-indigo-500 border border-indigo-500/30 flex items-center justify-center shrink-0">
+              <Landmark size={16} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
+                  Total Family Fixed Deposits
+                </h3>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[var(--radius-pill)] bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 uppercase tracking-wider">
+                  Combined
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--text-tertiary)]">
+                Aggregated term deposits across all family portfolios
+              </p>
+            </div>
+          </div>
+
+          {/* Right: Metric Badges */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-indigo-500/30 text-right">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Principal</span>
+              <span className="text-xs sm:text-sm font-bold text-indigo-500 tnum">
+                {formatINR(familyFDSummary.totalPrincipal)}
+              </span>
+            </div>
+            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-[var(--border-subtle)] text-right">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Maturity</span>
+              <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum">
+                {formatINR(familyFDSummary.totalCurrent)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2: 4 Summary Metrics Ribbon */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Principal Invested</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5 block">
+              {formatINR(familyFDSummary.totalPrincipal)}
+            </span>
+          </div>
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Current / Maturity Value</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block">
+              {formatINR(familyFDSummary.totalCurrent)}
+            </span>
+          </div>
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Accrued Interest</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block">
+              +{formatINR(familyFDSummary.accruedInterest)}
+            </span>
+          </div>
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Active Deposits</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
+              {familyFDSummary.activeCount} Active ({familyFDSummary.maturedCount} Matured)
+            </span>
+          </div>
+        </div>
+
+        {/* Row 3: Family Members Breakdown */}
+        {familyFDSummary.memberBreakdown.length > 0 && (
+          <div className="pt-2 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
+                Family Members Breakdown
+              </span>
+              <div className="flex items-center gap-2">
+                {selectedMember !== 'all' && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMember('all')}
+                    className="text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                  >
+                    View All
+                  </button>
+                )}
+                <span className="text-[10px] text-[var(--text-tertiary)]">
+                  {familyFDSummary.totalCount} Total FDs
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+              {familyFDSummary.memberBreakdown.map((m) => {
+                const config = getFamilyMemberConfig(m.name);
+                const isSelected = selectedMember === m.name;
+                return (
+                  <button
+                    key={m.name}
+                    type="button"
+                    onClick={() => setSelectedMember((prev) => (prev === m.name ? 'all' : m.name))}
+                    className={`flex items-center justify-between p-2 rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press ${
+                      isSelected
+                        ? 'bg-[var(--surface-secondary)] border-indigo-500 ring-1 ring-indigo-500/30 shadow-xs'
+                        : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-indigo-500/40'
+                    }`}
+                    title={`Click to filter ${m.label}'s fixed deposits`}
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
+                        {config.icon}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                            {m.label}
+                          </p>
+                          {isSelected && (
+                            <span className="text-[8.5px] font-bold px-1 rounded bg-indigo-500/20 text-indigo-600 dark:text-indigo-400">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-[var(--text-tertiary)]">
+                          {m.count} deposit{m.count === 1 ? '' : 's'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-bold text-indigo-500 tnum">
+                        {formatINR(m.principal)}
+                      </p>
+                      <p className="text-[10px] font-semibold text-[var(--positive)] tnum">
+                        {formatINR(m.current)}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Main FD Registry Container */}
       <AssetRegistryContainer
         title="Fixed Deposits"
         createBtnLabel="Add FD"
@@ -179,7 +369,6 @@ export function FixedDepositView({
         isLoading={isMutating}
         itemCount={fixedDeposits.length}
         onOpenAdd={openAdd}
-        stats={fixedDeposits.length > 0 ? statsRibbon : undefined}
         toolbar={
           fixedDeposits.length > 0 ? (
             <RegistryToolbar
@@ -199,37 +388,85 @@ export function FixedDepositView({
           ) : undefined
         }
       >
-        {filteredDeposits.length > 10 ? (
-          <List
-            height={Math.min(filteredDeposits.length * (isMobile ? 180 : 140), isMobile ? 420 : 540)}
-            itemCount={filteredDeposits.length}
-            itemSize={isMobile ? 180 : 140}
-            width="100%"
-          >
-            {({ index, style }) => {
-              const deposit = filteredDeposits[index];
-              return (
-                <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
+        {selectedMember !== 'all' ? (
+          <div>
+            <div className="px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/60 flex items-center justify-between border-b border-[var(--border-subtle)]">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-[var(--text-primary)]">
+                  {portfolioOptions.find((p) => p.name === selectedMember)?.label || selectedMember}&apos;s Fixed Deposits
+                </span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                  {activeDepositsForMember.length}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedMember('all')}
+                className="text-xs text-[var(--accent-blue)] hover:underline font-semibold cursor-pointer"
+              >
+                Show All Family
+              </button>
+            </div>
+            {activeDepositsForMember.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[var(--text-tertiary)] italic">
+                No fixed deposits recorded for this member.
+              </div>
+            ) : (
+              <div className="divide-y divide-[var(--border-subtle)]">
+                {activeDepositsForMember.map((deposit) => (
                   <DepositDetailsCard
+                    key={deposit.id}
                     deposit={deposit}
                     documents={documents}
                     onOpenEdit={openEdit}
                     onConfirmDelete={setConfirmDeleteItem}
                   />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="divide-y divide-[var(--border-subtle)]">
+            {displayDepositsByMember.map((item) => {
+              const config = getFamilyMemberConfig(item.portfolio.name);
+              return (
+                <div key={item.portfolio.name} className="border-b border-[var(--border-subtle)] last:border-b-0">
+                  <div className="px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/60 flex items-center justify-between border-b border-[var(--border-subtle)]">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
+                        {config.icon}
+                      </div>
+                      <span className="text-xs font-bold text-[var(--text-primary)]">{item.portfolio.label}&apos;s Fixed Deposits</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                        {item.deposits.length}
+                      </span>
+                    </div>
+                    <span className="text-xs font-bold text-indigo-500 tnum">
+                      {formatINR(item.principal)} {item.current > item.principal ? `(Mat: ${formatINR(item.current)})` : ''}
+                    </span>
+                  </div>
+
+                  {item.deposits.length === 0 ? (
+                    <div className="px-4 py-3 text-xs text-[var(--text-tertiary)] italic">
+                      No fixed deposits recorded for {item.portfolio.label}
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-[var(--border-subtle)]">
+                      {item.deposits.map((deposit) => (
+                        <DepositDetailsCard
+                          key={deposit.id}
+                          deposit={deposit}
+                          documents={documents}
+                          onOpenEdit={openEdit}
+                          onConfirmDelete={setConfirmDeleteItem}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
-            }}
-          </List>
-        ) : (
-          filteredDeposits.map((deposit) => (
-            <DepositDetailsCard
-              key={deposit.id}
-              deposit={deposit}
-              documents={documents}
-              onOpenEdit={openEdit}
-              onConfirmDelete={setConfirmDeleteItem}
-            />
-          ))
+            })}
+          </div>
         )}
       </AssetRegistryContainer>
 
@@ -237,7 +474,7 @@ export function FixedDepositView({
         isOpen={showModal}
         onClose={closeModal}
         editingFd={editingItem}
-        portfolioName={portfolioName}
+        portfolioName={selectedMember !== 'all' ? selectedMember : (portfolioName !== 'all' ? portfolioName : (portfolios?.[0]?.name || 'personal'))}
         portfolioOptions={portfolioOptions}
         onAdd={onAdd}
         onUpdate={onUpdate}

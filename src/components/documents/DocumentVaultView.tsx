@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
   DocumentMetadata,
   Portfolio,
@@ -19,6 +19,8 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
 import AssetCardSkeleton from '../AssetCardSkeleton';
 import EmptyState from '../EmptyState';
+import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
+import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
 
 type AssetType = 'general' | 'stock' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance';
 
@@ -68,31 +70,94 @@ export default React.memo(function DocumentVaultView({
     generateStoragePath: generateDocumentStoragePath,
   } = useDocumentStorage();
 
+  const [selectedMember, setSelectedMember] = useState<string>(portfolioName || 'all');
+
+  useEffect(() => {
+    setSelectedMember(portfolioName || 'all');
+  }, [portfolioName]);
+
+  // Aggregate all documents across all family members
+  const allFamilyDocs = useMemo(() => {
+    return portfolios.flatMap((p) =>
+      (p.documents || []).map((doc) => ({
+        ...doc,
+        portfolioName: p.name,
+        portfolioLabel: p.label || p.name,
+      }))
+    );
+  }, [portfolios]);
+
+  // Family Document Summary
+  const familyDocSummary = useMemo(() => {
+    let totalDocs = 0;
+    let linkedDocs = 0;
+    let generalDocs = 0;
+    let expiringSoonCount = 0;
+
+    const ordered = sortPortfolios(portfolios || []);
+    const memberBreakdown = ordered.map((p) => {
+      const pDocs = p.documents || [];
+      const memberCount = pDocs.length;
+      totalDocs += memberCount;
+
+      for (const d of pDocs) {
+        if (d.asset_type === 'general') {
+          generalDocs++;
+        } else {
+          linkedDocs++;
+        }
+        if (d.expiry_date) {
+          const daysLeft = Math.ceil((new Date(d.expiry_date).getTime() - Date.now()) / (1000 * 3600 * 24));
+          if (daysLeft >= 0 && daysLeft <= 30) {
+            expiringSoonCount++;
+          }
+        }
+      }
+
+      return {
+        name: p.name,
+        label: p.label || p.name,
+        count: memberCount,
+      };
+    });
+
+    return {
+      totalDocs,
+      linkedDocs,
+      generalDocs,
+      expiringSoonCount,
+      memberBreakdown,
+    };
+  }, [portfolios]);
+
   const assetLabelMap = useMemo(() => {
     const map = new Map<string, string>();
-    portfolio.holdings.forEach((h) => {
-      if (h.id) map.set(h.id, `${h.ticker} · ${h.stockName}`);
-    });
-    portfolio.fixedDeposits.forEach((f) => {
-      if (f.id) map.set(f.id, f.bank_name);
-    });
-    portfolio.goldHoldings.forEach((g) => {
-      if (g.id) map.set(g.id, g.item_name);
-    });
-    portfolio.realEstate.forEach((r) => {
-      if (r.id) map.set(r.id, r.property_name);
-    });
-    portfolio.insurances.forEach((i) => {
-      if (i.id) map.set(i.id, `${i.provider} · ${i.policy_name}`);
-    });
+    for (const p of portfolios) {
+      (p.holdings || []).forEach((h) => {
+        if (h.id) map.set(h.id, `${h.ticker} · ${h.stockName}`);
+      });
+      (p.fixedDeposits || []).forEach((f) => {
+        if (f.id) map.set(f.id, f.bank_name);
+      });
+      (p.goldHoldings || []).forEach((g) => {
+        if (g.id) map.set(g.id, g.item_name);
+      });
+      (p.realEstate || []).forEach((r) => {
+        if (r.id) map.set(r.id, r.property_name);
+      });
+      (p.insurances || []).forEach((i) => {
+        if (i.id) map.set(i.id, `${i.provider} · ${i.policy_name}`);
+      });
+    }
     return map;
-  }, [portfolio]);
+  }, [portfolios]);
+
   const [activeFolder, setActiveFolder] = useState<AssetType>('general');
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [formPortfolio, setFormPortfolio] = useState(() => portfolioName);
+  const [formPortfolio, setFormPortfolio] = useState(() => (portfolioName === 'all' ? (portfolios[0]?.name || 'personal') : portfolioName));
   const [linkedAssetId, setLinkedAssetId] = useState<string>('');
   const [documentName, setDocumentName] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
@@ -100,7 +165,13 @@ export default React.memo(function DocumentVaultView({
   const [isDeleting, setIsDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (selectedMember !== 'all') {
+      setFormPortfolio(selectedMember);
+    }
+  }, [selectedMember]);
+
+  useEffect(() => {
     if (autoOpenAddModal) {
       fileInputRef.current?.click();
     }
@@ -162,7 +233,12 @@ export default React.memo(function DocumentVaultView({
   }, [activeFolder, selectedPortfolioObj]);
 
   const folderDocs = useMemo(() => {
-    const docs = portfolio.documents.filter((d) => d.asset_type === activeFolder);
+    const docs = allFamilyDocs.filter((d) => {
+      const matchFolder = d.asset_type === activeFolder;
+      const matchMember = selectedMember === 'all' || d.portfolioName === selectedMember;
+      return matchFolder && matchMember;
+    });
+
     return [...docs].sort((a, b) => {
       if (a.expiry_date && b.expiry_date) {
         return new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime();
@@ -171,21 +247,19 @@ export default React.memo(function DocumentVaultView({
       if (b.expiry_date) return 1;
       return 0;
     });
-  }, [portfolio.documents, activeFolder]);
+  }, [allFamilyDocs, activeFolder, selectedMember]);
 
   function handleFilePick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
-      addToast('File size exceeds 10MB limit.', 'error');
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      addToast('File too large (max 10MB)', 'error');
       return;
     }
 
     setPendingFile(file);
-    setDocumentName(file.name);
-    setFormPortfolio(portfolioName);
+    setDocumentName(file.name.replace(/\.[^/.]+$/, ''));
     setLinkedAssetId('');
     setExpiryDate('');
     setUploadError('');
@@ -247,60 +321,166 @@ export default React.memo(function DocumentVaultView({
     }
   }
 
-
-
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="apple-card p-3 sm:p-3.5 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Document Vault</span>
-            <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">{portfolio.documents.length} Files</span>
-            <span className="text-[11px] text-[var(--text-tertiary)]">Stored securely</span>
+      {/* Unified Family Document Vault Banner */}
+      <div className="apple-card p-3 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-2.5">
+          {/* Left: Title & Subtitle */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-slate-500/20 text-slate-400 border border-slate-500/30 flex items-center justify-center shrink-0">
+              <FileText size={16} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
+                  Total Family Document Vault
+                </h3>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[var(--radius-pill)] bg-slate-500/15 text-slate-400 border border-slate-500/30 uppercase tracking-wider">
+                  Combined
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--text-tertiary)]">
+                Secure encrypted storage for financial records, deeds &amp; certificates
+              </p>
+            </div>
           </div>
-          <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] shrink-0">
-            <FileText size={16} />
+
+          {/* Right: Metric Badges */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-slate-500/30 text-right">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Files</span>
+              <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum">
+                {familyDocSummary.totalDocs} Files
+              </span>
+            </div>
+            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-[var(--border-subtle)] text-right">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Categories</span>
+              <span className="text-xs sm:text-sm font-bold text-[var(--accent-blue)] tnum">
+                {FOLDERS.length} Folders
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="apple-card p-3 sm:p-3.5 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Linked Documents</span>
-            <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
-              {portfolio.documents.filter((d) => d.asset_type !== 'general').length} Files
+        {/* Row 2: 4 Summary Metrics Ribbon */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Total Documents</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
+              {familyDocSummary.totalDocs} Files
             </span>
-            <span className="text-[11px] text-[var(--text-tertiary)]">Attached to assets</span>
           </div>
-          <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] flex items-center justify-center text-[var(--accent-blue)] shrink-0">
-            <Paperclip size={16} />
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Attached to Assets</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block">
+              {familyDocSummary.linkedDocs} Files
+            </span>
+          </div>
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">General Records</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5 block">
+              {familyDocSummary.generalDocs} Files
+            </span>
+          </div>
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Expiring / Due Soon</span>
+            <span className={`text-xs sm:text-sm font-bold tnum mt-0.5 block ${familyDocSummary.expiringSoonCount > 0 ? 'text-[var(--negative)]' : 'text-[var(--positive)]'}`}>
+              {familyDocSummary.expiringSoonCount > 0 ? `⚠️ ${familyDocSummary.expiringSoonCount} Due Soon` : '✓ All Up to date'}
+            </span>
           </div>
         </div>
 
-        <div className="apple-card p-3 sm:p-3.5 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">General Files</span>
-            <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
-              {portfolio.documents.filter((d) => d.asset_type === 'general').length} Files
-            </span>
-            <span className="text-[11px] text-[var(--text-tertiary)]">Unfiled / reference</span>
+        {/* Row 3: Family Members Breakdown */}
+        {familyDocSummary.memberBreakdown.length > 0 && (
+          <div className="pt-2 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
+                Family Members Breakdown
+              </span>
+              <div className="flex items-center gap-2">
+                {selectedMember !== 'all' && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMember('all')}
+                    className="text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                  >
+                    View All
+                  </button>
+                )}
+                <span className="text-[10px] text-[var(--text-tertiary)]">
+                  {familyDocSummary.totalDocs} Total Documents
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+              {familyDocSummary.memberBreakdown.map((m) => {
+                const config = getFamilyMemberConfig(m.name);
+                const isSelected = selectedMember === m.name;
+                return (
+                  <button
+                    key={m.name}
+                    type="button"
+                    onClick={() => setSelectedMember((prev) => (prev === m.name ? 'all' : m.name))}
+                    className={`flex items-center justify-between p-2 rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press ${
+                      isSelected
+                        ? 'bg-[var(--surface-secondary)] border-slate-400 ring-1 ring-slate-400/30 shadow-xs'
+                        : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-slate-400/40'
+                    }`}
+                    title={`Click to filter ${m.label}'s documents`}
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
+                        {config.icon}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                            {m.label}
+                          </p>
+                          {isSelected && (
+                            <span className="text-[8.5px] font-bold px-1 rounded bg-slate-500/20 text-slate-300">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-[var(--text-tertiary)]">
+                          Vault files
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-bold text-[var(--text-primary)] tnum">
+                        {m.count} file{m.count === 1 ? '' : 's'}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--warning-soft)] flex items-center justify-center text-[var(--warning)] shrink-0">
-            <Folder size={16} />
-          </div>
-        </div>
+        )}
       </div>
 
+      {/* Main Document Vault Content Card */}
       <div className="apple-card overflow-hidden">
         <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center justify-between flex-wrap gap-2.5">
           <div className="flex items-center gap-1.5 flex-wrap">
             {FOLDERS.map((f) => {
-              const count = portfolio.documents.filter((d) => d.asset_type === f.key).length;
+              const count = allFamilyDocs.filter((d) => {
+                const matchFolder = d.asset_type === f.key;
+                const matchMember = selectedMember === 'all' || d.portfolioName === selectedMember;
+                return matchFolder && matchMember;
+              }).length;
               const isActive = activeFolder === f.key;
               return (
                 <button
                   key={f.key}
                   onClick={() => setActiveFolder(f.key)}
-                  className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] border transition-all ios-press shrink-0 ${isActive
+                  className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] border transition-all ios-press shrink-0 cursor-pointer ${isActive
                     ? 'bg-[var(--text-primary)] text-[var(--surface)] border-[var(--text-primary)] shadow-xs'
                     : 'bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-tertiary)]'
                     }`}
@@ -335,6 +515,26 @@ export default React.memo(function DocumentVaultView({
           </div>
         </div>
 
+        {selectedMember !== 'all' && (
+          <div className="px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/40 flex items-center justify-between border-b border-[var(--border-subtle)]">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-[var(--text-primary)]">
+                Showing {portfolioOptions.find((p) => p.name === selectedMember)?.label || selectedMember}&apos;s Documents
+              </span>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                {folderDocs.length}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelectedMember('all')}
+              className="text-xs text-[var(--accent-blue)] hover:underline font-semibold cursor-pointer"
+            >
+              Show All Family
+            </button>
+          </div>
+        )}
+
         {isMutating ? (
           <div className="p-4">
             <AssetCardSkeleton count={Math.max(1, folderDocs.length || 3)} />
@@ -364,6 +564,7 @@ export default React.memo(function DocumentVaultView({
             {({ index, style }) => {
               const doc = folderDocs[index];
               const linkedLabel = doc.asset_id ? assetLabelMap.get(doc.asset_id) || null : null;
+              const memberConfig = getFamilyMemberConfig(doc.portfolioName);
               return (
                 <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
                   <div className="mobile-asset-card px-3.5 sm:px-4 py-3 hover:bg-[var(--surface-secondary)]/50 transition-colors flex items-center justify-between gap-3 h-full">
@@ -374,6 +575,12 @@ export default React.memo(function DocumentVaultView({
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-[var(--text-primary)] truncate" title={doc.name}>{doc.name}</p>
                         <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                          {selectedMember === 'all' && (
+                            <span className={`text-[9.5px] font-bold px-1.5 py-0.2 rounded-full ${memberConfig.bg} ${memberConfig.text} flex items-center gap-1`}>
+                              {memberConfig.icon}
+                              {doc.portfolioLabel}
+                            </span>
+                          )}
                           {doc.file_type && (
                             <span className="text-[10px] text-[var(--text-tertiary)] font-mono">{doc.file_type}</span>
                           )}
@@ -399,7 +606,7 @@ export default React.memo(function DocumentVaultView({
                       </button>
                       <button
                         onClick={() => handleDelete(doc)}
-                        className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press"
+                        className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press cursor-pointer"
                         title="Delete"
                       >
                         <Trash2 size={13} />
@@ -414,6 +621,7 @@ export default React.memo(function DocumentVaultView({
           <div className="divide-y divide-[var(--border-subtle)]">
             {folderDocs.map((doc) => {
               const linkedLabel = doc.asset_id ? assetLabelMap.get(doc.asset_id) || null : null;
+              const memberConfig = getFamilyMemberConfig(doc.portfolioName);
               return (
                 <div key={doc.id} className="mobile-asset-card px-3.5 sm:px-4 py-3 hover:bg-[var(--surface-secondary)]/50 transition-colors flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -423,6 +631,12 @@ export default React.memo(function DocumentVaultView({
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-[var(--text-primary)] truncate" title={doc.name}>{doc.name}</p>
                       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        {selectedMember === 'all' && (
+                          <span className={`text-[9.5px] font-bold px-1.5 py-0.2 rounded-full ${memberConfig.bg} ${memberConfig.text} flex items-center gap-1`}>
+                            {memberConfig.icon}
+                            {doc.portfolioLabel}
+                          </span>
+                        )}
                         {doc.file_type && (
                           <span className="text-[10px] text-[var(--text-tertiary)] font-mono">{doc.file_type}</span>
                         )}
@@ -448,7 +662,7 @@ export default React.memo(function DocumentVaultView({
                     </button>
                     <button
                       onClick={() => handleDelete(doc)}
-                      className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press"
+                      className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 size={13} />
@@ -476,7 +690,7 @@ export default React.memo(function DocumentVaultView({
               </div>
               <button
                 onClick={() => !uploading && setShowLinkModal(false)}
-                className="w-8 h-8 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
+                className="w-8 h-8 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors cursor-pointer"
                 aria-label="Close dialog"
               >
                 <X size={16} />
@@ -553,7 +767,7 @@ export default React.memo(function DocumentVaultView({
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-900 transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-900 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
                   {uploading ? 'Uploading...' : 'Upload'}
