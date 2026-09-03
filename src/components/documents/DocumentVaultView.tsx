@@ -345,49 +345,33 @@ export default React.memo(function DocumentVaultView({
               </p>
             </div>
           </div>
-
-          {/* Right: Metric Badges */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <div className="flex-1 sm:flex-initial bg-[var(--surface-secondary)] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[var(--radius-small)] border border-slate-500/30 text-right">
-              <span className="text-[8.5px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Files</span>
-              <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum">
-                {familyDocSummary.totalDocs} Files
-              </span>
-            </div>
-            <div className="flex-1 sm:flex-initial bg-[var(--surface-secondary)] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[var(--radius-small)] border border-[var(--border-subtle)] text-right">
-              <span className="text-[8.5px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Categories</span>
-              <span className="text-xs sm:text-sm font-bold text-[var(--accent-blue)] tnum">
-                {FOLDERS.length} Folders
-              </span>
-            </div>
-          </div>
         </div>
 
         {/* Row 2: 4 Summary Metrics Ribbon */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 text-xs">
           <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Total Documents</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Total Documents</span>
             <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block truncate">
               {familyDocSummary.totalDocs} Files
             </span>
           </div>
 
           <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Attached to Assets</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Attached to Assets</span>
             <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block truncate">
               {familyDocSummary.linkedDocs} Files
             </span>
           </div>
 
           <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">General Records</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">General Records</span>
             <span className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5 block truncate">
               {familyDocSummary.generalDocs} Files
             </span>
           </div>
 
           <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Expiring / Due Soon</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Expiring / Due Soon</span>
             <span className={`text-xs sm:text-sm font-bold tnum mt-0.5 block truncate ${familyDocSummary.expiringSoonCount > 0 ? 'text-[var(--negative)]' : 'text-[var(--positive)]'}`}>
               {familyDocSummary.expiringSoonCount > 0 ? `⚠️ ${familyDocSummary.expiringSoonCount} Due Soon` : '✓ All Current'}
             </span>
@@ -398,7 +382,7 @@ export default React.memo(function DocumentVaultView({
         {familyDocSummary.memberBreakdown.length > 0 && (
           <div className="pt-1.5 sm:pt-2 border-t border-[var(--border-subtle)]">
             <div className="flex items-center justify-between mb-1 sm:mb-1.5">
-              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
                 Family Members Breakdown
               </span>
               <div className="flex items-center gap-1.5">
@@ -406,12 +390,12 @@ export default React.memo(function DocumentVaultView({
                   <button
                     type="button"
                     onClick={() => setSelectedMember('all')}
-                    className="text-[9.5px] sm:text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                    className="text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
                   >
                     View All
                   </button>
                 )}
-                <span className="text-[9px] sm:text-[10px] text-[var(--text-tertiary)]">
+                <span className="text-[10px] text-[var(--text-tertiary)]">
                   {familyDocSummary.totalDocs} Documents
                 </span>
               </div>
@@ -425,7 +409,7 @@ export default React.memo(function DocumentVaultView({
                     key={m.name}
                     type="button"
                     onClick={() => setSelectedMember((prev) => (prev === m.name ? 'all' : m.name))}
-                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-1.5 sm:p-2 rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press min-w-0 ${
+                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-1.5 sm:p-2 min-h-[44px] justify-center rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press min-w-0 ${
                       isSelected
                         ? 'bg-[var(--surface-secondary)] border-slate-400 ring-1 ring-slate-400/30 shadow-xs'
                         : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-slate-400/40'
@@ -442,20 +426,24 @@ export default React.memo(function DocumentVaultView({
                             {m.label}
                           </p>
                           {isSelected && (
-                            <span className="hidden xs:inline text-[8px] font-bold px-1 rounded bg-slate-500/20 text-slate-300">
+                            <span className="hidden xs:inline text-[8px] font-bold px-1 rounded bg-slate-500/20 text-slate-700 dark:text-slate-300">
                               Active
                             </span>
                           )}
                         </div>
-                        <p className="text-[8.5px] sm:text-[10px] text-[var(--text-tertiary)] hidden sm:block">
+                        <p className="text-[9.5px] sm:text-[10px] text-[var(--text-tertiary)] hidden sm:block">
                           Vault files
                         </p>
                       </div>
                     </div>
                     <div className="text-left sm:text-right shrink-0 mt-1 sm:mt-0">
-                      <p className="text-[10.5px] sm:text-xs font-bold text-[var(--text-primary)] tnum truncate">
-                        {m.count} file{m.count === 1 ? '' : 's'}
-                      </p>
+                      {m.count === 0 ? (
+                        <span className="text-[10.5px] sm:text-xs text-[var(--text-tertiary)] font-normal block">—</span>
+                      ) : (
+                        <p className="text-[10.5px] sm:text-xs font-bold text-[var(--text-primary)] tnum truncate">
+                          {m.count} file{m.count === 1 ? '' : 's'}
+                        </p>
+                      )}
                     </div>
                   </button>
                 );

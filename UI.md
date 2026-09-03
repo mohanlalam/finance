@@ -450,8 +450,8 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
 +-----------------------------------------------------------------------------------------------+
 | UNIFIED FAMILY ASSET BANNER (.apple-card p-2.5 sm:p-3.5)                                      |
 |                                                                                               |
-| ROW 1: [Icon] Total Family [Asset] [Combined Pill]                [Badge 1]    [Badge 2]     |
-|        Aggregated description across family portfolios            (Principal)  (Maturity)     |
+| ROW 1: [Icon] Total Family [Asset] [Combined Pill]                [Optional Live Rates: 24K]  |
+|        Aggregated description across family portfolios                                        |
 |                                                                                               |
 | ROW 2: SUMMARY METRICS RIBBON (grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2)             |
 |        [ Metric 1 ]        [ Metric 2 ]        [ Metric 3 ]        [ Metric 4 ] (or 5)        |
@@ -471,9 +471,9 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
 ```
 
 #### Mobile Compactness & Clean UI Standards
-1. **Row 1 Badges**: On mobile (`< 768px`), top metric badges use `flex-1 sm:flex-initial` to share screen width equally (50/50) in a clean compact row with `px-2 py-0.5`, preventing awkward wrapping or text clipping.
-2. **Row 2 Metric Ribbon**: Mobile padding is tightly tuned to `p-1.5 sm:p-2` with `gap-1.5 sm:gap-2`. Labels use `text-[9px] uppercase tracking-wider truncate` and values use `text-xs sm:text-sm font-bold tnum truncate`.
-3. **Row 3 Member Breakdown (3-Col Grid)**: Uses `grid-cols-3 gap-1 sm:gap-1.5` instead of vertical stacking. On mobile, cards render in a clean vertical flex stack (`flex-col items-start min-w-0 p-1.5`) featuring a 16px avatar, bold name, and truncated value/weight, expanding smoothly to `sm:flex-row sm:items-center sm:justify-between p-2` on desktop. Saves **~65% vertical viewport space** on mobile devices.
+1. **Row 1 Cleanliness**: Dedicated strictly to identity (Category Icon, Title, `Combined` pill, Subtitle) and optional live market controls (e.g. Gold 24K/22K spot rates). Eliminating duplicate metric badges avoids double cognitive load and saves ~38px of vertical mobile screen space.
+2. **Row 2 Metric Ribbon**: Mobile padding is tightly tuned to `p-1.5 sm:p-2` with `gap-1.5 sm:gap-2`. Labels use `text-[10px] uppercase tracking-wider truncate` and values use `text-xs sm:text-sm font-bold tnum truncate`.
+3. **Row 3 Member Breakdown (3-Col Grid)**: Uses `grid-cols-3 gap-1 sm:gap-1.5` with `min-h-[44px] justify-center` ensuring compliance with Google Material and Apple HIG touch target guidelines. Shows muted `—` zero-state styling when a member has zero holdings.
 4. **1-Click Interactive Filtering**: Clicking any family member's card in Row 3 isolates their holdings below with an active highlight ring (`ring-1 ring-[color]/30`) and reveals an instant *"View All"* button.
 
 ---
@@ -506,9 +506,9 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
 
 * Component: `FixedDepositView.tsx` & `DepositDetailsCard.tsx`
 * **Unified Banner Structure**:
-  * **Row 1**: Landmark icon, title, `Combined` badge, Total Principal & Total Maturity badges.
+  * **Row 1**: Landmark icon, title, `Combined` badge, and subtitle (zero duplicate metric badges).
   * **Row 2 (4 Metrics)**: Principal Invested, Current/Maturity Value, Accrued Interest, Active Deposits count.
-  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) with Rammohan, Padmavathi, and Sai Laxmi principal and maturity totals.
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3 min-h-[44px]`) with Rammohan, Padmavathi, and Sai Laxmi principal and maturity totals (with muted `—` zero-state).
 * **Card Specs**:
   * Bank Name & Logo Badge (e.g., HDFC, ICICI, SBI).
   * Principal Amount vs Projected Maturity Amount split.
@@ -522,9 +522,9 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
 
 * Component: `RDView.tsx`, `RDAccountCard.tsx`, & `RDInstallmentSchedule.tsx`
 * **Unified Banner Structure**:
-  * **Row 1**: Clock icon, title, `Combined` badge, Total Monthly SIP & Current Value badges.
+  * **Row 1**: Clock icon, title, `Combined` badge, and subtitle.
   * **Row 2 (4 Metrics)**: Total Invested, Current Valuation, Accrued Interest, Monthly Deposit.
-  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) showing monthly SIP and current balance per member.
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3 min-h-[44px]`) showing monthly SIP and current balance per member (with muted `—` zero-state).
 * **Visual Specs**:
   * Monthly Commitment Indicator: Shows monthly deposit requirement and execution date.
   * Accumulated Balance Tracker.
@@ -535,9 +535,9 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
 
 * Component: `SIPView.tsx`, `SIPAccountCard.tsx`, `SIPFormModal.tsx`, `SIPFormFields.tsx`
 * **Unified Banner Structure**:
-  * **Row 1**: TrendingUp icon, title, `Combined` badge, Monthly Inflow & Current Valuation badges.
+  * **Row 1**: TrendingUp icon, title, `Combined` badge, and subtitle.
   * **Row 2 (4 Metrics)**: Total Invested, Current Valuation, Monthly SIP, Overall Return (P&L and %).
-  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) showing monthly SIP and current valuation per member.
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3 min-h-[44px]`) showing monthly SIP and current valuation per member (with muted `—` zero-state).
 * **Features**:
   * Direct integration with AMFI Live Mutual Fund NAV schemes.
   * Displays Scheme Category (Equity, Debt, Hybrid, Index), Monthly SIP Date, and Total Amount Invested.
@@ -548,14 +548,14 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
 
 * Component: `GoldHoldingView.tsx`, `GoldHoldingCard.tsx`, `GoldFormModal.tsx`
 * **Unified Banner Structure**:
-  * **Row 1**: Bullion icon, title, `Combined` badge, and Live 24K & 22K spot rates with inline calibration trigger (✎) and Sync trigger (redundant weight and valuation badges omitted to optimize mobile layout and eliminate duplication with Row 2).
+  * **Row 1**: Bullion icon, title, `Combined` badge, and Live 24K & 22K spot rates with inline calibration trigger (✎) and Sync trigger.
   * **Row 2 (5 Summary Metrics Ribbon)**:
     1. `Family Invested`
     2. `Current Value`
     3. `Family Weight (g)`
     4. `Weight in Tola` (Canonical conversion: $1\text{ tola} = 11.6638\text{ g}$)
     5. `Overall Return` (Monetary gain + percentage return)
-  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) showing weight in grams, weight in tola, and valuation per member.
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3 min-h-[44px]`) showing weight in grams, weight in tola, and valuation per member (with muted `—` zero-state).
 * **Holding Card Specifications**:
   * Supports 3 Sub-types: Sovereign Gold Bonds (SGB), Digital Gold, and Physical Bullion/Jewelry.
   * Tracks Weight in Grams, Weight in Tola, Purchase Rate per Gram, and Live Benchmark Rate (24K Gold per Gram).
@@ -566,9 +566,9 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
 
 * Component: `RealEstateView.tsx`, `RealEstateCard.tsx`, `RealEstateFormModal.tsx`
 * **Unified Banner Structure**:
-  * **Row 1**: Building2 icon, title, `Combined` badge, Total Invested & Current Valuation badges.
+  * **Row 1**: Building2 icon, title, `Combined` badge, and subtitle.
   * **Row 2 (4 Metrics)**: Total Investment, Current Valuation, Total Properties count, Overall Appreciation.
-  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) showing property valuation and invested cost per member.
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3 min-h-[44px]`) showing property valuation and invested cost per member (with muted `—` zero-state).
 * **Visual Attributes**:
   * Property Type Tags: Residential, Commercial, Land / Plot.
   * Purchase Value vs Current Estimated Market Valuation.
@@ -579,9 +579,9 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
 
 * Component: `InsuranceView.tsx`, `InsurancePolicyCard.tsx`, `InsuranceFormModal.tsx`
 * **Unified Banner Structure**:
-  * **Row 1**: Shield icon, title, `Combined` badge, Total Sum Assured & Annual Premium badges.
+  * **Row 1**: Shield icon, title, `Combined` badge, and subtitle.
   * **Row 2 (4 Metrics)**: Total Sum Assured, Annual Premium Outflow, Active Policies count, Renewals Alert (Due Soon warning).
-  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) showing sum assured and annual premium per member.
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3 min-h-[44px]`) showing sum assured and annual premium per member (with muted `—` zero-state).
 * **Features**:
   * Policy Types: Term Life, Health Insurance, Vehicle Insurance, ULIP / Investment.
   * Sum Assured Coverage Amount vs Annual Premium Cost.
@@ -592,9 +592,9 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
 
 * Component: `DocumentVaultView.tsx` & `DocumentAttachmentField.tsx`
 * **Unified Banner Structure**:
-  * **Row 1**: FileText icon, title, `Combined` badge, Total Files & Categories count badges.
+  * **Row 1**: FileText icon, title, `Combined` badge, and subtitle.
   * **Row 2 (4 Metrics)**: Total Documents, Attached to Assets, General Records, Expiring/Due Soon.
-  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3`) showing document counts per member.
+  * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3 min-h-[44px]`) showing document counts per member (with muted `—` zero-state).
 * **Structure**:
   * Taxonomy Categories: `fd_advice`, `policy_schedule`, `title_deed`, `tax_receipt`, `invoice`, `gold_hallmark`, `account_statement`, `general`.
   * Expiration Warning Pills: Highlights identity documents or policies nearing expiration.

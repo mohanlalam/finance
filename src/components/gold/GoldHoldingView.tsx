@@ -381,27 +381,27 @@ export function GoldHoldingView({
               <Scale size={11} />
             </div>
             <div className="min-w-0">
-              <span className="text-[9px] sm:text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block truncate">Family Weight</span>
-              <span className="text-xs sm:text-sm font-bold text-amber-500 tnum mt-0.5 block truncate">
-                {familyGoldSummary.totalGrams.toFixed(1)} <span className="text-[9px] font-normal text-[var(--text-tertiary)]">g</span>
+              <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block truncate">Family Weight</span>
+              <span className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400 tnum mt-0.5 block truncate">
+                {familyGoldSummary.totalGrams.toFixed(1)} <span className="text-[10px] font-normal text-[var(--text-tertiary)]">g</span>
               </span>
             </div>
           </div>
 
           <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-amber-500/25 flex items-center gap-1.5 sm:gap-2">
-            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-[var(--radius-small)] bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-[var(--radius-small)] bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
               <Scale size={11} />
             </div>
             <div className="min-w-0">
-              <span className="text-[9px] sm:text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block truncate">Weight in Tola</span>
-              <span className="text-xs sm:text-sm font-bold text-amber-500 tnum mt-0.5 block truncate">
-                {familyGoldSummary.totalTola.toFixed(2)} <span className="text-[9px] font-normal text-[var(--text-tertiary)]">tola</span>
+              <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block truncate">Weight in Tola</span>
+              <span className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400 tnum mt-0.5 block truncate">
+                {familyGoldSummary.totalTola.toFixed(2)} <span className="text-[10px] font-normal text-[var(--text-tertiary)]">tola</span>
               </span>
             </div>
           </div>
 
           <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)] col-span-2 sm:col-span-1">
-            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Overall Return</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Overall Return</span>
             <span className={`text-xs sm:text-sm font-bold tnum mt-0.5 block truncate ${pnlColor(familyGoldSummary.totalGain)}`}>
               {familyGoldSummary.totalGain >= 0 ? '+' : ''}{formatINR(familyGoldSummary.totalGain)} ({formatPercent(familyGoldSummary.gainPct)})
             </span>
@@ -412,7 +412,7 @@ export function GoldHoldingView({
         {familyGoldSummary.memberBreakdown.length > 0 && (
           <div className="pt-1.5 sm:pt-2 border-t border-[var(--border-subtle)]">
             <div className="flex items-center justify-between mb-1 sm:mb-1.5">
-              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
                 Family Members Breakdown
               </span>
               <div className="flex items-center gap-1.5">
@@ -420,12 +420,12 @@ export function GoldHoldingView({
                   <button
                     type="button"
                     onClick={() => setSelectedMember('all')}
-                    className="text-[9.5px] sm:text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                    className="text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
                   >
                     View All
                   </button>
                 )}
-                <span className="text-[9px] sm:text-[10px] text-[var(--text-tertiary)]">
+                <span className="text-[10px] text-[var(--text-tertiary)]">
                   {familyGoldSummary.memberBreakdown.reduce((acc, m) => acc + m.count, 0)} Holdings
                 </span>
               </div>
@@ -439,7 +439,7 @@ export function GoldHoldingView({
                     key={m.name}
                     type="button"
                     onClick={() => setSelectedMember((prev) => (prev === m.name ? 'all' : m.name))}
-                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-1.5 sm:p-2 rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press min-w-0 ${
+                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-1.5 sm:p-2 min-h-[44px] justify-center rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press min-w-0 ${
                       isSelected
                         ? 'bg-[var(--surface-secondary)] border-amber-500 ring-1 ring-amber-500/30 shadow-xs'
                         : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-amber-500/40'
@@ -456,23 +456,29 @@ export function GoldHoldingView({
                             {m.label}
                           </p>
                           {isSelected && (
-                            <span className="hidden xs:inline text-[8px] font-bold px-1 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                            <span className="hidden xs:inline text-[8px] font-bold px-1 rounded bg-amber-500/20 text-amber-700 dark:text-amber-400">
                               Active
                             </span>
                           )}
                         </div>
-                        <p className="text-[8.5px] sm:text-[10px] text-[var(--text-tertiary)] hidden sm:block">
+                        <p className="text-[9.5px] sm:text-[10px] text-[var(--text-tertiary)] hidden sm:block">
                           {m.count} holding{m.count === 1 ? '' : 's'}
                         </p>
                       </div>
                     </div>
                     <div className="text-left sm:text-right shrink-0 mt-1 sm:mt-0">
-                      <p className="text-[10.5px] sm:text-xs font-bold text-amber-500 tnum truncate">
-                        {m.grams.toFixed(1)}g <span className="text-[8.5px] font-normal text-[var(--text-tertiary)]">({m.tola.toFixed(1)}T)</span>
-                      </p>
-                      <p className="text-[9px] sm:text-[10px] font-semibold text-[var(--text-secondary)] tnum truncate">
-                        {formatINR(m.value)}
-                      </p>
+                      {m.count === 0 ? (
+                        <span className="text-[10.5px] sm:text-xs text-[var(--text-tertiary)] font-normal block">—</span>
+                      ) : (
+                        <>
+                          <p className="text-[10.5px] sm:text-xs font-bold text-amber-700 dark:text-amber-400 tnum truncate">
+                            {m.grams.toFixed(1)}g <span className="text-[9px] font-normal text-[var(--text-tertiary)]">({m.tola.toFixed(1)}T)</span>
+                          </p>
+                          <p className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--text-secondary)] tnum truncate">
+                            {formatINR(m.value)}
+                          </p>
+                        </>
+                      )}
                     </div>
                   </button>
                 );

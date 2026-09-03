@@ -283,49 +283,33 @@ export function RDView({
               </p>
             </div>
           </div>
-
-          {/* Right: Metric Badges */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <div className="flex-1 sm:flex-initial bg-[var(--surface-secondary)] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[var(--radius-small)] border border-purple-500/30 text-right">
-              <span className="text-[8.5px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Monthly SIP</span>
-              <span className="text-xs sm:text-sm font-bold text-purple-500 tnum">
-                {formatINR(familyRDSummary.totalMonthly)}/mo
-              </span>
-            </div>
-            <div className="flex-1 sm:flex-initial bg-[var(--surface-secondary)] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[var(--radius-small)] border border-[var(--border-subtle)] text-right">
-              <span className="text-[8.5px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Current Value</span>
-              <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum">
-                {formatINR(familyRDSummary.totalCurrent)}
-              </span>
-            </div>
-          </div>
         </div>
 
         {/* Row 2: 4 Summary Metrics Ribbon */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 text-xs">
           <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Total Invested</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Total Invested</span>
             <span className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5 block truncate">
               {formatINR(familyRDSummary.totalInvested)}
             </span>
           </div>
 
           <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Current Valuation</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Current Valuation</span>
             <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block truncate">
               {formatINR(familyRDSummary.totalCurrent)}
             </span>
           </div>
 
           <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Accrued Interest</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Accrued Interest</span>
             <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block truncate">
               +{formatINR(familyRDSummary.accruedInterest)}
             </span>
           </div>
 
           <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Monthly Deposit</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Monthly Deposit</span>
             <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block truncate">
               {formatINR(familyRDSummary.totalMonthly)}/mo
             </span>
@@ -336,7 +320,7 @@ export function RDView({
         {familyRDSummary.memberBreakdown.length > 0 && (
           <div className="pt-1.5 sm:pt-2 border-t border-[var(--border-subtle)]">
             <div className="flex items-center justify-between mb-1 sm:mb-1.5">
-              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
                 Family Members Breakdown
               </span>
               <div className="flex items-center gap-1.5">
@@ -344,12 +328,12 @@ export function RDView({
                   <button
                     type="button"
                     onClick={() => setSelectedMember('all')}
-                    className="text-[9.5px] sm:text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                    className="text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
                   >
                     View All
                   </button>
                 )}
-                <span className="text-[9px] sm:text-[10px] text-[var(--text-tertiary)]">
+                <span className="text-[10px] text-[var(--text-tertiary)]">
                   {familyRDSummary.totalCount} Total RDs
                 </span>
               </div>
@@ -363,7 +347,7 @@ export function RDView({
                     key={m.name}
                     type="button"
                     onClick={() => setSelectedMember((prev) => (prev === m.name ? 'all' : m.name))}
-                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-1.5 sm:p-2 rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press min-w-0 ${
+                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-1.5 sm:p-2 min-h-[44px] justify-center rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press min-w-0 ${
                       isSelected
                         ? 'bg-[var(--surface-secondary)] border-purple-500 ring-1 ring-purple-500/30 shadow-xs'
                         : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-purple-500/40'
@@ -380,23 +364,29 @@ export function RDView({
                             {m.label}
                           </p>
                           {isSelected && (
-                            <span className="hidden xs:inline text-[8px] font-bold px-1 rounded bg-purple-500/20 text-purple-600 dark:text-purple-400">
+                            <span className="hidden xs:inline text-[8px] font-bold px-1 rounded bg-purple-500/20 text-purple-700 dark:text-purple-400">
                               Active
                             </span>
                           )}
                         </div>
-                        <p className="text-[8.5px] sm:text-[10px] text-[var(--text-tertiary)] hidden sm:block">
+                        <p className="text-[9.5px] sm:text-[10px] text-[var(--text-tertiary)] hidden sm:block">
                           {m.count} account{m.count === 1 ? '' : 's'}
                         </p>
                       </div>
                     </div>
                     <div className="text-left sm:text-right shrink-0 mt-1 sm:mt-0">
-                      <p className="text-[10.5px] sm:text-xs font-bold text-purple-500 tnum truncate">
-                        {formatINR(m.monthly)}/mo
-                      </p>
-                      <p className="text-[9px] sm:text-[10px] font-semibold text-[var(--positive)] tnum truncate">
-                        {formatINR(m.current)}
-                      </p>
+                      {m.count === 0 ? (
+                        <span className="text-[10.5px] sm:text-xs text-[var(--text-tertiary)] font-normal block">—</span>
+                      ) : (
+                        <>
+                          <p className="text-[10.5px] sm:text-xs font-bold text-purple-700 dark:text-purple-400 tnum truncate">
+                            {formatINR(m.monthly)}/mo
+                          </p>
+                          <p className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--positive)] tnum truncate">
+                            {formatINR(m.current)}
+                          </p>
+                        </>
+                      )}
                     </div>
                   </button>
                 );
