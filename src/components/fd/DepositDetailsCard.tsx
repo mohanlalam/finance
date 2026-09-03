@@ -1,5 +1,5 @@
 import React from 'react';
-import { FixedDeposit, DocumentMetadata } from '../../types/portfolio';
+import { FixedDeposit, DocumentMetadata, FDPayload } from '../../types/portfolio';
 import { formatINR, getFDEffectiveValue } from '../../utils/formatters';
 import { openSecureDocument } from '../../utils/supabaseStorage';
 import { calculateDateDuration, formatDateDuration, toLocalDateString } from '../../utils/dateUtils';
@@ -23,8 +23,7 @@ interface DepositDetailsCardProps {
   documents: DocumentMetadata[];
   onOpenEdit: (fd: FixedDeposit) => void;
   onConfirmDelete: (fd: FixedDeposit) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate?: (assetType: string, id: string, payload: any) => Promise<void>;
+  onUpdate?: (assetType: string, id: string, payload: Partial<FDPayload> | Record<string, unknown>) => Promise<void>;
 }
 
 export function DepositDetailsCard({

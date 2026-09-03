@@ -4,16 +4,46 @@ const SESSION_KEY = 'finance_pin_verified';
 const HASH_KEY = 'finance_hashed_pin';
 const CUSTOM_HASH_KEY = 'custom_app_pin_hash';
 const CUSTOM_LENGTH_KEY = 'custom_app_pin_length';
-const LAST_KNOWN_PIN_HASH_KEY = 'last_known_pin_hash';
+const OFFLINE_VERIFIER_KEY = 'finance_offline_pin_verifier';
 
-export function getCachedValidPinHash(): string | null {
-  if (typeof localStorage === 'undefined') return null;
-  return localStorage.getItem(LAST_KNOWN_PIN_HASH_KEY);
+// Automatic security hygiene: purge any legacy plaintext PIN hashes from persistent storage
+try {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem('last_known_pin_hash');
+  }
+} catch {
+  // Ignore in environments without localStorage
 }
 
-export function setCachedValidPinHash(hash: string): void {
+export async function setOfflinePinVerifier(hashedPin: string): Promise<void> {
   if (typeof localStorage === 'undefined') return;
-  localStorage.setItem(LAST_KNOWN_PIN_HASH_KEY, hash);
+  // Double-hash with a domain-separated salt so stored verifier cannot be reused as server credential
+  const verifier = await hashPin(`vault_offline_verifier:${hashedPin}`);
+  localStorage.setItem(OFFLINE_VERIFIER_KEY, verifier);
+}
+
+export async function verifyOfflinePin(hashedPin: string): Promise<boolean> {
+  if (typeof localStorage === 'undefined') return false;
+  const stored = localStorage.getItem(OFFLINE_VERIFIER_KEY);
+  if (!stored) return false;
+  const verifier = await hashPin(`vault_offline_verifier:${hashedPin}`);
+  return verifier === stored;
+}
+
+export function clearOfflinePinVerifier(): void {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem(OFFLINE_VERIFIER_KEY);
+  }
+}
+
+/** @deprecated Retained for backwards compatibility; returns null to avoid leaking server credential */
+export function getCachedValidPinHash(): string | null {
+  return null;
+}
+
+/** @deprecated Use setOfflinePinVerifier instead */
+export function setCachedValidPinHash(hash: string): void {
+  void setOfflinePinVerifier(hash);
 }
 
 export function isPinConfigured(): boolean {
@@ -39,7 +69,7 @@ export function markSessionVerified(hashedPin?: string): void {
   sessionStorage.setItem(SESSION_KEY, 'true');
   if (hashedPin) {
     sessionStorage.setItem(HASH_KEY, hashedPin);
-    setCachedValidPinHash(hashedPin);
+    void setOfflinePinVerifier(hashedPin);
   }
 }
 
@@ -83,6 +113,7 @@ export function clearCustomPin(): void {
     localStorage.removeItem(CUSTOM_HASH_KEY);
     localStorage.removeItem(CUSTOM_LENGTH_KEY);
   }
+  clearOfflinePinVerifier();
   disableBiometrics();
 }
 
@@ -92,6 +123,6 @@ export async function setCustomPin(newPin: string): Promise<void> {
     localStorage.setItem(CUSTOM_HASH_KEY, hash);
     localStorage.setItem(CUSTOM_LENGTH_KEY, newPin.length.toString());
   }
-  updateBiometricPinHash(hash);
+  await updateBiometricPinHash(hash);
   markSessionVerified(hash);
 }

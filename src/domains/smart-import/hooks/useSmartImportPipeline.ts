@@ -67,8 +67,7 @@ interface UseSmartImportPipelineProps {
   onClose: () => void;
   activePortfolio: string;
   portfolios: Portfolio[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  addAsset: (assetType: string, portfolioName: string, payload: any, options?: { reload?: boolean }) => Promise<any>;
+  addAsset: (assetType: string, portfolioName: string, payload: Record<string, unknown>, options?: { reload?: boolean }) => Promise<unknown>;
   loadPortfolios: () => Promise<void>;
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void;
 }

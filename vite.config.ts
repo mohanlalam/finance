@@ -21,18 +21,6 @@ export default defineConfig(({ command }): UserConfig => ({
         ],
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.includes('/functions/v1/'),
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-api-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 24 * 60 * 60 * 7, // 7 days
-              },
-              networkTimeoutSeconds: 5,
-            },
-          },
-          {
             urlPattern: ({ url }) => url.host === 'api.mfapi.in',
             handler: 'NetworkFirst',
             options: {

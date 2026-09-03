@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useCallback, useRef, useMemo, ReactNode, MutableRefObject } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Portfolio, PortfolioName, AssetPayload, RDPayload, SIPPayload } from '../types/portfolio';
+import { Portfolio, PortfolioName, RDPayload, SIPPayload } from '../types/portfolio';
 import { NetWorthSnapshot, usePortfolioData, LoadStatus } from '../hooks/usePortfolioData';
 import { portfolioService } from '../domains/portfolio/services/portfolioService';
 import { logger } from '../infrastructure/logging/logger';
@@ -39,8 +39,8 @@ export interface PortfolioActionContextValue {
   addPortfolio: (name: string, label: string) => Promise<void>;
   renamePortfolio: (id: string, label: string) => Promise<void>;
   deletePortfolio: (id: string) => Promise<void>;
-  addAsset: (assetType: string, portfolioName: string, payload: AssetPayload, options?: { reload?: boolean }) => Promise<{ id?: string } | undefined>;
-  updateAsset: (assetType: string, id: string, payload: Partial<AssetPayload>) => Promise<void>;
+  addAsset: (assetType: string, portfolioName: string, payload: Record<string, unknown>, options?: { reload?: boolean }) => Promise<{ id?: string } | undefined>;
+  updateAsset: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   deleteAsset: (assetType: string, id: string) => Promise<void>;
   isMutatingRef: MutableRefObject<boolean>;
   addRDAccount: (portfolioName: string, payload: RDPayload) => Promise<void>;
@@ -282,8 +282,8 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     addPortfolio,
     renamePortfolio,
     deletePortfolio,
-    addAsset,
-    updateAsset,
+    addAsset: addAsset as (assetType: string, portfolioName: string, payload: Record<string, unknown>, options?: { reload?: boolean }) => Promise<{ id?: string } | undefined>,
+    updateAsset: updateAsset as (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>,
     deleteAsset,
     isMutatingRef,
     addRDAccount,

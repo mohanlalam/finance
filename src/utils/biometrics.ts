@@ -33,6 +33,72 @@ function base64ToBuffer(base64: string): ArrayBuffer {
   return bytes.buffer;
 }
 
+async function encryptBiometricPayload(pinHash: string, credId: string): Promise<string> {
+  try {
+    const enc = new TextEncoder();
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      enc.encode(`vault_biometric_salt_${credId}`),
+      'PBKDF2',
+      false,
+      ['deriveKey']
+    );
+    const key = await crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: 10000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt']
+    );
+    const encrypted = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv },
+      key,
+      enc.encode(pinHash)
+    );
+    return `${bufferToBase64(salt.buffer)}:${bufferToBase64(iv.buffer)}:${bufferToBase64(encrypted)}`;
+  } catch {
+    return pinHash;
+  }
+}
+
+async function decryptBiometricPayload(ciphertext: string, credId: string): Promise<string | null> {
+  try {
+    const parts = ciphertext.split(':');
+    if (parts.length !== 3) {
+      return ciphertext;
+    }
+    const [saltB64, ivB64, encB64] = parts;
+    const salt = new Uint8Array(base64ToBuffer(saltB64));
+    const iv = new Uint8Array(base64ToBuffer(ivB64));
+    const encrypted = base64ToBuffer(encB64);
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      enc.encode(`vault_biometric_salt_${credId}`),
+      'PBKDF2',
+      false,
+      ['deriveKey']
+    );
+    const key = await crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: 10000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['decrypt']
+    );
+    const decrypted = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv },
+      key,
+      encrypted
+    );
+    return new TextDecoder().decode(decrypted);
+  } catch {
+    return null;
+  }
+}
+
 /** Check if the current browser environment and hardware support biometric platform authenticators */
 export async function isBiometricsSupported(): Promise<boolean> {
   try {
@@ -156,9 +222,10 @@ export async function registerBiometrics(pinHash: string): Promise<boolean> {
 
     if (credential) {
       const credentialIdStr = bufferToBase64(credential.rawId);
+      const encryptedHash = await encryptBiometricPayload(pinHash, credentialIdStr);
       localStorage.setItem(BIOMETRIC_ENROLLED_KEY, 'true');
       localStorage.setItem(BIOMETRIC_CREDENTIAL_ID_KEY, credentialIdStr);
-      localStorage.setItem(BIOMETRIC_PIN_HASH_KEY, pinHash);
+      localStorage.setItem(BIOMETRIC_PIN_HASH_KEY, encryptedHash);
       localStorage.setItem(BIOMETRIC_AUTO_PROMPT_KEY, 'true');
       return true;
     }
@@ -176,8 +243,8 @@ export async function authenticateWithBiometrics(): Promise<string | null> {
     if (!isBiometricsEnrolled()) return null;
 
     const credentialIdStr = localStorage.getItem(BIOMETRIC_CREDENTIAL_ID_KEY);
-    const pinHash = localStorage.getItem(BIOMETRIC_PIN_HASH_KEY);
-    if (!credentialIdStr || !pinHash) return null;
+    const rawStoredHash = localStorage.getItem(BIOMETRIC_PIN_HASH_KEY);
+    if (!credentialIdStr || !rawStoredHash) return null;
 
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     const credentialId = base64ToBuffer(credentialIdStr);
@@ -200,7 +267,7 @@ export async function authenticateWithBiometrics(): Promise<string | null> {
     });
 
     if (assertion) {
-      return pinHash;
+      return await decryptBiometricPayload(rawStoredHash, credentialIdStr);
     }
     return null;
   } catch (err: unknown) {
@@ -219,10 +286,16 @@ export async function authenticateWithBiometrics(): Promise<string | null> {
 }
 
 /** Update the stored PIN hash when the user changes their PIN so biometrics stay in sync */
-export function updateBiometricPinHash(newPinHash: string): void {
+export async function updateBiometricPinHash(newPinHash: string): Promise<void> {
   try {
     if (isBiometricsEnrolled()) {
-      localStorage.setItem(BIOMETRIC_PIN_HASH_KEY, newPinHash);
+      const credId = localStorage.getItem(BIOMETRIC_CREDENTIAL_ID_KEY);
+      if (credId) {
+        const encrypted = await encryptBiometricPayload(newPinHash, credId);
+        localStorage.setItem(BIOMETRIC_PIN_HASH_KEY, encrypted);
+      } else {
+        localStorage.setItem(BIOMETRIC_PIN_HASH_KEY, newPinHash);
+      }
     }
   } catch {
     // Ignore storage errors

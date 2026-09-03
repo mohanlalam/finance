@@ -1,8 +1,7 @@
 import React from 'react';
 // Inline SVG icons — keeps lucide-react out of the critical bundle
 import { Wifi, WifiOff, Plus } from './icons/AppIcons';
-import { Portfolio, AssetPayload } from '../types/portfolio';
-import { FetchStatus } from '../types/portfolio';
+import { Portfolio, FetchStatus } from '../types/portfolio';
 import AssetCardSkeleton from './AssetCardSkeleton';
 import EmptyState from './EmptyState';
 // Eagerly loaded (lightweight, always visible on stocks tab)
@@ -34,8 +33,8 @@ interface AssetTabContentProps {
   onAddHoldingClick: () => void;
   onDeleteStock: (holdingId: string) => Promise<void>;
   onUpdateStock: (holdingId: string, qty: number, avgPrice: number) => Promise<void>;
-  onAddAsset: (assetType: string, portfolioName: string, payload: AssetPayload) => Promise<{ id?: string } | undefined | void>;
-  onUpdateAsset: (assetType: string, id: string, payload: Partial<AssetPayload>) => Promise<void>;
+  onAddAsset: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<{ id?: string; data?: { id?: string } } | void>;
+  onUpdateAsset: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDeleteAsset: (assetType: string, id: string) => Promise<void>;
   quickAddTarget?: 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | null;
   onQuickAddComplete?: () => void;

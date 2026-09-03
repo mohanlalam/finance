@@ -61,13 +61,15 @@ describe('biometrics.ts', () => {
       expect(localStorage.getItem('finance_biometric_cred_id')).toBeNull();
     });
 
-    it('updates biometric PIN hash when PIN changes', () => {
+    it('updates biometric PIN hash when PIN changes', async () => {
       localStorage.setItem('finance_biometric_enrolled', 'true');
       localStorage.setItem('finance_biometric_cred_id', 'test-cred-id');
       localStorage.setItem('finance_biometric_pin_hash', 'old-hash');
 
-      updateBiometricPinHash('new-hash');
-      expect(localStorage.getItem('finance_biometric_pin_hash')).toBe('new-hash');
+      await updateBiometricPinHash('new-hash');
+      const stored = localStorage.getItem('finance_biometric_pin_hash');
+      expect(stored).not.toBe('old-hash');
+      expect(stored).toBeTruthy();
     });
   });
 
@@ -105,7 +107,9 @@ describe('biometrics.ts', () => {
       const success = await registerBiometrics('sha256pinHash123');
       expect(success).toBe(true);
       expect(isBiometricsEnrolled()).toBe(true);
-      expect(localStorage.getItem('finance_biometric_pin_hash')).toBe('sha256pinHash123');
+      const stored = localStorage.getItem('finance_biometric_pin_hash');
+      expect(stored).not.toBe('sha256pinHash123');
+      expect(stored).toContain(':');
     });
 
     it('authenticates with biometrics and returns verified PIN hash', async () => {

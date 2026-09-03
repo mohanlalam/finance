@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Insurance, DocumentMetadata, PortfolioName } from '../../types/portfolio';
+import { Insurance, DocumentMetadata, PortfolioName, InsurancePayload } from '../../types/portfolio';
 import ConfirmModal from '../ConfirmModal';
 import InsurancePolicyCard from './InsurancePolicyCard';
 import InsuranceFormModal from './InsuranceFormModal';
@@ -25,10 +25,8 @@ interface InsuranceViewProps {
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: InsurancePayload | Record<string, unknown>) => Promise<{ id?: string; data?: { id?: string } } | void>;
+  onUpdate: (assetType: string, id: string, payload: Partial<InsurancePayload> | Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }

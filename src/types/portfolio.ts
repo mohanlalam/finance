@@ -172,6 +172,7 @@ export interface StockPayload {
   amountInvested: number;
   weekLow52?: number;
   weekHigh52?: number;
+  [key: string]: unknown;
 }
 
 export interface FDPayload {
@@ -187,6 +188,7 @@ export interface FDPayload {
   notes?: string;
   mf_scheme_code?: string;
   units?: number;
+  [key: string]: unknown;
 }
 
 export interface RDPayload {
@@ -199,6 +201,7 @@ export interface RDPayload {
   status: 'active' | 'matured';
   contributions?: { date: string; amount: number }[];
   notes?: string;
+  [key: string]: unknown;
 }
 
 export interface SIPPayload {
@@ -211,6 +214,7 @@ export interface SIPPayload {
   fallback_valuation: number;
   mf_scheme_code?: string;
   notes?: string;
+  [key: string]: unknown;
 }
 
 export interface GoldPayload {
@@ -221,6 +225,7 @@ export interface GoldPayload {
   current_valuation: number;
   purchase_date?: string;
   notes?: string;
+  [key: string]: unknown;
 }
 
 export interface RealEstatePayload {
@@ -232,6 +237,7 @@ export interface RealEstatePayload {
   purchase_date?: string;
   monthly_rent: number;
   notes?: string;
+  [key: string]: unknown;
 }
 
 export interface InsurancePayload {
@@ -243,6 +249,7 @@ export interface InsurancePayload {
   premium_amount: number;
   renewal_date?: string;
   notes?: string;
+  [key: string]: unknown;
 }
 
 export interface DocumentPayload {
@@ -252,7 +259,31 @@ export interface DocumentPayload {
   linkedAssetType: string;
   linkedAssetId: string | null;
   expiryDate: string | null;
+  [key: string]: unknown;
 }
 
 export type AssetPayload = StockPayload | FDPayload | RDPayload | SIPPayload | GoldPayload | RealEstatePayload | InsurancePayload | DocumentPayload;
+
+export type AssetMutationPayload =
+  | { type: 'fd'; payload: FDPayload }
+  | { type: 'rd'; payload: RDPayload }
+  | { type: 'sip'; payload: SIPPayload }
+  | { type: 'gold'; payload: GoldPayload }
+  | { type: 'real_estate'; payload: RealEstatePayload }
+  | { type: 'insurance'; payload: InsurancePayload }
+  | { type: 'documents'; payload: DocumentPayload }
+  | { type: 'stocks'; payload: StockPayload };
+
+export type AddAssetFunction = (
+  assetType: string,
+  portfolioName: string,
+  payload: Record<string, unknown>,
+  options?: { reload?: boolean }
+) => Promise<unknown>;
+
+export type UpdateAssetFunction = (
+  assetType: string,
+  id: string,
+  payload: Record<string, unknown>
+) => Promise<void>;
 

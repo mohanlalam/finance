@@ -9,7 +9,6 @@ import FamilyTabBar from '../components/FamilyTabBar';
 import AssetTabContent from '../components/AssetTabContent';
 import SectionErrorBoundary from '../components/SectionErrorBoundary';
 
-import ConfirmModal from '../components/ConfirmModal';
 import FloatingAddMenu from '../components/FloatingAddMenu';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { QuickAccessShortcuts } from '../components/ui/QuickAccessShortcuts';
@@ -20,19 +19,12 @@ import MobileStatusBar from '../components/MobileStatusBar';
 // Viewport-specific lazy loaded layouts
 const DesktopSidebar = React.lazy(() => import('./DesktopSidebar'));
 const MobileHomeSummary = React.lazy(() => import('../components/MobileHomeSummary'));
-const MobileAlertsView = React.lazy(() => import('../components/MobileAlertsView'));
 
-// Lazy loaded modals to keep initial bundle lightweight
-const AddHoldingModal = React.lazy(() => import('../components/AddHoldingModal'));
-const AddFamilyModal = React.lazy(() => import('../components/AddFamilyModal'));
-const RenamePortfolioModal = React.lazy(() => import('../components/RenamePortfolioModal'));
-const ChangePinModal = React.lazy(() => import('../components/ChangePinModal'));
-const SmartImportModal = React.lazy(() => import('../components/SmartImportModal'));
 import type { ImportRow } from '../components/ExportPanel'; // type-only: erased at build time
 import { AddHoldingPayload } from '../components/AddHoldingModal';
 
 import DashboardWidgets from '../components/DashboardWidgets';
-import PWAInstallBanner from '../components/PWAInstallBanner';
+import { AppShellModals } from './AppShellModals';
 import { useModalState } from '../hooks/useModalState';
 
 const PieChart = React.lazy(() => import('../components/PieChart'));
@@ -56,97 +48,8 @@ import { getBreakdownSlices } from '../utils/chartHelpers';
 import { estimateTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
 import { classBreakdown } from '../domains/portfolio/calculations/allocation';
 import { Badge } from '../components/ui/Badge';
-
-// Lazy viewport container that loads child components only when they are visible
-function LazyViewport({ children, placeholderHeight = 240 }: { children: React.ReactNode; placeholderHeight?: number }) {
-  const [isIntersected, setIsIntersected] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsIntersected(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '100px' }
-    );
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} style={{ minHeight: isIntersected ? undefined : placeholderHeight }}>
-      {isIntersected ? children : (
-        <div 
-          className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 animate-pulse" 
-          style={{ height: placeholderHeight }} 
-        />
-      )}
-    </div>
-  );
-}
-
 import { AssetTab } from '../types/portfolio';
-
-// Lazy chart wrapper that ensures the dynamic import is only evaluated on intersection
-function LazyChartWrapper<TProps extends object>({
-  importFunc,
-  fallback,
-  props,
-  placeholderHeight = 240
-}: {
-  importFunc: () => Promise<{ default: React.ComponentType<TProps> }>;
-  fallback: React.ReactNode;
-  props: TProps;
-  placeholderHeight?: number;
-}) {
-  const [isIntersected, setIsIntersected] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  // Pin the import function reference so React.lazy() is only called once per
-  // mount — prevents chart components from unmounting on every parent re-render
-  const importRef = useRef(importFunc);
-  importRef.current = importFunc;
-  const lazyComponentRef = useRef<React.ComponentType<TProps> | null>(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsIntersected(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '100px' }
-    );
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  if (isIntersected && !lazyComponentRef.current) {
-    lazyComponentRef.current = React.lazy(importRef.current) as unknown as React.ComponentType<TProps>;
-  }
-
-  const LazyComponent = lazyComponentRef.current;
-
-  return (
-    <div ref={ref} style={{ minHeight: isIntersected ? undefined : placeholderHeight }}>
-      {isIntersected && LazyComponent ? (
-        <Suspense fallback={fallback}>
-          <LazyComponent {...props} />
-        </Suspense>
-      ) : (
-        <div 
-          className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 animate-pulse" 
-          style={{ height: placeholderHeight }} 
-        />
-      )}
-    </div>
-  );
-}
+import { LazyViewport, LazyChartWrapper } from '../components/ui/LazyViewport';
 
 export default function AppShell() {
   const {
@@ -1007,82 +910,36 @@ export default function AppShell() {
         onOpenSmartImport={openSmartImport}
       />
 
-      {/* Lazy loaded Modals wrapped in Suspense */}
-      <Suspense fallback={null}>
-        {/* Smart AI Document Import Modal */}
-        {showSmartImport && (
-          <SmartImportModal
-            isOpen={showSmartImport}
-            onClose={closeSmartImport}
-          />
-        )}
-
-        {/* Add Holding Modal */}
-        {showAddModal && (
-          <AddHoldingModal
-            onClose={closeAddModal}
-            onAdd={handleAddHolding}
-            portfolioOptions={portfolioOptionsForModal}
-            defaultPortfolio={activeTab === 'all' ? portfolioOptionsForModal[0]?.name : activeTab}
-          />
-        )}
-
-        {/* Add Family Member Modal */}
-        {showAddFamily && (
-          <AddFamilyModal
-            isOpen={showAddFamily}
-            onClose={closeAddFamily}
-            onSubmit={handleAddFamilySubmit}
-          />
-        )}
-
-        {/* Rename Portfolio Modal */}
-        {renameTarget && (
-          <RenamePortfolioModal
-            isOpen={!!renameTarget}
-            target={renameTarget}
-            onClose={closeRenameModal}
-            onSubmit={handleRenameSubmit}
-          />
-        )}
-
-        {/* Change PIN Modal */}
-        {showChangePinModal && (
-          <ChangePinModal
-            onClose={closeChangePinModal}
-            onSuccess={() => {
-              closeChangePinModal();
-              addToast('PIN changed successfully', 'success');
-            }}
-          />
-        )}
-
-        {/* Mobile Alerts Full-Screen View */}
-        {showMobileAlerts && (
-          <MobileAlertsView
-            alerts={visibleAlerts}
-            onClose={closeMobileAlerts}
-            onDismissAlert={handleDismissAlert}
-            onDismissAll={handleDismissAll}
-          />
-        )}
-      </Suspense>
-
-      {/* Delete Portfolio Confirmation Modal */}
-      <ConfirmModal
-        isOpen={!!deleteTarget}
-        onClose={closeDeleteModal}
-        onConfirm={handleConfirmDeletePortfolio}
-        title="Delete Family Member"
-        message={`Are you sure you want to delete ${deleteTarget?.label} and all of their holdings, fixed deposits, and other assets? This action cannot be undone.`}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        variant="danger"
-        isLoading={isDeleting}
+      <AppShellModals
+        showSmartImport={showSmartImport}
+        closeSmartImport={closeSmartImport}
+        showAddModal={showAddModal}
+        closeAddModal={closeAddModal}
+        handleAddHolding={handleAddHolding}
+        portfolioOptionsForModal={portfolioOptionsForModal}
+        activeTab={activeTab}
+        showAddFamily={showAddFamily}
+        closeAddFamily={closeAddFamily}
+        handleAddFamilySubmit={handleAddFamilySubmit}
+        renameTarget={renameTarget}
+        closeRenameModal={closeRenameModal}
+        handleRenameSubmit={handleRenameSubmit}
+        showChangePinModal={showChangePinModal}
+        closeChangePinModal={closeChangePinModal}
+        onPinChangeSuccess={() => {
+          closeChangePinModal();
+          addToast('PIN changed successfully', 'success');
+        }}
+        showMobileAlerts={showMobileAlerts}
+        closeMobileAlerts={closeMobileAlerts}
+        visibleAlerts={visibleAlerts}
+        handleDismissAlert={handleDismissAlert}
+        handleDismissAll={handleDismissAll}
+        deleteTarget={deleteTarget}
+        closeDeleteModal={closeDeleteModal}
+        handleConfirmDeletePortfolio={handleConfirmDeletePortfolio}
+        isDeleting={isDeleting}
       />
-
-      {/* PWA Install Banner */}
-      <PWAInstallBanner />
     </div>
   );
 }

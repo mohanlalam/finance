@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { GoldHolding, DocumentMetadata, PortfolioName } from '../../types/portfolio';
+import { GoldHolding, DocumentMetadata, PortfolioName, GoldPayload } from '../../types/portfolio';
 import ConfirmModal from '../ConfirmModal';
 import Modal from '../Modal';
 import GoldHoldingCard from './GoldHoldingCard';
@@ -71,10 +71,8 @@ interface GoldHoldingViewProps {
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: GoldPayload | Record<string, unknown>) => Promise<{ id?: string; data?: { id?: string } } | void>;
+  onUpdate: (assetType: string, id: string, payload: Partial<GoldPayload> | Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }

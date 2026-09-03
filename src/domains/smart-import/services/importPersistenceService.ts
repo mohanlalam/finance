@@ -5,8 +5,7 @@ import { SmartImportFormData, ImportSaveStep } from '../types';
 
 export interface PersistenceCallbacks {
   onStepChange: (step: ImportSaveStep, message: string) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  addAsset: (assetType: string, portfolioName: string, payload: any, options?: { reload?: boolean }) => Promise<any>;
+  addAsset: (assetType: string, portfolioName: string, payload: Record<string, unknown>, options?: { reload?: boolean }) => Promise<unknown>;
   loadPortfolios: () => Promise<void>;
 }
 
@@ -15,6 +14,12 @@ export interface PersistenceResult {
   assetId?: string;
   documentLinked: boolean;
   error?: string;
+}
+
+function extractAssetId(res: unknown): string | undefined {
+  if (!res || typeof res !== 'object') return undefined;
+  const obj = res as { id?: string; data?: { id?: string } };
+  return obj.id || obj.data?.id;
 }
 
 export async function executeImportPersistence(
@@ -57,7 +62,7 @@ export async function executeImportPersistence(
         status: 'active',
         notes: formData.notes,
       }, { reload: false });
-      createdAssetId = res?.id || res?.data?.id;
+      createdAssetId = extractAssetId(res);
     } else if (assetType === 'rd') {
       const monthly = parseFloat(formData.monthlyDeposit) || 0;
       const rate = parseFloat(formData.interestRate) || 0;
@@ -84,7 +89,7 @@ export async function executeImportPersistence(
         status: 'active',
         notes: formData.notes,
       }, { reload: false });
-      createdAssetId = res?.id || res?.data?.id;
+      createdAssetId = extractAssetId(res);
     } else if (assetType === 'sip') {
       const monthly = parseFloat(formData.monthlySip) || 0;
       const nav = parseFloat(formData.nav) || 0;
@@ -109,7 +114,7 @@ export async function executeImportPersistence(
         status: 'active',
         notes: formData.notes,
       }, { reload: false });
-      createdAssetId = res?.id || res?.data?.id;
+      createdAssetId = extractAssetId(res);
     } else if (assetType === 'gold') {
       const grams = parseFloat(formData.weightGrams) || 0;
       let pPrice = parseFloat(formData.purchasePrice) || 0;
@@ -136,7 +141,7 @@ export async function executeImportPersistence(
         purchaseDate: pDate,
         notes: formData.notes,
       }, { reload: false });
-      createdAssetId = res?.id || res?.data?.id;
+      createdAssetId = extractAssetId(res);
     } else if (assetType === 'stocks') {
       const qty = parseFloat(formData.quantity) || 1;
       const avg = parseFloat(formData.avgBuyPrice) || 0;
@@ -149,7 +154,7 @@ export async function executeImportPersistence(
         amount_invested: Math.round(qty * avg),
         amountInvested: Math.round(qty * avg),
       }, { reload: false });
-      createdAssetId = res?.id || res?.data?.id;
+      createdAssetId = extractAssetId(res);
     } else if (assetType === 'real_estate') {
       const purchase = parseFloat(formData.purchasePriceRealty) || 0;
       const current = parseFloat(formData.currentValuationRealty) || purchase;
@@ -172,7 +177,7 @@ export async function executeImportPersistence(
         purchaseDate: pDate,
         notes: formData.notes,
       }, { reload: false });
-      createdAssetId = res?.id || res?.data?.id;
+      createdAssetId = extractAssetId(res);
     } else if (assetType === 'insurance') {
       const sum = parseFloat(formData.sumAssured) || 0;
       const premium = parseFloat(formData.premiumAmount) || 0;
@@ -193,7 +198,7 @@ export async function executeImportPersistence(
         renewalDate: renewal,
         notes: formData.notes,
       }, { reload: false });
-      createdAssetId = res?.id || res?.data?.id;
+      createdAssetId = extractAssetId(res);
     }
 
     // 3. Uploading Document Attachment (if file provided)

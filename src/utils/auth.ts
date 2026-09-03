@@ -10,7 +10,7 @@ import {
   ensureHashedPin,
   clearCustomPin,
   setCustomPin,
-  getCachedValidPinHash,
+  verifyOfflinePin,
 } from './sessionStore';
 
 export {
@@ -69,9 +69,9 @@ export async function verifyPin(pin: string): Promise<boolean> {
         if (fallbackErr instanceof AppApiError && fallbackErr.status === 401) {
           return false; // Valid request, but wrong PIN
         }
-        // If server 500 or network error, check last known valid PIN hash for offline unlocking
-        const cachedHash = getCachedValidPinHash();
-        if (cachedHash && cachedHash === inputHash) {
+        // If server 500 or network error, check offline verifier for safe offline unlocking
+        const isOfflineValid = await verifyOfflinePin(inputHash);
+        if (isOfflineValid) {
           markSessionVerified(inputHash);
           return true;
         }
@@ -79,9 +79,9 @@ export async function verifyPin(pin: string): Promise<boolean> {
       }
     }
 
-    // Check cached hash if server threw before fallback
-    const cachedHash = getCachedValidPinHash();
-    if (cachedHash && cachedHash === inputHash) {
+    // Check offline verifier if server threw before fallback
+    const isOfflineValid = await verifyOfflinePin(inputHash);
+    if (isOfflineValid) {
       markSessionVerified(inputHash);
       return true;
     }

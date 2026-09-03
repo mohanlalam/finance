@@ -49,3 +49,7 @@ scratch/
 .chrome_test_profile/
 *.profile/
 
+# Playwright test outputs
+test-results/
+playwright-report/
+

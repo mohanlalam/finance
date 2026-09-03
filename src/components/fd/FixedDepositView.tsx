@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { FixedDeposit, DocumentMetadata, PortfolioName } from '../../types/portfolio';
+import { FixedDeposit, DocumentMetadata, PortfolioName, FDPayload } from '../../types/portfolio';
 import ConfirmModal from '../ConfirmModal';
 import DepositDetailsCard from './DepositDetailsCard';
 import FDFormModal from './FDFormModal';
@@ -25,10 +25,8 @@ interface FixedDepositViewProps {
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: FDPayload | Record<string, unknown>) => Promise<unknown>;
+  onUpdate: (assetType: string, id: string, payload: Partial<FDPayload> | Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { RealEstate, DocumentMetadata, PortfolioName } from '../../types/portfolio';
+import { RealEstate, DocumentMetadata, PortfolioName, RealEstatePayload } from '../../types/portfolio';
 import ConfirmModal from '../ConfirmModal';
 import RealEstateCard from './RealEstateCard';
 import RealEstateFormModal from './RealEstateFormModal';
@@ -24,10 +24,8 @@ interface RealEstateViewProps {
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAdd: (assetType: string, portfolioName: string, payload: any) => Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdate: (assetType: string, id: string, payload: any) => Promise<void>;
+  onAdd: (assetType: string, portfolioName: string, payload: RealEstatePayload | Record<string, unknown>) => Promise<{ id?: string; data?: { id?: string } } | void>;
+  onUpdate: (assetType: string, id: string, payload: Partial<RealEstatePayload> | Record<string, unknown>) => Promise<void>;
   onDelete: (assetType: string, id: string) => Promise<void>;
   autoOpenAddModal?: boolean;
 }
