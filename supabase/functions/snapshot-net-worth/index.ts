@@ -222,6 +222,8 @@ Deno.serve(async (req: Request) => {
     const goldValue = (gold_holdings || []).reduce((sum, g) => sum + Number(g.current_valuation || g.purchase_price || 0), 0);
 
     // Real Estate Value
+    const reValue = (real_estate || []).reduce((sum, r) => sum + Number(r.current_valuation || r.purchase_price || 0), 0);
+
     // Timeline Net Worth encompasses Stocks & ETFs + FDs only
     const totalValue = stocksValue + fdValue;
     const snapshotDate = new Date().toISOString().split('T')[0];
