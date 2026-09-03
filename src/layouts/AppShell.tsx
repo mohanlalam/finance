@@ -408,7 +408,7 @@ export default function AppShell() {
           fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
           props={{
             history: netWorthHistory,
-            currentNetWorth: summaryData.totalCurrentValue,
+            currentNetWorth: (breakdown.stocks || 0) + (breakdown.fd || 0),
             currentStocks: breakdown.stocks,
             currentFD: breakdown.fd,
           }}
@@ -440,7 +440,7 @@ export default function AppShell() {
         </LazyViewport>
       </SectionErrorBoundary>
     </div>
-  ), [netWorthHistory, summaryData.totalCurrentValue, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick]);
+  ), [netWorthHistory, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick]);
 
   const desktopDashboardWidgets = useMemo(() => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -451,7 +451,7 @@ export default function AppShell() {
           fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
           props={{
             history: netWorthHistory,
-            currentNetWorth: summaryData.totalCurrentValue,
+            currentNetWorth: (breakdown.stocks || 0) + (breakdown.fd || 0),
             currentStocks: breakdown.stocks,
             currentFD: breakdown.fd,
           }}
@@ -483,7 +483,7 @@ export default function AppShell() {
         </LazyViewport>
       </SectionErrorBoundary>
     </div>
-  ), [netWorthHistory, summaryData.totalCurrentValue, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick]);
+  ), [netWorthHistory, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick]);
 
 
   const handleImportCSV = useCallback(async (rows: ImportRow[], portfolioName: string) => {

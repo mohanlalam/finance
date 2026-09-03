@@ -48,8 +48,8 @@ export function createNetWorthSnapshot(portfolios: Portfolio[], dateStr?: string
     real_estate_value += Number(p.realEstateValue) || 0;
   }
 
-  // Financial Net Worth (Stocks + FDs + RDs + SIPs)
-  const total_value = stocks_value + fd_value + rd_value + sip_value;
+  // Timeline Net Worth encompasses Stocks & ETFs + FDs
+  const total_value = stocks_value + fd_value;
 
   return {
     snapshot_date,

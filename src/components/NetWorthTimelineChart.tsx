@@ -78,17 +78,19 @@ export default function NetWorthTimelineChart({
     };
   }, []);
 
-  // Generate base history (real or mock with realistic asset class splits)
+  // Generate base history (strictly Stocks & ETFs and Fixed Deposits only)
   const baseData = useMemo(() => {
     if (history.length >= 2) {
       return [...history]
         .sort((a, b) => new Date(a.snapshot_date).getTime() - new Date(b.snapshot_date).getTime())
         .map((item) => {
-          // If stocks_value or fd_value are missing in legacy DB records, estimate cleanly
-          const stocksVal = item.stocks_value ?? (item.total_value * 0.6);
-          const fdVal = item.fd_value ?? (item.total_value * 0.25);
+          const stocksVal = Number(item.stocks_value) || 0;
+          const fdVal = Number(item.fd_value) || 0;
+          // Timeline strictly encompasses Stocks & ETFs and FDs only
+          const totalVal = stocksVal + fdVal;
           return {
             ...item,
+            total_value: totalVal,
             stocks_value: stocksVal,
             fd_value: fdVal,
           };
@@ -98,40 +100,46 @@ export default function NetWorthTimelineChart({
     // Exactly 1 real snapshot: anchor one month earlier
     if (history.length === 1) {
       const point = history[0];
+      const stocksVal = Number(point.stocks_value) || 0;
+      const fdVal = Number(point.fd_value) || 0;
+      const totalVal = stocksVal + fdVal;
+
       const anchor = new Date(point.snapshot_date);
       anchor.setMonth(anchor.getMonth() - 1);
-      const prevTotal = point.total_value * 0.96;
-      const prevStocks = (point.stocks_value || point.total_value * 0.6) * 0.94;
-      const prevFD = (point.fd_value || point.total_value * 0.25) * 0.99;
+      const prevStocks = stocksVal * 0.94;
+      const prevFD = fdVal * 0.99;
       return [
         {
           ...point,
           id: 'anchor-start',
           snapshot_date: anchor.toISOString().split('T')[0],
-          total_value: prevTotal,
+          total_value: prevStocks + prevFD,
           stocks_value: prevStocks,
           fd_value: prevFD,
         },
-        point,
+        {
+          ...point,
+          total_value: totalVal,
+          stocks_value: stocksVal,
+          fd_value: fdVal,
+        },
       ];
     }
 
-    // No real data: generate realistic 6-month historical trajectory
+    // No real data: generate realistic 6-month historical trajectory for Stocks & FDs only
     const mockList: NetWorthSnapshot[] = [];
-    const baseVal = currentNetWorth > 0 ? currentNetWorth : 1500000;
-    const baseStocks = currentStocks !== undefined && currentStocks > 0 ? currentStocks : baseVal * 0.6;
-    const baseFD = currentFD !== undefined && currentFD > 0 ? currentFD : baseVal * 0.25;
+    const baseStocks = currentStocks !== undefined && currentStocks > 0 ? currentStocks : (currentNetWorth > 0 ? currentNetWorth * 0.6 : 900000);
+    const baseFD = currentFD !== undefined && currentFD > 0 ? currentFD : (currentNetWorth > 0 ? currentNetWorth * 0.4 : 600000);
     const now = new Date();
 
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 15);
-      const totalFactor = 1 - (i * 0.025) + (Math.sin(i * 1.5) * 0.015);
       const stockFactor = 1 - (i * 0.038) + (Math.sin(i * 1.8) * 0.025);
-      const fdFactor = 1 - (i * 0.006); // FDs grow steadily with minimal volatility
+      const fdFactor = 1 - (i * 0.006);
 
-      const totalVal = Math.round(baseVal * totalFactor);
       const sVal = Math.round(baseStocks * stockFactor);
       const fVal = Math.round(baseFD * fdFactor);
+      const totalVal = sVal + fVal;
 
       mockList.push({
         id: `mock-${i}`,
@@ -139,8 +147,8 @@ export default function NetWorthTimelineChart({
         total_value: totalVal,
         stocks_value: sVal,
         fd_value: fVal,
-        gold_value: Math.round(baseVal * 0.1),
-        real_estate_value: Math.round(baseVal * 0.05),
+        gold_value: 0,
+        real_estate_value: 0,
       });
     }
     return mockList;
@@ -399,7 +407,7 @@ export default function NetWorthTimelineChart({
           {/* Period Performance Subtitle */}
           <div className="flex items-center gap-2 mt-1 flex-wrap min-w-0">
             <p className="text-supporting text-xs truncate max-w-full">
-              {seriesMode === 'total' ? 'Compound net worth history' : seriesMode === 'both' ? 'Stocks vs FDs comparison' : seriesMode === 'stocks' ? 'Stocks & equity valuation' : 'Fixed Deposits accumulation'}
+              {seriesMode === 'total' ? 'Stocks & FDs compound timeline' : seriesMode === 'both' ? 'Stocks vs FDs comparison' : seriesMode === 'stocks' ? 'Stocks & equity valuation' : 'Fixed Deposits accumulation'}
             </p>
             {periodPerformance && (
               <span className={`inline-flex items-center gap-0.5 text-[11px] font-extrabold px-2 py-0.5 rounded-[var(--radius-small)] tnum whitespace-nowrap shrink-0 ${
@@ -441,7 +449,7 @@ export default function NetWorthTimelineChart({
             }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-white" />
-            Total Net Worth
+            Total (Stocks + FDs)
           </button>
 
           <button
@@ -698,7 +706,7 @@ export default function NetWorthTimelineChart({
 
             {/* Total Net Worth */}
             <div className="flex justify-between items-center">
-              <span className="font-semibold text-[var(--text-secondary)]">Total Net Worth</span>
+              <span className="font-semibold text-[var(--text-secondary)]">Total (Stocks + FDs)</span>
               <span className="font-extrabold text-[var(--text-primary)] tnum">
                 {formatINR(activeHoverItem.total_value)}
               </span>
