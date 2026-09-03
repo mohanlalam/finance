@@ -10,8 +10,6 @@ import { useIsMutating, usePortfolioEntities } from '../../contexts/PortfolioCon
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
 import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
-import { useIsMobile } from '../../hooks/useIsMobile';
-import { FixedSizeList as List } from 'react-window';
 import { RotateCw, Scale, Coins, Check, User, Users } from '../icons/AppIcons';
 import { 
   deriveGoldRates, 
@@ -100,16 +98,9 @@ export function GoldHoldingView({
   onDelete,
   autoOpenAddModal,
 }: GoldHoldingViewProps) {
-  const isMobile = useIsMobile();
   const isMutating = useIsMutating();
   const { addToast } = useToastActions();
   const { portfolios } = usePortfolioEntities();
-
-  const currentPortfolioLabel = useMemo(() => {
-    if (portfolioName === 'all') return 'All Family Members';
-    const opt = portfolioOptions.find((p) => p.name === portfolioName);
-    return opt?.label || portfolioName;
-  }, [portfolioName, portfolioOptions]);
 
   // Aggregate Family Gold totals across all family members
   const familyGoldSummary = useMemo(() => {
@@ -155,6 +146,13 @@ export function GoldHoldingView({
       memberBreakdown,
     };
   }, [portfolios]);
+
+  const [selectedMember, setSelectedMember] = useState<string>(portfolioName || 'all');
+
+  useEffect(() => {
+    setSelectedMember(portfolioName || 'all');
+  }, [portfolioName]);
+
   const {
     showModal,
     editingItem,
@@ -190,6 +188,30 @@ export function GoldHoldingView({
     },
     debounceMs: 150,
   });
+
+  const displayHoldingsByMember = useMemo(() => {
+    const ordered = sortPortfolios(portfolios || []);
+    return ordered.map((p) => {
+      const pId = p.id;
+      const memberHoldings = filteredHoldings.filter(
+        (h) => h.portfolio_id === pId || (!h.portfolio_id && p.name === (portfolioName === 'all' ? p.name : portfolioName))
+      );
+      const memberGrams = memberHoldings.reduce((sum, h) => sum + (Number(h.weight_grams) || 0), 0);
+      const memberVal = memberHoldings.reduce((sum, h) => sum + (Number(h.current_valuation) || 0), 0);
+      return {
+        portfolio: p,
+        holdings: memberHoldings,
+        grams: memberGrams,
+        val: memberVal,
+      };
+    });
+  }, [portfolios, filteredHoldings, portfolioName]);
+
+  const activeHoldingsForMember = useMemo(() => {
+    if (selectedMember === 'all') return filteredHoldings;
+    const found = displayHoldingsByMember.find((item) => item.portfolio.name === selectedMember);
+    return found ? found.holdings : filteredHoldings;
+  }, [selectedMember, filteredHoldings, displayHoldingsByMember]);
 
   const handleDelete = useCallback(async (id: string) => {
     setDeleting(true);
@@ -260,24 +282,6 @@ export function GoldHoldingView({
     addToast('Reverted to Live MCX & IBJA Bullion rates', 'success');
     setIsEditingRate(false);
   };
-
-  // Compute aggregate gold portfolio totals
-  const totals = useMemo(() => {
-    let totalGrams = 0;
-    let totalInvested = 0;
-    let totalCurrent = 0;
-
-    for (const h of goldHoldings) {
-      totalGrams += Number(h.weight_grams) || 0;
-      totalInvested += Number(h.purchase_price) || 0;
-      totalCurrent += Number(h.current_valuation) || 0;
-    }
-
-    const totalGain = totalCurrent - totalInvested;
-    const gainPct = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
-
-    return { totalGrams, totalInvested, totalCurrent, totalGain, gainPct };
-  }, [goldHoldings]);
 
   return (
     <div className="space-y-4">
@@ -418,22 +422,36 @@ export function GoldHoldingView({
               <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
                 Family Members Breakdown
               </span>
-              <span className="text-[10px] text-[var(--text-tertiary)]">
-                {familyGoldSummary.memberBreakdown.reduce((acc, m) => acc + m.count, 0)} Total Holdings
-              </span>
+              <div className="flex items-center gap-2">
+                {selectedMember !== 'all' && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMember('all')}
+                    className="text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                  >
+                    View All
+                  </button>
+                )}
+                <span className="text-[10px] text-[var(--text-tertiary)]">
+                  {familyGoldSummary.memberBreakdown.reduce((acc, m) => acc + m.count, 0)} Total Holdings
+                </span>
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
               {familyGoldSummary.memberBreakdown.map((m) => {
                 const config = getFamilyMemberConfig(m.name);
-                const isSelected = portfolioName === m.name;
+                const isSelected = selectedMember === m.name;
                 return (
-                  <div
+                  <button
                     key={m.name}
-                    className={`flex items-center justify-between p-2 rounded-[var(--radius-small)] border transition-all ${
+                    type="button"
+                    onClick={() => setSelectedMember((prev) => (prev === m.name ? 'all' : m.name))}
+                    className={`flex items-center justify-between p-2 rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press ${
                       isSelected
-                        ? 'bg-[var(--surface-secondary)] border-amber-500 shadow-xs'
-                        : 'bg-[var(--surface)] border-[var(--border-subtle)]'
+                        ? 'bg-[var(--surface-secondary)] border-amber-500 ring-1 ring-amber-500/30 shadow-xs'
+                        : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-amber-500/40'
                     }`}
+                    title={`Click to filter ${m.label}'s gold holdings`}
                   >
                     <div className="flex items-center gap-1.5 min-w-0">
                       <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
@@ -463,22 +481,10 @@ export function GoldHoldingView({
                         {formatINR(m.value)}
                       </p>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
-          </div>
-        )}
-
-        {/* Selected Member Subtotal Notification (when on single-member view) */}
-        {portfolioName !== 'all' && (
-          <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs text-[var(--text-tertiary)]">
-            <span>
-              Showing <span className="font-bold text-[var(--text-primary)]">{currentPortfolioLabel}&apos;s</span> personal holdings below:
-            </span>
-            <span className="font-bold text-amber-500 tnum">
-              {totals.totalGrams.toFixed(2)} g ({formatINR(totals.totalCurrent)})
-            </span>
           </div>
         )}
       </div>
@@ -584,42 +590,84 @@ export function GoldHoldingView({
           ) : undefined
         }
       >
-        {filteredHoldings.length > 10 ? (
-          <div style={{ overflow: 'hidden' }}>
-            <List
-              key={`gold-list-${filteredHoldings.length}`}
-              height={Math.min(filteredHoldings.length * (isMobile ? 165 : 130), isMobile ? 420 : 540)}
-              itemCount={filteredHoldings.length}
-              itemSize={isMobile ? 165 : 130}
-              width="100%"
-              style={{ overflowX: 'hidden', overflowY: 'auto' }}
-            >
-              {({ index, style }) => {
-                const holding = filteredHoldings[index];
-                return (
-                  <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
-                    <GoldHoldingCard
-                      holding={holding}
-                      documents={documents}
-                      onOpenEdit={openEdit}
-                      onConfirmDelete={setConfirmDeleteItem}
-                    />
-                  </div>
-                );
-              }}
-            </List>
+        {selectedMember !== 'all' ? (
+          <div>
+            <div className="px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/60 flex items-center justify-between border-b border-[var(--border-subtle)]">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-[var(--text-primary)]">
+                  {portfolioOptions.find((p) => p.name === selectedMember)?.label || selectedMember}&apos;s Holdings
+                </span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                  {activeHoldingsForMember.length}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedMember('all')}
+                className="text-xs text-[var(--accent-blue)] hover:underline font-semibold cursor-pointer"
+              >
+                Show All Family
+              </button>
+            </div>
+            {activeHoldingsForMember.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[var(--text-tertiary)] italic">
+                No gold holdings recorded for this member.
+              </div>
+            ) : (
+              <div className="divide-y divide-[var(--border-subtle)]">
+                {activeHoldingsForMember.map((holding) => (
+                  <GoldHoldingCard
+                    key={holding.id}
+                    holding={holding}
+                    documents={documents}
+                    onOpenEdit={openEdit}
+                    onConfirmDelete={setConfirmDeleteItem}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <div className="divide-y divide-[var(--border-subtle)]">
-            {filteredHoldings.map((holding) => (
-              <GoldHoldingCard
-                key={holding.id}
-                holding={holding}
-                documents={documents}
-                onOpenEdit={openEdit}
-                onConfirmDelete={setConfirmDeleteItem}
-              />
-            ))}
+            {displayHoldingsByMember.map((item) => {
+              const config = getFamilyMemberConfig(item.portfolio.name);
+              return (
+                <div key={item.portfolio.name} className="border-b border-[var(--border-subtle)] last:border-b-0">
+                  <div className="px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/60 flex items-center justify-between border-b border-[var(--border-subtle)]">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
+                        {config.icon}
+                      </div>
+                      <span className="text-xs font-bold text-[var(--text-primary)]">{item.portfolio.label}&apos;s Gold Holdings</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                        {item.holdings.length}
+                      </span>
+                    </div>
+                    <span className="text-xs font-bold text-amber-500 tnum">
+                      {item.grams.toFixed(2)} g {item.val > 0 ? `(${formatINR(item.val)})` : ''}
+                    </span>
+                  </div>
+
+                  {item.holdings.length === 0 ? (
+                    <div className="px-4 py-3 text-xs text-[var(--text-tertiary)] italic">
+                      No gold holdings recorded for {item.portfolio.label}
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-[var(--border-subtle)]">
+                      {item.holdings.map((holding) => (
+                        <GoldHoldingCard
+                          key={holding.id}
+                          holding={holding}
+                          documents={documents}
+                          onOpenEdit={openEdit}
+                          onConfirmDelete={setConfirmDeleteItem}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </AssetRegistryContainer>
@@ -630,7 +678,7 @@ export function GoldHoldingView({
           isOpen={showModal}
           onClose={closeModal}
           editingHolding={editingItem}
-          portfolioName={portfolioName}
+          portfolioName={selectedMember !== 'all' ? selectedMember : (portfolioName !== 'all' ? portfolioName : (portfolios?.[0]?.name || 'personal'))}
           portfolioOptions={portfolioOptions}
           documents={documents}
           onAdd={onAdd}

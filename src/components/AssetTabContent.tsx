@@ -87,6 +87,14 @@ export default React.memo(function AssetTabContent({
     }
     return map;
   }, [portfolios]);
+
+  const allGoldHoldings = React.useMemo(() => {
+    return portfolios.flatMap((p) => p.goldHoldings || []);
+  }, [portfolios]);
+
+  const allGoldDocuments = React.useMemo(() => {
+    return portfolios.flatMap((p) => p.documents || []);
+  }, [portfolios]);
   
   React.useEffect(() => {
     if (quickAddTarget && quickAddTarget === activeAsset) {
@@ -391,26 +399,16 @@ export default React.memo(function AssetTabContent({
       )}
 
       {activeAsset === 'gold' && (
-        <div className="space-y-8">
-          {portfolios.map((p, index) => (
-            <div key={p.name}>
-              <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
-                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
-              </div>
-              <GoldHoldingView
-                goldHoldings={p.goldHoldings}
-                documents={p.documents}
-                portfolioName={p.name}
-                portfolioOptions={portfolioOptions}
-                onAdd={onAddAsset}
-                onUpdate={onUpdateAsset}
-                onDelete={onDeleteAsset}
-                autoOpenAddModal={index === 0 && quickAddTarget === 'gold'}
-              />
-            </div>
-          ))}
-        </div>
+        <GoldHoldingView
+          goldHoldings={allGoldHoldings}
+          documents={allGoldDocuments}
+          portfolioName="all"
+          portfolioOptions={portfolioOptions}
+          onAdd={onAddAsset}
+          onUpdate={onUpdateAsset}
+          onDelete={onDeleteAsset}
+          autoOpenAddModal={quickAddTarget === 'gold'}
+        />
       )}
 
       {activeAsset === 'real_estate' && (
