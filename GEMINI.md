@@ -86,7 +86,7 @@ External APIs & Databases (PostgreSQL, Supabase Functions, Yahoo Finance, AMFI, 
     3. Last-Known Stale Quote / Snapshot from Database/IndexedDB
     ```
 * **Workers & Storage**:
-  * **[xirr.worker.ts](src/workers/xirr.worker.ts)**: Background Web Worker infrastructure for off-thread Newton-Raphson cash flow calculations (not wired into the synchronous calculation call path; standard UI portfolio returns compute synchronously via pure math modules with memoization).
+  * **[documentCrypto.ts](src/utils/documentCrypto.ts)**: Zero-Trust Client-Side Document Encryption module using native W3C Web Crypto (`AES-GCM-256` + `PBKDF2` with 100,000 rounds of SHA-256). Encrypts binary payloads on the client device prior to storage transmission; decrypts in-memory on demand with zero cloud API keys required.
   * **[supabaseStorage.ts](src/utils/supabaseStorage.ts)**: Supabase Document Storage with client-side path traversal protection, PIN-authenticated signed URL generation (private bucket), UUID path randomization, and secure Edge Function routing.
   * **[logger.ts](src/infrastructure/logging/logger.ts)**: Lightweight logger with automated regex-based redaction of sensitive credentials (PINs, API keys, tokens, auth headers).
 

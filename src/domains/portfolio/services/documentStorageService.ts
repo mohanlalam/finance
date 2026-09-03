@@ -3,12 +3,17 @@ import {
   StorageUploadResult,
 } from '../repositories/IDocumentStorageRepository';
 import { supabaseDocumentStorageRepository } from '../../../infrastructure/supabase/repositories/SupabaseDocumentStorageRepository';
+import { isDocumentCryptoSupported } from '../../../utils/documentCrypto';
 
 export class DocumentStorageService {
   private repository: IDocumentStorageRepository;
 
   constructor(repository: IDocumentStorageRepository = supabaseDocumentStorageRepository) {
     this.repository = repository;
+  }
+
+  isZeroKnowledgeSupported(): boolean {
+    return isDocumentCryptoSupported();
   }
 
   generateStoragePath(portfolio: string, folder: string, fileName: string): string {

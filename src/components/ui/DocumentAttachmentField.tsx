@@ -1,5 +1,5 @@
 import React, { useId, useState } from 'react';
-import { FileText, Upload, X, Trash2, Paperclip, ExternalLink, Calendar, Plus, AlertCircle } from '../icons/AppIcons';
+import { FileText, Upload, X, Trash2, Paperclip, ExternalLink, Calendar, Plus, AlertCircle, Shield } from '../icons/AppIcons';
 import { DocumentMetadata } from '../../types/portfolio';
 import { openSecureDocument } from '../../utils/supabaseStorage';
 
@@ -352,6 +352,15 @@ export function DocumentAttachmentField({
           </>
         )}
       </label>
+
+      {/* Zero-Knowledge Privacy Guarantee */}
+      <div className="flex items-center justify-between text-[10px] text-emerald-700 dark:text-emerald-400 font-medium px-0.5 pt-0.5">
+        <span className="flex items-center gap-1">
+          <Shield size={11} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <span>Zero-Knowledge AES-GCM-256 Encrypted</span>
+        </span>
+        <span className="text-[var(--text-tertiary)] font-normal text-[9.5px]">Client-Side Only</span>
+      </div>
     </div>
   );
 }

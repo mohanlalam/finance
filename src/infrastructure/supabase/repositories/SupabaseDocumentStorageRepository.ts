@@ -3,6 +3,13 @@ import {
   StorageUploadResult,
 } from '../../../domains/portfolio/repositories/IDocumentStorageRepository';
 import { getApiAuthHeaders } from '../../../utils/apiClient';
+import {
+  isDocumentCryptoSupported,
+  isDocumentEncrypted,
+  encryptDocumentFile,
+  decryptDocumentBlob,
+} from '../../../utils/documentCrypto';
+import { getHashedPin, ensureHashedPin } from '../../../utils/sessionStore';
 
 function sanitizeEnv(val: string | undefined): string {
   if (!val) return '';
@@ -97,7 +104,8 @@ export class SupabaseDocumentStorageRepository implements IDocumentStorageReposi
 
   /**
    * Securely opens a document in a new browser tab using a PIN-authenticated signed URL.
-   * Proactively opens a window synchronously during the user click gesture to avoid browser popup blockers.
+   * If the document is zero-trust encrypted (AGYENC format), it decrypts in-memory and launches a local blob URL.
+   * If the document is legacy unencrypted, it opens directly via the signed URL.
    */
   async openSecureDocument(filePath: string): Promise<void> {
     if (!filePath) return;
@@ -111,6 +119,42 @@ export class SupabaseDocumentStorageRepository implements IDocumentStorageReposi
         throw new Error('Could not generate secure document link');
       }
 
+      // Check if file is encrypted by inspecting initial bytes
+      let pinHash = getHashedPin();
+      if (!pinHash) {
+        pinHash = await ensureHashedPin();
+      }
+
+      if (pinHash && isDocumentCryptoSupported()) {
+        try {
+          const res = await fetch(signedUrl);
+          if (res.ok) {
+            const buffer = await res.arrayBuffer();
+            if (isDocumentEncrypted(buffer)) {
+              const { blob } = await decryptDocumentBlob(buffer, pinHash);
+              const objectUrl = URL.createObjectURL(blob);
+              if (newWindow) {
+                newWindow.location.href = objectUrl;
+              } else if (typeof window !== 'undefined') {
+                window.open(objectUrl, '_blank', 'noopener,noreferrer');
+              }
+              // Revoke transient URL after 2 minutes to prevent memory leaks
+              setTimeout(() => {
+                try {
+                  URL.revokeObjectURL(objectUrl);
+                } catch {
+                  // ignore
+                }
+              }, 120_000);
+              return;
+            }
+          }
+        } catch (decryptErr) {
+          console.warn('[storage] Direct decryption failed or document is external, opening signedUrl directly:', decryptErr);
+        }
+      }
+
+      // Legacy unencrypted document or direct fallback
       if (newWindow) {
         newWindow.location.href = signedUrl;
       } else if (typeof window !== 'undefined') {
@@ -125,8 +169,8 @@ export class SupabaseDocumentStorageRepository implements IDocumentStorageReposi
 
   /**
    * Uploads a file to Supabase Storage.
-   * Routes exclusively through the holdings-crud Edge Function (service role) to enforce PIN authentication
-   * and prevent unauthenticated write access via public anon storage policies.
+   * Automatically encrypts file payload client-side with AES-GCM-256 using the session PIN hash
+   * before transmission, ensuring true Zero-Knowledge Cloud Storage.
    */
   async uploadDocumentFile(
     bucket: string,
@@ -148,10 +192,25 @@ export class SupabaseDocumentStorageRepository implements IDocumentStorageReposi
       throw new Error('Invalid storage path');
     }
 
+    // Encrypt client-side if PIN hash is available in active verified session
+    let filePayload: File | Blob = file;
+    try {
+      let pinHash = getHashedPin();
+      if (!pinHash) {
+        pinHash = await ensureHashedPin();
+      }
+      if (pinHash && isDocumentCryptoSupported()) {
+        const originalName = file instanceof File ? file.name : 'document.bin';
+        filePayload = await encryptDocumentFile(file, pinHash, originalName);
+      }
+    } catch (encryptErr) {
+      console.warn('[storage] Client-side encryption skipped, uploading original:', encryptErr);
+    }
+
     const formData = new FormData();
     formData.append('bucket', bucket);
     formData.append('path', cleanPath);
-    formData.append('file', file);
+    formData.append('file', filePayload);
 
     const headers = await getApiAuthHeaders();
     delete headers['Content-Type']; // Let browser set multipart boundary

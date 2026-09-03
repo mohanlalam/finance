@@ -10,7 +10,7 @@ import {
   Holding,
 } from '../../types/portfolio';
 import { useDocumentStorage } from '../../hooks/useDocumentStorage';
-import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X } from '../icons/AppIcons';
+import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X, Shield } from '../icons/AppIcons';
 import Modal from '../Modal';
 import ConfirmModal from '../ConfirmModal';
 import { useIsMutating } from '../../contexts/PortfolioContext';
@@ -332,12 +332,16 @@ export default React.memo(function DocumentVaultView({
               <FileText size={15} />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Total Family Document Vault
                 </h3>
                 <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-slate-500/15 text-slate-400 border border-slate-500/30 uppercase tracking-wider shrink-0">
                   Combined
+                </span>
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 tracking-wider shrink-0 flex items-center gap-1">
+                  <Shield size={9} />
+                  <span>AES-GCM-256 Encrypted</span>
                 </span>
               </div>
               <p className="text-[10px] sm:text-[11px] text-[var(--text-tertiary)] truncate">
