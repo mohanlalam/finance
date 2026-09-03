@@ -385,111 +385,111 @@ export function GoldHoldingView({
       </div>
 
       {/* Total Family Members Gold Holdings Banner */}
-      <div className="apple-card p-4 sm:p-5 bg-gradient-to-br from-amber-500/10 via-[var(--surface)] to-amber-500/5 border border-amber-500/30 space-y-3.5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-[var(--radius-medium)] bg-amber-500/20 text-amber-500 border border-amber-500/30 flex items-center justify-center shrink-0">
-              <Users size={20} />
+      <div className="apple-card p-3 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[var(--border-subtle)] pb-2.5">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-amber-500/20 text-amber-500 border border-amber-500/30 flex items-center justify-center shrink-0">
+              <Users size={16} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
+                <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
                   Total Family Gold Holdings
                 </h3>
-                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-[var(--radius-pill)] bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 uppercase tracking-wider">
-                  Combined Vault
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[var(--radius-pill)] bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 uppercase tracking-wider">
+                  Combined
                 </span>
               </div>
-              <p className="text-xs text-[var(--text-tertiary)]">
-                Aggregated gold weight &amp; valuation across all family members
+              <p className="text-[11px] text-[var(--text-tertiary)]">
+                Aggregated bullion weight &amp; value across all family vaults
               </p>
             </div>
           </div>
 
-          {/* Prominent High-Visibility Metric Badges */}
-          <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-            <div className="bg-[var(--surface)] px-3.5 py-1.5 rounded-[var(--radius-medium)] border border-amber-500/40 shadow-xs text-right min-w-[110px]">
+          {/* Metric Badges */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-amber-500/30 text-right">
               <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Weight</span>
-              <span className="text-sm sm:text-base font-black text-amber-500 tnum">
-                {familyGoldSummary.totalGrams.toFixed(2)} <span className="text-xs font-semibold text-[var(--text-secondary)]">g</span>
+              <span className="text-xs sm:text-sm font-bold text-amber-500 tnum">
+                {familyGoldSummary.totalGrams.toFixed(2)} <span className="text-[11px] font-normal text-[var(--text-secondary)]">g</span>
               </span>
             </div>
-            <div className="bg-[var(--surface)] px-3.5 py-1.5 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] shadow-xs text-right min-w-[120px]">
+            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-[var(--border-subtle)] text-right">
               <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Valuation</span>
-              <span className="text-sm sm:text-base font-black text-[var(--text-primary)] tnum">
+              <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum">
                 {formatINR(familyGoldSummary.totalValue)}
               </span>
             </div>
           </div>
         </div>
 
-        {/* 4 Detailed Summary Metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-          <div className="p-2.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)]">
-            <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Family Investment</p>
-            <p className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5">
+        {/* 4 Summary Metrics (Matches FD and Stocks Stats Ribbon) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Family Invested</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5 block">
               {formatINR(familyGoldSummary.totalInvested)}
-            </p>
+            </span>
           </div>
 
-          <div className="p-2.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)] flex items-center gap-2">
-            <div className="w-7 h-7 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
-              <Coins size={14} />
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)] flex items-center gap-2">
+            <div className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
+              <Coins size={12} />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Current Value</p>
-              <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5">
+              <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Current Value</span>
+              <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
                 {formatINR(familyGoldSummary.totalValue)}
-              </p>
+              </span>
             </div>
           </div>
 
-          <div className="p-2.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-amber-500/25 flex items-center gap-2">
-            <div className="w-7 h-7 rounded-[var(--radius-small)] bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
-              <Scale size={14} />
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-amber-500/25 flex items-center gap-2">
+            <div className="w-6 h-6 rounded-[var(--radius-small)] bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
+              <Scale size={12} />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400 tracking-wider">Family Weight</p>
-              <p className="text-xs sm:text-sm font-black text-amber-500 tnum mt-0.5">
+              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">Family Weight</span>
+              <span className="text-xs sm:text-sm font-bold text-amber-500 tnum mt-0.5 block">
                 {familyGoldSummary.totalGrams.toFixed(2)} <span className="text-[10px] font-normal text-[var(--text-tertiary)]">g</span>
-              </p>
+              </span>
             </div>
           </div>
 
-          <div className="p-2.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)]">
-            <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Overall Return</p>
-            <p className={`text-xs sm:text-sm font-bold tnum mt-0.5 ${pnlColor(familyGoldSummary.totalGain)}`}>
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Overall Return</span>
+            <span className={`text-xs sm:text-sm font-bold tnum mt-0.5 block ${pnlColor(familyGoldSummary.totalGain)}`}>
               {familyGoldSummary.totalGain >= 0 ? '+' : ''}{formatINR(familyGoldSummary.totalGain)} ({formatPercent(familyGoldSummary.gainPct)})
-            </p>
+            </span>
           </div>
         </div>
 
         {/* Member-by-Member Distribution Cards */}
         {familyGoldSummary.memberBreakdown.length > 0 && (
           <div className="pt-2 border-t border-[var(--border-subtle)]">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
                 Family Members Breakdown
-              </p>
+              </span>
               <span className="text-[10px] text-[var(--text-tertiary)]">
                 {familyGoldSummary.memberBreakdown.reduce((acc, m) => acc + m.count, 0)} Total Holdings
               </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
               {familyGoldSummary.memberBreakdown.map((m) => {
                 const config = getFamilyMemberConfig(m.name);
                 const isSelected = portfolioName === m.name;
                 return (
                   <div
                     key={m.name}
-                    className={`flex items-center justify-between p-2.5 rounded-[var(--radius-small)] border transition-all ${
+                    className={`flex items-center justify-between p-2 rounded-[var(--radius-small)] border transition-all ${
                       isSelected
-                        ? 'bg-[var(--surface)] border-amber-500 ring-1 ring-amber-500/30 shadow-xs'
-                        : 'bg-[var(--surface)]/80 border-[var(--border-subtle)] hover:border-amber-500/40'
+                        ? 'bg-[var(--surface-secondary)] border-amber-500 shadow-xs'
+                        : 'bg-[var(--surface)] border-[var(--border-subtle)]'
                     }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
                         {config.icon}
                       </div>
                       <div className="min-w-0">
@@ -498,21 +498,21 @@ export function GoldHoldingView({
                             {m.label}
                           </p>
                           {isSelected && (
-                            <span className="text-[9px] font-extrabold px-1 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                            <span className="text-[8.5px] font-bold px-1 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
                               Active
                             </span>
                           )}
                         </div>
-                        <p className="text-[10.5px] text-[var(--text-tertiary)]">
+                        <p className="text-[10px] text-[var(--text-tertiary)]">
                           {m.count} holding{m.count === 1 ? '' : 's'}
                         </p>
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-xs font-black text-amber-500 tnum">
+                      <p className="text-xs font-bold text-amber-500 tnum">
                         {m.grams.toFixed(2)} g
                       </p>
-                      <p className="text-[10.5px] font-bold text-[var(--text-secondary)] tnum">
+                      <p className="text-[10px] font-semibold text-[var(--text-secondary)] tnum">
                         {formatINR(m.value)}
                       </p>
                     </div>

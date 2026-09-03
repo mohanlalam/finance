@@ -4,7 +4,7 @@ import { formatINR } from '../../utils/formatters';
 import { openSecureDocument } from '../../utils/supabaseStorage';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../domains/assets/rd/calculations/rdCompounding';
 
-import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote, Share2 } from '../icons/AppIcons';
+import { CheckCircle, FileText, Edit2, Trash2, Clock, Share2 } from '../icons/AppIcons';
 import RDInstallmentSchedule from './RDInstallmentSchedule';
 import { useLongPress } from '../../hooks/useLongPress';
 import { ContextMenu } from '../ui/ContextMenu';
@@ -70,15 +70,15 @@ export function RDAccountCard({
   return (
     <>
       <div 
-        className="py-4 hover:bg-[var(--surface-secondary)]/50 transition-all px-4 sm:px-6 rounded-[var(--radius-large)] border border-transparent hover:border-[var(--border-subtle)] select-none mobile-asset-card"
+        className="p-3.5 sm:p-4 hover:bg-[var(--surface-secondary)]/50 transition-colors select-none mobile-asset-card"
         {...longPressProps}
       >
-        <div className="flex items-start justify-between gap-4 flex-wrap sm:flex-nowrap">
+        <div className="flex items-start justify-between gap-3 sm:gap-4 flex-wrap sm:flex-nowrap">
         {/* Left Side: Meta & Dates */}
         <div className="space-y-1.5 flex-1 min-w-[200px]">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`w-2.5 h-2.5 rounded-full ${isMatured ? 'bg-[var(--text-tertiary)]' : 'bg-[var(--positive)] animate-pulse'}`} aria-hidden="true" />
-            <h4 className="text-sm font-bold text-[var(--text-primary)]">{account.bank_name}</h4>
+            <span className={`w-2 h-2 rounded-full ${isMatured ? 'bg-[var(--text-tertiary)]' : 'bg-[var(--positive)] animate-pulse'}`} aria-hidden="true" />
+            <h4 className="text-sm font-bold text-[var(--text-primary)] truncate">{account.bank_name}</h4>
             {isMatured ? (
               <span className="text-[10px] font-bold bg-[var(--surface-secondary)] text-[var(--text-secondary)] px-2 py-0.5 rounded-[var(--radius-pill)] flex items-center gap-0.5 border border-[var(--border-subtle)]">
                 <CheckCircle size={10} /> Matured
@@ -90,7 +90,7 @@ export function RDAccountCard({
             )}
           </div>
           
-          <div className="flex items-center gap-3 text-xs text-[var(--text-tertiary)] flex-wrap">
+          <div className="flex items-center gap-2.5 text-xs text-[var(--text-tertiary)] flex-wrap">
             <span>Started: <strong className="text-[var(--text-secondary)]">{account.start_date}</strong></span>
             <span className="hidden sm:inline">&bull;</span>
             <span>Matures: <strong className="text-[var(--text-secondary)]">{account.maturity_date}</strong></span>
@@ -118,34 +118,27 @@ export function RDAccountCard({
               </div>
             </div>
           )}
-
-          {account.notes && (
-            <p className="text-xs text-[var(--text-secondary)] flex items-center gap-1 bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] w-fit mt-1">
-              <StickyNote size={11} className="text-[var(--text-tertiary)]" />
-              {account.notes}
-            </p>
-          )}
         </div>
 
         {/* Center: Balances & Math */}
-        <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 sm:gap-8 text-left sm:text-right w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--border-subtle)] shrink-0">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 sm:gap-6 text-left sm:text-right w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--border-subtle)] shrink-0">
           <div>
-            <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Monthly Deposit</p>
+            <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Monthly</p>
             <p className="text-xs font-bold text-[var(--text-secondary)] tnum">{formatINR(account.monthly_deposit)}</p>
           </div>
           <div>
-            <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Interest Rate</p>
-            <p className="text-xs font-extrabold text-[var(--accent-blue)] tnum">+{account.interest_rate}% p.a.</p>
+            <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Rate</p>
+            <p className="text-xs font-bold text-[var(--accent-blue)] tnum">+{account.interest_rate}% p.a.</p>
           </div>
           <div>
-            <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Total Invested</p>
+            <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Invested</p>
             <p className="text-xs font-bold text-[var(--text-secondary)] tnum">{formatINR(invested)}</p>
           </div>
           <div>
             <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Current Value</p>
-            <p className="text-sm font-black text-[var(--text-primary)] text-financial tnum">{formatINR(currentVal)}</p>
+            <p className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(currentVal)}</p>
             {interestEarned > 0 && (
-              <p className="text-[10px] font-bold text-[var(--positive)] mt-0.5 tnum">
+              <p className="text-[10px] font-semibold text-[var(--positive)] mt-0.5 tnum">
                 +{formatINR(interestEarned)} interest
               </p>
             )}
@@ -160,24 +153,24 @@ export function RDAccountCard({
               onClick={() => openSecureDocument(linkedDocs[0].file_path)}
               title={`View Attached Document: ${linkedDocs[0].name}`}
               aria-label={`Open document: ${linkedDocs[0].name}`}
-              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press cursor-pointer"
+              className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press cursor-pointer"
             >
-              <FileText size={15} />
+              <FileText size={13} />
             </button>
           )}
           <button
             onClick={() => onOpenEdit(account)}
-            className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] transition-colors ios-press"
+            className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] transition-colors ios-press"
             aria-label="Edit Recurring Deposit"
           >
-            <Edit2 size={14} />
+            <Edit2 size={13} />
           </button>
           <button
             onClick={() => onConfirmDelete(account)}
-            className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] transition-colors ios-press"
+            className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] transition-colors ios-press"
             aria-label="Delete Recurring Deposit"
           >
-            <Trash2 size={14} />
+            <Trash2 size={13} />
           </button>
         </div>
       </div>

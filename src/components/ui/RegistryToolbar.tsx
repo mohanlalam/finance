@@ -45,10 +45,10 @@ export function RegistryToolbar<F extends string = string>({
   const isFiltered = Boolean(searchQuery || (activeFilter && activeFilter !== 'all'));
 
   return (
-    <div className="px-3.5 sm:px-5 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-2.5 border-b border-[var(--border-subtle)] bg-[var(--surface)]/90 backdrop-blur-sm">
+    <div className="px-3 sm:px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-2.5 border-b border-[var(--border-subtle)] bg-[var(--surface)]">
       <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
         {/* Search Input */}
-        <div className="relative flex items-center w-full sm:w-64 shrink-0">
+        <div className="relative flex items-center w-full sm:w-56 shrink-0">
           <Search size={13} className="absolute left-2.5 text-[var(--text-tertiary)] pointer-events-none" aria-hidden="true" />
           <input
             type="text"
@@ -80,9 +80,9 @@ export function RegistryToolbar<F extends string = string>({
                   key={opt.id}
                   type="button"
                   onClick={() => onFilterChange(opt.id)}
-                  className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-[var(--radius-pill)] border transition-all ios-press shrink-0 ${
+                  className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] border transition-all ios-press shrink-0 ${
                     isActive
-                      ? 'bg-[var(--text-primary)] text-[var(--surface)] border-[var(--text-primary)] shadow-sm'
+                      ? 'bg-[var(--text-primary)] text-[var(--surface)] border-[var(--text-primary)] shadow-xs'
                       : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-tertiary)]'
                   }`}
                   role="tab"
@@ -90,7 +90,7 @@ export function RegistryToolbar<F extends string = string>({
                 >
                   <span>{opt.label}</span>
                   {opt.count !== undefined && (
-                    <span className={`text-[9px] px-1 py-0.2 rounded-full ${isActive ? 'bg-[var(--surface)] text-[var(--text-primary)]' : 'bg-[var(--border-subtle)] text-[var(--text-tertiary)]'}`}>
+                    <span className={`text-[10px] px-1 py-0.2 rounded-full ${isActive ? 'bg-[var(--surface)] text-[var(--text-primary)]' : 'bg-[var(--border-subtle)] text-[var(--text-tertiary)]'}`}>
                       {opt.count}
                     </span>
                   )}

@@ -60,15 +60,15 @@ export function SIPAccountCard({
   return (
     <>
       <div 
-        className="py-4 hover:bg-[var(--surface-secondary)]/50 transition-all px-4 sm:px-6 rounded-[var(--radius-large)] border border-transparent hover:border-[var(--border-subtle)] select-none mobile-asset-card"
+        className="p-3.5 sm:p-4 hover:bg-[var(--surface-secondary)]/50 transition-colors select-none mobile-asset-card"
         {...longPressProps}
       >
-        <div className="flex items-start justify-between gap-4 flex-wrap sm:flex-nowrap">
+        <div className="flex items-start justify-between gap-3 sm:gap-4 flex-wrap sm:flex-nowrap">
         {/* Left Side: Meta & Dates */}
         <div className="space-y-1.5 flex-1 min-w-[200px]">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="w-2.5 h-2.5 rounded-full bg-[var(--positive)] animate-pulse" aria-hidden="true" />
-            <h4 className="text-sm font-bold text-[var(--text-primary)]">{account.fund_name}</h4>
+            <span className="w-2 h-2 rounded-full bg-[var(--positive)] animate-pulse" aria-hidden="true" />
+            <h4 className="text-sm font-bold text-[var(--text-primary)] truncate">{account.fund_name}</h4>
             {account.mf_scheme_code ? (
               account.navIsStale ? (
                 <span className="text-[10px] font-bold bg-[var(--warning-soft)] text-[var(--warning)] px-2 py-0.5 rounded-[var(--radius-pill)] flex items-center gap-0.5 border border-[var(--warning)]/30">
@@ -86,7 +86,7 @@ export function SIPAccountCard({
             )}
           </div>
           
-          <div className="flex items-center gap-3 text-xs text-[var(--text-tertiary)] flex-wrap">
+          <div className="flex items-center gap-2.5 text-xs text-[var(--text-tertiary)] flex-wrap">
             <span>Started: <strong className="text-[var(--text-secondary)]">{account.start_date}</strong></span>
             {account.next_sip_date && (
               <>
@@ -111,29 +111,29 @@ export function SIPAccountCard({
         </div>
 
         {/* Center: Balances & CAGR */}
-        <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 sm:gap-8 text-left sm:text-right w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--border-subtle)] shrink-0">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 sm:gap-6 text-left sm:text-right w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--border-subtle)] shrink-0">
           <div>
             <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Monthly SIP</p>
             <p className="text-xs font-bold text-[var(--text-secondary)] tnum">{formatINR(account.monthly_sip)}</p>
           </div>
           <div>
-            <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Exp. CAGR / Return</p>
-            <p className="text-xs font-extrabold text-[var(--accent-blue)] tnum">+{account.expected_cagr}%</p>
+            <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Exp. CAGR</p>
+            <p className="text-xs font-bold text-[var(--accent-blue)] tnum">+{account.expected_cagr}%</p>
             {invested > 0 && (
-              <p className={`text-[10px] font-bold tnum ${isProfit ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-                {isProfit ? '+' : ''}{formatPercent(plPercent, 1)} act
+              <p className={`text-[10px] font-semibold tnum ${isProfit ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                {isProfit ? '+' : ''}{formatPercent(plPercent, 1)}
               </p>
             )}
           </div>
           <div>
-            <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Est. Invested</p>
+            <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Invested</p>
             <p className="text-xs font-bold text-[var(--text-secondary)] tnum">{formatINR(invested)}</p>
           </div>
           <div>
             <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Current Value</p>
-            <p className="text-sm font-black text-[var(--text-primary)] text-financial tnum">{formatINR(currentVal)}</p>
+            <p className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(currentVal)}</p>
             {invested > 0 && (
-              <p className={`text-[10px] font-bold mt-0.5 tnum ${isProfit ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+              <p className={`text-[10px] font-semibold mt-0.5 tnum ${isProfit ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                 {isProfit ? '+' : ''}{formatINR(profitLoss)}
               </p>
             )}
@@ -148,24 +148,24 @@ export function SIPAccountCard({
               onClick={() => openSecureDocument(linkedDocs[0].file_path)}
               title={`View Attached Document: ${linkedDocs[0].name}`}
               aria-label={`Open document: ${linkedDocs[0].name}`}
-              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press cursor-pointer"
+              className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press cursor-pointer"
             >
-              <FileText size={15} />
+              <FileText size={13} />
             </button>
           )}
           <button
             onClick={() => onOpenEdit(account)}
-            className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] transition-colors ios-press"
+            className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] transition-colors ios-press"
             aria-label="Edit SIP"
           >
-            <Edit2 size={14} />
+            <Edit2 size={13} />
           </button>
           <button
             onClick={() => onConfirmDelete(account)}
-            className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] transition-colors ios-press"
+            className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] transition-colors ios-press"
             aria-label="Delete SIP"
           >
-            <Trash2 size={14} />
+            <Trash2 size={13} />
           </button>
         </div>
       </div>

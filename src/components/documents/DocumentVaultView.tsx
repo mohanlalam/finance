@@ -250,43 +250,49 @@ export default React.memo(function DocumentVaultView({
 
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-tr from-slate-700 to-slate-900 rounded-2xl p-4 text-white shadow-md flex items-center justify-between">
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="apple-card p-3 sm:p-3.5 flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Document Vault</p>
-            <p className="text-2xl font-bold mt-1">{portfolio.documents.length}</p>
-            <p className="text-xs text-slate-300 mt-2">Files stored securely</p>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Document Vault</span>
+            <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">{portfolio.documents.length} Files</span>
+            <span className="text-[11px] text-[var(--text-tertiary)]">Stored securely</span>
           </div>
-          <FileText size={40} className="opacity-20 shrink-0" />
+          <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] shrink-0">
+            <FileText size={16} />
+          </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+        <div className="apple-card p-3 sm:p-3.5 flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">Linked Documents</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
-              {portfolio.documents.filter((d) => d.asset_type !== 'general').length}
-            </p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Attached to assets</p>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Linked Documents</span>
+            <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
+              {portfolio.documents.filter((d) => d.asset_type !== 'general').length} Files
+            </span>
+            <span className="text-[11px] text-[var(--text-tertiary)]">Attached to assets</span>
           </div>
-          <Paperclip size={40} className="text-blue-500/20 shrink-0" />
+          <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] flex items-center justify-center text-[var(--accent-blue)] shrink-0">
+            <Paperclip size={16} />
+          </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+        <div className="apple-card p-3 sm:p-3.5 flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">General Files</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
-              {portfolio.documents.filter((d) => d.asset_type === 'general').length}
-            </p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Unfiled / reference</p>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">General Files</span>
+            <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
+              {portfolio.documents.filter((d) => d.asset_type === 'general').length} Files
+            </span>
+            <span className="text-[11px] text-[var(--text-tertiary)]">Unfiled / reference</span>
           </div>
-          <Folder size={40} className="text-amber-500/20 shrink-0" />
+          <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--warning-soft)] flex items-center justify-center text-[var(--warning)] shrink-0">
+            <Folder size={16} />
+          </div>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
+      <div className="apple-card overflow-hidden">
+        <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center justify-between flex-wrap gap-2.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {FOLDERS.map((f) => {
               const count = portfolio.documents.filter((d) => d.asset_type === f.key).length;
               const isActive = activeFolder === f.key;
@@ -294,15 +300,15 @@ export default React.memo(function DocumentVaultView({
                 <button
                   key={f.key}
                   onClick={() => setActiveFolder(f.key)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-semibold transition-all ${isActive
-                    ? f.color + ' ring-1 ring-current/20'
-                    : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600'
+                  className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] border transition-all ios-press shrink-0 ${isActive
+                    ? 'bg-[var(--text-primary)] text-[var(--surface)] border-[var(--text-primary)] shadow-xs'
+                    : 'bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-tertiary)]'
                     }`}
                 >
-                  {isActive ? <FolderOpen size={13} /> : <Folder size={13} />}
-                  {f.label}
+                  {isActive ? <FolderOpen size={12} /> : <Folder size={12} />}
+                  <span>{f.label}</span>
                   {count > 0 && (
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${isActive ? 'bg-white/60 dark:bg-slate-800/80' : 'bg-slate-100 dark:bg-slate-700'}`}>
+                    <span className={`text-[10px] px-1 py-0.2 rounded-full ${isActive ? 'bg-[var(--surface)] text-[var(--text-primary)]' : 'bg-[var(--surface-secondary)] text-[var(--text-tertiary)]'}`}>
                       {count}
                     </span>
                   )}
@@ -321,9 +327,9 @@ export default React.memo(function DocumentVaultView({
             />
             <label
               htmlFor="vault-file-upload-input"
-              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-[10px] transition-colors shadow-sm cursor-pointer select-none active:scale-[0.98]"
+              className="flex items-center gap-1.5 bg-[var(--text-primary)] hover:opacity-90 text-[var(--surface)] text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] transition-all shadow-xs cursor-pointer select-none ios-press"
             >
-              <Upload size={13} />
+              <Upload size={12} />
               <span>Upload to {FOLDERS.find((f) => f.key === activeFolder)?.label}</span>
             </label>
           </div>
@@ -360,14 +366,14 @@ export default React.memo(function DocumentVaultView({
               const linkedLabel = doc.asset_id ? assetLabelMap.get(doc.asset_id) || null : null;
               return (
                 <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
-                  <div className="mobile-asset-card px-6 py-4 hover:bg-[var(--surface-secondary)]/50 transition-colors flex items-center justify-between gap-4 h-full">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
-                        <FileText size={18} />
+                  <div className="mobile-asset-card px-3.5 sm:px-4 py-3 hover:bg-[var(--surface-secondary)]/50 transition-colors flex items-center justify-between gap-3 h-full">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
+                        <FileText size={15} />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-[var(--text-primary)] truncate" title={doc.name}>{doc.name}</p>
-                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        <p className="text-sm font-bold text-[var(--text-primary)] truncate" title={doc.name}>{doc.name}</p>
+                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                           {doc.file_type && (
                             <span className="text-[10px] text-[var(--text-tertiary)] font-mono">{doc.file_type}</span>
                           )}
@@ -385,18 +391,18 @@ export default React.memo(function DocumentVaultView({
                       <button
                         type="button"
                         onClick={() => openSecureDocument(doc.file_path)}
-                        className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-[32px] sm:min-h-[32px] rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
+                        className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
                         title="Open document"
                         aria-label={`Open document: ${doc.name}`}
                       >
-                        <ExternalLink size={14} />
+                        <ExternalLink size={13} />
                       </button>
                       <button
                         onClick={() => handleDelete(doc)}
-                        className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-[32px] sm:min-h-[32px] rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press"
+                        className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press"
                         title="Delete"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   </div>
@@ -409,14 +415,14 @@ export default React.memo(function DocumentVaultView({
             {folderDocs.map((doc) => {
               const linkedLabel = doc.asset_id ? assetLabelMap.get(doc.asset_id) || null : null;
               return (
-                <div key={doc.id} className="mobile-asset-card px-6 py-4 hover:bg-[var(--surface-secondary)]/50 transition-colors flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
-                      <FileText size={18} />
+                <div key={doc.id} className="mobile-asset-card px-3.5 sm:px-4 py-3 hover:bg-[var(--surface-secondary)]/50 transition-colors flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
+                      <FileText size={15} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[var(--text-primary)] truncate" title={doc.name}>{doc.name}</p>
-                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <p className="text-sm font-bold text-[var(--text-primary)] truncate" title={doc.name}>{doc.name}</p>
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         {doc.file_type && (
                           <span className="text-[10px] text-[var(--text-tertiary)] font-mono">{doc.file_type}</span>
                         )}
@@ -434,18 +440,18 @@ export default React.memo(function DocumentVaultView({
                     <button
                       type="button"
                       onClick={() => openSecureDocument(doc.file_path)}
-                      className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-[32px] sm:min-h-[32px] rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
+                      className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
                       title="Open document"
                       aria-label={`Open document: ${doc.name}`}
                     >
-                      <ExternalLink size={14} />
+                      <ExternalLink size={13} />
                     </button>
                     <button
                       onClick={() => handleDelete(doc)}
-                      className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-[32px] sm:min-h-[32px] rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press"
+                      className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press"
                       title="Delete"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 </div>

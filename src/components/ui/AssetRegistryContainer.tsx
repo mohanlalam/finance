@@ -35,12 +35,12 @@ export const AssetRegistryContainer = React.memo(function AssetRegistryContainer
   return (
     <div className="apple-card overflow-hidden">
       {/* Header Bar */}
-      <div className="px-5 py-3.5 sm:px-6 sm:py-4 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]/50 flex items-center justify-between">
-        <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider">{title}</h3>
+      <div className="px-3 sm:px-4 py-2.5 sm:py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center justify-between">
+        <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{title}</h3>
         <button
           type="button"
           onClick={onOpenAdd}
-          className={`flex items-center gap-1.5 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] transition-all shadow-sm ios-press ${themeColor}`}
+          className={`flex items-center gap-1.5 text-white text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] transition-all shadow-xs ios-press ${themeColor}`}
         >
           <Plus size={13} aria-hidden="true" />
           {createBtnLabel}

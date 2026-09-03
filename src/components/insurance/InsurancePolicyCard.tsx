@@ -37,16 +37,16 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
   const daysRemaining = renewalStatus.daysRemaining !== Infinity ? renewalStatus.daysRemaining : null;
 
   return (
-    <div className="p-4 sm:p-5 hover:bg-[var(--surface-secondary)]/50 transition-colors mobile-asset-card">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-[var(--radius-medium)] flex items-center justify-center shrink-0 border border-[var(--border-subtle)] ${style.bg}`}>
-            {isExpiringSoon ? <ShieldAlert size={18} className="text-[var(--negative)]" /> : <Shield size={18} className={style.text} />}
+    <div className="p-3.5 sm:p-4 hover:bg-[var(--surface-secondary)]/50 transition-colors mobile-asset-card">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2.5">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className={`w-8 h-8 rounded-[var(--radius-small)] flex items-center justify-center shrink-0 border border-[var(--border-subtle)] ${style.bg}`}>
+            {isExpiringSoon ? <ShieldAlert size={16} className="text-[var(--negative)]" /> : <Shield size={16} className={style.text} />}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h4 className="font-bold text-[var(--text-primary)] text-base">{policy.policy_name}</h4>
-              <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-[var(--radius-pill)] ${style.bg}`}>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="font-bold text-[var(--text-primary)] text-sm truncate">{policy.policy_name}</h4>
+              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-[var(--radius-pill)] ${style.bg} shrink-0`}>
                 {style.label}
               </span>
               {docs.length > 0 ? (
@@ -59,7 +59,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
                 </span>
               )}
             </div>
-            <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
+            <p className="text-xs text-[var(--text-tertiary)] mt-0.5 truncate">
               {policy.provider} {policy.policy_number ? `• Policy #${policy.policy_number}` : ''}
             </p>
           </div>
@@ -70,17 +70,17 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
             <span className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block sm:hidden">
               Sum Assured
             </span>
-            <p className="text-sm font-black text-[var(--text-primary)] text-financial tnum">{formatINR(policy.sum_assured)}</p>
+            <p className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(policy.sum_assured)}</p>
             <p className="text-xs text-[var(--text-tertiary)] tnum">
               Prem: {formatINR(policy.premium_amount)}/yr
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={() => onOpenEdit(policy)}
-              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:border-[var(--negative)] ios-press transition-colors"
+              className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:border-[var(--negative)] ios-press transition-colors"
               title="Edit policy & documents"
               aria-label={`Edit ${policy.policy_name}`}
             >
@@ -89,7 +89,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
             <button
               type="button"
               onClick={() => onConfirmDelete(policy)}
-              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:border-[var(--negative)] ios-press transition-colors"
+              className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:border-[var(--negative)] ios-press transition-colors"
               title="Delete policy"
               aria-label={`Delete ${policy.policy_name}`}
             >

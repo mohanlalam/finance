@@ -96,14 +96,14 @@ export function DepositDetailsCard({
   return (
     <>
       <div 
-        className="p-4 sm:p-6 hover:bg-[var(--surface-secondary)]/50 transition-colors select-none mobile-asset-card" 
+        className="p-3.5 sm:p-4 hover:bg-[var(--surface-secondary)]/50 transition-colors select-none mobile-asset-card" 
         role="listitem"
         {...longPressProps}
       >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-start gap-3 min-w-0">
-          <div className={`w-10 h-10 rounded-[var(--radius-medium)] flex items-center justify-center shrink-0 ${isMatured ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]'}`}>
-            {isMatured ? <CheckCircle size={20} aria-hidden="true" /> : <IconComponent size={20} aria-hidden="true" />}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-start gap-2.5 sm:gap-3 min-w-0">
+          <div className={`w-8 h-8 rounded-[var(--radius-small)] flex items-center justify-center shrink-0 ${isMatured ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]'}`}>
+            {isMatured ? <CheckCircle size={16} aria-hidden="true" /> : <IconComponent size={16} aria-hidden="true" />}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
@@ -142,28 +142,28 @@ export function DepositDetailsCard({
                 key={doc.id}
                 type="button"
                 onClick={() => openSecureDocument(doc.file_path)}
-                className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] ios-press transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] ios-press transition-colors cursor-pointer"
                 title={doc.name}
                 aria-label={`Open document: ${doc.name}`}
               >
-                <FileText size={14} aria-hidden="true" />
+                <FileText size={13} aria-hidden="true" />
               </button>
             ))}
             <button
               onClick={() => onOpenEdit(fd)}
-              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] ios-press transition-colors"
+              className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] ios-press transition-colors"
               title={`Edit ${cfg.title}`}
               aria-label={`Edit ${cfg.title} at ${fd.bank_name}`}
             >
-              <Edit2 size={14} aria-hidden="true" />
+              <Edit2 size={13} aria-hidden="true" />
             </button>
             <button
               onClick={() => onConfirmDelete(fd)}
-              className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:border-[var(--negative)] ios-press transition-colors"
+              className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--negative-soft)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:border-[var(--negative)] ios-press transition-colors"
               title={`Delete ${cfg.title}`}
               aria-label={`Delete ${cfg.title} at ${fd.bank_name}`}
             >
-              <Trash2 size={14} aria-hidden="true" />
+              <Trash2 size={13} aria-hidden="true" />
             </button>
           </div>
         </div>
