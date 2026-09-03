@@ -39,14 +39,14 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 
 1. **Server-Side PIN Authentication (Fail-Closed)**:
    - Client-side PIN entries are hashed with SHA-256 (`crypto.subtle.digest`) and sent via the `X-App-Pin` header.
-   - Supabase Edge Functions (`holdings-crud`, `verify-pin`, `snapshot-net-worth`) validate this header directly against the server-side `APP_PIN_HASH` environment secret.
+   - Supabase Edge Functions (`holdings-crud`, `verify-pin`, `snapshot-net-worth`, and `market-data`) validate this header directly against the server-side `APP_PIN_HASH` environment secret.
    - If the server PIN secret is missing or unconfigured, functions **Fail Closed (HTTP 503)** immediately.
 2. **Brute-Force & Rate-Limiting Protection**:
    - IP-based sliding window rate limiter (`MAX_FAILED_ATTEMPTS = 5`, `RATE_WINDOW_MS = 5 min`) protects all PIN-locked endpoints.
    - Exceeding attempts returns **HTTP 429 (Too Many Requests)** with standard `Retry-After` headers.
 3. **Private Document Storage with Time-Limited Signed URLs**:
    - The `investment-documents` bucket is strictly **private (`public = false`)** with all direct public read/write policies dropped.
-   - Attachments are accessed via short-lived signed URLs (60-second expiration) issued by PIN-authenticated Edge Functions.
+   - Attachments are accessed via short-lived signed URLs issued by PIN-authenticated Edge Functions (the client requests 60 seconds; the backend supports 60–3600 seconds with a 300-second default).
    - Client-side storage path generators enforce UUID path randomization and sanitization against directory traversal (`../`).
 4. **Biometric Hardware-Backed Authentication**:
    - WebAuthn platform authenticators enable 1-second FaceID, TouchID, and Windows Hello unlocking without transmitting credentials over the wire.
@@ -58,8 +58,8 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 1. **Schema-Validated Full Backup & Restore**:
    - Unified export in JSON, CSV, and printable PDF statements.
    - The backup restore engine (`backupValidator.ts`) enforces envelope integrity, schema structure, and duplicate collision detection before applying restorations to the database.
-2. **Automated Daily Net Worth Snapshots**:
-   - The `snapshot-net-worth` Edge Function runs daily, computing exact consolidated valuations across all asset classes and logging historical timeline snapshots into `net_worth_history`.
+2. **Client-Triggered Daily Net Worth Snapshots**:
+   - Once per day upon a successful portfolio load, the application triggers the `snapshot-net-worth` Edge Function, which computes exact consolidated valuations across all asset classes and records historical timeline snapshots into `net_worth_history`.
 
 ---
 
@@ -223,13 +223,10 @@ project antigravity/
 The repository enforces strict verification before deployment:
 
 ```bash
-# Run Vitest test suite across 45 test files and 241 tests (100% passing)
+# Run Vitest test suite across 50 test files and 259 tests (100% passing)
 npm test
 
-# Run interactive Vitest UI with watch mode
-npm run test:ui
-
-# Run complete verification pipeline: ESLint + TypeScript typecheck + Vite build
+# Run complete verification pipeline: ESLint + TypeScript typecheck + Vitest + Vite build
 npm run verify
 ```
 
@@ -238,7 +235,7 @@ npm run verify
 ## 🚀 Getting Started
 
 ### 1. Prerequisites
-- Node.js (v20+ or v22 LTS recommended)
+- Node.js (v20+ required, v22 LTS recommended)
 - npm (v10+)
 - A Supabase project
 
@@ -284,14 +281,16 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | Script | Command | Description |
 |---|---|---|
 | **Dev Server** | `npm run dev` | Start Vite dev server with HMR |
-| **Test Suite** | `npm test` | Run Vitest unit & integration tests (45 test files / 241 tests) |
+| **Test Suite** | `npm test` | Run Vitest unit & integration tests (50 test files / 259 tests) |
 | **Build** | `npm run build` | Production build to `dist/` |
 | **Preview** | `npm run preview` | Preview the production build locally |
 | **Lint** | `npm run lint` | Run ESLint checks |
 | **Type Check** | `npm run typecheck` | Run TypeScript compiler checks (no emit) |
-| **Verify All** | `npm run verify` | Run lint + typecheck + build in sequence |
-| **Mobile Sync** | `npm run mobile:sync` | Build web assets and sync Capacitor Android project |
-| **Mobile Run** | `npm run mobile:run` | Build, sync, and launch Capacitor Android app in emulator |
+| **Verify All** | `npm run verify` | Run lint + typecheck + test + build in sequence |
+| **Mobile Sync** | `npm run mobile:sync` | Build web assets and sync Capacitor Android project (requires local `../android/mobile` directory) |
+| **Mobile Run** | `npm run mobile:run` | Build, sync, and launch Capacitor Android app in emulator (requires local `../android/mobile` directory) |
+
+> **Note on Mobile Scripts**: The scripts `npm run mobile:sync` and `npm run mobile:run` depend on an external sibling directory (`../android/mobile`) containing the Capacitor Android shell and are intended for local Android mobile development setups.
 
 ---
 
