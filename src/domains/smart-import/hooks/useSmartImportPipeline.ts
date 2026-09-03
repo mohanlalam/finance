@@ -16,6 +16,7 @@ import { checkForDuplicateAsset } from '../services/duplicateDetectionService';
 import { executeImportPersistence } from '../services/importPersistenceService';
 import { disambiguateEntity } from '../services/entityDisambiguationService';
 import { buildEvidenceHeatmap } from '../services/evidenceHeatmapService';
+import { enhanceDocumentImage } from '../../../utils/imageEnhancer';
 
 const INITIAL_FORM_DATA: SmartImportFormData = {
   institutionName: '',
@@ -145,11 +146,29 @@ export function useSmartImportPipeline({
    * Helper to extract a single file with disambiguation and evidence heatmaps
    */
   const processSingleFile = useCallback(async (selectedFile: File): Promise<BatchImportItem> => {
-    const preview = selectedFile.type.startsWith('image/')
+    let fileToExtract = selectedFile;
+    let preview = selectedFile.type.startsWith('image/')
       ? URL.createObjectURL(selectedFile)
       : null;
+    let wasEnhanced = false;
+    let contrastGainPct = 0;
 
-    const result = await extractAssetFromDocument(selectedFile);
+    // Mobile Photo Contrast & Sharpness Auto-Enhancer
+    if (selectedFile.type.startsWith('image/')) {
+      try {
+        const enhancement = await enhanceDocumentImage(selectedFile);
+        if (enhancement.wasEnhanced) {
+          fileToExtract = enhancement.enhancedFile;
+          preview = enhancement.previewUrl;
+          wasEnhanced = true;
+          contrastGainPct = enhancement.metrics?.contrastGainPct || 15;
+        }
+      } catch {
+        // Fallback to original file
+      }
+    }
+
+    const result = await extractAssetFromDocument(fileToExtract);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rawData: any = result.data || {};
     const rawResult = result as unknown as { documentType?: SmartImportExtractionResult['documentType']; rawText?: string };
@@ -261,6 +280,8 @@ export function useSmartImportPipeline({
       targetPortfolio: disambiguation.portfolioName,
       disambiguation,
       duplicateMatch: duplicate,
+      wasEnhanced,
+      contrastGainPct,
     };
   }, [activePortfolio, portfolios]);
 
@@ -500,6 +521,8 @@ export function useSmartImportPipeline({
     batchItems,
     activeBatchIndex,
     isBatchMode: batchItems.length > 1,
+    wasEnhanced: Boolean(batchItems[activeBatchIndex]?.wasEnhanced),
+    contrastGainPct: batchItems[activeBatchIndex]?.contrastGainPct || 0,
     extractedResult,
     formData,
     setFormData: handleFormDataChange,

@@ -58,6 +58,8 @@ export interface BatchImportItem {
   targetPortfolio: string;
   disambiguation: DisambiguationResult;
   duplicateMatch?: DuplicateMatch | null;
+  wasEnhanced?: boolean;
+  contrastGainPct?: number;
 }
 
 export type ImportSaveStep =

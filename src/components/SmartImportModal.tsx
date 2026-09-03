@@ -38,6 +38,8 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ isOpen, onCl
     batchItems,
     activeBatchIndex,
     isBatchMode,
+    wasEnhanced,
+    contrastGainPct,
     extractedResult,
     formData,
     setFormData,
@@ -215,11 +217,18 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ isOpen, onCl
               {/* Document Thumbnail Preview */}
               <div className="border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-2.5 sm:p-4 bg-slate-50 dark:bg-slate-900/40 flex flex-col items-center justify-center min-h-[70px] sm:min-h-[140px] md:min-h-[220px]">
                 {filePreview ? (
-                  <img
-                    src={filePreview}
-                    alt="Document scan"
-                    className="max-h-36 sm:max-h-60 md:max-h-72 object-contain rounded-xl shadow-xs border border-slate-200 dark:border-slate-700"
-                  />
+                  <div className="flex flex-col items-center gap-1.5 w-full">
+                    <img
+                      src={filePreview}
+                      alt="Document scan"
+                      className="max-h-36 sm:max-h-60 md:max-h-72 object-contain rounded-xl shadow-xs border border-slate-200 dark:border-slate-700"
+                    />
+                    {wasEnhanced && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-500/20">
+                        <Sparkles size={10} /> Auto-Enhanced (+{contrastGainPct}% text contrast)
+                      </span>
+                    )}
+                  </div>
                 ) : (
                   <div className="text-center p-2 sm:p-6 space-y-1 sm:space-y-2 flex sm:flex-col items-center gap-2.5 sm:gap-0">
                     <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 mx-auto flex items-center justify-center font-bold text-[10px] sm:text-xs shrink-0">

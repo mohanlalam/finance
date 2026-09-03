@@ -128,6 +128,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 * **Smart Import & Family Vault Agent Domain (`src/domains/smart-import/`)**:
   * **[entityDisambiguationService.ts](src/domains/smart-import/services/entityDisambiguationService.ts)**: Cross-Asset Entity Disambiguation automatically pre-sorting documents into Rammohan, Padmavathi, or Sai Laxmi registries based on PAN patterns, folios, and name hints.
   * **[evidenceHeatmapService.ts](src/domains/smart-import/services/evidenceHeatmapService.ts)**: Visual Hallucination Safeguard computing confidence ratings, exact source text snippets, and document coordinates for parsed financial figures.
+  * **[imageEnhancer.ts](src/utils/imageEnhancer.ts)**: In-browser HTML5 Canvas auto-contrast normalization, luminance histogram stretching, and text sharpness kernel pre-processing for mobile camera receipts.
   * **[BatchQuarantineReview.tsx](src/components/smart-import/BatchQuarantineReview.tsx)**: Batch multi-statement synthesis quarantine review staging UI supporting parallel multi-document drops and 1-click batch approvals.
 * **Backup & Restore Domain (`src/domains/portfolio/backup/`)**:
   * **[backupSchema.ts](src/domains/portfolio/backup/backupSchema.ts)** & **[backupValidator.ts](src/domains/portfolio/backup/backupValidator.ts)**: Schema-enforcing backup and restore diagnostic engine with envelope validation and collision detection.
@@ -166,12 +167,12 @@ All core financial calculations are pure functions with zero UI, React, or datab
 ### 7. Testing Strategy
 * **Test Conventions & Locations**:
   * Unit and pure calculation tests: located under `src/domains/__tests__/` (e.g., `portfolioTotals.test.ts`, `taxHarvesting.test.ts`, `goldValuation.test.ts`, `dataQuality.test.ts`, `backupValidator.test.ts`, `wealthStrategist.test.ts`, `entityDisambiguationService.test.ts`, `evidenceHeatmapService.test.ts`).
-  * Component & formatter tests: located under `src/utils/__tests__/` and `src/hooks/__tests__/`.
+  * Component & formatter tests: located under `src/utils/__tests__/` and `src/hooks/__tests__/` (e.g. `imageEnhancer.test.ts`).
 * **Mocking & Environment Isolation**:
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 49 test files and 256 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 50 test files and 259 unit/integration test cases (100% passing).
 
 ---
 
