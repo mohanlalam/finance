@@ -318,7 +318,7 @@ export default function AppShell() {
 
   const handleFloatingAddAsset = useCallback((type: AssetTab) => {
     setActiveAsset(type);
-    if (type !== 'home' && type !== 'widgets' && type !== 'tax') {
+    if (type !== 'home' && type !== 'widgets' && type !== 'tax' && type !== 'cashflow') {
       setQuickAddTarget(type);
     }
   }, [setQuickAddTarget, setActiveAsset]);

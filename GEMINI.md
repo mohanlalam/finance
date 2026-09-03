@@ -114,6 +114,9 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * **[rdCompounding.ts](src/domains/assets/rd/calculations/rdCompounding.ts)**: Indian Banking standard quarterly compounding RD valuation.
   * **[sipValuation.ts](src/domains/assets/sip/calculations/sipValuation.ts)**: Live AMFI NAV scheme price multiplication and accrued valuations.
   * **[goldValuation.ts](src/domains/assets/gold/calculations/goldValuation.ts)**: Bullion weight × 24K spot rate × hallmark purity multiplier (24K, 22K/916, 18K/750, 14K/585).
+* **Cash Flow & Reinvestment Calculations (`src/domains/cashflow/calculations/`)**:
+  * **[cashFlowTimeline.ts](src/domains/cashflow/calculations/cashFlowTimeline.ts)**: 12-month forward predictive liquidity engine aggregating positive inflows (maturing FDs/RDs, SGB 2.5% semi-annual interest coupons, rental yields) and recurring outflows (active SIPs, RD monthly installments, insurance premiums) with per-member attribution for Rammohan, Padmavathi, and Sai Laxmi.
+  * **[reinvestmentPlaybook.ts](src/domains/cashflow/calculations/reinvestmentPlaybook.ts)**: Auto-maturity tax arbitrage and reinvestment engine evaluating upcoming deposit maturities, comparing Scheduled Bank FDs (with Senior Citizen 80TTB ₹50,000 tax-free interest limit) vs Arbitrage Funds (12.5% LTCG above ₹1.25L exemption) vs SGB bullion accumulation.
 
 ---
 
@@ -155,18 +158,19 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * **[RDView.tsx](src/components/rd/RDView.tsx)**, **[RDAccountCard.tsx](src/components/rd/RDAccountCard.tsx)**, and **[RDFormModal.tsx](src/components/rd/RDFormModal.tsx)**.
   * **[SIPView.tsx](src/components/sip/SIPView.tsx)**, **[SIPAccountCard.tsx](src/components/sip/SIPAccountCard.tsx)**, and **[SIPFormModal.tsx](src/components/sip/SIPFormModal.tsx)**.
   * **[DocumentVaultView.tsx](src/components/documents/DocumentVaultView.tsx)** and **[TaxHarvestingView.tsx](src/components/tax/TaxHarvestingView.tsx)**.
+  * **[CashFlowView.tsx](src/components/cashflow/CashFlowView.tsx)**: 12-month predictive cash flow horizon, recurring commitments schedule, and auto-maturity reinvestment tax arbitrage matrix.
 
 ---
 
 ### 7. Testing Strategy
 * **Test Conventions & Locations**:
-  * Unit and pure calculation tests: located under `src/domains/__tests__/` (e.g., `portfolioTotals.test.ts`, `taxHarvesting.test.ts`, `goldValuation.test.ts`, `dataQuality.test.ts`, `backupValidator.test.ts`).
+  * Unit and pure calculation tests: located under `src/domains/__tests__/` (e.g., `portfolioTotals.test.ts`, `taxHarvesting.test.ts`, `goldValuation.test.ts`, `dataQuality.test.ts`, `backupValidator.test.ts`, `cashFlowTimeline.test.ts`, `reinvestmentPlaybook.test.ts`).
   * Component & formatter tests: located under `src/utils/__tests__/` and `src/hooks/__tests__/`.
 * **Mocking & Environment Isolation**:
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 45 test files and 241 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 48 test files and 254 unit/integration test cases (100% passing).
 
 ---
 

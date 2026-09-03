@@ -18,8 +18,9 @@ const FixedDepositView  = React.lazy(() => import('./fd/FixedDepositView'));
 const RDView            = React.lazy(() => import('./rd/RDView'));
 const SIPView           = React.lazy(() => import('./sip/SIPView'));
 const TaxHarvestingView = React.lazy(() => import('./tax/TaxHarvestingView'));
+const CashFlowView      = React.lazy(() => import('./cashflow/CashFlowView'));
 
-type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
+type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax' | 'cashflow';
 
 interface PortfolioOption {
   name: string;
@@ -457,6 +458,10 @@ export default React.memo(function AssetTabContent({
           onDelete={onDeleteAsset}
           autoOpenAddModal={quickAddTarget === 'documents'}
         />
+      )}
+
+      {activeAsset === 'cashflow' && (
+        <CashFlowView portfolios={portfolios} />
       )}
       </React.Suspense>
     </div>

@@ -50,6 +50,14 @@ export function ChevronUp({ size = 24, className = '' }: IconProps) {
   );
 }
 
+export function ChevronDown({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
 export function ChevronRight({ size = 24, className = '' }: IconProps) {
   return (
     <svg {...base(size, className)}>
