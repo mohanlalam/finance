@@ -388,6 +388,15 @@ input[type="week"] {
   appearance: none;
 }
 
+/* iOS Safari Auto-Zoom Prevention: Inputs must be at least 16px on mobile viewports */
+@media screen and (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 .mobile-hardware-layer {
   transform: translateZ(0);
   backface-visibility: hidden;

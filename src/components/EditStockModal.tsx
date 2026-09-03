@@ -111,7 +111,7 @@ export default function EditStockModal({
         />
       </div>
 
-      <form onSubmit={handleSubmit} className="flex-1 min-h-0 overflow-y-auto px-6 py-5 space-y-5">
+      <form onSubmit={handleSubmit} className="flex-1 min-h-0 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 space-y-3.5 sm:space-y-5">
         {/* Live Calculation Preview Banner */}
         <div className="p-4 rounded-[var(--radius-large)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] space-y-3">
           <div className="flex items-center justify-between text-xs text-[var(--text-tertiary)]">

@@ -100,7 +100,7 @@ export default function DataQualityHealthModal({
       title="🛡️ Portfolio Data Quality & Health Check"
       maxWidth="max-w-2xl"
     >
-      <div className="p-5 space-y-5">
+      <div className="p-3.5 sm:p-5 space-y-3.5 sm:space-y-5">
         {/* Score & Summary Banner */}
         <div className={`p-4 rounded-[var(--radius-large)] border flex flex-col sm:flex-row items-center justify-between gap-4 ${getScoreColor(score)}`}>
           <div className="flex items-center gap-3.5">

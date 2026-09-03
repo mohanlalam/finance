@@ -154,7 +154,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
       title={editingProperty ? 'Edit Property' : 'Add Property'}
       preventClose={loading}
     >
-      <form onSubmit={handleSubmit} className="p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4">
         {portfolioOptions.length > 1 && !editingProperty && (
           <div>
             <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">

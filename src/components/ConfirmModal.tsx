@@ -64,7 +64,7 @@ export default function ConfirmModal({
       ariaLabel={title}
       preventClose={isLoading}
     >
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="flex items-start gap-4">
           <div className={`w-10 h-10 rounded-[var(--radius-pill)] ${styles.iconBg} flex items-center justify-center shrink-0`}>
             {styles.icon}

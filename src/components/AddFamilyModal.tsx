@@ -62,7 +62,7 @@ export default React.memo(function AddFamilyModal({
           disabled={submitting}
         />
       </div>
-      <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+      <form onSubmit={handleSubmit} className="px-4 py-4 sm:px-6 sm:py-5 space-y-3.5 sm:space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Display Label</label>
           <input
