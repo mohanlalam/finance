@@ -128,6 +128,7 @@ export function GoldHoldingView({
         name: p.name,
         label: p.label || p.name,
         grams: memberGrams,
+        tola: memberGrams / 11.6638,
         value: memberValue,
         invested: memberInvested,
         count: (p.goldHoldings || []).length,
@@ -136,9 +137,11 @@ export function GoldHoldingView({
 
     const totalGain = totalValue - totalInvested;
     const gainPct = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
+    const totalTola = totalGrams / 11.6638;
 
     return {
       totalGrams,
+      totalTola,
       totalValue,
       totalInvested,
       totalGain,
@@ -374,8 +377,8 @@ export function GoldHoldingView({
           </div>
         </div>
 
-        {/* 4 Summary Metrics (Matches FD and Stocks Stats Ribbon) */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+        {/* Summary Metrics (Matches FD and Stocks Stats Ribbon) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-xs">
           <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
             <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Family Invested</span>
             <span className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5 block">
@@ -407,7 +410,19 @@ export function GoldHoldingView({
             </div>
           </div>
 
-          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-amber-500/25 flex items-center gap-2">
+            <div className="w-6 h-6 rounded-[var(--radius-small)] bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
+              <Scale size={12} />
+            </div>
+            <div>
+              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">Weight in Tola</span>
+              <span className="text-xs sm:text-sm font-bold text-amber-500 tnum mt-0.5 block">
+                {familyGoldSummary.totalTola.toFixed(2)} <span className="text-[10px] font-normal text-[var(--text-tertiary)]">tola</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)] col-span-2 sm:col-span-1">
             <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Overall Return</span>
             <span className={`text-xs sm:text-sm font-bold tnum mt-0.5 block ${pnlColor(familyGoldSummary.totalGain)}`}>
               {familyGoldSummary.totalGain >= 0 ? '+' : ''}{formatINR(familyGoldSummary.totalGain)} ({formatPercent(familyGoldSummary.gainPct)})
@@ -475,7 +490,7 @@ export function GoldHoldingView({
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xs font-bold text-amber-500 tnum">
-                        {m.grams.toFixed(2)} g
+                        {m.grams.toFixed(2)} g <span className="text-[10px] font-normal text-[var(--text-tertiary)]">({m.tola.toFixed(2)} tola)</span>
                       </p>
                       <p className="text-[10px] font-semibold text-[var(--text-secondary)] tnum">
                         {formatINR(m.value)}
@@ -644,7 +659,7 @@ export function GoldHoldingView({
                       </span>
                     </div>
                     <span className="text-xs font-bold text-amber-500 tnum">
-                      {item.grams.toFixed(2)} g {item.val > 0 ? `(${formatINR(item.val)})` : ''}
+                      {item.grams.toFixed(2)} g <span className="text-[10px] font-normal text-[var(--text-tertiary)]">({(item.grams / 11.6638).toFixed(2)} tola)</span> {item.val > 0 ? `• ${formatINR(item.val)}` : ''}
                     </span>
                   </div>
 
