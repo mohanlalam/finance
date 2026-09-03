@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import DashboardError from './DashboardError';
+import { handleChunkError } from '../utils/chunkReload';
 
 interface AppErrorBoundaryProps {
   children: ReactNode;
@@ -25,29 +26,7 @@ export default class AppErrorBoundary extends Component<AppErrorBoundaryProps, A
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('[app] render failed:', error, info);
-    
-    const isChunkError = 
-      error.message.includes('dynamically imported module') ||
-      error.message.includes('chunk load') ||
-      error.message.includes('Loading chunk') ||
-      error.message.includes('loading chunk') ||
-      error.message.includes('Importing a module script failed') ||
-      error.message.includes('module script failed');
-
-    const isStaleCache =
-      error instanceof ReferenceError &&
-      error.message.includes('is not defined');
-      
-    if (isChunkError || isStaleCache) {
-      const chunkErrorKey = 'finance_chunk_error_reload';
-      const lastReload = sessionStorage.getItem(chunkErrorKey);
-      const now = Date.now();
-      
-      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
-        sessionStorage.setItem(chunkErrorKey, now.toString());
-        window.location.reload();
-      }
-    }
+    handleChunkError(error);
   }
 
   render() {

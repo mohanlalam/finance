@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from './icons/AppIcons';
+import { handleChunkError } from '../utils/chunkReload';
 
 interface SectionErrorBoundaryProps {
   children: ReactNode;
@@ -30,32 +31,7 @@ export default class SectionErrorBoundary extends Component<SectionErrorBoundary
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error(`[${this.props.sectionName ?? 'section'}] render error:`, error, info);
-    
-    const isChunkError = 
-      error.message.includes('dynamically imported module') ||
-      error.message.includes('chunk load') ||
-      error.message.includes('Loading chunk') ||
-      error.message.includes('loading chunk') ||
-      error.message.includes('Importing a module script failed') ||
-      error.message.includes('module script failed');
-
-    // Stale PWA cache: a ReferenceError with 'is not defined' on a known variable
-    // usually means the service worker served an old chunk that references a variable
-    // that no longer exists after a code change. Force reload to clear the cache.
-    const isStaleCache =
-      error instanceof ReferenceError &&
-      error.message.includes('is not defined');
-      
-    if (isChunkError || isStaleCache) {
-      const chunkErrorKey = 'finance_chunk_error_reload';
-      const lastReload = sessionStorage.getItem(chunkErrorKey);
-      const now = Date.now();
-      
-      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
-        sessionStorage.setItem(chunkErrorKey, now.toString());
-        window.location.reload();
-      }
-    }
+    handleChunkError(error);
   }
 
   handleRetry = () => {

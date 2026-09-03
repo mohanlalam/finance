@@ -5,7 +5,7 @@ import InsurancePolicyCard from './InsurancePolicyCard';
 import InsuranceFormModal from './InsuranceFormModal';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import RegistryToolbar, { SortOption, FilterPillOption } from '../ui/RegistryToolbar';
-import { usePortfolioStatus } from '../../contexts/PortfolioContext';
+import { useIsMutating } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
 import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
@@ -52,7 +52,7 @@ export function InsuranceView({
   autoOpenAddModal,
 }: InsuranceViewProps) {
   const isMobile = useIsMobile();
-  const { isMutating } = usePortfolioStatus();
+  const isMutating = useIsMutating();
   const { addToast } = useToastActions();
   const {
     showModal,

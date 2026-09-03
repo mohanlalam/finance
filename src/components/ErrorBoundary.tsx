@@ -1,4 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
+import { handleChunkError } from '../utils/chunkReload';
 
 interface Props {
   children: ReactNode;
@@ -22,29 +23,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('[ErrorBoundary caught error]:', error, errorInfo);
-
-    const isChunkError = 
-      error.message.includes('dynamically imported module') ||
-      error.message.includes('chunk load') ||
-      error.message.includes('Loading chunk') ||
-      error.message.includes('loading chunk') ||
-      error.message.includes('Importing a module script failed') ||
-      error.message.includes('module script failed');
-
-    const isStaleCache =
-      error instanceof ReferenceError &&
-      error.message.includes('is not defined');
-      
-    if (isChunkError || isStaleCache) {
-      const chunkErrorKey = 'finance_chunk_error_reload';
-      const lastReload = sessionStorage.getItem(chunkErrorKey);
-      const now = Date.now();
-      
-      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
-        sessionStorage.setItem(chunkErrorKey, now.toString());
-        window.location.reload();
-      }
-    }
+    handleChunkError(error);
   }
 
   private handleReset = () => {

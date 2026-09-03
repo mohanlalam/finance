@@ -54,6 +54,11 @@ export interface PortfolioActionContextValue {
 const PortfolioEntitiesContext = createContext<PortfolioEntitiesContextValue | null>(null);
 const PortfolioStatusContext = createContext<PortfolioStatusContextValue | null>(null);
 const PortfolioActionContext = createContext<PortfolioActionContextValue | null>(null);
+const PortfolioMutationContext = createContext<boolean>(false);
+
+export function useIsMutating(): boolean {
+  return useContext(PortfolioMutationContext);
+}
 
 export function usePortfolioEntities(): PortfolioEntitiesContextValue {
   const ctx = useContext(PortfolioEntitiesContext);
@@ -310,9 +315,11 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
   return (
     <PortfolioEntitiesContext.Provider value={entitiesValue}>
       <PortfolioStatusContext.Provider value={statusValue}>
-        <PortfolioActionContext.Provider value={actionValue}>
-          {children}
-        </PortfolioActionContext.Provider>
+        <PortfolioMutationContext.Provider value={isMutating}>
+          <PortfolioActionContext.Provider value={actionValue}>
+            {children}
+          </PortfolioActionContext.Provider>
+        </PortfolioMutationContext.Provider>
       </PortfolioStatusContext.Provider>
     </PortfolioEntitiesContext.Provider>
   );

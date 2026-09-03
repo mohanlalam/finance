@@ -5,7 +5,7 @@ import RealEstateCard from './RealEstateCard';
 import RealEstateFormModal from './RealEstateFormModal';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import RegistryToolbar, { SortOption } from '../ui/RegistryToolbar';
-import { usePortfolioStatus } from '../../contexts/PortfolioContext';
+import { useIsMutating } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
 import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
@@ -51,7 +51,7 @@ export function RealEstateView({
   autoOpenAddModal,
 }: RealEstateViewProps) {
   const isMobile = useIsMobile();
-  const { isMutating } = usePortfolioStatus();
+  const isMutating = useIsMutating();
   const { addToast } = useToastActions();
   const {
     showModal,

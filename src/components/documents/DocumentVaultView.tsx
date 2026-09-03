@@ -13,7 +13,7 @@ import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Loader2, Paperclip, X } from '../icons/AppIcons';
 import Modal from '../Modal';
 import ConfirmModal from '../ConfirmModal';
-import { usePortfolioStatus } from '../../contexts/PortfolioContext';
+import { useIsMutating } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
@@ -59,7 +59,7 @@ export default React.memo(function DocumentVaultView({
   autoOpenAddModal,
 }: DocumentVaultViewProps) {
   const isMobile = useIsMobile();
-  const { isMutating } = usePortfolioStatus();
+  const isMutating = useIsMutating();
   const { addToast } = useToastActions();
   const {
     uploadFile: uploadDocumentFile,

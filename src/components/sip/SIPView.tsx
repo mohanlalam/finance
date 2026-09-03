@@ -3,7 +3,7 @@ import { DocumentMetadata, SIPAccount, PortfolioName, SIPPayload } from '../../t
 import ConfirmModal from '../ConfirmModal';
 import SIPAccountCard from './SIPAccountCard';
 import { SIPFormModal } from './SIPFormModal';
-import { usePortfolioStatus, usePortfolioActions } from '../../contexts/PortfolioContext';
+import { useIsMutating, usePortfolioActions } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import RegistryToolbar, { SortOption } from '../ui/RegistryToolbar';
@@ -51,7 +51,7 @@ export function SIPView({
   autoOpenAddModal,
 }: SIPViewProps) {
   const isMobile = useIsMobile();
-  const { isMutating } = usePortfolioStatus();
+  const isMutating = useIsMutating();
   const { addToast } = useToastActions();
   const { addSIPAccount, updateSIPAccount, deleteSIPAccount } = usePortfolioActions();
 

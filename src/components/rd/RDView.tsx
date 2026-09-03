@@ -3,7 +3,7 @@ import { DocumentMetadata, RDAccount, PortfolioName, RDPayload } from '../../typ
 import ConfirmModal from '../ConfirmModal';
 import RDAccountCard from './RDAccountCard';
 import { RDFormModal } from './RDFormModal';
-import { usePortfolioStatus, usePortfolioActions } from '../../contexts/PortfolioContext';
+import { useIsMutating, usePortfolioActions } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import RegistryToolbar, { SortOption, FilterPillOption } from '../ui/RegistryToolbar';
@@ -52,7 +52,7 @@ export function RDView({
   autoOpenAddModal,
 }: RDViewProps) {
   const isMobile = useIsMobile();
-  const { isMutating } = usePortfolioStatus();
+  const isMutating = useIsMutating();
   const { addToast } = useToastActions();
   const { addRDAccount, updateRDAccount, deleteRDAccount } = usePortfolioActions();
 
