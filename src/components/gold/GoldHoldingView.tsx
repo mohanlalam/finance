@@ -6,13 +6,13 @@ import GoldHoldingCard from './GoldHoldingCard';
 import GoldFormModal from './GoldFormModal';
 import AssetRegistryContainer from '../ui/AssetRegistryContainer';
 import RegistryToolbar, { SortOption } from '../ui/RegistryToolbar';
-import { useIsMutating } from '../../contexts/PortfolioContext';
+import { useIsMutating, usePortfolioEntities } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
 import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { FixedSizeList as List } from 'react-window';
-import { RotateCw, TrendingUp, TrendingDown, Scale, Coins, Check } from '../icons/AppIcons';
+import { RotateCw, TrendingUp, TrendingDown, Scale, Coins, Check, User, Users } from '../icons/AppIcons';
 import { 
   deriveGoldRates, 
   saveStoredGoldRate, 
@@ -20,6 +20,48 @@ import {
   clearCustomGoldRate 
 } from '../../utils/goldPricing';
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
+import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
+
+const familyMemberConfigs: Record<string, { icon: React.ReactNode; bg: string; text: string }> = {
+  rammohan: {
+    icon: <User size={12} />,
+    bg: 'bg-blue-500/15 dark:bg-blue-400/20',
+    text: 'text-blue-600 dark:text-blue-400',
+  },
+  padmavathi: {
+    icon: <User size={12} />,
+    bg: 'bg-emerald-500/15 dark:bg-emerald-400/20',
+    text: 'text-emerald-600 dark:text-emerald-400',
+  },
+  sai_laxmi: {
+    icon: <Users size={12} />,
+    bg: 'bg-purple-500/15 dark:bg-purple-400/20',
+    text: 'text-purple-600 dark:text-purple-400',
+  },
+  sailaxmi: {
+    icon: <Users size={12} />,
+    bg: 'bg-purple-500/15 dark:bg-purple-400/20',
+    text: 'text-purple-600 dark:text-purple-400',
+  },
+};
+
+function getFamilyMemberConfig(name: string) {
+  const normalized = (name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (normalized.includes('rammohan') || normalized.includes('ram')) {
+    return familyMemberConfigs.rammohan;
+  }
+  if (normalized.includes('padmavathi')) {
+    return familyMemberConfigs.padmavathi;
+  }
+  if (normalized.includes('sailaxmi') || normalized.includes('sai')) {
+    return familyMemberConfigs.sai_laxmi;
+  }
+  return familyMemberConfigs[normalized] ?? {
+    icon: <User size={12} />,
+    bg: 'bg-amber-500/15 dark:bg-amber-400/20',
+    text: 'text-amber-600 dark:text-amber-400',
+  };
+}
 
 interface PortfolioOption {
   name: string;
@@ -61,6 +103,58 @@ export function GoldHoldingView({
   const isMobile = useIsMobile();
   const isMutating = useIsMutating();
   const { addToast } = useToastActions();
+  const { portfolios } = usePortfolioEntities();
+
+  const currentPortfolioLabel = useMemo(() => {
+    if (portfolioName === 'all') return 'All Family Members';
+    const opt = portfolioOptions.find((p) => p.name === portfolioName);
+    return opt?.label || portfolioName;
+  }, [portfolioName, portfolioOptions]);
+
+  // Aggregate Family Gold totals across all family members
+  const familyGoldSummary = useMemo(() => {
+    let totalGrams = 0;
+    let totalInvested = 0;
+    let totalValue = 0;
+
+    const ordered = sortPortfolios(portfolios || []);
+    const memberBreakdown = ordered.map((p) => {
+      let memberGrams = 0;
+      let memberInvested = 0;
+      let memberValue = 0;
+
+      for (const h of p.goldHoldings || []) {
+        memberGrams += Number(h.weight_grams) || 0;
+        memberInvested += Number(h.purchase_price) || 0;
+        memberValue += Number(h.current_valuation) || 0;
+      }
+
+      totalGrams += memberGrams;
+      totalInvested += memberInvested;
+      totalValue += memberValue;
+
+      return {
+        name: p.name,
+        label: p.label || p.name,
+        grams: memberGrams,
+        value: memberValue,
+        invested: memberInvested,
+        count: (p.goldHoldings || []).length,
+      };
+    });
+
+    const totalGain = totalValue - totalInvested;
+    const gainPct = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
+
+    return {
+      totalGrams,
+      totalValue,
+      totalInvested,
+      totalGain,
+      gainPct,
+      memberBreakdown,
+    };
+  }, [portfolios]);
   const {
     showModal,
     editingItem,
@@ -290,48 +384,157 @@ export function GoldHoldingView({
         </div>
       </div>
 
-      {/* Gold Standalone Aggregate Valuation Ribbon */}
-      {goldHoldings.length > 0 && (
-        <div className="apple-card p-3.5 sm:p-4 grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[var(--surface)] border border-[var(--border-subtle)]">
-          <div>
-            <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Total Investment</p>
+      {/* Total Family Members Gold Holdings Banner */}
+      <div className="apple-card p-4 sm:p-5 bg-gradient-to-br from-amber-500/10 via-[var(--surface)] to-amber-500/5 border border-amber-500/30 space-y-3.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-[var(--radius-medium)] bg-amber-500/20 text-amber-500 border border-amber-500/30 flex items-center justify-center shrink-0">
+              <Users size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
+                  Total Family Gold Holdings
+                </h3>
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-[var(--radius-pill)] bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 uppercase tracking-wider">
+                  Combined Vault
+                </span>
+              </div>
+              <p className="text-xs text-[var(--text-tertiary)]">
+                Aggregated gold weight &amp; valuation across all family members
+              </p>
+            </div>
+          </div>
+
+          {/* Prominent High-Visibility Metric Badges */}
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+            <div className="bg-[var(--surface)] px-3.5 py-1.5 rounded-[var(--radius-medium)] border border-amber-500/40 shadow-xs text-right min-w-[110px]">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Weight</span>
+              <span className="text-sm sm:text-base font-black text-amber-500 tnum">
+                {familyGoldSummary.totalGrams.toFixed(2)} <span className="text-xs font-semibold text-[var(--text-secondary)]">g</span>
+              </span>
+            </div>
+            <div className="bg-[var(--surface)] px-3.5 py-1.5 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] shadow-xs text-right min-w-[120px]">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Valuation</span>
+              <span className="text-sm sm:text-base font-black text-[var(--text-primary)] tnum">
+                {formatINR(familyGoldSummary.totalValue)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 4 Detailed Summary Metrics */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+          <div className="p-2.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)]">
+            <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Family Investment</p>
             <p className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5">
-              {formatINR(totals.totalInvested)}
+              {formatINR(familyGoldSummary.totalInvested)}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
-              <Coins size={16} />
+          <div className="p-2.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)] flex items-center gap-2">
+            <div className="w-7 h-7 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
+              <Coins size={14} />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Total Value as of Date</p>
+              <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Current Value</p>
               <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5">
-                {formatINR(totals.totalCurrent)}
+                {formatINR(familyGoldSummary.totalValue)}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--warning-soft)] text-[var(--warning)] flex items-center justify-center shrink-0">
-              <Scale size={16} />
+          <div className="p-2.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-amber-500/25 flex items-center gap-2">
+            <div className="w-7 h-7 rounded-[var(--radius-small)] bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
+              <Scale size={14} />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Total Weight</p>
-              <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5">
-                {totals.totalGrams.toFixed(2)} <span className="text-[10px] font-normal text-[var(--text-tertiary)]">g</span>
+              <p className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400 tracking-wider">Family Weight</p>
+              <p className="text-xs sm:text-sm font-black text-amber-500 tnum mt-0.5">
+                {familyGoldSummary.totalGrams.toFixed(2)} <span className="text-[10px] font-normal text-[var(--text-tertiary)]">g</span>
               </p>
             </div>
           </div>
 
-          <div>
-            <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Total Return</p>
-            <p className={`text-xs sm:text-sm font-bold tnum mt-0.5 ${pnlColor(totals.totalGain)}`}>
-              {totals.totalGain >= 0 ? '+' : ''}{formatINR(totals.totalGain)} ({formatPercent(totals.gainPct)})
+          <div className="p-2.5 rounded-[var(--radius-small)] bg-[var(--surface)] border border-[var(--border-subtle)]">
+            <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">Overall Return</p>
+            <p className={`text-xs sm:text-sm font-bold tnum mt-0.5 ${pnlColor(familyGoldSummary.totalGain)}`}>
+              {familyGoldSummary.totalGain >= 0 ? '+' : ''}{formatINR(familyGoldSummary.totalGain)} ({formatPercent(familyGoldSummary.gainPct)})
             </p>
           </div>
         </div>
-      )}
+
+        {/* Member-by-Member Distribution Cards */}
+        {familyGoldSummary.memberBreakdown.length > 0 && (
+          <div className="pt-2 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
+                Family Members Breakdown
+              </p>
+              <span className="text-[10px] text-[var(--text-tertiary)]">
+                {familyGoldSummary.memberBreakdown.reduce((acc, m) => acc + m.count, 0)} Total Holdings
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {familyGoldSummary.memberBreakdown.map((m) => {
+                const config = getFamilyMemberConfig(m.name);
+                const isSelected = portfolioName === m.name;
+                return (
+                  <div
+                    key={m.name}
+                    className={`flex items-center justify-between p-2.5 rounded-[var(--radius-small)] border transition-all ${
+                      isSelected
+                        ? 'bg-[var(--surface)] border-amber-500 ring-1 ring-amber-500/30 shadow-xs'
+                        : 'bg-[var(--surface)]/80 border-[var(--border-subtle)] hover:border-amber-500/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
+                        {config.icon}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                            {m.label}
+                          </p>
+                          {isSelected && (
+                            <span className="text-[9px] font-extrabold px-1 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10.5px] text-[var(--text-tertiary)]">
+                          {m.count} holding{m.count === 1 ? '' : 's'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-black text-amber-500 tnum">
+                        {m.grams.toFixed(2)} g
+                      </p>
+                      <p className="text-[10.5px] font-bold text-[var(--text-secondary)] tnum">
+                        {formatINR(m.value)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Selected Member Subtotal Notification (when on single-member view) */}
+        {portfolioName !== 'all' && (
+          <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs text-[var(--text-tertiary)]">
+            <span>
+              Showing <span className="font-bold text-[var(--text-primary)]">{currentPortfolioLabel}&apos;s</span> personal holdings below:
+            </span>
+            <span className="font-bold text-amber-500 tnum">
+              {totals.totalGrams.toFixed(2)} g ({formatINR(totals.totalCurrent)})
+            </span>
+          </div>
+        )}
+      </div>
 
       {/* Spot Rate Calibration Modal */}
       {isEditingRate && (
