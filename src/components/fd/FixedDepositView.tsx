@@ -212,40 +212,40 @@ export function FixedDepositView({
   }, [onDelete, addToast, setConfirmDeleteItem]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Unified Family Fixed Deposits Banner */}
-      <div className="apple-card p-3 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-2.5">
+      <div className="apple-card p-2.5 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-2 sm:space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-[var(--border-subtle)] pb-2 sm:pb-2.5">
           {/* Left: Title & Subtitle */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-indigo-500/20 text-indigo-500 border border-indigo-500/30 flex items-center justify-center shrink-0">
-              <Landmark size={16} />
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[var(--radius-small)] bg-indigo-500/20 text-indigo-500 border border-indigo-500/30 flex items-center justify-center shrink-0">
+              <Landmark size={15} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Total Family Fixed Deposits
                 </h3>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[var(--radius-pill)] bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 uppercase tracking-wider">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 uppercase tracking-wider shrink-0">
                   Combined
                 </span>
               </div>
-              <p className="text-[11px] text-[var(--text-tertiary)]">
+              <p className="text-[10px] sm:text-[11px] text-[var(--text-tertiary)] truncate">
                 Aggregated term deposits across all family portfolios
               </p>
             </div>
           </div>
 
           {/* Right: Metric Badges */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-indigo-500/30 text-right">
-              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Principal</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <div className="flex-1 sm:flex-initial bg-[var(--surface-secondary)] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[var(--radius-small)] border border-indigo-500/30 text-right">
+              <span className="text-[8.5px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Principal</span>
               <span className="text-xs sm:text-sm font-bold text-indigo-500 tnum">
                 {formatINR(familyFDSummary.totalPrincipal)}
               </span>
             </div>
-            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-[var(--border-subtle)] text-right">
-              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Maturity</span>
+            <div className="flex-1 sm:flex-initial bg-[var(--surface-secondary)] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[var(--radius-small)] border border-[var(--border-subtle)] text-right">
+              <span className="text-[8.5px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Maturity</span>
               <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum">
                 {formatINR(familyFDSummary.totalCurrent)}
               </span>
@@ -254,59 +254,59 @@ export function FixedDepositView({
         </div>
 
         {/* Row 2: 4 Summary Metrics Ribbon */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Principal Invested</span>
-            <span className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5 block">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 text-xs">
+          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Principal Invested</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5 block truncate">
               {formatINR(familyFDSummary.totalPrincipal)}
             </span>
           </div>
 
-          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Current / Maturity Value</span>
-            <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block">
+          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Current / Maturity Value</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block truncate">
               {formatINR(familyFDSummary.totalCurrent)}
             </span>
           </div>
 
-          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Accrued Interest</span>
-            <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block">
+          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Accrued Interest</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block truncate">
               +{formatINR(familyFDSummary.accruedInterest)}
             </span>
           </div>
 
-          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Active Deposits</span>
-            <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
-              {familyFDSummary.activeCount} Active ({familyFDSummary.maturedCount} Matured)
+          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Active Deposits</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block truncate">
+              {familyFDSummary.activeCount} Act ({familyFDSummary.maturedCount} Mat)
             </span>
           </div>
         </div>
 
-        {/* Row 3: Family Members Breakdown */}
+        {/* Row 3: Family Members Breakdown: 3 compact columns on mobile */}
         {familyFDSummary.memberBreakdown.length > 0 && (
-          <div className="pt-2 border-t border-[var(--border-subtle)]">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
+          <div className="pt-1.5 sm:pt-2 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between mb-1 sm:mb-1.5">
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
                 Family Members Breakdown
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {selectedMember !== 'all' && (
                   <button
                     type="button"
                     onClick={() => setSelectedMember('all')}
-                    className="text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                    className="text-[9.5px] sm:text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
                   >
                     View All
                   </button>
                 )}
-                <span className="text-[10px] text-[var(--text-tertiary)]">
+                <span className="text-[9px] sm:text-[10px] text-[var(--text-tertiary)]">
                   {familyFDSummary.totalCount} Total FDs
                 </span>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-3 gap-1 sm:gap-1.5">
               {familyFDSummary.memberBreakdown.map((m) => {
                 const config = getFamilyMemberConfig(m.name);
                 const isSelected = selectedMember === m.name;
@@ -315,38 +315,38 @@ export function FixedDepositView({
                     key={m.name}
                     type="button"
                     onClick={() => setSelectedMember((prev) => (prev === m.name ? 'all' : m.name))}
-                    className={`flex items-center justify-between p-2 rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press ${
+                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-1.5 sm:p-2 rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press min-w-0 ${
                       isSelected
                         ? 'bg-[var(--surface-secondary)] border-indigo-500 ring-1 ring-indigo-500/30 shadow-xs'
                         : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-indigo-500/40'
                     }`}
                     title={`Click to filter ${m.label}'s fixed deposits`}
                   >
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
+                    <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+                      <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
                         {config.icon}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1">
-                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                          <p className="text-[10.5px] sm:text-xs font-bold text-[var(--text-primary)] truncate">
                             {m.label}
                           </p>
                           {isSelected && (
-                            <span className="text-[8.5px] font-bold px-1 rounded bg-indigo-500/20 text-indigo-600 dark:text-indigo-400">
+                            <span className="hidden xs:inline text-[8px] font-bold px-1 rounded bg-indigo-500/20 text-indigo-600 dark:text-indigo-400">
                               Active
                             </span>
                           )}
                         </div>
-                        <p className="text-[10px] text-[var(--text-tertiary)]">
+                        <p className="text-[8.5px] sm:text-[10px] text-[var(--text-tertiary)] hidden sm:block">
                           {m.count} deposit{m.count === 1 ? '' : 's'}
                         </p>
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-bold text-indigo-500 tnum">
+                    <div className="text-left sm:text-right shrink-0 mt-1 sm:mt-0">
+                      <p className="text-[10.5px] sm:text-xs font-bold text-indigo-500 tnum truncate">
                         {formatINR(m.principal)}
                       </p>
-                      <p className="text-[10px] font-semibold text-[var(--positive)] tnum">
+                      <p className="text-[9px] sm:text-[10px] font-semibold text-[var(--positive)] tnum truncate">
                         {formatINR(m.current)}
                       </p>
                     </div>

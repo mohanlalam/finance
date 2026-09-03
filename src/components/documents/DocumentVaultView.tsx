@@ -322,40 +322,40 @@ export default React.memo(function DocumentVaultView({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Unified Family Document Vault Banner */}
-      <div className="apple-card p-3 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-2.5">
+      <div className="apple-card p-2.5 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-2 sm:space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-[var(--border-subtle)] pb-2 sm:pb-2.5">
           {/* Left: Title & Subtitle */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 rounded-[var(--radius-small)] bg-slate-500/20 text-slate-400 border border-slate-500/30 flex items-center justify-center shrink-0">
-              <FileText size={16} />
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[var(--radius-small)] bg-slate-500/20 text-slate-400 border border-slate-500/30 flex items-center justify-center shrink-0">
+              <FileText size={15} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Total Family Document Vault
                 </h3>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[var(--radius-pill)] bg-slate-500/15 text-slate-400 border border-slate-500/30 uppercase tracking-wider">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-slate-500/15 text-slate-400 border border-slate-500/30 uppercase tracking-wider shrink-0">
                   Combined
                 </span>
               </div>
-              <p className="text-[11px] text-[var(--text-tertiary)]">
+              <p className="text-[10px] sm:text-[11px] text-[var(--text-tertiary)] truncate">
                 Secure encrypted storage for financial records, deeds &amp; certificates
               </p>
             </div>
           </div>
 
           {/* Right: Metric Badges */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-slate-500/30 text-right">
-              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Files</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <div className="flex-1 sm:flex-initial bg-[var(--surface-secondary)] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[var(--radius-small)] border border-slate-500/30 text-right">
+              <span className="text-[8.5px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Total Files</span>
               <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum">
                 {familyDocSummary.totalDocs} Files
               </span>
             </div>
-            <div className="bg-[var(--surface-secondary)] px-2.5 py-1 rounded-[var(--radius-small)] border border-[var(--border-subtle)] text-right">
-              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Categories</span>
+            <div className="flex-1 sm:flex-initial bg-[var(--surface-secondary)] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[var(--radius-small)] border border-[var(--border-subtle)] text-right">
+              <span className="text-[8.5px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Categories</span>
               <span className="text-xs sm:text-sm font-bold text-[var(--accent-blue)] tnum">
                 {FOLDERS.length} Folders
               </span>
@@ -364,59 +364,59 @@ export default React.memo(function DocumentVaultView({
         </div>
 
         {/* Row 2: 4 Summary Metrics Ribbon */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Total Documents</span>
-            <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 text-xs">
+          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Total Documents</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block truncate">
               {familyDocSummary.totalDocs} Files
             </span>
           </div>
 
-          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Attached to Assets</span>
-            <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block">
+          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Attached to Assets</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block truncate">
               {familyDocSummary.linkedDocs} Files
             </span>
           </div>
 
-          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">General Records</span>
-            <span className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5 block">
+          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">General Records</span>
+            <span className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5 block truncate">
               {familyDocSummary.generalDocs} Files
             </span>
           </div>
 
-          <div className="p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
-            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Expiring / Due Soon</span>
-            <span className={`text-xs sm:text-sm font-bold tnum mt-0.5 block ${familyDocSummary.expiringSoonCount > 0 ? 'text-[var(--negative)]' : 'text-[var(--positive)]'}`}>
-              {familyDocSummary.expiringSoonCount > 0 ? `⚠️ ${familyDocSummary.expiringSoonCount} Due Soon` : '✓ All Up to date'}
+          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+            <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Expiring / Due Soon</span>
+            <span className={`text-xs sm:text-sm font-bold tnum mt-0.5 block truncate ${familyDocSummary.expiringSoonCount > 0 ? 'text-[var(--negative)]' : 'text-[var(--positive)]'}`}>
+              {familyDocSummary.expiringSoonCount > 0 ? `⚠️ ${familyDocSummary.expiringSoonCount} Due Soon` : '✓ All Current'}
             </span>
           </div>
         </div>
 
-        {/* Row 3: Family Members Breakdown */}
+        {/* Row 3: Family Members Breakdown: 3 compact columns on mobile */}
         {familyDocSummary.memberBreakdown.length > 0 && (
-          <div className="pt-2 border-t border-[var(--border-subtle)]">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
+          <div className="pt-1.5 sm:pt-2 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between mb-1 sm:mb-1.5">
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider">
                 Family Members Breakdown
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {selectedMember !== 'all' && (
                   <button
                     type="button"
                     onClick={() => setSelectedMember('all')}
-                    className="text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                    className="text-[9.5px] sm:text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
                   >
                     View All
                   </button>
                 )}
-                <span className="text-[10px] text-[var(--text-tertiary)]">
-                  {familyDocSummary.totalDocs} Total Documents
+                <span className="text-[9px] sm:text-[10px] text-[var(--text-tertiary)]">
+                  {familyDocSummary.totalDocs} Documents
                 </span>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-3 gap-1 sm:gap-1.5">
               {familyDocSummary.memberBreakdown.map((m) => {
                 const config = getFamilyMemberConfig(m.name);
                 const isSelected = selectedMember === m.name;
@@ -425,35 +425,35 @@ export default React.memo(function DocumentVaultView({
                     key={m.name}
                     type="button"
                     onClick={() => setSelectedMember((prev) => (prev === m.name ? 'all' : m.name))}
-                    className={`flex items-center justify-between p-2 rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press ${
+                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-1.5 sm:p-2 rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press min-w-0 ${
                       isSelected
                         ? 'bg-[var(--surface-secondary)] border-slate-400 ring-1 ring-slate-400/30 shadow-xs'
                         : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-slate-400/40'
                     }`}
                     title={`Click to filter ${m.label}'s documents`}
                   >
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
+                    <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+                      <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
                         {config.icon}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1">
-                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                          <p className="text-[10.5px] sm:text-xs font-bold text-[var(--text-primary)] truncate">
                             {m.label}
                           </p>
                           {isSelected && (
-                            <span className="text-[8.5px] font-bold px-1 rounded bg-slate-500/20 text-slate-300">
+                            <span className="hidden xs:inline text-[8px] font-bold px-1 rounded bg-slate-500/20 text-slate-300">
                               Active
                             </span>
                           )}
                         </div>
-                        <p className="text-[10px] text-[var(--text-tertiary)]">
+                        <p className="text-[8.5px] sm:text-[10px] text-[var(--text-tertiary)] hidden sm:block">
                           Vault files
                         </p>
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-bold text-[var(--text-primary)] tnum">
+                    <div className="text-left sm:text-right shrink-0 mt-1 sm:mt-0">
+                      <p className="text-[10.5px] sm:text-xs font-bold text-[var(--text-primary)] tnum truncate">
                         {m.count} file{m.count === 1 ? '' : 's'}
                       </p>
                     </div>
