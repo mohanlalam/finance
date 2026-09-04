@@ -47,6 +47,17 @@ test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
 
     // Verify property appears in the registry
     await expect(page.locator(`text=${uniquePropName}`).first()).toBeVisible({ timeout: 12000 });
+
+    // Clean up created property so tests leave zero residual artifacts in the database
+    const propCard = page.locator(`.mobile-asset-card:has-text("${uniquePropName}")`).first();
+    const deleteBtn = propCard.locator('button[aria-label*="Delete"]').first();
+    await deleteBtn.click();
+    const confirmDialog = page.getByRole('dialog').first();
+    await expect(confirmDialog).toBeVisible({ timeout: 4000 });
+    const confirmBtn = confirmDialog.locator('button:has-text("Delete")').first();
+    await confirmBtn.click();
+    await expect(confirmDialog).not.toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('heading', { name: uniquePropName })).not.toBeVisible({ timeout: 12000 });
   });
 
   test('Mutual Fund SIP - Open form, create new SIP and verify rendering', async ({ page }) => {
@@ -79,6 +90,17 @@ test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
 
       // Verify the new SIP is registered
       await expect(page.locator(`text=${uniqueFund}`).first()).toBeVisible({ timeout: 12000 });
+
+      // Clean up created SIP
+      const sipCard = page.locator(`.mobile-asset-card:has-text("${uniqueFund}")`).first();
+      const deleteSipBtn = sipCard.locator('button[aria-label*="Delete"]').first();
+      await deleteSipBtn.click();
+      const confirmSipDialog = page.getByRole('dialog').first();
+      await expect(confirmSipDialog).toBeVisible({ timeout: 4000 });
+      const confirmSipBtn = confirmSipDialog.locator('button:has-text("Delete")').first();
+      await confirmSipBtn.click();
+      await expect(confirmSipDialog).not.toBeVisible({ timeout: 8000 });
+      await expect(page.getByRole('heading', { name: uniqueFund })).not.toBeVisible({ timeout: 12000 });
     }
   });
 
@@ -110,5 +132,16 @@ test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
 
     // Verify gold item renders in registry
     await expect(page.locator(`text=${uniqueGoldItem}`).first()).toBeVisible({ timeout: 12000 });
+
+    // Clean up created Gold holding
+    const goldCard = page.locator(`.mobile-asset-card:has-text("${uniqueGoldItem}")`).first();
+    const deleteGoldBtn = goldCard.locator('button[aria-label*="Delete"]').first();
+    await deleteGoldBtn.click();
+    const confirmGoldDialog = page.getByRole('dialog').first();
+    await expect(confirmGoldDialog).toBeVisible({ timeout: 4000 });
+    const confirmGoldBtn = confirmGoldDialog.locator('button:has-text("Delete")').first();
+    await confirmGoldBtn.click();
+    await expect(confirmGoldDialog).not.toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('heading', { name: uniqueGoldItem })).not.toBeVisible({ timeout: 12000 });
   });
 });

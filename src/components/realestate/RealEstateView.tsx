@@ -20,7 +20,8 @@ interface PortfolioOption {
 }
 
 interface RealEstateViewProps {
-  realEstate: RealEstate[];
+  realEstate?: RealEstate[];
+  properties?: RealEstate[];
   documents: DocumentMetadata[];
   portfolioName: PortfolioName;
   portfolioOptions: PortfolioOption[];
@@ -39,7 +40,8 @@ const SORT_OPTIONS: SortOption<RealEstateSortField>[] = [
 ];
 
 export function RealEstateView({
-  realEstate,
+  realEstate: propRealEstate,
+  properties: propProperties,
   documents,
   portfolioName,
   portfolioOptions,
@@ -48,6 +50,7 @@ export function RealEstateView({
   onDelete,
   autoOpenAddModal,
 }: RealEstateViewProps) {
+  const realEstate = useMemo(() => propRealEstate || propProperties || [], [propRealEstate, propProperties]);
   const isMutating = useIsMutating();
   const { addToast } = useToastActions();
   const { portfolios } = usePortfolioEntities();
