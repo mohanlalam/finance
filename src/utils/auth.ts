@@ -14,6 +14,9 @@ import {
   setCustomPin,
   verifyCustomPin,
   verifyOfflinePin,
+  getLastAuthTime,
+  updateLastAuthTime,
+  isReauthRequired,
 } from './sessionStore';
 
 export {
@@ -30,6 +33,9 @@ export {
   clearCustomPin,
   setCustomPin,
   verifyCustomPin,
+  getLastAuthTime,
+  updateLastAuthTime,
+  isReauthRequired,
 };
 
 export async function verifyPin(pin: string): Promise<boolean> {

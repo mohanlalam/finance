@@ -6,6 +6,7 @@ const SESSION_TOKEN_KEY = 'finance_session_token';
 const CUSTOM_VERIFIER_KEY = 'custom_app_pin_verifier';
 const CUSTOM_LENGTH_KEY = 'custom_app_pin_length';
 const OFFLINE_VERIFIER_KEY = 'finance_offline_pin_verifier';
+const LAST_AUTH_TIME_KEY = 'finance_last_auth_time';
 
 // Legacy keys to purge/migrate
 const LEGACY_CUSTOM_HASH_KEY = 'custom_app_pin_hash';
@@ -13,6 +14,7 @@ const LEGACY_CUSTOM_HASH_KEY = 'custom_app_pin_hash';
 // In-memory session state (purged on tab close / reload if not in sessionStorage)
 let _inMemorySessionToken: string | null = null;
 let _inMemoryHashedPin: string | null = null;
+let _inMemoryLastAuthTime: number = Date.now();
 
 // Automatic security hygiene: purge legacy plaintext/reusable PIN hashes from persistent storage
 try {
@@ -99,9 +101,38 @@ export function setSessionToken(token: string): void {
   }
 }
 
+export function updateLastAuthTime(time: number = Date.now()): void {
+  _inMemoryLastAuthTime = time;
+  if (typeof sessionStorage !== 'undefined') {
+    sessionStorage.setItem(LAST_AUTH_TIME_KEY, String(_inMemoryLastAuthTime));
+  }
+}
+
+export function getLastAuthTime(): number {
+  if (_inMemoryLastAuthTime) return _inMemoryLastAuthTime;
+  if (typeof sessionStorage !== 'undefined') {
+    const stored = sessionStorage.getItem(LAST_AUTH_TIME_KEY);
+    if (stored) {
+      const parsed = parseInt(stored, 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        _inMemoryLastAuthTime = parsed;
+        return parsed;
+      }
+    }
+  }
+  return Date.now();
+}
+
+export function isReauthRequired(timeoutMs: number = 900_000): boolean {
+  if (!isSessionVerified()) return true;
+  const lastAuth = getLastAuthTime();
+  return Date.now() - lastAuth >= timeoutMs;
+}
+
 export function markSessionVerified(hashedPin?: string, sessionToken?: string): void {
   if (typeof sessionStorage === 'undefined') return;
   sessionStorage.setItem(SESSION_KEY, 'true');
+  updateLastAuthTime();
   if (hashedPin) {
     _inMemoryHashedPin = hashedPin;
     sessionStorage.setItem(HASH_KEY, hashedPin);
@@ -115,10 +146,12 @@ export function markSessionVerified(hashedPin?: string, sessionToken?: string): 
 export function clearSessionVerification(): void {
   _inMemorySessionToken = null;
   _inMemoryHashedPin = null;
+  _inMemoryLastAuthTime = 0;
   if (typeof sessionStorage !== 'undefined') {
     sessionStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(HASH_KEY);
     sessionStorage.removeItem(SESSION_TOKEN_KEY);
+    sessionStorage.removeItem(LAST_AUTH_TIME_KEY);
   }
 }
 

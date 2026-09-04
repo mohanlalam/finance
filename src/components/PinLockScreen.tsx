@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { markSessionVerified, hashPin, getPinLength, verifyPin, clearCustomPin } from '../utils/auth';
-import { prewarmApiCache } from '../utils/apiClient';
+import { markSessionVerified, hashPin, getPinLength, verifyPin, clearCustomPin, setSessionToken } from '../utils/auth';
+import { prewarmApiCache, invokeFunction } from '../utils/apiClient';
 import { triggerHaptic } from '../utils/haptics';
 import { 
   isBiometricsSupported, 
@@ -175,6 +175,17 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
           triggerHaptic('success');
           setSuccess(true);
           markSessionVerified(pinHash);
+          // Acquire signed session token from verify-pin in parallel
+          invokeFunction<{ verified: boolean; session_token?: string }>('verify-pin', {
+            method: 'POST',
+            body: { pin_hash: pinHash },
+          })
+            .then((res) => {
+              if (res?.session_token) {
+                setSessionToken(res.session_token);
+              }
+            })
+            .catch(() => {});
           setTimeout(() => {
             onUnlock();
           }, 300);

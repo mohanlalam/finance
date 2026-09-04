@@ -15,6 +15,9 @@ import {
   setCustomPin,
   clearCustomPin,
   verifyCustomPin,
+  getLastAuthTime,
+  updateLastAuthTime,
+  isReauthRequired,
 } from '../auth';
 import { invokeFunction } from '../apiClient';
 
@@ -148,6 +151,33 @@ describe('auth utility', () => {
       expect(ok).toBe(true);
       expect(isSessionVerified()).toBe(true);
       expect(getSessionToken()).toBe('server-issued-hmac-token');
+    });
+  });
+
+  describe('session re-authentication and inactivity tracking', () => {
+    it('initializes auth timestamp upon session verification', () => {
+      markSessionVerified('test-hash');
+      const authTime = getLastAuthTime();
+      expect(authTime).toBeGreaterThan(0);
+      expect(isReauthRequired(10000)).toBe(false);
+    });
+
+    it('requires reauth if session is not verified', () => {
+      clearSessionVerification();
+      expect(isReauthRequired()).toBe(true);
+    });
+
+    it('detects when timeout has elapsed', () => {
+      markSessionVerified('test-hash');
+      // Timeout of 0ms should immediately flag reauth required
+      expect(isReauthRequired(0)).toBe(true);
+    });
+
+    it('updates auth timestamp when updateLastAuthTime is invoked', () => {
+      const past = Date.now() - 50000;
+      sessionStorage.setItem('finance_last_auth_time', String(past));
+      updateLastAuthTime();
+      expect(getLastAuthTime()).toBeGreaterThanOrEqual(Date.now() - 100);
     });
   });
 });

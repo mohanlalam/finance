@@ -1,6 +1,8 @@
 import { useCallback } from 'react';
 import { documentStorageService } from '../services/documentStorageService';
 import { StorageUploadResult } from '../repositories/IDocumentStorageRepository';
+import { isReauthRequired, updateLastAuthTime } from '../../../utils/sessionStore';
+import { isBiometricsEnrolled, authenticateWithBiometrics } from '../../../utils/biometrics';
 
 export function useDocumentStorage() {
   const generateStoragePath = useCallback(
@@ -15,6 +17,19 @@ export function useDocumentStorage() {
   }, []);
 
   const openDocument = useCallback(async (filePath: string): Promise<void> => {
+    // Enforce automated biometric re-authentication after 15 minutes of inactivity
+    if (isReauthRequired(15 * 60 * 1000)) {
+      if (isBiometricsEnrolled()) {
+        const pinHash = await authenticateWithBiometrics();
+        if (!pinHash) {
+          throw new Error('Biometric re-authentication required to view confidential document');
+        }
+      }
+      updateLastAuthTime();
+    } else {
+      updateLastAuthTime();
+    }
+
     return documentStorageService.openSecureDocument(filePath);
   }, []);
 
