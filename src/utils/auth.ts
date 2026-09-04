@@ -6,10 +6,13 @@ import {
   markSessionVerified,
   clearSessionVerification,
   getHashedPin,
+  getSessionToken,
+  setSessionToken,
   hashPin,
   ensureHashedPin,
   clearCustomPin,
   setCustomPin,
+  verifyCustomPin,
   verifyOfflinePin,
 } from './sessionStore';
 
@@ -20,21 +23,22 @@ export {
   markSessionVerified,
   clearSessionVerification,
   getHashedPin,
+  getSessionToken,
+  setSessionToken,
   hashPin,
   ensureHashedPin,
   clearCustomPin,
   setCustomPin,
+  verifyCustomPin,
 };
-
-const CUSTOM_HASH_KEY = 'custom_app_pin_hash';
 
 export async function verifyPin(pin: string): Promise<boolean> {
   const inputHash = await hashPin(pin);
 
-  // 1. Custom PIN hash match (user configured PIN via device settings)
-  const customHash = typeof localStorage !== 'undefined' ? localStorage.getItem(CUSTOM_HASH_KEY) : null;
-  if (customHash) {
-    if (customHash === inputHash) {
+  // 1. Custom PIN check via salted domain-separated verifier (never stores raw hash in localStorage)
+  if (isPinConfigured()) {
+    const isCustomValid = await verifyCustomPin(inputHash);
+    if (isCustomValid) {
       markSessionVerified(inputHash);
       return true;
     }
@@ -44,12 +48,12 @@ export async function verifyPin(pin: string): Promise<boolean> {
 
   // 2. Authoritative backend Edge Function check (fail-closed)
   try {
-    const result = await invokeFunction<{ verified: boolean }>('verify-pin', {
+    const result = await invokeFunction<{ verified: boolean; session_token?: string }>('verify-pin', {
       method: 'POST',
       body: { pin_hash: inputHash },
     });
     if (result?.verified === true) {
-      markSessionVerified(inputHash);
+      markSessionVerified(inputHash, result.session_token);
       return true;
     }
     return false;

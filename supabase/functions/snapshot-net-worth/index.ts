@@ -11,8 +11,60 @@ function getCorsHeaders(req: Request) {
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin, X-Session-Token",
   };
+}
+
+function base64UrlDecode(str: string): Uint8Array {
+  let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (base64.length % 4) {
+    base64 += "=";
+  }
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function verifySessionToken(token: string, secret: string): Promise<boolean> {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 2) return false;
+
+    const [payloadB64, sigB64] = parts;
+    const enc = new TextEncoder();
+
+    const key = await crypto.subtle.importKey(
+      "raw",
+      enc.encode(`vault_session_key:${secret}`),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+
+    const sigBytes = base64UrlDecode(sigB64);
+    const isValid = await crypto.subtle.verify(
+      "HMAC",
+      key,
+      sigBytes,
+      enc.encode(payloadB64)
+    );
+
+    if (!isValid) return false;
+
+    const payloadBytes = base64UrlDecode(payloadB64);
+    const payload = JSON.parse(new TextDecoder().decode(payloadBytes));
+
+    if (typeof payload.exp === "number" && payload.exp < Date.now()) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 const supabase = createClient(
@@ -135,22 +187,32 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  const clientPin = req.headers.get("X-App-Pin");
   let isValid = false;
-  if (clientPin) {
-    if (clientPin === serverPinHash) {
-      isValid = true;
-    } else {
-      try {
-        const msgBuffer = new TextEncoder().encode(serverPinHash);
-        const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashedServerPin = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-        if (clientPin === hashedServerPin) {
-          isValid = true;
+
+  // 1. Check ephemeral signed session token
+  const sessionToken = req.headers.get("X-Session-Token") || req.headers.get("x-session-token");
+  if (sessionToken) {
+    isValid = await verifySessionToken(sessionToken, serverPinHash);
+  }
+
+  // 2. Fallback to direct X-App-Pin check for backward compatibility
+  if (!isValid) {
+    const clientPin = req.headers.get("X-App-Pin");
+    if (clientPin) {
+      if (clientPin === serverPinHash) {
+        isValid = true;
+      } else {
+        try {
+          const msgBuffer = new TextEncoder().encode(serverPinHash);
+          const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          const hashedServerPin = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+          if (clientPin === hashedServerPin) {
+            isValid = true;
+          }
+        } catch (e) {
+          console.error("Error hashing server PIN:", e);
         }
-      } catch (e) {
-        console.error("Error hashing server PIN:", e);
       }
     }
   }

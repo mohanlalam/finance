@@ -1,4 +1,4 @@
-import { clearSessionVerification, ensureHashedPin } from './sessionStore';
+import { clearSessionVerification, ensureHashedPin, getSessionToken } from './sessionStore';
 
 function sanitizeEnv(val: string | undefined): string {
   if (!val) return '';
@@ -71,12 +71,17 @@ export async function getApiAuthHeaders(contentType?: string): Promise<Record<st
     _cachedPinHash = await ensureHashedPin();
   }
   const hashedPin = _cachedPinHash;
+  const sessionToken = getSessionToken();
   const headers: Record<string, string> = {
     apikey: SUPABASE_ANON_KEY,
   };
 
   if (contentType) {
     headers['Content-Type'] = contentType;
+  }
+
+  if (sessionToken) {
+    headers['X-Session-Token'] = sessionToken;
   }
 
   if (hashedPin) {

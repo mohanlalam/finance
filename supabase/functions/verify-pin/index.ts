@@ -10,8 +10,35 @@ function getCorsHeaders(req: Request) {
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin, X-Session-Token",
   };
+}
+
+function base64UrlEncode(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function signSessionToken(payload: Record<string, unknown>, secret: string): Promise<string> {
+  const enc = new TextEncoder();
+  const payloadStr = JSON.stringify(payload);
+  const payloadB64 = base64UrlEncode(enc.encode(payloadStr));
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(`vault_session_key:${secret}`),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const sigBuffer = await crypto.subtle.sign("HMAC", key, enc.encode(payloadB64));
+  const sigB64 = base64UrlEncode(new Uint8Array(sigBuffer));
+
+  return `${payloadB64}.${sigB64}`;
 }
 
 // In-memory rate limiting store (resets on cold start, which is acceptable for Edge Functions)
@@ -150,9 +177,26 @@ Deno.serve(async (req: Request) => {
     // Success — clear rate limit for this IP
     clearRateLimit(rateLimitKey);
 
-    return new Response(JSON.stringify({ verified: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    const expiresAt = Date.now() + 12 * 60 * 60 * 1000; // 12 hours
+    const sessionToken = await signSessionToken(
+      {
+        iat: Date.now(),
+        exp: expiresAt,
+        scope: "vault-session",
+      },
+      serverPinHash
+    );
+
+    return new Response(
+      JSON.stringify({
+        verified: true,
+        session_token: sessionToken,
+        expires_at: expiresAt,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   } catch (e: unknown) {
     console.error("Error in verify-pin:", e);
     return new Response(

@@ -8,11 +8,15 @@ import {
   markSessionVerified,
   clearSessionVerification,
   getHashedPin,
+  getSessionToken,
+  setSessionToken,
   ensureHashedPin,
   verifyPin,
   setCustomPin,
   clearCustomPin,
+  verifyCustomPin,
 } from '../auth';
+import { invokeFunction } from '../apiClient';
 
 // Mock apiClient and biometrics
 vi.mock('../apiClient', () => ({
@@ -29,6 +33,7 @@ describe('auth utility', () => {
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
+    clearSessionVerification();
     vi.clearAllMocks();
   });
 
@@ -47,28 +52,36 @@ describe('auth utility', () => {
     });
   });
 
-  describe('session verification', () => {
-    it('defaults to not verified', () => {
+  describe('session verification and tokens', () => {
+    it('defaults to not verified and empty tokens', () => {
       expect(isSessionVerified()).toBe(false);
       expect(getHashedPin()).toBe('');
+      expect(getSessionToken()).toBe('');
     });
 
-    it('marks session verified with hashed PIN', () => {
-      markSessionVerified('test-hash-123');
+    it('marks session verified with hashed PIN and session token', () => {
+      markSessionVerified('test-hash-123', 'test-token-xyz');
       expect(isSessionVerified()).toBe(true);
       expect(getHashedPin()).toBe('test-hash-123');
+      expect(getSessionToken()).toBe('test-token-xyz');
     });
 
-    it('clears session verification correctly', () => {
-      markSessionVerified('test-hash-123');
+    it('clears session verification correctly including session token', () => {
+      markSessionVerified('test-hash-123', 'test-token-xyz');
       clearSessionVerification();
       expect(isSessionVerified()).toBe(false);
       expect(getHashedPin()).toBe('');
+      expect(getSessionToken()).toBe('');
+    });
+
+    it('allows setting session token independently', () => {
+      setSessionToken('session-jwt-123');
+      expect(getSessionToken()).toBe('session-jwt-123');
     });
   });
 
-  describe('custom PIN management', () => {
-    it('identifies when custom PIN is configured', async () => {
+  describe('hardened custom PIN management', () => {
+    it('stores domain-separated verifier and NEVER stores raw hash in localStorage', async () => {
       expect(isPinConfigured()).toBe(false);
       expect(getPinLength()).toBe(4);
 
@@ -76,18 +89,23 @@ describe('auth utility', () => {
       expect(isPinConfigured()).toBe(true);
       expect(getPinLength()).toBe(6);
       expect(isSessionVerified()).toBe(true);
+
+      // Verify that custom_app_pin_hash was NOT stored, but custom_app_pin_verifier was
+      expect(localStorage.getItem('custom_app_pin_hash')).toBeNull();
+      expect(localStorage.getItem('custom_app_pin_verifier')).toBeTruthy();
     });
 
-    it('clears custom PIN and resets session cache', async () => {
+    it('clears custom PIN and resets configuration', async () => {
       await setCustomPin('9876');
       expect(isPinConfigured()).toBe(true);
 
       clearCustomPin();
       expect(isPinConfigured()).toBe(false);
       expect(getPinLength()).toBe(4);
+      expect(localStorage.getItem('custom_app_pin_verifier')).toBeNull();
     });
 
-    it('verifies custom PIN matching hash', async () => {
+    it('verifies custom PIN matching verifier', async () => {
       await setCustomPin('4321');
       clearSessionVerification();
 
@@ -98,24 +116,38 @@ describe('auth utility', () => {
       const failResult = await verifyPin('0000');
       expect(failResult).toBe(false);
     });
+
+    it('migrates legacy custom hash on the fly during verifyCustomPin', async () => {
+      const pin = '7890';
+      const hash = await hashPin(pin);
+      localStorage.setItem('custom_app_pin_hash', hash);
+
+      const isValid = await verifyCustomPin(hash);
+      expect(isValid).toBe(true);
+      expect(localStorage.getItem('custom_app_pin_hash')).toBeNull();
+      expect(localStorage.getItem('custom_app_pin_verifier')).toBeTruthy();
+    });
   });
 
-  describe('ensureHashedPin', () => {
-    it('returns session hash if available', async () => {
+  describe('ensureHashedPin and verifyPin with backend token', () => {
+    it('returns in-memory or session hash if available', async () => {
       markSessionVerified('cached-hash-999');
       const hash = await ensureHashedPin();
       expect(hash).toBe('cached-hash-999');
     });
 
-    it('hydrates session from custom hash if session is verified', async () => {
-      const testPin = '5555';
-      const expectedHash = await hashPin(testPin);
-      localStorage.setItem('custom_app_pin_hash', expectedHash);
-      sessionStorage.setItem('finance_pin_verified', 'true');
+    it('receives and sets session token from verify-pin endpoint', async () => {
+      vi.mocked(invokeFunction).mockResolvedValueOnce({
+        verified: true,
+        session_token: 'server-issued-hmac-token',
+        expires_at: Date.now() + 3600000,
+      });
 
-      const hash = await ensureHashedPin();
-      expect(hash).toBe(expectedHash);
-      expect(sessionStorage.getItem('finance_hashed_pin')).toBe(expectedHash);
+      const pin = '3463';
+      const ok = await verifyPin(pin);
+      expect(ok).toBe(true);
+      expect(isSessionVerified()).toBe(true);
+      expect(getSessionToken()).toBe('server-issued-hmac-token');
     });
   });
 });
