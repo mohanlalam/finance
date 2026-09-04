@@ -129,10 +129,10 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
               Live Market Price (LTP)
             </span>
             <div className="flex items-baseline justify-between gap-2">
-              <span className="text-2xl font-black text-[var(--text-primary)] tnum">
+              <span className="text-2xl font-bold text-[var(--text-primary)] tnum">
                 ₹{formatNumber(holding.ltp)}
               </span>
-              <div className={`inline-flex items-center gap-1 text-xs font-extrabold px-2.5 py-1 rounded-[var(--radius-pill)] tnum ${
+              <div className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-[var(--radius-pill)] tnum ${
                 isUp ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'
               }`}>
                 {isUp ? <TrendingUp size={12} aria-hidden="true" /> : <TrendingDown size={12} aria-hidden="true" />}
@@ -151,28 +151,28 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
             <div className="grid grid-cols-2 gap-3">
               <div className="apple-card p-3">
                 <span className="text-[10.5px] text-[var(--text-tertiary)] font-semibold block">Quantity</span>
-                <span className="text-sm font-extrabold text-[var(--text-primary)] tnum mt-0.5 block">
+                <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
                   {renderVal(holding.qty, (v) => formatNumber(v, 0))} shares
                 </span>
               </div>
 
               <div className="apple-card p-3">
                 <span className="text-[10.5px] text-[var(--text-tertiary)] font-semibold block">Average Price</span>
-                <span className="text-sm font-extrabold text-[var(--text-primary)] tnum mt-0.5 block">
+                <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
                   {isBalancesHidden ? '••••••' : `₹${formatNumber(holding.avgPrice)}`}
                 </span>
               </div>
 
               <div className="apple-card p-3">
                 <span className="text-[10.5px] text-[var(--text-tertiary)] font-semibold block">Total Invested</span>
-                <span className="text-sm font-extrabold text-[var(--text-primary)] tnum mt-0.5 block">
+                <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
                   {renderVal(holding.amountInvested)}
                 </span>
               </div>
 
               <div className="apple-card p-3">
                 <span className="text-[10.5px] text-[var(--text-tertiary)] font-semibold block">Current Value</span>
-                <span className="text-sm font-extrabold text-[var(--text-primary)] tnum mt-0.5 block">
+                <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
                   {renderVal(holding.currentValue)}
                 </span>
               </div>
@@ -186,12 +186,12 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
                 <span className="text-[10.5px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">
                   Total Profit &amp; Loss
                 </span>
-                <span className={`text-base font-black tnum ${isOverallProfit ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                <span className={`text-base font-bold tnum ${isOverallProfit ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                   {isBalancesHidden ? '••••••' : <>{isOverallProfit ? '+' : ''}{formatINR(holding.unrealizedPnL)}</>}
                 </span>
               </div>
 
-              <span className={`text-xs font-black px-2 py-1 rounded-[var(--radius-small)] tnum ${
+              <span className={`text-xs font-bold px-2 py-1 rounded-[var(--radius-pill)] tnum ${
                 isOverallProfit ? 'bg-[var(--positive)] text-white' : 'bg-[var(--negative)] text-white'
               }`}>
                 {isBalancesHidden ? '••••••' : formatPercent(holding.pnlPercent)}

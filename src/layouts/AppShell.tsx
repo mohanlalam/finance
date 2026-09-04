@@ -118,6 +118,7 @@ export default function AppShell() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const prefetchViews = () => {
+      import('../components/stocks/StocksView');
       import('../components/PortfolioTable');
       import('../components/fd/FixedDepositView');
       import('../components/sip/SIPView');

@@ -32,6 +32,7 @@ interface PortfolioTableProps {
   totalPnLPercent: number;
   onDelete?: (holdingId: string) => Promise<void>;
   onUpdate?: (holdingId: string, qty: number, avgPrice: number) => Promise<void>;
+  hideOverviewRibbon?: boolean;
 }
 
 type SortKey = keyof Holding | '_allocation';
@@ -78,7 +79,7 @@ const Th = React.memo(({
         <span>{label}</span>
         {!hideArrow && (
           <span 
-            className={`text-xs inline-block transition-transform duration-150 ${sortKey === k ? 'text-[var(--accent-blue)] font-extrabold' : 'text-[var(--text-tertiary)]'}`}
+            className={`text-xs inline-block transition-transform duration-150 ${sortKey === k ? 'text-[var(--accent-blue)] font-bold' : 'text-[var(--text-tertiary)]'}`}
             aria-hidden="true"
           >
             {sortKey === k ? (sortAsc ? '▲' : '▼') : '⇅'}
@@ -123,13 +124,13 @@ const MobileStockRow = React.memo(function MobileStockRow({
       {/* Row 1: Instrument Name on Left, Current Value on Right */}
       <div className="flex justify-between items-start gap-2.5">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <div className="w-9 h-9 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-extrabold text-xs flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
+          <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-bold text-xs flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
             {h.ticker.slice(0, 2)}
           </div>
           <div className="min-w-0 flex-1">
             <button
               onClick={() => onSelectDetail(h)}
-              className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight block text-left hover:text-[var(--accent-blue)] transition-colors ios-press truncate max-w-full"
+              className="text-sm font-bold text-[var(--text-primary)] tracking-tight block text-left hover:text-[var(--accent-blue)] transition-colors ios-press truncate max-w-full"
               title={h.stockName}
             >
               {h.ticker}
@@ -141,10 +142,10 @@ const MobileStockRow = React.memo(function MobileStockRow({
         </div>
 
         <div className="text-right shrink-0 flex flex-col items-end">
-          <span className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">
+          <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">
             Current Value
           </span>
-          <p className="text-sm font-black text-[var(--text-primary)] text-financial tnum mt-0.5">
+          <p className="text-sm font-bold text-[var(--text-primary)] text-financial tnum mt-0.5">
             {renderValue(h.currentValue)}
           </p>
         </div>
@@ -162,8 +163,8 @@ const MobileStockRow = React.memo(function MobileStockRow({
           <span className={`text-[10.5px] font-bold whitespace-nowrap tnum ${h.unrealizedPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
             {isBalancesHidden ? '••••••' : <>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</>}
           </span>
-          <span className={`inline-flex items-center gap-0.5 text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-[var(--radius-pill)] whitespace-nowrap tnum ${h.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
-            <span className="text-[9px] font-black" aria-hidden="true">{h.pnlPercent >= 0 ? '↗' : '↘'}</span>
+          <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-[var(--radius-pill)] whitespace-nowrap tnum ${h.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
+            <span className="text-[9px] font-bold" aria-hidden="true">{h.pnlPercent >= 0 ? '↗' : '↘'}</span>
             {isBalancesHidden ? '••••••' : formatPercent(h.pnlPercent)}
           </span>
         </div>
@@ -219,6 +220,7 @@ export default React.memo(function PortfolioTable({
   totalPnLPercent,
   onDelete,
   onUpdate,
+  hideOverviewRibbon = false,
 }: PortfolioTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
@@ -362,43 +364,45 @@ export default React.memo(function PortfolioTable({
   return (
     <div className="apple-card overflow-hidden">
       {/* Zerodha Kite Holdings Overview Ribbon */}
-      <div className="px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)]">
-        <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-2.5 sm:gap-4 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-[var(--text-primary)] text-xs">Holdings</span>
-            <span className="px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] text-[11px] font-extrabold tnum">
-              {holdings.length}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-[var(--text-tertiary)]">Invested:</span>
-            <span className="font-bold text-[var(--text-primary)] tnum">{renderValue(totalInvested)}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-[var(--text-tertiary)]">Current:</span>
-            <span className="font-black text-[var(--text-primary)] text-financial tnum">{renderValue(totalCurrentValue)}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-xs col-span-2 sm:col-span-1 justify-between sm:justify-end border-t sm:border-t-0 pt-1.5 sm:pt-0 border-[var(--border-subtle)]/60">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[var(--text-tertiary)]">Stock P&amp;L:</span>
-              <span className={`font-black tnum ${totalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-                {isBalancesHidden ? '••••••' : <>{totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)} ({formatPercent(totalPnLPercent)})</>}
+      {!hideOverviewRibbon && (
+        <div className="px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)]">
+          <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-2.5 sm:gap-4 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-[var(--text-primary)] text-xs">Holdings</span>
+              <span className="px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] text-[11px] font-bold tnum">
+                {holdings.length}
               </span>
             </div>
-            {todayTotalPnL !== 0 && (
-              <div className="flex items-center gap-1 text-[11px]">
-                <span className="text-[var(--text-tertiary)]">Day:</span>
-                <span className={`font-bold tnum ${todayTotalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-                  {isBalancesHidden ? '••••••' : <>{todayTotalPnL >= 0 ? '+' : ''}{formatINR(todayTotalPnL)} ({formatPercent(todayTotalPnLPercent)})</>}
+
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="text-[var(--text-tertiary)]">Invested:</span>
+              <span className="font-bold text-[var(--text-primary)] tnum">{renderValue(totalInvested)}</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="text-[var(--text-tertiary)]">Current:</span>
+              <span className="font-bold text-[var(--text-primary)] text-financial tnum">{renderValue(totalCurrentValue)}</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs col-span-2 sm:col-span-1 justify-between sm:justify-end border-t sm:border-t-0 pt-1.5 sm:pt-0 border-[var(--border-subtle)]/60">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[var(--text-tertiary)]">Stock P&amp;L:</span>
+                <span className={`font-bold tnum ${totalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                  {isBalancesHidden ? '••••••' : <>{totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)} ({formatPercent(totalPnLPercent)})</>}
                 </span>
               </div>
-            )}
+              {todayTotalPnL !== 0 && (
+                <div className="flex items-center gap-1 text-[11px]">
+                  <span className="text-[var(--text-tertiary)]">Day:</span>
+                  <span className={`font-bold tnum ${todayTotalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                    {isBalancesHidden ? '••••••' : <>{todayTotalPnL >= 0 ? '+' : ''}{formatINR(todayTotalPnL)} ({formatPercent(todayTotalPnLPercent)})</>}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Search & Quick Filters Bar */}
       <div className="px-3 sm:px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-2.5 border-b border-[var(--border-subtle)] bg-[var(--surface)]">
@@ -573,7 +577,7 @@ export default React.memo(function PortfolioTable({
                   >
                     <td className="px-3 py-2.5 font-bold text-[var(--text-primary)]">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-extrabold text-[10px] flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
+                        <div className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-bold text-[10px] flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
                           {h.ticker.slice(0, 2)}
                         </div>
                         <div>
@@ -600,7 +604,7 @@ export default React.memo(function PortfolioTable({
                     </td>
 
                     <td className="px-3 py-2.5 font-bold text-[var(--text-primary)] text-right tnum">₹{formatNumber(h.ltp)}</td>
-                    <td className="px-3 py-2.5 font-extrabold text-[var(--text-primary)] text-right tnum">{renderValue(h.currentValue)}</td>
+                    <td className="px-3 py-2.5 font-bold text-[var(--text-primary)] text-right tnum">{renderValue(h.currentValue)}</td>
                     <td className="px-3 py-2.5 text-[var(--text-secondary)] text-right tnum">{renderValue(h.amountInvested)}</td>
                     
                     <td className={`px-3 py-2.5 font-bold text-right tnum ${h.unrealizedPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
@@ -608,7 +612,7 @@ export default React.memo(function PortfolioTable({
                     </td>
 
                     <td className="px-3 py-2.5 text-right">
-                      <span className={`inline-flex items-center gap-0.5 text-[11px] font-extrabold px-1.5 py-0.5 rounded-[var(--radius-small)] tnum ${h.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
+                      <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-[var(--radius-pill)] tnum ${h.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
                         <span className="text-[9px]" aria-hidden="true">{h.pnlPercent >= 0 ? '↗' : '↘'}</span>
                         {isBalancesHidden ? '••••••' : formatPercent(h.pnlPercent)}
                       </span>
@@ -665,12 +669,12 @@ export default React.memo(function PortfolioTable({
             <tfoot className="bg-[var(--surface-secondary)] border-t-2 border-[var(--border-subtle)] text-[var(--text-primary)]">
               <tr>
                 <td colSpan={4} className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider">Total</td>
-                <td className="px-3 py-2.5 text-xs font-extrabold text-right tnum">{renderValue(totalCurrentValue)}</td>
+                <td className="px-3 py-2.5 text-xs font-bold text-right tnum">{renderValue(totalCurrentValue)}</td>
                 <td className="px-3 py-2.5 text-xs font-bold text-right text-[var(--text-secondary)] tnum">{renderValue(totalInvested)}</td>
-                <td className={`px-3 py-2.5 text-xs font-extrabold text-right tnum ${totalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                <td className={`px-3 py-2.5 text-xs font-bold text-right tnum ${totalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                   {isBalancesHidden ? '••••••' : <>{totalPnL >= 0 ? '+' : ''}{formatINR(totalPnL)}</>}
                 </td>
-                <td colSpan={(onDelete || onUpdate) ? 4 : 3} className={`px-3 py-2.5 text-xs font-extrabold text-right tnum ${totalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                <td colSpan={(onDelete || onUpdate) ? 4 : 3} className={`px-3 py-2.5 text-xs font-bold text-right tnum ${totalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                   {isBalancesHidden ? '••••••' : formatPercent(totalPnLPercent)}
                 </td>
               </tr>

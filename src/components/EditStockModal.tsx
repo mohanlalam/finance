@@ -86,15 +86,15 @@ export default function EditStockModal({
       {/* Header */}
       <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--surface-secondary)]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[var(--radius-medium)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-extrabold text-sm flex items-center justify-center uppercase">
+          <div className="w-10 h-10 rounded-[var(--radius-medium)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-bold text-sm flex items-center justify-center uppercase">
             {holding.ticker.slice(0, 2)}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-extrabold text-[var(--text-primary)] tracking-tight">
+              <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
                 {holding.ticker}
               </h3>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-[var(--radius-pill)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-[var(--radius-pill)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]">
                 LTP: ₹{holding.ltp.toLocaleString('en-IN')}
               </span>
             </div>
@@ -124,15 +124,15 @@ export default function EditStockModal({
           <div className="grid grid-cols-3 gap-2 pt-1 border-t border-[var(--border-subtle)] text-center">
             <div>
               <p className="text-[10px] text-[var(--text-tertiary)] font-semibold uppercase">New Invested</p>
-              <p className="text-sm font-extrabold tnum text-[var(--text-primary)] mt-0.5">{formatINR(newInvested)}</p>
+              <p className="text-sm font-bold tnum text-[var(--text-primary)] mt-0.5">{formatINR(newInvested)}</p>
             </div>
             <div>
               <p className="text-[10px] text-[var(--text-tertiary)] font-semibold uppercase">Current Value</p>
-              <p className="text-sm font-extrabold tnum text-[var(--text-primary)] mt-0.5">{formatINR(newCurrentValue)}</p>
+              <p className="text-sm font-bold tnum text-[var(--text-primary)] mt-0.5">{formatINR(newCurrentValue)}</p>
             </div>
             <div>
               <p className="text-[10px] text-[var(--text-tertiary)] font-semibold uppercase">Estimated P&amp;L</p>
-              <p className={`text-sm font-extrabold tnum mt-0.5 flex items-center justify-center gap-0.5 ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+              <p className={`text-sm font-bold tnum mt-0.5 flex items-center justify-center gap-0.5 ${isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                 {isGain ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                 {formatPercent(newPnLPct, 1)}
               </p>
@@ -157,7 +157,7 @@ export default function EditStockModal({
               value={qty}
               onChange={(e) => setQty(e.target.value)}
               disabled={saving}
-              className="flex-1 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3.5 py-2.5 text-sm font-extrabold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none tnum"
+              className="flex-1 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3.5 py-2.5 text-sm font-bold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none tnum"
               placeholder="Enter quantity"
               required
             />
@@ -171,7 +171,7 @@ export default function EditStockModal({
                 key={delta}
                 type="button"
                 onClick={() => handleStepper(delta)}
-                className="px-3 py-2 min-h-[44px] min-w-[44px] rounded-[var(--radius-small)] text-xs font-extrabold bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:bg-[var(--accent-blue-soft)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] transition-all active:scale-95 flex items-center justify-center touch-manipulation cursor-pointer"
+                className="px-3 py-2 min-h-[44px] min-w-[44px] rounded-[var(--radius-small)] text-xs font-semibold bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:bg-[var(--accent-blue-soft)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] transition-all active:scale-95 flex items-center justify-center touch-manipulation cursor-pointer"
               >
                 {delta > 0 ? `+${delta}` : delta}
               </button>
@@ -203,7 +203,7 @@ export default function EditStockModal({
               value={avgPrice}
               onChange={(e) => setAvgPrice(e.target.value)}
               disabled={saving}
-              className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] pl-8 pr-3.5 py-2.5 text-sm font-extrabold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none tnum"
+              className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] pl-8 pr-3.5 py-2.5 text-sm font-bold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] transition-all outline-none tnum"
               placeholder="Enter avg price"
               required
             />

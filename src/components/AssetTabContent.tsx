@@ -1,14 +1,9 @@
 import React from 'react';
-// Inline SVG icons — keeps lucide-react out of the critical bundle
-import { Wifi, WifiOff, Plus } from './icons/AppIcons';
 import { Portfolio, FetchStatus } from '../types/portfolio';
 import AssetCardSkeleton from './AssetCardSkeleton';
-import EmptyState from './EmptyState';
-// Eagerly loaded (lightweight, always visible on stocks tab)
-import { pnlColor, formatPercent, formatINR } from '../utils/formatters';
 
 // Lazy-loaded: only fetched when the user navigates to that tab
-const PortfolioTable    = React.lazy(() => import('./PortfolioTable'));
+const StocksView        = React.lazy(() => import('./stocks/StocksView'));
 const GoldHoldingView   = React.lazy(() => import('./gold/GoldHoldingView'));
 const RealEstateView    = React.lazy(() => import('./realestate/RealEstateView'));
 const InsuranceView     = React.lazy(() => import('./insurance/InsuranceView'));
@@ -56,36 +51,6 @@ export default React.memo(function AssetTabContent({
   onQuickAddComplete,
   portfolioOptions,
 }: AssetTabContentProps) {
-
-  const singleStockTotals = React.useMemo(() => {
-    if (!visiblePortfolio) return { inv: 0, cur: 0, pnl: 0 };
-    return visiblePortfolio.holdings.reduce(
-      (acc, h) => {
-        acc.inv += h.amountInvested;
-        acc.cur += h.currentValue;
-        acc.pnl += h.unrealizedPnL;
-        return acc;
-      },
-      { inv: 0, cur: 0, pnl: 0 }
-    );
-  }, [visiblePortfolio]);
-
-  const totalsMap = React.useMemo(() => {
-    const map = new Map<string, { inv: number; cur: number; pnl: number }>();
-    for (const p of portfolios) {
-      const totals = p.holdings.reduce(
-        (acc, h) => {
-          acc.inv += h.amountInvested;
-          acc.cur += h.currentValue;
-          acc.pnl += h.unrealizedPnL;
-          return acc;
-        },
-        { inv: 0, cur: 0, pnl: 0 }
-      );
-      map.set(p.name, totals);
-    }
-    return map;
-  }, [portfolios]);
 
   const allFixedDeposits = React.useMemo(() => {
     return portfolios.flatMap((p) =>
@@ -158,52 +123,16 @@ export default React.memo(function AssetTabContent({
       >
         <React.Suspense fallback={<AssetCardSkeleton />}>
           {activeAsset === 'stocks' && (
-          <div>
-            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-[var(--text-primary)]">{visiblePortfolio.label}</h2>
-                <span className={`flex items-center gap-1.5 text-xs font-bold ${pnlColor(visiblePortfolio.totalPnL)}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${visiblePortfolio.totalPnL >= 0 ? 'bg-[var(--positive)]' : 'bg-[var(--negative)]'}`} />
-                  {formatPercent(visiblePortfolio.totalPnLPercent, 2)} ({formatINR(visiblePortfolio.totalPnL)})
-                </span>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                {priceStatus === 'success' && (
-                  <span className="flex items-center gap-1 text-xs text-[var(--positive)] bg-[var(--positive-soft)] px-2 py-1 rounded-[var(--radius-small)]">
-                    <Wifi size={11} />
-                    Live prices
-                  </span>
-                )}
-                {priceStatus === 'error' && (
-                  <span className="flex items-center gap-1 text-xs text-[var(--text-secondary)] bg-[var(--surface-secondary)] px-2 py-1 rounded-[var(--radius-small)]">
-                    <WifiOff size={11} />
-                    Snapshot data
-                  </span>
-                )}
-                <span className="text-xs text-[var(--text-tertiary)] bg-[var(--surface-secondary)] px-2 py-1 rounded-[var(--radius-small)]">
-                  {visiblePortfolio.holdings.length} stocks &bull; Click column to sort
-                </span>
-                <button
-                  onClick={onAddHoldingClick}
-                  className="flex items-center gap-1.5 bg-[var(--accent-blue)] hover:brightness-110 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] transition-colors shadow-sm ios-press cursor-pointer"
-                >
-                  <Plus size={13} />
-                  Add Holding
-                </button>
-              </div>
-            </div>
-
-            <PortfolioTable
-              holdings={visiblePortfolio.holdings}
-              totalInvested={singleStockTotals.inv}
-              totalCurrentValue={singleStockTotals.cur}
-              totalPnL={singleStockTotals.pnl}
-              totalPnLPercent={singleStockTotals.inv > 0 ? (singleStockTotals.pnl / singleStockTotals.inv) * 100 : 0}
-              onDelete={onDeleteStock}
-              onUpdate={onUpdateStock}
+            <StocksView
+              portfolios={portfolios}
+              portfolioName={visiblePortfolio.name}
+              portfolioOptions={portfolioOptions}
+              priceStatus={priceStatus}
+              onAddHoldingClick={onAddHoldingClick}
+              onDeleteStock={onDeleteStock}
+              onUpdateStock={onUpdateStock}
             />
-          </div>
-        )}
+          )}
 
         {activeAsset === 'fd' && (
           <FixedDepositView
@@ -310,63 +239,16 @@ export default React.memo(function AssetTabContent({
     >
       <React.Suspense fallback={<AssetCardSkeleton />}>
         {activeAsset === 'stocks' && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-bold text-[var(--text-primary)]">All Stock Holdings</h2>
-            <button
-              onClick={onAddHoldingClick}
-              className="flex items-center gap-1.5 bg-[var(--accent-blue)] hover:brightness-110 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] transition-colors shadow-sm ios-press cursor-pointer"
-            >
-              <Plus size={13} />
-              Add Holding
-            </button>
-          </div>
-          <div className="space-y-6">
-            {portfolios.map((p) => (
-              <div key={p.name} className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-sm font-bold text-[var(--text-primary)]">{p.label}</h3>
-                  <div className="h-px flex-1 bg-[var(--border-subtle)]" />
-                  <span className={`flex items-center gap-1.5 text-xs font-bold ${pnlColor(p.totalPnL)}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p.totalPnL >= 0 ? 'bg-[var(--positive)]' : 'bg-[var(--negative)]'}`} />
-                    {formatPercent(p.totalPnLPercent, 2)} ({formatINR(p.totalPnL)})
-                  </span>
-                </div>
-                {p.holdings.length === 0 ? (
-                  <EmptyState
-                    type="stocks"
-                    title="No stock holdings yet"
-                    description="Add stocks or ETFs to start tracking live prices and P&L."
-                    actionButton={
-                      <button
-                        onClick={onAddHoldingClick}
-                        className="inline-flex items-center gap-1.5 bg-[var(--accent-blue)] hover:brightness-110 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] transition-colors shadow-sm ios-press cursor-pointer"
-                      >
-                        <Plus size={13} />
-                        Add Holding
-                      </button>
-                    }
-                  />
-                ) : (
-                  <PortfolioTable
-                    holdings={p.holdings}
-                    totalInvested={totalsMap.get(p.name)?.inv ?? 0}
-                    totalCurrentValue={totalsMap.get(p.name)?.cur ?? 0}
-                    totalPnL={totalsMap.get(p.name)?.pnl ?? 0}
-                    totalPnLPercent={
-                      (totalsMap.get(p.name)?.inv ?? 0) > 0
-                        ? ((totalsMap.get(p.name)?.pnl ?? 0) / (totalsMap.get(p.name)?.inv ?? 1)) * 100
-                        : 0
-                    }
-                    onDelete={onDeleteStock}
-                    onUpdate={onUpdateStock}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+          <StocksView
+            portfolios={portfolios}
+            portfolioName="all"
+            portfolioOptions={portfolioOptions}
+            priceStatus={priceStatus}
+            onAddHoldingClick={onAddHoldingClick}
+            onDeleteStock={onDeleteStock}
+            onUpdateStock={onUpdateStock}
+          />
+        )}
 
       {activeAsset === 'fd' && (
         <FixedDepositView
