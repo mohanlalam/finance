@@ -331,5 +331,44 @@ After **any correction** from the user, append a new entry here with the pattern
 4. In Gold Holdings, added canonical Tola weight ($1\text{ tola} = 11.6638\text{ g}$) as the 5th summary metric.  
 **Rule**: On mobile financial dashboards, always design member breakdown ribbons as compact side-by-side multi-column grids (`grid-cols-3 gap-1`) rather than stacking full-width cards vertically. Ensure top badge pairs use `flex-1 sm:flex-initial` to share mobile width equally without clipping or uneven wrapping.
 
+---
 
+### 2026-09-04 — Edge Function PIN Authorization & Documentation / `.env.example` Parity
+**Mistake**: `README.md` claimed the `gemini-proxy` Edge Function validated the app PIN, but `supabase/functions/gemini-proxy/index.ts` only resolved the API key and applied rate limits without validating `X-App-Pin`. Concurrently, `.env.example` omitted `VITE_APP_PIN` and `VITE_GEMINI_API_KEY`, causing developer onboarding and environment setup to diverge from documented claims.  
+**Root Cause**: Documentation was updated with target security assertions before the server-side PIN check was implemented, and example environment configurations were not updated alongside README documentation changes.  
+**Fix**: 
+1. Added fail-closed `X-App-Pin` validation against `APP_PIN_HASH` in `gemini-proxy/index.ts` (returning HTTP 503 when unconfigured and HTTP 401 when unauthorized).
+2. Updated `.env.example` to declare all required variables (`VITE_APP_PIN`, `VITE_GEMINI_API_KEY`, Supabase credentials) matching `README.md`.  
+**Rule**: Never assert security protections in documentation or `README.md` before the enforcing code is active in production. Always keep `.env.example`, documentation, and Edge Function authentication implementations in strict lockstep whenever new environment variables or endpoints are introduced.
 
+---
+
+### 2026-09-04 — Design Token Discipline: Hero Typography (`.text-financial`) Bleeding into Table Rows & Arbitrary Fractions
+**Mistake**: On mobile stock rows, stock holding values rendered in an excessively huge font size (`22px`), completely breaking visual hierarchy and font consistency with Fixed Deposits, SIPs, and Gold cards. Arbitrary fractional text classes (`text-[10.5px]`, `text-[9.5px]`), `font-extrabold` (800), and redundant bottom padding (`pb-24`) were scattered across stock components, causing large blank gaps between family members.  
+**Root Cause**: 
+1. `PortfolioTable.tsx` used `.text-financial` alongside `.text-sm` on `MobileStockRow`. `.text-financial` defines `font-size: 22px; font-weight: 700;` in `src/index.css` for page-level Net Worth hero displays. Its CSS rule cascade took precedence over Tailwind's `.text-sm` (14px).
+2. Developer applied arbitrary Tailwind utility classes (`text-[10.5px]`, `font-extrabold`) instead of adhering to the canonical design token scale governed by `UI.md`.
+3. `pb-24` (96px padding) was hardcoded on the mobile table container. When rendered inside `StocksView.tsx` in a per-member loop, it inserted 96px of empty white space below *every* family member's table.  
+**Fix**: 
+1. Removed `.text-financial` from `MobileStockRow` and the overview ribbon in `PortfolioTable.tsx`, ensuring values render uniformly at `text-sm font-bold text-[var(--text-primary)] tnum`.
+2. Standardized typography across `HoldingDetailDrawer.tsx`, `MobileHomeSummary.tsx`, `StocksView.tsx`, and `PortfolioAssistant.tsx` to canonical `text-sm font-bold` for asset amounts, `font-bold` (700) for headers, and `text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider` for micro-labels.
+3. Conditionally omitted `pb-24` when `hideOverviewRibbon={true}` so multi-member stock views attach seamlessly without vertical gaps.  
+**Rule**: Never apply hero typography classes (such as `.text-financial`) to table rows, lists, drawers, or asset cards. Always follow `UI.md` design tokens strictly (`text-sm font-bold` for primary asset amounts, `text-[10px]` uppercase tracking-wider for labels). Never hardcode tall bottom padding (`pb-24`) on sub-components that can be rendered multiple times in parent container loops.
+
+---
+
+### 2026-09-04 — Automated E2E Test Database Pollution & Reappearing Deleted Assets
+**Mistake**: Test entities created during automated Playwright testing (`E2E Palm Heights <ID>` in Real Estate and `E2E 24K Sovereign <ID>` in Gold) persisted in the database. When the user manually deleted them via the UI, they disappeared; however, whenever automated verification or `npm run test:e2e` ran, fresh test assets were created with new IDs and timestamps, giving the appearance that deleted assets "came back".  
+**Root Cause**: Playwright browser tests in `e2e/crud.spec.ts` executed against the live Supabase database without an automated lifecycle teardown phase. The tests verified asset creation and form submission, but never deleted the newly created entities before exiting.  
+**Fix**: 
+1. Purged all residual test entities (`E2E Palm Heights *` and `E2E 24K Sovereign *`) directly from the Supabase database via the `holdings-crud` endpoint.
+2. Hardened `e2e/crud.spec.ts` so every test scenario (Real Estate, SIPs, Gold) creates the entity, asserts visibility, and immediately invokes the in-app delete modal (`ConfirmModal`), confirms deletion, and asserts that the item is permanently unmounted from the DOM.  
+**Rule**: All E2E test scenarios that perform mutations against a live or shared persistent database MUST implement automated lifecycle cleanup in the same test run (create → verify → delete → verify removal). Never allow test suites to leave residual entities in the persistent backend.
+
+---
+
+### 2026-09-04 — Dual-Prop Aliasing for Asset View Containers (`realEstate` vs `properties`)
+**Mistake**: Switching between the all-members combined view and single-member views caused Real Estate assets to disappear or trigger undefined prop warnings.  
+**Root Cause**: `RealEstateViewProps` defined `properties?: RealEstate[]` while `AssetTabContent.tsx` passed `realEstate={allRealEstate}`, resulting in `properties` evaluating to `undefined` in combined views.  
+**Fix**: Updated `RealEstateViewProps` to accept both `realEstate?: RealEstate[]` and `properties?: RealEstate[]`, normalizing the entity list with `const realEstate = useMemo(() => propRealEstate || propProperties || [], [propRealEstate, propProperties])`.  
+**Rule**: When standardizing container props across asset views (`stocks`, `fixedDeposits`, `sipAccounts`, `goldHoldings`, `realEstate`), ensure container prop names match the domain entity type or provide backwards-compatible dual-prop aliases to prevent missing data in combined or polymorphic views.
