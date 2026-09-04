@@ -59,7 +59,7 @@ describe('getFDEffectiveValue', () => {
     expect(getFDEffectiveValue(fd)).toBe(107713);
   });
 
-  it('calculates half-yearly compounding for regular active FDs', () => {
+  it('calculates quarterly compounding for regular active FDs by default', () => {
     const fd: FixedDeposit = {
       id: 'fd-2',
       portfolio_id: 'p1',
@@ -68,14 +68,18 @@ describe('getFDEffectiveValue', () => {
       interest_rate: 8,
       start_date: '2026-01-01',
       maturity_date: '2027-01-01',
-      maturity_amount: 108160,
+      maturity_amount: 108243,
       status: 'active',
       fd_type: 'regular',
     };
-    // 1 year half-yearly compounding: 100000 * (1 + 0.08 / 2)^2 = 108160
-    // Since 2026 is 365 days, years = 365 / 365.25, giving 108154
+    // 1 year quarterly compounding (RBI standard): 100000 * (1 + 0.08 / 4)^4 = 108243
+    // Since 2026 is 365 days, years = 365 / 365.25, giving 108237
     const val = getFDEffectiveValue(fd, new Date('2027-01-01'));
-    expect(Math.round(val)).toBe(108154);
+    expect(Math.round(val)).toBe(108237);
+
+    // Explicit half-yearly compounding (frequency = 2)
+    const valHalfYearly = getFDEffectiveValue(fd, new Date('2027-01-01'), 2);
+    expect(Math.round(valHalfYearly)).toBe(108154);
   });
 });
 

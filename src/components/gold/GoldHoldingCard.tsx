@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
-import { openSecureDocument } from '../../utils/supabaseStorage';
+import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 import { Edit2, Trash2, Scale, Coins, FileText, StickyNote, Paperclip } from '../icons/AppIcons';
 
 interface GoldHoldingCardProps {
@@ -17,6 +17,7 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
   onOpenEdit,
   onConfirmDelete,
 }: GoldHoldingCardProps) {
+  const { openDocument: openSecureDocument } = useDocumentStorage();
   const [showNotes, setShowNotes] = useState(false);
 
   const purchasePrice = holding.purchase_price || 0;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { SIPAccount, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, formatPercent } from '../../utils/formatters';
-import { openSecureDocument } from '../../utils/supabaseStorage';
+import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../domains/assets/sip/calculations/sipValuation';
 
 import { FileText, Edit2, Trash2, StickyNote, Wifi, Share2 } from '../icons/AppIcons';
@@ -22,6 +22,7 @@ export function SIPAccountCard({
   onOpenEdit,
   onConfirmDelete,
 }: SIPAccountCardProps) {
+  const { openDocument: openSecureDocument } = useDocumentStorage();
   const { addToast } = useToastActions();
   const [contextMenu, setContextMenu] = React.useState<{ isOpen: boolean; x: number; y: number }>({
     isOpen: false,

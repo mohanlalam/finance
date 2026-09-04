@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Insurance, DocumentMetadata } from '../../types/portfolio';
 import { formatINR } from '../../utils/formatters';
 import { getPolicyRenewalStatus } from '../../utils/insuranceUtils';
-import { openSecureDocument } from '../../utils/supabaseStorage';
+import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 import { Edit2, Trash2, Shield, ShieldAlert, Calendar, FileText, StickyNote, Paperclip } from '../icons/AppIcons';
 
 interface InsurancePolicyCardProps {
@@ -26,6 +26,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
   onOpenEdit,
   onConfirmDelete,
 }: InsurancePolicyCardProps) {
+  const { openDocument: openSecureDocument } = useDocumentStorage();
   const [showNotes, setShowNotes] = useState(false);
 
   const style = TYPE_STYLES[policy.insurance_type] || TYPE_STYLES.other;

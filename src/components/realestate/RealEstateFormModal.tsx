@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { RealEstate, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
 import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
-import { uploadDocumentFile, generateDocumentStoragePath } from '../../utils/supabaseStorage';
+import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 
 interface PortfolioOption {
   name: string;
@@ -34,6 +34,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
   onUpdate,
   onDeleteDoc,
 }: RealEstateFormModalProps) {
+  const { uploadFile: uploadDocumentFile, generateStoragePath: generateDocumentStoragePath } = useDocumentStorage();
   const [propertyName, setPropertyName] = useState('');
   const [propertyType, setPropertyType] = useState<RealEstate['property_type']>('apartment');
   const [location, setLocation] = useState('');

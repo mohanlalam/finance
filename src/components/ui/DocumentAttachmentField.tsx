@@ -1,7 +1,7 @@
 import React, { useId, useState } from 'react';
 import { FileText, Upload, X, Trash2, Paperclip, ExternalLink, Calendar, Plus, AlertCircle, Shield } from '../icons/AppIcons';
 import { DocumentMetadata } from '../../types/portfolio';
-import { openSecureDocument } from '../../utils/supabaseStorage';
+import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 
 export type DocumentCategory =
   | 'fd_advice'
@@ -66,6 +66,7 @@ export function DocumentAttachmentField({
   hintText,
   defaultCategory = 'general',
 }: DocumentAttachmentFieldProps) {
+  const { openDocument: openSecureDocument } = useDocumentStorage();
   const inputId = useId();
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);

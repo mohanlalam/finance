@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
 import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
-import { uploadDocumentFile, generateDocumentStoragePath } from '../../utils/supabaseStorage';
+import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 import { normalizeToIsoDate } from '../../utils/aiDocumentExtractor';
 import { deriveGoldRates } from '../../utils/goldPricing';
 import { formatINR } from '../../utils/formatters';
@@ -37,6 +37,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
   onUpdate,
   onDeleteDoc,
 }: GoldFormModalProps) {
+  const { uploadFile: uploadDocumentFile, generateStoragePath: generateDocumentStoragePath } = useDocumentStorage();
   const [itemName, setItemName] = useState('');
   const [purity, setPurity] = useState<GoldHolding['purity']>('24K');
   const [weightGrams, setWeightGrams] = useState('');

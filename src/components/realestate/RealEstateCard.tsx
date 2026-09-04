@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { RealEstate, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 import { calculateRentalYield } from '../../utils/realEstateUtils';
-import { openSecureDocument } from '../../utils/supabaseStorage';
+import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 import { Edit2, Trash2, Home, MapPin, FileText, StickyNote, Paperclip } from '../icons/AppIcons';
 
 interface RealEstateCardProps {
@@ -18,6 +18,7 @@ export const RealEstateCard = React.memo(function RealEstateCard({
   onOpenEdit,
   onConfirmDelete,
 }: RealEstateCardProps) {
+  const { openDocument: openSecureDocument } = useDocumentStorage();
   const [showNotes, setShowNotes] = useState(false);
 
   const purchasePrice = property.purchase_price || 0;

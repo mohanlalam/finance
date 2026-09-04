@@ -1,7 +1,7 @@
 import React from 'react';
 import { FixedDeposit, DocumentMetadata, FDPayload } from '../../types/portfolio';
 import { formatINR, getFDEffectiveValue } from '../../utils/formatters';
-import { openSecureDocument } from '../../utils/supabaseStorage';
+import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 import { calculateDateDuration, formatDateDuration, toLocalDateString } from '../../utils/dateUtils';
 import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote, Share2 } from '../icons/AppIcons';
 import { useLongPress } from '../../hooks/useLongPress';
@@ -35,6 +35,7 @@ export function DepositDetailsCard({
   onConfirmDelete,
 }: DepositDetailsCardProps) {
   const fd = itemFd || itemDeposit!;
+  const { openDocument: openSecureDocument } = useDocumentStorage();
   const { addToast } = useToastActions();
   const IconComponent = cfg.iconClass;
   const [contextMenu, setContextMenu] = React.useState<{ isOpen: boolean; x: number; y: number }>({

@@ -1,7 +1,7 @@
 import React from 'react';
 import { RDAccount, DocumentMetadata, RDPayload } from '../../types/portfolio';
 import { formatINR } from '../../utils/formatters';
-import { openSecureDocument } from '../../utils/supabaseStorage';
+import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../domains/assets/rd/calculations/rdCompounding';
 
 import { CheckCircle, FileText, Edit2, Trash2, Clock, Share2 } from '../icons/AppIcons';
@@ -25,6 +25,7 @@ export function RDAccountCard({
   onConfirmDelete,
   onUpdate,
 }: RDAccountCardProps) {
+  const { openDocument: openSecureDocument } = useDocumentStorage();
   const { addToast } = useToastActions();
   const [contextMenu, setContextMenu] = React.useState<{ isOpen: boolean; x: number; y: number }>({
     isOpen: false,

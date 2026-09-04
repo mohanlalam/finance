@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Insurance, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
 import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
-import { uploadDocumentFile, generateDocumentStoragePath } from '../../utils/supabaseStorage';
+import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 
 interface PortfolioOption {
   name: string;
@@ -34,6 +34,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
   onUpdate,
   onDeleteDoc,
 }: InsuranceFormModalProps) {
+  const { uploadFile: uploadDocumentFile, generateStoragePath: generateDocumentStoragePath } = useDocumentStorage();
   const [policyName, setPolicyName] = useState('');
   const [insuranceType, setInsuranceType] = useState<Insurance['insurance_type']>('health');
   const [provider, setProvider] = useState('');

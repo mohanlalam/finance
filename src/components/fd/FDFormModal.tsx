@@ -72,8 +72,8 @@ export const FDFormModal = React.memo(function FDFormModal({
     const r = parseFloat(interestRate);
     if (isNaN(p) || isNaN(r) || p <= 0 || r <= 0 || !startDate || !maturityDate) return;
     
-    // Half-yearly compounding for FDs (frequency = 2)
-    const matAmt = calculateFDMaturityValue(p, r, startDate, maturityDate, 2);
+    // Indian Banking quarterly compounding for term deposits (frequency = 4)
+    const matAmt = calculateFDMaturityValue(p, r, startDate, maturityDate, 4);
     if (matAmt > 0) {
       setMaturityAmount(matAmt.toFixed(2));
     }
