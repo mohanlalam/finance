@@ -119,7 +119,7 @@ const MobileStockRow = React.memo(function MobileStockRow({
 }: MobileStockRowProps) {
   return (
     <div
-      className={`py-3 px-1.5 flex flex-col gap-2 transition-opacity mobile-asset-card ${isDeleting ? 'opacity-40' : ''}`}
+      className={`p-3.5 sm:p-4 flex flex-col gap-2.5 transition-opacity hover:bg-[var(--surface-secondary)]/50 select-none mobile-asset-card ${isDeleting ? 'opacity-40' : ''}`}
     >
       {/* Row 1: Instrument Name on Left, Current Value on Right */}
       <div className="flex justify-between items-start gap-2.5">
@@ -135,7 +135,7 @@ const MobileStockRow = React.memo(function MobileStockRow({
             >
               {h.ticker}
             </button>
-            <span className="text-[10.5px] text-[var(--text-tertiary)] block -mt-0.5 truncate max-w-full font-medium">
+            <span className="text-xs text-[var(--text-tertiary)] block mt-0.5 truncate max-w-full font-medium">
               {h.stockName}
             </span>
           </div>
@@ -145,7 +145,7 @@ const MobileStockRow = React.memo(function MobileStockRow({
           <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">
             Current Value
           </span>
-          <p className="text-sm font-bold text-[var(--text-primary)] text-financial tnum mt-0.5">
+          <p className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5">
             {renderValue(h.currentValue)}
           </p>
         </div>
@@ -153,14 +153,14 @@ const MobileStockRow = React.memo(function MobileStockRow({
 
       {/* Row 2: Shares & LTP on Left, P&L on Right */}
       <div className="flex justify-between items-center text-xs gap-2 pt-0.5">
-        <div className="text-[11px] text-[var(--text-secondary)] font-medium flex items-center gap-1.5 flex-wrap">
+        <div className="text-xs text-[var(--text-secondary)] font-medium flex items-center gap-1.5 flex-wrap">
           <span>{isBalancesHidden ? '••••••' : `${formatNumber(h.qty, 0)} shares @ ₹${formatNumber(h.avgPrice)}`}</span>
           <span className="text-[var(--text-tertiary)]">·</span>
           <span>LTP: <span className="font-bold text-[var(--text-primary)] tnum">₹{formatNumber(h.ltp)}</span></span>
         </div>
 
-        <div className="flex items-center gap-1 justify-end shrink-0">
-          <span className={`text-[10.5px] font-bold whitespace-nowrap tnum ${h.unrealizedPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+        <div className="flex items-center gap-1.5 justify-end shrink-0">
+          <span className={`text-xs font-bold whitespace-nowrap tnum ${h.unrealizedPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
             {isBalancesHidden ? '••••••' : <>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</>}
           </span>
           <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-[var(--radius-pill)] whitespace-nowrap tnum ${h.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
@@ -171,16 +171,16 @@ const MobileStockRow = React.memo(function MobileStockRow({
       </div>
 
       {/* Row 3: Allocation, Today P&L on Left, Actions on Right */}
-      <div className="flex justify-between items-center text-[10.5px] text-[var(--text-secondary)] pt-1.5 border-t border-[var(--border-subtle)] gap-2">
+      <div className="flex justify-between items-center text-xs text-[var(--text-secondary)] pt-2 border-t border-[var(--border-subtle)] gap-2">
         <div className="flex items-center gap-2.5 flex-wrap">
-          <span>Alloc: <span className="font-semibold text-[var(--text-primary)] tnum">{h._allocation.toFixed(1)}%</span></span>
-          <span>Today: <span className={`font-semibold tnum ${(h.todayPnLPercent ?? 0) >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>{formatPercent(h.todayPnLPercent ?? 0)}</span></span>
+          <span>Alloc: <span className="font-bold text-[var(--text-primary)] tnum">{h._allocation.toFixed(1)}%</span></span>
+          <span>Today: <span className={`font-bold tnum ${(h.todayPnLPercent ?? 0) >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>{formatPercent(h.todayPnLPercent ?? 0)}</span></span>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => onShare(h)}
-            className="w-10 h-10 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press"
+            className="w-8 h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press transition-colors"
             title="Share holding"
             aria-label="Share holding summary"
           >
@@ -189,7 +189,7 @@ const MobileStockRow = React.memo(function MobileStockRow({
           {canUpdate && (
             <button
               onClick={() => onStartEdit(h)}
-              className="w-10 h-10 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press"
+              className="w-8 h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press transition-colors"
               aria-label="Edit holding quantity and price"
               title="Edit holding"
             >
@@ -199,7 +199,7 @@ const MobileStockRow = React.memo(function MobileStockRow({
           {canDelete && (
             <button
               onClick={() => onDelete(h)}
-              className="w-10 h-10 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--negative)] border border-[var(--border-subtle)] shadow-xs ios-press"
+              className="w-8 h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--negative)] hover:border-[var(--negative)] border border-[var(--border-subtle)] shadow-xs ios-press transition-colors"
               aria-label="Delete holding"
               title="Delete holding"
             >
@@ -362,7 +362,7 @@ export default React.memo(function PortfolioTable({
   }, [todayTotalPnL, totalCurrentValue]);
 
   return (
-    <div className="apple-card overflow-hidden">
+    <div className={`apple-card overflow-hidden ${hideOverviewRibbon ? 'rounded-t-none border-t-0' : ''}`}>
       {/* Zerodha Kite Holdings Overview Ribbon */}
       {!hideOverviewRibbon && (
         <div className="px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)]">
@@ -381,7 +381,7 @@ export default React.memo(function PortfolioTable({
 
             <div className="flex items-center gap-1.5 text-xs">
               <span className="text-[var(--text-tertiary)]">Current:</span>
-              <span className="font-bold text-[var(--text-primary)] text-financial tnum">{renderValue(totalCurrentValue)}</span>
+              <span className="font-bold text-[var(--text-primary)] tnum">{renderValue(totalCurrentValue)}</span>
             </div>
 
             <div className="flex items-center gap-1.5 text-xs col-span-2 sm:col-span-1 justify-between sm:justify-end border-t sm:border-t-0 pt-1.5 sm:pt-0 border-[var(--border-subtle)]/60">
@@ -464,7 +464,7 @@ export default React.memo(function PortfolioTable({
             <button
               key={preset.id}
               onClick={() => handlePreset(preset.id)}
-              className={`px-2 py-1 rounded-[var(--radius-small)] text-[10.5px] font-semibold transition-all whitespace-nowrap ios-press ${
+              className={`px-2 py-1 rounded-[var(--radius-small)] text-xs font-semibold transition-all whitespace-nowrap ios-press ${
                 activePreset === preset.id
                   ? 'bg-[var(--text-primary)] text-[var(--surface)] shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]'
@@ -479,7 +479,7 @@ export default React.memo(function PortfolioTable({
       {/* Single-pass responsive layout selection */}
       {isMobile ? (
         <div className="block">
-          <div className="divide-y divide-[var(--border-subtle)] p-3 space-y-3 pb-28">
+          <div className={`divide-y divide-[var(--border-subtle)] ${hideOverviewRibbon ? '' : 'pb-24'}`}>
             {sorted.length === 0 ? (
               <div className="py-4">
                 <EmptyState 
@@ -490,9 +490,9 @@ export default React.memo(function PortfolioTable({
               </div>
             ) : sorted.length > 20 ? (
               <List
-                height={Math.min(sorted.length * 115, 540)}
+                height={Math.min(sorted.length * 125, 540)}
                 itemCount={sorted.length}
-                itemSize={115}
+                itemSize={125}
                 width="100%"
               >
                 {({ index, style }) => {

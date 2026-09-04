@@ -801,7 +801,7 @@ export default function AppShell() {
                           className="p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 flex flex-col justify-between text-left transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
                         >
                           <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">{item.label}</span>
-                          <p className="text-sm sm:text-base font-extrabold text-[var(--text-primary)] mt-1 text-financial tnum truncate">{formatINR(item.value)}</p>
+                          <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(item.value)}</p>
                         </button>
                       ))}
                       <button
@@ -810,7 +810,7 @@ export default function AppShell() {
                       >
                         <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">Insurance</span>
                         <div>
-                          <p className="text-sm sm:text-base font-extrabold text-[var(--text-primary)] mt-1 text-financial tnum truncate">{formatINR(breakdown.insuranceCover)}</p>
+                          <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(breakdown.insuranceCover)}</p>
                           <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5 tnum">{formatINR(breakdown.insurancePremium)}/yr premium</p>
                         </div>
                       </button>

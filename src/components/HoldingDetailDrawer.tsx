@@ -99,11 +99,11 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
         {/* Drawer Header */}
         <div className="px-5 py-3.5 sm:py-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--surface-secondary)]/50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-extrabold text-sm flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
+            <div className="w-10 h-10 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-bold text-xs flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
               {holding.ticker.slice(0, 2)}
             </div>
             <div>
-              <h2 id="drawer-title" className="text-base font-extrabold text-[var(--text-primary)] tracking-tight">
+              <h2 id="drawer-title" className="text-base font-bold text-[var(--text-primary)] tracking-tight">
                 {holding.ticker}
               </h2>
               <p className="text-xs text-[var(--text-tertiary)] truncate max-w-[220px]">
@@ -125,7 +125,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {/* Real-time Price & Day Movement */}
           <div className="apple-card p-4">
-            <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-1">
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block mb-1">
               Live Market Price (LTP)
             </span>
             <div className="flex items-baseline justify-between gap-2">
@@ -150,28 +150,28 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="apple-card p-3">
-                <span className="text-[10.5px] text-[var(--text-tertiary)] font-semibold block">Quantity</span>
+                <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Quantity</span>
                 <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
                   {renderVal(holding.qty, (v) => formatNumber(v, 0))} shares
                 </span>
               </div>
 
               <div className="apple-card p-3">
-                <span className="text-[10.5px] text-[var(--text-tertiary)] font-semibold block">Average Price</span>
+                <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Average Price</span>
                 <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
                   {isBalancesHidden ? '••••••' : `₹${formatNumber(holding.avgPrice)}`}
                 </span>
               </div>
 
               <div className="apple-card p-3">
-                <span className="text-[10.5px] text-[var(--text-tertiary)] font-semibold block">Total Invested</span>
+                <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Total Invested</span>
                 <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
                   {renderVal(holding.amountInvested)}
                 </span>
               </div>
 
               <div className="apple-card p-3">
-                <span className="text-[10.5px] text-[var(--text-tertiary)] font-semibold block">Current Value</span>
+                <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">Current Value</span>
                 <span className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block">
                   {renderVal(holding.currentValue)}
                 </span>
@@ -183,7 +183,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
               isOverallProfit ? 'border-[var(--positive)]/20 bg-[var(--positive-soft)]' : 'border-[var(--negative)]/20 bg-[var(--negative-soft)]'
             }`}>
               <div>
-                <span className="text-[10.5px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">
+                <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">
                   Total Profit &amp; Loss
                 </span>
                 <span className={`text-base font-bold tnum ${isOverallProfit ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>

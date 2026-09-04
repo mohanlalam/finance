@@ -100,7 +100,7 @@ const renderMarkdown = (text: string) => {
             {bodyRows.map((row, rowIndex) => (
               <tr key={rowIndex} className="hover:bg-[var(--surface-secondary)] transition-colors">
                 {row.map((cell, cellIndex) => (
-                  <td key={cellIndex} className="px-3 py-1.5 whitespace-nowrap font-medium text-[11px] text-financial">
+                  <td key={cellIndex} className="px-3 py-1.5 whitespace-nowrap font-medium text-[11px] tnum">
                     {parseBoldAndCode(cell)}
                   </td>
                 ))}
@@ -333,7 +333,7 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
                       <span className="text-[var(--text-primary)] truncate pr-2">{asset.name}</span>
                       <span className="text-[var(--text-secondary)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider shrink-0 font-bold">{asset.type}</span>
                     </div>
-                    <span className="text-[10px] text-[var(--text-tertiary)] font-medium truncate text-financial">{asset.details}</span>
+                    <span className="text-[10px] text-[var(--text-tertiary)] font-medium truncate tnum">{asset.details}</span>
                   </div>
                 ))}
               </div>
