@@ -34,8 +34,9 @@ Thumbs.db
 .env.local
 .env.*.local
 
-# Bolt
+# AI Tool State
 .bolt/
+.claude/
 
 # Supabase local state
 supabase/.temp/
