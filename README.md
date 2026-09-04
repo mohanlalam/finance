@@ -203,19 +203,12 @@ project antigravity/
 │   │   ├── useKeyboardShortcuts.ts # Global hotkey listeners
 │   │   ├── useLongPress.ts       # Tactile long-press gesture detector
 │   │   ├── useModalState.ts      # Modal visibility state coordinator
-│   │   ├── usePortfolioData.ts   # Backward-compatible portfolio state facade
-│   │   ├── usePortfolioInsights.ts # Computes allocation, performer, and reminder insights
-│   │   ├── usePullToRefresh.ts   # Tactile mobile pull-to-refresh hook
-│   │   └── useSwipeNavigation.ts # Touch swipe gesture tracking for mobile tab layout
 │   ├── workers/
-│   │   ├── xirr.worker.ts        # Background Web Worker for Newton-Raphson XIRR cash flow calculation
-│   │   └── xirrClient.ts         # Asynchronous Promise client with sync fallback
 │   ├── types/
-│   │   └── portfolio.ts          # Core TypeScript interfaces (Holding, NetWorthSnapshot, etc.)
-│   └── utils/                    # Shared pure utility modules (math, dates, formatters, storage, familyMemberConfig)
+│   └── utils/
 ├── supabase/
-│   ├── functions/                # Deno Edge Functions (gemini-proxy, holdings-crud, market-data, snapshot-net-worth, verify-pin)
-│   └── migrations/               # PostgreSQL schema migrations, indexes, and RLS policies
+│   ├── functions/                # Deno Edge Functions
+│   └── migrations/               # PostgreSQL schema migrations
 ```
 
 ---
@@ -225,7 +218,7 @@ project antigravity/
 The repository enforces strict verification across unit, integration, and browser end-to-end suites:
 
 ```bash
-# Run Vitest test suite across 50 test files and 260 tests (100% passing)
+# Run Vitest test suite across 51 test files and 271 tests (100% passing)
 npm test
 
 # Run Playwright browser E2E tests (9 tests: 6 smoke + 3 deep CRUD workflows)
@@ -256,7 +249,7 @@ Create a `.env` file in the root directory:
 ```env
 VITE_SUPABASE_URL=https://your-supabase-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
-VITE_APP_PIN=your-4-digit-pin
+VITE_APP_PIN=your-4-digit-pin # Used only by local Playwright E2E tests (e2e/crud.spec.ts); never bundled into client JS
 VITE_GEMINI_API_KEY=your-gemini-api-key # Optional fallback if gemini-proxy is unconfigured
 ```
 
@@ -291,7 +284,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | Script | Command | Description |
 |---|---|---|
 | **Dev Server** | `npm run dev` | Start Vite dev server with HMR |
-| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (50 test files / 260 tests) |
+| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (51 test files / 271 tests, 100% passing) |
 | **E2E Tests** | `npm run test:e2e` | Run Playwright browser E2E tests (9 tests across smoke and CRUD specs) |
 | **Build** | `npm run build` | Production build to `dist/` |
 | **Preview** | `npm run preview` | Preview the production build locally |

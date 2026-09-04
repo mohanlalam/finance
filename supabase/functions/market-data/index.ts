@@ -15,6 +15,15 @@ function getCorsHeaders(req: Request) {
   };
 }
 
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
 function base64UrlDecode(str: string): Uint8Array {
   let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
   while (base64.length % 4) {
@@ -226,7 +235,7 @@ Deno.serve(async (req: Request) => {
   if (!isValid) {
     const clientPin = req.headers.get("X-App-Pin");
     if (clientPin) {
-      if (clientPin === serverPinHash) {
+      if (timingSafeEqual(clientPin, serverPinHash)) {
         isValid = true;
       } else {
         // If serverPinHash is raw (e.g. 4-6 digits) and clientPin is hashed, check SHA-256 hash of serverPinHash
@@ -235,7 +244,7 @@ Deno.serve(async (req: Request) => {
           const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
           const hashArray = Array.from(new Uint8Array(hashBuffer));
           const hashedServerPin = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-          if (clientPin === hashedServerPin) {
+          if (timingSafeEqual(clientPin, hashedServerPin)) {
             isValid = true;
           }
         } catch (e) {

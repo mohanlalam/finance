@@ -103,6 +103,7 @@ interface MobileStockRowProps {
   canUpdate: boolean;
   canDelete: boolean;
   renderValue: (val: number) => React.ReactNode;
+  isVirtualized?: boolean;
 }
 
 const MobileStockRow = React.memo(function MobileStockRow({
@@ -116,10 +117,11 @@ const MobileStockRow = React.memo(function MobileStockRow({
   canUpdate,
   canDelete,
   renderValue,
+  isVirtualized = false,
 }: MobileStockRowProps) {
   return (
     <div
-      className={`p-3.5 sm:p-4 flex flex-col gap-2.5 transition-opacity hover:bg-[var(--surface-secondary)]/50 select-none mobile-asset-card ${isDeleting ? 'opacity-40' : ''}`}
+      className={`p-3.5 sm:p-4 flex flex-col gap-2.5 transition-opacity hover:bg-[var(--surface-secondary)]/50 select-none ${isVirtualized ? '' : 'mobile-asset-card'} ${isDeleting ? 'opacity-40' : ''}`}
     >
       {/* Row 1: Instrument Name on Left, Current Value on Right */}
       <div className="flex justify-between items-start gap-2.5">
@@ -511,6 +513,7 @@ export default React.memo(function PortfolioTable({
                         canUpdate={!!onUpdate}
                         canDelete={!!onDelete}
                         renderValue={renderValue}
+                        isVirtualized={true}
                       />
                     </div>
                   );

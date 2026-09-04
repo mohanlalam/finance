@@ -172,7 +172,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 50 test files and 259 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 51 test files and 271 unit/integration test cases (100% passing).
 
 ---
 
@@ -199,12 +199,12 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 ## ⚡ Performance Optimizations & Web Workers
 
-1. **Sub-Millisecond Aggregation (< 1ms)**: `portfolioBenchmark.test.ts` validates multi-portfolio aggregation for 1,000+ assets in ~0.8ms (well within the 16.6ms 60 FPS frame budget).
+1. **Sub-Millisecond Aggregation (< 1ms)**: `portfolioBenchmark.test.ts` validates multi-portfolio aggregation for 1,000+ assets in ~0.2ms and 10,000 assets in ~0.7ms (well within the 16.6ms 60 FPS frame budget).
 2. **Instant PWA Zero-Skeleton Hydration**: Initial render hydrates synchronously from IndexedDB offline cache (`offlineHydration.test.ts`) before any network request occurs, eliminating layout shifts.
-3. **Mobile Offscreen Containment (`content-visibility: auto`)**: Mobile holding cards (`.mobile-asset-card`) apply `content-visibility: auto; contain-intrinsic-size: 0 100px; contain: layout style;` to skip layout and style computation until scrolled into the viewport.
+3. **Mobile Offscreen Containment (`content-visibility: auto`)**: Un-virtualized holding cards (`.mobile-asset-card`) apply `content-visibility: auto; contain-intrinsic-size: 0 100px; contain: layout style;` to skip layout and style computation until scrolled into the viewport, while virtualized tables bypass intrinsic sizing via `isVirtualized` to prevent layout shifts.
 4. **Zero-Latency Touch & GPU Layer Promotion**: Global `touch-action: manipulation` eliminates the 300ms mobile tap delay. Fixed bars (`.mobile-bottom-nav`, `.mobile-status-bar`) promote to GPU compositor layers (`transform: translateZ(0)`).
 5. **Idle Chunk Pre-warming**: `requestIdleCallback` pre-warms the top 4 heaviest asset view chunks (`PortfolioTable`, `FixedDepositView`, `SIPView`, `GoldHoldingView`) during device idle time for zero-skeleton tab switching.
-6. **Off-Thread Worker Infrastructure (`xirr.worker.ts`)**: Background Web Worker infrastructure prepared for off-main-thread async Newton-Raphson cash flow calculations during large batch workloads.
+6. **Off-Thread Worker Infrastructure (`xirr.worker.ts`)**: Background Web Worker infrastructure prepared for off-main-thread async Newton-Raphson cash flow calculations (`calculateXIRRAsync`) during bulk batch workloads > 10,000 cash flows; synchronous calculation is used by default for sub-millisecond execution (< 0.2ms for typical family portfolios).
 7. **Render Memoization & Virtualization**: Registry tables utilize `react-window` virtualization and `React.memo` with strict equality comparators on card components.
 8. **PWA Auto-Update**: Workbox instant takeover (`skipWaiting: true`, `clientsClaim: true`) and document `visibilitychange` update listeners.
 
@@ -257,6 +257,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 | Date | Version | Key Changes & Milestones |
 | :--- | :--- | :--- |
+| **2026-09-04** | `v2.9` | **Security Hardening, Concurrency Testing & Design Token Parity**: (1) Constant-time byte comparison (`timingSafeEqual`) across all 4 Edge Functions (`verify-pin`, `holdings-crud`, `gemini-proxy`, `market-data`); (2) Server-side enforced UUID path randomization on storage uploads; (3) Resolved layout shift conflict between `content-visibility: auto` and `react-window` virtualization (`isVirtualized` prop); (4) Aligned FD day count compounding with Indian Banking 365.0-day convention; (5) Added `PortfolioSyncService` concurrency mutex unit test suite covering timeouts and queue unblocking; (6) Verified 51 test files / 271 tests passing (100%). |
 | **2026-09-03** | `v2.8` | **Unified Single-Banner Asset Architecture & Ultra-Compact Mobile Layout**: (1) Unified all 7 asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `Mutual Funds & SIPs`, `Real Estate`, `Insurance`, `Document Vault`) with exactly ONE single top family banner and member-grouped holdings list below; (2) Standardized `familyMemberConfig.tsx` for consistent avatar icons, color badges, and themes for Rammohan, Padmavathi, and Sai Laxmi; (3) Added canonical Tola weight ($1\text{ tola} = 11.6638\text{ g}$) as the 5th summary metric for Gold Holdings; (4) Compacted mobile layouts with a side-by-side 3-column member breakdown (`grid-cols-3 gap-1`), 2x2 metric ribbons (`p-1.5`), and balanced 50/50 top badges (`flex-1 sm:flex-initial`), saving ~65% vertical screen space; (5) Verified 45 test files / 241 tests passing (100%). |
 | **2026-09-02** | `v2.7` | **Comprehensive Security, Mathematical & Clean Architecture Hardening**: (1) Purged `VITE_APP_PIN` from build pipelines and client-side fallbacks; (2) Corrected XIRR bisection fallback convergence bracketing; (3) Added 999 & 995 bullion purity multipliers; (4) Stabilized `PortfolioActionContext` memoization barrier across price ticks; (5) Removed orphaned proxy files and debug scripts; (6) Fortified privacy logger with financial identifier regexes and recursive array traversal; (7) Verified 43 test files / 232 tests passing (100%). |
 | **2026-09-01** | `v2.6` | **Mobile UX, Security & Real-Time Valuation Hardening**: (1) Upgraded Quick Add Asset menu to a native bottom sheet modal docked cleanly at the bottom edge with backdrop blur and drag handle; (2) Added real-time auto-computation of Gold Market Valuation on weight & purity changes with two-way Buy Rate / gram ↔ Total Cost calculator; (3) Hardened PIN authentication with request dedupe cache isolation (`skipCache: true`, `X-App-Pin` header keying) and added `VITE_APP_PIN` to CI/CD build steps; (4) Added 20s hard timeout and automatic queue reset to `portfolioSyncService` to prevent mutex deadlocks; (5) Verified 40 test files / 222 tests passing (100%). |

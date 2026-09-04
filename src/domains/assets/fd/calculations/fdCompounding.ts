@@ -32,7 +32,7 @@ export function calculateFDEffectiveValue(
   const matTs = fd.maturity_date ? parseLocalDate(fd.maturity_date) : NaN;
   const effectiveEndTs = !isNaN(matTs) && matTs < asOfTs ? matTs : asOfTs;
 
-  const years = (effectiveEndTs - startTs) / (365.25 * 24 * 3600 * 1000);
+  const years = (effectiveEndTs - startTs) / (365.0 * 24 * 3600 * 1000);
   if (years <= 0) return principal;
 
   const frequency = Number((fd as unknown as Record<string, unknown>)?.compounding_frequency) || compoundingFrequency || 4;
@@ -58,7 +58,7 @@ export function calculateFDMaturityValue(
   const matTs = parseLocalDate(maturityDateStr);
   if (isNaN(startTs) || isNaN(matTs) || matTs <= startTs) return p;
 
-  const years = (matTs - startTs) / (365.25 * 24 * 3600 * 1000);
+  const years = (matTs - startTs) / (365.0 * 24 * 3600 * 1000);
   return compoundValue(p, r, compoundingFrequency, years);
 }
 

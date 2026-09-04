@@ -14,6 +14,15 @@ function getCorsHeaders(req: Request) {
   };
 }
 
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
 function base64UrlEncode(bytes: Uint8Array): string {
   let binary = "";
   for (let i = 0; i < bytes.byteLength; i++) {
@@ -150,7 +159,7 @@ Deno.serve(async (req: Request) => {
     let isValid = false;
 
     // Direct match (server stores SHA-256 hash)
-    if (pin_hash === serverPinHash) {
+    if (timingSafeEqual(pin_hash, serverPinHash)) {
       isValid = true;
     } else {
       // Server stores raw PIN — compute its SHA-256 and compare
@@ -159,7 +168,7 @@ Deno.serve(async (req: Request) => {
         const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashedServerPin = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-        if (pin_hash === hashedServerPin) {
+        if (timingSafeEqual(pin_hash, hashedServerPin)) {
           isValid = true;
         }
       } catch (e) {

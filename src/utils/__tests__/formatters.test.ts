@@ -73,13 +73,12 @@ describe('getFDEffectiveValue', () => {
       fd_type: 'regular',
     };
     // 1 year quarterly compounding (RBI standard): 100000 * (1 + 0.08 / 4)^4 = 108243
-    // Since 2026 is 365 days, years = 365 / 365.25, giving 108237
     const val = getFDEffectiveValue(fd, new Date('2027-01-01'));
-    expect(Math.round(val)).toBe(108237);
+    expect(Math.round(val)).toBe(108243);
 
-    // Explicit half-yearly compounding (frequency = 2)
+    // Explicit half-yearly compounding (frequency = 2): 100000 * (1 + 0.08 / 2)^2 = 108160
     const valHalfYearly = getFDEffectiveValue(fd, new Date('2027-01-01'), 2);
-    expect(Math.round(valHalfYearly)).toBe(108154);
+    expect(Math.round(valHalfYearly)).toBe(108160);
   });
 });
 

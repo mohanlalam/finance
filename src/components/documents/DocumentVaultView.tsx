@@ -559,7 +559,7 @@ export default React.memo(function DocumentVaultView({
               const memberConfig = getFamilyMemberConfig(doc.portfolioName);
               return (
                 <div style={style} className="border-b border-[var(--border-subtle)] last:border-b-0">
-                  <div className="mobile-asset-card px-3.5 sm:px-4 py-3 hover:bg-[var(--surface-secondary)]/50 transition-colors flex items-center justify-between gap-3 h-full">
+                  <div className="px-3.5 sm:px-4 py-3 hover:bg-[var(--surface-secondary)]/50 transition-colors flex items-center justify-between gap-3 h-full">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
                         <FileText size={15} />
