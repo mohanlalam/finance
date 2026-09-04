@@ -27,7 +27,8 @@ export function RDFormModal({
   onAdd,
   onUpdate,
 }: RDFormModalProps) {
-  const [formPortfolio, setFormPortfolio] = useState(() => portfolioName);
+  const defaultPortfolio = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
+  const [formPortfolio, setFormPortfolio] = useState(() => defaultPortfolio);
   const [bankName, setBankName] = useState('');
   const [monthlyDeposit, setMonthlyDeposit] = useState('');
   const [interestRate, setInterestRate] = useState('');
@@ -41,8 +42,9 @@ export function RDFormModal({
 
   // Auto-fill values when editing
   useEffect(() => {
+    const initialPortfolio = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
     if (editingAccount) {
-      setFormPortfolio(portfolioName);
+      setFormPortfolio(initialPortfolio);
       setBankName(editingAccount.bank_name);
       setMonthlyDeposit(editingAccount.monthly_deposit.toString());
       setInterestRate(editingAccount.interest_rate.toString());
@@ -52,7 +54,7 @@ export function RDFormModal({
       setStatus(editingAccount.status);
       setNotes(editingAccount.notes ?? '');
     } else {
-      setFormPortfolio(portfolioName);
+      setFormPortfolio(initialPortfolio);
       setBankName('');
       setMonthlyDeposit('');
       setInterestRate('');

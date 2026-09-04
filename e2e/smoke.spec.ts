@@ -1,37 +1,24 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
+
+async function unlockIfLocked(page: Page) {
+  const pinHeading = page.getByRole('heading', { name: 'Enter Passcode' });
+  if (await pinHeading.isVisible({ timeout: 4000 }).catch(() => false)) {
+    await page.keyboard.type('3463');
+  }
+  await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 15000 });
+}
 
 test.describe('Family Wealth Tracker - Smoke & E2E Workflows', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to local app
     await page.goto('/');
+    await unlockIfLocked(page);
   });
 
   test('Security Gate - PIN unlock with correct PIN 3463', async ({ page }) => {
-    // Check if PinLockScreen is visible
-    const pinPad = page.locator('text=Family Vault');
-    if (await pinPad.isVisible({ timeout: 2000 })) {
-      // Click PIN keypad buttons 3, 4, 6, 3
-      await page.click('button:has-text("3")');
-      await page.click('button:has-text("4")');
-      await page.click('button:has-text("6")');
-      await page.click('button:has-text("3")');
-    }
-
-    // Header and dashboard should become visible
-    await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible();
   });
 
   test('Navigation - Switch family member tabs and asset classes', async ({ page }) => {
-    // Auto unlock if needed
-    const pinPad = page.locator('text=Family Vault');
-    if (await pinPad.isVisible({ timeout: 2000 })) {
-      for (const digit of ['3', '4', '6', '3']) {
-        await page.click(`button:has-text("${digit}")`);
-      }
-    }
-
-    await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 8000 });
-
     // Switch between family member tabs
     const rammohanTab = page.locator('button:has-text("Rammohan")').first();
     if (await rammohanTab.isVisible()) {
@@ -53,24 +40,15 @@ test.describe('Family Wealth Tracker - Smoke & E2E Workflows', () => {
   });
 
   test('Asset Registries - Quick Access Shortcuts navigation', async ({ page }) => {
-    const pinPad = page.locator('text=Family Vault');
-    if (await pinPad.isVisible({ timeout: 2000 })) {
-      for (const digit of ['3', '4', '6', '3']) {
-        await page.click(`button:has-text("${digit}")`);
-      }
-    }
-
-    await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 8000 });
-
     // Click Fixed Deposits shortcut
-    const fdShortcut = page.locator('button:has-text("Fixed Deposits")').first();
+    const fdShortcut = page.locator('button[aria-label="Jump to Fixed Deposits"]').or(page.locator('button:has-text("Fixed Deposits")')).first();
     if (await fdShortcut.isVisible()) {
       await fdShortcut.click();
       await expect(page.locator('text=Fixed Deposits').first()).toBeVisible();
     }
 
     // Click Gold shortcut
-    const goldShortcut = page.locator('button:has-text("Gold")').first();
+    const goldShortcut = page.locator('button[aria-label="Jump to Gold Holdings"]').or(page.locator('button:has-text("Gold")')).first();
     if (await goldShortcut.isVisible()) {
       await goldShortcut.click();
       await expect(page.locator('text=Gold Holdings').or(page.locator('text=Gold')).first()).toBeVisible();
@@ -78,15 +56,6 @@ test.describe('Family Wealth Tracker - Smoke & E2E Workflows', () => {
   });
 
   test('Export & Backup Modal - Open and verify controls', async ({ page }) => {
-    const pinPad = page.locator('text=Family Vault');
-    if (await pinPad.isVisible({ timeout: 2000 })) {
-      for (const digit of ['3', '4', '6', '3']) {
-        await page.click(`button:has-text("${digit}")`);
-      }
-    }
-
-    await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 8000 });
-
     // Open Export / Backup dropdown or modal if button present
     const exportBtn = page.locator('button:has-text("Export")').or(page.locator('button:has-text("Backup")')).first();
     if (await exportBtn.isVisible()) {
@@ -97,15 +66,6 @@ test.describe('Family Wealth Tracker - Smoke & E2E Workflows', () => {
   });
 
   test('Smart Import - Open modal and verify dropzone', async ({ page }) => {
-    const pinPad = page.locator('text=Family Vault');
-    if (await pinPad.isVisible({ timeout: 2000 })) {
-      for (const digit of ['3', '4', '6', '3']) {
-        await page.click(`button:has-text("${digit}")`);
-      }
-    }
-
-    await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 8000 });
-
     // Trigger Smart Import
     const importBtn = page.locator('button[aria-label*="Smart Import"]').or(page.locator('button:has-text("Smart Import")')).first();
     if (await importBtn.isVisible()) {
@@ -115,15 +75,6 @@ test.describe('Family Wealth Tracker - Smoke & E2E Workflows', () => {
   });
 
   test('Offline Resilience - Remains functional when offline', async ({ page, context }) => {
-    const pinPad = page.locator('text=Family Vault');
-    if (await pinPad.isVisible({ timeout: 2000 })) {
-      for (const digit of ['3', '4', '6', '3']) {
-        await page.click(`button:has-text("${digit}")`);
-      }
-    }
-
-    await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 8000 });
-
     // Simulate network disconnection
     await context.setOffline(true);
 

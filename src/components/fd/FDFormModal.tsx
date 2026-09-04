@@ -36,11 +36,13 @@ export const FDFormModal = React.memo(function FDFormModal({
   const [maturityAmount, setMaturityAmount] = useState('');
   const [status, setStatus] = useState<'active' | 'matured'>('active');
   const [notes, setNotes] = useState('');
-  const [targetPortfolio, setTargetPortfolio] = useState(portfolioName);
+  const defaultTargetPort = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
+  const [targetPortfolio, setTargetPortfolio] = useState(defaultTargetPort);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const resolvedPort = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
     if (editingFd) {
       setBankName(editingFd.bank_name || '');
       setPrincipal(editingFd.principal_amount ? String(editingFd.principal_amount) : '');
@@ -50,7 +52,7 @@ export const FDFormModal = React.memo(function FDFormModal({
       setMaturityAmount(editingFd.maturity_amount ? String(editingFd.maturity_amount) : '');
       setStatus(editingFd.status || 'active');
       setNotes(editingFd.notes || '');
-      setTargetPortfolio(portfolioName);
+      setTargetPortfolio(resolvedPort);
     } else {
       setBankName('');
       setPrincipal('');
@@ -60,10 +62,10 @@ export const FDFormModal = React.memo(function FDFormModal({
       setMaturityAmount('');
       setStatus('active');
       setNotes('');
-      setTargetPortfolio(portfolioName);
+      setTargetPortfolio(resolvedPort);
     }
     setError(null);
-  }, [editingFd, portfolioName, isOpen]);
+  }, [editingFd, portfolioName, portfolioOptions, isOpen]);
 
   const calculateMaturity = useCallback(() => {
     const p = parseFloat(principal);

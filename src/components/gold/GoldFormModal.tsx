@@ -45,7 +45,8 @@ export const GoldFormModal = React.memo(function GoldFormModal({
   const [currentValuation, setCurrentValuation] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
   const [notes, setNotes] = useState('');
-  const [targetPortfolio, setTargetPortfolio] = useState(portfolioName);
+  const defaultTargetPort = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
+  const [targetPortfolio, setTargetPortfolio] = useState(defaultTargetPort);
   const [pendingFiles, setPendingFiles] = useState<PendingDocument[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -117,10 +118,12 @@ export const GoldFormModal = React.memo(function GoldFormModal({
         setCurrentValuation(rawVal ? String(rawVal) : '');
       }
 
+      const resolvedPort = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
       setPurchaseDate(editingHolding.purchase_date || '');
       setNotes(editingHolding.notes || '');
-      setTargetPortfolio(portfolioName);
+      setTargetPortfolio(resolvedPort);
     } else {
+      const resolvedPort = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
       setItemName('');
       setPurity('24K');
       setWeightGrams('');
@@ -129,11 +132,11 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       setCurrentValuation('');
       setPurchaseDate('');
       setNotes('');
-      setTargetPortfolio(portfolioName);
+      setTargetPortfolio(resolvedPort);
     }
     setPendingFiles([]);
     setError(null);
-  }, [isOpen, editingHolding, portfolioName, getRateForPurity]);
+  }, [isOpen, editingHolding, portfolioName, portfolioOptions, getRateForPurity]);
 
   // Handle purity change and automatically recompute live market valuation
   const handlePurityChange = (newPurity: GoldHolding['purity']) => {

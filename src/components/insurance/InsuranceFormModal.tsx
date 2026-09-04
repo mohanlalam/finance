@@ -42,7 +42,8 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
   const [premiumAmount, setPremiumAmount] = useState('');
   const [renewalDate, setRenewalDate] = useState('');
   const [notes, setNotes] = useState('');
-  const [targetPortfolio, setTargetPortfolio] = useState(portfolioName);
+  const defaultPortfolio = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
+  const [targetPortfolio, setTargetPortfolio] = useState(defaultPortfolio);
   const [pendingFiles, setPendingFiles] = useState<PendingDocument[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -55,6 +56,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
 
   useEffect(() => {
     createdAssetIdRef.current = null;
+    const initialPortfolio = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
     if (editingPolicy) {
       setPolicyName(editingPolicy.policy_name || '');
       setInsuranceType(editingPolicy.insurance_type || 'health');
@@ -64,7 +66,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
       setPremiumAmount(editingPolicy.premium_amount ? String(editingPolicy.premium_amount) : '');
       setRenewalDate(editingPolicy.renewal_date || '');
       setNotes(editingPolicy.notes || '');
-      setTargetPortfolio(portfolioName);
+      setTargetPortfolio(initialPortfolio);
     } else {
       setPolicyName('');
       setInsuranceType('health');
@@ -74,11 +76,11 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
       setPremiumAmount('');
       setRenewalDate('');
       setNotes('');
-      setTargetPortfolio(portfolioName);
+      setTargetPortfolio(initialPortfolio);
     }
     setPendingFiles([]);
     setError(null);
-  }, [editingPolicy, portfolioName, isOpen]);
+  }, [editingPolicy, portfolioName, portfolioOptions, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

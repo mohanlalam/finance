@@ -41,7 +41,8 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
   const [currentValuation, setCurrentValuation] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
   const [notes, setNotes] = useState('');
-  const [targetPortfolio, setTargetPortfolio] = useState(portfolioName);
+  const defaultPortfolio = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
+  const [targetPortfolio, setTargetPortfolio] = useState(defaultPortfolio);
   const [pendingFiles, setPendingFiles] = useState<PendingDocument[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -54,6 +55,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
 
   useEffect(() => {
     createdAssetIdRef.current = null;
+    const initialPortfolio = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
     if (editingProperty) {
       setPropertyName(editingProperty.property_name || '');
       setPropertyType(editingProperty.property_type || 'apartment');
@@ -62,7 +64,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
       setCurrentValuation(editingProperty.current_valuation ? String(editingProperty.current_valuation) : '');
       setPurchaseDate(editingProperty.purchase_date || '');
       setNotes(editingProperty.notes || '');
-      setTargetPortfolio(portfolioName);
+      setTargetPortfolio(initialPortfolio);
     } else {
       setPropertyName('');
       setPropertyType('apartment');
@@ -71,11 +73,11 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
       setCurrentValuation('');
       setPurchaseDate('');
       setNotes('');
-      setTargetPortfolio(portfolioName);
+      setTargetPortfolio(initialPortfolio);
     }
     setPendingFiles([]);
     setError(null);
-  }, [editingProperty, portfolioName, isOpen]);
+  }, [editingProperty, portfolioName, portfolioOptions, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,12 +102,19 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
     setError(null);
 
     try {
+      const pPrice = purchasePrice ? parseFloat(purchasePrice) : 0;
+      const cVal = currentValuation ? parseFloat(currentValuation) : pPrice;
       const payload = {
+        propertyName: propertyName.trim(),
         property_name: propertyName.trim(),
+        propertyType: propertyType,
         property_type: propertyType,
         location: location.trim() || undefined,
-        purchase_price: purchasePrice ? parseFloat(purchasePrice) : undefined,
-        current_valuation: currentValuation ? parseFloat(currentValuation) : undefined,
+        purchasePrice: pPrice,
+        purchase_price: pPrice,
+        currentValuation: cVal,
+        current_valuation: cVal,
+        purchaseDate: purchaseDate || undefined,
         purchase_date: purchaseDate || undefined,
         notes: notes.trim() || undefined,
       };

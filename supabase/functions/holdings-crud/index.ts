@@ -287,8 +287,6 @@ Deno.serve(async (req: Request) => {
             mf_scheme_code: payload.mfSchemeCode ? String(payload.mfSchemeCode).slice(0, 50) : null,
             units: payload.units !== undefined && payload.units !== null ? Number(payload.units) : null,
             notes: payload.notes ? String(payload.notes).slice(0, 1000) : null,
-            girl_dob: payload.girlDob || null,
-            rate_schedule: payload.rateSchedule || null,
           })
           .select()
           .single();

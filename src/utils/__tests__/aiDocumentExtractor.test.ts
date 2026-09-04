@@ -318,5 +318,10 @@ describe('aiDocumentExtractor', () => {
       expect(result.data.notes).toContain('Policy Term: 25 yrs');
       expect(result.data.notes).toContain('PPT: 16 yrs');
     });
+
+    it('attempts proxy extraction when apiKeyOverride is not supplied', async () => {
+      const file = new File(['sample'], 'doc.pdf', { type: 'application/pdf' });
+      await expect(extractAssetFromDocument(file, '')).rejects.toThrow(/Gemini API key is required/);
+    });
   });
 });

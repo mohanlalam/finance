@@ -3,6 +3,8 @@
  * Supports PDF documents, receipts, invoices, and photos on mobile and web.
  */
 
+import { invokeFunction } from './apiClient';
+
 export interface ExtractedAssetResult {
   assetType: 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'stocks';
   confidence: number;
@@ -508,11 +510,39 @@ export async function extractAssetFromDocument(
     },
   };
 
-  const candidateModels = await fetchAvailableGeminiModels(apiKey);
-  let lastError: Error | null = null;
   let rawText = '';
+  let lastError: Error | null = null;
 
-  for (const model of candidateModels) {
+  // 1. Attempt extraction via Supabase Edge Function proxy (gemini-proxy) when no override key is supplied
+  if (!apiKeyOverride) {
+    try {
+      const proxyResult = await invokeFunction<{ candidates?: { content: { parts: { text: string }[] } }[] }>(
+        'gemini-proxy',
+        {
+          method: 'POST',
+          body: {
+            action: 'generate',
+            payload,
+            apiKey: apiKey || undefined,
+          },
+          timeoutMs: 30000,
+          skipCache: true,
+        }
+      );
+      const proxyText = proxyResult?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (proxyText) {
+        rawText = proxyText;
+      }
+    } catch (_proxyErr) {
+      // Edge function proxy offline or unavailable — fall through to direct Gemini API
+    }
+  }
+
+  // 2. Direct client fallback
+  if (!rawText) {
+    const candidateModels = await fetchAvailableGeminiModels(apiKey);
+
+    for (const model of candidateModels) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     try {
@@ -555,6 +585,7 @@ export async function extractAssetFromDocument(
       }
       lastError = err instanceof Error ? err : new Error(String(err));
     }
+  }
   }
 
   if (!rawText) {
