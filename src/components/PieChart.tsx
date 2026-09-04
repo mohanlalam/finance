@@ -209,7 +209,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                     x={cx}
                     y={cy - 14}
                     textAnchor="middle"
-                    className="fill-[var(--text-secondary)] font-extrabold uppercase tracking-wider text-[9.5px]"
+                    className="fill-[var(--text-secondary)] font-bold uppercase tracking-wider text-[10px]"
                   >
                     {hoverSlice.fullName.length > 14 ? hoverSlice.label : hoverSlice.fullName}
                   </text>
@@ -217,7 +217,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                     x={cx}
                     y={cy + 6}
                     textAnchor="middle"
-                    className="fill-[var(--text-primary)] font-black text-sm tnum"
+                    className="fill-[var(--text-primary)] font-bold text-sm tnum"
                   >
                     {isBalancesHidden ? '••••••' : formatINR(hoverSlice.value)}
                   </text>
@@ -244,7 +244,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                     x={cx}
                     y={cy + 7}
                     textAnchor="middle"
-                    className="fill-[var(--text-primary)] font-black text-sm tnum"
+                    className="fill-[var(--text-primary)] font-bold text-sm tnum"
                   >
                     {isBalancesHidden ? '••••••' : formatINR(total)}
                   </text>
@@ -252,7 +252,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                     x={cx}
                     y={cy + 22}
                     textAnchor="middle"
-                    className="fill-[var(--text-tertiary)] font-semibold text-[9.5px]"
+                    className="fill-[var(--text-tertiary)] font-semibold text-[10px]"
                   >
                     {slices.length} Asset {slices.length === 1 ? 'Class' : 'Classes'}
                   </text>
@@ -305,7 +305,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                         {isBalancesHidden ? '••••••' : formatINR(slice.value)}
                       </span>
                       <span
-                        className="text-[11px] font-extrabold px-1.5 py-0.2 rounded-[var(--radius-small)] tnum"
+                        className="text-[11px] font-bold px-1.5 py-0.2 rounded-[var(--radius-small)] tnum"
                         style={{
                           backgroundColor: `${slice.color}18`,
                           color: slice.color,

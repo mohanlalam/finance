@@ -15,7 +15,7 @@ function FDIllustration() {
 
 function StockIllustration() {
   return (
-    <svg className="w-14 h-14 text-[var(--accent-blue,#387ed1)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <svg className="w-14 h-14 text-[var(--accent-blue)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <rect x="6" y="8" width="36" height="32" rx="4" className="stroke-[var(--border-subtle)] fill-[var(--surface-secondary)]" strokeWidth="2" />
       <path d="M12 32L20 22L28 27L36 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M30 16H36V22" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -44,7 +44,7 @@ function GoldIllustration() {
 
 function RealEstateIllustration() {
   return (
-    <svg className="w-14 h-14 text-[var(--positive,#00b074)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <svg className="w-14 h-14 text-[var(--positive)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       {/* Main building */}
       <rect x="18" y="10" width="22" height="30" rx="2" className="stroke-current fill-[var(--surface-secondary)]" strokeWidth="2" />
       {/* Windows */}
@@ -64,7 +64,7 @@ function RealEstateIllustration() {
 
 function InsuranceIllustration() {
   return (
-    <svg className="w-14 h-14 text-[var(--negative,#df514c)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <svg className="w-14 h-14 text-[var(--negative)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <path d="M24 6L38 12V22C38 31.5 32 38.5 24 42C16 38.5 10 31.5 10 22V12L24 6Z" className="stroke-current fill-[var(--surface-secondary)]" strokeWidth="2" strokeLinejoin="round" />
       <path d="M18 23L22 27L30 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M24 10V38" stroke="currentColor" strokeWidth="1" strokeDasharray="2 2" opacity="0.3" />

@@ -426,7 +426,7 @@ export default React.memo(function DocumentVaultView({
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1">
-                          <p className="text-[10.5px] sm:text-xs font-bold text-[var(--text-primary)] truncate">
+                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">
                             {m.label}
                           </p>
                           {isSelected && (
@@ -435,16 +435,16 @@ export default React.memo(function DocumentVaultView({
                             </span>
                           )}
                         </div>
-                        <p className="text-[9.5px] sm:text-[10px] text-[var(--text-tertiary)] hidden sm:block">
+                        <p className="text-[10px] text-[var(--text-tertiary)] hidden sm:block">
                           Vault files
                         </p>
                       </div>
                     </div>
                     <div className="text-left sm:text-right shrink-0 mt-1 sm:mt-0">
                       {m.count === 0 ? (
-                        <span className="text-[10.5px] sm:text-xs text-[var(--text-tertiary)] font-normal block">—</span>
+                        <span className="text-xs text-[var(--text-tertiary)] font-normal block">—</span>
                       ) : (
-                        <p className="text-[10.5px] sm:text-xs font-bold text-[var(--text-primary)] tnum truncate">
+                        <p className="text-xs font-bold text-[var(--text-primary)] tnum truncate">
                           {m.count} file{m.count === 1 ? '' : 's'}
                         </p>
                       )}

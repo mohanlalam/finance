@@ -129,7 +129,7 @@ export default React.memo(function FamilyTabBar({
                   setMenuTarget(null);
                   onTabChange(p.name);
                 }}
-                className={`flex items-center gap-1.5 h-9 sm:h-8 pl-2.5 pr-1.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none cursor-pointer ${
+                className={`flex items-center gap-1.5 h-10 sm:h-8 pl-2.5 pr-1.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none cursor-pointer ${
                   isActive
                     ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-card)] border border-[var(--border-luminous)] ring-1 ring-[var(--accent-blue)]/20'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]/50'
@@ -144,7 +144,7 @@ export default React.memo(function FamilyTabBar({
 
                 {/* Return Percentage Badge */}
                 <span
-                  className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded tnum transition-colors shrink-0 ${
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded tnum transition-colors shrink-0 ${
                     isPositive
                       ? 'bg-[var(--positive-soft)] text-[var(--positive)]'
                       : 'bg-[var(--negative-soft)] text-[var(--negative)]'
@@ -161,7 +161,7 @@ export default React.memo(function FamilyTabBar({
                   e.stopPropagation();
                   setMenuTarget(isMenuOpen ? null : { id: p.id, name: p.name, label: p.label });
                 }}
-                className="sm:hidden w-7 h-9 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-1 shrink-0 touch-manipulation ios-press cursor-pointer"
+                className="sm:hidden min-w-[36px] h-10 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-1 shrink-0 touch-manipulation ios-press cursor-pointer"
                 title={`Options for ${p.label}`}
                 aria-label={`Options for portfolio ${p.label}`}
                 aria-expanded={isMenuOpen}

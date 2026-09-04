@@ -67,7 +67,7 @@ function DashboardWidgets({ portfolios, activePortfolio }: DashboardWidgetsProps
           </div>
           <div>
             <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Net Worth</p>
-            <h3 className="text-2xl font-extrabold text-[var(--text-primary)] text-financial tnum mt-1.5 truncate">
+            <h3 className="text-2xl font-bold text-[var(--text-primary)] tnum mt-1.5 truncate">
               {formatINR(totalCurrentValue)}
             </h3>
           </div>
@@ -90,7 +90,7 @@ function DashboardWidgets({ portfolios, activePortfolio }: DashboardWidgetsProps
           </div>
           <div>
             <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Today's P&L</p>
-            <h3 className={`text-2xl font-extrabold text-financial tnum mt-1.5 truncate ${todayPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+            <h3 className={`text-2xl font-bold tnum mt-1.5 truncate ${todayPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
               {todayPnL >= 0 ? '+' : ''}{formatINR(todayPnL)}
             </h3>
           </div>
@@ -114,7 +114,7 @@ function DashboardWidgets({ portfolios, activePortfolio }: DashboardWidgetsProps
               <div className="mt-2 space-y-1">
                 <h4 className="text-xs font-bold text-[var(--text-primary)] truncate">{maturingFDs[0].bank_name}</h4>
                 <p className="text-[10px] text-[var(--text-secondary)]">Due {new Date(maturingFDs[0].maturity_date!).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-                <p className="text-[11px] font-extrabold text-[var(--warning)] tnum">{formatINR(getFDEffectiveValue(maturingFDs[0]))}</p>
+                <p className="text-[11px] font-bold text-[var(--warning)] tnum">{formatINR(getFDEffectiveValue(maturingFDs[0]))}</p>
               </div>
             ) : (
               <div className="mt-3 text-center py-2 bg-[var(--surface-secondary)] rounded-[var(--radius-medium)] border border-[var(--border-subtle)]">

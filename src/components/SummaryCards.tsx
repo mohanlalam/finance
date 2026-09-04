@@ -62,8 +62,8 @@ function SummaryCards({
   }, [netWorthHistory]);
 
   const sparklineColor = React.useMemo(() => {
-    if (sparklineData.length < 2) return '#00b074';
-    return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? '#00b074' : '#df514c';
+    if (sparklineData.length < 2) return 'var(--positive)';
+    return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? 'var(--positive)' : 'var(--negative)';
   }, [sparklineData]);
 
   const { isBalancesHidden } = usePrivacy();
@@ -99,7 +99,7 @@ function SummaryCards({
 
           <div className="flex items-end justify-between mt-1">
             <div>
-              <p className={`text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] text-financial tnum tracking-tight transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
+              <p className={`text-2xl sm:text-3xl font-bold text-[var(--text-primary)] text-financial tnum tracking-tight transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
                 {renderValue(totalCurrentValue)}
               </p>
               <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
@@ -148,7 +148,7 @@ function SummaryCards({
           </div>
 
           <div className="mt-1">
-            <p className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] text-financial tnum tracking-tight">
+            <p className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tnum tracking-tight">
               {renderValue(totalInvested)}
             </p>
             <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">Total capital deployed</p>
@@ -184,11 +184,11 @@ function SummaryCards({
           </div>
 
           <div className="mt-1">
-            <p className={`text-2xl sm:text-3xl font-extrabold text-financial tnum tracking-tight ${isGain ? 'neon-glow-positive' : 'neon-glow-negative'}`}>
+            <p className={`text-2xl sm:text-3xl font-bold tnum tracking-tight ${isGain ? 'neon-glow-positive' : 'neon-glow-negative'}`}>
               {isBalancesHidden ? '••••••' : <>{isGain ? '+' : ''}<AnimatedNumber value={totalPnL} formatter={formatINR} /></>}
             </p>
             <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">
-              {formatPercent(totalPnLPercent)} return (all assets)
+              <span className="tnum">{formatPercent(totalPnLPercent)}</span> return (all assets)
             </p>
           </div>
 
@@ -225,7 +225,7 @@ function SummaryCards({
           <div className="mt-1">
             {todayPnL !== undefined ? (
               <>
-                <p className={`text-2xl sm:text-3xl font-extrabold text-financial tnum tracking-tight ${isTodayGain ? 'neon-glow-positive' : 'neon-glow-negative'}`}>
+                <p className={`text-2xl sm:text-3xl font-bold tnum tracking-tight ${isTodayGain ? 'neon-glow-positive' : 'neon-glow-negative'}`}>
                   {isBalancesHidden ? '••••••' : <>{isTodayGain ? '+' : ''}<AnimatedNumber value={todayPnL} formatter={formatINR} /></>}
                 </p>
                 <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">
@@ -234,7 +234,7 @@ function SummaryCards({
               </>
             ) : (
               <>
-                <p className="text-2xl sm:text-3xl font-extrabold text-financial tnum opacity-40">--</p>
+                <p className="text-2xl sm:text-3xl font-bold tnum opacity-40">--</p>
                 <p className="text-supporting text-[11px] text-[var(--text-tertiary)] mt-0.5">Delta unavailable</p>
               </>
             )}

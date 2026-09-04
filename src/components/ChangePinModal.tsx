@@ -168,7 +168,7 @@ export default function ChangePinModal({ onClose, onSuccess }: ChangePinModalPro
 
         <div className="relative flex items-center justify-center">
           <div className="border-t border-[var(--border-subtle)] w-full" />
-          <span className="bg-[var(--surface)] px-3 text-[10px] uppercase tracking-wider font-extrabold text-[var(--text-tertiary)] absolute">
+          <span className="bg-[var(--surface)] px-3 text-[10px] uppercase tracking-wider font-bold text-[var(--text-tertiary)] absolute">
             Change 4-Digit PIN
           </span>
         </div>

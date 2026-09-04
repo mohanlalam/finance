@@ -120,7 +120,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
           <div className="w-10 h-1 rounded-full bg-[var(--border-subtle)] mx-auto mb-3" aria-hidden="true" />
           <div className="flex items-center justify-between pb-3 mb-2 border-b border-[var(--border-subtle)]">
             <div>
-              <h4 className="text-xs font-extrabold text-[var(--text-primary)] uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
                 More Asset Classes
               </h4>
               <p className="text-[11px] text-[var(--text-tertiary)]">Select category to view details</p>
@@ -152,7 +152,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold text-slate-800 dark:text-slate-100">✨ Smart AI Import</p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Scan FD, Gold, or Insurance photo/PDF</p>
+                  <p className="text-[11px] text-slate-700 dark:text-slate-300">Scan FD, Gold, or Insurance photo/PDF</p>
                 </div>
               </div>
               <ChevronRight size={16} className="text-amber-500 shrink-0" />
@@ -233,7 +233,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                   {tab.id === 'home' && alertCount > 0 && (
                     <span 
                       role="status"
-                      className="absolute -top-1 -right-1 min-w-[15px] h-[15px] rounded-full bg-[var(--negative)] text-white text-[9px] font-extrabold flex items-center justify-center px-1 leading-none shadow-xs"
+                      className="absolute -top-1 -right-1 min-w-[15px] h-[15px] rounded-full bg-[var(--negative)] text-white text-[9px] font-bold flex items-center justify-center px-1 leading-none shadow-xs"
                       aria-label={`${alertCount} notifications`}
                     >
                       {alertCount > 9 ? '9+' : alertCount}

@@ -160,7 +160,7 @@ export default function FloatingAddMenu({
           {/* Header Row */}
           <div className="flex items-center justify-between pb-3 mb-2 border-b border-[var(--border-subtle)] gap-2">
             <div>
-              <h4 className="text-xs font-extrabold text-[var(--text-primary)] uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
                 ✨ Quick Add Asset
               </h4>
               <p className="text-[11px] text-[var(--text-tertiary)]">Select category to add to portfolio</p>
@@ -206,7 +206,7 @@ export default function FloatingAddMenu({
                 setIsOpen(false);
                 fabButtonRef.current?.focus();
               }}
-              className="w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-[var(--radius-medium)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] ios-press transition-colors shrink-0 touch-manipulation cursor-pointer"
+              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-[var(--radius-medium)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] ios-press transition-colors shrink-0 touch-manipulation cursor-pointer"
               aria-label="Close add menu"
             >
               <X size={18} aria-hidden="true" />
@@ -217,7 +217,7 @@ export default function FloatingAddMenu({
           <div className="overflow-y-auto max-h-[60vh] space-y-3.5 pr-1">
             {menuGroups.map((group) => (
               <div key={group.category} className="space-y-1.5">
-                <span className="px-1 text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-tertiary)] block">
+                <span className="px-1 text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] block">
                   {group.category}
                 </span>
                 <div className="grid grid-cols-1 gap-1.5">

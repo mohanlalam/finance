@@ -15,7 +15,7 @@ function DashboardLoading() {
               <TrendingUp size={18} />
             </div>
             <div>
-              <p className="text-sm font-extrabold text-[var(--text-primary)] leading-tight">Family Wealth</p>
+              <p className="text-sm font-bold text-[var(--text-primary)] leading-tight">Family Wealth</p>
               <p className="text-xs text-[var(--text-tertiary)]">Loading portfolio...</p>
             </div>
           </div>

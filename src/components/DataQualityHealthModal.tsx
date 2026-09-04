@@ -105,7 +105,7 @@ export default function DataQualityHealthModal({
         <div className={`p-4 rounded-[var(--radius-large)] border flex flex-col sm:flex-row items-center justify-between gap-4 ${getScoreColor(score)}`}>
           <div className="flex items-center gap-3.5">
             <div className="w-14 h-14 rounded-[var(--radius-large)] bg-[var(--surface)] shadow-xs flex flex-col items-center justify-center border border-inherit shrink-0">
-              <span className="text-xl font-black leading-none text-[var(--text-primary)] tnum">{score}</span>
+              <span className="text-xl font-bold leading-none text-[var(--text-primary)] tnum">{score}</span>
               <span className="text-[10px] font-bold text-[var(--text-tertiary)] opacity-80">/ 100</span>
             </div>
             <div>

@@ -92,7 +92,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
               <Bell size={16} />
             </div>
             <div>
-              <h2 className="text-sm font-extrabold text-[var(--text-primary)]">Active Alerts</h2>
+              <h2 className="text-sm font-bold text-[var(--text-primary)]">Active Alerts</h2>
               <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{alerts.length} action items require attention</p>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
               <div className="w-12 h-12 rounded-xl bg-[var(--positive-soft)] text-[var(--positive)] border border-[var(--positive)]/20 flex items-center justify-center mb-3">
                 <CheckCircle2 size={24} />
               </div>
-              <h3 className="text-sm font-extrabold text-[var(--text-primary)] mb-1">All Clear!</h3>
+              <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">All Clear!</h3>
               <p className="text-xs text-[var(--text-tertiary)] max-w-xs">
                 No active notifications in this category. You're completely up to date.
               </p>
@@ -173,7 +173,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
                         {cfg.icon}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-extrabold leading-tight text-[var(--text-primary)] break-words">{alert.title}</p>
+                        <p className="text-xs font-bold leading-tight text-[var(--text-primary)] break-words">{alert.title}</p>
                         <p className="text-xs font-medium opacity-90 mt-1 break-words">{alert.message}</p>
                         {alert.portfolioLabel && (
                           <span className="inline-block mt-2 text-[10px] font-bold uppercase bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] px-2 py-0.5 rounded">

@@ -467,7 +467,7 @@ export default function AppShell() {
       onTouchMove={handleCombinedTouchMove}
       onTouchEnd={handleCombinedTouchEnd}
       onTouchCancel={handleCombinedTouchCancel}
-      className="min-h-screen bg-[var(--app-background)] pb-safe-content md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden"
+      className="min-h-screen bg-[var(--app-background)] md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden"
     >
       {/* 🌌 Antigravity Cosmic Ambient Atmosphere */}
       <div className="antigravity-bg" aria-hidden="true" />
@@ -503,7 +503,7 @@ export default function AppShell() {
         </div>
         <div className="text-right">
           <p className="text-lg font-bold text-slate-800">{formatINR(summaryData.totalCurrentValue)}</p>
-          <p className={`text-sm font-semibold ${summaryData.totalPnL >= 0 ? 'text-[var(--positive,#00b074)]' : 'text-[var(--negative,#df514c)]'}`}>
+          <p className={`text-sm font-semibold ${summaryData.totalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
             {summaryData.totalPnL >= 0 ? '+' : ''}{formatINR(summaryData.totalPnL)} ({formatPercent(summaryData.totalPnLPercent)})
           </p>
         </div>
@@ -532,7 +532,7 @@ export default function AppShell() {
         onOpenMobileAlerts={openMobileAlerts}
       />
 
-      <div className="max-w-[1720px] mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-6 space-y-3.5 sm:space-y-6 pb-[calc(env(safe-area-inset-bottom,0px)+5.5rem)] sm:pb-8">
+      <div className="max-w-[1720px] mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-6 space-y-3.5 sm:space-y-6 pb-[calc(env(safe-area-inset-bottom,0px)+7.5rem)] sm:pb-8">
         {isUsingCachedData && (
           <div className="flex flex-col gap-2 rounded-[var(--radius-medium)] border border-[var(--accent-blue)]/30 bg-[var(--accent-blue-soft)] px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-[var(--accent-blue)] sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -749,12 +749,12 @@ export default function AppShell() {
                                       <Trash2 size={11} />
                                     </button>
                                   </div>
-                                  <Badge variant={pnlGain ? 'positive' : 'negative'} className="text-[10px] py-0.5 px-2 font-extrabold">
+                                  <Badge variant={pnlGain ? 'positive' : 'negative'} className="text-[10px] py-0.5 px-2 font-bold">
                                     {formatPercent(p.totalPnLPercent, 1)}
                                   </Badge>
                                 </div>
                               </div>
-                              <p className={`text-2xl font-extrabold text-[var(--text-primary)] text-financial tnum tracking-tight transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>
+                              <p className={`text-2xl font-bold text-[var(--text-primary)] tnum tracking-tight transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>
                                 {formatINR(p.totalCurrentValue)}
                               </p>
                               <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">

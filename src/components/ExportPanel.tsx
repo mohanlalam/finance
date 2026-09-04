@@ -724,7 +724,7 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
             <div className="bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] overflow-hidden">
               <div className="px-3 py-2 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex items-center justify-between text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
                 <span>Holdings Preview ({importRows.length} stocks)</span>
-                <span className="text-[var(--accent-blue)] font-extrabold">Total: ₹{importRows.reduce((sum, r) => sum + (r.qty * r.avg_price), 0).toLocaleString('en-IN')}</span>
+                <span className="text-[var(--accent-blue)] font-bold tnum">Total: ₹{importRows.reduce((sum, r) => sum + (r.qty * r.avg_price), 0).toLocaleString('en-IN')}</span>
               </div>
               <div className="max-h-48 overflow-y-auto divide-y divide-[var(--border-subtle)]">
                 {importRows.slice(0, 20).map((r, i) => (

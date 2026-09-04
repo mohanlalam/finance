@@ -319,11 +319,11 @@ function Header({
                                     e.stopPropagation();
                                     onDismissAlert(alert.id);
                                   }}
-                                  className="w-6 h-6 flex items-center justify-center rounded-[var(--radius-small)] text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--surface)] transition-colors cursor-pointer shrink-0 opacity-70 group-hover:opacity-100"
+                                  className="w-8 h-8 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-[var(--radius-small)] text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--surface)] transition-colors cursor-pointer shrink-0 opacity-70 group-hover:opacity-100 touch-manipulation"
                                   aria-label="Dismiss alert"
                                   title="Dismiss alert"
                                 >
-                                  <X size={12} />
+                                  <X size={13} />
                                 </button>
                               </div>
                             );
@@ -343,13 +343,13 @@ function Header({
                 onClick={() => setOpenMobileMenu((prev) => !prev)}
                 aria-label="Settings"
                 aria-expanded={openMobileMenu}
-                className={`relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] active:scale-95 transition-all duration-150 cursor-pointer ${
+                className={`relative w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] active:scale-95 transition-all duration-150 cursor-pointer touch-manipulation ${
                   openMobileMenu ? 'ring-2 ring-[var(--accent-blue)] text-[var(--accent-blue)] bg-[var(--surface)]' : ''
                 }`}
               >
-                <Settings size={16} />
+                <Settings size={17} />
                 {visibleAlerts.length > 0 && (
-                  <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-[var(--negative)] rounded-full ring-2 ring-[var(--surface)] animate-pulse" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--negative)] rounded-full ring-2 ring-[var(--surface)] animate-pulse" />
                 )}
               </button>
 

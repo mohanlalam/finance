@@ -117,7 +117,7 @@ export default function StocksView({
                 <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Total Family Stocks &amp; ETFs
                 </h3>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30 uppercase tracking-wider shrink-0">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-sky-500/15 text-sky-700 dark:text-sky-400 border border-sky-500/30 uppercase tracking-wider shrink-0">
                   Combined
                 </span>
               </div>

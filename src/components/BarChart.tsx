@@ -90,7 +90,7 @@ function BarChart({ portfolios }: BarChartProps) {
               Invested vs Current
             </h3>
             <span
-              className={`text-[10.5px] font-extrabold px-1.5 py-0.5 rounded-[var(--radius-small)] tnum inline-flex items-center gap-0.5 ${
+              className={`text-[11px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] tnum inline-flex items-center gap-0.5 ${
                 aggregate.pct >= 0
                   ? 'bg-[var(--positive-soft)] text-[var(--positive)]'
                   : 'bg-[var(--negative-soft)] text-[var(--negative)]'
@@ -287,7 +287,7 @@ function BarChart({ portfolios }: BarChartProps) {
                         x={groupCenterX}
                         y={paddingTop + chartHeight + 28}
                         textAnchor="middle"
-                        className={`text-[10px] font-extrabold tnum ${
+                        className={`text-[10px] font-bold tnum ${
                           p.totalPnLPercent >= 0 ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
                         }`}
                       >
@@ -413,7 +413,7 @@ function BarChart({ portfolios }: BarChartProps) {
                         x={groupCenterX}
                         y={isGain ? barY - 4 : barY + barHeight + 10}
                         textAnchor="middle"
-                        className={`font-black text-[9.5px] tnum ${
+                        className={`font-bold text-[10px] tnum ${
                           isGain ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
                         }`}
                       >
@@ -425,7 +425,7 @@ function BarChart({ portfolios }: BarChartProps) {
                         x={groupCenterX}
                         y={paddingTop + chartHeight + 16}
                         textAnchor="middle"
-                        className="fill-[var(--text-primary)] font-bold text-[10.5px]"
+                        className="fill-[var(--text-primary)] font-bold text-[11px]"
                       >
                         {shortName}
                       </text>
@@ -459,7 +459,7 @@ function BarChart({ portfolios }: BarChartProps) {
 
                     <div className="flex items-center gap-2 shrink-0">
                       <span
-                        className={`text-xs font-black tnum ${
+                        className={`text-xs font-bold tnum ${
                           isGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'
                         }`}
                       >
@@ -467,7 +467,7 @@ function BarChart({ portfolios }: BarChartProps) {
                         {isBalancesHidden ? '••••••' : formatINR(p.totalPnL)}
                       </span>
                       <span
-                        className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-[var(--radius-small)] tnum ${
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] tnum ${
                           isGain
                             ? 'bg-[var(--positive-soft)] text-[var(--positive)]'
                             : 'bg-[var(--negative-soft)] text-[var(--negative)]'

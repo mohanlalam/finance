@@ -398,7 +398,7 @@ export default function NetWorthTimelineChart({
               Net worth timeline
             </h3>
             {history.length < 2 && (
-              <span className="text-[9px] font-extrabold bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] px-2 py-0.5 rounded-[var(--radius-pill)] uppercase tracking-wider shrink-0">
+              <span className="text-[9px] font-bold bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] px-2 py-0.5 rounded-[var(--radius-pill)] uppercase tracking-wider shrink-0">
                 Simulated
               </span>
             )}
@@ -410,7 +410,7 @@ export default function NetWorthTimelineChart({
               {seriesMode === 'total' ? 'Stocks & FDs compound timeline' : seriesMode === 'both' ? 'Stocks vs FDs comparison' : seriesMode === 'stocks' ? 'Stocks & equity valuation' : 'Fixed Deposits accumulation'}
             </p>
             {periodPerformance && (
-              <span className={`inline-flex items-center gap-0.5 text-[11px] font-extrabold px-2 py-0.5 rounded-[var(--radius-small)] tnum whitespace-nowrap shrink-0 ${
+              <span className={`inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-[var(--radius-small)] tnum whitespace-nowrap shrink-0 ${
                 periodPerformance.isPositive ? 'text-[var(--positive)] bg-[var(--positive-soft)]' : 'text-[var(--negative)] bg-[var(--negative-soft)]'
               }`}>
                 {periodPerformance.isPositive ? <TrendingUp size={11} aria-hidden="true" /> : <TrendingDown size={11} aria-hidden="true" />}
@@ -480,7 +480,7 @@ export default function NetWorthTimelineChart({
             onClick={() => setSeriesMode('fd')}
             className={`px-2.5 py-1 rounded-[var(--radius-small)] font-bold text-xs transition-all ios-press shrink-0 flex items-center gap-1.5 ${
               seriesMode === 'fd'
-                ? 'bg-[var(--warning)] text-white shadow-xs'
+                ? 'bg-[var(--cyan,#06b6d4)] text-white shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]'
             }`}
           >
@@ -504,7 +504,7 @@ export default function NetWorthTimelineChart({
             <div className="bg-[var(--surface)]/80 backdrop-blur-sm rounded-[var(--radius-pill)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] shadow-sm mb-1 border border-[var(--border-subtle)]">
               Sample Preview Mode
             </div>
-            <div className="text-[10.5px] font-medium text-[var(--text-tertiary)] bg-[var(--surface-secondary)]/60 px-2.5 py-0.5 rounded-[var(--radius-pill)]">
+            <div className="text-[11px] font-medium text-[var(--text-tertiary)] bg-[var(--surface-secondary)]/60 px-2.5 py-0.5 rounded-[var(--radius-pill)]">
               Add assets to track your wealth trajectory over time
             </div>
           </div>
@@ -530,8 +530,8 @@ export default function NetWorthTimelineChart({
               <stop offset="100%" stopColor="#387ed1" stopOpacity="0.0" />
             </linearGradient>
             <linearGradient id="fdAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.22" />
-              <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
@@ -610,7 +610,7 @@ export default function NetWorthTimelineChart({
               <path
                 d={fdPaths.linePath}
                 fill="none"
-                stroke="#f59e0b"
+                stroke="#06b6d4"
                 strokeWidth={2.2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -676,8 +676,8 @@ export default function NetWorthTimelineChart({
                     r={isHovered ? 5 : 3}
                     className={`transition-all ${
                       isHovered
-                        ? 'fill-[#f59e0b] stroke-[var(--surface)]'
-                        : 'fill-transparent hover:fill-[#f59e0b]/20'
+                        ? 'fill-[#06b6d4] stroke-[var(--surface)]'
+                        : 'fill-transparent hover:fill-[#06b6d4]/20'
                     }`}
                     strokeWidth={isHovered ? 2 : 0}
                   />
@@ -698,22 +698,22 @@ export default function NetWorthTimelineChart({
           >
             {/* Tooltip Header */}
             <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-1">
-              <span className="text-[10px] text-[var(--text-tertiary)] font-extrabold uppercase tracking-wider">
+              <span className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">
                 {(activeHoverItem as { formattedDate?: string }).formattedDate || activeHoverItem.snapshot_date}
               </span>
-              <span className="text-[9.5px] font-bold text-[var(--text-secondary)]">Historical Pointer</span>
+              <span className="text-[10px] font-bold text-[var(--text-secondary)]">Historical Pointer</span>
             </div>
 
             {/* Total Net Worth */}
             <div className="flex justify-between items-center">
               <span className="font-semibold text-[var(--text-secondary)]">Total (Stocks + FDs)</span>
-              <span className="font-extrabold text-[var(--text-primary)] tnum">
+              <span className="font-bold text-[var(--text-primary)] tnum">
                 {formatINR(activeHoverItem.total_value)}
               </span>
             </div>
 
             {/* Stocks Breakdown */}
-            <div className="flex justify-between items-center text-[10.5px]">
+            <div className="flex justify-between items-center text-xs">
               <span className="flex items-center gap-1 text-[var(--text-secondary)]">
                 <span className="w-2 h-2 rounded-full bg-[#387ed1]" />
                 Stocks &amp; ETFs
@@ -724,12 +724,12 @@ export default function NetWorthTimelineChart({
             </div>
 
             {/* Fixed Deposits Breakdown */}
-            <div className="flex justify-between items-center text-[10.5px]">
+            <div className="flex justify-between items-center text-xs">
               <span className="flex items-center gap-1 text-[var(--text-secondary)]">
-                <span className="w-2 h-2 rounded-full bg-[#f59e0b]" />
+                <span className="w-2 h-2 rounded-full bg-[#06b6d4]" />
                 Fixed Deposits
               </span>
-              <span className="font-bold text-[#f59e0b] tnum">
+              <span className="font-bold text-[#06b6d4] tnum">
                 {formatINR(activeHoverItem.fd_value || 0)}
               </span>
             </div>

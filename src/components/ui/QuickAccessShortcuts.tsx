@@ -34,7 +34,7 @@ export function QuickAccessShortcuts({ activeAsset, onSelectAsset }: QuickAccess
     <div className="apple-card p-4 sm:p-5 transition-all mt-5">
       <div className="flex items-center justify-between mb-3.5">
         <div>
-          <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">
+          <h3 className="text-sm font-bold text-[var(--text-primary)] tracking-tight">
             Quick Asset Navigation
           </h3>
           <p className="text-xs text-[var(--text-secondary)] mt-0.5">
@@ -62,7 +62,7 @@ export function QuickAccessShortcuts({ activeAsset, onSelectAsset }: QuickAccess
               <div className={`w-9 h-9 rounded-[var(--radius-small)] flex items-center justify-center transition-transform group-hover:scale-110 mb-1.5 ${item.bg} ${item.color}`}>
                 <Icon size={18} aria-hidden="true" />
               </div>
-              <span className={`text-[11px] font-bold tracking-tight line-clamp-1 ${isActive ? 'text-[var(--accent-blue)] font-extrabold' : 'text-[var(--text-primary)]'}`}>
+              <span className={`text-[11px] font-bold tracking-tight line-clamp-1 ${isActive ? 'text-[var(--accent-blue)]' : 'text-[var(--text-primary)]'}`}>
                 {item.shortLabel}
               </span>
             </button>

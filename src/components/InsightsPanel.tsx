@@ -364,7 +364,7 @@ export default React.memo(function InsightsPanel({
         <div className="apple-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[var(--border-subtle)] hover:border-[var(--accent-blue)]/50 transition-all">
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-12 h-12 rounded-[var(--radius-medium)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex flex-col items-center justify-center shrink-0 border border-[var(--accent-blue)]/30">
-              <span className="text-base font-black leading-none tnum">{healthSummary.score}</span>
+              <span className="text-base font-bold leading-none tnum">{healthSummary.score}</span>
               <span className="text-[8px] font-bold opacity-80 uppercase">Score</span>
             </div>
             <div className="min-w-0">
@@ -402,9 +402,9 @@ export default React.memo(function InsightsPanel({
             </div>
             <div className="min-w-0">
               <p className="text-xs font-bold text-[var(--text-primary)]">
-                Real Estate Yield: <span className="text-[var(--accent-blue)] font-extrabold tnum">{realEstateMetrics.grossYield.toFixed(2)}% p.a.</span>
+                Real Estate Yield: <span className="text-[var(--accent-blue)] font-bold tnum">{realEstateMetrics.grossYield.toFixed(2)}% p.a.</span>
               </p>
-              <p className="text-[11px] text-[var(--text-tertiary)] truncate">
+              <p className="text-[11px] text-[var(--text-tertiary)] truncate tnum">
                 {realEstateMetrics.propertyCount} propert{realEstateMetrics.propertyCount > 1 ? 'ies' : 'y'} · {formatINR(realEstateMetrics.totalVal)} val · {formatINR(realEstateMetrics.totalMonthlyRental)}/mo rental
               </p>
             </div>

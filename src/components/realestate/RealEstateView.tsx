@@ -188,7 +188,7 @@ export function RealEstateView({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-[var(--border-subtle)] pb-2 sm:pb-2.5">
           {/* Left: Title & Subtitle */}
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[var(--radius-small)] bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[var(--radius-small)] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
               <Building2 size={15} />
             </div>
             <div className="min-w-0">
@@ -196,7 +196,7 @@ export function RealEstateView({
                 <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Total Family Real Estate
                 </h3>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 uppercase tracking-wider shrink-0">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 uppercase tracking-wider shrink-0">
                   Combined
                 </span>
               </div>
@@ -204,6 +204,16 @@ export function RealEstateView({
                 Aggregated land, residential &amp; commercial properties
               </p>
             </div>
+          </div>
+
+          {/* Right: Aggregate Summary Badges */}
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
+            <span className="flex items-center gap-1 text-[11px] font-semibold text-[var(--positive)] bg-[var(--positive-soft)] px-2 py-0.5 rounded-[var(--radius-small)] tnum">
+              {familyRealEstateSummary.totalProperties} Properties
+            </span>
+            <span className="text-[11px] font-medium text-[var(--text-tertiary)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-[var(--radius-small)] hidden sm:inline-block tnum">
+              Click member to filter
+            </span>
           </div>
         </div>
 
@@ -282,7 +292,7 @@ export function RealEstateView({
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1">
-                          <p className="text-[10.5px] sm:text-xs font-bold text-[var(--text-primary)] truncate">
+                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">
                             {m.label}
                           </p>
                           {isSelected && (
@@ -291,21 +301,21 @@ export function RealEstateView({
                             </span>
                           )}
                         </div>
-                        <p className="text-[9.5px] sm:text-[10px] text-[var(--text-tertiary)] hidden sm:block">
+                        <p className="text-[10px] text-[var(--text-tertiary)] hidden sm:block">
                           {m.count} propert{m.count === 1 ? 'y' : 'ies'}
                         </p>
                       </div>
                     </div>
                     <div className="text-left sm:text-right shrink-0 mt-1 sm:mt-0">
                       {m.count === 0 ? (
-                        <span className="text-[10.5px] sm:text-xs text-[var(--text-tertiary)] font-normal block">—</span>
+                        <span className="text-xs text-[var(--text-tertiary)] font-normal block">—</span>
                       ) : (
                         <>
-                          <p className="text-[10.5px] sm:text-xs font-bold text-emerald-700 dark:text-emerald-400 tnum truncate">
+                          <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 tnum truncate">
                             {formatINR(m.valuation)}
                           </p>
-                          <p className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--text-secondary)] tnum truncate">
-                            Inv: {formatINR(m.invested)}
+                          <p className="text-[10px] font-semibold text-[var(--text-secondary)] tnum truncate">
+                            {m.count} held
                           </p>
                         </>
                       )}

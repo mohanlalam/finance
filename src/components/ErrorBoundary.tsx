@@ -51,7 +51,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               </svg>
             </div>
 
-            <h2 className="text-xl font-extrabold text-slate-100 mb-2">Something went wrong</h2>
+            <h2 className="text-xl font-bold text-slate-100 mb-2">Something went wrong</h2>
             <p className="text-xs text-slate-400 mb-6 leading-relaxed">
               An unexpected error occurred while loading this view. Our secure database session remains safe.
             </p>

@@ -233,7 +233,7 @@ export function SIPView({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-[var(--border-subtle)] pb-2 sm:pb-2.5">
           {/* Left: Title & Subtitle */}
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[var(--radius-small)] bg-teal-500/20 text-teal-500 border border-teal-500/30 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[var(--radius-small)] bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30 flex items-center justify-center shrink-0">
               <TrendingUp size={15} />
             </div>
             <div className="min-w-0">
@@ -241,7 +241,7 @@ export function SIPView({
                 <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Total Family Mutual Funds &amp; SIPs
                 </h3>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30 uppercase tracking-wider shrink-0">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30 uppercase tracking-wider shrink-0">
                   Combined
                 </span>
               </div>
@@ -249,6 +249,16 @@ export function SIPView({
                 Aggregated equity &amp; debt schemes across family portfolios
               </p>
             </div>
+          </div>
+
+          {/* Right: Aggregate Summary Badges */}
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
+            <span className="flex items-center gap-1 text-[11px] font-semibold text-[var(--positive)] bg-[var(--positive-soft)] px-2 py-0.5 rounded-[var(--radius-small)] tnum">
+              {familySIPSummary.totalCount} Active Schemes
+            </span>
+            <span className="text-[11px] font-medium text-[var(--text-tertiary)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-[var(--radius-small)] hidden sm:inline-block tnum">
+              {formatINR(familySIPSummary.totalMonthly)}/mo SIP &bull; Click member to filter
+            </span>
           </div>
         </div>
 
@@ -316,8 +326,8 @@ export function SIPView({
                     onClick={() => setSelectedMember((prev) => (prev === m.name ? 'all' : m.name))}
                     className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-1.5 sm:p-2 min-h-[44px] justify-center rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press min-w-0 ${
                       isSelected
-                        ? 'bg-[var(--surface-secondary)] border-teal-500 ring-1 ring-teal-500/30 shadow-xs'
-                        : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-teal-500/40'
+                        ? 'bg-[var(--surface-secondary)] border-purple-500 ring-1 ring-purple-500/30 shadow-xs'
+                        : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-purple-500/40'
                     }`}
                     title={`Click to filter ${m.label}'s mutual funds`}
                   >
@@ -327,29 +337,29 @@ export function SIPView({
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1">
-                          <p className="text-[10.5px] sm:text-xs font-bold text-[var(--text-primary)] truncate">
+                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">
                             {m.label}
                           </p>
                           {isSelected && (
-                            <span className="hidden xs:inline text-[8px] font-bold px-1 rounded bg-teal-500/20 text-teal-700 dark:text-teal-400">
+                            <span className="hidden xs:inline text-[8px] font-bold px-1 rounded bg-purple-500/20 text-purple-700 dark:text-purple-400">
                               Active
                             </span>
                           )}
                         </div>
-                        <p className="text-[9.5px] sm:text-[10px] text-[var(--text-tertiary)] hidden sm:block">
+                        <p className="text-[10px] text-[var(--text-tertiary)] hidden sm:block">
                           {m.count} scheme{m.count === 1 ? '' : 's'}
                         </p>
                       </div>
                     </div>
                     <div className="text-left sm:text-right shrink-0 mt-1 sm:mt-0">
                       {m.count === 0 ? (
-                        <span className="text-[10.5px] sm:text-xs text-[var(--text-tertiary)] font-normal block">—</span>
+                        <span className="text-xs text-[var(--text-tertiary)] font-normal block">—</span>
                       ) : (
                         <>
-                          <p className="text-[10.5px] sm:text-xs font-bold text-teal-700 dark:text-teal-400 tnum truncate">
+                          <p className="text-xs font-bold text-purple-700 dark:text-purple-400 tnum truncate">
                             {formatINR(m.monthly)}/mo
                           </p>
-                          <p className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--positive)] tnum truncate">
+                          <p className="text-[10px] font-semibold text-[var(--positive)] tnum truncate">
                             {formatINR(m.current)}
                           </p>
                         </>
