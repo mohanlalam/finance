@@ -42,13 +42,13 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
    - Client-side PIN entries are hashed with SHA-256 (`crypto.subtle.digest`) and sent via the `X-App-Pin` header.
    - Supabase Edge Functions (`holdings-crud`, `verify-pin`, `snapshot-net-worth`, and `market-data`) validate this header directly against the server-side `APP_PIN_HASH` environment secret.
    - If the server PIN secret is missing or unconfigured, functions **Fail Closed (HTTP 503)** immediately.
-2. **Brute-Force & Rate-Limiting Protection**:
-   - IP-based sliding window rate limiter (`MAX_FAILED_ATTEMPTS = 5`, `RATE_WINDOW_MS = 5 min`) protects all PIN-locked endpoints.
+2. **Brute-Force & CGNAT Rate-Limiting Protection**:
+   - Composite IP and client device sliding window rate limiter (`MAX_FAILED_ATTEMPTS = 5`, `RATE_WINDOW_MS = 5 min`) protects all PIN-locked endpoints. Keying on `IP + Device Identifier` ensures individual failed attempts never lock out family members sharing the same mobile carrier CGNAT gateway (e.g., Jio, Airtel).
    - Exceeding attempts returns **HTTP 429 (Too Many Requests)** with standard `Retry-After` headers.
 3. **Private Document Storage with Time-Limited Signed URLs**:
    - The `investment-documents` bucket is strictly **private (`public = false`)** with all direct public read/write policies dropped.
    - Attachments are accessed via short-lived signed URLs issued by PIN-authenticated Edge Functions (the client requests 60 seconds; the backend supports 60–3600 seconds with a 300-second default).
-   - Client-side storage path generators enforce UUID path randomization and sanitization against directory traversal (`../`).
+   - Storage upload handler unconditionally strips any client-provided UUID prefix and generates an authoritative server-side UUID to guarantee uniqueness and prevent collision or path spoofing.
 4. **Biometric Hardware-Backed Authentication**:
    - WebAuthn platform authenticators enable 1-second FaceID, TouchID, and Windows Hello unlocking without transmitting credentials over the wire.
 
@@ -218,7 +218,7 @@ project antigravity/
 The repository enforces strict verification across unit, integration, and browser end-to-end suites:
 
 ```bash
-# Run Vitest test suite across 51 test files and 271 tests (100% passing)
+# Run Vitest test suite across 52 test files and 284 tests (100% passing)
 npm test
 
 # Run Playwright browser E2E tests (9 tests: 6 smoke + 3 deep CRUD workflows)

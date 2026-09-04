@@ -1,4 +1,4 @@
-import { clearSessionVerification, ensureHashedPin, getSessionToken } from './sessionStore';
+import { clearSessionVerification, ensureHashedPin, getSessionToken, getDeviceId } from './sessionStore';
 
 function sanitizeEnv(val: string | undefined): string {
   if (!val) return '';
@@ -86,6 +86,11 @@ export async function getApiAuthHeaders(contentType?: string): Promise<Record<st
 
   if (hashedPin) {
     headers['X-App-Pin'] = hashedPin;
+  }
+
+  const deviceId = getDeviceId();
+  if (deviceId) {
+    headers['X-Client-Info'] = `vault-device:${deviceId}`;
   }
 
   if (SUPABASE_ANON_KEY) {

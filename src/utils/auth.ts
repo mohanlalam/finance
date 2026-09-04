@@ -17,6 +17,7 @@ import {
   getLastAuthTime,
   updateLastAuthTime,
   isReauthRequired,
+  getDeviceId,
 } from './sessionStore';
 
 export {
@@ -36,6 +37,7 @@ export {
   getLastAuthTime,
   updateLastAuthTime,
   isReauthRequired,
+  getDeviceId,
 };
 
 export async function verifyPin(pin: string): Promise<boolean> {

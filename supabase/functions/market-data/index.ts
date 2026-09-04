@@ -11,7 +11,7 @@ function getCorsHeaders(req: Request) {
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin, X-Session-Token",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin, X-Session-Token, X-Device-Id",
   };
 }
 
@@ -120,9 +120,16 @@ function getClientIp(req: Request): string {
   return "unknown";
 }
 
-function checkRateLimit(ip: string): { allowed: boolean; retryAfterSeconds: number } {
+function getRateLimitKey(req: Request): string {
+  const clientIp = getClientIp(req);
+  // Composite device/client keying to mitigate Indian mobile CGNAT lockout (Jio/Airtel)
+  const deviceId = req.headers.get("x-device-id")?.trim() || req.headers.get("x-client-info")?.trim() || req.headers.get("user-agent")?.trim() || "default-device";
+  return `${clientIp}:${deviceId}`;
+}
+
+function checkRateLimit(key: string): { allowed: boolean; retryAfterSeconds: number } {
   const now = Date.now();
-  const record = pinFailedAttempts.get(ip);
+  const record = pinFailedAttempts.get(key);
 
   if (!record || (now - record.firstAttempt) > RATE_WINDOW_MS) {
     return { allowed: true, retryAfterSeconds: 0 };
@@ -136,18 +143,18 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfterSeconds: numb
   return { allowed: true, retryAfterSeconds: 0 };
 }
 
-function recordFailedAttempt(ip: string): void {
+function recordFailedAttempt(key: string): void {
   const now = Date.now();
-  const record = pinFailedAttempts.get(ip);
+  const record = pinFailedAttempts.get(key);
   if (!record || (now - record.firstAttempt) > RATE_WINDOW_MS) {
-    pinFailedAttempts.set(ip, { count: 1, firstAttempt: now });
+    pinFailedAttempts.set(key, { count: 1, firstAttempt: now });
   } else {
     record.count += 1;
   }
 }
 
-function clearRateLimit(ip: string): void {
-  pinFailedAttempts.delete(ip);
+function clearRateLimit(key: string): void {
+  pinFailedAttempts.delete(key);
 }
 
 async function fetchQuote(ticker: string, yahooSymbol: string): Promise<Omit<QuoteResult, "ticker">> {
@@ -204,8 +211,8 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const clientIp = getClientIp(req);
-  const rateCheck = checkRateLimit(clientIp);
+  const rateLimitKey = getRateLimitKey(req);
+  const rateCheck = checkRateLimit(rateLimitKey);
   if (!rateCheck.allowed) {
     return new Response(
       JSON.stringify({
@@ -255,15 +262,15 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!isValid) {
-    recordFailedAttempt(clientIp);
+    recordFailedAttempt(rateLimitKey);
     return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
 
-  // Valid PIN: clear failed attempts for this client IP
-  clearRateLimit(clientIp);
+  // Valid PIN: clear failed attempts for this composite client key
+  clearRateLimit(rateLimitKey);
 
   try {
     const { symbols }: { symbols: SymbolRequest[] } = await req.json();

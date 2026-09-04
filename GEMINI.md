@@ -166,13 +166,13 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 ### 7. Testing Strategy
 * **Test Conventions & Locations**:
-  * Unit and pure calculation tests: located under `src/domains/__tests__/` (e.g., `portfolioTotals.test.ts`, `taxHarvesting.test.ts`, `goldValuation.test.ts`, `dataQuality.test.ts`, `backupValidator.test.ts`, `wealthStrategist.test.ts`, `entityDisambiguationService.test.ts`, `evidenceHeatmapService.test.ts`).
-  * Component & formatter tests: located under `src/utils/__tests__/` and `src/hooks/__tests__/` (e.g. `imageEnhancer.test.ts`).
+  * Unit and pure calculation tests: located under `src/domains/__tests__/` (e.g., `portfolioTotals.test.ts`, `taxHarvesting.test.ts`, `goldValuation.test.ts`, `dataQuality.test.ts`, `backupValidator.test.ts`, `wealthStrategist.test.ts`, `entityDisambiguationService.test.ts`, `evidenceHeatmapService.test.ts`, `authSecurity.test.ts`).
+  * Component & formatter tests: located under `src/utils/__tests__/` and `src/hooks/__tests__/` (e.g. `imageEnhancer.test.ts`, `auth.test.ts`).
 * **Mocking & Environment Isolation**:
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 51 test files and 271 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 52 test files and 284 unit/integration test cases (100% passing).
 
 ---
 

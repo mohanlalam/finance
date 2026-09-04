@@ -7,6 +7,7 @@ const CUSTOM_VERIFIER_KEY = 'custom_app_pin_verifier';
 const CUSTOM_LENGTH_KEY = 'custom_app_pin_length';
 const OFFLINE_VERIFIER_KEY = 'finance_offline_pin_verifier';
 const LAST_AUTH_TIME_KEY = 'finance_last_auth_time';
+const DEVICE_ID_KEY = 'finance_device_id';
 
 // Legacy keys to purge/migrate
 const LEGACY_CUSTOM_HASH_KEY = 'custom_app_pin_hash';
@@ -15,6 +16,26 @@ const LEGACY_CUSTOM_HASH_KEY = 'custom_app_pin_hash';
 let _inMemorySessionToken: string | null = null;
 let _inMemoryHashedPin: string | null = null;
 let _inMemoryLastAuthTime: number = Date.now();
+let _inMemoryDeviceId: string | null = null;
+
+export function getDeviceId(): string {
+  if (_inMemoryDeviceId) return _inMemoryDeviceId;
+  if (typeof localStorage !== 'undefined') {
+    let stored = localStorage.getItem(DEVICE_ID_KEY);
+    if (!stored) {
+      stored = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `dev-${Math.random().toString(36).substring(2, 15)}`;
+      try {
+        localStorage.setItem(DEVICE_ID_KEY, stored);
+      } catch {
+        // Safe to ignore in private browsing storage limits
+      }
+    }
+    _inMemoryDeviceId = stored;
+    return stored;
+  }
+  _inMemoryDeviceId = `dev-${Math.random().toString(36).substring(2, 15)}`;
+  return _inMemoryDeviceId;
+}
 
 // Automatic security hygiene: purge legacy plaintext/reusable PIN hashes from persistent storage
 try {

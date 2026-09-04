@@ -11,7 +11,7 @@ function getCorsHeaders(req: Request) {
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin, X-Session-Token, X-Gemini-Key",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin, X-Session-Token, X-Gemini-Key, X-Device-Id",
   };
 }
 
@@ -76,7 +76,7 @@ async function verifySessionToken(token: string, secret: string): Promise<boolea
   }
 }
 
-// In-memory rate limiting store (max 20 requests per 60s window per IP)
+// In-memory rate limiting store (max 20 requests per 60s window per IP/device)
 const requestRateMap: Map<string, { count: number; firstAttempt: number }> = new Map();
 const MAX_REQUESTS = 20;
 const WINDOW_MS = 60 * 1000;
@@ -99,12 +99,19 @@ function getClientIp(req: Request): string {
   return "unknown";
 }
 
-function checkRateLimit(ip: string): { allowed: boolean; retryAfterSeconds: number } {
+function getRateLimitKey(req: Request): string {
+  const clientIp = getClientIp(req);
+  // Composite device/client keying to mitigate Indian mobile CGNAT lockout (Jio/Airtel)
+  const deviceId = req.headers.get("x-device-id")?.trim() || req.headers.get("x-client-info")?.trim() || req.headers.get("user-agent")?.trim() || "default-device";
+  return `${clientIp}:${deviceId}`;
+}
+
+function checkRateLimit(key: string): { allowed: boolean; retryAfterSeconds: number } {
   const now = Date.now();
-  const record = requestRateMap.get(ip);
+  const record = requestRateMap.get(key);
 
   if (!record || (now - record.firstAttempt) > WINDOW_MS) {
-    requestRateMap.set(ip, { count: 1, firstAttempt: now });
+    requestRateMap.set(key, { count: 1, firstAttempt: now });
     return { allowed: true, retryAfterSeconds: 0 };
   }
 
@@ -133,8 +140,8 @@ Deno.serve(async (req: Request) => {
   }
 
   // Rate limiting check
-  const clientIp = getClientIp(req);
-  const { allowed, retryAfterSeconds } = checkRateLimit(clientIp);
+  const rateLimitKey = getRateLimitKey(req);
+  const { allowed, retryAfterSeconds } = checkRateLimit(rateLimitKey);
   if (!allowed) {
     return new Response(
       JSON.stringify({

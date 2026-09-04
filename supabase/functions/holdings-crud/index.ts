@@ -11,7 +11,7 @@ function getCorsHeaders(req: Request) {
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin, X-Session-Token",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin, X-Session-Token, X-Device-Id",
   };
 }
 
@@ -108,9 +108,16 @@ function getClientIp(req: Request): string {
   return "unknown";
 }
 
-function checkRateLimit(ip: string): { allowed: boolean; retryAfterSeconds: number } {
+function getRateLimitKey(req: Request): string {
+  const clientIp = getClientIp(req);
+  // Composite device/client keying to mitigate Indian mobile CGNAT lockout (Jio/Airtel)
+  const deviceId = req.headers.get("x-device-id")?.trim() || req.headers.get("x-client-info")?.trim() || req.headers.get("user-agent")?.trim() || "default-device";
+  return `${clientIp}:${deviceId}`;
+}
+
+function checkRateLimit(key: string): { allowed: boolean; retryAfterSeconds: number } {
   const now = Date.now();
-  const record = pinFailedAttempts.get(ip);
+  const record = pinFailedAttempts.get(key);
 
   if (!record || (now - record.firstAttempt) > RATE_WINDOW_MS) {
     return { allowed: true, retryAfterSeconds: 0 };
@@ -124,18 +131,18 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfterSeconds: numb
   return { allowed: true, retryAfterSeconds: 0 };
 }
 
-function recordFailedAttempt(ip: string): void {
+function recordFailedAttempt(key: string): void {
   const now = Date.now();
-  const record = pinFailedAttempts.get(ip);
+  const record = pinFailedAttempts.get(key);
   if (!record || (now - record.firstAttempt) > RATE_WINDOW_MS) {
-    pinFailedAttempts.set(ip, { count: 1, firstAttempt: now });
+    pinFailedAttempts.set(key, { count: 1, firstAttempt: now });
   } else {
     record.count += 1;
   }
 }
 
-function clearRateLimit(ip: string): void {
-  pinFailedAttempts.delete(ip);
+function clearRateLimit(key: string): void {
+  pinFailedAttempts.delete(key);
 }
 
 Deno.serve(async (req: Request) => {
@@ -154,8 +161,8 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const clientIp = getClientIp(req);
-  const rateCheck = checkRateLimit(clientIp);
+  const rateLimitKey = getRateLimitKey(req);
+  const rateCheck = checkRateLimit(rateLimitKey);
   if (!rateCheck.allowed) {
     return new Response(
       JSON.stringify({
@@ -205,15 +212,15 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!isValid) {
-    recordFailedAttempt(clientIp);
+    recordFailedAttempt(rateLimitKey);
     return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
 
-  // Valid PIN: clear failed attempts for this client IP
-  clearRateLimit(clientIp);
+  // Valid PIN: clear failed attempts for this composite client key
+  clearRateLimit(rateLimitKey);
 
   try {
     const url = new URL(req.url);
@@ -674,13 +681,13 @@ Deno.serve(async (req: Request) => {
         throw new Error("File and valid storage path are required");
       }
 
-      // Enforce server-side UUID in storage filename to guarantee uniqueness and prevent collision/overwriting
+      // Unconditionally strip any client-provided UUID prefix and generate server-side UUID to prevent collision and spoofing
       const segments = cleanPath.split("/");
-      const fileName = segments[segments.length - 1];
-      const uuidPrefixRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_/i;
-      if (!uuidPrefixRegex.test(fileName)) {
-        segments[segments.length - 1] = `${crypto.randomUUID()}_${fileName}`;
-      }
+      const rawFileName = segments[segments.length - 1].replace(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_/i,
+        ""
+      );
+      segments[segments.length - 1] = `${crypto.randomUUID()}_${rawFileName}`;
       const safePath = segments.join("/");
 
       const arrayBuffer = await file.arrayBuffer();

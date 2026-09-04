@@ -10,7 +10,7 @@ function getCorsHeaders(req: Request) {
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin, X-Session-Token",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-App-Pin, X-Session-Token, X-Device-Id",
   };
 }
 
@@ -55,7 +55,7 @@ const attempts: Map<string, { count: number; firstAttempt: number }> = new Map()
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 5 * 60 * 1000; // 5-minute window
 
-function getRateLimitKey(req: Request): string {
+function getClientIp(req: Request): string {
   // 1. Cloudflare Connecting IP (overwritten at edge by Cloudflare, cannot be spoofed by client)
   const cfIp = req.headers.get("cf-connecting-ip")?.trim();
   if (cfIp) return cfIp;
@@ -75,6 +75,13 @@ function getRateLimitKey(req: Request): string {
   }
 
   return "unknown";
+}
+
+function getRateLimitKey(req: Request): string {
+  const clientIp = getClientIp(req);
+  // Composite device/client keying to mitigate Indian mobile CGNAT lockout (Jio/Airtel)
+  const deviceId = req.headers.get("x-device-id")?.trim() || req.headers.get("x-client-info")?.trim() || req.headers.get("user-agent")?.trim() || "default-device";
+  return `${clientIp}:${deviceId}`;
 }
 
 function checkRateLimit(key: string): { allowed: boolean; retryAfterSeconds: number } {

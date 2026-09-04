@@ -1,8 +1,10 @@
 import { useCallback, useEffect } from 'react';
 import { portfolioService } from '../services/portfolioService';
+import { portfolioSyncService } from '../services/portfolioSyncService';
 import { offlineOutboxService } from '../services/offlineOutboxService';
 import { AssetPayload } from '../../../types/portfolio';
 import { AppApiError } from '../../../utils/apiClient';
+import { logger } from '../../../infrastructure/logging/logger';
 
 interface UsePortfolioMutationOptions {
   onReload: () => Promise<void>;
@@ -24,6 +26,20 @@ export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMu
   // Initialize auto-sync listener
   useEffect(() => {
     const cleanup = offlineOutboxService.initAutoSync(onReload);
+    return cleanup;
+  }, [onReload]);
+
+  // Active late-settlement reconciliation:
+  // If an upstream server write succeeds AFTER a client-side timeout has fired,
+  // reload the freshest portfolio data so local state never silently drifts from the database.
+  useEffect(() => {
+    const cleanup = portfolioSyncService.onLateSettle(async () => {
+      try {
+        await onReload();
+      } catch (err) {
+        logger.warn('Failed to reload portfolio after late mutation settlement', { error: String(err) });
+      }
+    });
     return cleanup;
   }, [onReload]);
 

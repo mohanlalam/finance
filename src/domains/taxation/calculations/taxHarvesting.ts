@@ -1,5 +1,5 @@
 import { Holding } from '../../../types/portfolio';
-import { INDIAN_TAX_RATES_2024 } from './capitalGains';
+import { CapitalGainsRates, INDIAN_TAX_RATES_2024 } from './capitalGains';
 
 export interface TaxHarvestingDetails {
   holding: Holding;
@@ -26,9 +26,12 @@ export interface TaxSummary {
 
 /**
  * Pure tax harvesting calculator distinguishing equity STCG (20%) / LTCG (12.5% over ₹1.25L)
- * from slab-rate debt and gold bullion assets.
+ * from slab-rate debt and gold bullion assets. Supports configurable multi-year tax rates.
  */
-export function calculateTaxHarvesting(holdings: Holding[]): TaxSummary {
+export function calculateTaxHarvesting(
+  holdings: Holding[],
+  rates: CapitalGainsRates = INDIAN_TAX_RATES_2024
+): TaxSummary {
   let unrealizedSTCG = 0;
   let unrealizedLTCG = 0;
   let unrealizedDebtOrGold = 0;
@@ -74,9 +77,9 @@ export function calculateTaxHarvesting(holdings: Holding[]): TaxSummary {
     }
   }
 
-  const STCG_RATE = INDIAN_TAX_RATES_2024.equitySTCG;
-  const LTCG_RATE = INDIAN_TAX_RATES_2024.equityLTCG;
-  const LTCG_EXEMPTION = INDIAN_TAX_RATES_2024.ltcgExemption;
+  const STCG_RATE = rates.equitySTCG;
+  const LTCG_RATE = rates.equityLTCG;
+  const LTCG_EXEMPTION = rates.ltcgExemption;
 
   const harvestableLosses = opportunities.reduce((sum, o) => sum + Math.abs(o.unrealizedPnL), 0);
 

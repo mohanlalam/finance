@@ -101,4 +101,33 @@ describe('PortfolioSyncService Mutex & Concurrency Controls', () => {
     const res = await syncService.runMutation(async () => 42);
     expect(res).toBe(42);
   });
+
+  it('triggers onLateSettle listener when a slow mutation resolves after client timeout', async () => {
+    let lateResult: unknown = null;
+    const unsubscribe = syncService.onLateSettle((result) => {
+      lateResult = result;
+    });
+
+    let resolveMutation!: (value: unknown) => void;
+    const deferredPromise = new Promise((res) => {
+      resolveMutation = res;
+    });
+
+    // Run mutation with 30ms timeout
+    const mutationPromise = syncService.runMutation(async () => deferredPromise, 30);
+
+    // Initial client expectation: times out after 30ms
+    await expect(mutationPromise).rejects.toThrow('Mutation timed out. Please try again.');
+    expect(lateResult).toBeNull();
+
+    // Now server operation finally settles in the background
+    resolveMutation({ status: 'db_write_success', id: 'holding_999' });
+
+    // Allow event loop ticks for execution
+    await new Promise((r) => setTimeout(r, 20));
+
+    expect(lateResult).toEqual({ status: 'db_write_success', id: 'holding_999' });
+
+    unsubscribe();
+  });
 });

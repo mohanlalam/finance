@@ -18,14 +18,19 @@ import {
   getLastAuthTime,
   updateLastAuthTime,
   isReauthRequired,
+  getDeviceId,
 } from '../auth';
-import { invokeFunction } from '../apiClient';
+import { invokeFunction, AppApiError } from '../apiClient';
 
 // Mock apiClient and biometrics
-vi.mock('../apiClient', () => ({
-  clearApiSessionCache: vi.fn(),
-  invokeFunction: vi.fn(),
-}));
+vi.mock('../apiClient', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../apiClient')>();
+  return {
+    ...actual,
+    clearApiSessionCache: vi.fn(),
+    invokeFunction: vi.fn(),
+  };
+});
 
 vi.mock('../biometrics', () => ({
   updateBiometricPinHash: vi.fn(),
@@ -151,6 +156,26 @@ describe('auth utility', () => {
       expect(ok).toBe(true);
       expect(isSessionVerified()).toBe(true);
       expect(getSessionToken()).toBe('server-issued-hmac-token');
+    });
+
+    it('propagates 503 Server PIN error rather than treating it as incorrect PIN', async () => {
+      vi.mocked(invokeFunction).mockRejectedValue(
+        new AppApiError('Server PIN configuration missing', 'server', { status: 503 })
+      );
+
+      await expect(verifyPin('1234')).rejects.toThrow('Server PIN configuration missing');
+      expect(isSessionVerified()).toBe(false);
+    });
+  });
+
+  describe('device identifier for CGNAT rate limiting', () => {
+    it('generates, persists, and reuses unique device id', () => {
+      const id1 = getDeviceId();
+      expect(id1).toBeTruthy();
+      expect(localStorage.getItem('finance_device_id')).toBe(id1);
+
+      const id2 = getDeviceId();
+      expect(id2).toBe(id1);
     });
   });
 
