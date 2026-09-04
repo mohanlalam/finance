@@ -65,7 +65,7 @@ export function RDFormModal({
       setNotes('');
     }
     setError('');
-  }, [editingAccount, isOpen, portfolioName]);
+  }, [editingAccount, isOpen, portfolioName, portfolioOptions]);
 
   const calculateMaturity = useCallback(() => {
     const p = parseFloat(monthlyDeposit);

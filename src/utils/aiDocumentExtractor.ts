@@ -533,7 +533,7 @@ export async function extractAssetFromDocument(
       if (proxyText) {
         rawText = proxyText;
       }
-    } catch (_proxyErr) {
+    } catch {
       // Edge function proxy offline or unavailable — fall through to direct Gemini API
     }
   }

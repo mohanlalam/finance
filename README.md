@@ -30,8 +30,9 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 - **Document Vault** — Secure attachment manager linked by asset class with expiry date tracking and upcoming deadline alerts.
 
 ### 🤖 AI Document Import & Assistant
-- **Smart AI Import (Quarantine & Review Workflow)** — Zero silent database writes. Scans broker statements, gold invoices, FD certificates, or insurance receipts using multi-model Gemini Vision into a quarantined side-by-side verification modal with inline field editing, instant non-blocking saves, and document vault linking.
-- **Deterministic Intent Classifier** — Client-side NLP engine parsing 17 financial intents (`NET_WORTH`, `PERFORMERS`, `MATURITY_TIMELINE`, `ALLOCATION_SPLIT`, `SPECIFIC_GOLD`, `SPECIFIC_FDS`, `INSURANCE_REMINDERS`, `FAMILY_BREAKDOWN`, etc.) with matched asset badge tags and zero hallucinated numbers.
+- **Smart AI Import (Quarantine & Review Workflow)** — Zero silent database writes. Scans broker statements, gold invoices, FD certificates, or insurance receipts using multi-model Gemini Vision through a secure server-side proxy (`gemini-proxy` Edge Function) into a quarantined side-by-side verification modal with inline field editing, instant non-blocking saves, and document vault linking.
+- **Deterministic Intent Classifier** — Modularized client-side NLP engine parsing 17 financial intents (`NET_WORTH`, `PERFORMERS`, `MATURITY_TIMELINE`, `ALLOCATION_SPLIT`, `SPECIFIC_GOLD`, `SPECIFIC_FDS`, `INSURANCE_REMINDERS`, `FAMILY_BREAKDOWN`, etc.) with matched asset badge tags and zero hallucinated numbers. Intent evaluation is split into focused domain modules (`wealthIntents`, `assetIntents`, `timelineIntents`, `performanceIntents`).
+- **Secure Gemini Proxy** — `gemini-proxy` Supabase Edge Function proxies all Gemini API calls server-side, protecting the API key from client exposure with IP-based sliding-window rate limiting (20 req/min), PIN validation, and graceful client fallback for offline/unconfigured environments.
 
 ---
 
@@ -93,6 +94,7 @@ External APIs & Databases (PostgreSQL, Supabase Functions, Yahoo Finance, AMFI, 
 ```text
 project antigravity/
 ├── index.html                    # HTML entry point
+├── e2e/                          # Playwright end-to-end test specs (smoke.spec.ts, crud.spec.ts)
 ├── src/
 │   ├── App.tsx                   # Lightweight entry gate with PIN Lock screen
 │   ├── MainApp.tsx               # Context providers, routing, and dashboard load gates
@@ -212,7 +214,7 @@ project antigravity/
 │   │   └── portfolio.ts          # Core TypeScript interfaces (Holding, NetWorthSnapshot, etc.)
 │   └── utils/                    # Shared pure utility modules (math, dates, formatters, storage, familyMemberConfig)
 ├── supabase/
-│   ├── functions/                # Deno Edge Functions (holdings-crud, market-data, snapshot-net-worth, verify-pin)
+│   ├── functions/                # Deno Edge Functions (gemini-proxy, holdings-crud, market-data, snapshot-net-worth, verify-pin)
 │   └── migrations/               # PostgreSQL schema migrations, indexes, and RLS policies
 ```
 
@@ -220,11 +222,14 @@ project antigravity/
 
 ## 🧪 Testing & Verification Pipeline
 
-The repository enforces strict verification before deployment:
+The repository enforces strict verification across unit, integration, and browser end-to-end suites:
 
 ```bash
-# Run Vitest test suite across 50 test files and 259 tests (100% passing)
+# Run Vitest test suite across 50 test files and 260 tests (100% passing)
 npm test
+
+# Run Playwright browser E2E tests (9 tests: 6 smoke + 3 deep CRUD workflows)
+npm run test:e2e
 
 # Run complete verification pipeline: ESLint + TypeScript typecheck + Vitest + Vite build
 npm run verify
@@ -235,7 +240,7 @@ npm run verify
 ## 🚀 Getting Started
 
 ### 1. Prerequisites
-- Node.js (v20+ required, v22 LTS recommended)
+- Node.js (v20+ required, v22 LTS recommended; `engines` set to `>=20`)
 - npm (v10+)
 - A Supabase project
 
@@ -251,12 +256,17 @@ Create a `.env` file in the root directory:
 ```env
 VITE_SUPABASE_URL=https://your-supabase-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
-VITE_GEMINI_API_KEY=your-gemini-api-key # Optional for AI Assistant
+VITE_APP_PIN=your-4-digit-pin
+VITE_GEMINI_API_KEY=your-gemini-api-key # Optional fallback if gemini-proxy is unconfigured
 ```
 
-Set the server-side PIN secret in Supabase:
+Set the server-side secrets in Supabase (never expose in client `.env`):
 ```bash
+# PIN hash (SHA-256 of PIN) for fail-closed Edge Function authentication
 npx supabase secrets set APP_PIN_HASH="<sha256_hash_of_pin>"
+
+# Gemini API key for the server-side gemini-proxy Edge Function
+npx supabase secrets set GEMINI_API_KEY="<your-gemini-api-key>"
 ```
 
 ### 4. Database Setup & Edge Functions
@@ -264,7 +274,7 @@ npx supabase secrets set APP_PIN_HASH="<sha256_hash_of_pin>"
 # Deploy PostgreSQL schema migrations
 npx supabase db push
 
-# Deploy Deno Edge Functions
+# Deploy all Deno Edge Functions
 npx supabase functions deploy --project-ref <project-ref> --no-verify-jwt
 ```
 
@@ -281,7 +291,8 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | Script | Command | Description |
 |---|---|---|
 | **Dev Server** | `npm run dev` | Start Vite dev server with HMR |
-| **Test Suite** | `npm test` | Run Vitest unit & integration tests (50 test files / 259 tests) |
+| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (50 test files / 260 tests) |
+| **E2E Tests** | `npm run test:e2e` | Run Playwright browser E2E tests (9 tests across smoke and CRUD specs) |
 | **Build** | `npm run build` | Production build to `dist/` |
 | **Preview** | `npm run preview` | Preview the production build locally |
 | **Lint** | `npm run lint` | Run ESLint checks |
