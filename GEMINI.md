@@ -134,8 +134,11 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 ### 5. App Shell, Security Gate & Navigation Router
 * **[App.tsx](src/App.tsx)**: Lightweight entry gate. Renders `PinLockScreen` from a clean, provider-free chunk. Once unlocked, dynamically imports and mounts `MainApp` using `React.lazy`. Prefetches `MainApp` during device idle time.
-* **[MainApp.tsx](src/MainApp.tsx)**: Hosts context providers (`ThemeProvider`, `PrivacyContext`, `ToastProvider`, `PortfolioProvider`), Router structure, and dashboard load gates.
+* **[MainApp.tsx](src/MainApp.tsx)**: Hosts context providers (`ThemeProvider`, `PrivacyContext`, `ToastProvider`, `PortfolioProvider`), Router structure, and dashboard load gates. Sets default route to `/:family/home`.
 * **[AppShell.tsx](src/layouts/AppShell.tsx)**: Core responsive layout manager combining `DesktopSidebar` with main content area, idle prefetching, and segmented mobile views (*"📊 Summary & Assets"* vs *"📈 Charts & AI"*).
+  * **Home Page Isolation (`activeAsset === 'home'`)**: Displays strictly the 4 core overview blocks: Summary Cards, Wealth Mosaic (asset class totals), Portfolio Insights, and the 2x2 Equalized Dashboard Widget Grid (Net Worth Timeline, Asset Allocation, Member Returns, and AI Portfolio Assistant placed last). Holding tables and shortcuts are excluded from Home for clean high-level visibility.
+  * **Asset Category Isolation (`activeAsset !== 'home'`)**: Clicking any asset in the sidebar (Stocks, FDs, RDs, SIPs, Gold, Real Estate, Insurance, Documents, Tax) isolates that category view and renders it starting cleanly from the top of the page.
+  * **Family Overview Navigation**: Clicking "Family Overview" in the sidebar or the "Portfolio Tracker" brand logo in the header cleanly and atomically routes to `#/all/home`.
 * **[PinLockScreen.tsx](src/components/PinLockScreen.tsx)** & **[biometrics.ts](src/utils/biometrics.ts)**: Aurora gradient passcode screen with 1-second FaceID / TouchID / Windows Hello platform unlocking and 4-digit PIN fallback with brute-force rate limiting.
 
 ---

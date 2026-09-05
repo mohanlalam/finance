@@ -224,25 +224,27 @@ The web view is designed for wide screens (`md: 768px` up to `2xl: 1720px`), emp
 |  🔄 Recurring Deposits        |                                                                               |
 |  💰 Mutual Fund SIPs          |  [ 2x2 EQUALIZED DASHBOARD WIDGET GRID (Height: 370px) ]                       |
 |  🥇 Physical & Digital Gold   |  +-----------------------------------+-------------------------------------+  |
-|  🏢 Real Estate               |  | Net Worth Timeline Chart (SVG)    | Portfolio AI Assistant (Chatbot)    |  |
+|  🏢 Real Estate               |  | Net Worth Timeline Chart (SVG)    | Asset Allocation (Pie / Donut)      |  |
 |  🛡️ Insurance Policies        |  +-----------------------------------+-------------------------------------+  |
-|  📁 Document Vault            |  | Asset Allocation (Pie / Donut)    | Asset Performance (Bar Chart)       |  |
+|  📁 Document Vault            |  | Asset Performance (Bar Chart)     | Portfolio AI Assistant (Chatbot)    |  |
 |  ⚖️ Tax Harvesting            |  +-----------------------------------+-------------------------------------+  |
 |                               |                                                                               |
 |                               |  [ PORTFOLIO INSIGHTS & DATA HEALTH METRICS PANEL ]                           |
 |                               |                                                                               |
-|                               |  [ ACTIVE ASSET REGISTRY TABLE / CONTAINER VIEW ]                             |
+|                               |  [ ACTIVE ASSET REGISTRY TABLE (When specific asset tab selected) ]          |
 +-------------------------------+-------------------------------------------------------------------------------+
 ```
 
 ### Desktop Layout Hierarchy
 
-1. **Header Bar** (`Header.tsx`): Fixed top bar spanning up to `1720px` max container width.
+1. **Header Bar** (`Header.tsx`): Fixed top bar spanning up to `1720px` max container width with quick Home link on brand logo.
 2. **Global Alerts Banner** (`AlertsBanner.tsx`): High-priority notification strip for 52-week price swings, maturities (<30d), and premium dues (<60d).
 3. **Family Tab Bar** (`FamilyTabBar.tsx`): Pinned under header, allowing instant portfolio context switching.
 4. **Sidebar + Main Content Grid**:
-   - Left Sidebar: `w-64`, `sticky top-6`, `self-start` height constraint (prevents vertical white space).
-   - Right Main Area: `flex-1 min-w-0`, stacked in vertical order: Summary Cards → Family Member Cards → 2x2 Widget Grid → Portfolio Insights → Asset Category Registry View.
+   - Left Sidebar: `w-64`, `sticky top-6`, `self-start` height constraint (prevents vertical white space). "Family Overview" acts as the home button to return to the core overview.
+   - Right Main Area: `flex-1 min-w-0`:
+     - **Home / Overview Mode** (`activeAsset === 'home'`): Strictly renders the 4 core dashboard blocks: Summary Cards → Wealth Mosaic → Portfolio Insights → 2x2 Equalized Dashboard Widget Grid (AI Assistant placed last). No holding tables or shortcuts bar.
+     - **Asset View Mode** (`activeAsset !== 'home'`): Renders only the selected asset registry (Stocks, FDs, SIPs, Gold, etc.) with its unified single-banner starting from the top of the viewport.
 
 ### Header & Global Command Bar
 
@@ -314,22 +316,22 @@ The web view is designed for wide screens (`md: 768px` up to `2xl: 1720px`), emp
 
 All four core visualization widgets are constrained to an **equalized height of 370px** inside a `grid-cols-1 lg:grid-cols-2 gap-5` container to maintain strict visual alignment:
 
-1. **Net Worth Timeline Chart** (`NetWorthTimelineChart.tsx`):
+1. **Net Worth Timeline Chart** (`NetWorthTimelineChart.tsx`) — *Top-Left*:
    * Interactive SVG line & filled area chart showing historical wealth growth.
    * Date range selector pills: `1M`, `3M`, `6M`, `1Y`, `ALL`.
    * Multi-series toggle: Total Portfolio, Stocks vs FDs, Stocks, FDs.
    * Interactive hover crosshair with exact date and valuation tooltip.
    * Empty state preview: Muted reference curve with glassmorphic badge overlay.
-2. **Portfolio Assistant (AI Chatbot)** (`PortfolioAssistant.tsx`):
-   * Conversational NLP panel formatted to 370px height matching neighboring charts with internal scroll body (`flex-1 min-h-0 overflow-y-auto`).
-   * Features quick suggestion prompt pills, typing indicator, markdown formatting, memoized message rendering (`ChatMessageItem`), `Bot` SVG icon integration, and copy response button.
-3. **Asset Allocation Donut Chart** (`PieChart.tsx`):
+2. **Asset Allocation Donut Chart** (`PieChart.tsx`) — *Top-Right*:
    * Donut chart representing portfolio breakdown across asset classes (Stocks & ETFs, Fixed Deposits, Recurring Deposits, Mutual Fund SIPs, Gold Holdings, Real Estate).
    * **Dual Legend Breakdown**: Displays both the formatted monetary valuation (`formatINR`) and the composition weight percentage (`%`) without signed `+`/`-` prefixes.
    * **Privacy / Stealth Mode Integration**: Fully respects `PrivacyContext` (`isBalancesHidden`), replacing monetary figures in the donut center, hover tooltips, and legend rows with masked bullet strings (`••••••`).
    * **Interactive Donut Hover**: Hovering over any slice shifts the arc outward (`scale(1.04)`) and updates the center label to display the slice name, weight percentage, and formatted monetary value.
-4. **Performance Bar Chart** (`BarChart.tsx`):
-   * Bar visualization comparing invested value vs current market value per asset class.
+3. **Performance Bar Chart** (`BarChart.tsx`) — *Bottom-Left*:
+   * Bar visualization comparing invested value vs current market value per family portfolio.
+4. **Portfolio Assistant (AI Chatbot)** (`PortfolioAssistant.tsx`) — *Bottom-Right (Positioned Last)*:
+   * Conversational NLP panel formatted to 370px height matching neighboring charts with internal scroll body (`flex-1 min-h-0 overflow-y-auto`).
+   * Features quick suggestion prompt pills, typing indicator, markdown formatting, memoized message rendering (`ChatMessageItem`), `Bot` SVG icon integration, and copy response button.
 
 ### Portfolio Insights & Data Health Panel
 
