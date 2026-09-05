@@ -4,6 +4,7 @@ import { getFDInvestedAmount, getFDEffectiveValue } from '../../assets/fd/calcul
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../assets/rd/calculations/rdCompounding';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../assets/sip/calculations/sipValuation';
 import { calculateRealEstateValuation } from '../../assets/real-estate/calculations/realEstateValuation';
+import { calculateGoldValuation } from '../../assets/gold/calculations/goldValuation';
 
 export class PortfolioCalculationService {
   recalculateSinglePortfolio(portfolio: Portfolio): Portfolio {
@@ -45,8 +46,18 @@ export class PortfolioCalculationService {
 
     let goldCurrent = 0;
     const gold = portfolio.goldHoldings || [];
-    for (let i = 0; i < gold.length; i++) {
-      const g = gold[i];
+    const healedGold = gold.map((g) => {
+      const w = Number(g.weight_grams) || 0;
+      const rawVal = Number(g.current_valuation) || 0;
+      const isCorrupt = w > 0 && rawVal > 0 && rawVal / w < 2000;
+      if (w > 0 && (rawVal <= 0 || isCorrupt)) {
+        const liveVal = calculateGoldValuation(w, g.purity);
+        return { ...g, current_valuation: liveVal, currentValuation: liveVal };
+      }
+      return g;
+    });
+    for (let i = 0; i < healedGold.length; i++) {
+      const g = healedGold[i];
       goldCurrent += Number(g.current_valuation) || 0;
     }
 
@@ -67,6 +78,7 @@ export class PortfolioCalculationService {
 
     return {
       ...portfolio,
+      goldHoldings: healedGold,
       totalInvested,
       totalCurrentValue,
       totalPnL,

@@ -26,11 +26,11 @@ export function getPurityMultiplier(purityStr: string): number {
 export function calculateGoldValuation(
   weightGrams: number,
   purity: string,
-  rate24kPerGram: number
+  rate24kPerGram: number = DEFAULT_GOLD_RATE_24K
 ): number {
   const weight = Number(weightGrams) || 0;
   if (weight <= 0) return 0;
-  const rate = Number(rate24kPerGram) || 0;
+  const rate = Number(rate24kPerGram);
   if (rate <= 0) return 0;
   const multiplier = getPurityMultiplier(purity);
   return Math.round(weight * rate * multiplier);

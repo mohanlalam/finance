@@ -112,9 +112,10 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       const holdingRate = getRateForPurity(hPurity);
       const rawVal = Number(editingHolding.current_valuation) || 0;
       // Auto-compute live valuation
-      if (g > 0) {
+      if (g > 0 && holdingRate > 0) {
         const liveVal = Math.round(g * holdingRate);
-        setCurrentValuation(String(liveVal || rawVal));
+        const isCorrupt = rawVal > 0 && (rawVal / g) < 2000;
+        setCurrentValuation(String((isCorrupt || rawVal <= 0) ? liveVal : (rawVal || liveVal)));
       } else {
         setCurrentValuation(rawVal ? String(rawVal) : '');
       }
@@ -213,8 +214,9 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       return;
     }
 
-    // If currentValuation is empty or was entered as per-gram rate
-    if (currVal === undefined || currVal === 0 || (currVal > 1000 && currVal <= 40000 && grams > 1 && (currVal / grams) < 500)) {
+    // If currentValuation is empty, 0, or was entered as per-gram rate or corrupted (< ₹2,000/g)
+    const isCorruptVal = currVal !== undefined && currVal > 0 && grams > 0 && (currVal / grams) < 2000;
+    if (currVal === undefined || currVal === 0 || isCorruptVal || (currVal > 1000 && currVal <= 40000 && grams > 1 && (currVal / grams) < 500)) {
       currVal = Math.round(grams * liveRatePerGram);
     }
 

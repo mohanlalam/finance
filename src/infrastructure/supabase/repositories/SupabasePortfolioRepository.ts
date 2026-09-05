@@ -19,6 +19,7 @@ import { invokeFunction, AppApiError } from '../../../utils/apiClient';
 import { getFDInvestedAmount, getFDEffectiveValue } from '../../../domains/assets/fd/calculations/fdCompounding';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../../domains/assets/rd/calculations/rdCompounding';
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../../domains/assets/sip/calculations/sipValuation';
+import { calculateGoldValuation } from '../../../domains/assets/gold/calculations/goldValuation';
 import { RepositoryError, ValidationError } from '../../../shared/errors/AppError';
 import { sortPortfolios } from '../../../domains/portfolio/calculations/portfolioOrdering';
 
@@ -241,12 +242,23 @@ function buildPortfolio(
     };
   });
 
+  const healedGold = gold.map((g) => {
+    const w = Number(g.weight_grams) || 0;
+    const curVal = Number(g.current_valuation) || 0;
+    const isCorrupt = w > 0 && curVal > 0 && curVal / w < 2000;
+    if (w > 0 && (curVal === 0 || isCorrupt)) {
+      const liveVal = calculateGoldValuation(w, g.purity);
+      return { ...g, current_valuation: liveVal, currentValuation: liveVal };
+    }
+    return g;
+  });
+
   const totals = recalcPortfolioTotals(
     holdings,
     fdsWithTs,
     rdAccounts,
     sipAccounts,
-    gold,
+    healedGold,
     realEstate
   );
 
@@ -259,7 +271,7 @@ function buildPortfolio(
     fixedDeposits: fdsWithTs,
     rdAccounts,
     sipAccounts,
-    goldHoldings: gold,
+    goldHoldings: healedGold,
     realEstate,
     insurances: insurancesWithTs,
     documents: docsWithTs,

@@ -15,7 +15,8 @@ import {
   deriveGoldRates, 
   saveStoredGoldRate, 
   fetchLiveGoldRates, 
-  clearCustomGoldRate 
+  clearCustomGoldRate,
+  calculateGoldValuation
 } from '../../utils/goldPricing';
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
@@ -60,136 +61,12 @@ export function GoldHoldingView({
   const { addToast } = useToastActions();
   const { portfolios } = usePortfolioEntities();
 
-  // Aggregate Family Gold totals across all family members
-  const familyGoldSummary = useMemo(() => {
-    let totalGrams = 0;
-    let totalInvested = 0;
-    let totalValue = 0;
-
-    const ordered = sortPortfolios(portfolios || []);
-    const memberBreakdown = ordered.map((p) => {
-      let memberGrams = 0;
-      let memberInvested = 0;
-      let memberValue = 0;
-
-      for (const h of p.goldHoldings || []) {
-        memberGrams += Number(h.weight_grams) || 0;
-        memberInvested += Number(h.purchase_price) || 0;
-        memberValue += Number(h.current_valuation) || 0;
-      }
-
-      totalGrams += memberGrams;
-      totalInvested += memberInvested;
-      totalValue += memberValue;
-
-      return {
-        name: p.name,
-        label: p.label || p.name,
-        grams: memberGrams,
-        tola: memberGrams / 11.6638,
-        value: memberValue,
-        invested: memberInvested,
-        count: (p.goldHoldings || []).length,
-      };
-    });
-
-    const totalGain = totalValue - totalInvested;
-    const gainPct = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
-    const totalTola = totalGrams / 11.6638;
-
-    return {
-      totalGrams,
-      totalTola,
-      totalValue,
-      totalInvested,
-      totalGain,
-      gainPct,
-      memberBreakdown,
-    };
-  }, [portfolios]);
-
-  const [selectedMember, setSelectedMember] = useState<string>(portfolioName || 'all');
-
-  useEffect(() => {
-    setSelectedMember(portfolioName || 'all');
-  }, [portfolioName]);
-
-  const {
-    showModal,
-    editingItem,
-    confirmDeleteItem,
-    openAdd,
-    openEdit,
-    closeModal,
-    setConfirmDeleteItem,
-  } = useAssetModal<GoldHolding>(autoOpenAddModal);
-
-  const [deleting, setDeleting] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  // Search & Sorting Hook
-  const {
-    items: filteredHoldings,
-    searchQuery,
-    setSearchQuery,
-    sortField,
-    sortOrder,
-    toggleSort,
-    filteredCount,
-    totalCount,
-  } = useAssetFilterSort<GoldHolding, GoldSortField>(goldHoldings, {
-    searchFields: ['item_name', 'purity'],
-    initialSortField: 'current_valuation',
-    initialSortOrder: 'desc',
-    sortComparators: {
-      current_valuation: (a, b) => (Number(a.current_valuation) || 0) - (Number(b.current_valuation) || 0),
-      weight_grams: (a, b) => (Number(a.weight_grams) || 0) - (Number(b.weight_grams) || 0),
-      purchase_price: (a, b) => (Number(a.purchase_price) || 0) - (Number(b.purchase_price) || 0),
-      item_name: (a, b) => (a.item_name || '').localeCompare(b.item_name || ''),
-    },
-    debounceMs: 150,
-  });
-
-  const displayHoldingsByMember = useMemo(() => {
-    const ordered = sortPortfolios(portfolios || []);
-    return ordered.map((p) => {
-      const pId = p.id;
-      const memberHoldings = filteredHoldings.filter(
-        (h) => h.portfolio_id === pId || (!h.portfolio_id && (portfolioName !== 'all' ? p.name === portfolioName : p.id === (ordered[0]?.id)))
-      );
-      const memberGrams = memberHoldings.reduce((sum, h) => sum + (Number(h.weight_grams) || 0), 0);
-      const memberVal = memberHoldings.reduce((sum, h) => sum + (Number(h.current_valuation) || 0), 0);
-      return {
-        portfolio: p,
-        holdings: memberHoldings,
-        grams: memberGrams,
-        val: memberVal,
-      };
-    });
-  }, [portfolios, filteredHoldings, portfolioName]);
-
-  const activeHoldingsForMember = useMemo(() => {
-    if (selectedMember === 'all') return filteredHoldings;
-    const found = displayHoldingsByMember.find((item) => item.portfolio.name === selectedMember);
-    return found ? found.holdings : filteredHoldings;
-  }, [selectedMember, filteredHoldings, displayHoldingsByMember]);
-
-  const handleDelete = useCallback(async (id: string) => {
-    setDeleting(true);
-    try {
-      await onDelete('gold', id);
-      addToast('Gold holding deleted successfully', 'success');
-      setConfirmDeleteItem(null);
-    } catch (err) {
-      addToast(err instanceof Error ? err.message : 'Failed to delete gold holding', 'error');
-    } finally {
-      setDeleting(false);
-    }
-  }, [onDelete, addToast, setConfirmDeleteItem]);
-
-  const [isEditingRate, setIsEditingRate] = useState(false);
-  const [tempRateInput, setTempRateInput] = useState('');
   const [rateTick, setRateTick] = useState(0);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const rates = useMemo(() => {
+    void rateTick;
+    return deriveGoldRates();
+  }, [rateTick]);
 
   const syncRates = useCallback(async (force = false) => {
     setIsSyncing(true);
@@ -221,8 +98,172 @@ export function GoldHoldingView({
     return () => clearInterval(timer);
   }, [syncRates]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const rates = useMemo(() => deriveGoldRates(), [rateTick]);
+  // Auto-heal corrupted gold valuations in Supabase in background
+  useEffect(() => {
+    for (const h of goldHoldings) {
+      const w = Number(h.weight_grams) || 0;
+      const curVal = Number(h.current_valuation) || 0;
+      if (w > 0 && curVal > 0 && (curVal / w) < 2000 && h.id) {
+        const liveVal = calculateGoldValuation(w, h.purity, rates.rate24kPerGram);
+        if (liveVal > 0) {
+          onUpdate('gold', h.id, {
+            current_valuation: liveVal,
+            currentValuation: liveVal,
+          }).catch(() => {});
+        }
+      }
+    }
+  }, [goldHoldings, rates.rate24kPerGram, onUpdate]);
+
+  // Aggregate Family Gold totals across all family members
+  const familyGoldSummary = useMemo(() => {
+    let totalGrams = 0;
+    let totalInvested = 0;
+    let totalValue = 0;
+
+    const ordered = sortPortfolios(portfolios || []);
+    const memberBreakdown = ordered.map((p) => {
+      let memberGrams = 0;
+      let memberInvested = 0;
+      let memberValue = 0;
+
+      for (const h of p.goldHoldings || []) {
+        const w = Number(h.weight_grams) || 0;
+        const rawVal = Number(h.current_valuation) || 0;
+        const isCorrupt = w > 0 && rawVal > 0 && (rawVal / w) < 2000;
+        const liveVal = w > 0 ? calculateGoldValuation(w, h.purity, rates.rate24kPerGram) : 0;
+        const val = (isCorrupt || rawVal <= 0) ? liveVal : rawVal;
+
+        memberGrams += w;
+        memberInvested += Number(h.purchase_price) || 0;
+        memberValue += val;
+      }
+
+      totalGrams += memberGrams;
+      totalInvested += memberInvested;
+      totalValue += memberValue;
+
+      return {
+        name: p.name,
+        label: p.label || p.name,
+        grams: memberGrams,
+        tola: memberGrams / 11.6638,
+        value: memberValue,
+        invested: memberInvested,
+        count: (p.goldHoldings || []).length,
+      };
+    });
+
+    const totalGain = totalValue - totalInvested;
+    const gainPct = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
+    const totalTola = totalGrams / 11.6638;
+
+    return {
+      totalGrams,
+      totalTola,
+      totalValue,
+      totalInvested,
+      totalGain,
+      gainPct,
+      memberBreakdown,
+    };
+  }, [portfolios, rates.rate24kPerGram]);
+
+  const [selectedMember, setSelectedMember] = useState<string>(portfolioName || 'all');
+
+  useEffect(() => {
+    setSelectedMember(portfolioName || 'all');
+  }, [portfolioName]);
+
+  const {
+    showModal,
+    editingItem,
+    confirmDeleteItem,
+    openAdd,
+    openEdit,
+    closeModal,
+    setConfirmDeleteItem,
+  } = useAssetModal<GoldHolding>(autoOpenAddModal);
+
+  const [deleting, setDeleting] = useState(false);
+
+  // Search & Sorting Hook
+  const {
+    items: filteredHoldings,
+    searchQuery,
+    setSearchQuery,
+    sortField,
+    sortOrder,
+    toggleSort,
+    filteredCount,
+    totalCount,
+  } = useAssetFilterSort<GoldHolding, GoldSortField>(goldHoldings, {
+    searchFields: ['item_name', 'purity'],
+    initialSortField: 'current_valuation',
+    initialSortOrder: 'desc',
+    sortComparators: {
+      current_valuation: (a, b) => {
+        const getVal = (h: GoldHolding) => {
+          const w = Number(h.weight_grams) || 0;
+          const rawVal = Number(h.current_valuation) || 0;
+          const isCorrupt = w > 0 && rawVal > 0 && (rawVal / w) < 2000;
+          const liveVal = w > 0 ? calculateGoldValuation(w, h.purity, rates.rate24kPerGram) : 0;
+          return (isCorrupt || rawVal <= 0) ? liveVal : rawVal;
+        };
+        return getVal(a) - getVal(b);
+      },
+      weight_grams: (a, b) => (Number(a.weight_grams) || 0) - (Number(b.weight_grams) || 0),
+      purchase_price: (a, b) => (Number(a.purchase_price) || 0) - (Number(b.purchase_price) || 0),
+      item_name: (a, b) => (a.item_name || '').localeCompare(b.item_name || ''),
+    },
+    debounceMs: 150,
+  });
+
+  const displayHoldingsByMember = useMemo(() => {
+    const ordered = sortPortfolios(portfolios || []);
+    return ordered.map((p) => {
+      const pId = p.id;
+      const memberHoldings = filteredHoldings.filter(
+        (h) => h.portfolio_id === pId || (!h.portfolio_id && (portfolioName !== 'all' ? p.name === portfolioName : p.id === (ordered[0]?.id)))
+      );
+      const memberGrams = memberHoldings.reduce((sum, h) => sum + (Number(h.weight_grams) || 0), 0);
+      const memberVal = memberHoldings.reduce((sum, h) => {
+        const w = Number(h.weight_grams) || 0;
+        const rawVal = Number(h.current_valuation) || 0;
+        const isCorrupt = w > 0 && rawVal > 0 && (rawVal / w) < 2000;
+        const liveVal = w > 0 ? calculateGoldValuation(w, h.purity, rates.rate24kPerGram) : 0;
+        return sum + ((isCorrupt || rawVal <= 0) ? liveVal : rawVal);
+      }, 0);
+      return {
+        portfolio: p,
+        holdings: memberHoldings,
+        grams: memberGrams,
+        val: memberVal,
+      };
+    });
+  }, [portfolios, filteredHoldings, portfolioName, rates.rate24kPerGram]);
+
+  const activeHoldingsForMember = useMemo(() => {
+    if (selectedMember === 'all') return filteredHoldings;
+    const found = displayHoldingsByMember.find((item) => item.portfolio.name === selectedMember);
+    return found ? found.holdings : filteredHoldings;
+  }, [selectedMember, filteredHoldings, displayHoldingsByMember]);
+
+  const handleDelete = useCallback(async (id: string) => {
+    setDeleting(true);
+    try {
+      await onDelete('gold', id);
+      addToast('Gold holding deleted successfully', 'success');
+      setConfirmDeleteItem(null);
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : 'Failed to delete gold holding', 'error');
+    } finally {
+      setDeleting(false);
+    }
+  }, [onDelete, addToast, setConfirmDeleteItem]);
+
+  const [isEditingRate, setIsEditingRate] = useState(false);
+  const [tempRateInput, setTempRateInput] = useState('');
 
   const handleSaveRate = () => {
     const val = parseFloat(tempRateInput);

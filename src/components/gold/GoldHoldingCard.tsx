@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 import { useDocumentStorage } from '../../hooks/useDocumentStorage';
+import { deriveGoldRates, calculateGoldValuation, getPurityMultiplier } from '../../utils/goldPricing';
 import { Edit2, Trash2, Scale, Coins, FileText, StickyNote, Paperclip } from '../icons/AppIcons';
 
 interface GoldHoldingCardProps {
@@ -20,15 +21,26 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
   const { openDocument: openSecureDocument } = useDocumentStorage();
   const [showNotes, setShowNotes] = useState(false);
 
+  const weight = Number(holding.weight_grams) || 0;
+  const rates = deriveGoldRates();
+  const purityMultiplier = getPurityMultiplier(holding.purity);
+  const liveRatePerGram = Math.round(rates.rate24kPerGram * purityMultiplier);
+
+  // Compute live market valuation from spot bullion rate
+  const liveValuation = weight > 0 ? calculateGoldValuation(weight, holding.purity, rates.rate24kPerGram) : 0;
+
+  // Auto-heal corrupted database valuations (e.g. ghost ₹806 / ₹15/g when actual value is ~₹7.86 Lakhs)
+  const rawValuation = Number(holding.current_valuation) || 0;
+  const isCorruptValuation = weight > 0 && rawValuation > 0 && (rawValuation / weight) < 2000;
+  const currentValuation = (isCorruptValuation || rawValuation <= 0) ? liveValuation : rawValuation;
+
   const purchasePrice = holding.purchase_price || 0;
-  const currentValuation = holding.current_valuation || 0;
   const pnl = currentValuation - purchasePrice;
   const pnlPct = purchasePrice > 0 ? (pnl / purchasePrice) * 100 : 0;
   const docs = documents.filter((d) => d.asset_type === 'gold' && d.asset_id === holding.id);
 
-  const weight = Number(holding.weight_grams) || 0;
   const buyPricePerGram = weight > 0 && purchasePrice > 0 ? Math.round(purchasePrice / weight) : null;
-  const curPricePerGram = weight > 0 && currentValuation > 0 ? Math.round(currentValuation / weight) : null;
+  const curPricePerGram = liveRatePerGram > 0 ? liveRatePerGram : (weight > 0 && currentValuation > 0 ? Math.round(currentValuation / weight) : null);
 
   return (
     <div className="p-3.5 sm:p-4 hover:bg-[var(--surface-secondary)]/50 transition-colors mobile-asset-card">
