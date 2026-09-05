@@ -60,7 +60,7 @@ export default function DesktopSidebar({
           <button
             type="button"
             onClick={() => onSelectPortfolio('all')}
-            className={getNavItemClass(selectedPortfolioId === 'all')}
+            className={getNavItemClass(selectedPortfolioId === 'all' && activeTab === 'home')}
           >
             Family Overview
           </button>
@@ -69,7 +69,7 @@ export default function DesktopSidebar({
               <button
                 type="button"
                 onClick={() => onSelectPortfolio(p.name)}
-                className={`flex-1 ${getNavItemClass(selectedPortfolioId === p.name)}`}
+                className={`flex-1 ${getNavItemClass(selectedPortfolioId === p.name && activeTab === 'home')}`}
               >
                 <span className="truncate">{p.label}</span>
               </button>

@@ -10,7 +10,6 @@ import SectionErrorBoundary from '../components/SectionErrorBoundary';
 
 import FloatingAddMenu from '../components/FloatingAddMenu';
 import { useIsMobile } from '../hooks/useIsMobile';
-import { QuickAccessShortcuts } from '../components/ui/QuickAccessShortcuts';
 
 import MobileBottomNav from '../components/MobileBottomNav';
 import MobileStatusBar from '../components/MobileStatusBar';
@@ -211,8 +210,6 @@ export default function AppShell() {
       document.body.classList.remove('is-scrolling-down');
     };
   }, []);
-
-  const effectiveAsset = activeAsset === 'home' && !isMobile ? 'stocks' : activeAsset;
 
   const handleSidebarTabChange = useCallback((tabId: string) => {
     setActiveAsset(tabId as AssetTab);
@@ -425,7 +422,10 @@ export default function AppShell() {
 
   const handleTabChange = useCallback((tab: string) => {
     setActiveTab(tab);
-  }, [setActiveTab]);
+    if (tab === 'all') {
+      setActiveAsset('home');
+    }
+  }, [setActiveTab, setActiveAsset]);
 
   const handleAddFamilyClick = openAddFamily;
   const handleRenameClick = openRenameModal;
@@ -677,7 +677,7 @@ export default function AppShell() {
             <div className="flex gap-0">
               <Suspense fallback={<div className="hidden md:block w-60 shrink-0 pr-4 mr-4" aria-hidden="true" />}>
                 <DesktopSidebar
-                  activeTab={effectiveAsset}
+                  activeTab={activeAsset}
                   onTabChange={handleSidebarTabChange}
                   portfolios={portfolios}
                   selectedPortfolioId={activeTab}
@@ -691,101 +691,100 @@ export default function AppShell() {
 
               {/* Main content area */}
               <main id="main-content" className="flex-1 min-w-0 space-y-6">
-                {/* Summary metrics */}
-                <SummaryCards
-                  totalInvested={summaryData.totalInvested}
-                  totalCurrentValue={summaryData.totalCurrentValue}
-                  totalPnL={summaryData.totalPnL}
-                  totalPnLPercent={summaryData.totalPnLPercent}
-                  todayPnL={todayPnL}
-                  label={summaryData.label}
-                  isLoading={isLoading}
-                  portfolios={portfolios}
-                  activePortfolio={portfolio}
-                  netWorthHistory={netWorthHistory}
-                />
-                {/* Wealth Mosaic — asset class totals */}
-                {activeTab === 'all' && (
-                  <div className="apple-card rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] shadow-[var(--shadow-card)] p-3 sm:p-4">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-3">
-                      {[
-                        { label: 'Stocks', value: breakdown.stocks, id: 'stocks' },
-                        { label: 'FDs', value: breakdown.fd, id: 'fd' },
-                        { label: 'RDs', value: breakdown.rd, id: 'rd' },
-                        { label: 'SIPs', value: breakdown.sip, id: 'sip' },
-                        { label: 'Gold', value: breakdown.gold, id: 'gold' },
-                        { label: 'Real Estate', value: breakdown.realEstate, id: 'real_estate' },
-                      ].map((item) => (
-                        <button
-                          key={item.label}
-                          onClick={() => setActiveAsset(item.id as AssetTab)}
-                          className="p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 flex flex-col justify-between text-left transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
-                        >
-                          <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">{item.label}</span>
-                          <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(item.value)}</p>
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => setActiveAsset('insurance')}
-                        className="p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 flex flex-col justify-between text-left transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
-                      >
-                        <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">Insurance</span>
-                        <div>
-                          <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(breakdown.insuranceCover)}</p>
-                          <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5 tnum">{formatINR(breakdown.insurancePremium)}/yr premium</p>
+                {activeAsset === 'home' ? (
+                  <div className="space-y-6">
+                    {/* Summary metrics */}
+                    <SummaryCards
+                      totalInvested={summaryData.totalInvested}
+                      totalCurrentValue={summaryData.totalCurrentValue}
+                      totalPnL={summaryData.totalPnL}
+                      totalPnLPercent={summaryData.totalPnLPercent}
+                      todayPnL={todayPnL}
+                      label={summaryData.label}
+                      isLoading={isLoading}
+                      portfolios={portfolios}
+                      activePortfolio={portfolio}
+                      netWorthHistory={netWorthHistory}
+                    />
+
+                    {/* Wealth Mosaic — asset class totals */}
+                    {activeTab === 'all' && (
+                      <div className="apple-card rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] shadow-[var(--shadow-card)] p-3 sm:p-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-3">
+                          {[
+                            { label: 'Stocks', value: breakdown.stocks, id: 'stocks' },
+                            { label: 'FDs', value: breakdown.fd, id: 'fd' },
+                            { label: 'RDs', value: breakdown.rd, id: 'rd' },
+                            { label: 'SIPs', value: breakdown.sip, id: 'sip' },
+                            { label: 'Gold', value: breakdown.gold, id: 'gold' },
+                            { label: 'Real Estate', value: breakdown.realEstate, id: 'real_estate' },
+                          ].map((item) => (
+                            <button
+                              key={item.label}
+                              onClick={() => setActiveAsset(item.id as AssetTab)}
+                              className="p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 flex flex-col justify-between text-left transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
+                            >
+                              <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">{item.label}</span>
+                              <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(item.value)}</p>
+                            </button>
+                          ))}
+                          <button
+                            onClick={() => setActiveAsset('insurance')}
+                            className="p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 flex flex-col justify-between text-left transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
+                          >
+                            <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">Insurance</span>
+                            <div>
+                              <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(breakdown.insuranceCover)}</p>
+                              <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5 tnum">{formatINR(breakdown.insurancePremium)}/yr premium</p>
+                            </div>
+                          </button>
                         </div>
-                      </button>
-                    </div>
+                      </div>
+                    )}
+
+                    {/* Insights Panel — only on family overview */}
+                    {activeTab === 'all' && (
+                      <SectionErrorBoundary sectionName="Portfolio Insights">
+                        <Suspense fallback={<div className="h-40 bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                          <InsightsPanel
+                            insights={insights}
+                            portfolios={portfolios}
+                            activePortfolio={portfolio}
+                            onNavigateAsset={setActiveAsset}
+                            onRefreshPrices={refreshPrices}
+                            isLoadingPrices={isLoadingPrices}
+                            isPriceStale={isPriceStale}
+                            priceStatus={priceStatus}
+                          />
+                        </Suspense>
+                      </SectionErrorBoundary>
+                    )}
+
+                    {/* Dashboard charts — only on family overview */}
+                    {activeTab === 'all' && desktopDashboardWidgets}
+                  </div>
+                ) : (
+                  /* Dedicated Asset Registry View — starts right at the top */
+                  <div ref={assetTabSectionRef} id="asset-tab-content" className="scroll-mt-24">
+                    <SectionErrorBoundary sectionName="Asset Tab Content">
+                      <AssetTabContent
+                        activeAsset={activeAsset}
+                        visiblePortfolio={visiblePortfolio}
+                        portfolios={portfolios}
+                        priceStatus={priceStatus}
+                        onAddHoldingClick={openAddModal}
+                        onDeleteStock={tableDeleteHandler}
+                        onUpdateStock={tableUpdateHandler}
+                        onAddAsset={addAsset}
+                        onUpdateAsset={updateAsset}
+                        onDeleteAsset={deleteAsset}
+                        quickAddTarget={quickAddTarget}
+                        onQuickAddComplete={clearQuickAddTarget}
+                        portfolioOptions={portfolioOptionsForModal}
+                      />
+                    </SectionErrorBoundary>
                   </div>
                 )}
-
-                {/* Insights Panel — only on family overview */}
-                {activeTab === 'all' && (
-                  <SectionErrorBoundary sectionName="Portfolio Insights">
-                    <Suspense fallback={<div className="h-40 bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                      <InsightsPanel
-                        insights={insights}
-                        portfolios={portfolios}
-                        activePortfolio={portfolio}
-                        onNavigateAsset={setActiveAsset}
-                        onRefreshPrices={refreshPrices}
-                        isLoadingPrices={isLoadingPrices}
-                        isPriceStale={isPriceStale}
-                        priceStatus={priceStatus}
-                      />
-                    </Suspense>
-                  </SectionErrorBoundary>
-                )}
-
-                {/* Dashboard charts — only on family overview */}
-                {activeTab === 'all' && desktopDashboardWidgets}
-
-                {/* 10-Asset Quick Access Shortcut Bar */}
-                <QuickAccessShortcuts
-                  activeAsset={effectiveAsset}
-                  onSelectAsset={setActiveAsset}
-                />
-
-                {/* Stock holdings & Asset Registries — always at the bottom */}
-                <div ref={assetTabSectionRef} id="asset-tab-content" className="scroll-mt-24">
-                  <SectionErrorBoundary sectionName="Asset Tab Content">
-                    <AssetTabContent
-                      activeAsset={effectiveAsset}
-                      visiblePortfolio={visiblePortfolio}
-                      portfolios={portfolios}
-                      priceStatus={priceStatus}
-                      onAddHoldingClick={openAddModal}
-                      onDeleteStock={tableDeleteHandler}
-                      onUpdateStock={tableUpdateHandler}
-                      onAddAsset={addAsset}
-                      onUpdateAsset={updateAsset}
-                      onDeleteAsset={deleteAsset}
-                      quickAddTarget={quickAddTarget}
-                      onQuickAddComplete={clearQuickAddTarget}
-                      portfolioOptions={portfolioOptionsForModal}
-                    />
-                  </SectionErrorBoundary>
-                </div>
               </main>
             </div>
           </>
