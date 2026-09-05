@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 
 // Lazy viewport container that loads child components only when they are visible
-export function LazyViewport({ children, placeholderHeight = 240 }: { children: React.ReactNode; placeholderHeight?: number }) {
+export function LazyViewport({
+  children,
+  placeholderHeight = 240,
+  className = 'h-full flex flex-col',
+}: {
+  children: React.ReactNode;
+  placeholderHeight?: number;
+  className?: string;
+}) {
   const [isIntersected, setIsIntersected] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -21,11 +29,15 @@ export function LazyViewport({ children, placeholderHeight = 240 }: { children: 
   }, []);
 
   return (
-    <div ref={ref} style={{ minHeight: isIntersected ? undefined : placeholderHeight }}>
+    <div
+      ref={ref}
+      className={className}
+      style={{ minHeight: isIntersected ? undefined : placeholderHeight }}
+    >
       {isIntersected ? children : (
         <div 
-          className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 animate-pulse" 
-          style={{ height: placeholderHeight }} 
+          className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 animate-pulse w-full h-full" 
+          style={{ minHeight: placeholderHeight }} 
         />
       )}
     </div>
@@ -37,12 +49,14 @@ export function LazyChartWrapper<TProps extends object>({
   importFunc,
   fallback,
   props,
-  placeholderHeight = 240
+  placeholderHeight = 240,
+  className = 'h-full flex flex-col',
 }: {
   importFunc: () => Promise<{ default: React.ComponentType<TProps> }>;
   fallback: React.ReactNode;
   props: TProps;
   placeholderHeight?: number;
+  className?: string;
 }) {
   const [isIntersected, setIsIntersected] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -72,15 +86,19 @@ export function LazyChartWrapper<TProps extends object>({
   const LazyComponent = lazyComponentRef.current;
 
   return (
-    <div ref={ref} style={{ minHeight: isIntersected ? undefined : placeholderHeight }}>
+    <div
+      ref={ref}
+      className={className}
+      style={{ minHeight: isIntersected ? undefined : placeholderHeight }}
+    >
       {isIntersected && LazyComponent ? (
         <Suspense fallback={fallback}>
           <LazyComponent {...props} />
         </Suspense>
       ) : (
         <div 
-          className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 animate-pulse" 
-          style={{ height: placeholderHeight }} 
+          className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 animate-pulse w-full h-full" 
+          style={{ minHeight: placeholderHeight }} 
         />
       )}
     </div>

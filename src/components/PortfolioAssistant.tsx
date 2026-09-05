@@ -429,7 +429,7 @@ export default function PortfolioAssistant({ portfolios, onSelectAsset }: Portfo
   };
 
   return (
-    <div className="apple-card p-4 sm:p-5 text-[var(--text-primary)] relative overflow-hidden flex flex-col min-h-[320px] sm:min-h-[370px] justify-between">
+    <div className="apple-card p-4 sm:p-5 text-[var(--text-primary)] relative overflow-hidden flex flex-col h-full min-h-[380px] lg:h-[420px] justify-between">
       {/* Background ambient lighting */}
       <div className="absolute top-[-40px] right-[-40px] w-[140px] h-[140px] bg-[var(--accent-blue)]/10 rounded-full blur-[35px] pointer-events-none" />
 
@@ -490,7 +490,7 @@ export default function PortfolioAssistant({ portfolios, onSelectAsset }: Portfo
       {suggestions.length > 0 && messages.length <= 2 && (
         <div className="flex flex-col gap-1.5 mb-2.5 shrink-0">
           <p className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Suggested Queries:</p>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 max-h-[88px] overflow-y-auto pr-0.5">
             {suggestions.map((s, idx) => (
               <button
                 key={idx}

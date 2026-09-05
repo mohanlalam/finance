@@ -5,7 +5,7 @@ import { Skeleton } from './Skeleton';
  */
 export function AreaChartSkeleton({ className = '' }: { className?: string }) {
   return (
-    <div className={`apple-card p-5 h-[320px] sm:h-[370px] flex flex-col justify-between overflow-hidden ${className}`}>
+    <div className={`apple-card p-5 h-full min-h-[380px] lg:h-[420px] flex flex-col justify-between overflow-hidden ${className}`}>
       {/* Header controls skeleton */}
       <div className="flex items-center justify-between">
         <div className="space-y-1.5">
@@ -63,7 +63,7 @@ export function AreaChartSkeleton({ className = '' }: { className?: string }) {
  */
 export function DonutChartSkeleton({ className = '' }: { className?: string }) {
   return (
-    <div className={`apple-card p-5 h-[320px] sm:h-[370px] flex flex-col justify-between ${className}`}>
+    <div className={`apple-card p-5 h-full min-h-[380px] lg:h-[420px] flex flex-col justify-between ${className}`}>
       <div className="flex items-center justify-between">
         <Skeleton width="120px" height="18px" className="rounded-md" />
         <Skeleton width="60px" height="24px" className="rounded-md" />

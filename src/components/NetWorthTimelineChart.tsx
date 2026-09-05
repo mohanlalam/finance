@@ -396,7 +396,7 @@ export default function NetWorthTimelineChart({
   const hoverX = hoveredIdx !== null ? pointsMap.totalPoints[hoveredIdx]?.x : null;
 
   return (
-    <div ref={containerRef} className="apple-card p-4 sm:p-5 relative overflow-hidden flex flex-col min-h-[320px] sm:min-h-[370px] justify-between">
+    <div ref={containerRef} className="apple-card p-4 sm:p-5 relative overflow-hidden flex flex-col h-full min-h-[380px] lg:h-[420px] justify-between">
       {/* Header with Title, Period Performance & Controls */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2.5 mb-2.5">
         <div className="min-w-0 flex-1">

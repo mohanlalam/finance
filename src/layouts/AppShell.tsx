@@ -323,12 +323,13 @@ export default function AppShell() {
   ), [netWorthHistory, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick, handleSidebarTabChange]);
 
   const desktopDashboardWidgets = useMemo(() => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch auto-rows-fr">
       <SectionErrorBoundary sectionName="Net Worth Timeline">
         <LazyChartWrapper
+          className="h-full flex flex-col"
           importFunc={() => import('../components/NetWorthTimelineChart')}
-          placeholderHeight={370}
-          fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
+          placeholderHeight={420}
+          fallback={<div className="h-full min-h-[380px] lg:h-[420px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
           props={{
             history: netWorthHistory,
             currentNetWorth: (breakdown.stocks || 0) + (breakdown.fd || 0),
@@ -338,8 +339,8 @@ export default function AppShell() {
         />
       </SectionErrorBoundary>
       <SectionErrorBoundary sectionName="Asset Class Pie Chart">
-        <LazyViewport placeholderHeight={370}>
-          <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
+        <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
+          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
             <PieChart
               slices={breakdownSlices}
               title={`Asset Class Breakdown — ${summaryData.label}`}
@@ -349,15 +350,15 @@ export default function AppShell() {
         </LazyViewport>
       </SectionErrorBoundary>
       <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
-        <LazyViewport placeholderHeight={370}>
-          <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
+        <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
+          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
             <BarChart portfolios={barChartPortfolios} />
           </Suspense>
         </LazyViewport>
       </SectionErrorBoundary>
       <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-        <LazyViewport placeholderHeight={370}>
-          <Suspense fallback={<div className="h-[300px] sm:h-[370px] apple-card rounded-xl animate-pulse" />}>
+        <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
+          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] apple-card rounded-xl animate-pulse" />}>
             <PortfolioAssistant portfolios={portfolios} onSelectAsset={handleSidebarTabChange} />
           </Suspense>
         </LazyViewport>

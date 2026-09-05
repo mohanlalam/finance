@@ -49,7 +49,7 @@ function BarChart({ portfolios }: BarChartProps) {
 
   if (!validPortfolios || validPortfolios.length === 0) {
     return (
-      <div className="apple-card p-4 sm:p-5 flex flex-col min-h-[320px] sm:min-h-[370px] justify-between">
+      <div className="apple-card p-4 sm:p-5 flex flex-col h-full min-h-[380px] lg:h-[420px] justify-between">
         <div className="flex justify-between items-start">
           <div>
             <h3 className="text-card-title font-bold text-[var(--text-primary)]">Invested vs Current Value</h3>
@@ -81,7 +81,7 @@ function BarChart({ portfolios }: BarChartProps) {
   const yTicks = 4;
 
   return (
-    <div className="apple-card p-4 sm:p-5 flex flex-col min-h-[320px] sm:min-h-[370px] justify-between select-none">
+    <div className="apple-card p-4 sm:p-5 flex flex-col h-full min-h-[380px] lg:h-[420px] justify-between select-none">
       {/* Header with Title & Mode Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5 shrink-0">
         <div>

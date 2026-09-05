@@ -127,7 +127,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
   }, [onSelectSlice]);
 
   return (
-    <div className="apple-card p-4 sm:p-5 flex flex-col min-h-[320px] sm:min-h-[370px] justify-between">
+    <div className="apple-card p-4 sm:p-5 flex flex-col h-full min-h-[380px] lg:h-[420px] justify-between">
       {/* Header */}
       <div className="flex justify-between items-start mb-2 shrink-0">
         <div>
