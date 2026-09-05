@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, Suspense } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   TrendingUp,
   TrendingDown,
@@ -9,7 +9,6 @@ import {
   Target,
   BarChart3,
   Filter,
-  ChevronRight,
   Home
 } from './icons/AppIcons';
 import { formatINR, formatPercent } from '../utils/formatters';
@@ -22,9 +21,6 @@ import {
 } from '../hooks/usePortfolioInsights';
 import { Portfolio, AssetTab, FetchStatus } from '../types/portfolio';
 import { InsightsSkeleton } from './ui/ChartSkeleton';
-import { analyzePortfolioHealth } from '../utils/dataQuality';
-
-const DataQualityHealthModal = React.lazy(() => import('./DataQualityHealthModal'));
 
 interface InsightsPanelProps {
   insights: PortfolioInsights;
@@ -245,11 +241,10 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
 
 /* ── Main Component ── */
 
-type InsightFilter = 'all' | 'health' | 'stocks' | 'fds' | 'insurance' | 'due_soon';
+type InsightFilter = 'all' | 'stocks' | 'fds' | 'insurance' | 'due_soon';
 
 const FILTERS: { id: InsightFilter; label: string }[] = [
   { id: 'all', label: 'All Insights' },
-  { id: 'health', label: '🛡️ Health Check' },
   { id: 'stocks', label: 'Stocks' },
   { id: 'fds', label: 'Deposits' },
   { id: 'insurance', label: 'Insurance' },
@@ -260,21 +255,12 @@ export default React.memo(function InsightsPanel({
   insights,
   portfolios = [],
   onNavigateAsset,
-  onRefreshPrices,
-  isLoadingPrices = false,
-  isPriceStale = false,
-  priceStatus = 'idle',
 }: InsightsPanelProps) {
   const [activeFilter, setActiveFilter] = useState<InsightFilter>('all');
-  const [showHealthModal, setShowHealthModal] = useState(false);
 
   const handleFilterClick = useCallback((id: InsightFilter) => {
     setActiveFilter(id);
   }, []);
-
-  const healthSummary = useMemo(() => {
-    return analyzePortfolioHealth(portfolios, { isPriceStale, priceStatus });
-  }, [portfolios, isPriceStale, priceStatus]);
 
   const realEstateMetrics = useMemo(() => {
     let totalVal = 0;
@@ -306,7 +292,6 @@ export default React.memo(function InsightsPanel({
   }, [portfolios]);
 
   const f = activeFilter;
-  const showHealth = f === 'all' || f === 'health';
   const showStocks = f === 'all' || f === 'stocks';
   const showFDs = f === 'all' || f === 'fds' || f === 'due_soon';
   const showInsurance = f === 'all' || f === 'insurance' || f === 'due_soon';
@@ -318,14 +303,6 @@ export default React.memo(function InsightsPanel({
     return <InsightsSkeleton />;
   }
 
-  const getHealthBadge = (score: number) => {
-    if (score >= 90) return { label: 'A+ (Optimal)', color: 'text-[var(--positive)] bg-[var(--positive-soft)] border-[var(--positive)]/30' };
-    if (score >= 70) return { label: 'B (Good)', color: 'text-[var(--warning)] bg-[var(--warning-soft)] border-[var(--warning)]/30' };
-    return { label: 'Action Needed', color: 'text-[var(--negative)] bg-[var(--negative-soft)] border-[var(--negative)]/30' };
-  };
-
-  const healthBadge = getHealthBadge(healthSummary.score);
-
   return (
     <div role="region" aria-label="Portfolio Insights" className="space-y-6">
       
@@ -335,7 +312,7 @@ export default React.memo(function InsightsPanel({
           <div className="w-6 h-6 rounded-[var(--radius-medium)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center">
             <BarChart3 size={13} aria-hidden="true" />
           </div>
-          <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider">Portfolio Insights & Health</h3>
+          <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider">Portfolio Insights</h3>
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
@@ -358,40 +335,6 @@ export default React.memo(function InsightsPanel({
           })}
         </div>
       </div>
-
-      {/* 0. Data Quality & Health Check Strip */}
-      {showHealth && (
-        <div className="apple-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[var(--border-subtle)] hover:border-[var(--accent-blue)]/50 transition-all">
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-12 h-12 rounded-[var(--radius-medium)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex flex-col items-center justify-center shrink-0 border border-[var(--accent-blue)]/30">
-              <span className="text-base font-bold leading-none tnum">{healthSummary.score}</span>
-              <span className="text-[8px] font-bold opacity-80 uppercase">Score</span>
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold text-[var(--text-primary)]">Data Quality & Completeness</span>
-                <span className={`px-2 py-0.5 rounded-[var(--radius-small)] text-[10px] font-bold border ${healthBadge.color}`}>
-                  {healthBadge.label}
-                </span>
-              </div>
-              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                {healthSummary.issues.length === 0
-                  ? 'All records, valuations, maturity dates, and attached vault documents are complete.'
-                  : `${healthSummary.criticalCount} critical, ${healthSummary.warningCount} warnings, and ${healthSummary.infoCount} missing documents found.`}
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setShowHealthModal(true)}
-            className="shrink-0 w-full sm:w-auto px-3.5 py-2 bg-[var(--accent-blue)] hover:opacity-90 text-white rounded-[var(--radius-medium)] text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs ios-press transition-opacity"
-          >
-            <span>{healthSummary.issues.length > 0 ? 'Run Health Audit' : 'View Audit Details'}</span>
-            <ChevronRight size={14} />
-          </button>
-        </div>
-      )}
 
       {/* Real Estate Rental Yield Banner if properties exist */}
       {realEstateMetrics.propertyCount > 0 && (
@@ -459,20 +402,6 @@ export default React.memo(function InsightsPanel({
             )}
           </div>
         </div>
-      )}
-
-      {/* Modal Dialog */}
-      {showHealthModal && (
-        <Suspense fallback={null}>
-          <DataQualityHealthModal
-            isOpen={showHealthModal}
-            onClose={() => setShowHealthModal(false)}
-            healthSummary={healthSummary}
-            onNavigateAsset={onNavigateAsset}
-            onRefreshPrices={onRefreshPrices}
-            isLoadingPrices={isLoadingPrices}
-          />
-        </Suspense>
       )}
 
     </div>

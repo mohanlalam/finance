@@ -117,11 +117,8 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 ---
 
-### 4. Supporting Domains (AI, Data Quality, Backup/Restore)
+### 4. Supporting Domains (AI, Smart Import, Backup/Restore)
 
-* **Data Quality Domain (`src/domains/data-quality/`)**:
-  * **[healthScore.ts](src/domains/data-quality/healthScore.ts)**: Health scoring rules engine auditing missing maturity dates, zero valuations, overdue insurance renewals, and missing attachments.
-  * **[types.ts](src/domains/data-quality/types.ts)**: Standardized issue types with severity tiers (`info`, `warning`, `critical`).
 * **AI Assistant Domain (`src/domains/ai/`)**:
   * **[assistantEngine.ts](src/domains/ai/assistant/assistantEngine.ts)** & **[index.ts](src/domains/ai/index.ts)**: Deterministic client-side NLP assistant engine parsing and evaluating 17 financial intents (`NET_WORTH`, `PERFORMERS`, `MATURITY_TIMELINE`, `ALLOCATION_SPLIT`, `SPECIFIC_GOLD`, `SPECIFIC_MUTUAL_FUNDS`, `SPECIFIC_STOCKS`, `SPECIFIC_FDS`, `INSURANCE_REMINDERS`, `FAMILY_BREAKDOWN`, `NEXT_SIP_DATE`, `EMERGENCY_FUND`, `RENTAL_YIELD`, `EXPIRED_DOCUMENTS`, `COMPREHENSIVE_SEARCH`, `UNKNOWN`, `HELP`) with matched asset badges and zero hallucinated numbers.
   * **[wealthStrategistEngine.ts](src/domains/ai/assistant/wealthStrategistEngine.ts)**: Multi-Agent Conversational Wealth Strategist decomposing compound multi-clause financial reasoning queries into deterministic pure math domain tool calls (`findTaxHarvestingOpportunities`, `checkInsuranceCommitments`, `auditFixedDepositLock`, `cashFlowDeltaSolver`) with verified executive advisory reports and interactive simulation action chips.
@@ -166,7 +163,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 ### 7. Testing Strategy
 * **Test Conventions & Locations**:
-  * Unit and pure calculation tests: located under `src/domains/__tests__/` (e.g., `portfolioTotals.test.ts`, `taxHarvesting.test.ts`, `goldValuation.test.ts`, `dataQuality.test.ts`, `backupValidator.test.ts`, `wealthStrategist.test.ts`, `entityDisambiguationService.test.ts`, `evidenceHeatmapService.test.ts`, `authSecurity.test.ts`).
+  * Unit and pure calculation tests: located under `src/domains/__tests__/` (e.g., `portfolioTotals.test.ts`, `taxHarvesting.test.ts`, `goldValuation.test.ts`, `backupValidator.test.ts`, `wealthStrategist.test.ts`, `entityDisambiguationService.test.ts`, `evidenceHeatmapService.test.ts`, `authSecurity.test.ts`).
   * Component & formatter tests: located under `src/utils/__tests__/` and `src/hooks/__tests__/` (e.g. `imageEnhancer.test.ts`, `auth.test.ts`).
 * **Mocking & Environment Isolation**:
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
