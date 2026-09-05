@@ -171,7 +171,7 @@ export function FixedDepositView({
     return ordered.map((p) => {
       const pId = p.id;
       const memberDeposits = filteredDeposits.filter(
-        (fd) => fd.portfolio_id === pId || (!fd.portfolio_id && p.name === (portfolioName === 'all' ? p.name : portfolioName))
+        (fd) => fd.portfolio_id === pId || (!fd.portfolio_id && (portfolioName !== 'all' ? p.name === portfolioName : p.id === (ordered[0]?.id)))
       );
       const memberPrincipal = memberDeposits.reduce((sum, fd) => sum + getFDInvestedAmount(fd), 0);
       const memberCurrent = memberDeposits.reduce((sum, fd) => sum + getFDEffectiveValue(fd), 0);

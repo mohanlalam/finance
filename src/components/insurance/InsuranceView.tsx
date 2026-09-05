@@ -150,7 +150,7 @@ export function InsuranceView({
     return ordered.map((p) => {
       const pId = p.id;
       const memberPolicies = filteredPolicies.filter(
-        (ins) => ins.portfolio_id === pId || (!ins.portfolio_id && p.name === (portfolioName === 'all' ? p.name : portfolioName))
+        (ins) => ins.portfolio_id === pId || (!ins.portfolio_id && (portfolioName !== 'all' ? p.name === portfolioName : p.id === (ordered[0]?.id)))
       );
       const memberSum = memberPolicies.reduce((sum, ins) => sum + (Number(ins.sum_assured) || 0), 0);
       const memberPrem = memberPolicies.reduce((sum, ins) => sum + (Number(ins.premium_amount) || 0), 0);

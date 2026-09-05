@@ -3,7 +3,7 @@ import { NetWorthSnapshot } from '../../domains/portfolio/calculations/netWorth'
 import { getFromIDBCache, setInIDBCache, removeFromIDBCache } from './indexedDbCache';
 
 export const PORTFOLIO_CACHE_KEY = 'family_portfolios_offline_cache';
-export const PORTFOLIO_CACHE_VERSION = 1;
+export const PORTFOLIO_CACHE_VERSION = 2;
 
 export interface CachedPortfolioPayload {
   version?: number;

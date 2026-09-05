@@ -93,7 +93,10 @@ export async function getApiAuthHeaders(contentType?: string): Promise<Record<st
     headers['X-Client-Info'] = `vault-device:${deviceId}`;
   }
 
-  if (SUPABASE_ANON_KEY) {
+  // Only attach Bearer Authorization if anon key is a legacy JWT (starts with ey).
+  // Modern Supabase publishable keys (sb_publishable_*) must not be sent as Bearer tokens,
+  // as Kong/PostgREST rejects them with PGRST303 (JWT issued at future).
+  if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.startsWith('ey')) {
     headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
   }
 

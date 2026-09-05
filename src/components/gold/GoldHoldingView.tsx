@@ -155,7 +155,7 @@ export function GoldHoldingView({
     return ordered.map((p) => {
       const pId = p.id;
       const memberHoldings = filteredHoldings.filter(
-        (h) => h.portfolio_id === pId || (!h.portfolio_id && p.name === (portfolioName === 'all' ? p.name : portfolioName))
+        (h) => h.portfolio_id === pId || (!h.portfolio_id && (portfolioName !== 'all' ? p.name === portfolioName : p.id === (ordered[0]?.id)))
       );
       const memberGrams = memberHoldings.reduce((sum, h) => sum + (Number(h.weight_grams) || 0), 0);
       const memberVal = memberHoldings.reduce((sum, h) => sum + (Number(h.current_valuation) || 0), 0);

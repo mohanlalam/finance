@@ -148,7 +148,7 @@ export function RealEstateView({
     return ordered.map((p) => {
       const pId = p.id;
       const memberProperties = filteredProperties.filter(
-        (re) => re.portfolio_id === pId || (!re.portfolio_id && p.name === (portfolioName === 'all' ? p.name : portfolioName))
+        (re) => re.portfolio_id === pId || (!re.portfolio_id && (portfolioName !== 'all' ? p.name === portfolioName : p.id === (ordered[0]?.id)))
       );
       const memberInvested = memberProperties.reduce((sum, re) => sum + (Number(re.purchase_price) || 0), 0);
       const memberValuation = memberProperties.reduce((sum, re) => sum + (Number(re.current_valuation) || 0), 0);

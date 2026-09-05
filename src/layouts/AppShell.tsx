@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react';
-// Inline SVG icons — keeps lucide-react out of the critical post-unlock bundle
-import { WifiOff, AlertCircle, RefreshCw, Pencil, Trash2 } from '../components/icons/AppIcons';
+import { WifiOff, AlertCircle, RefreshCw } from '../components/icons/AppIcons';
 
 
 import Header from '../components/Header';
@@ -47,7 +46,6 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { getBreakdownSlices } from '../utils/chartHelpers';
 import { estimateTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
 import { classBreakdown } from '../domains/portfolio/calculations/allocation';
-import { Badge } from '../components/ui/Badge';
 import { AssetTab } from '../types/portfolio';
 import { LazyViewport, LazyChartWrapper } from '../components/ui/LazyViewport';
 
@@ -706,83 +704,6 @@ export default function AppShell() {
                   activePortfolio={portfolio}
                   netWorthHistory={netWorthHistory}
                 />
-
-                {/* Family Overview - drill-down member cards */}
-                {activeTab === 'all' && (
-                  <div className="apple-card rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] shadow-[var(--shadow-card)] p-4 sm:p-5">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {portfolios.map((p) => {
-                        const pnlGain = p.totalPnL >= 0;
-                        return (
-                          <div
-                            key={p.name}
-                            onClick={() => handleTabChange(p.name)}
-                            className="p-4 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 text-left transition-all duration-150 flex flex-col justify-between h-44 group cursor-pointer relative"
-                          >
-                            <div>
-                              <div className="flex items-center justify-between gap-2 mb-2">
-                                <span className="text-xs font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors truncate">{p.label}</span>
-                                <div className="flex items-center gap-1.5">
-                                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        openRenameModal({ id: p.id, name: p.name, label: p.label });
-                                      }}
-                                      className="p-1 rounded text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface)] transition-colors cursor-pointer"
-                                      title={`Rename ${p.label}`}
-                                      aria-label={`Rename ${p.label}`}
-                                    >
-                                      <Pencil size={11} />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        openDeleteModal({ id: p.id, name: p.name, label: p.label });
-                                      }}
-                                      className="p-1 rounded text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors cursor-pointer"
-                                      title={`Delete ${p.label}`}
-                                      aria-label={`Delete ${p.label}`}
-                                    >
-                                      <Trash2 size={11} />
-                                    </button>
-                                  </div>
-                                  <Badge variant={pnlGain ? 'positive' : 'negative'} className="text-[10px] py-0.5 px-2 font-bold">
-                                    {formatPercent(p.totalPnLPercent, 1)}
-                                  </Badge>
-                                </div>
-                              </div>
-                              <p className={`text-2xl font-bold text-[var(--text-primary)] tnum tracking-tight transition-opacity ${isLoadingPrices ? 'opacity-40' : ''}`}>
-                                {formatINR(p.totalCurrentValue)}
-                              </p>
-                              <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">
-                                Invested: <span className="font-semibold text-[var(--text-secondary)] tnum">{formatINR(p.totalInvested)}</span>
-                              </p>
-                            </div>
-
-                            <div className="pt-2.5 border-t border-[var(--border-subtle)] grid grid-cols-3 gap-2 text-[10px] text-[var(--text-secondary)]">
-                              <div>
-                                <p className="font-normal text-[var(--text-tertiary)]">Stocks</p>
-                                <p className="font-bold text-[var(--text-primary)] mt-0.5 tnum">{p.holdings.length}</p>
-                              </div>
-                              <div>
-                                <p className="font-normal text-[var(--text-tertiary)]">FDs</p>
-                                <p className="font-bold text-[var(--text-primary)] mt-0.5 tnum">{p.fixedDeposits.length}</p>
-                              </div>
-                              <div>
-                                <p className="font-normal text-[var(--text-tertiary)]">Properties</p>
-                                <p className="font-bold text-[var(--text-primary)] mt-0.5 tnum">{p.realEstate.length}</p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
                 {/* Wealth Mosaic — asset class totals */}
                 {activeTab === 'all' && (
                   <div className="apple-card rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] shadow-[var(--shadow-card)] p-3 sm:p-4">

@@ -178,7 +178,7 @@ export function RDView({
     return ordered.map((p) => {
       const pId = p.id;
       const memberAccounts = filteredAccounts.filter(
-        (rd) => rd.portfolio_id === pId || (!rd.portfolio_id && p.name === (portfolioName === 'all' ? p.name : portfolioName))
+        (rd) => rd.portfolio_id === pId || (!rd.portfolio_id && (portfolioName !== 'all' ? p.name === portfolioName : p.id === (ordered[0]?.id)))
       );
       const memberMonthly = memberAccounts.reduce((sum, rd) => sum + (Number(rd.monthly_deposit) || 0), 0);
       const memberInvested = memberAccounts.reduce((sum, rd) => sum + getRDInvestedAmount(rd), 0);

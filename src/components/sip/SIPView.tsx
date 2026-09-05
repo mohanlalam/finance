@@ -153,7 +153,7 @@ export function SIPView({
     return ordered.map((p) => {
       const pId = p.id;
       const memberAccounts = filteredAccounts.filter(
-        (sip) => sip.portfolio_id === pId || (!sip.portfolio_id && p.name === (portfolioName === 'all' ? p.name : portfolioName))
+        (sip) => sip.portfolio_id === pId || (!sip.portfolio_id && (portfolioName !== 'all' ? p.name === portfolioName : p.id === (ordered[0]?.id)))
       );
       const memberMonthly = memberAccounts.reduce((sum, sip) => sum + (Number(sip.monthly_sip) || 0), 0);
       const memberInvested = memberAccounts.reduce((sum, sip) => sum + getSIPInvestedAmount(sip), 0);
