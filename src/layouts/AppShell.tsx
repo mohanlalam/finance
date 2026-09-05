@@ -71,32 +71,13 @@ export default function AppShell() {
   // reading window.innerWidth (which forces a layout reflow) on every render
   const isMobile = useIsMobile();
 
-  const activeAsset = (asset as AssetTab) || (isMobile ? 'home' : 'stocks');
+  const activeAsset = (asset as AssetTab) || 'home';
   const assetTabSectionRef = useRef<HTMLDivElement>(null);
-
-  const scrollToAssetSection = useCallback(() => {
-    setTimeout(() => {
-      if (assetTabSectionRef.current) {
-        const headerOffset = 84; // 64px sticky header + 20px padding
-        const elementPosition = assetTabSectionRef.current.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.scrollY - headerOffset;
-
-        window.scrollTo({
-          top: Math.max(0, offsetPosition),
-          behavior: 'smooth'
-        });
-      }
-    }, 40);
-  }, []);
 
   const setActiveAsset = useCallback((newAsset: AssetTab) => {
     navigate(`/${family || 'all'}/${newAsset}`);
-    if (isMobile) {
-      window.scrollTo(0, 0);
-    } else {
-      scrollToAssetSection();
-    }
-  }, [navigate, family, isMobile, scrollToAssetSection]);
+    window.scrollTo(0, 0);
+  }, [navigate, family]);
   const {
     quickAddTarget, setQuickAddTarget, clearQuickAddTarget,
     showAddModal, openAddModal, closeAddModal,
@@ -421,11 +402,14 @@ export default function AppShell() {
   }, [renamePortfolio]);
 
   const handleTabChange = useCallback((tab: string) => {
-    setActiveTab(tab);
     if (tab === 'all') {
-      setActiveAsset('home');
+      navigate('/all/home');
+      window.scrollTo(0, 0);
+    } else {
+      navigate(`/${tab}/${activeAsset}`);
+      window.scrollTo(0, 0);
     }
-  }, [setActiveTab, setActiveAsset]);
+  }, [navigate, activeAsset]);
 
   const handleAddFamilyClick = openAddFamily;
   const handleRenameClick = openRenameModal;

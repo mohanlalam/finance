@@ -69,7 +69,7 @@ export default function DesktopSidebar({
               <button
                 type="button"
                 onClick={() => onSelectPortfolio(p.name)}
-                className={`flex-1 ${getNavItemClass(selectedPortfolioId === p.name && activeTab === 'home')}`}
+                className={`flex-1 ${getNavItemClass(selectedPortfolioId === p.name)}`}
               >
                 <span className="truncate">{p.label}</span>
               </button>

@@ -19,8 +19,7 @@ interface MainAppProps {
 }
 
 export default function MainApp({ onAuthExpired }: MainAppProps) {
-  const isMobile = window.matchMedia('(max-width: 767px)').matches;
-  const defaultAsset = isMobile ? 'home' : 'stocks';
+  const defaultAsset = 'home';
 
   let initialFamily = 'all';
   let initialAsset = defaultAsset;

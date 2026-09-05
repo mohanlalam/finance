@@ -135,7 +135,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
   }, [pathParts]);
 
   const activeAsset = useMemo(() => {
-    return pathParts[1] || 'stocks';
+    return pathParts[1] || 'home';
   }, [pathParts]);
 
   const activeAssetRef = useRef(activeAsset);

@@ -161,13 +161,17 @@ function Header({
         <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
 
           {/* Logo & title */}
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-[var(--radius-medium)] bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-1 ring-white/20 shrink-0">
+          <a
+            href="#/all/home"
+            className="flex items-center gap-2 sm:gap-3 min-w-0 cursor-pointer group no-underline"
+            title="Family Overview"
+          >
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-[var(--radius-medium)] bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-1 ring-white/20 shrink-0 group-hover:scale-105 transition-transform">
               <TrendingUp size={16} className="sm:w-[18px] sm:h-[18px]" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="text-sm sm:text-base font-bold text-[var(--text-primary)] tracking-tight leading-none truncate">
+                <h1 className="text-sm sm:text-base font-bold text-[var(--text-primary)] tracking-tight leading-none truncate group-hover:text-[var(--accent-blue)] transition-colors">
                   Portfolio Tracker
                 </h1>
                 {activePortfolioLabel && (
@@ -183,7 +187,7 @@ function Header({
                 </span>
               </p>
             </div>
-          </div>
+          </a>
 
           {/* ── Action icons section ── */}
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
