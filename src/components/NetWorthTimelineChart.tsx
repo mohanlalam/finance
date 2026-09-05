@@ -80,8 +80,13 @@ export default function NetWorthTimelineChart({
 
   // Generate base history (strictly Stocks & ETFs and Fixed Deposits only)
   const baseData = useMemo(() => {
-    if (history.length >= 2) {
-      return [...history]
+    const seedDates = new Set(['2025-12-31', '2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30']);
+    const cleanHistory = (history || []).filter(
+      (item) => item && !seedDates.has(item.snapshot_date) && item.snapshot_date >= '2026-05-31'
+    );
+
+    if (cleanHistory.length >= 2) {
+      return [...cleanHistory]
         .sort((a, b) => new Date(a.snapshot_date).getTime() - new Date(b.snapshot_date).getTime())
         .map((item) => {
           const stocksVal = Number(item.stocks_value) || 0;
@@ -98,8 +103,8 @@ export default function NetWorthTimelineChart({
     }
 
     // Exactly 1 real snapshot: anchor one month earlier
-    if (history.length === 1) {
-      const point = history[0];
+    if (cleanHistory.length === 1) {
+      const point = cleanHistory[0];
       const stocksVal = Number(point.stocks_value) || 0;
       const fdVal = Number(point.fd_value) || 0;
       const totalVal = stocksVal + fdVal;
@@ -156,19 +161,21 @@ export default function NetWorthTimelineChart({
 
   // Filter history based on range selector
   const chartData = useMemo(() => {
-    if (range === 'ALL') return baseData;
-    const now = new Date();
-    let days = 365;
-    if (range === '1M') days = 30;
-    else if (range === '3M') days = 90;
-    else if (range === '6M') days = 180;
-    else if (range === '1Y') days = 365;
-    else if (range === '3Y') days = 1095;
+    let filtered = baseData;
+    if (range !== 'ALL') {
+      const now = new Date();
+      let days = 365;
+      if (range === '1M') days = 30;
+      else if (range === '3M') days = 90;
+      else if (range === '6M') days = 180;
+      else if (range === '1Y') days = 365;
+      else if (range === '3Y') days = 1095;
 
-    const cutoff = new Date();
-    cutoff.setDate(now.getDate() - days);
+      const cutoff = new Date();
+      cutoff.setDate(now.getDate() - days);
 
-    const filtered = baseData.filter((d) => new Date(d.snapshot_date) >= cutoff);
+      filtered = baseData.filter((d) => new Date(d.snapshot_date) >= cutoff);
+    }
     const result = filtered.length < 2 ? baseData.slice(-2) : filtered;
     return result.map((d) => ({
       ...d,

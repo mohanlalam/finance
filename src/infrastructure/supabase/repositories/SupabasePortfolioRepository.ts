@@ -284,7 +284,19 @@ export class SupabasePortfolioRepository implements IPortfolioRepository {
       const dbRealEstate = data.real_estate || [];
       const dbInsurances = data.insurances || [];
       const dbDocs = data.documents || [];
-      const netWorthHistory = data.net_worth_history || [];
+      const rawNetWorthHistory = data.net_worth_history || [];
+      const seedIds = new Set([
+        'f264e9d7-1e93-4532-a43e-b0bab7f8bae7',
+        'a4a03a65-c813-4d7e-b0b6-a1c533c325c8',
+        '33883bf6-0bc6-4198-acdc-e3678b45a7d1',
+        '2975e20c-d076-4fed-ac50-906a4284436f',
+        'cd38e4fe-1cf8-4c98-82c9-124a4650e718',
+      ]);
+      const netWorthHistory = rawNetWorthHistory.filter((item) => {
+        if (!item) return false;
+        if (item.id && seedIds.has(item.id)) return false;
+        return item.snapshot_date >= '2026-05-31';
+      });
 
       // Group entities by portfolio_id
       const holdingsByPid = new Map<string, Holding[]>();
