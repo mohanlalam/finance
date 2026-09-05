@@ -294,13 +294,6 @@ export default function AppShell() {
           }}
         />
       </SectionErrorBoundary>
-      <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-        <LazyViewport placeholderHeight={300}>
-          <Suspense fallback={<div className="h-[300px] sm:h-[370px] apple-card rounded-xl animate-pulse" />}>
-            <PortfolioAssistant portfolios={portfolios} onSelectAsset={handleSidebarTabChange} />
-          </Suspense>
-        </LazyViewport>
-      </SectionErrorBoundary>
       <SectionErrorBoundary sectionName="Asset Class Pie Chart">
         <LazyViewport placeholderHeight={300}>
           <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
@@ -316,6 +309,13 @@ export default function AppShell() {
         <LazyViewport placeholderHeight={300}>
           <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
             <BarChart portfolios={barChartPortfolios} />
+          </Suspense>
+        </LazyViewport>
+      </SectionErrorBoundary>
+      <SectionErrorBoundary sectionName="AI Portfolio Assistant">
+        <LazyViewport placeholderHeight={300}>
+          <Suspense fallback={<div className="h-[300px] sm:h-[370px] apple-card rounded-xl animate-pulse" />}>
+            <PortfolioAssistant portfolios={portfolios} onSelectAsset={handleSidebarTabChange} />
           </Suspense>
         </LazyViewport>
       </SectionErrorBoundary>
@@ -337,13 +337,6 @@ export default function AppShell() {
           }}
         />
       </SectionErrorBoundary>
-      <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-        <LazyViewport placeholderHeight={370}>
-          <Suspense fallback={<div className="h-[300px] sm:h-[370px] apple-card rounded-xl animate-pulse" />}>
-            <PortfolioAssistant portfolios={portfolios} onSelectAsset={handleSidebarTabChange} />
-          </Suspense>
-        </LazyViewport>
-      </SectionErrorBoundary>
       <SectionErrorBoundary sectionName="Asset Class Pie Chart">
         <LazyViewport placeholderHeight={370}>
           <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
@@ -359,6 +352,13 @@ export default function AppShell() {
         <LazyViewport placeholderHeight={370}>
           <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
             <BarChart portfolios={barChartPortfolios} />
+          </Suspense>
+        </LazyViewport>
+      </SectionErrorBoundary>
+      <SectionErrorBoundary sectionName="AI Portfolio Assistant">
+        <LazyViewport placeholderHeight={370}>
+          <Suspense fallback={<div className="h-[300px] sm:h-[370px] apple-card rounded-xl animate-pulse" />}>
+            <PortfolioAssistant portfolios={portfolios} onSelectAsset={handleSidebarTabChange} />
           </Suspense>
         </LazyViewport>
       </SectionErrorBoundary>
