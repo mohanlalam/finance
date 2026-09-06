@@ -99,7 +99,7 @@ function SummaryCards({
 
           <div className="flex items-end justify-between mt-1">
             <div>
-              <p className={`text-2xl sm:text-3xl font-bold text-[var(--text-primary)] text-financial tnum tracking-tight transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
+              <p className={`text-2xl sm:text-3xl font-bold text-gradient-wealth text-financial tnum tracking-tight transition-opacity ${isLoading ? 'opacity-40' : ''}`}>
                 {renderValue(totalCurrentValue)}
               </p>
               <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
@@ -139,7 +139,7 @@ function SummaryCards({
         </div>
 
         {/* 2. Invested */}
-        <div className="flex flex-col justify-between gap-1">
+        <div className="flex flex-col justify-between gap-1 summary-col-divider">
           <div className="flex items-center justify-between">
             <span className="text-label-small text-[var(--text-secondary)] font-semibold">Invested</span>
             <span className="w-6 h-6 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] flex items-center justify-center">
@@ -173,7 +173,7 @@ function SummaryCards({
         </div>
 
         {/* 3. Total Return */}
-        <div className="flex flex-col justify-between gap-1">
+        <div className="flex flex-col justify-between gap-1 summary-col-divider">
           <div className="flex items-center justify-between">
             <span className="text-label-small text-[var(--text-secondary)] font-semibold">Total Return</span>
             <span className={`w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center ${
@@ -212,7 +212,7 @@ function SummaryCards({
         </div>
 
         {/* 4. Today's Return */}
-        <div className="flex flex-col justify-between gap-1">
+        <div className="flex flex-col justify-between gap-1 summary-col-divider">
           <div className="flex items-center justify-between">
             <span className="text-label-small text-[var(--text-secondary)] font-semibold">Today's Return</span>
             <span className={`w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center ${

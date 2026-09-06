@@ -40,15 +40,15 @@ interface DocumentVaultViewProps {
   autoOpenAddModal?: boolean;
 }
 
-const FOLDERS: { key: AssetType; label: string; color: string }[] = [
-  { key: 'general', label: 'General', color: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300' },
-  { key: 'stock', label: 'Stocks', color: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400' },
-  { key: 'fd', label: 'Fixed Deposits', color: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400' },
-  { key: 'rd', label: 'Recurring Deposits', color: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400' },
-  { key: 'sip', label: 'Mutual Funds / SIP', color: 'bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-400' },
-  { key: 'gold', label: 'Gold', color: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400' },
-  { key: 'real_estate', label: 'Real Estate', color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' },
-  { key: 'insurance', label: 'Insurance', color: 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-500' },
+const FOLDERS: { key: AssetType; label: string }[] = [
+  { key: 'general', label: 'General' },
+  { key: 'stock', label: 'Stocks' },
+  { key: 'fd', label: 'Fixed Deposits' },
+  { key: 'rd', label: 'Recurring Deposits' },
+  { key: 'sip', label: 'Mutual Funds / SIP' },
+  { key: 'gold', label: 'Gold' },
+  { key: 'real_estate', label: 'Real Estate' },
+  { key: 'insurance', label: 'Insurance' },
 ];
 
 export default React.memo(function DocumentVaultView({
@@ -472,15 +472,22 @@ export default React.memo(function DocumentVaultView({
                 <button
                   key={f.key}
                   onClick={() => setActiveFolder(f.key)}
-                  className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] border transition-all ios-press shrink-0 cursor-pointer ${isActive
-                    ? 'bg-[var(--text-primary)] text-[var(--surface)] border-[var(--text-primary)] shadow-xs'
-                    : 'bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-tertiary)]'
-                    }`}
+                  className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] border transition-all ios-press shrink-0 cursor-pointer ${
+                    isActive
+                      ? 'bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)] text-white border-transparent shadow-[0_2px_10px_rgba(2,132,199,0.25)] scale-[1.02]'
+                      : 'bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-tertiary)] hover:scale-[1.01]'
+                  }`}
                 >
                   {isActive ? <FolderOpen size={12} /> : <Folder size={12} />}
                   <span>{f.label}</span>
                   {count > 0 && (
-                    <span className={`text-[10px] px-1 py-0.2 rounded-full ${isActive ? 'bg-[var(--surface)] text-[var(--text-primary)]' : 'bg-[var(--surface-secondary)] text-[var(--text-tertiary)]'}`}>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                        isActive
+                          ? 'bg-white/20 text-white'
+                          : 'bg-[var(--surface-secondary)] text-[var(--text-tertiary)]'
+                      }`}
+                    >
                       {count}
                     </span>
                   )}
@@ -499,7 +506,7 @@ export default React.memo(function DocumentVaultView({
             />
             <label
               htmlFor="vault-file-upload-input"
-              className="flex items-center gap-1.5 bg-[var(--text-primary)] hover:opacity-90 text-[var(--surface)] text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] transition-all shadow-xs cursor-pointer select-none ios-press"
+              className="flex items-center gap-1.5 bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)] hover:opacity-95 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] transition-all shadow-[0_2px_10px_rgba(2,132,199,0.25)] hover:shadow-[0_4px_14px_rgba(2,132,199,0.35)] cursor-pointer select-none ios-press"
             >
               <Upload size={12} />
               <span>Upload to {FOLDERS.find((f) => f.key === activeFolder)?.label}</span>

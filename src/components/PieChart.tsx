@@ -153,12 +153,13 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
           {/* Donut Visualizer with Interactive Center HUD */}
           <div className="relative shrink-0 flex items-center justify-center py-1">
             <svg
+              key={slices.length}
               width={195}
               height={195}
               viewBox="0 0 230 230"
               role="img"
               aria-label={`${title} donut chart showing ${slices.length} segments totalling ${isBalancesHidden ? 'hidden' : formatINR(total)}`}
-              className="overflow-visible max-w-full drop-shadow-sm"
+              className="overflow-visible max-w-full drop-shadow-sm animate-stitch-fade"
             >
               <defs>
                 <filter id="donutGlow" x="-30%" y="-30%" width="160%" height="160%">
@@ -201,6 +202,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
               {/* Center Cutout Disk with Glassmorphic Ring */}
               <circle cx={cx} cy={cy} r={innerR - 2} className="fill-[var(--surface)] shadow-inner" />
               <circle cx={cx} cy={cy} r={innerR - 2} fill="none" stroke="var(--border-subtle)" strokeWidth={1} />
+              <circle cx={cx} cy={cy} r={innerR - 5} fill="none" stroke="var(--accent-blue)" strokeWidth={0.75} strokeDasharray="3 4" className="opacity-40 animate-pulse" />
 
               {/* Center HUD Text */}
               {hoverSlice ? (

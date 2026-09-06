@@ -258,10 +258,13 @@ export function InsuranceView({
             </span>
           </div>
 
-          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+          <div className={`p-1.5 sm:p-2 rounded-[var(--radius-small)] border transition-all ${familyInsuranceSummary.expiringSoonCount > 0 ? 'bg-[var(--negative-soft)]/30 border-[var(--negative)]/40 ring-1 ring-[var(--negative)]/30 shadow-[0_0_12px_rgba(244,63,94,0.12)]' : 'bg-[var(--surface-secondary)]/50 border-[var(--border-subtle)]'}`}>
             <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Renewals Alert</span>
-            <span className={`text-xs sm:text-sm font-bold tnum mt-0.5 block truncate ${familyInsuranceSummary.expiringSoonCount > 0 ? 'text-[var(--negative)]' : 'text-[var(--positive)]'}`}>
-              {familyInsuranceSummary.expiringSoonCount > 0 ? `⚠️ ${familyInsuranceSummary.expiringSoonCount} Due Soon` : '✓ All Current'}
+            <span className={`text-xs sm:text-sm font-bold tnum mt-0.5 flex items-center gap-1.5 truncate ${familyInsuranceSummary.expiringSoonCount > 0 ? 'text-[var(--negative)]' : 'text-[var(--positive)]'}`}>
+              {familyInsuranceSummary.expiringSoonCount > 0 && (
+                <span className="w-2 h-2 rounded-full bg-[var(--negative)] animate-pulse shrink-0 inline-block shadow-[0_0_6px_var(--negative)]" />
+              )}
+              <span>{familyInsuranceSummary.expiringSoonCount > 0 ? `${familyInsuranceSummary.expiringSoonCount} Due Soon` : '✓ All Current'}</span>
             </span>
           </div>
         </div>

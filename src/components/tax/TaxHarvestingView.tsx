@@ -18,6 +18,12 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
   const taxData = React.useMemo(() => calculateTaxHarvesting(holdings), [holdings]);
   const ltcgExemptionLimit = 125000;
   const exemptionProgress = Math.min(100, (taxData.ltcgExemptionUsed / ltcgExemptionLimit) * 100);
+  const progressGradient =
+    exemptionProgress >= 90
+      ? 'bg-gradient-to-r from-amber-500 to-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]'
+      : exemptionProgress >= 60
+      ? 'bg-gradient-to-r from-[var(--accent-blue)] to-amber-500'
+      : 'bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)] shadow-[0_0_8px_rgba(56,189,248,0.3)]';
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
@@ -43,25 +49,25 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="apple-card p-4 flex flex-col justify-between">
-          <span className="text-xs font-semibold text-[var(--text-tertiary)]">Estimated Tax Liability</span>
+          <span className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Estimated Tax Liability</span>
           <p className="text-xl font-bold text-[var(--text-primary)] mt-2 tnum">{formatINR(taxData.totalEstimatedTax)}</p>
         </div>
         <div className="apple-card p-4 flex flex-col justify-between">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-semibold text-[var(--text-tertiary)]">LTCG Exemption Used</span>
+            <span className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">LTCG Exemption Used</span>
             <span className="text-xs font-bold text-[var(--accent-blue)] tnum">{formatINR(taxData.ltcgExemptionUsed)} / 1.25L</span>
           </div>
-          <div className="w-full bg-[var(--surface-secondary)] rounded-[var(--radius-pill)] h-2 mt-auto overflow-hidden">
-            <div className="bg-[var(--accent-blue)] h-2 rounded-[var(--radius-pill)] transition-all duration-500" style={{ width: `${exemptionProgress}%` }}></div>
+          <div className="w-full bg-[var(--surface-secondary)] rounded-[var(--radius-pill)] h-2.5 mt-auto overflow-hidden p-0.5 border border-[var(--border-subtle)]">
+            <div className={`h-full rounded-[var(--radius-pill)] transition-all duration-700 ${progressGradient}`} style={{ width: `${exemptionProgress}%` }}></div>
           </div>
         </div>
-        <div className="apple-card p-4 flex flex-col justify-between">
-          <span className="text-xs font-semibold text-[var(--text-tertiary)]">Harvestable Loss Potential</span>
-          <p className="text-xl font-bold text-[var(--negative)] mt-2 tnum">{formatINR(taxData.harvestableLosses)}</p>
+        <div className="apple-card p-4 flex flex-col justify-between border-l-4 border-l-[var(--negative)] hover:shadow-[0_0_16px_rgba(244,63,94,0.12)]">
+          <span className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Harvestable Loss Potential</span>
+          <p className="text-xl font-bold text-[var(--negative)] neon-glow-negative mt-2 tnum">{formatINR(taxData.harvestableLosses)}</p>
         </div>
-        <div className="apple-card p-4 flex flex-col justify-between">
-          <span className="text-xs font-semibold text-[var(--text-tertiary)]">Potential Tax Savings</span>
-          <p className="text-xl font-bold text-[var(--positive)] mt-2 tnum">{formatINR(taxData.potentialTaxSavings)}</p>
+        <div className="apple-card p-4 flex flex-col justify-between border-l-4 border-l-[var(--positive)] bg-gradient-to-br from-[var(--surface)] to-[var(--positive-soft)]/40 ring-1 ring-[var(--positive)]/30 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+          <span className="text-xs font-bold text-[var(--positive)] uppercase tracking-wider">Potential Tax Savings</span>
+          <p className="text-2xl font-bold text-[var(--positive)] neon-glow-positive mt-2 tnum">{formatINR(taxData.potentialTaxSavings)}</p>
         </div>
       </div>
 

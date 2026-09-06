@@ -118,12 +118,14 @@ The visual theme is governed by CSS Custom Properties declared in `src/index.css
 
 ### Typography & Tabular Numerics
 
-The typography system prioritizes tabular alignment for financial digits, using `-apple-system` / `SF Pro` fonts:
+The typography system prioritizes tabular alignment for financial digits, powered by Google Fonts **Inter** alongside Apple SF Pro fallbacks:
 
 ```css
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.011em;
 }
 ```
 
@@ -131,19 +133,31 @@ body {
 
 | Class Name | Mobile Size | Desktop Size | Weight | Line Height | Usage |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `h1` / `.text-page-title` | `28px` | `34px` | `700` (Bold) | `1.2` | Top dashboard page titles |
-| `h2` / `.text-section-title` | `20px` | `24px` | `700` (Bold) | `1.3` | Section headings, widget headers |
-| `h3` / `.text-card-title` | `15px` | `17px` | `600` (SemiBold) | `1.4` | Asset card titles, table headers |
+| `h1` / `.text-page-title` | `28px` | `34px` | `700` (Bold) | `1.15` | Top dashboard page titles |
+| `h2` / `.text-section-title` | `20px` | `24px` | `700` (Bold) | `1.25` | Section headings, widget headers |
+| `h3` / `.text-card-title` | `15px` | `17px` | `600` (SemiBold) | `1.35` | Asset card titles, table headers |
 | `.text-body` | `14px` | `16px` | `400` (Regular) | `1.5` | Standard body copy, descriptions |
-| `.text-supporting` | `12px` | `13px` | `400` (Regular) | `1.5` | Secondary metadata, dates, tickers |
+| `.text-supporting` | `12px` | `12px` | `400` (Regular) | `1.5` | Secondary metadata, dates, tickers (`color: var(--text-tertiary)`) |
 | `.text-financial` | `22px` | `26px` | `700` (Bold) | `1.2` | Net Worth totals, asset values |
-| `.text-label-small` | `11px` | `12px` | `500` (Medium) | `1.4` | Small pill text, category tags |
-| `.text-label-micro` | `10px` | `10px` | `500` (Medium) | `1.2` | Ultra-compact badge labels |
+| `.text-label-small` | `11px` | `12px` | `600` (SemiBold) | `1.4` | Small pill text, category tags |
+| `.text-label-micro` | `10px` | `10px` | `700` (Bold) | `1.2` | Ultra-compact badge labels |
+
+#### Neon Financial Luminance & Gradient Utilities
+
+| Class Name | Visual Effect | Application |
+| :--- | :--- | :--- |
+| `.neon-glow-positive` | `#10b981` with `drop-shadow(0 0 8px rgba(16, 185, 129, 0.4))` | Positive returns, tax savings |
+| `.neon-glow-negative` | `#f43f5e` with `drop-shadow(0 0 8px rgba(244, 63, 94, 0.4))` | Loss indicators, harvestable losses |
+| `.neon-glow-cyan` | `#38bdf8` with `drop-shadow(0 0 8px rgba(56, 189, 248, 0.4))` | Blue asset highlights, Kite Sky Blue |
+| `.neon-glow-gold` | `#f59e0b` with `drop-shadow(0 0 8px rgba(245, 158, 11, 0.45))` | Bullion rates, Gold valuation |
+| `.text-gradient-wealth` | `linear-gradient(135deg, var(--text-primary) 20%, var(--accent-blue) 75%, #38bdf8 100%)` | Hero Net Worth title text with luminous drop shadow |
+| `.text-gradient-positive` | `linear-gradient(135deg, #10b981 0%, #059669 100%)` | Highlighted gain metrics |
+| `.text-gradient-negative` | `linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)` | Highlighted loss metrics |
 
 #### Tabular Number Rules
 * **`.tnum` / `.text-financial`**: Enforces `font-variant-numeric: tabular-nums` and `font-feature-settings: "tnum" 1, "cv05" 1, "cv01" 1`. Prevents layout jitter when financial values change dynamically.
 * **`.ios-currency`**: Renders currency symbols (₹, $) with reduced opacity (`0.85`) and lighter weight (`300`) for subtle visual hierarchy.
-* **`AnimatedNumber`**: Smooth count-up interpolation using `requestAnimationFrame` with cubic ease-out transitions. Automatically falls back to static rendering when `prefers-reduced-motion` is enabled.
+* **`AnimatedNumber`**: Smooth count-up interpolation with a tactile value-pop bounce (`.animate-value-pop`) on value transitions. Automatically falls back to static rendering when `prefers-reduced-motion` is enabled.
 
 ### Corner Radii, Elevation Shadows & Z-Index
 
@@ -173,16 +187,22 @@ To maintain a compact, crisp financial interface, corner radii and shadows are s
 * **Tactile Press Feedback (`.ios-press`)**:
   ```css
   .ios-press {
-    transition: transform 0.14s var(--ios-spring), background-color 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.16s var(--ios-spring), background-color 0.15s ease, opacity 0.15s ease, box-shadow 0.2s ease;
   }
   .ios-press:active {
-    transform: scale(0.975);
-    opacity: 0.92;
+    transform: scale(0.965);
+    opacity: 0.9;
   }
   ```
-* **Modal Scale-In (`.animate-modal-content`)**: `0.35s` duration using `cubic-bezier(0.34, 1.56, 0.64, 1)` spring expansion.
-* **Sparkline Line Draw (`.animate-sparkline-draw`)**: SVG line drawing over `0.8s` using `stroke-dashoffset` animation.
-* **Tab Fade In (`.tab-transition`)**: `0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94)` with slight vertical translation (`translateY(2px) → translateY(0)`).
+* **Modal Scale-In (`.modal-animate-in`)**: `0.26s` duration using `cubic-bezier(0.16, 1, 0.3, 1)` spring expansion with vertical lift.
+* **Toast Notification Slide (`.animate-slide-in`, `.animate-slide-out`)**: `0.26s` spring entrance and `0.2s` ease exit.
+* **Sparkline Line Draw (`.animate-sparkline-draw`)**: Polyline SVG stroke drawing over `0.85s` using `@keyframes sparklineDraw` stroke-dashoffset transition.
+* **Tab & View Stitch Fade (`.animate-stitch-fade`, `.tab-transition`)**: `0.28s - 0.32s` cubic-bezier with subtle translation (`translateY(4px) → translateY(0)`).
+* **Financial Value Pop (`.animate-value-pop`)**: `0.28s` bounce scale (`scale(1.06) → scale(1)`) on value transition.
+* **Bar Chart Staggered Rise (`.animate-bar-rise`)**: `0.6s` cubic-bezier scaling (`transform-origin: bottom`) with progressive delay offsets (`pi * 75ms`).
+* **Skeleton Shimmer Wave (`.animate-shimmer`)**: `1.8s` infinite ease-in-out wave across a 200% gradient background.
+* **Zero-G Weightless Float (`.animate-float`)**: `4s` infinite floating translation (`translateY(-4px)`).
+* **Cosmic Nebula Drift (`nebulaDrift`, `nebulaDrift2`)**: 25s–30s ambient atmospheric floating background gradients.
 
 ### UI Component Primitives Library
 
@@ -289,7 +309,7 @@ The web view is designed for wide screens (`md: 768px` up to `2xl: 1720px`), emp
   10. ⚖️ **Tax Harvesting** (`'tax'`)
 * **Item Styling**:
   * Inactive Item: `text-[var(--text-secondary)]`, hover background `bg-[var(--surface-secondary)]`.
-  * Active Item: `bg-blue-600 text-white font-semibold shadow-sm`.
+  * Active Item (`.sidebar-item-active`): `linear-gradient(90deg, var(--accent-blue-soft) 0%, rgba(56, 189, 248, 0.02) 100%)`, `border-left: 3px solid var(--accent-blue)`, `color: var(--accent-blue)`, `font-weight: 700`, `box-shadow: var(--shadow-card)`.
   * Count Badges: Small pill on the right showing total asset count per category.
 
 ### Family Selector & Tab Navigation
@@ -304,31 +324,33 @@ The web view is designed for wide screens (`md: 768px` up to `2xl: 1720px`), emp
 ### Summary Cards & Sparklines
 
 * Component: `SummaryCards.tsx`
-* Layout: Grid of 4 cards on desktop (`grid-cols-4 gap-4`).
+* Layout: Grid of 4 cards on desktop (`grid-cols-4 gap-4`), with subtle vertical dividers between columns (`.summary-col-divider`).
 * Card Types:
-  1. **Total Net Worth**: Live balance, 24h change indicator, and 7-point Mini Sparkline.
+  1. **Total Net Worth**: Live balance with `.text-gradient-wealth`, 24h change indicator, and 7-point Mini Sparkline.
   2. **Total Invested**: Principal capital allocated across all asset classes.
-  3. **Today's P&L**: Daily fluctuation with system green/red indicator.
+  3. **Today's P&L**: Daily fluctuation with system green/red indicator and `.neon-glow` accents.
   4. **Total P&L / Returns**: Overall profit/loss with percentage badge and overall yield sparkline.
-* **Sparklines**: Mini inline SVG graphs (`Sparkline.tsx`) with animated line-draw on mount (`.animate-sparkline-draw`).
+* **Sparklines**: Mini inline SVG graphs (`Sparkline.tsx`) with animated line-draw on mount (`.animate-sparkline-draw` with `@keyframes sparklineDraw`).
 
 ### 2x2 Equalized Dashboard Widget Grid
 
 All four core visualization widgets are constrained to an **equalized height of 370px** inside a `grid-cols-1 lg:grid-cols-2 gap-5` container to maintain strict visual alignment:
 
 1. **Net Worth Timeline Chart** (`NetWorthTimelineChart.tsx`) — *Top-Left*:
-   * Interactive SVG line & filled area chart showing historical wealth growth.
+   * Interactive SVG line & filled area chart showing historical wealth growth with ambient line-glow filters.
    * Date range selector pills: `1M`, `3M`, `6M`, `1Y`, `ALL`.
    * Multi-series toggle: Total Portfolio, Stocks vs FDs, Stocks, FDs.
    * Interactive hover crosshair with exact date and valuation tooltip.
    * Empty state preview: Muted reference curve with glassmorphic badge overlay.
 2. **Asset Allocation Donut Chart** (`PieChart.tsx`) — *Top-Right*:
    * Donut chart representing portfolio breakdown across asset classes (Stocks & ETFs, Fixed Deposits, Recurring Deposits, Mutual Fund SIPs, Gold Holdings, Real Estate).
+   * **Entry Animation & Ambient HUD Ring**: Animated mount via `.animate-stitch-fade` and an inner pulsating dashed accent ring (`strokeDasharray="3 4"`, `animate-pulse`) in the center cutout disk.
    * **Dual Legend Breakdown**: Displays both the formatted monetary valuation (`formatINR`) and the composition weight percentage (`%`) without signed `+`/`-` prefixes.
    * **Privacy / Stealth Mode Integration**: Fully respects `PrivacyContext` (`isBalancesHidden`), replacing monetary figures in the donut center, hover tooltips, and legend rows with masked bullet strings (`••••••`).
-   * **Interactive Donut Hover**: Hovering over any slice shifts the arc outward (`scale(1.04)`) and updates the center label to display the slice name, weight percentage, and formatted monetary value.
+   * **Interactive Donut Hover**: Hovering over any slice shifts the arc outward (`scale(1.035)`) with an SVG drop shadow filter (`#donutGlow`) and updates the center label to display the slice name, weight percentage, and formatted monetary value.
 3. **Performance Bar Chart** (`BarChart.tsx`) — *Bottom-Left*:
    * Bar visualization comparing invested value vs current market value per family portfolio.
+   * **Multi-Stop Gradients & Staggered Rise**: Utilizes SVG linear gradients (`#barInvestedGrad`, `#barPositiveGrad`, `#barNegativeGrad`), subtle dashed gridlines (`strokeDasharray="4 6"`), and staggered entrance animation (`.animate-bar-rise` with progressive delay offsets).
 4. **Portfolio Assistant (AI Chatbot)** (`PortfolioAssistant.tsx`) — *Bottom-Right (Positioned Last)*:
    * Conversational NLP panel formatted to 370px height matching neighboring charts with internal scroll body (`flex-1 min-h-0 overflow-y-auto`).
    * Features quick suggestion prompt pills, typing indicator, markdown formatting, memoized message rendering (`ChatMessageItem`), `Bot` SVG icon integration, and copy response button.
@@ -381,7 +403,7 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   * Background: Aurora purple-to-blue gradient overlay with radial soft lights.
   * Clock & Header: Live iOS-style bold time & date display.
   * Animated Padlock Icon: Smoothly toggles between locked and unlocked keyhole states.
-  * Keypad: 3x4 grid of circular frosted glass buttons (`backdrop-filter: blur(16px)`), featuring large numeric digits (1-9, 0) and telephone letter sub-labels (ABC, DEF, GHI...).
+  * Keypad: 3x4 grid of circular frosted glass buttons (`backdrop-filter: blur(16px)`), featuring large numeric digits (1-9, 0) and telephone letter sub-labels (ABC, DEF, GHI...). Styled with `.pin-key` incorporating cubic-bezier spring physics (`cubic-bezier(0.16, 1, 0.3, 1)`), hover illumination with border brightening, and an active cosmic cyan zero-G glow aura (`box-shadow: 0 0 20px rgba(56, 189, 248, 0.4)`).
   * PIN Dots: 4 circular dots that glow soft blue when filled and execute a horizontal shake animation on incorrect passcode input.
 
 ### Mobile Top Bar & Family Pill Selector
@@ -584,6 +606,8 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
   * **Row 1**: Shield icon, title, `Combined` badge, and subtitle.
   * **Row 2 (4 Metrics)**: Total Sum Assured, Annual Premium Outflow, Active Policies count, Renewals Alert (Due Soon warning).
   * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3 min-h-[44px]`) showing sum assured and annual premium per member (with muted `—` zero-state).
+* **Urgency Indicators**:
+  * When `expiringSoonCount > 0`, the Renewals Alert card highlights with a rose alert container ring (`bg-[var(--negative-soft)]/30 border-[var(--negative)]/40 ring-1 ring-[var(--negative)]/30 shadow-[0_0_12px_rgba(244,63,94,0.12)]`) and displays a pulsing red dot indicator (`w-2 h-2 rounded-full bg-[var(--negative)] animate-pulse shadow-[0_0_6px_var(--negative)]`).
 * **Features**:
   * Policy Types: Term Life, Health Insurance, Vehicle Insurance, ULIP / Investment.
   * Sum Assured Coverage Amount vs Annual Premium Cost.
@@ -597,7 +621,10 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
   * **Row 1**: FileText icon, title, `Combined` badge, and subtitle.
   * **Row 2 (4 Metrics)**: Total Documents, Attached to Assets, General Records, Expiring/Due Soon.
   * **Row 3 (Member Breakdown)**: 3-column grid (`grid-cols-3 min-h-[44px]`) showing document counts per member (with muted `—` zero-state).
-* **Structure**:
+* **Folder System & Actions**:
+  * Asset Category Folders: General, Stocks, Fixed Deposits, Recurring Deposits, Mutual Funds, Gold, Real Estate, Insurance.
+  * Active Folder Pills: Styled with cyan/blue gradient (`bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)]`), white text, translucent count badge (`bg-white/20`), and glowing shadow.
+  * Upload Trigger: Prominent gradient CTA button with tactile feedback (`.ios-press`).
   * Taxonomy Categories: `fd_advice`, `policy_schedule`, `title_deed`, `tax_receipt`, `invoice`, `gold_hallmark`, `account_statement`, `general`.
   * Expiration Warning Pills: Highlights identity documents or policies nearing expiration.
   * Secure Download / View action triggers with thumbnail previews.
@@ -605,10 +632,15 @@ All 7 non-stock asset classes (`Gold`, `Fixed Deposits`, `Recurring Deposits`, `
 ### Tax Harvesting Recommendation View
 
 * Component: `TaxHarvestingView.tsx`
-* Components:
-  * Short-Term Capital Gains (STCG) vs Long-Term Capital Gains (LTCG) Summary Cards.
-  * ₹1.25 Lakh Annual LTCG Exemption Progress Bar.
-  * Harvesting Opportunity List: Recommends specific stock/ETF holdings to sell and repurchase to offset taxable capital gains.
+* **Metric Cards & Visual Drama**:
+  * **Dynamic LTCG Exemption Progress Bar**: Visual progress across the ₹1.25 Lakh annual LTCG threshold using a dynamic multi-stage gradient:
+    - `< 60%`: Cyan-to-blue glow (`shadow-[0_0_8px_rgba(56,189,248,0.3)]`)
+    - `60% – 89%`: Blue-to-amber transition
+    - `≥ 90%`: Amber-to-rose alert glow (`shadow-[0_0_8px_rgba(244,63,94,0.4)]`)
+  * **Potential Tax Savings (Hero Card)**: Highlighted with an emerald left-accent border (`border-l-4 border-l-[var(--positive)]`), soft radial green backdrop (`from-[var(--surface)] to-[var(--positive-soft)]/40`), green container ring (`ring-1 ring-[var(--positive)]/30`), and neon glowing savings figure (`.neon-glow-positive`).
+  * **Harvestable Loss Potential**: Rose left-accent border (`border-l-4 border-l-[var(--negative)]`) with neon negative glowing metric (`.neon-glow-negative`).
+  * **Capital Gains Classification**: Short-Term Capital Gains (STCG @ 20%) vs Long-Term Capital Gains (LTCG @ 12.5% over ₹1.25L) breakdown cards.
+* **Harvesting Opportunity List**: Recommends specific stock/ETF holdings to sell and repurchase to offset taxable capital gains.
 
 ### Portfolio Assistant (AI Conversational UI)
 
@@ -729,13 +761,15 @@ The application integrates desktop keyboard shortcuts (via `useKeyboardShortcuts
 ### Shimmer Skeleton Loading States
 
 * Components: `AssetCardSkeleton.tsx`, `ChartSkeleton.tsx`, & `DashboardLoading.tsx`
-* CSS Utility: `.shimmer-bg` and `.shimmer-bar`
-* Animation: Linear gradient highlight moving left-to-right (`@keyframes shimmerAnimation`) matching the precise layout of actual asset cards and summary tiles to prevent cumulative layout shift (CLS).
+* CSS Utility: `.animate-shimmer` with `@keyframes shimmerWave`
+* Animation: Seamless linear gradient highlight moving across a 200% width canvas (`linear-gradient(90deg, var(--surface-secondary) 0%, var(--surface-tertiary) 50%, var(--surface-secondary) 100%)`) over `1.8s ease-in-out infinite` matching the precise layout of actual asset cards, summary tiles, and 2x2 dashboard widgets to eliminate layout shifts (CLS).
 
 ### Empty State Guidelines
 
 * Component: `EmptyState.tsx`
-* Visuals: Contextual icon enclosed in a soft blue circle, clear title (e.g., "No Fixed Deposits Added"), descriptive subtext, and a prominent call-to-action button ("+ Add Your First FD").
+* **Zero-G Floating Illustration**: Contextual SVG illustration enclosed in a frosted container styled with `.animate-float`, gentle radial background, subtle cyan glow (`shadow-[0_8px_20px_rgba(2,132,199,0.08)]`), and 1px border ring.
+* **Brand Gradient CTA Button**: Primary call-to-action button styled with the signature cyan-blue gradient (`bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)]`), glowing elevation shadow (`shadow-[0_4px_14px_rgba(2,132,199,0.25)]`), and spring press feedback (`.ios-press`).
+* **Copy Hierarchy**: Bold descriptive title (e.g., "No Fixed Deposits Added"), clear instructional subtext, and clear guidance.
 
 ### Privacy / Stealth Mode Masking
 

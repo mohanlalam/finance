@@ -97,6 +97,20 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
     }
   };
 
+  const getProgressBarColor = () => {
+    switch (toast.type) {
+      case 'success':
+        return 'bg-emerald-500';
+      case 'error':
+        return 'bg-red-500';
+      case 'warning':
+        return 'bg-amber-500';
+      case 'info':
+      default:
+        return 'bg-blue-500';
+    }
+  };
+
   const styles = getToastStyles();
 
   return (
@@ -104,7 +118,7 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
       role="status"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`flex items-center gap-3 px-4 py-3 rounded-[var(--radius-medium)] border pointer-events-auto max-w-sm w-auto transition-all duration-200 apple-card ${styles.bg} ${isExiting ? 'animate-slide-out scale-95 opacity-0' : 'animate-slide-in scale-100 opacity-100'}`}
+      className={`relative overflow-hidden flex items-center gap-3 px-4 py-3 rounded-[var(--radius-medium)] border pointer-events-auto max-w-sm w-auto transition-all duration-200 apple-card ${styles.bg} ${isExiting ? 'animate-slide-out scale-95 opacity-0' : 'animate-slide-in scale-100 opacity-100'}`}
     >
       {styles.icon}
       <p className="text-xs font-semibold tracking-tight text-[var(--text-primary)] flex-1">{toast.message}</p>
@@ -115,6 +129,15 @@ function ToastItem({ toast }: { toast: ToastMessage }) {
       >
         <IconClose />
       </button>
+      <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-black/5 dark:bg-white/10 overflow-hidden pointer-events-none">
+        <div
+          className={`h-full ${getProgressBarColor()} origin-left`}
+          style={{
+            animation: `toastProgress ${initialDuration}ms linear forwards`,
+            animationPlayState: isHovered ? 'paused' : 'running',
+          }}
+        />
+      </div>
     </div>
   );
 }

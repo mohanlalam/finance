@@ -22,7 +22,9 @@ export const AnimatedNumber = React.memo(({
       className={`tnum ${className}`}
       aria-label={formattedFinalTarget}
     >
-      <span aria-hidden="true">{animatedValue as React.ReactNode}</span>
+      <span key={value} className="inline-block animate-value-pop" aria-hidden="true">
+        {animatedValue as React.ReactNode}
+      </span>
     </span>
   );
 });

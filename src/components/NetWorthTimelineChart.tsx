@@ -528,18 +528,27 @@ export default function NetWorthTimelineChart({
           {/* Gradients & Filters */}
           <defs>
             <linearGradient id="totalAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#387ed1" stopOpacity="0.25" />
-              <stop offset="50%" stopColor="#387ed1" stopOpacity="0.08" />
+              <stop offset="0%" stopColor="#387ed1" stopOpacity="0.45" />
+              <stop offset="35%" stopColor="#2563eb" stopOpacity="0.2" />
+              <stop offset="70%" stopColor="#387ed1" stopOpacity="0.05" />
               <stop offset="100%" stopColor="#387ed1" stopOpacity="0.0" />
             </linearGradient>
             <linearGradient id="stocksAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#387ed1" stopOpacity="0.22" />
+              <stop offset="0%" stopColor="#387ed1" stopOpacity="0.38" />
+              <stop offset="50%" stopColor="#2563eb" stopOpacity="0.12" />
               <stop offset="100%" stopColor="#387ed1" stopOpacity="0.0" />
             </linearGradient>
             <linearGradient id="fdAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.22" />
+              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.38" />
+              <stop offset="50%" stopColor="#0891b2" stopOpacity="0.12" />
               <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
             </linearGradient>
+            <filter id="lineGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#387ed1" floodOpacity="0.4" />
+            </filter>
+            <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#387ed1" floodOpacity="0.6" />
+            </filter>
           </defs>
 
           {/* Grid lines (horizontal) */}
@@ -591,6 +600,7 @@ export default function NetWorthTimelineChart({
                 strokeWidth={2.5}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                filter="url(#lineGlow)"
               />
             </>
           )}
@@ -649,45 +659,77 @@ export default function NetWorthTimelineChart({
               <g key={idx}>
                 {/* Visible Dots based on series mode */}
                 {seriesMode === 'total' && (
-                  <circle
-                    cx={p.x}
-                    cy={p.y}
-                    r={isHovered ? 5.5 : 3.5}
-                    className={`transition-all ${
-                      isHovered
-                        ? 'fill-[#387ed1] stroke-[var(--surface)]'
-                        : 'fill-transparent hover:fill-[#387ed1]/20'
-                    }`}
-                    strokeWidth={isHovered ? 2.5 : 0}
-                  />
+                  <>
+                    {isHovered && (
+                      <circle
+                        cx={p.x}
+                        cy={p.y}
+                        r={11}
+                        className="fill-[#387ed1]/25 animate-pulse pointer-events-none"
+                      />
+                    )}
+                    <circle
+                      cx={p.x}
+                      cy={p.y}
+                      r={isHovered ? 6 : 3.5}
+                      filter={isHovered ? 'url(#nodeGlow)' : undefined}
+                      className={`transition-all ${
+                        isHovered
+                          ? 'fill-[#387ed1] stroke-[var(--surface)]'
+                          : 'fill-transparent hover:fill-[#387ed1]/20'
+                      }`}
+                      strokeWidth={isHovered ? 2.5 : 0}
+                    />
+                  </>
                 )}
 
                 {(seriesMode === 'both' || seriesMode === 'stocks') && stockP && (
-                  <circle
-                    cx={stockP.x}
-                    cy={stockP.y}
-                    r={isHovered ? 5 : 3}
-                    className={`transition-all ${
-                      isHovered
-                        ? 'fill-[#387ed1] stroke-[var(--surface)]'
-                        : 'fill-transparent hover:fill-[#387ed1]/20'
-                    }`}
-                    strokeWidth={isHovered ? 2 : 0}
-                  />
+                  <>
+                    {isHovered && (
+                      <circle
+                        cx={stockP.x}
+                        cy={stockP.y}
+                        r={10}
+                        className="fill-[#387ed1]/25 animate-pulse pointer-events-none"
+                      />
+                    )}
+                    <circle
+                      cx={stockP.x}
+                      cy={stockP.y}
+                      r={isHovered ? 5.5 : 3}
+                      filter={isHovered ? 'url(#nodeGlow)' : undefined}
+                      className={`transition-all ${
+                        isHovered
+                          ? 'fill-[#387ed1] stroke-[var(--surface)]'
+                          : 'fill-transparent hover:fill-[#387ed1]/20'
+                      }`}
+                      strokeWidth={isHovered ? 2 : 0}
+                    />
+                  </>
                 )}
 
                 {(seriesMode === 'both' || seriesMode === 'fd') && fdP && (
-                  <circle
-                    cx={fdP.x}
-                    cy={fdP.y}
-                    r={isHovered ? 5 : 3}
-                    className={`transition-all ${
-                      isHovered
-                        ? 'fill-[#06b6d4] stroke-[var(--surface)]'
-                        : 'fill-transparent hover:fill-[#06b6d4]/20'
-                    }`}
-                    strokeWidth={isHovered ? 2 : 0}
-                  />
+                  <>
+                    {isHovered && (
+                      <circle
+                        cx={fdP.x}
+                        cy={fdP.y}
+                        r={10}
+                        className="fill-[#06b6d4]/25 animate-pulse pointer-events-none"
+                      />
+                    )}
+                    <circle
+                      cx={fdP.x}
+                      cy={fdP.y}
+                      r={isHovered ? 5.5 : 3}
+                      className={`transition-all ${
+                        isHovered
+                          ? 'fill-[#06b6d4] stroke-[var(--surface)]'
+                          : 'fill-transparent hover:fill-[#06b6d4]/20'
+                      }`}
+                      strokeWidth={isHovered ? 2 : 0}
+                    />
+                  </>
                 )}
               </g>
             );

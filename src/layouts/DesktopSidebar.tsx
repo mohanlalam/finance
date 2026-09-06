@@ -29,10 +29,10 @@ export default function DesktopSidebar({
   const sortedPortfolios = useMemo(() => sortPortfolios(portfolios), [portfolios]);
 
   const getNavItemClass = (isActive: boolean) =>
-    `flex items-center gap-2.5 w-full text-left px-3.5 py-2.5 rounded-[var(--radius-medium)] text-xs font-semibold ios-press transition-all outline-none ${
+    `flex items-center gap-2.5 w-full text-left px-3.5 py-2.5 rounded-[var(--radius-medium)] text-xs ios-press transition-all outline-none ${
       isActive
-        ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border border-[var(--accent-blue)]/30 shadow-[var(--shadow-card)] font-bold'
-        : 'text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] border border-transparent'
+        ? 'sidebar-item-active border border-[var(--accent-blue)]/30 font-bold'
+        : 'text-[var(--text-secondary)] font-semibold hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] border border-transparent'
     }`;
 
   return (

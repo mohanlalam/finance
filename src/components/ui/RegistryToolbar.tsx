@@ -55,7 +55,7 @@ export function RegistryToolbar<F extends string = string>({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full pl-8 pr-7 py-1.5 text-xs rounded-[var(--radius-small)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] focus:border-[var(--accent-blue)] transition-all"
+            className="w-full pl-8 pr-7 py-1.5 text-xs rounded-[var(--radius-small)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue-soft)] focus:border-[var(--accent-blue)] focus:shadow-[0_0_12px_var(--accent-blue-soft)] transition-all"
             aria-label={searchPlaceholder}
           />
           {searchQuery && (
@@ -80,17 +80,17 @@ export function RegistryToolbar<F extends string = string>({
                   key={opt.id}
                   type="button"
                   onClick={() => onFilterChange(opt.id)}
-                  className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] border transition-all ios-press shrink-0 ${
+                  className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] border transition-all ios-press shrink-0 ${
                     isActive
-                      ? 'bg-[var(--text-primary)] text-[var(--surface)] border-[var(--text-primary)] shadow-xs'
-                      : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-tertiary)]'
+                      ? 'bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)] text-white border-transparent shadow-[0_2px_10px_rgba(2,132,199,0.25)] scale-[1.02]'
+                      : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-tertiary)] hover:scale-[1.01]'
                   }`}
                   role="tab"
                   aria-selected={isActive}
                 >
                   <span>{opt.label}</span>
                   {opt.count !== undefined && (
-                    <span className={`text-[10px] px-1 py-0.2 rounded-full ${isActive ? 'bg-[var(--surface)] text-[var(--text-primary)]' : 'bg-[var(--border-subtle)] text-[var(--text-tertiary)]'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-[var(--border-subtle)] text-[var(--text-tertiary)]'}`}>
                       {opt.count}
                     </span>
                   )}

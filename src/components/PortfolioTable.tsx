@@ -162,7 +162,7 @@ const MobileStockRow = React.memo(function MobileStockRow({
         </div>
 
         <div className="flex items-center gap-1.5 justify-end shrink-0">
-          <span className={`text-xs font-bold whitespace-nowrap tnum ${h.unrealizedPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+          <span className={`text-xs font-bold whitespace-nowrap tnum ${h.unrealizedPnL >= 0 ? 'neon-glow-positive' : 'neon-glow-negative'}`}>
             {isBalancesHidden ? '••••••' : <>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</>}
           </span>
           <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-[var(--radius-pill)] whitespace-nowrap tnum ${h.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
@@ -610,7 +610,7 @@ export default React.memo(function PortfolioTable({
                     <td className="px-3 py-2.5 font-bold text-[var(--text-primary)] text-right tnum">{renderValue(h.currentValue)}</td>
                     <td className="px-3 py-2.5 text-[var(--text-secondary)] text-right tnum">{renderValue(h.amountInvested)}</td>
                     
-                    <td className={`px-3 py-2.5 font-bold text-right tnum ${h.unrealizedPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                    <td className={`px-3 py-2.5 font-bold text-right tnum ${h.unrealizedPnL >= 0 ? 'neon-glow-positive' : 'neon-glow-negative'}`}>
                       {isBalancesHidden ? '••••••' : <>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</>}
                     </td>
 
@@ -621,7 +621,7 @@ export default React.memo(function PortfolioTable({
                       </span>
                     </td>
 
-                    <td className={`px-3 py-2.5 font-bold text-right tnum ${h.todayPnLPercent >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+                    <td className={`px-3 py-2.5 font-bold text-right tnum ${h.todayPnLPercent >= 0 ? 'neon-glow-positive' : 'neon-glow-negative'}`}>
                       {isBalancesHidden ? '••••••' : formatPercent(h.todayPnLPercent)}
                     </td>
 

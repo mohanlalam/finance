@@ -141,7 +141,7 @@ export default function EmptyState({
       aria-label={title}
       className="flex flex-col items-center justify-center py-12 px-6 text-center bg-[var(--surface)] border border-dashed border-[var(--border-subtle)] rounded-[var(--radius-large)] w-full max-w-lg mx-auto animate-fade-in shadow-xs"
     >
-      <div className="mb-4 p-3 bg-[var(--surface-secondary)] rounded-2xl inline-flex items-center justify-center ring-1 ring-[var(--border-subtle)]">
+      <div className="mb-4 p-3.5 bg-gradient-to-b from-[var(--surface-secondary)] to-[var(--surface)] rounded-2xl inline-flex items-center justify-center ring-1 ring-[var(--border-subtle)] shadow-[0_8px_20px_rgba(2,132,199,0.08)] animate-float">
         {getIllustration()}
       </div>
       <h4 className="text-sm font-bold text-[var(--text-primary)] mb-1.5">{title}</h4>
@@ -151,7 +151,7 @@ export default function EmptyState({
       ) : actionLabel && onAction ? (
         <button
           onClick={onAction}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[var(--accent-blue)] text-[var(--surface)] font-bold text-xs rounded-[var(--radius-medium)] shadow-xs hover:opacity-90 active:scale-95 transition-transform cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-4.5 py-2 bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)] text-white font-bold text-xs rounded-[var(--radius-medium)] shadow-[0_4px_14px_rgba(2,132,199,0.25)] hover:opacity-95 hover:shadow-[0_6px_18px_rgba(2,132,199,0.35)] ios-press cursor-pointer"
         >
           {actionLabel}
         </button>

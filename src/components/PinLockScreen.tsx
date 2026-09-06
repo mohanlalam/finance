@@ -396,10 +396,10 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
               return (
                 <div
                   key={index}
-                  className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-150 ${
+                  className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-200 ${
                     isFilled
-                      ? 'bg-white border-white shadow-[0_0_12px_rgba(255,255,255,0.85)] scale-105'
-                      : 'bg-transparent border-white/60'
+                      ? 'bg-white border-white shadow-[0_0_14px_rgba(255,255,255,0.95),0_0_24px_rgba(56,189,248,0.45)] scale-110 animate-dot-pop'
+                      : 'bg-transparent border-white/50 scale-100'
                   }`}
                 />
               );
@@ -557,12 +557,33 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
           border: 1px solid rgba(255, 255, 255, 0.18);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+          transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+          user-select: none;
+          -webkit-user-select: none;
+          touch-action: manipulation;
+        }
+        .pin-key:hover:not(:disabled) {
+          background: rgba(255, 255, 255, 0.18);
+          border-color: rgba(255, 255, 255, 0.35);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 16px rgba(56, 189, 248, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+          transform: translateY(-1px);
         }
         .pin-key:active {
-          background: rgba(255, 255, 255, 0.28);
-          transform: scale(0.94);
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.32) !important;
+          transform: scale(0.92) !important;
+          box-shadow: 0 0 24px rgba(56, 189, 248, 0.55), 0 0 8px rgba(255, 255, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+          border-color: rgba(56, 189, 248, 0.7) !important;
+          transition: transform 0.08s ease, box-shadow 0.08s ease !important;
+        }
+
+        @keyframes dotPop {
+          0% { transform: scale(0.6); opacity: 0.5; }
+          60% { transform: scale(1.35); }
+          100% { transform: scale(1.1); opacity: 1; }
+        }
+        .animate-dot-pop {
+          animation: dotPop 0.24s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         @keyframes shake {

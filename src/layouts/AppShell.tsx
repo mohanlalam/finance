@@ -329,7 +329,7 @@ export default function AppShell() {
           className="h-full flex flex-col"
           importFunc={() => import('../components/NetWorthTimelineChart')}
           placeholderHeight={420}
-          fallback={<div className="h-full min-h-[380px] lg:h-[420px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
+          fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}
           props={{
             history: netWorthHistory,
             currentNetWorth: (breakdown.stocks || 0) + (breakdown.fd || 0),
@@ -340,7 +340,7 @@ export default function AppShell() {
       </SectionErrorBoundary>
       <SectionErrorBoundary sectionName="Asset Class Pie Chart">
         <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
-          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
+          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
             <PieChart
               slices={breakdownSlices}
               title={`Asset Class Breakdown — ${summaryData.label}`}
@@ -351,14 +351,14 @@ export default function AppShell() {
       </SectionErrorBoundary>
       <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
         <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
-          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
+          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
             <BarChart portfolios={barChartPortfolios} />
           </Suspense>
         </LazyViewport>
       </SectionErrorBoundary>
       <SectionErrorBoundary sectionName="AI Portfolio Assistant">
         <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
-          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] apple-card rounded-xl animate-pulse" />}>
+          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
             <PortfolioAssistant portfolios={portfolios} onSelectAsset={handleSidebarTabChange} />
           </Suspense>
         </LazyViewport>
@@ -573,13 +573,13 @@ export default function AppShell() {
             {activeAsset === 'home' ? (
               <div className="space-y-4">
                 <Suspense fallback={
-                  <div className="space-y-3 animate-pulse" aria-hidden="true">
-                    <div className="h-44 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)]" />
+                  <div className="space-y-3" aria-hidden="true">
+                    <div className="h-44 border border-[var(--border-subtle)] rounded-[var(--radius-large)] animate-shimmer" />
                     <div className="grid grid-cols-2 gap-2.5">
-                      <div className="h-24 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)]" />
-                      <div className="h-24 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)]" />
-                      <div className="h-24 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)]" />
-                      <div className="h-24 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)]" />
+                      <div className="h-24 border border-[var(--border-subtle)] rounded-[var(--radius-large)] animate-shimmer" />
+                      <div className="h-24 border border-[var(--border-subtle)] rounded-[var(--radius-large)] animate-shimmer" />
+                      <div className="h-24 border border-[var(--border-subtle)] rounded-[var(--radius-large)] animate-shimmer" />
+                      <div className="h-24 border border-[var(--border-subtle)] rounded-[var(--radius-large)] animate-shimmer" />
                     </div>
                   </div>
                 }>
@@ -697,27 +697,35 @@ export default function AppShell() {
                       <div className="apple-card rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] shadow-[var(--shadow-card)] p-3 sm:p-4">
                         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-3">
                           {[
-                            { label: 'Stocks', value: breakdown.stocks, id: 'stocks' },
-                            { label: 'FDs', value: breakdown.fd, id: 'fd' },
-                            { label: 'RDs', value: breakdown.rd, id: 'rd' },
-                            { label: 'SIPs', value: breakdown.sip, id: 'sip' },
-                            { label: 'Gold', value: breakdown.gold, id: 'gold' },
-                            { label: 'Real Estate', value: breakdown.realEstate, id: 'real_estate' },
+                            { label: 'Stocks', value: breakdown.stocks, id: 'stocks', color: '#387ed1' },
+                            { label: 'FDs', value: breakdown.fd, id: 'fd', color: '#06b6d4' },
+                            { label: 'RDs', value: breakdown.rd, id: 'rd', color: '#c2410c' },
+                            { label: 'SIPs', value: breakdown.sip, id: 'sip', color: '#9333ea' },
+                            { label: 'Gold', value: breakdown.gold, id: 'gold', color: '#facc15' },
+                            { label: 'Real Estate', value: breakdown.realEstate, id: 'real_estate', color: '#16a34a' },
                           ].map((item) => (
                             <button
                               key={item.label}
                               onClick={() => setActiveAsset(item.id as AssetTab)}
-                              className="p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 flex flex-col justify-between text-left transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
+                              style={{ borderLeftColor: item.color }}
+                              className="p-3 rounded-[var(--radius-medium)] border-l-[3px] bg-[var(--surface-secondary)]/40 hover:bg-[var(--surface-secondary)]/90 border border-t-[var(--border-subtle)]/50 border-r-[var(--border-subtle)]/50 border-b-[var(--border-subtle)]/50 flex flex-col justify-between text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] ios-press touch-manipulation active:scale-[0.97] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
                             >
-                              <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">{item.label}</span>
+                              <div className="flex items-center justify-between w-full">
+                                <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">{item.label}</span>
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
+                              </div>
                               <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(item.value)}</p>
                             </button>
                           ))}
                           <button
                             onClick={() => setActiveAsset('insurance')}
-                            className="p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/30 hover:bg-[var(--surface-secondary)]/80 border border-[var(--border-subtle)]/60 flex flex-col justify-between text-left transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
+                            style={{ borderLeftColor: '#0ea5e9' }}
+                            className="p-3 rounded-[var(--radius-medium)] border-l-[3px] bg-[var(--surface-secondary)]/40 hover:bg-[var(--surface-secondary)]/90 border border-t-[var(--border-subtle)]/50 border-r-[var(--border-subtle)]/50 border-b-[var(--border-subtle)]/50 flex flex-col justify-between text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] ios-press touch-manipulation active:scale-[0.97] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
                           >
-                            <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">Insurance</span>
+                            <div className="flex items-center justify-between w-full">
+                              <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">Insurance</span>
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#0ea5e9]" />
+                            </div>
                             <div>
                               <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(breakdown.insuranceCover)}</p>
                               <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5 tnum">{formatINR(breakdown.insurancePremium)}/yr premium</p>
@@ -730,7 +738,7 @@ export default function AppShell() {
                     {/* Insights Panel — only on family overview */}
                     {activeTab === 'all' && (
                       <SectionErrorBoundary sectionName="Portfolio Insights">
-                        <Suspense fallback={<div className="h-40 bg-white dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                        <Suspense fallback={<div className="h-40 rounded-2xl animate-shimmer border border-[var(--border-subtle)]" />}>
                           <InsightsPanel
                             insights={insights}
                             portfolios={portfolios}
@@ -776,20 +784,25 @@ export default function AppShell() {
         )}
       </div>
 
-      <footer className="mt-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hidden md:block">
+      <footer className="mt-12 border-t border-[var(--border-subtle)] bg-[var(--surface-glass)] backdrop-blur-xl hidden md:block">
         <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <p className="text-xs text-slate-400 dark:text-slate-500">
-            Family Wealth Tracker
-            {lastUpdated && (
-              <span className="ml-2 text-slate-300 dark:text-slate-600">
-                — Last updated: {lastUpdated.toLocaleTimeString('en-IN')}
-              </span>
-            )}
-          </p>
+          <div className="flex items-center gap-2">
+            <span className="w-5 h-5 rounded-[var(--radius-small)] bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-[10px] font-bold shadow-xs">
+              💼
+            </span>
+            <p className="text-xs font-medium text-[var(--text-secondary)]">
+              Family Wealth Tracker
+              {lastUpdated && (
+                <span className="ml-2 text-[var(--text-tertiary)] tnum">
+                  — Last updated: {lastUpdated.toLocaleTimeString('en-IN')}
+                </span>
+              )}
+            </p>
+          </div>
           <button
             onClick={refreshPrices}
             disabled={isLoading}
-            className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors disabled:opacity-40"
+            className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] transition-colors disabled:opacity-40 cursor-pointer ios-press"
           >
             <RefreshCw size={12} className={isLoadingPrices ? 'animate-spin' : ''} />
             Refresh prices

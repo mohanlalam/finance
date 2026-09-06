@@ -169,6 +169,21 @@ function BarChart({ portfolios }: BarChartProps) {
                 role="img"
                 aria-label="Invested vs Current Value bar chart"
               >
+                <defs>
+                  <linearGradient id="barInvestedGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--text-tertiary)" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="var(--text-tertiary)" stopOpacity="0.45" />
+                  </linearGradient>
+                  <linearGradient id="barPositiveGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.95" />
+                    <stop offset="100%" stopColor="#059669" stopOpacity="0.75" />
+                  </linearGradient>
+                  <linearGradient id="barNegativeGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.95" />
+                    <stop offset="100%" stopColor="#e11d48" stopOpacity="0.75" />
+                  </linearGradient>
+                </defs>
+
                 {/* Horizontal Grid lines and Y-axis labels */}
                 {Array.from({ length: yTicks + 1 }).map((_, i) => {
                   const val = (maxVal / yTicks) * i;
@@ -181,8 +196,8 @@ function BarChart({ portfolios }: BarChartProps) {
                         x2={svgWidth - paddingRight}
                         y2={y}
                         stroke="var(--border-subtle)"
-                        strokeDasharray={i === 0 ? undefined : '3 3'}
-                        strokeOpacity={i === 0 ? 0.8 : 0.4}
+                        strokeDasharray={i === 0 ? undefined : '4 6'}
+                        strokeOpacity={i === 0 ? 0.8 : 0.35}
                         strokeWidth={1}
                       />
                       <text
@@ -252,10 +267,12 @@ function BarChart({ portfolios }: BarChartProps) {
                         width={barWidth}
                         height={investedH}
                         rx={4}
-                        className={`transition-all duration-150 fill-[var(--surface-tertiary)] stroke-[var(--border-subtle)] ${
-                          isHovered ? 'opacity-100 filter brightness-110' : 'opacity-85'
+                        fill="url(#barInvestedGrad)"
+                        className={`transition-all duration-150 animate-bar-rise stroke-[var(--border-subtle)] ${
+                          isHovered ? 'opacity-100 filter brightness-125' : 'opacity-85'
                         }`}
                         strokeWidth={0.5}
+                        style={{ animationDelay: `${pi * 75}ms` }}
                       />
 
                       {/* Current Value Bar */}
@@ -265,9 +282,11 @@ function BarChart({ portfolios }: BarChartProps) {
                         width={barWidth}
                         height={currentH}
                         rx={4}
-                        className={`transition-all duration-150 ${
-                          isGain ? 'fill-[var(--positive)]' : 'fill-[var(--negative)]'
-                        } ${isHovered ? 'opacity-100 filter drop-shadow(0 2px 4px rgba(0,0,0,0.15))' : 'opacity-90'}`}
+                        fill={isGain ? 'url(#barPositiveGrad)' : 'url(#barNegativeGrad)'}
+                        className={`transition-all duration-150 animate-bar-rise ${
+                          isGain ? 'neon-glow-positive' : 'neon-glow-negative'
+                        } ${isHovered ? 'opacity-100 filter drop-shadow(0 2px 6px rgba(0,0,0,0.2)) brightness-110' : 'opacity-90'}`}
+                        style={{ animationDelay: `${pi * 75 + 35}ms` }}
                       />
 
                       {/* Member Name Label */}
