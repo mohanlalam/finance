@@ -114,7 +114,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
 
           <button
             onClick={onClose}
-            className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-[32px] sm:min-h-[32px] rounded-[var(--radius-small)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] transition-colors ios-press touch-manipulation cursor-pointer"
+            className="w-11 h-11 sm:w-8 sm:h-8 min-w-[44px] min-h-[44px] sm:min-w-[32px] sm:min-h-[32px] rounded-[var(--radius-small)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
             aria-label="Close holding details drawer"
           >
             <X size={18} aria-hidden="true" />
@@ -205,7 +205,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
               href={`https://finance.yahoo.com/quote/${encodeURIComponent(holding.yahooSymbol)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between p-3 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors ios-press"
+              className="flex items-center justify-between p-3 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors ios-press outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
             >
               <span className="flex items-center gap-2">
                 <ExternalLink size={14} aria-hidden="true" />
@@ -220,8 +220,9 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
         <div className="p-4 border-t border-[var(--border-subtle)] bg-[var(--surface)] flex items-center gap-2.5">
           {onShare && (
             <button
+              type="button"
               onClick={() => onShare(holding)}
-              className="flex-1 py-2.5 px-3 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-xs font-bold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors ios-press"
+              className="flex-1 py-2.5 px-3 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-xs font-bold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
             >
               <Share2 size={14} aria-hidden="true" />
               Share
@@ -230,11 +231,12 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
 
           {onEdit && (
             <button
+              type="button"
               onClick={() => {
                 onClose();
                 onEdit(holding);
               }}
-              className="flex-1 py-2.5 px-3 rounded-[var(--radius-medium)] bg-[var(--accent-blue)] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-opacity hover:opacity-90 ios-press"
+              className="flex-1 py-2.5 px-3 rounded-[var(--radius-medium)] bg-[var(--accent-blue)] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-opacity hover:opacity-90 ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1"
             >
               <Pencil size={14} aria-hidden="true" />
               Edit Holding
@@ -243,11 +245,12 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
 
           {onDelete && (
             <button
+              type="button"
               onClick={() => {
                 onClose();
                 onDelete(holding);
               }}
-              className="py-2.5 px-3 rounded-[var(--radius-medium)] border border-[var(--negative)]/30 text-[var(--negative)] hover:bg-[var(--negative-soft)] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ios-press"
+              className="py-2.5 px-3 rounded-[var(--radius-medium)] border border-[var(--negative)]/30 text-[var(--negative)] hover:bg-[var(--negative-soft)] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--negative)]"
               title="Delete holding"
               aria-label="Delete holding"
             >

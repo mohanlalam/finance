@@ -172,7 +172,7 @@ function MobileHomeSummary({
         subtext: `${rdCount} Accounts`,
         returnBadge: breakdown.rd > 0 ? calcShare(breakdown.rd) : null,
         icon: ICON_RD,
-        accentColor: 'bg-indigo-500 dark:bg-indigo-400',
+        accentColor: 'bg-[#c2410c]',
       },
       {
         id: 'sip' as const,
@@ -181,7 +181,7 @@ function MobileHomeSummary({
         subtext: `${sipCount} Active SIPs`,
         returnBadge: breakdown.sip > 0 ? calcShare(breakdown.sip) : null,
         icon: ICON_SIP,
-        accentColor: 'bg-emerald-500 dark:bg-emerald-400',
+        accentColor: 'bg-[var(--accent-violet)]',
       },
       {
         id: 'gold' as const,
@@ -190,7 +190,7 @@ function MobileHomeSummary({
         subtext: `${goldCount} Items`,
         returnBadge: breakdown.gold > 0 ? calcShare(breakdown.gold) : null,
         icon: ICON_GOLD,
-        accentColor: 'bg-yellow-500 dark:bg-yellow-400',
+        accentColor: 'bg-[var(--gold)]',
       },
       {
         id: 'real_estate' as const,
@@ -199,7 +199,7 @@ function MobileHomeSummary({
         subtext: `${propertyCount} Properties`,
         returnBadge: breakdown.realEstate > 0 ? calcShare(breakdown.realEstate) : null,
         icon: ICON_REALTY,
-        accentColor: 'bg-purple-500 dark:bg-purple-400',
+        accentColor: 'bg-[var(--positive)]',
       },
       {
         id: 'insurance' as const,
@@ -357,7 +357,9 @@ function MobileHomeSummary({
       {alertCount > 0 && (
         <button
           onClick={onOpenAlerts}
-          className="w-full flex items-center justify-between p-3.5 rounded-[var(--radius-large)] text-left border bg-[var(--negative-soft)] border-[var(--border-subtle)] text-[var(--negative)] ios-press transition-all apple-card"
+          aria-haspopup="dialog"
+          aria-label={`View ${alertCount} portfolio alerts`}
+          className="w-full flex items-center justify-between p-3.5 rounded-[var(--radius-large)] text-left border bg-[var(--negative-soft)] border-[var(--border-subtle)] text-[var(--negative)] ios-press transition-all apple-card outline-none focus-visible:ring-2 focus-visible:ring-[var(--negative)] cursor-pointer"
         >
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-[var(--radius-medium)] bg-[var(--negative)] text-[var(--surface)] flex items-center justify-center shrink-0">
@@ -383,7 +385,8 @@ function MobileHomeSummary({
           <button
             key={item.id}
             onClick={() => onNavigateAsset(item.id)}
-            className="mobile-asset-card w-full flex items-center justify-between p-3.5 rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] transition-all text-left ios-press apple-card"
+            aria-label={`View ${item.label} holdings`}
+            className="mobile-asset-card w-full flex items-center justify-between p-3.5 rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] transition-all text-left ios-press apple-card outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] cursor-pointer"
           >
             <div className="flex items-center gap-3 min-w-0">
               {/* Category Icon Badge */}

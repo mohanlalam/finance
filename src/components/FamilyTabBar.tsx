@@ -33,11 +33,18 @@ export default React.memo(function FamilyTabBar({
         setMenuTarget(null);
       }
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenuTarget(null);
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [menuTarget]);
 
@@ -59,7 +66,7 @@ export default React.memo(function FamilyTabBar({
             setMenuTarget(null);
             onTabChange('all');
           }}
-          className={`flex items-center gap-2 h-9 sm:h-8 px-3 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none shrink-0 cursor-pointer ${
+          className={`flex items-center gap-2 h-9 sm:h-8 px-3 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 shrink-0 cursor-pointer ${
             activeTab === 'all'
               ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-card)] border border-[var(--border-luminous)] ring-1 ring-[var(--accent-blue)]/20'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]/50'
@@ -74,7 +81,7 @@ export default React.memo(function FamilyTabBar({
         {/* Member Tabs */}
         {sortedPortfolios.map((p) => {
           const isActive = activeTab === p.name;
-          const iconConfig = getFamilyIconConfig(p.name);
+          const iconConfig = getFamilyMemberConfig(p.name);
           const isPositive = p.totalPnL >= 0;
           const isMenuOpen = menuTarget?.id === p.id;
 
@@ -89,7 +96,7 @@ export default React.memo(function FamilyTabBar({
                   setMenuTarget(null);
                   onTabChange(p.name);
                 }}
-                className={`flex items-center gap-1.5 h-10 sm:h-8 pl-2.5 pr-1.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none cursor-pointer ${
+                className={`flex items-center gap-1.5 h-10 sm:h-8 pl-2.5 pr-1.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 cursor-pointer ${
                   isActive
                     ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-card)] border border-[var(--border-luminous)] ring-1 ring-[var(--accent-blue)]/20'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]/50'
@@ -121,12 +128,14 @@ export default React.memo(function FamilyTabBar({
                   e.stopPropagation();
                   setMenuTarget(isMenuOpen ? null : { id: p.id, name: p.name, label: p.label });
                 }}
-                className="sm:hidden min-w-[36px] h-10 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-1 shrink-0 touch-manipulation ios-press cursor-pointer"
+                className="sm:hidden min-w-[36px] h-10 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-1 shrink-0 touch-manipulation ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
                 title={`Options for ${p.label}`}
                 aria-label={`Options for portfolio ${p.label}`}
+                aria-haspopup="menu"
                 aria-expanded={isMenuOpen}
+                aria-controls={`menu-${p.id}`}
               >
-                <MoreVertical size={13} />
+                <MoreVertical size={13} aria-hidden="true" />
               </button>
 
               {/* Desktop action buttons (pencil, trash) displayed on hover */}
@@ -137,11 +146,11 @@ export default React.memo(function FamilyTabBar({
                     e.stopPropagation();
                     onRenameClick({ id: p.id, name: p.name, label: p.label });
                   }}
-                  className="w-4 h-4 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition-colors cursor-pointer"
+                  className="w-5 h-5 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
                   title={`Rename ${p.label}`}
                   aria-label={`Rename portfolio ${p.label}`}
                 >
-                  <Pencil size={10} />
+                  <Pencil size={11} aria-hidden="true" />
                 </button>
                 <button
                   type="button"
@@ -149,11 +158,11 @@ export default React.memo(function FamilyTabBar({
                     e.stopPropagation();
                     onDeleteClick({ id: p.id, name: p.name, label: p.label });
                   }}
-                  className="w-4 h-4 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors cursor-pointer"
+                  className="w-5 h-5 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--negative)]"
                   title={`Delete ${p.label}`}
                   aria-label={`Delete portfolio ${p.label}`}
                 >
-                  <Trash2 size={10} />
+                  <Trash2 size={11} aria-hidden="true" />
                 </button>
               </div>
 
@@ -161,30 +170,35 @@ export default React.memo(function FamilyTabBar({
               {isMenuOpen && (
                 <div
                   ref={menuRef}
-                  className="absolute top-10 right-0 z-50 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] shadow-xl p-1 min-w-[120px] animate-scale-in sm:hidden"
+                  id={`menu-${p.id}`}
+                  role="menu"
+                  aria-label={`Options for ${p.label}`}
+                  className="absolute top-10 right-0 z-50 bg-[var(--surface-solid)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] shadow-xl p-1 min-w-[120px] animate-slide-up sm:hidden"
                 >
                   <button
+                    role="menuitem"
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setMenuTarget(null);
                       onRenameClick({ id: p.id, name: p.name, label: p.label });
                     }}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] rounded-[var(--radius-small)] transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] rounded-[var(--radius-small)] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
                   >
-                    <Pencil size={12} className="text-[var(--text-secondary)]" />
+                    <Pencil size={12} className="text-[var(--text-secondary)]" aria-hidden="true" />
                     <span>Rename</span>
                   </button>
                   <button
+                    role="menuitem"
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setMenuTarget(null);
                       onDeleteClick({ id: p.id, name: p.name, label: p.label });
                     }}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-[var(--negative)] hover:bg-[var(--negative-soft)] rounded-[var(--radius-small)] transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-[var(--negative)] hover:bg-[var(--negative-soft)] rounded-[var(--radius-small)] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--negative)]"
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={12} aria-hidden="true" />
                     <span>Delete</span>
                   </button>
                 </div>
@@ -196,10 +210,10 @@ export default React.memo(function FamilyTabBar({
         {/* Add Member Button inside scroll track */}
         <button
           onClick={onAddFamilyClick}
-          className="flex items-center justify-center gap-1.5 px-3 h-9 sm:h-8 rounded-[var(--radius-small)] text-xs font-bold border border-dashed border-[var(--border-subtle)] bg-[var(--surface)] hover:border-[var(--accent-blue)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] ios-press transition-colors shrink-0 cursor-pointer"
+          className="flex items-center justify-center gap-1.5 px-3 h-9 sm:h-8 rounded-[var(--radius-small)] text-xs font-bold border border-dashed border-[var(--border-subtle)] bg-[var(--surface)] hover:border-[var(--accent-blue)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] ios-press transition-colors shrink-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
           aria-label="Add family member"
         >
-          <UserPlus size={13} />
+          <UserPlus size={13} aria-hidden="true" />
           <span className="whitespace-nowrap">Add Member</span>
         </button>
       </div>
@@ -207,10 +221,10 @@ export default React.memo(function FamilyTabBar({
       {/* Desktop Add family control */}
       <button
         onClick={onAddFamilyClick}
-        className="hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-[var(--radius-medium)] text-xs font-bold border border-[var(--border-subtle)] bg-[var(--surface)] hover:border-[var(--accent-blue)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] ios-press transition-colors shrink-0 cursor-pointer"
+        className="hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-[var(--radius-medium)] text-xs font-bold border border-[var(--border-subtle)] bg-[var(--surface)] hover:border-[var(--accent-blue)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] ios-press transition-colors shrink-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
         aria-label="Add family member"
       >
-        <UserPlus size={14} />
+        <UserPlus size={14} aria-hidden="true" />
         <span className="whitespace-nowrap">Add Member</span>
       </button>
     </div>
