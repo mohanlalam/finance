@@ -36,3 +36,11 @@ export function roundToDecimals(val: number, decimals: number = 2): number {
   return Math.round((val + (val >= 0 ? eps : -eps)) * factor) / factor;
 }
 
+/**
+ * Rounds currency amount to 2 decimal places (cents / paise) to prevent
+ * IEEE 754 floating-point accumulation across multi-asset summation loops.
+ */
+export function roundToCurrency(amount: number, decimals: number = 2): number {
+  return roundToDecimals(amount, decimals);
+}
+

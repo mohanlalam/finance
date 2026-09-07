@@ -1,5 +1,5 @@
 import { getFromIDBCache, setInIDBCache, removeFromIDBCache } from '../../../infrastructure/cache/indexedDbCache';
-import { portfolioService } from './portfolioService';
+import { PortfolioService } from './portfolioService';
 import { portfolioSyncService } from './portfolioSyncService';
 import { logger } from '../../../infrastructure/logging/logger';
 import { AssetPayload } from '../../../types/portfolio';
@@ -26,6 +26,15 @@ const MAX_RETRY_COUNT = 5;
 export class OfflineOutboxService {
   private isDraining = false;
   private syncListeners = new Set<(pendingCount: number) => void>();
+  private service?: PortfolioService;
+
+  constructor(service?: PortfolioService) {
+    this.service = service;
+  }
+
+  setPortfolioService(service: PortfolioService): void {
+    this.service = service;
+  }
 
   subscribe(listener: (pendingCount: number) => void): () => void {
     this.syncListeners.add(listener);
@@ -100,6 +109,12 @@ export class OfflineOutboxService {
         return { synced: 0, failed: 0 };
       }
 
+      const svc = this.service;
+      if (!svc) {
+        logger.warn('[Outbox] PortfolioService not attached yet, skipping drain');
+        return { synced: 0, failed: 0 };
+      }
+
       logger.info(`[Outbox] Draining ${queue.length} pending mutations...`);
 
       for (const item of queue) {
@@ -114,36 +129,36 @@ export class OfflineOutboxService {
           await portfolioSyncService.runMutation(async () => {
             switch (item.type) {
               case 'ADD_PORTFOLIO':
-                await portfolioService.addPortfolio(
+                await svc.addPortfolio(
                   item.params.name as string,
                   item.params.label as string
                 );
                 break;
               case 'RENAME_PORTFOLIO':
-                await portfolioService.renamePortfolio(
+                await svc.renamePortfolio(
                   item.params.id as string,
                   item.params.newLabel as string
                 );
                 break;
               case 'DELETE_PORTFOLIO':
-                await portfolioService.deletePortfolio(item.params.id as string);
+                await svc.deletePortfolio(item.params.id as string);
                 break;
               case 'ADD_ASSET':
-                await portfolioService.addAsset(
+                await svc.addAsset(
                   item.params.assetType as string,
                   item.params.portfolioName as string,
                   item.params.payload as AssetPayload
                 );
                 break;
               case 'UPDATE_ASSET':
-                await portfolioService.updateAsset(
+                await svc.updateAsset(
                   item.params.assetType as string,
                   item.params.id as string,
                   item.params.payload as Partial<AssetPayload>
                 );
                 break;
               case 'DELETE_ASSET':
-                await portfolioService.deleteAsset(
+                await svc.deleteAsset(
                   item.params.assetType as string,
                   item.params.id as string
                 );

@@ -146,7 +146,6 @@ project antigravity/
 │   │   ├── DashboardError.tsx    # Full-page retry UI for API connection failures
 │   │   ├── DashboardLoading.tsx  # Skeleton loader states for initial dashboard load
 │   │   ├── DashboardWidgets.tsx  # Summary KPI and widget container
-│   │   ├── DataQualityHealthModal.tsx # Data quality audit modal with resolution tracking
 │   │   ├── EditStockModal.tsx    # Stock holding edit modal
 │   │   ├── EmptyState.tsx        # Styled empty state placeholder with CTA
 │   │   ├── ErrorBoundary.tsx     # Root shell fail-safe error boundary
@@ -284,7 +283,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | Script | Command | Description |
 |---|---|---|
 | **Dev Server** | `npm run dev` | Start Vite dev server with HMR |
-| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (51 test files / 271 tests, 100% passing) |
+| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (52 test files / 284 tests, 100% passing) |
 | **E2E Tests** | `npm run test:e2e` | Run Playwright browser E2E tests (9 tests across smoke and CRUD specs) |
 | **Build** | `npm run build` | Production build to `dist/` |
 | **Preview** | `npm run preview` | Preview the production build locally |

@@ -36,6 +36,7 @@ export function usePortfolioState({ onAuthExpired }: UsePortfolioStateOptions = 
       lastUpdated: query.lastUpdated,
       failedSymbols: refresh.failedSymbols,
       isUsingCachedData: query.isUsingCachedData,
+      isCacheStale: query.isCacheStale,
       cacheUpdatedAt: query.cacheUpdatedAt,
       isAuthRequired: false,
       isMutating: sync.isMutating,

@@ -95,4 +95,19 @@ describe('PWA Offline Cache & Instant Hydration Engine', () => {
     const result = await getFromIDBCache<{ test: number }>('test_key');
     expect(result).toEqual({ test: 123 });
   });
+
+  it('rejects cached portfolio data older than the 30-day max TTL', () => {
+    const freshPayload = {
+      portfolios: samplePortfolios,
+      cachedAt: new Date().toISOString(),
+    };
+    expect(isValidCachedData(freshPayload)).toBe(true);
+
+    const thirtyOneDaysAgo = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
+    const expiredPayload = {
+      portfolios: samplePortfolios,
+      cachedAt: thirtyOneDaysAgo,
+    };
+    expect(isValidCachedData(expiredPayload)).toBe(false);
+  });
 });

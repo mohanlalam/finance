@@ -202,7 +202,7 @@ function getFDEffectiveValue(f: any, upToDate: Date = new Date()): number {
     : upToDate;
     
   const timeDiff = end.getTime() - s.getTime();
-  const years = timeDiff / (1000 * 3600 * 24 * 365.25);
+  const years = timeDiff / (1000 * 3600 * 24 * 365.0);
   
   if (years > 0 && !isNaN(p) && !isNaN(r) && !isNaN(s.getTime())) {
     // FDs compound quarterly in Indian banking standard

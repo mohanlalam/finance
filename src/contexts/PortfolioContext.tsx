@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useCallback, useRef, useMemo, Rea
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Portfolio, PortfolioName, RDPayload, SIPPayload } from '../types/portfolio';
 import { NetWorthSnapshot, usePortfolioData, LoadStatus } from '../hooks/usePortfolioData';
-import { portfolioService } from '../domains/portfolio/services/portfolioService';
+import { portfolioService } from '../compositionRoot';
 import { logger } from '../infrastructure/logging/logger';
 
 
@@ -22,6 +22,7 @@ export interface PortfolioStatusContextValue {
   lastUpdated: Date | null;
   failedSymbols: string[];
   isUsingCachedData: boolean;
+  isCacheStale: boolean;
   cacheUpdatedAt: Date | null;
   isAuthRequired: boolean;
   isMutating: boolean;
@@ -106,6 +107,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     lastUpdated,
     failedSymbols,
     isUsingCachedData,
+    isCacheStale,
     cacheUpdatedAt,
     isAuthRequired,
     lastPriceFetch,
@@ -255,6 +257,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     lastUpdated,
     failedSymbols,
     isUsingCachedData,
+    isCacheStale,
     cacheUpdatedAt,
     isAuthRequired,
     isMutating,
@@ -267,6 +270,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     lastUpdated,
     failedSymbols,
     isUsingCachedData,
+    isCacheStale,
     cacheUpdatedAt,
     isAuthRequired,
     isMutating,

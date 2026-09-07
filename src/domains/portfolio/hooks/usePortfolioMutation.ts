@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { portfolioService } from '../services/portfolioService';
+import { portfolioService } from '../../../compositionRoot';
 import { portfolioSyncService } from '../services/portfolioSyncService';
 import { offlineOutboxService } from '../services/offlineOutboxService';
 import { AssetPayload } from '../../../types/portfolio';

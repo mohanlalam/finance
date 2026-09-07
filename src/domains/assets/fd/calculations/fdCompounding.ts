@@ -1,5 +1,5 @@
 import { FixedDeposit } from '../../../../types/portfolio';
-import { compoundValue } from '../../../../utils/mathUtils';
+import { compoundValue, roundToCurrency } from '../../../../utils/mathUtils';
 import { parseLocalDate } from '../../../../utils/dateUtils';
 
 /**
@@ -36,7 +36,7 @@ export function calculateFDEffectiveValue(
   if (years <= 0) return principal;
 
   const frequency = Number((fd as unknown as Record<string, unknown>)?.compounding_frequency) || compoundingFrequency || 4;
-  return compoundValue(principal, rate, frequency, years);
+  return roundToCurrency(compoundValue(principal, rate, frequency, years));
 }
 
 /**
@@ -59,7 +59,7 @@ export function calculateFDMaturityValue(
   if (isNaN(startTs) || isNaN(matTs) || matTs <= startTs) return p;
 
   const years = (matTs - startTs) / (365.0 * 24 * 3600 * 1000);
-  return compoundValue(p, r, compoundingFrequency, years);
+  return roundToCurrency(compoundValue(p, r, compoundingFrequency, years));
 }
 
 export function getFDInvestedAmount(f: FixedDeposit): number {

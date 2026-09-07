@@ -1,5 +1,4 @@
 import { IPortfolioRepository } from '../repositories/IPortfolioRepository';
-import { supabasePortfolioRepository } from '../../../infrastructure/supabase/repositories/SupabasePortfolioRepository';
 import {
   setCachedPortfolioData,
   invalidatePortfolioCache,
@@ -85,5 +84,3 @@ export class PortfolioService {
     return this.repository.triggerNetWorthSnapshot();
   }
 }
-
-export const portfolioService = new PortfolioService(supabasePortfolioRepository);

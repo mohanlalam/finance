@@ -3,8 +3,9 @@ import useSWR from 'swr';
 import { Portfolio } from '../../../types/portfolio';
 import { NetWorthSnapshot } from '../calculations/netWorth';
 import { sortPortfolios } from '../calculations/portfolioOrdering';
-import { portfolioService } from '../services/portfolioService';
+import { portfolioService } from '../../../compositionRoot';
 import { swrDefaultConfig } from '../../../infrastructure/cache/swrConfig';
+import { isCacheStale } from '../../../infrastructure/cache/portfolioCache';
 import { AppApiError } from '../../../utils/apiClient';
 
 export type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -17,6 +18,7 @@ interface UsePortfolioQueryResult {
   loadStatus: LoadStatus;
   loadError: string;
   isUsingCachedData: boolean;
+  isCacheStale: boolean;
   cacheUpdatedAt: Date | null;
   lastUpdated: Date | null;
   load: () => Promise<void>;
@@ -29,11 +31,12 @@ export function usePortfolioQuery(onAuthExpired?: () => void): UsePortfolioQuery
   const [loadStatus, setLoadStatus] = useState<LoadStatus>('idle');
   const [loadError, setLoadError] = useState<string>('');
   const [isUsingCachedData, setIsUsingCachedData] = useState(false);
+  const [isCacheStaleFlag, setIsCacheStaleFlag] = useState(false);
   const [cacheUpdatedAt, setCacheUpdatedAt] = useState<Date | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const hasHydratedRef = useRef(false);
 
-  // 1. Hydrate from IndexedDB cache immediately on mount
+  // 1. Hydrate from IndexedDB cache immediately on mount (enforcing 30-day max TTL)
   useEffect(() => {
     let active = true;
     (async () => {
@@ -43,6 +46,7 @@ export function usePortfolioQuery(onAuthExpired?: () => void): UsePortfolioQuery
           setPortfolios(sortPortfolios(cached.portfolios));
           setNetWorthHistory(cached.netWorthHistory);
           setIsUsingCachedData(true);
+          setIsCacheStaleFlag(isCacheStale(cached.cachedAt));
           setCacheUpdatedAt(new Date(cached.cachedAt));
           setLoadStatus('success');
         }
@@ -67,6 +71,7 @@ export function usePortfolioQuery(onAuthExpired?: () => void): UsePortfolioQuery
       setPortfolios(sortPortfolios(freshData.portfolios));
       setNetWorthHistory(freshData.netWorthHistory);
       setIsUsingCachedData(false);
+      setIsCacheStaleFlag(false);
       setLoadStatus('success');
       setLoadError('');
       setLastUpdated(new Date());
@@ -96,6 +101,7 @@ export function usePortfolioQuery(onAuthExpired?: () => void): UsePortfolioQuery
         setPortfolios(sortPortfolios(fresh.portfolios));
         setNetWorthHistory(fresh.netWorthHistory);
         setIsUsingCachedData(false);
+        setIsCacheStaleFlag(false);
         setLoadStatus('success');
         setLastUpdated(new Date());
       }
@@ -121,6 +127,7 @@ export function usePortfolioQuery(onAuthExpired?: () => void): UsePortfolioQuery
     loadStatus: resolvedLoadStatus,
     loadError: resolvedLoadError,
     isUsingCachedData,
+    isCacheStale: isCacheStaleFlag,
     cacheUpdatedAt,
     lastUpdated,
     load,
@@ -133,6 +140,7 @@ export function usePortfolioQuery(onAuthExpired?: () => void): UsePortfolioQuery
     resolvedLoadStatus,
     resolvedLoadError,
     isUsingCachedData,
+    isCacheStaleFlag,
     cacheUpdatedAt,
     lastUpdated,
     load,

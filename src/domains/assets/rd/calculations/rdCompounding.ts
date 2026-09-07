@@ -1,5 +1,5 @@
 import { RDAccount } from '../../../../types/portfolio';
-import { compoundValue } from '../../../../utils/mathUtils';
+import { compoundValue, roundToCurrency } from '../../../../utils/mathUtils';
 import { getDaysInMonth, parseLocalDateObj as parseLocalDate } from '../../../../utils/dateUtils';
 
 export { parseLocalDate };
@@ -87,7 +87,7 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
           total += compoundValue(cAmt, r, 4, remYears);
         }
       }
-      return !isNaN(total) && total > 0 ? total : 0;
+      return !isNaN(total) && total > 0 ? roundToCurrency(total) : 0;
     } else {
       if (r === 0 || totalMonths <= 0) {
         return p * Math.max(0, totalMonths);
@@ -102,7 +102,7 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
         return p * totalMonths;
       }
       const total = p * (numerator / denominator);
-      return !isNaN(total) && total > 0 ? total : p * totalMonths;
+      return !isNaN(total) && total > 0 ? roundToCurrency(total) : p * totalMonths;
     }
   }
   return 0;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { roundToDecimals, compoundValue } from '../mathUtils';
+import { roundToDecimals, roundToCurrency, compoundValue } from '../mathUtils';
 
 describe('mathUtils', () => {
   describe('roundToDecimals', () => {
@@ -22,6 +22,15 @@ describe('mathUtils', () => {
     it('handles NaN and 0 values safely', () => {
       expect(roundToDecimals(NaN)).toBe(0);
       expect(roundToDecimals(0)).toBe(0);
+    });
+  });
+
+  describe('roundToCurrency', () => {
+    it('rounds currency figures to two decimal places (cents/paise)', () => {
+      expect(roundToCurrency(1234.5678)).toBe(1234.57);
+      expect(roundToCurrency(1234.5612)).toBe(1234.56);
+      expect(roundToCurrency(0)).toBe(0);
+      expect(roundToCurrency(NaN)).toBe(0);
     });
   });
 

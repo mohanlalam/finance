@@ -352,14 +352,14 @@ All four core visualization widgets are constrained to an **equalized height of 
    * Bar visualization comparing invested value vs current market value per family portfolio.
    * **Multi-Stop Gradients & Staggered Rise**: Utilizes SVG linear gradients (`#barInvestedGrad`, `#barPositiveGrad`, `#barNegativeGrad`), subtle dashed gridlines (`strokeDasharray="4 6"`), and staggered entrance animation (`.animate-bar-rise` with progressive delay offsets).
 4. **Portfolio Assistant (AI Chatbot)** (`PortfolioAssistant.tsx`) — *Bottom-Right (Positioned Last)*:
-   * Conversational NLP panel formatted to 370px height matching neighboring charts with internal scroll body (`flex-1 min-h-0 overflow-y-auto`).
+   * Conversational NLP panel formatted to 420px height matching neighboring charts with internal scroll body (`flex-1 min-h-0 overflow-y-auto`).
    * Features quick suggestion prompt pills, typing indicator, markdown formatting, memoized message rendering (`ChatMessageItem`), `Bot` SVG icon integration, and copy response button.
 
 ### Portfolio Insights & Data Health Panel
 
 * Component: `InsightsPanel.tsx`
 * Metrics Evaluated:
-  * **Portfolio Health Score Audit**: Weighted 0-100 score evaluating diversification, emergency liquidity, document completeness, and stale price records. Includes quick trigger to open `DataQualityHealthModal`.
+  * **Portfolio Health Score Audit**: Weighted 0-100 score evaluating diversification, emergency liquidity, document completeness, and stale price records.
   * **Top 5 Today's Movers**: Displays top 5 daily stock/ETF movers ranked by absolute percentage movement with compact spacing (`space-y-2`) and scaled badge icons.
   * **Allocation Drift Alerts**: Highlights asset classes exceeding target allocation thresholds.
   * **Upcoming Deposit Maturities (30 Days)** & **Insurance Renewals (60 Days)**: Urgency notification cards with direct action buttons.
@@ -713,15 +713,6 @@ All modal dialogs across the application share a single, unified draggable modal
   * Side-by-side Quarantined Review (stacked on mobile): Shows extracted JSON fields alongside the visual document preview before committing to the database.
   * Interactive category switcher and inline field editor covering all 7 asset classes (FD, RD, SIP, Gold, Real Estate, Insurance, Stocks).
   * Target portfolio owner selector with atomic commit and automated document storage rollback if metadata persistence fails.
-
-### Data Quality Health Diagnostic Modal
-
-* Component: `DataQualityHealthModal.tsx`
-* Diagnostic Engine: Powered by `src/utils/dataQuality.ts`.
-* Features:
-  * Comprehensive audit of portfolio completeness (missing maturity dates, zero valuations, missing document attachments, stale prices).
-  * Rolling 30-entry historical score progression graph (`localStorage`).
-  * Monthly resolved issue counter tracking maintenance improvements over time.
 
 ### Confirmation Dialogs & Context Menus
 
