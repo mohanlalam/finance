@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { LayoutDashboard, Pencil, Trash2, UserPlus, User, Users, MoreVertical } from './icons/AppIcons';
+import { LayoutDashboard, Pencil, Trash2, UserPlus, MoreVertical } from './icons/AppIcons';
 import { Portfolio, PortfolioName } from '../types/portfolio';
 import { formatPercent } from '../utils/formatters';
 import { sortPortfolios } from '../domains/portfolio/calculations/portfolioOrdering';
+import { getFamilyMemberConfig } from '../utils/familyMemberConfig';
 
 interface FamilyTabBarProps {
   portfolios: Portfolio[];
@@ -11,47 +12,6 @@ interface FamilyTabBarProps {
   onAddFamilyClick: () => void;
   onRenameClick: (portfolio: { id: string; name: string; label: string }) => void;
   onDeleteClick: (portfolio: { id: string; name: string; label: string }) => void;
-}
-
-const familyIconConfigs: Record<string, { icon: React.ReactNode; bg: string; text: string }> = {
-  rammohan: {
-    icon: <User size={13} />,
-    bg: 'bg-blue-500/15 dark:bg-blue-400/20',
-    text: 'text-blue-600 dark:text-blue-400',
-  },
-  padmavathi: {
-    icon: <User size={13} />,
-    bg: 'bg-emerald-500/15 dark:bg-emerald-400/20',
-    text: 'text-emerald-600 dark:text-emerald-400',
-  },
-  sai_laxmi: {
-    icon: <Users size={13} />,
-    bg: 'bg-purple-500/15 dark:bg-purple-400/20',
-    text: 'text-purple-600 dark:text-purple-400',
-  },
-  sailaxmi: {
-    icon: <Users size={13} />,
-    bg: 'bg-purple-500/15 dark:bg-purple-400/20',
-    text: 'text-purple-600 dark:text-purple-400',
-  },
-};
-
-function getFamilyIconConfig(name: string) {
-  const normalized = (name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  if (normalized.includes('rammohan') || normalized.includes('ram')) {
-    return familyIconConfigs.rammohan;
-  }
-  if (normalized.includes('padmavathi')) {
-    return familyIconConfigs.padmavathi;
-  }
-  if (normalized.includes('sailaxmi') || normalized.includes('sai')) {
-    return familyIconConfigs.sai_laxmi;
-  }
-  return familyIconConfigs[normalized] ?? {
-    icon: <User size={13} />,
-    bg: 'bg-teal-500/15 dark:bg-teal-400/20',
-    text: 'text-teal-600 dark:text-teal-400',
-  };
 }
 
 export default React.memo(function FamilyTabBar({

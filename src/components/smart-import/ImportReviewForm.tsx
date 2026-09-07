@@ -64,13 +64,13 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
       {/* Target Portfolio Select */}
       {portfolioOptions.length > 1 && (
         <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
             Target Portfolio
           </label>
           <select
             value={targetPortfolio}
             onChange={(e) => onTargetPortfolioChange(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+            className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
           >
             {portfolioOptions.map((p) => (
               <option key={p.name} value={p.name}>
@@ -86,7 +86,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
         <div className="space-y-3">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              <label className="text-xs font-semibold text-[var(--text-secondary)]">
                 Bank / Institution *
               </label>
               {renderConfidenceBadge('institutionName', 'Bank / Institution')}
@@ -95,7 +95,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
               type="text"
               value={formData.institutionName}
               onChange={(e) => handleFieldChange('institutionName', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               placeholder="e.g. HDFC Bank, SBI"
             />
           </div>
@@ -103,7 +103,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Principal Amount (₹) *
                 </label>
                 {renderConfidenceBadge('principalAmount', 'Principal Amount')}
@@ -112,12 +112,12 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 type="number"
                 value={formData.principalAmount}
                 onChange={(e) => handleFieldChange('principalAmount', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Interest Rate (% p.a.) *
                 </label>
                 {renderConfidenceBadge('interestRate', 'Interest Rate (% p.a.)')}
@@ -127,7 +127,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 step="0.01"
                 value={formData.interestRate}
                 onChange={(e) => handleFieldChange('interestRate', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
           </div>
@@ -135,7 +135,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Start Date *
                 </label>
                 {renderConfidenceBadge('startDate', 'Start Date')}
@@ -144,12 +144,12 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => handleFieldChange('startDate', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Maturity Date *
                 </label>
                 {renderConfidenceBadge('maturityDate', 'Maturity Date')}
@@ -158,14 +158,14 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 type="date"
                 value={formData.maturityDate}
                 onChange={(e) => handleFieldChange('maturityDate', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              <label className="text-xs font-semibold text-[var(--text-secondary)]">
                 Maturity Amount (₹)
               </label>
               {renderConfidenceBadge('maturityAmount', 'Maturity Amount')}
@@ -174,7 +174,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
               type="number"
               value={formData.maturityAmount}
               onChange={(e) => handleFieldChange('maturityAmount', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             />
           </div>
         </div>
@@ -185,7 +185,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
         <div className="space-y-3">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              <label className="text-xs font-semibold text-[var(--text-secondary)]">
                 Item Description *
               </label>
               {renderConfidenceBadge('itemName', 'Item Description')}
@@ -194,20 +194,20 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
               type="text"
               value={formData.itemName}
               onChange={(e) => handleFieldChange('itemName', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               placeholder="e.g. 22K Gold Bangle"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
                 Purity
               </label>
               <select
                 value={formData.purity}
                 onChange={(e) => handleFieldChange('purity', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               >
                 <option value="24K">24K (999)</option>
                 <option value="22K">22K (916)</option>
@@ -217,7 +217,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Weight (grams) *
                 </label>
                 {renderConfidenceBadge('weightGrams', 'Weight (grams)')}
@@ -227,7 +227,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 step="0.01"
                 value={formData.weightGrams}
                 onChange={(e) => handleFieldChange('weightGrams', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
           </div>
@@ -235,7 +235,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Total Purchase Price (₹)
                 </label>
                 {renderConfidenceBadge('purchasePrice', 'Purchase Price')}
@@ -244,15 +244,15 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 type="number"
                 value={formData.purchasePrice}
                 onChange={(e) => handleFieldChange('purchasePrice', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Live Market Value (₹)
                 </label>
-                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">
+                <span className="text-[10px] text-[var(--warning)] font-bold">
                   {formatINR(liveGoldRate)}/g
                 </span>
               </div>
@@ -264,19 +264,19 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                     : ''
                 }
                 readOnly
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 font-semibold cursor-not-allowed"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface-secondary)] font-semibold cursor-not-allowed"
               />
             </div>
           </div>
 
           {/* One-Tap Ambiguity Quick Selector */}
           {formData.weightGrams && parseFloat(formData.weightGrams) > 1 && formData.purchasePrice && parseFloat(formData.purchasePrice) > 1000 && parseFloat(formData.purchasePrice) <= 40000 && (
-            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 space-y-2 animate-fade-in">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400">
+            <div className="rounded-[var(--radius-medium)] border border-[var(--warning)]/30 bg-[var(--warning-soft)] p-3 space-y-2 animate-fade-in">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--warning)]">
                 <Sparkles size={14} />
                 <span>Price Ambiguity Detected for ₹{parseFloat(formData.purchasePrice).toLocaleString('en-IN')}</span>
               </div>
-              <p className="text-[11px] text-slate-600 dark:text-slate-300">
+              <p className="text-[11px] text-[var(--text-secondary)]">
                 Is ₹{parseFloat(formData.purchasePrice).toLocaleString('en-IN')} the price per gram, or the total purchase cost?
               </p>
               <div className="grid grid-cols-2 gap-2 pt-1">
@@ -292,10 +292,10 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                       purchasePriceType: 'per_gram',
                     }));
                   }}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all text-left ${
+                  className={`px-2.5 py-1.5 rounded-[var(--radius-small)] text-xs font-semibold border transition-all text-left cursor-pointer ${
                     formData.purchasePriceType === 'per_gram'
-                      ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
-                      : 'bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-300 border-amber-500/30 hover:bg-amber-50 dark:hover:bg-amber-950/30'
+                      ? 'bg-[var(--accent-blue)] text-white border-[var(--accent-blue)] shadow-sm'
+                      : 'bg-[var(--surface)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--surface-secondary)]'
                   }`}
                 >
                   <div className="font-bold">🔘 ₹{parseFloat(formData.purchasePrice).toLocaleString('en-IN')}/g Rate</div>
@@ -312,10 +312,10 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                       purchasePriceType: 'total',
                     }));
                   }}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all text-left ${
+                  className={`px-2.5 py-1.5 rounded-[var(--radius-small)] text-xs font-semibold border transition-all text-left cursor-pointer ${
                     formData.purchasePriceType === 'total'
-                      ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
-                      : 'bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-300 border-amber-500/30 hover:bg-amber-50 dark:hover:bg-amber-950/30'
+                      ? 'bg-[var(--accent-blue)] text-white border-[var(--accent-blue)] shadow-sm'
+                      : 'bg-[var(--surface)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--surface-secondary)]'
                   }`}
                 >
                   <div className="font-bold">🔘 ₹{parseFloat(formData.purchasePrice).toLocaleString('en-IN')} Total Cost</div>
@@ -333,65 +333,65 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
       {assetType === 'real_estate' && (
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
               Property Name / Title *
             </label>
             <input
               type="text"
               value={formData.propertyName}
               onChange={(e) => handleFieldChange('propertyName', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               placeholder="e.g. 3BHK Flat, Green Acres Plot"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
                 Purchase Price (₹) *
               </label>
               <input
                 type="number"
                 value={formData.purchasePriceRealty}
                 onChange={(e) => handleFieldChange('purchasePriceRealty', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
                 Current Market Valuation (₹) *
               </label>
               <input
                 type="number"
                 value={formData.currentValuationRealty}
                 onChange={(e) => handleFieldChange('currentValuationRealty', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
                 Location
               </label>
               <input
                 type="text"
                 value={formData.location}
                 onChange={(e) => handleFieldChange('location', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
                 placeholder="e.g. Bangalore East"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
                 Monthly Rent (₹/mo)
               </label>
               <input
                 type="number"
                 value={formData.monthlyRent}
                 onChange={(e) => handleFieldChange('monthlyRent', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
                 placeholder="0"
               />
             </div>
@@ -404,7 +404,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
         <div className="space-y-3">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              <label className="text-xs font-semibold text-[var(--text-secondary)]">
                 Policy Name / Provider *
               </label>
               {renderConfidenceBadge('policyName', 'Policy Name / Provider')}
@@ -413,7 +413,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
               type="text"
               value={formData.policyName}
               onChange={(e) => handleFieldChange('policyName', e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               placeholder="e.g. LIC Tech Term, HDFC Ergo Health"
             />
           </div>
@@ -421,7 +421,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Policy Number
                 </label>
                 {renderConfidenceBadge('policyNumber', 'Policy Number')}
@@ -430,12 +430,12 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 type="text"
                 value={formData.policyNumber}
                 onChange={(e) => handleFieldChange('policyNumber', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Sum Assured (₹) *
                 </label>
                 {renderConfidenceBadge('sumAssured', 'Sum Assured')}
@@ -444,7 +444,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 type="number"
                 value={formData.sumAssured}
                 onChange={(e) => handleFieldChange('sumAssured', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
           </div>
@@ -452,7 +452,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Annual Premium (₹) *
                 </label>
                 {renderConfidenceBadge('premiumAmount', 'Annual Premium')}
@@ -461,12 +461,12 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 type="number"
                 value={formData.premiumAmount}
                 onChange={(e) => handleFieldChange('premiumAmount', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Renewal Date *
                 </label>
                 {renderConfidenceBadge('renewalDate', 'Renewal Date')}
@@ -475,7 +475,7 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
                 type="date"
                 value={formData.renewalDate}
                 onChange={(e) => handleFieldChange('renewalDate', e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+                className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               />
             </div>
           </div>
@@ -484,14 +484,14 @@ export const ImportReviewForm: React.FC<ImportReviewFormProps> = ({
 
       {/* Optional Notes */}
       <div>
-        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
           Notes / Remarks
         </label>
         <textarea
           rows={2}
           value={formData.notes}
           onChange={(e) => handleFieldChange('notes', e.target.value)}
-          className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900"
+          className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
           placeholder="Optional notes or references"
         />
       </div>

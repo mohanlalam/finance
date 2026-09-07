@@ -374,9 +374,9 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
         <p className="text-xs sm:text-sm font-semibold tracking-wider text-white/80 uppercase mb-0.5 drop-shadow">
           {formattedDate}
         </p>
-        <h2 className="ios-clock-display text-5xl sm:text-6xl font-bold tracking-tight text-white drop-shadow-md">
+        <h1 className="ios-clock-display text-5xl sm:text-6xl font-bold tracking-tight text-white drop-shadow-md">
           {formattedTime}
-        </h2>
+        </h1>
       </header>
 
       {/* iOS Passcode Entry Form */}
@@ -384,9 +384,9 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
         
         <div className={`flex flex-col items-center w-full transition-all duration-300 ${shake ? 'animate-shake' : ''}`}>
           
-          <h1 className="text-sm font-medium mb-5 tracking-wide text-white/90 drop-shadow">
+          <h2 className="text-sm font-medium mb-5 tracking-wide text-white/90 drop-shadow">
             {success ? 'Vault Unlocked' : 'Enter Passcode'}
-          </h1>
+          </h2>
           
           <div className="flex gap-4 mb-4 h-6 items-center">
             {dots.map((_, index) => {
@@ -487,112 +487,6 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
           </button>
         )}
       </footer>
-
-      <style>{`
-        .pin-lock-root {
-          position: relative;
-          background: #090916;
-        }
-
-        .ios-clock-display {
-          font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display", sans-serif;
-          font-variant-numeric: tabular-nums;
-          font-feature-settings: "tnum" 1;
-        }
-
-        .pin-lock-bg {
-          position: absolute;
-          inset: 0;
-          background:
-            radial-gradient(ellipse 120% 60% at 20% 100%, rgba(88, 28, 135, 0.85) 0%, transparent 70%),
-            radial-gradient(ellipse 100% 50% at 80% 90%, rgba(30, 58, 138, 0.8) 0%, transparent 65%),
-            radial-gradient(ellipse 80% 40% at 50% 110%, rgba(139, 92, 246, 0.55) 0%, transparent 60%),
-            radial-gradient(ellipse 60% 35% at 70% 80%, rgba(59, 130, 246, 0.4) 0%, transparent 55%),
-            radial-gradient(ellipse 50% 50% at 30% 20%, rgba(88, 28, 135, 0.25) 0%, transparent 70%),
-            linear-gradient(180deg, #070712 0%, #0d0928 40%, #160e3b 100%);
-          animation: auroraShift 12s ease-in-out infinite alternate;
-        }
-
-        .pin-lock-stars {
-          position: absolute;
-          inset: 0;
-          background-image:
-            radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.4), transparent),
-            radial-gradient(1px 1px at 25% 8%, rgba(255,255,255,0.3), transparent),
-            radial-gradient(1px 1px at 40% 22%, rgba(255,255,255,0.2), transparent),
-            radial-gradient(1px 1px at 55% 5%, rgba(255,255,255,0.35), transparent),
-            radial-gradient(1px 1px at 70% 18%, rgba(255,255,255,0.25), transparent),
-            radial-gradient(1px 1px at 85% 12%, rgba(255,255,255,0.3), transparent),
-            radial-gradient(1px 1px at 15% 35%, rgba(255,255,255,0.15), transparent),
-            radial-gradient(1.5px 1.5px at 90% 30%, rgba(255,255,255,0.45), transparent),
-            radial-gradient(1px 1px at 5% 25%, rgba(255,255,255,0.2), transparent),
-            radial-gradient(1px 1px at 60% 28%, rgba(255,255,255,0.18), transparent),
-            radial-gradient(1.5px 1.5px at 35% 3%, rgba(255,255,255,0.5), transparent),
-            radial-gradient(1px 1px at 78% 38%, rgba(255,255,255,0.22), transparent);
-          opacity: 0.7;
-          animation: starsTwinkle 6s ease-in-out infinite alternate;
-        }
-
-        @keyframes auroraShift {
-          0% {
-            filter: brightness(1) hue-rotate(0deg);
-          }
-          50% {
-            filter: brightness(1.08) hue-rotate(8deg);
-          }
-          100% {
-            filter: brightness(0.95) hue-rotate(-5deg);
-          }
-        }
-
-        @keyframes starsTwinkle {
-          0% { opacity: 0.5; }
-          100% { opacity: 0.8; }
-        }
-
-        .pin-key {
-          background: rgba(255, 255, 255, 0.11);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.18);
-          transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-          user-select: none;
-          -webkit-user-select: none;
-          touch-action: manipulation;
-        }
-        .pin-key:hover:not(:disabled) {
-          background: rgba(255, 255, 255, 0.18);
-          border-color: rgba(255, 255, 255, 0.35);
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 16px rgba(56, 189, 248, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.28);
-          transform: translateY(-1px);
-        }
-        .pin-key:active {
-          background: rgba(255, 255, 255, 0.32) !important;
-          transform: scale(0.92) !important;
-          box-shadow: 0 0 24px rgba(56, 189, 248, 0.55), 0 0 8px rgba(255, 255, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
-          border-color: rgba(56, 189, 248, 0.7) !important;
-          transition: transform 0.08s ease, box-shadow 0.08s ease !important;
-        }
-
-        @keyframes dotPop {
-          0% { transform: scale(0.6); opacity: 0.5; }
-          60% { transform: scale(1.35); }
-          100% { transform: scale(1.1); opacity: 1; }
-        }
-        .animate-dot-pop {
-          animation: dotPop 0.24s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
-          20%, 40%, 60%, 80% { transform: translateX(6px); }
-        }
-        .animate-shake {
-          animation: shake 0.5s ease-in-out;
-        }
-      `}</style>
     </div>
   );
 }

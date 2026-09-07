@@ -168,7 +168,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
             <select
               value={targetPortfolio}
               onChange={(e) => setTargetPortfolio(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             >
               {portfolioOptions.map((p) => (
                 <option key={p.name} value={p.name}>{p.label}</option>
@@ -178,7 +178,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
         )}
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
             Policy Name *
           </label>
           <input
@@ -187,19 +187,19 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
             placeholder="e.g. Family Health Optima, Super Top Up"
             value={policyName}
             onChange={(e) => setPolicyName(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+            className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
               Policy Type
             </label>
             <select
               value={insuranceType}
               onChange={(e) => setInsuranceType(e.target.value as Insurance['insurance_type'])}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 capitalize"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors capitalize"
             >
               {TYPE_OPTIONS.map((t) => (
                 <option key={t} value={t}>{t}</option>
@@ -207,7 +207,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
               Insurer / Provider
             </label>
             <input
@@ -215,14 +215,14 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
               placeholder="e.g. Star Health, HDFC ERGO"
               value={provider}
               onChange={(e) => setProvider(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
               Policy Number
             </label>
             <input
@@ -230,11 +230,11 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
               placeholder="e.g. P/12345/01/2026"
               value={policyNumber}
               onChange={(e) => setPolicyNumber(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
               Sum Assured (₹) *
             </label>
             <input
@@ -245,14 +245,14 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
               placeholder="e.g. 1000000"
               value={sumAssured}
               onChange={(e) => setSumAssured(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="min-w-0">
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 truncate">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 truncate">
               Premium Amount (₹)
             </label>
             <input
@@ -262,25 +262,25 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
               placeholder="e.g. 24000"
               value={premiumAmount}
               onChange={(e) => setPremiumAmount(e.target.value)}
-              className="w-full h-10 border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+              className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             />
           </div>
 
           <div className="min-w-0 overflow-hidden">
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 truncate">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 truncate">
               Renewal Date
             </label>
             <input
               type="date"
               value={renewalDate}
               onChange={(e) => setRenewalDate(e.target.value)}
-              className="w-full h-10 min-w-0 border border-slate-200 dark:border-slate-700 rounded-[14px] px-2.5 sm:px-3 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+              className="w-full h-10 min-w-0 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-2.5 sm:px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
             Notes
           </label>
           <textarea
@@ -288,7 +288,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
             placeholder="e.g. TPA details, cashless card number, claim helpline"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/30 resize-none"
+            className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors resize-none"
           />
         </div>
 

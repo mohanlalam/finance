@@ -59,6 +59,7 @@ export default function DesktopSidebar({
         <div className="space-y-0.5">
           <button
             type="button"
+            aria-current={selectedPortfolioId === 'all' && activeTab === 'home' ? 'page' : undefined}
             onClick={() => onSelectPortfolio('all')}
             className={getNavItemClass(selectedPortfolioId === 'all' && activeTab === 'home')}
           >
@@ -68,6 +69,7 @@ export default function DesktopSidebar({
             <div key={p.name} className="flex items-center group relative">
               <button
                 type="button"
+                aria-current={selectedPortfolioId === p.name ? 'page' : undefined}
                 onClick={() => onSelectPortfolio(p.name)}
                 className={`flex-1 ${getNavItemClass(selectedPortfolioId === p.name)}`}
               >

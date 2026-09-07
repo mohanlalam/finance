@@ -171,7 +171,7 @@ export default function FloatingAddMenu({
               <button
                 type="button"
                 onClick={() => changePosition('left')}
-                className={`px-2 py-1 min-h-[26px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer ${position === 'left' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                className={`px-2 py-1 min-h-[26px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${position === 'left' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
                 title="Move button to Left"
                 aria-checked={position === 'left'}
                 role="radio"
@@ -181,7 +181,7 @@ export default function FloatingAddMenu({
               <button
                 type="button"
                 onClick={() => changePosition('center')}
-                className={`px-2 py-1 min-h-[26px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer ${position === 'center' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                className={`px-2 py-1 min-h-[26px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${position === 'center' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
                 title="Move button to Center"
                 aria-checked={position === 'center'}
                 role="radio"
@@ -191,7 +191,7 @@ export default function FloatingAddMenu({
               <button
                 type="button"
                 onClick={() => changePosition('right')}
-                className={`px-2 py-1 min-h-[26px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer ${position === 'right' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                className={`px-2 py-1 min-h-[26px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${position === 'right' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
                 title="Move button to Right"
                 aria-checked={position === 'right'}
                 role="radio"
@@ -206,7 +206,7 @@ export default function FloatingAddMenu({
                 setIsOpen(false);
                 fabButtonRef.current?.focus();
               }}
-              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-[var(--radius-medium)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] ios-press transition-colors shrink-0 touch-manipulation cursor-pointer"
+              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-[var(--radius-medium)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] ios-press transition-colors shrink-0 touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
               aria-label="Close add menu"
             >
               <X size={18} aria-hidden="true" />
@@ -226,7 +226,7 @@ export default function FloatingAddMenu({
                       key={idx}
                       type="button"
                       onClick={item.onClick}
-                      className={`w-full flex items-center justify-between p-2.5 min-h-[46px] rounded-[var(--radius-medium)] text-left outline-none ios-press border transition-all cursor-pointer ${
+                      className={`w-full flex items-center justify-between p-2.5 min-h-[46px] rounded-[var(--radius-medium)] text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 ios-press border transition-all cursor-pointer ${
                         item.highlight
                           ? 'bg-gradient-to-r from-amber-500/15 to-amber-600/15 border-amber-500/30 text-amber-800 dark:text-amber-300'
                           : 'bg-[var(--surface-secondary)]/60 hover:bg-[var(--surface-secondary)] border-[var(--border-subtle)] text-[var(--text-primary)]'
@@ -254,7 +254,7 @@ export default function FloatingAddMenu({
       )}
 
       {/* Floating Action Button (FAB) Docked Cleanly Above Navigation */}
-      <div className={`fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] z-40 transition-all duration-300 ease-out ${isOpen ? 'opacity-0 pointer-events-none scale-75' : 'fab-scroll-hide opacity-100 scale-100'} ${getFabButtonPositionClass()}`}>
+      <div className={`fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] z-[55] transition-all duration-300 ease-out ${isOpen ? 'opacity-0 pointer-events-none scale-75' : 'fab-scroll-hide opacity-100 scale-100'} ${getFabButtonPositionClass()}`}>
         <button
           ref={fabButtonRef}
           type="button"
@@ -264,7 +264,7 @@ export default function FloatingAddMenu({
           }}
           aria-label="Open quick add menu"
           aria-expanded={isOpen}
-          className="min-w-[50px] min-h-[50px] w-12.5 h-12.5 rounded-full bg-[var(--accent-blue)] text-white flex items-center justify-center shadow-[0_6px_20px_rgba(59,130,246,0.4)] ios-press transition-all outline-none cursor-pointer active:scale-90"
+          className="min-w-[50px] min-h-[50px] w-12.5 h-12.5 rounded-full bg-[var(--accent-blue)] text-white flex items-center justify-center shadow-[0_6px_20px_rgba(59,130,246,0.4)] ios-press transition-all outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-2 cursor-pointer active:scale-90"
         >
           <Plus size={24} aria-hidden="true" />
         </button>

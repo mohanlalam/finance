@@ -159,6 +159,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
               viewBox="0 0 230 230"
               role="img"
               aria-label={`${title} donut chart showing ${slices.length} segments totalling ${isBalancesHidden ? 'hidden' : formatINR(total)}`}
+              aria-labelledby="piechart-title piechart-desc"
               className="overflow-visible max-w-full drop-shadow-sm animate-stitch-fade"
             >
               <defs>
@@ -166,7 +167,8 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                   <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.25" />
                 </filter>
               </defs>
-              <title>{title}</title>
+              <title id="piechart-title">{title}</title>
+              <desc id="piechart-desc">Donut chart illustrating percentage asset allocation across asset classes</desc>
               {paths.map(({ d, color, i }) => {
                 const isHovered = safeHovered === i;
                 return (
@@ -176,7 +178,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                     fill={color}
                     stroke="var(--surface)"
                     strokeWidth={2.5}
-                    className="cursor-pointer transition-all duration-150 focus:outline-none"
+                    className="cursor-pointer transition-all duration-150 focus:outline-none focus-visible:outline-none focus-visible:stroke-[var(--accent-blue)] focus-visible:stroke-[3.5px]"
                     tabIndex={0}
                     role="button"
                     aria-label={`${slices[i].fullName}: ${slices[i].pct.toFixed(1)}%`}

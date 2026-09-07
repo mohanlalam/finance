@@ -98,15 +98,15 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
           </div>
           <button
             onClick={onClose}
-            className="w-11 h-11 min-w-[44px] min-h-[44px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] ios-press transition-colors touch-manipulation cursor-pointer"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] ios-press transition-colors touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
             aria-label="Close alerts"
           >
-            <X size={16} />
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="px-3 py-2 pb-3 border-b border-[var(--border-subtle)] flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
+        <div role="tablist" aria-label="Alert categories" className="px-3 py-2 pb-3 border-b border-[var(--border-subtle)] flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
           {tabs.map((tab) => {
             const count = alerts.filter((a) => {
               if (tab.key === 'due_soon') return a.type === 'fd_maturity' || a.type === 'rd_maturity' || a.type === 'insurance_renewal' || a.type === 'document_expiry';
@@ -120,8 +120,11 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
             return (
               <button
                 key={tab.key}
+                role="tab"
+                aria-selected={isActive}
+                aria-controls="alerts-panel"
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-[var(--radius-small)] text-xs font-bold transition-all shrink-0 touch-manipulation ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-[var(--radius-small)] text-xs font-bold transition-all shrink-0 touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 cursor-pointer ${
                   isActive
                     ? 'bg-[var(--accent-blue)] text-white shadow-xs'
                     : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
@@ -141,11 +144,11 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
         </div>
 
         {/* Alerts Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div id="alerts-panel" role="tabpanel" aria-label="Alerts list" className="flex-1 overflow-y-auto p-4 space-y-3">
           {filteredAlerts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="w-12 h-12 rounded-xl bg-[var(--positive-soft)] text-[var(--positive)] border border-[var(--positive)]/20 flex items-center justify-center mb-3">
-                <CheckCircle2 size={24} />
+                <CheckCircle2 size={24} aria-hidden="true" />
               </div>
               <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">All Clear!</h3>
               <p className="text-xs text-[var(--text-tertiary)] max-w-xs">
@@ -194,9 +197,9 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
                           onDismissAlert(alert.id);
                         }}
                         aria-label={`Dismiss ${alert.title}`}
-                        className="w-8 h-8 rounded-lg bg-[var(--surface)]/80 hover:bg-[var(--surface)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
+                        className="w-8 h-8 rounded-lg bg-[var(--surface)]/80 hover:bg-[var(--surface)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
                       >
-                        <X size={14} />
+                        <X size={14} aria-hidden="true" />
                       </button>
                     </div>
                   </div>
@@ -215,7 +218,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
                 e.stopPropagation();
                 onDismissAll();
               }}
-              className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-[var(--surface-secondary)] hover:bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] ios-press transition-all cursor-pointer"
+              className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-[var(--surface-secondary)] hover:bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] ios-press transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
             >
               Clear All ({alerts.length})
             </button>
@@ -223,7 +226,7 @@ export default function MobileAlertsView({ alerts, onClose, onDismissAlert, onDi
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-[var(--accent-blue)] hover:brightness-110 active:scale-95 text-white rounded-[var(--radius-medium)] ios-press transition-all shadow-xs cursor-pointer"
+            className="flex-1 min-h-[44px] py-2.5 text-xs font-bold text-center bg-[var(--accent-blue)] hover:brightness-110 active:scale-95 text-white rounded-[var(--radius-medium)] ios-press transition-all shadow-xs cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
           >
             Back to Dashboard
           </button>

@@ -168,7 +168,10 @@ function BarChart({ portfolios }: BarChartProps) {
                 preserveAspectRatio="xMidYMid meet"
                 role="img"
                 aria-label="Invested vs Current Value bar chart"
+                aria-labelledby="barchart-title barchart-desc"
               >
+                <title id="barchart-title">Invested vs Current Value</title>
+                <desc id="barchart-desc">Comparison bar chart showing total invested versus current valuation across portfolio members</desc>
                 <defs>
                   <linearGradient id="barInvestedGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="var(--text-tertiary)" stopOpacity="0.8" />

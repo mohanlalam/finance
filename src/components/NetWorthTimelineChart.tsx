@@ -519,12 +519,17 @@ export default function NetWorthTimelineChart({
 
         <svg
           viewBox={`0 0 ${width} ${height}`}
+          role="img"
+          aria-label="Net worth timeline interactive area chart showing historical progression and valuation"
+          aria-labelledby="networth-chart-title networth-chart-desc"
           onPointerEnter={updateSvgRect}
           onPointerDown={(e) => { updateSvgRect(e); handlePointerMove(e); }}
           onPointerMove={handlePointerMove}
           onPointerLeave={() => { setHoveredIdx(null); svgRectRef.current = null; }}
           className={`w-full h-full touch-none select-none ${history.length < 2 ? 'opacity-40' : ''}`}
         >
+          <title id="networth-chart-title">Net Worth Timeline</title>
+          <desc id="networth-chart-desc">Interactive area chart displaying portfolio net worth over time with date range filters</desc>
           {/* Gradients & Filters */}
           <defs>
             <linearGradient id="totalAreaGrad" x1="0" y1="0" x2="0" y2="1">

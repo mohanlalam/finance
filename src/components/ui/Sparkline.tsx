@@ -56,6 +56,8 @@ export const Sparkline = React.memo(function Sparkline({
       width={width} 
       height={height} 
       viewBox={`0 0 ${width} ${height}`} 
+      aria-hidden="true"
+      role="presentation"
       className={`overflow-visible ${className}`}
     >
       <defs>

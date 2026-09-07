@@ -323,7 +323,7 @@ export default React.memo(function InsightsPanel({
               <button
                 key={filter.id}
                 onClick={() => handleFilterClick(filter.id)}
-                className={`shrink-0 px-2.5 py-1 rounded-[var(--radius-medium)] text-[10px] font-bold transition-all duration-150 outline-none ios-press ${
+                className={`shrink-0 px-2.5 py-1 rounded-[var(--radius-medium)] text-[10px] font-bold transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 ios-press cursor-pointer ${
                   isActive
                     ? 'bg-[var(--accent-blue)] text-[var(--surface)] shadow-xs'
                     : 'bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]'

@@ -588,6 +588,7 @@ export default React.memo(function PortfolioTable({
                             onClick={() => setSelectedDetailHolding(h)}
                             className="font-bold text-[var(--text-primary)] block leading-tight text-left hover:text-[var(--accent-blue)] transition-colors ios-press"
                             title={h.stockName}
+                            aria-label={`View holding details for ${h.stockName} (${h.ticker})`}
                           >
                             {h.ticker}
                           </button>

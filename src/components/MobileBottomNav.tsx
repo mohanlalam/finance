@@ -116,6 +116,9 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
             maxHeight: '80vh',
           }}
         >
+          <span className="sr-only" role="status" aria-live="polite">
+            More asset categories drawer opened
+          </span>
           {/* Header with Drag Handle */}
           <div className="w-10 h-1 rounded-full bg-[var(--border-subtle)] mx-auto mb-3" aria-hidden="true" />
           <div className="flex items-center justify-between pb-3 mb-2 border-b border-[var(--border-subtle)]">
@@ -128,7 +131,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
             <button
               type="button"
               onClick={() => setIsDrawerOpen(false)}
-              className="w-10 h-10 min-w-[40px] min-h-[40px] -mr-2 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] rounded-[var(--radius-medium)] hover:bg-[var(--surface-secondary)] transition-colors outline-none cursor-pointer touch-manipulation"
+              className="w-10 h-10 min-w-[40px] min-h-[40px] -mr-2 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] rounded-[var(--radius-medium)] hover:bg-[var(--surface-secondary)] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] cursor-pointer touch-manipulation"
               aria-label="Close menu"
             >
               <X size={18} aria-hidden="true" />
@@ -144,18 +147,18 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                 setIsDrawerOpen(false);
                 onOpenSmartImport();
               }}
-              className="w-full flex items-center justify-between p-3 mb-3 bg-gradient-to-r from-amber-500/15 to-amber-600/15 border border-amber-500/30 rounded-[var(--radius-medium)] text-amber-800 dark:text-amber-300 ios-press cursor-pointer"
+              className="w-full flex items-center justify-between p-3 mb-3 bg-gradient-to-r from-amber-500/15 to-amber-600/15 border border-amber-500/30 rounded-[var(--radius-medium)] text-amber-800 dark:text-amber-300 ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0">
-                  <Sparkles size={16} />
+                  <Sparkles size={16} aria-hidden="true" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-100">✨ Smart AI Import</p>
-                  <p className="text-[11px] text-slate-700 dark:text-slate-300">Scan FD, Gold, or Insurance photo/PDF</p>
+                  <p className="text-xs font-bold text-[var(--text-primary)]">✨ Smart AI Import</p>
+                  <p className="text-[11px] text-[var(--text-tertiary)]">Scan FD, Gold, or Insurance photo/PDF</p>
                 </div>
               </div>
-              <ChevronRight size={16} className="text-amber-500 shrink-0" />
+              <ChevronRight size={16} className="text-amber-500 shrink-0" aria-hidden="true" />
             </button>
           )}
 
@@ -168,7 +171,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                   key={tab.id}
                   type="button"
                   onClick={() => handleMoreTabClick(tab.id)}
-                  className={`w-full flex items-center justify-between px-3 min-h-[48px] py-2.5 rounded-[var(--radius-medium)] transition-colors text-left outline-none cursor-pointer active:scale-[0.99] ${
+                  className={`w-full flex items-center justify-between px-3 min-h-[48px] py-2.5 rounded-[var(--radius-medium)] transition-colors text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 cursor-pointer active:scale-[0.99] ${
                     isActive
                       ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-bold border border-[var(--accent-blue)]/30'
                       : 'text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] border border-transparent'
@@ -214,7 +217,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                   setIsDrawerOpen(false);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`relative flex-1 flex flex-col items-center justify-center h-12 py-1 rounded-xl touch-manipulation transition-all duration-150 outline-none cursor-pointer active:scale-95 ${
+                className={`relative flex-1 flex flex-col items-center justify-center h-12 py-1 rounded-xl touch-manipulation transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 cursor-pointer active:scale-95 ${
                   isActive
                     ? 'text-[var(--accent-blue)] font-bold'
                     : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
@@ -255,7 +258,8 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
               setIsDrawerOpen(!isDrawerOpen);
             }}
             aria-expanded={isDrawerOpen}
-            className={`relative flex-1 flex flex-col items-center justify-center h-12 py-1 rounded-xl touch-manipulation transition-all duration-150 outline-none cursor-pointer active:scale-95 ${
+            aria-label={isMoreActive ? `More asset categories (currently active: ${activeAsset})` : 'More asset categories'}
+            className={`relative flex-1 flex flex-col items-center justify-center h-12 py-1 rounded-xl touch-manipulation transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 cursor-pointer active:scale-95 ${
               isMoreActive || isDrawerOpen
                 ? 'text-[var(--accent-blue)] font-bold'
                 : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'

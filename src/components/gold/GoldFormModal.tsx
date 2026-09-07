@@ -287,13 +287,13 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4">
         {portfolioOptions.length > 1 && !editingHolding && (
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
               Portfolio
             </label>
             <select
               value={targetPortfolio}
               onChange={(e) => setTargetPortfolio(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             >
               {portfolioOptions.map((p) => (
                 <option key={p.name} value={p.name}>{p.label}</option>
@@ -303,7 +303,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
         )}
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
             Item Name / Description *
           </label>
           <input
@@ -312,19 +312,19 @@ export const GoldFormModal = React.memo(function GoldFormModal({
             placeholder="e.g. 24K Gold Coin, Gold Necklace"
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+            className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
               Purity
             </label>
             <select
               value={purity}
               onChange={(e) => handlePurityChange(e.target.value as GoldHolding['purity'])}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             >
               {PURITY_OPTIONS.map((p) => (
                 <option key={p} value={p}>{p}</option>
@@ -332,7 +332,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
               Weight (grams) *
             </label>
             <input
@@ -343,7 +343,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
               placeholder="e.g. 55.33"
               value={weightGrams}
               onChange={(e) => handleWeightChange(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-medium"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors font-medium"
             />
           </div>
         </div>
@@ -351,11 +351,11 @@ export const GoldFormModal = React.memo(function GoldFormModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)]">
                 Buy Rate / Gram (₹/g)
               </label>
               {ratePerGram && (
-                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">
+                <span className="text-[10px] text-[var(--warning)] font-bold">
                   {formatINR(Number(ratePerGram))}/g
                 </span>
               )}
@@ -367,16 +367,16 @@ export const GoldFormModal = React.memo(function GoldFormModal({
               placeholder="e.g. 5200"
               value={ratePerGram}
               onChange={(e) => handleRatePerGramChange(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             />
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+              <label className="block text-xs font-semibold text-[var(--text-secondary)]">
                 Total Purchase Cost (₹)
               </label>
               {purchasePrice && Number(purchasePrice) > 0 && (
-                <span className="text-[10px] text-slate-500 font-semibold">
+                <span className="text-[10px] text-[var(--text-tertiary)] font-semibold">
                   {formatINR(Number(purchasePrice))}
                 </span>
               )}
@@ -388,14 +388,14 @@ export const GoldFormModal = React.memo(function GoldFormModal({
               placeholder="e.g. 287716"
               value={purchasePrice}
               onChange={(e) => handlePurchasePriceChange(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             />
           </div>
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)]">
               Current Market Valuation (₹)
             </label>
             {weightGrams && parseFloat(weightGrams) > 0 && (
@@ -406,7 +406,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
                   const autoVal = Math.round(grams * liveRatePerGram);
                   setCurrentValuation(String(autoVal));
                 }}
-                className="text-[10.5px] text-amber-600 dark:text-amber-400 hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                className="text-[10.5px] text-[var(--accent-blue)] hover:underline font-bold flex items-center gap-1 cursor-pointer"
               >
                 <span>⚡ Auto-compute (Live: {formatINR(liveRatePerGram)}/g ➔ {formatINR(Math.round(parseFloat(weightGrams) * liveRatePerGram))})</span>
               </button>
@@ -419,24 +419,24 @@ export const GoldFormModal = React.memo(function GoldFormModal({
             placeholder="e.g. 781148"
             value={currentValuation}
             onChange={(e) => setCurrentValuation(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-semibold"
+            className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors font-semibold"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
             Purchase Date
           </label>
           <input
             type="date"
             value={purchaseDate}
             onChange={(e) => setPurchaseDate(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+            className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
             Notes
           </label>
           <textarea
@@ -444,7 +444,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
             placeholder="e.g. Stored in bank locker #42"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 resize-none"
+            className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors resize-none"
           />
         </div>
 

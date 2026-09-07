@@ -22,14 +22,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   disabled,
   ...props
 }, ref) => {
-  const baseClasses = 'inline-flex items-center justify-center font-semibold rounded-[var(--radius-medium)] ios-press transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed select-none whitespace-nowrap leading-none';
+  const baseClasses = 'inline-flex items-center justify-center font-semibold rounded-[var(--radius-medium)] ios-press transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed select-none whitespace-nowrap leading-none';
   
   const variantClasses: Record<ButtonVariant, string> = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 shadow-xs',
-    secondary: 'bg-white text-slate-700 hover:bg-slate-50 active:bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-xs',
-    ghost: 'bg-transparent text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/80',
-    danger: 'bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800 dark:bg-rose-600 dark:hover:bg-rose-500 shadow-xs',
-    success: 'bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 shadow-xs',
+    primary: 'bg-[var(--accent-blue)] text-white hover:opacity-95 active:opacity-90 shadow-xs focus-visible:ring-[var(--accent-blue)]',
+    secondary: 'bg-[var(--surface)] text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] active:bg-[var(--surface-tertiary)] border border-[var(--border-subtle)] shadow-xs focus-visible:ring-[var(--accent-blue)]',
+    ghost: 'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] focus-visible:ring-[var(--accent-blue)]',
+    danger: 'bg-[var(--negative)] text-white hover:opacity-95 active:opacity-90 shadow-xs focus-visible:ring-[var(--negative)]',
+    success: 'bg-[var(--positive)] text-white hover:opacity-95 active:opacity-90 shadow-xs focus-visible:ring-[var(--positive)]',
   };
 
   const sizeClasses: Record<ButtonSize, string> = {
