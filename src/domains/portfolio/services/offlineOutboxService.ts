@@ -21,6 +21,7 @@ export interface QueuedMutation {
 }
 
 const OUTBOX_STORAGE_KEY = 'portfolio_offline_outbox_v1';
+const MAX_RETRY_COUNT = 5;
 
 export class OfflineOutboxService {
   private isDraining = false;
@@ -102,6 +103,13 @@ export class OfflineOutboxService {
       logger.info(`[Outbox] Draining ${queue.length} pending mutations...`);
 
       for (const item of queue) {
+        if ((item.retryCount || 0) >= MAX_RETRY_COUNT) {
+          logger.warn(`[Outbox] Abandoning mutation ${item.id} (${item.type}) after ${item.retryCount} retries`);
+          await this.remove(item.id);
+          failed++;
+          continue;
+        }
+
         try {
           await portfolioSyncService.runMutation(async () => {
             switch (item.type) {

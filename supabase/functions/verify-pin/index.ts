@@ -69,13 +69,16 @@ function getClientIp(req: Request): string {
   const realIp = req.headers.get("x-real-ip")?.trim();
   if (realIp) return realIp;
 
-  // 3. X-Forwarded-For: Take the LAST entry (appended by closest trusted reverse proxy),
-  //    never the first entry which is attacker-controlled and easily spoofed.
+  // 3. X-Forwarded-For: In the Supabase / Deno Deploy proxy topology, the rightmost IP
+  // is appended by the nearest trusted infrastructure reverse proxy (Kong / Deno Edge Gateway).
+  // Picking the last entry ensures an attacker cannot spoof an arbitrary client IP by prepending
+  // falsified headers. Note: If a custom external CDN is ever placed in front, ensure the CDN's
+  // client IP header or trusted hop count is configured accordingly.
   const xff = req.headers.get("x-forwarded-for");
   if (xff) {
     const parts = xff.split(",").map((p) => p.trim()).filter(Boolean);
     if (parts.length > 0) {
-      return parts[parts.length - 1]; // Rightmost proxy-verified IP
+      return parts[parts.length - 1]; // Rightmost proxy-verified IP in Deno Deploy topology
     }
   }
 

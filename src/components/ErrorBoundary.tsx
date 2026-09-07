@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { handleChunkError } from '../utils/chunkReload';
+import { logger } from '../infrastructure/logging/logger';
 
 interface Props {
   children: ReactNode;
@@ -22,7 +23,9 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('[ErrorBoundary caught error]:', error, errorInfo);
+    logger.error('[ErrorBoundary caught error]:', error, {
+      componentStack: errorInfo.componentStack ?? undefined,
+    });
     handleChunkError(error);
   }
 

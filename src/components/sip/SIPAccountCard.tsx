@@ -187,7 +187,7 @@ export function SIPAccountCard({
             onClick: () => {
               const summary = `SIP in ${account.fund_name}\nMonthly: ${formatINR(account.monthly_sip)}\nValue: ${formatINR(currentVal)}`;
               if (navigator.share) {
-                navigator.share({ title: `SIP Summary`, text: summary }).catch(console.error);
+                navigator.share({ title: `SIP Summary`, text: summary }).catch(() => {});
               } else {
                 navigator.clipboard.writeText(summary);
                 addToast('Summary copied to clipboard!', 'success');

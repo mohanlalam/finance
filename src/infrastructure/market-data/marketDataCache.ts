@@ -24,8 +24,20 @@ export function getStaleQuote(symbol: string): { ltp: number; todayPct: number }
   return stalePriceCache.get(symbol.toUpperCase()) || null;
 }
 
+const MAX_CACHE_ENTRIES = 500;
+
 export function setCachedQuote(symbol: string, ltp: number, todayPct: number): void {
   const sym = symbol.toUpperCase();
+  // Prevent unbounded memory growth over long-lived sessions
+  if (stalePriceCache.size >= MAX_CACHE_ENTRIES && !stalePriceCache.has(sym)) {
+    const oldestKey = stalePriceCache.keys().next().value;
+    if (oldestKey) stalePriceCache.delete(oldestKey);
+  }
+  if (memoryPriceCache.size >= MAX_CACHE_ENTRIES && !memoryPriceCache.has(sym)) {
+    const oldestKey = memoryPriceCache.keys().next().value;
+    if (oldestKey) memoryPriceCache.delete(oldestKey);
+  }
+
   memoryPriceCache.set(sym, {
     ltp,
     todayPct,
@@ -36,5 +48,6 @@ export function setCachedQuote(symbol: string, ltp: number, todayPct: number): v
 
 export function clearPriceCache(): void {
   memoryPriceCache.clear();
+  stalePriceCache.clear();
 }
 

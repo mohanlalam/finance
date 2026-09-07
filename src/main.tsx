@@ -30,6 +30,8 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
     window.addEventListener('online', checkForUpdates);
 
     // Periodic check every 10 minutes
+    // NOTE: Interval is intentionally module-level and never cleared.
+    // checkForUpdates is idempotent — it only calls registration.update() which is a no-op if no update is available.
     setInterval(checkForUpdates, 10 * 60 * 1000);
   }).catch(() => {});
 

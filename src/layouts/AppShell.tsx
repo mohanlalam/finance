@@ -5,29 +5,25 @@ import { WifiOff, AlertCircle, RefreshCw } from '../components/icons/AppIcons';
 import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
 import FamilyTabBar from '../components/FamilyTabBar';
-import AssetTabContent from '../components/AssetTabContent';
 import SectionErrorBoundary from '../components/SectionErrorBoundary';
-
-import FloatingAddMenu from '../components/FloatingAddMenu';
-import { useIsMobile } from '../hooks/useIsMobile';
-
-import MobileBottomNav from '../components/MobileBottomNav';
 import MobileStatusBar from '../components/MobileStatusBar';
 
-// Viewport-specific lazy loaded layouts
+import { useIsMobile } from '../hooks/useIsMobile';
+import { useModalState } from '../hooks/useModalState';
+
+// Viewport and route-specific lazy loaded layouts to minimize initial AppShell chunk size and LCP
 const DesktopSidebar = React.lazy(() => import('./DesktopSidebar'));
 const MobileHomeSummary = React.lazy(() => import('../components/MobileHomeSummary'));
+const MobileBottomNav = React.lazy(() => import('../components/MobileBottomNav'));
+const FloatingAddMenu = React.lazy(() => import('../components/FloatingAddMenu'));
+const AssetTabContent = React.lazy(() => import('../components/AssetTabContent'));
+const DashboardWidgets = React.lazy(() => import('../components/DashboardWidgets'));
+const AppShellModals = React.lazy(() => import('./AppShellModals'));
 
 import type { ImportRow } from '../components/ExportPanel'; // type-only: erased at build time
 import { AddHoldingPayload } from '../components/AddHoldingModal';
 
-import DashboardWidgets from '../components/DashboardWidgets';
-import { AppShellModals } from './AppShellModals';
-import { useModalState } from '../hooks/useModalState';
-
-const PieChart = React.lazy(() => import('../components/PieChart'));
-const BarChart = React.lazy(() => import('../components/BarChart'));
-const PortfolioAssistant = React.lazy(() => import('../components/PortfolioAssistant'));
+const HomeDashboardWidgets = React.lazy(() => import('./HomeDashboardWidgets'));
 // Lazy-loaded: only fetched when activeTab === 'all' renders it on screen
 const InsightsPanel = React.lazy(() => import('../components/InsightsPanel'));
 import { InsightsSkeleton } from '../components/ui/ChartSkeleton';
@@ -46,7 +42,6 @@ import { getBreakdownSlices } from '../utils/chartHelpers';
 import { estimateTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
 import { classBreakdown } from '../domains/portfolio/calculations/allocation';
 import { AssetTab } from '../types/portfolio';
-import { LazyViewport, LazyChartWrapper } from '../components/ui/LazyViewport';
 
 export default function AppShell() {
   const {
@@ -276,95 +271,7 @@ export default function AppShell() {
     }
   }, [setActiveAsset]);
 
-  // ─── Memoized Dashboard Widget Trees ───
-  // Split into separate mobile/desktop memos so each only re-renders when its
-  // specific data dependencies change — not on every AppShell state update.
-  const mobileDashboardWidgets = useMemo(() => (
-    <div className="space-y-4 mobile-section">
-      <SectionErrorBoundary sectionName="Net Worth Timeline">
-        <LazyChartWrapper
-          importFunc={() => import('../components/NetWorthTimelineChart')}
-          placeholderHeight={300}
-          fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
-          props={{
-            history: netWorthHistory,
-            currentNetWorth: (breakdown.stocks || 0) + (breakdown.fd || 0),
-            currentStocks: breakdown.stocks,
-            currentFD: breakdown.fd,
-          }}
-        />
-      </SectionErrorBoundary>
-      <SectionErrorBoundary sectionName="Asset Class Pie Chart">
-        <LazyViewport placeholderHeight={300}>
-          <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
-            <PieChart
-              slices={breakdownSlices}
-              title={`Asset Class Breakdown — ${summaryData.label}`}
-              onSelectSlice={handleSliceClick}
-            />
-          </Suspense>
-        </LazyViewport>
-      </SectionErrorBoundary>
-      <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
-        <LazyViewport placeholderHeight={300}>
-          <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
-            <BarChart portfolios={barChartPortfolios} />
-          </Suspense>
-        </LazyViewport>
-      </SectionErrorBoundary>
-      <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-        <LazyViewport placeholderHeight={300}>
-          <Suspense fallback={<div className="h-[300px] sm:h-[370px] apple-card rounded-xl animate-pulse" />}>
-            <PortfolioAssistant portfolios={portfolios} onSelectAsset={handleSidebarTabChange} />
-          </Suspense>
-        </LazyViewport>
-      </SectionErrorBoundary>
-    </div>
-  ), [netWorthHistory, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick, handleSidebarTabChange]);
 
-  const desktopDashboardWidgets = useMemo(() => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch auto-rows-fr">
-      <SectionErrorBoundary sectionName="Net Worth Timeline">
-        <LazyChartWrapper
-          className="h-full flex flex-col"
-          importFunc={() => import('../components/NetWorthTimelineChart')}
-          placeholderHeight={420}
-          fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}
-          props={{
-            history: netWorthHistory,
-            currentNetWorth: (breakdown.stocks || 0) + (breakdown.fd || 0),
-            currentStocks: breakdown.stocks,
-            currentFD: breakdown.fd,
-          }}
-        />
-      </SectionErrorBoundary>
-      <SectionErrorBoundary sectionName="Asset Class Pie Chart">
-        <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
-          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
-            <PieChart
-              slices={breakdownSlices}
-              title={`Asset Class Breakdown — ${summaryData.label}`}
-              onSelectSlice={handleSliceClick}
-            />
-          </Suspense>
-        </LazyViewport>
-      </SectionErrorBoundary>
-      <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
-        <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
-          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
-            <BarChart portfolios={barChartPortfolios} />
-          </Suspense>
-        </LazyViewport>
-      </SectionErrorBoundary>
-      <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-        <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
-          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
-            <PortfolioAssistant portfolios={portfolios} onSelectAsset={handleSidebarTabChange} />
-          </Suspense>
-        </LazyViewport>
-      </SectionErrorBoundary>
-    </div>
-  ), [netWorthHistory, summaryData.label, breakdown.stocks, breakdown.fd, breakdownSlices, barChartPortfolios, portfolios, handleSliceClick, handleSidebarTabChange]);
 
 
   const handleImportCSV = useCallback(async (rows: ImportRow[], portfolioName: string) => {
@@ -441,7 +348,11 @@ export default function AppShell() {
   const visiblePortfolio = portfolio;
 
   if (activeAsset === 'widgets') {
-    return <DashboardWidgets portfolios={portfolios} activePortfolio={portfolio} />;
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-[var(--app-background)]" />}>
+        <DashboardWidgets portfolios={portfolios} activePortfolio={portfolio} />
+      </Suspense>
+    );
   }
 
   return (
@@ -623,7 +534,19 @@ export default function AppShell() {
 
                 {/* Charts & AI Dashboard Widgets in Home after Assets */}
                 <div className="space-y-4 pt-1">
-                  {mobileDashboardWidgets}
+                  <Suspense fallback={<div className="h-[300px] rounded-xl animate-pulse" />}>
+                    <HomeDashboardWidgets
+                      isMobile={true}
+                      netWorthHistory={netWorthHistory}
+                      summaryLabel={summaryData.label}
+                      breakdown={breakdown}
+                      breakdownSlices={breakdownSlices}
+                      barChartPortfolios={barChartPortfolios}
+                      portfolios={portfolios}
+                      onSliceClick={handleSliceClick}
+                      onSelectAsset={handleSidebarTabChange}
+                    />
+                  </Suspense>
                 </div>
               </div>
             ) : (
@@ -637,21 +560,23 @@ export default function AppShell() {
                 />
 
                 <SectionErrorBoundary sectionName="Asset Tab Content">
-                  <AssetTabContent
-                    activeAsset={activeAsset}
-                    visiblePortfolio={visiblePortfolio}
-                    portfolios={portfolios}
-                    priceStatus={priceStatus}
-                    onAddHoldingClick={openAddModal}
-                    onDeleteStock={tableDeleteHandler}
-                    onUpdateStock={tableUpdateHandler}
-                    onAddAsset={addAsset}
-                    onUpdateAsset={updateAsset}
-                    onDeleteAsset={deleteAsset}
-                    quickAddTarget={quickAddTarget}
-                    onQuickAddComplete={clearQuickAddTarget}
-                    portfolioOptions={portfolioOptionsForModal}
-                  />
+                  <Suspense fallback={<div className="space-y-4 py-2"><div className="h-44 rounded-2xl animate-shimmer border border-[var(--border-subtle)]" /></div>}>
+                    <AssetTabContent
+                      activeAsset={activeAsset}
+                      visiblePortfolio={visiblePortfolio}
+                      portfolios={portfolios}
+                      priceStatus={priceStatus}
+                      onAddHoldingClick={openAddModal}
+                      onDeleteStock={tableDeleteHandler}
+                      onUpdateStock={tableUpdateHandler}
+                      onAddAsset={addAsset}
+                      onUpdateAsset={updateAsset}
+                      onDeleteAsset={deleteAsset}
+                      quickAddTarget={quickAddTarget}
+                      onQuickAddComplete={clearQuickAddTarget}
+                      portfolioOptions={portfolioOptionsForModal}
+                    />
+                  </Suspense>
                 </SectionErrorBoundary>
               </div>
             )}
@@ -754,27 +679,43 @@ export default function AppShell() {
                     )}
 
                     {/* Dashboard charts — only on family overview */}
-                    {activeTab === 'all' && desktopDashboardWidgets}
+                    {activeTab === 'all' && (
+                      <Suspense fallback={<div className="h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
+                        <HomeDashboardWidgets
+                          isMobile={false}
+                          netWorthHistory={netWorthHistory}
+                          summaryLabel={summaryData.label}
+                          breakdown={breakdown}
+                          breakdownSlices={breakdownSlices}
+                          barChartPortfolios={barChartPortfolios}
+                          portfolios={portfolios}
+                          onSliceClick={handleSliceClick}
+                          onSelectAsset={handleSidebarTabChange}
+                        />
+                      </Suspense>
+                    )}
                   </div>
                 ) : (
                   /* Dedicated Asset Registry View — starts right at the top */
                   <div ref={assetTabSectionRef} id="asset-tab-content" className="scroll-mt-24">
                     <SectionErrorBoundary sectionName="Asset Tab Content">
-                      <AssetTabContent
-                        activeAsset={activeAsset}
-                        visiblePortfolio={visiblePortfolio}
-                        portfolios={portfolios}
-                        priceStatus={priceStatus}
-                        onAddHoldingClick={openAddModal}
-                        onDeleteStock={tableDeleteHandler}
-                        onUpdateStock={tableUpdateHandler}
-                        onAddAsset={addAsset}
-                        onUpdateAsset={updateAsset}
-                        onDeleteAsset={deleteAsset}
-                        quickAddTarget={quickAddTarget}
-                        onQuickAddComplete={clearQuickAddTarget}
-                        portfolioOptions={portfolioOptionsForModal}
-                      />
+                      <Suspense fallback={<div className="space-y-4 py-2"><div className="h-64 rounded-2xl animate-shimmer border border-[var(--border-subtle)]" /></div>}>
+                        <AssetTabContent
+                          activeAsset={activeAsset}
+                          visiblePortfolio={visiblePortfolio}
+                          portfolios={portfolios}
+                          priceStatus={priceStatus}
+                          onAddHoldingClick={openAddModal}
+                          onDeleteStock={tableDeleteHandler}
+                          onUpdateStock={tableUpdateHandler}
+                          onAddAsset={addAsset}
+                          onUpdateAsset={updateAsset}
+                          onDeleteAsset={deleteAsset}
+                          quickAddTarget={quickAddTarget}
+                          onQuickAddComplete={clearQuickAddTarget}
+                          portfolioOptions={portfolioOptionsForModal}
+                        />
+                      </Suspense>
                     </SectionErrorBoundary>
                   </div>
                 )}
@@ -811,54 +752,60 @@ export default function AppShell() {
       </footer>
 
       {/* Mobile Bottom Navigation */}
-      <MobileBottomNav
-        activeAsset={activeAsset}
-        onChangeAsset={setActiveAsset}
-        alertCount={visibleAlerts.length}
-        onOpenSmartImport={openSmartImport}
-        onAddStock={openAddModal}
-        onAddAsset={handleFloatingAddAsset}
-        onDrawerStateChange={setIsMoreDrawerOpen}
-      />
+      <Suspense fallback={null}>
+        <MobileBottomNav
+          activeAsset={activeAsset}
+          onChangeAsset={setActiveAsset}
+          alertCount={visibleAlerts.length}
+          onOpenSmartImport={openSmartImport}
+          onAddStock={openAddModal}
+          onAddAsset={handleFloatingAddAsset}
+          onDrawerStateChange={setIsMoreDrawerOpen}
+        />
+      </Suspense>
 
       {/* Floating Add Menu (FAB) */}
-      <FloatingAddMenu
-        isHidden={isAnyModalOpen || isMoreDrawerOpen}
-        onAddStock={openAddModal}
-        onAddAsset={handleFloatingAddAsset}
-        onOpenSmartImport={openSmartImport}
-      />
+      <Suspense fallback={null}>
+        <FloatingAddMenu
+          isHidden={isAnyModalOpen || isMoreDrawerOpen}
+          onAddStock={openAddModal}
+          onAddAsset={handleFloatingAddAsset}
+          onOpenSmartImport={openSmartImport}
+        />
+      </Suspense>
 
-      <AppShellModals
-        showSmartImport={showSmartImport}
-        closeSmartImport={closeSmartImport}
-        showAddModal={showAddModal}
-        closeAddModal={closeAddModal}
-        handleAddHolding={handleAddHolding}
-        portfolioOptionsForModal={portfolioOptionsForModal}
-        activeTab={activeTab}
-        showAddFamily={showAddFamily}
-        closeAddFamily={closeAddFamily}
-        handleAddFamilySubmit={handleAddFamilySubmit}
-        renameTarget={renameTarget}
-        closeRenameModal={closeRenameModal}
-        handleRenameSubmit={handleRenameSubmit}
-        showChangePinModal={showChangePinModal}
-        closeChangePinModal={closeChangePinModal}
-        onPinChangeSuccess={() => {
-          closeChangePinModal();
-          addToast('PIN changed successfully', 'success');
-        }}
-        showMobileAlerts={showMobileAlerts}
-        closeMobileAlerts={closeMobileAlerts}
-        visibleAlerts={visibleAlerts}
-        handleDismissAlert={handleDismissAlert}
-        handleDismissAll={handleDismissAll}
-        deleteTarget={deleteTarget}
-        closeDeleteModal={closeDeleteModal}
-        handleConfirmDeletePortfolio={handleConfirmDeletePortfolio}
-        isDeleting={isDeleting}
-      />
+      <Suspense fallback={null}>
+        <AppShellModals
+          showSmartImport={showSmartImport}
+          closeSmartImport={closeSmartImport}
+          showAddModal={showAddModal}
+          closeAddModal={closeAddModal}
+          handleAddHolding={handleAddHolding}
+          portfolioOptionsForModal={portfolioOptionsForModal}
+          activeTab={activeTab}
+          showAddFamily={showAddFamily}
+          closeAddFamily={closeAddFamily}
+          handleAddFamilySubmit={handleAddFamilySubmit}
+          renameTarget={renameTarget}
+          closeRenameModal={closeRenameModal}
+          handleRenameSubmit={handleRenameSubmit}
+          showChangePinModal={showChangePinModal}
+          closeChangePinModal={closeChangePinModal}
+          onPinChangeSuccess={() => {
+            closeChangePinModal();
+            addToast('PIN changed successfully', 'success');
+          }}
+          showMobileAlerts={showMobileAlerts}
+          closeMobileAlerts={closeMobileAlerts}
+          visibleAlerts={visibleAlerts}
+          handleDismissAlert={handleDismissAlert}
+          handleDismissAll={handleDismissAll}
+          deleteTarget={deleteTarget}
+          closeDeleteModal={closeDeleteModal}
+          handleConfirmDeletePortfolio={handleConfirmDeletePortfolio}
+          isDeleting={isDeleting}
+        />
+      </Suspense>
     </div>
   );
 }

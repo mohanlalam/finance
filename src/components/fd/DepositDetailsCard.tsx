@@ -223,7 +223,7 @@ export function DepositDetailsCard({
             onClick: () => {
               const summary = `${cfg.title} at ${fd.bank_name}\nPrincipal: ${formatINR(Number(fd.principal_amount))}\nMaturity: ${fd.maturity_date || 'Ongoing'}`;
               if (navigator.share) {
-                navigator.share({ title: `${cfg.title} Summary`, text: summary }).catch(console.error);
+                navigator.share({ title: `${cfg.title} Summary`, text: summary }).catch(() => {});
               } else {
                 navigator.clipboard.writeText(summary);
                 addToast('Summary copied to clipboard!', 'success');

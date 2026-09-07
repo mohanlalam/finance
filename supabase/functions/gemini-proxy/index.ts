@@ -1,4 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
+
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+);
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin");
@@ -76,23 +82,29 @@ async function verifySessionToken(token: string, secret: string): Promise<boolea
   }
 }
 
-// In-memory rate limiting store (max 20 requests per 60s window per IP/device)
-const requestRateMap: Map<string, { count: number; firstAttempt: number }> = new Map();
+// Persistent rate limiting store backed by pin_rate_limits table (max 20 requests per 60s window per IP/device)
 const MAX_REQUESTS = 20;
 const WINDOW_MS = 60 * 1000;
 
 function getClientIp(req: Request): string {
+  // 1. Cloudflare Connecting IP (overwritten at edge by Cloudflare, cannot be spoofed by client)
   const cfIp = req.headers.get("cf-connecting-ip")?.trim();
   if (cfIp) return cfIp;
 
+  // 2. X-Real-IP (set by Supabase Kong API Gateway)
   const realIp = req.headers.get("x-real-ip")?.trim();
   if (realIp) return realIp;
 
+  // 3. X-Forwarded-For: In the Supabase / Deno Deploy proxy topology, the rightmost IP
+  // is appended by the nearest trusted infrastructure reverse proxy (Kong / Deno Edge Gateway).
+  // Picking the last entry ensures an attacker cannot spoof an arbitrary client IP by prepending
+  // falsified headers. Note: If a custom external CDN is ever placed in front, ensure the CDN's
+  // client IP header or trusted hop count is configured accordingly.
   const xff = req.headers.get("x-forwarded-for");
   if (xff) {
     const parts = xff.split(",").map((p) => p.trim()).filter(Boolean);
     if (parts.length > 0) {
-      return parts[parts.length - 1];
+      return parts[parts.length - 1]; // Rightmost proxy-verified IP in Deno Deploy topology
     }
   }
 
@@ -106,22 +118,51 @@ function getRateLimitKey(req: Request): string {
   return `${clientIp}:${deviceId}`;
 }
 
-function checkRateLimit(key: string): { allowed: boolean; retryAfterSeconds: number } {
-  const now = Date.now();
-  const record = requestRateMap.get(key);
+async function checkRateLimit(key: string): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
+  try {
+    const now = Date.now();
+    const { data, error } = await supabase
+      .from("pin_rate_limits")
+      .select("attempt_count, window_start")
+      .eq("rate_key", key)
+      .maybeSingle();
 
-  if (!record || (now - record.firstAttempt) > WINDOW_MS) {
-    requestRateMap.set(key, { count: 1, firstAttempt: now });
+    if (error || !data) {
+      await supabase.from("pin_rate_limits").upsert({
+        rate_key: key,
+        attempt_count: 1,
+        window_start: new Date(now).toISOString(),
+      });
+      return { allowed: true, retryAfterSeconds: 0 };
+    }
+
+    const windowStart = new Date(data.window_start).getTime();
+    if (now - windowStart > WINDOW_MS) {
+      await supabase.from("pin_rate_limits").upsert({
+        rate_key: key,
+        attempt_count: 1,
+        window_start: new Date(now).toISOString(),
+      });
+      return { allowed: true, retryAfterSeconds: 0 };
+    }
+
+    if (data.attempt_count >= MAX_REQUESTS) {
+      const retryAfterSeconds = Math.max(1, Math.ceil((windowStart + WINDOW_MS - now) / 1000));
+      return { allowed: false, retryAfterSeconds };
+    }
+
+    await supabase
+      .from("pin_rate_limits")
+      .update({
+        attempt_count: data.attempt_count + 1,
+      })
+      .eq("rate_key", key);
+
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (err) {
+    console.error("Persistent rate limit check failed in gemini-proxy:", err);
     return { allowed: true, retryAfterSeconds: 0 };
   }
-
-  if (record.count >= MAX_REQUESTS) {
-    const retryAfterSeconds = Math.ceil((record.firstAttempt + WINDOW_MS - now) / 1000);
-    return { allowed: false, retryAfterSeconds };
-  }
-
-  record.count += 1;
-  return { allowed: true, retryAfterSeconds: 0 };
 }
 
 Deno.serve(async (req: Request) => {
@@ -141,7 +182,7 @@ Deno.serve(async (req: Request) => {
 
   // Rate limiting check
   const rateLimitKey = getRateLimitKey(req);
-  const { allowed, retryAfterSeconds } = checkRateLimit(rateLimitKey);
+  const { allowed, retryAfterSeconds } = await checkRateLimit(rateLimitKey);
   if (!allowed) {
     return new Response(
       JSON.stringify({

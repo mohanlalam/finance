@@ -199,7 +199,7 @@ export function RDAccountCard({
             onClick: () => {
               const summary = `Recurring Deposit at ${account.bank_name}\nMonthly: ${formatINR(account.monthly_deposit)}\nValue: ${formatINR(currentVal)}`;
               if (navigator.share) {
-                navigator.share({ title: `RD Summary`, text: summary }).catch(console.error);
+                navigator.share({ title: `RD Summary`, text: summary }).catch(() => {});
               } else {
                 navigator.clipboard.writeText(summary);
                 addToast('Summary copied to clipboard!', 'success');

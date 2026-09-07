@@ -1,10 +1,10 @@
 import React, { Suspense } from 'react';
-import ConfirmModal from '../components/ConfirmModal';
-import PWAInstallBanner from '../components/PWAInstallBanner';
 import type { AddHoldingPayload } from '../components/AddHoldingModal';
 import type { Alert } from '../hooks/useAlerts';
 import type { PortfolioTarget } from '../hooks/useModalState';
 
+const ConfirmModal = React.lazy(() => import('../components/ConfirmModal'));
+const PWAInstallBanner = React.lazy(() => import('../components/PWAInstallBanner'));
 const SmartImportModal = React.lazy(() => import('../components/SmartImportModal'));
 const AddHoldingModal = React.lazy(() => import('../components/AddHoldingModal'));
 const AddFamilyModal = React.lazy(() => import('../components/AddFamilyModal'));
@@ -120,19 +120,23 @@ export const AppShellModals = React.memo(function AppShellModals({
         )}
       </Suspense>
 
-      <ConfirmModal
-        isOpen={!!deleteTarget}
-        onClose={closeDeleteModal}
-        onConfirm={handleConfirmDeletePortfolio}
-        title="Delete Family Member"
-        message={`Are you sure you want to delete ${deleteTarget?.label} and all of their holdings, fixed deposits, and other assets? This action cannot be undone.`}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        variant="danger"
-        isLoading={isDeleting}
-      />
+      <Suspense fallback={null}>
+        <ConfirmModal
+          isOpen={!!deleteTarget}
+          onClose={closeDeleteModal}
+          onConfirm={handleConfirmDeletePortfolio}
+          title="Delete Family Member"
+          message={`Are you sure you want to delete ${deleteTarget?.label} and all of their holdings, fixed deposits, and other assets? This action cannot be undone.`}
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          variant="danger"
+          isLoading={isDeleting}
+        />
 
-      <PWAInstallBanner />
+        <PWAInstallBanner />
+      </Suspense>
     </>
   );
 });
+
+export default AppShellModals;

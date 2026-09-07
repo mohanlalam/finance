@@ -54,6 +54,18 @@ try {
   // Ignore in environments without localStorage
 }
 
+/**
+ * SECURITY NOTE (S-6 — DevTools & Physical Access Threat Model):
+ * The offline PIN verifier stored in localStorage is double-hashed with domain-separated salts
+ * ('vault_offline_verifier:<hash>'), mathematically preventing it from ever being replayed as the
+ * server-side X-App-Pin credential or decrypted back into the raw PIN.
+ *
+ * For the session PIN hash in sessionStorage (finance_hashed_pin):
+ * - It is strictly scoped to the tab session and cleared on window close.
+ * - Guarded by the 15-minute re-authentication window (isReauthRequired).
+ * - In the family-trust single-device PWA deployment model, this accepted design balances
+ *   robust offline biometric/PIN unlocking against unauthorized cloud API replay.
+ */
 export async function setOfflinePinVerifier(hashedPin: string): Promise<void> {
   if (typeof localStorage === 'undefined') return;
   // Double-hash with a domain-separated salt so stored verifier cannot be reused as server credential

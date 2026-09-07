@@ -1,3 +1,5 @@
+import { logger } from '../../../infrastructure/logging/logger';
+
 /**
  * Serialized Promise Queue Mutex to prevent race conditions during rapid user mutations.
  */
@@ -39,7 +41,7 @@ export class PortfolioSyncService {
       try {
         l(result);
       } catch (err) {
-        console.error('Error in onLateSettle listener:', err);
+        logger.error('Error in onLateSettle listener:', err);
       }
     });
   }

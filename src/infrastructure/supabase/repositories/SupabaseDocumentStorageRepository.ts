@@ -10,6 +10,7 @@ import {
   decryptDocumentBlob,
 } from '../../../utils/documentCrypto';
 import { getHashedPin, ensureHashedPin } from '../../../utils/sessionStore';
+import { logger } from '../../logging/logger';
 
 function sanitizeEnv(val: string | undefined): string {
   if (!val) return '';
@@ -162,7 +163,7 @@ export class SupabaseDocumentStorageRepository implements IDocumentStorageReposi
       }
     } catch (err) {
       if (newWindow) newWindow.close();
-      console.error('[storage] Failed to open secure document:', err);
+      logger.error('[storage] Failed to open secure document:', err);
       throw err;
     }
   }
