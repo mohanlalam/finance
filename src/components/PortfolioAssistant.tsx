@@ -3,6 +3,7 @@ import { Portfolio } from '../types/portfolio';
 import { askAssistant, AssistantResponse } from '../utils/assistant';
 import { Send, Sparkles, Trash2, Copy, Check, Bot, User, Search } from './icons/AppIcons';
 import ConfirmModal from './ConfirmModal';
+import { logger } from '../infrastructure/logging/logger';
 
 interface PortfolioAssistantProps {
   portfolios: Portfolio[];
@@ -25,7 +26,7 @@ function CopyButton({ text }: { text: string }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      logger.error('Failed to copy text', err);
     }
   }, [text]);
 
@@ -406,7 +407,7 @@ export default function PortfolioAssistant({ portfolios, onSelectAsset }: Portfo
       };
       setMessages(prev => [...prev, assistantMsg]);
     } catch (e) {
-      console.error('[assistant] Query processing failed:', e);
+      logger.error('[assistant] Query processing failed', e);
       const errorMsg: ChatMessage = {
         id: Math.random().toString(36).substring(7),
         role: 'assistant',

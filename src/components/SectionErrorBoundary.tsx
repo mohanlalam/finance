@@ -1,6 +1,7 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from './icons/AppIcons';
 import { handleChunkError } from '../utils/chunkReload';
+import { logger } from '../infrastructure/logging/logger';
 
 interface SectionErrorBoundaryProps {
   children: ReactNode;
@@ -30,7 +31,7 @@ export default class SectionErrorBoundary extends Component<SectionErrorBoundary
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error(`[${this.props.sectionName ?? 'section'}] render error:`, error, info);
+    logger.error(`[${this.props.sectionName ?? 'section'}] render error`, error, { componentStack: info.componentStack });
     handleChunkError(error);
   }
 

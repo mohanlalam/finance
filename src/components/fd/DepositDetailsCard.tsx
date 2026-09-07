@@ -133,7 +133,7 @@ export function DepositDetailsCard({
             <p className="text-sm font-bold text-[var(--text-primary)] truncate tnum">{formatINR(Number(fd.principal_amount))}</p>
           </div>
           <div className="min-w-0">
-            <p className="text-xs text-[var(--text-tertiary)] truncate">{fd.maturity_date ? 'Maturity Value' : 'Current Value'}</p>
+            <p className="text-xs text-[var(--text-tertiary)] truncate">{fd.status === 'matured' ? 'Maturity Value' : 'Accrued Value'}</p>
             <p className="text-sm font-bold text-[var(--text-primary)] truncate tnum">{formatINR(getFDEffectiveValue(fd))}</p>
           </div>
           <div className="col-span-2 sm:col-span-1 flex items-center justify-start md:justify-end gap-2">

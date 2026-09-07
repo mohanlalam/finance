@@ -1,9 +1,8 @@
 import { useState, useEffect, Suspense, lazy, useCallback } from 'react';
-import { isSessionVerified, clearSessionVerification, ensureHashedPin } from './utils/auth';
+import { isSessionVerified, clearSessionVerification, ensureHashedPin, prewarmSessionCache } from './utils/auth';
 import PinLockScreen from './components/PinLockScreen';
 import DashboardLoading from './components/DashboardLoading';
 import { useAutoLock } from './hooks/useAutoLock';
-import { prewarmApiCache } from './utils/apiClient';
 const MainApp = lazy(() => import('./MainApp'));
 
 export default function App() {
@@ -32,7 +31,7 @@ export default function App() {
         try {
           const cachedHash = await ensureHashedPin();
           if (cachedHash) {
-            prewarmApiCache(cachedHash);
+            prewarmSessionCache(cachedHash);
           }
         } catch {
           // No cached hash available — user must verify PIN first

@@ -96,4 +96,52 @@ describe('Tax Calculations', () => {
     // April 1, 2025 is outside FY 2024-25
     expect(isDateInFinancialYear(new Date(2025, 3, 1, 0, 0, 0), apr2024)).toBe(false);
   });
+
+  it('prioritizes purchase_date over created_at for LTCG determination and classifies debt/gold ETFs', () => {
+    const twoYearsAgo = new Date(Date.now() - 730 * 24 * 3600 * 1000).toISOString();
+    const yesterday = new Date(Date.now() - 1 * 24 * 3600 * 1000).toISOString();
+
+    const holdings: Holding[] = [
+      {
+        id: 'h-old-purchase',
+        sno: 1,
+        stockName: 'TCS',
+        ticker: 'TCS',
+        yahooSymbol: 'TCS.NS',
+        qty: 10,
+        avgPrice: 3000,
+        ltp: 3500,
+        amountInvested: 30000,
+        unrealizedPnL: 5000,
+        pnlPercent: 16.67,
+        todayPnLPercent: 0,
+        currentValue: 35000,
+        created_at: yesterday, // Created recently in DB
+        purchase_date: twoYearsAgo, // Actually bought 2 years ago -> LTCG
+      },
+      {
+        id: 'h-gilt-etf',
+        sno: 2,
+        stockName: 'Nippon India ETF Gilt',
+        ticker: 'GILT5Y',
+        yahooSymbol: 'GILT5Y.NS',
+        qty: 100,
+        avgPrice: 50,
+        ltp: 48,
+        amountInvested: 5000,
+        unrealizedPnL: -200,
+        pnlPercent: -4,
+        todayPnLPercent: 0,
+        currentValue: 4800,
+        created_at: yesterday,
+      },
+    ];
+
+    const result = calculateTaxHarvesting(holdings);
+    // TCS should be classified as LTCG because purchase_date is 2 years ago
+    expect(result.unrealizedLTCG).toBe(5000);
+    // Gilt ETF should be classified as debt
+    expect(result.unrealizedDebtOrGold).toBe(-200);
+  });
 });
+

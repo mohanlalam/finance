@@ -214,15 +214,31 @@ Respond ONLY with valid, minified JSON matching this schema:
 `;
 
 export const STATIC_FALLBACK_MODELS = [
-  'gemini-3.5-flash-lite',
-  'gemini-3.5-flash',
-  'gemini-2.5-flash',
-  'gemini-2.5-pro',
   'gemini-2.0-flash',
   'gemini-2.0-flash-lite',
-  'gemini-1.5-flash-latest',
   'gemini-1.5-flash',
+  'gemini-1.5-flash-latest',
+  'gemini-1.5-pro',
 ];
+
+const EXCLUDED_MODEL_PATTERNS = [
+  'tts',
+  'audio',
+  'speech',
+  'realtime',
+  'embedding',
+  'aqa',
+  'imagen',
+  'bison',
+  'custom',
+  'robotics',
+];
+
+export function isEligibleVisionModel(modelName: string): boolean {
+  const name = modelName.toLowerCase();
+  if (!name.includes('gemini')) return false;
+  return !EXCLUDED_MODEL_PATTERNS.some((p) => name.includes(p));
+}
 
 interface GeminiModelItem {
   name: string;
@@ -239,22 +255,22 @@ export function clearDiscoveredModelsCache(): void {
 
 export function getModelPreferenceScore(modelName: string): number {
   const name = modelName.toLowerCase();
+  if (!isEligibleVisionModel(name)) return -10000;
+
   let score = 0;
 
   // Prefer fast/multimodal flash & lite models for document extraction
   if (name.includes('flash')) score += 100;
-  if (name.includes('lite')) score += 10;
+  if (name.includes('lite')) score += 20;
 
-  // Prefer newer versions
-  if (name.includes('3.5')) score += 50;
-  else if (name.includes('3.0') || name.includes('3-')) score += 40;
-  else if (name.includes('2.5')) score += 30;
-  else if (name.includes('2.0') || name.includes('2-')) score += 20;
-  else if (name.includes('1.5')) score += 10;
+  // Prefer stable production releases
+  if (name.includes('2.0')) score += 50;
+  else if (name.includes('2.5')) score += 40;
+  else if (name.includes('1.5')) score += 30;
 
-  // Deprioritize non-general / embedding / audio-only models
-  if (name.includes('embedding') || name.includes('aqa') || name.includes('imagen') || name.includes('tts')) {
-    score -= 1000;
+  // Experimental / preview models typically have strict free tier rate limits (or limit: 0)
+  if (name.includes('preview') || name.includes('exp')) {
+    score -= 40;
   }
 
   return score;
@@ -278,8 +294,9 @@ export async function fetchAvailableGeminiModels(apiKey: string): Promise<string
         const validModels = data.models
           .filter(
             (m) =>
-              !m.supportedGenerationMethods ||
-              m.supportedGenerationMethods.includes('generateContent')
+              isEligibleVisionModel(m.name) &&
+              (!m.supportedGenerationMethods ||
+                m.supportedGenerationMethods.includes('generateContent'))
           )
           .map((m) => m.name.replace(/^models\//, ''));
 
@@ -574,12 +591,27 @@ export async function extractAssetFromDocument(
           throw new Error(`Invalid Gemini API Key or permissions issue: ${message}`);
         }
 
+        if (
+          response.status === 429 ||
+          message.toLowerCase().includes('quota') ||
+          message.toLowerCase().includes('rate limit') ||
+          message.toLowerCase().includes('resource_exhausted')
+        ) {
+          const retryMatch = message.match(/retry in\s+([0-9.]+)\s*s/i);
+          const retrySec = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) : 30;
+          throw new Error(
+            `Gemini Free Quota Exceeded: Google AI Studio rate limit reached on your free API key. Please wait ${retrySec} seconds before retrying, or check billing at ai.google.dev.`
+          );
+        }
+
         lastError = new Error(`AI Extraction failed (${model}): ${message}`);
       }
     } catch (err: unknown) {
       if (
         err instanceof Error &&
-        (err.message.includes('Invalid Gemini API Key') || err.message.includes('permissions issue'))
+        (err.message.includes('Invalid Gemini API Key') ||
+          err.message.includes('permissions issue') ||
+          err.message.includes('Quota Exceeded'))
       ) {
         throw err;
       }

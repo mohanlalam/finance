@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { markSessionVerified, hashPin, getPinLength, verifyPin, clearCustomPin, setSessionToken } from '../utils/auth';
-import { prewarmApiCache, invokeFunction } from '../utils/apiClient';
+import { 
+  markSessionVerified, 
+  hashPin, 
+  getPinLength, 
+  verifyPin, 
+  clearCustomPin, 
+  acquireSessionToken,
+  prewarmSessionCache 
+} from '../utils/auth';
 import { triggerHaptic } from '../utils/haptics';
 import { 
   isBiometricsSupported, 
@@ -176,16 +183,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
           setSuccess(true);
           markSessionVerified(pinHash);
           // Acquire signed session token from verify-pin in parallel
-          invokeFunction<{ verified: boolean; session_token?: string }>('verify-pin', {
-            method: 'POST',
-            body: { pin_hash: pinHash },
-          })
-            .then((res) => {
-              if (res?.session_token) {
-                setSessionToken(res.session_token);
-              }
-            })
-            .catch(() => {});
+          acquireSessionToken(pinHash);
           setTimeout(() => {
             onUnlock();
           }, 300);
@@ -280,7 +278,7 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
             markSessionVerified(hash);
             // Pre-warm API cache immediately — fires the holdings prefetch
             // during the 300ms success animation so data arrives faster.
-            prewarmApiCache(hash);
+            prewarmSessionCache(hash);
             setTimeout(() => {
               onUnlock();
             }, 300);

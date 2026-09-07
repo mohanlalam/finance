@@ -25,6 +25,7 @@ export interface Holding {
   weekLow52?: number;
   weekHigh52?: number;
   created_at?: string;
+  purchase_date?: string;
 }
 
 export interface FixedDeposit {

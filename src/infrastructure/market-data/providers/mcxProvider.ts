@@ -17,7 +17,7 @@ function getStoredGoldSnapshot(): { rate24k: number } | null {
       const saved = localStorage.getItem(SNAPSHOT_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed.rate24k === 'number' && parsed.rate24k >= 10000) {
+        if (parsed && typeof parsed.rate24k === 'number' && parsed.rate24k >= 5000) {
           return parsed;
         }
       }
@@ -44,11 +44,11 @@ export class MCXGoldDataProvider {
       const basePerGram = rawOunceINR / 31.1034768;
       // India retail benchmark includes statutory customs duty + GST (~15.19%)
       const rate24k = Math.round(basePerGram * 1.1519);
-      if (rate24k < 9000 || rate24k > 25000) return null;
+      if (rate24k < 5000 || rate24k > 25000) return null;
 
       const existingSnapshot = getStoredGoldSnapshot();
       const prevCloseRate =
-        existingSnapshot?.rate24k && existingSnapshot.rate24k >= 10000
+        existingSnapshot?.rate24k && existingSnapshot.rate24k >= 5000
           ? existingSnapshot.rate24k
           : DEFAULT_GOLD_RATE_24K || rate24k;
 

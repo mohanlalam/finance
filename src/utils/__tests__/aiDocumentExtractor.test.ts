@@ -193,27 +193,30 @@ describe('aiDocumentExtractor', () => {
     await expect(extractAssetFromDocument(file, 'bad_key')).rejects.toThrow(/Invalid Gemini API Key/);
   });
 
-  it('correctly scores model preference (flash > pro, 3.5 > 1.5)', () => {
-    const score35Flash = getModelPreferenceScore('gemini-3.5-flash');
-    const score35FlashLite = getModelPreferenceScore('gemini-3.5-flash-lite');
-    const score25Flash = getModelPreferenceScore('gemini-2.5-flash');
+  it('correctly scores model preference (flash > pro, newer > older, filters non-vision)', () => {
+    const score20FlashLite = getModelPreferenceScore('gemini-2.0-flash-lite');
+    const score20Flash = getModelPreferenceScore('gemini-2.0-flash');
     const score15Flash = getModelPreferenceScore('gemini-1.5-flash');
+    const score15Pro = getModelPreferenceScore('gemini-1.5-pro');
+    const scoreTTS = getModelPreferenceScore('gemini-2.5-pro-preview-tts');
     const scoreEmbedding = getModelPreferenceScore('text-embedding-004');
 
-    expect(score35FlashLite).toBeGreaterThan(score35Flash); // lite + flash
-    expect(score35Flash).toBeGreaterThan(score25Flash);
-    expect(score25Flash).toBeGreaterThan(score15Flash);
-    expect(score15Flash).toBeGreaterThan(scoreEmbedding);
+    expect(score20FlashLite).toBeGreaterThan(score20Flash);
+    expect(score20Flash).toBeGreaterThan(score15Flash);
+    expect(score15Flash).toBeGreaterThan(score15Pro);
+    expect(score15Pro).toBeGreaterThan(scoreTTS);
+    expect(score15Pro).toBeGreaterThan(scoreEmbedding);
   });
 
-  it('dynamically queries Gemini models API and ranks models', async () => {
+  it('dynamically queries Gemini models API, filters out non-vision/TTS models, and ranks models', async () => {
     clearDiscoveredModelsCache();
     const mockModelsResponse = {
       models: [
         { name: 'models/gemini-1.5-pro', supportedGenerationMethods: ['generateContent'] },
-        { name: 'models/gemini-3.5-flash-lite', supportedGenerationMethods: ['generateContent'] },
+        { name: 'models/gemini-2.0-flash', supportedGenerationMethods: ['generateContent'] },
         { name: 'models/text-embedding-004', supportedGenerationMethods: ['embedContent'] },
-        { name: 'models/gemini-2.5-flash', supportedGenerationMethods: ['generateContent'] },
+        { name: 'models/gemini-2.5-pro-preview-tts', supportedGenerationMethods: ['generateContent'] },
+        { name: 'models/gemini-2.0-flash-lite', supportedGenerationMethods: ['generateContent'] },
       ],
     };
 
@@ -223,11 +226,31 @@ describe('aiDocumentExtractor', () => {
     } as unknown as Response);
 
     const models = await fetchAvailableGeminiModels('test_key');
-    expect(models).toContain('gemini-3.5-flash-lite');
-    expect(models).toContain('gemini-2.5-flash');
+    expect(models).toContain('gemini-2.0-flash-lite');
+    expect(models).toContain('gemini-2.0-flash');
     expect(models).toContain('gemini-1.5-pro');
     expect(models).not.toContain('text-embedding-004');
-    expect(models[0]).toBe('gemini-3.5-flash-lite');
+    expect(models).not.toContain('gemini-2.5-pro-preview-tts');
+    expect(models[0]).toBe('gemini-2.0-flash-lite');
+  });
+
+  it('catches HTTP 429 Quota Exceeded and produces user-friendly retry guidance', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 429,
+      json: async () => ({
+        error: {
+          code: 429,
+          message: 'Quota exceeded for metric: generate_content_free_tier_requests... Please retry in 37.08s.',
+          status: 'RESOURCE_EXHAUSTED',
+        },
+      }),
+    } as unknown as Response);
+
+    const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' });
+    await expect(extractAssetFromDocument(file, 'test_key')).rejects.toThrow(
+      /Gemini Free Quota Exceeded: Google AI Studio rate limit reached.*Please wait 38 seconds/
+    );
   });
 
   it('successfully extracts data when Gemini wraps response in markdown code fences', async () => {

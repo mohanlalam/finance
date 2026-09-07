@@ -23,10 +23,26 @@ function isNetworkError(err: unknown): boolean {
 }
 
 export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMutationOptions) {
-  // Initialize auto-sync listener
+  // Initialize auto-sync listener when network is restored
   useEffect(() => {
-    const cleanup = offlineOutboxService.initAutoSync(onReload);
-    return cleanup;
+    if (typeof window === 'undefined') return;
+
+    const handleOnline = () => {
+      logger.info('[Outbox] Network restored, draining outbox queue...');
+      offlineOutboxService.drain(onReload);
+    };
+
+    window.addEventListener('online', handleOnline);
+
+    if (navigator.onLine) {
+      setTimeout(() => {
+        offlineOutboxService.drain(onReload);
+      }, 1500);
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+    };
   }, [onReload]);
 
   // Active late-settlement reconciliation:

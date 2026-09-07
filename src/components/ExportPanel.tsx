@@ -25,9 +25,9 @@ import { usePortfolioActions } from '../contexts/PortfolioContext';
 import { verifyPin } from '../utils/auth';
 export type { ImportRow, ParseResult } from '../domains/portfolio/export/csvImportParser';
 import { ImportRow, parseCSV, csvToImportRows } from '../domains/portfolio/export/csvImportParser';
+import { downloadFile } from '../utils/downloadHelper';
 import {
   portfoliosToJSON,
-  downloadFile,
   allAssetsToCSV,
   stocksToCSV,
   fdsToCSV,

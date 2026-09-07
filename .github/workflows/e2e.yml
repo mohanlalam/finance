@@ -37,7 +37,7 @@ jobs:
         run: npm run test:e2e
         env:
           CI: true
-          VITE_APP_PIN: '3463'
+          VITE_APP_PIN: ${{ secrets.E2E_APP_PIN || '3463' }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://mock-vault.supabase.co' }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'mock-anon-key' }}
 

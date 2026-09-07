@@ -81,8 +81,7 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
-// In-memory rate limiting store for failed PIN attempts (resets on cold start)
-const pinFailedAttempts: Map<string, { count: number; firstAttempt: number }> = new Map();
+// Persistent rate limiting store backed by pin_rate_limits table
 const MAX_FAILED_ATTEMPTS = 5;
 const RATE_WINDOW_MS = 5 * 60 * 1000; // 5-minute window
 
@@ -115,34 +114,75 @@ function getRateLimitKey(req: Request): string {
   return `${clientIp}:${deviceId}`;
 }
 
-function checkRateLimit(key: string): { allowed: boolean; retryAfterSeconds: number } {
-  const now = Date.now();
-  const record = pinFailedAttempts.get(key);
+async function checkRateLimit(key: string): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
+  try {
+    const now = Date.now();
+    const { data, error } = await supabase
+      .from("pin_rate_limits")
+      .select("attempt_count, window_start")
+      .eq("rate_key", key)
+      .maybeSingle();
 
-  if (!record || (now - record.firstAttempt) > RATE_WINDOW_MS) {
+    if (error || !data) {
+      return { allowed: true, retryAfterSeconds: 0 };
+    }
+
+    const windowStart = new Date(data.window_start).getTime();
+    if (now - windowStart > RATE_WINDOW_MS) {
+      return { allowed: true, retryAfterSeconds: 0 };
+    }
+
+    if (data.attempt_count >= MAX_FAILED_ATTEMPTS) {
+      const retryAfterSeconds = Math.max(1, Math.ceil((windowStart + RATE_WINDOW_MS - now) / 1000));
+      return { allowed: false, retryAfterSeconds };
+    }
+
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (err) {
+    console.error("Persistent rate limit check failed:", err);
     return { allowed: true, retryAfterSeconds: 0 };
   }
-
-  if (record.count >= MAX_FAILED_ATTEMPTS) {
-    const retryAfterSeconds = Math.ceil((record.firstAttempt + RATE_WINDOW_MS - now) / 1000);
-    return { allowed: false, retryAfterSeconds };
-  }
-
-  return { allowed: true, retryAfterSeconds: 0 };
 }
 
-function recordFailedAttempt(key: string): void {
-  const now = Date.now();
-  const record = pinFailedAttempts.get(key);
-  if (!record || (now - record.firstAttempt) > RATE_WINDOW_MS) {
-    pinFailedAttempts.set(key, { count: 1, firstAttempt: now });
-  } else {
-    record.count += 1;
+async function recordFailedAttempt(key: string): Promise<void> {
+  try {
+    const now = Date.now();
+    const { data } = await supabase
+      .from("pin_rate_limits")
+      .select("attempt_count, window_start")
+      .eq("rate_key", key)
+      .maybeSingle();
+
+    if (!data || (now - new Date(data.window_start).getTime()) > RATE_WINDOW_MS) {
+      await supabase
+        .from("pin_rate_limits")
+        .upsert({
+          rate_key: key,
+          attempt_count: 1,
+          window_start: new Date(now).toISOString(),
+        });
+    } else {
+      await supabase
+        .from("pin_rate_limits")
+        .update({
+          attempt_count: (data.attempt_count || 0) + 1,
+        })
+        .eq("rate_key", key);
+    }
+  } catch (err) {
+    console.error("Recording failed attempt failed:", err);
   }
 }
 
-function clearRateLimit(key: string): void {
-  pinFailedAttempts.delete(key);
+async function clearRateLimit(key: string): Promise<void> {
+  try {
+    await supabase
+      .from("pin_rate_limits")
+      .delete()
+      .eq("rate_key", key);
+  } catch (err) {
+    console.error("Clearing rate limit failed:", err);
+  }
 }
 
 Deno.serve(async (req: Request) => {
@@ -162,7 +202,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const rateLimitKey = getRateLimitKey(req);
-  const rateCheck = checkRateLimit(rateLimitKey);
+  const rateCheck = await checkRateLimit(rateLimitKey);
   if (!rateCheck.allowed) {
     return new Response(
       JSON.stringify({
@@ -212,7 +252,7 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!isValid) {
-    recordFailedAttempt(rateLimitKey);
+    await recordFailedAttempt(rateLimitKey);
     return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -220,7 +260,7 @@ Deno.serve(async (req: Request) => {
   }
 
   // Valid PIN: clear failed attempts for this composite client key
-  clearRateLimit(rateLimitKey);
+  await clearRateLimit(rateLimitKey);
 
   try {
     const url = new URL(req.url);
@@ -343,6 +383,7 @@ Deno.serve(async (req: Request) => {
             qty: Number(payload.qty),
             avg_price: Number(payload.avgPrice),
             amount_invested: Number(payload.amountInvested),
+            purchase_date: payload.purchaseDate || payload.purchase_date || null,
           })
           .select()
           .single();
@@ -518,6 +559,9 @@ Deno.serve(async (req: Request) => {
         if (payload.qty !== undefined) updates.qty = Number(payload.qty);
         if (payload.avgPrice !== undefined) updates.avg_price = Number(payload.avgPrice);
         if (payload.amountInvested !== undefined) updates.amount_invested = Number(payload.amountInvested);
+        if (payload.purchaseDate !== undefined || payload.purchase_date !== undefined) {
+          updates.purchase_date = payload.purchaseDate ?? payload.purchase_date;
+        }
       } else if (asset_type === "fd" || asset_type === "fixed_deposit") {
         table = "fixed_deposits";
         if (payload.bankName !== undefined) updates.bank_name = payload.bankName;

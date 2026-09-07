@@ -85,12 +85,12 @@ export function RDFormModal({
         maturity_date: maturityDate,
         maturity_amount: 0,
         status: 'active',
-        contributions: editingAccount?.contributions || [],
+        contributions: [],
       };
       const val = getRDEffectiveValue(tempAccount, m);
       setMaturityAmount(val.toFixed(2));
     }
-  }, [monthlyDeposit, interestRate, startDate, maturityDate, editingAccount]);
+  }, [monthlyDeposit, interestRate, startDate, maturityDate]);
 
   useEffect(() => {
     calculateMaturity();

@@ -13,7 +13,7 @@ import { logger } from '../../../infrastructure/logging/logger';
 export class PortfolioService {
   private repository: IPortfolioRepository;
 
-  constructor(repository: IPortfolioRepository = supabasePortfolioRepository) {
+  constructor(repository: IPortfolioRepository) {
     this.repository = repository;
   }
 
@@ -86,4 +86,4 @@ export class PortfolioService {
   }
 }
 
-export const portfolioService = new PortfolioService();
+export const portfolioService = new PortfolioService(supabasePortfolioRepository);

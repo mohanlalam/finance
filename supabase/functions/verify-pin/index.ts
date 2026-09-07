@@ -1,4 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
+
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+);
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin");
@@ -50,10 +56,9 @@ async function signSessionToken(payload: Record<string, unknown>, secret: string
   return `${payloadB64}.${sigB64}`;
 }
 
-// In-memory rate limiting store (resets on cold start, which is acceptable for Edge Functions)
-const attempts: Map<string, { count: number; firstAttempt: number }> = new Map();
+// Persistent rate limiting configuration backed by pin_rate_limits table
 const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 5 * 60 * 1000; // 5-minute window
+const RATE_WINDOW_MS = 5 * 60 * 1000; // 5-minute window
 
 function getClientIp(req: Request): string {
   // 1. Cloudflare Connecting IP (overwritten at edge by Cloudflare, cannot be spoofed by client)
@@ -84,27 +89,75 @@ function getRateLimitKey(req: Request): string {
   return `${clientIp}:${deviceId}`;
 }
 
-function checkRateLimit(key: string): { allowed: boolean; retryAfterSeconds: number } {
-  const now = Date.now();
-  const record = attempts.get(key);
+async function checkRateLimit(key: string): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
+  try {
+    const now = Date.now();
+    const { data, error } = await supabase
+      .from("pin_rate_limits")
+      .select("attempt_count, window_start")
+      .eq("rate_key", key)
+      .maybeSingle();
 
-  if (!record || (now - record.firstAttempt) > WINDOW_MS) {
-    // Window expired or no record — reset
-    attempts.set(key, { count: 1, firstAttempt: now });
+    if (error || !data) {
+      return { allowed: true, retryAfterSeconds: 0 };
+    }
+
+    const windowStart = new Date(data.window_start).getTime();
+    if (now - windowStart > RATE_WINDOW_MS) {
+      return { allowed: true, retryAfterSeconds: 0 };
+    }
+
+    if (data.attempt_count >= MAX_ATTEMPTS) {
+      const retryAfterSeconds = Math.max(1, Math.ceil((windowStart + RATE_WINDOW_MS - now) / 1000));
+      return { allowed: false, retryAfterSeconds };
+    }
+
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (err) {
+    console.error("Persistent rate limit check failed:", err);
     return { allowed: true, retryAfterSeconds: 0 };
   }
-
-  if (record.count >= MAX_ATTEMPTS) {
-    const retryAfterSeconds = Math.ceil((record.firstAttempt + WINDOW_MS - now) / 1000);
-    return { allowed: false, retryAfterSeconds };
-  }
-
-  record.count += 1;
-  return { allowed: true, retryAfterSeconds: 0 };
 }
 
-function clearRateLimit(key: string): void {
-  attempts.delete(key);
+async function recordFailedAttempt(key: string): Promise<void> {
+  try {
+    const now = Date.now();
+    const { data } = await supabase
+      .from("pin_rate_limits")
+      .select("attempt_count, window_start")
+      .eq("rate_key", key)
+      .maybeSingle();
+
+    if (!data || (now - new Date(data.window_start).getTime()) > RATE_WINDOW_MS) {
+      await supabase
+        .from("pin_rate_limits")
+        .upsert({
+          rate_key: key,
+          attempt_count: 1,
+          window_start: new Date(now).toISOString(),
+        });
+    } else {
+      await supabase
+        .from("pin_rate_limits")
+        .update({
+          attempt_count: (data.attempt_count || 0) + 1,
+        })
+        .eq("rate_key", key);
+    }
+  } catch (err) {
+    console.error("Recording failed attempt failed:", err);
+  }
+}
+
+async function clearRateLimit(key: string): Promise<void> {
+  try {
+    await supabase
+      .from("pin_rate_limits")
+      .delete()
+      .eq("rate_key", key);
+  } catch (err) {
+    console.error("Clearing rate limit failed:", err);
+  }
 }
 
 Deno.serve(async (req: Request) => {
@@ -122,7 +175,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const rateLimitKey = getRateLimitKey(req);
-  const rateCheck = checkRateLimit(rateLimitKey);
+  const rateCheck = await checkRateLimit(rateLimitKey);
 
   if (!rateCheck.allowed) {
     return new Response(
@@ -184,14 +237,15 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!isValid) {
+      await recordFailedAttempt(rateLimitKey);
       return new Response(JSON.stringify({ error: "Incorrect PIN", verified: false }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Success — clear rate limit for this IP
-    clearRateLimit(rateLimitKey);
+    // Success — clear rate limit for this client
+    await clearRateLimit(rateLimitKey);
 
     const expiresAt = Date.now() + 12 * 60 * 60 * 1000; // 12 hours
     const sessionToken = await signSessionToken(

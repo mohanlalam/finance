@@ -8,7 +8,7 @@ import { isDocumentCryptoSupported } from '../../../utils/documentCrypto';
 export class DocumentStorageService {
   private repository: IDocumentStorageRepository;
 
-  constructor(repository: IDocumentStorageRepository = supabaseDocumentStorageRepository) {
+  constructor(repository: IDocumentStorageRepository) {
     this.repository = repository;
   }
 
@@ -41,4 +41,4 @@ export class DocumentStorageService {
   }
 }
 
-export const documentStorageService = new DocumentStorageService();
+export const documentStorageService = new DocumentStorageService(supabaseDocumentStorageRepository);

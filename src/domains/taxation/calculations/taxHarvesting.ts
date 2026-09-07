@@ -46,15 +46,19 @@ export function calculateTaxHarvesting(
     const pnl = Number(h.unrealizedPnL) || 0;
     let isLTCG = false;
 
-    if (h.created_at) {
-      const ageMs = now - new Date(h.created_at).getTime();
+    // Priority: explicit purchase_date, falling back to created_at
+    const acquisitionDateStr = h.purchase_date || h.created_at;
+    if (acquisitionDateStr) {
+      const ageMs = now - new Date(acquisitionDateStr).getTime();
       isLTCG = ageMs >= ONE_YEAR_MS;
     }
 
-    const isDebtOrGold =
-      h.ticker?.toUpperCase().includes('GOLD') ||
-      h.ticker?.toUpperCase().includes('LIQUID') ||
-      false;
+    const tickerUpper = (h.ticker || '').toUpperCase();
+    const KNOWN_DEBT_GOLD_PATTERNS = [
+      'GOLD', 'LIQUID', 'GILT', 'NIFTY10YR', 'TREPS', 'OVERNIGHT', 'DEBT', 'MONEYMARKET',
+      'BHARATBOND', 'EDELWEISS', 'SDL', 'CPSE'
+    ];
+    const isDebtOrGold = KNOWN_DEBT_GOLD_PATTERNS.some((pat) => tickerUpper.includes(pat));
 
     if (isDebtOrGold) {
       unrealizedDebtOrGold += pnl;

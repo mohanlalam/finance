@@ -1,6 +1,7 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import DashboardError from './DashboardError';
 import { handleChunkError } from '../utils/chunkReload';
+import { logger } from '../infrastructure/logging/logger';
 
 interface AppErrorBoundaryProps {
   children: ReactNode;
@@ -25,7 +26,7 @@ export default class AppErrorBoundary extends Component<AppErrorBoundaryProps, A
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('[app] render failed:', error, info);
+    logger.error('[app] render failed', error, { componentStack: info.componentStack });
     handleChunkError(error);
   }
 

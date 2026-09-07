@@ -91,4 +91,12 @@ describe('Backup Validation Engine', () => {
     expect(report.isValid).toBe(false);
     expect(report.schemaErrors.length).toBeGreaterThan(0);
   });
+
+  it('rejects backup payload exceeding 10 MB size limit', () => {
+    // Generate a string exceeding 10 MB limit
+    const oversizedJson = ' '.repeat(10_000_001);
+    const report = validateBackupJSON(oversizedJson);
+    expect(report.isValid).toBe(false);
+    expect(report.schemaErrors).toContain('Backup file exceeds the 10 MB size limit.');
+  });
 });

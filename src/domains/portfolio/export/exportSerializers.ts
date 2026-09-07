@@ -39,17 +39,7 @@ export function portfoliosToJSON(portfolios: Portfolio[]): string {
   return JSON.stringify({ schema_version: 2, version: 2, portfolios: sanitizedPortfolios, exportedAt: new Date().toISOString() }, null, 2);
 }
 
-export function downloadFile(content: string, filename: string, mime: string): void {
-  const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
+export { downloadFile } from '../../../utils/downloadHelper';
 
 export function csvCell(value: unknown): string {
   const text = value === null || value === undefined ? '' : String(value);

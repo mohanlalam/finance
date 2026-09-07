@@ -207,7 +207,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { action, payload, model = "gemini-2.5-flash" } = body;
+    const { action, payload, model = "gemini-2.0-flash" } = body;
 
     // Resolve API key: prefer server-side secret, fallback to client-supplied header/body key
     const serverKey = Deno.env.get("GEMINI_API_KEY")?.trim();
@@ -240,11 +240,11 @@ Deno.serve(async (req: Request) => {
     // Action: generate
     if (action === "generate" && payload) {
       const candidateModels = [
-        model,
-        "gemini-2.5-flash",
-        "gemini-1.5-flash",
-        "gemini-1.5-pro",
+        model || "gemini-2.0-flash",
         "gemini-2.0-flash",
+        "gemini-1.5-flash",
+        "gemini-2.0-flash-lite",
+        "gemini-1.5-pro",
       ];
       const uniqueModels = [...new Set(candidateModels)];
 
@@ -267,6 +267,13 @@ Deno.serve(async (req: Request) => {
           if (res.ok && data?.candidates?.[0]?.content?.parts?.[0]?.text) {
             return new Response(JSON.stringify(data), {
               status: 200,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+
+          if (res.status === 429) {
+            return new Response(JSON.stringify(data), {
+              status: 429,
               headers: { ...corsHeaders, "Content-Type": "application/json" },
             });
           }

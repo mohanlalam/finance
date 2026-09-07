@@ -1,4 +1,4 @@
-import { invokeFunction, AppApiError } from './apiClient';
+import { invokeFunction, prewarmApiCache, AppApiError } from './apiClient';
 import {
   isPinConfigured,
   getPinLength,
@@ -109,4 +109,31 @@ export async function verifyPin(pin: string): Promise<boolean> {
     // 401/403 server response → wrong PIN (don't re-throw)
     return false;
   }
+}
+
+/**
+ * Pre-warms the API cache for holdings data.
+ * Encapsulates network prefetching so UI components do not import apiClient directly.
+ */
+export function prewarmSessionCache(pinHash: string): void {
+  prewarmApiCache(pinHash);
+}
+
+/**
+ * Exchanges a verified PIN hash for an ephemeral signed session token from the verify-pin endpoint.
+ */
+export async function acquireSessionToken(pinHash: string): Promise<string | undefined> {
+  try {
+    const res = await invokeFunction<{ verified: boolean; session_token?: string }>('verify-pin', {
+      method: 'POST',
+      body: { pin_hash: pinHash },
+    });
+    if (res?.session_token) {
+      setSessionToken(res.session_token);
+      return res.session_token;
+    }
+  } catch {
+    // Non-fatal; continue with direct pin auth
+  }
+  return undefined;
 }

@@ -112,6 +112,29 @@ export function validateBackupJSON(
   const schemaErrors: string[] = [];
   const warnings: string[] = [];
 
+  if (typeof jsonText === 'string' && jsonText.length > 10_000_000) {
+    return {
+      isValid: false,
+      portfolioCount: 0,
+      portfolioNames: [],
+      counts: {
+        stocks: 0,
+        fixedDeposits: 0,
+        rdAccounts: 0,
+        sipAccounts: 0,
+        goldHoldings: 0,
+        realEstate: 0,
+        insurances: 0,
+        documents: 0,
+        totalAssets: 0,
+      },
+      duplicates: { stocks: [], fixedDeposits: [], goldHoldings: [], realEstate: [], insurances: [] },
+      missingLinkedDocs: [],
+      schemaErrors: ['Backup file exceeds the 10 MB size limit.'],
+      warnings: [],
+    };
+  }
+
   let data: unknown;
   try {
     data = JSON.parse(jsonText);

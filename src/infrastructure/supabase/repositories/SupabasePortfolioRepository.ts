@@ -39,6 +39,7 @@ interface DBHolding {
   cached_ltp?: number | null;
   cached_today_pct?: number | null;
   created_at?: string;
+  purchase_date?: string | null;
 }
 
 interface DBPortfolio {
@@ -128,6 +129,7 @@ function dbToHolding(h: DBHolding): Holding {
     todayPnLPercent,
     currentValue,
     created_at: h.created_at,
+    purchase_date: h.purchase_date ?? undefined,
   };
 }
 
