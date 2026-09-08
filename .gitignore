@@ -48,6 +48,7 @@ scratch/
 .chrome_full_profile/
 .chrome_profile/
 .chrome_test_profile/
+.chrome_capture_*/
 *.profile/
 
 # Playwright test outputs

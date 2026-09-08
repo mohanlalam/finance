@@ -167,12 +167,13 @@ export default function FloatingAddMenu({
             </div>
 
             {/* Position Switcher Controls */}
-            <div className="flex items-center gap-1 bg-[var(--surface-secondary)] p-0.5 rounded-[var(--radius-small)] text-[10px]" role="radiogroup" aria-label="Button alignment">
+            <div className="flex items-center gap-1 bg-[var(--surface-secondary)] px-1.5 py-0.5 rounded-[var(--radius-small)] text-[10px]" role="radiogroup" aria-label="Button dock side">
+              <span className="text-[9.5px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Dock:</span>
               <button
                 type="button"
                 onClick={() => changePosition('left')}
-                className={`px-2 py-1 min-h-[26px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${position === 'left' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
-                title="Move button to Left"
+                className={`px-2 py-1 min-h-[24px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${position === 'left' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                title="Dock button on Left"
                 aria-checked={position === 'left'}
                 role="radio"
               >
@@ -180,19 +181,9 @@ export default function FloatingAddMenu({
               </button>
               <button
                 type="button"
-                onClick={() => changePosition('center')}
-                className={`px-2 py-1 min-h-[26px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${position === 'center' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
-                title="Move button to Center"
-                aria-checked={position === 'center'}
-                role="radio"
-              >
-                Center
-              </button>
-              <button
-                type="button"
                 onClick={() => changePosition('right')}
-                className={`px-2 py-1 min-h-[26px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${position === 'right' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
-                title="Move button to Right"
+                className={`px-2 py-1 min-h-[24px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${position === 'right' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                title="Dock button on Right"
                 aria-checked={position === 'right'}
                 role="radio"
               >

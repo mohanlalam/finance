@@ -507,13 +507,11 @@ export default function NetWorthTimelineChart({
       {/* SVG Multi-Series Interactive Chart Area */}
       <div className="relative w-full flex-1 min-h-[210px] mt-2">
         {history.length < 2 && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none mt-4">
-            <div className="bg-[var(--surface)]/80 backdrop-blur-sm rounded-[var(--radius-pill)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] shadow-sm mb-1 border border-[var(--border-subtle)]">
-              Sample Preview Mode
-            </div>
-            <div className="text-[11px] font-medium text-[var(--text-tertiary)] bg-[var(--surface-secondary)]/60 px-2.5 py-0.5 rounded-[var(--radius-pill)]">
-              Add assets to track your wealth trajectory over time
-            </div>
+          <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 pointer-events-none">
+            <span className="inline-flex items-center gap-1.5 bg-[var(--surface)]/90 backdrop-blur-md rounded-[var(--radius-pill)] px-2.5 py-1 text-[11px] font-semibold text-[var(--text-secondary)] shadow-xs border border-[var(--border-subtle)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-blue)] animate-pulse" />
+              Projected Trajectory (Preview)
+            </span>
           </div>
         )}
 
@@ -526,7 +524,7 @@ export default function NetWorthTimelineChart({
           onPointerDown={(e) => { updateSvgRect(e); handlePointerMove(e); }}
           onPointerMove={handlePointerMove}
           onPointerLeave={() => { setHoveredIdx(null); svgRectRef.current = null; }}
-          className={`w-full h-full touch-none select-none ${history.length < 2 ? 'opacity-40' : ''}`}
+          className={`w-full h-full touch-none select-none ${history.length < 2 ? 'opacity-85' : ''}`}
         >
           <title id="networth-chart-title">Net Worth Timeline</title>
           <desc id="networth-chart-desc">Interactive area chart displaying portfolio net worth over time with date range filters</desc>

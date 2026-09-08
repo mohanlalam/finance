@@ -26,6 +26,7 @@ interface HeaderProps {
   darkMode: boolean;
   onToggleDarkMode: () => void;
   activePortfolioLabel?: string;
+  activeAssetLabel?: string;
   isPriceStale?: boolean;
   isUsingCachedData?: boolean;
   onChangePinClick?: () => void;
@@ -79,6 +80,7 @@ function Header({
   darkMode,
   onToggleDarkMode,
   activePortfolioLabel = 'Family',
+  activeAssetLabel,
   onChangePinClick,
   onOpenMobileAlerts,
 }: HeaderProps) {
@@ -172,11 +174,23 @@ function Header({
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h1 className="text-sm sm:text-base font-bold text-[var(--text-primary)] tracking-tight leading-none truncate group-hover:text-[var(--accent-blue)] transition-colors">
-                  Portfolio Tracker
+                  {activeAssetLabel ? (
+                    <>
+                      <span className="sm:hidden">{activeAssetLabel}</span>
+                      <span className="hidden sm:inline">Portfolio Tracker</span>
+                    </>
+                  ) : (
+                    'Portfolio Tracker'
+                  )}
                 </h1>
                 {activePortfolioLabel && (
                   <span className="hidden sm:inline text-label-micro font-semibold px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
                     {activePortfolioLabel}
+                  </span>
+                )}
+                {activeAssetLabel && (
+                  <span className="sm:hidden text-[9.5px] font-bold px-1.5 py-0.2 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border border-[var(--accent-blue)]/30 shrink-0">
+                    {activePortfolioLabel || 'Family'}
                   </span>
                 )}
               </div>
@@ -258,11 +272,10 @@ function Header({
                       aria-label="Notifications panel"
                       className="absolute right-0 top-full mt-2 w-96 max-w-[calc(100vw-2rem)] bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-floating)] z-[var(--z-modal)] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
                     >
-                      <div className="px-4 py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] flex items-center justify-between">
+                      <div className="px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]/50 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
-                            Notifications
-                          </span>
+                          <Bell size={15} className="text-[var(--accent-blue)]" />
+                          <h3 className="text-xs font-bold text-[var(--text-primary)]">Notifications &amp; Alerts</h3>
                           <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]">
                             {visibleAlerts.length}
                           </span>
@@ -270,64 +283,52 @@ function Header({
                         {visibleAlerts.length > 0 && (
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDismissAll();
-                            }}
-                            className="text-label-micro font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                            onClick={onDismissAll}
+                            className="text-[11px] font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                           >
-                            Clear All
+                            Dismiss all
                           </button>
                         )}
                       </div>
 
                       <div className="max-h-[380px] overflow-y-auto divide-y divide-[var(--border-subtle)]">
                         {visibleAlerts.length === 0 ? (
-                          <div className="py-8 px-4 text-center flex flex-col items-center justify-center gap-2">
-                            <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                              <CheckCircle2 size={20} />
+                          <div className="p-8 text-center">
+                            <div className="w-10 h-10 rounded-full bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--positive)] mx-auto mb-2.5">
+                              <CheckCircle2 size={18} />
                             </div>
-                            <span className="text-xs font-bold text-[var(--text-primary)]">All Caught Up!</span>
-                            <span className="text-[11px] text-[var(--text-tertiary)] max-w-[220px]">No active notifications. You're completely up to date.</span>
+                            <p className="text-xs font-bold text-[var(--text-primary)]">All Clear!</p>
+                            <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">No upcoming maturities, renewals or alert triggers.</p>
                           </div>
                         ) : (
                           visibleAlerts.map((alert) => {
-                            const cfg = ALERTS_TYPE_CONFIG[alert.type] ?? {
-                              icon: <Bell size={14} />,
-                              color: 'text-[var(--text-secondary)]',
-                              bg: 'bg-[var(--surface-secondary)]',
-                              border: 'border-[var(--border-subtle)]',
-                            };
+                            const config = ALERTS_TYPE_CONFIG[alert.type] || ALERTS_TYPE_CONFIG.portfolio_swing;
                             return (
-                              <div
-                                key={alert.id}
-                                className="p-3.5 hover:bg-[var(--surface-secondary)] transition-colors flex items-start gap-3 group"
-                              >
-                                <div className={`p-1.5 rounded-[var(--radius-small)] ${cfg.bg} ${cfg.color} shrink-0 mt-0.5 border ${cfg.border}`}>
-                                  {cfg.icon}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <p className="text-xs font-bold text-[var(--text-primary)] leading-tight">{alert.title}</p>
-                                    {alert.portfolioLabel && (
-                                      <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-[var(--surface-secondary)] text-[var(--text-tertiary)] border border-[var(--border-subtle)]">
-                                        {alert.portfolioLabel}
-                                      </span>
-                                    )}
+                              <div key={alert.id} className="p-3 hover:bg-[var(--surface-secondary)]/40 transition-colors flex items-start justify-between gap-2.5 group">
+                                <div className="flex items-start gap-2.5 min-w-0">
+                                  <div className={`w-7 h-7 rounded-[var(--radius-small)] ${config.bg} ${config.color} border ${config.border} flex items-center justify-center shrink-0 mt-0.5`}>
+                                    {config.icon}
                                   </div>
-                                  <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed mt-1">{alert.message}</p>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                      <p className="text-xs font-bold text-[var(--text-primary)] truncate">{alert.title}</p>
+                                      {alert.portfolioLabel && (
+                                        <span className="text-[9px] font-semibold px-1 rounded bg-[var(--surface-secondary)] text-[var(--text-tertiary)] shrink-0">
+                                          {alert.portfolioLabel}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 leading-snug">{alert.message}</p>
+                                  </div>
                                 </div>
                                 <button
                                   type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onDismissAlert(alert.id);
-                                  }}
-                                  className="w-8 h-8 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-[var(--radius-small)] text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--surface)] transition-colors cursor-pointer shrink-0 opacity-70 group-hover:opacity-100 touch-manipulation"
-                                  aria-label="Dismiss alert"
+                                  onClick={() => onDismissAlert(alert.id)}
+                                  className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-1 rounded hover:bg-[var(--surface-secondary)] transition-colors opacity-0 group-hover:opacity-100 cursor-pointer shrink-0"
                                   title="Dismiss alert"
+                                  aria-label="Dismiss alert"
                                 >
-                                  <X size={13} />
+                                  <X size={12} />
                                 </button>
                               </div>
                             );
@@ -352,7 +353,7 @@ function Header({
                 }`}
               >
                 <Settings size={17} />
-                {visibleAlerts.length > 0 && (
+                {visibleAlerts.some((a) => a.severity === 'critical') && (
                   <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--negative)] rounded-full ring-2 ring-[var(--surface)] animate-pulse" />
                 )}
               </button>

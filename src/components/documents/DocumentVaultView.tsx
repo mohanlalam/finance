@@ -460,7 +460,7 @@ export default React.memo(function DocumentVaultView({
       {/* Main Document Vault Content Card */}
       <div className="apple-card overflow-hidden">
         <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center justify-between flex-wrap gap-2.5">
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none max-w-full pb-1 sm:pb-0">
             {FOLDERS.map((f) => {
               const count = allFamilyDocs.filter((d) => {
                 const matchFolder = d.asset_type === f.key;
@@ -495,7 +495,7 @@ export default React.memo(function DocumentVaultView({
               );
             })}
           </div>
-          <div>
+          <div className="shrink-0">
             <input
               id="vault-file-upload-input"
               ref={fileInputRef}
@@ -546,7 +546,7 @@ export default React.memo(function DocumentVaultView({
             actionButton={
               <label
                 htmlFor="vault-file-upload-input"
-                className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-600 dark:hover:bg-slate-500 text-white text-xs font-bold px-5 py-2.5 rounded-[14px] transition-colors shadow-sm cursor-pointer select-none active:scale-[0.98]"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)] hover:opacity-95 text-white text-xs font-bold px-5 py-2.5 rounded-[var(--radius-medium)] transition-all shadow-[0_4px_14px_rgba(2,132,199,0.25)] hover:shadow-[0_6px_18px_rgba(2,132,199,0.35)] cursor-pointer select-none ios-press active:scale-[0.98]"
               >
                 <Upload size={15} />
                 <span>Upload Your First Document</span>

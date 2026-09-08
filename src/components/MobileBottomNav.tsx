@@ -147,18 +147,18 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                 setIsDrawerOpen(false);
                 onOpenSmartImport();
               }}
-              className="w-full flex items-center justify-between p-3 mb-3 bg-gradient-to-r from-amber-500/15 to-amber-600/15 border border-amber-500/30 rounded-[var(--radius-medium)] text-amber-800 dark:text-amber-300 ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+              className="w-full flex items-center justify-between p-3 mb-3 bg-gradient-to-r from-cyan-500/15 via-blue-500/15 to-purple-500/15 border border-[var(--accent-blue)]/30 rounded-[var(--radius-medium)] text-[var(--text-primary)] hover:from-cyan-500/25 hover:to-purple-500/25 transition-all ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] shadow-xs"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--accent-blue)] text-white flex items-center justify-center shrink-0 shadow-xs">
                   <Sparkles size={16} aria-hidden="true" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-bold text-[var(--text-primary)]">✨ Smart AI Import</p>
-                  <p className="text-[11px] text-[var(--text-tertiary)]">Scan FD, Gold, or Insurance photo/PDF</p>
+                  <p className="text-xs font-bold text-[var(--accent-blue)]">✨ Smart AI Import</p>
+                  <p className="text-[11px] text-[var(--text-tertiary)]">Auto-extract details from document/photo</p>
                 </div>
               </div>
-              <ChevronRight size={16} className="text-amber-500 shrink-0" aria-hidden="true" />
+              <ChevronRight size={16} className="text-[var(--accent-blue)] shrink-0" aria-hidden="true" />
             </button>
           )}
 
@@ -236,7 +236,7 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
                   {tab.id === 'home' && alertCount > 0 && (
                     <span 
                       role="status"
-                      className="absolute -top-1 -right-1 min-w-[15px] h-[15px] rounded-full bg-[var(--negative)] text-white text-[9px] font-bold flex items-center justify-center px-1 leading-none shadow-xs"
+                      className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-[var(--negative)] text-white text-[9.5px] font-bold flex items-center justify-center px-1 leading-none shadow-xs tnum"
                       aria-label={`${alertCount} notifications`}
                     >
                       {alertCount > 9 ? '9+' : alertCount}

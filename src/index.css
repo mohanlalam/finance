@@ -44,7 +44,7 @@
   --radius-pill: 9999px;
 
   /* Shadows - Weightless Levitation */
-  --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 16px -2px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95);
   --shadow-floating: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 0 20px rgba(2, 132, 199, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95);
   --shadow-luminous: 0 0 25px rgba(2, 132, 199, 0.18);
   --shadow-modal: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 0 20px rgba(2, 132, 199, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95);
@@ -214,6 +214,63 @@
 .ios-press:active {
   transform: scale(0.965);
   opacity: 0.9;
+}
+
+/* 🧭 Desktop Sidebar Active Navigation */
+.sidebar-item-active {
+  background: var(--accent-blue-soft) !important;
+  color: var(--accent-blue) !important;
+  border-color: rgba(2, 132, 199, 0.35) !important;
+  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08);
+}
+.dark .sidebar-item-active {
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: var(--accent-blue) !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* ⚠️ Stale Price Warning Banner */
+.stale-price-banner {
+  background-color: var(--warning-soft);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #b45309;
+}
+.dark .stale-price-banner {
+  color: var(--warning);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+/* ✨ Skeleton Shimmer Animation */
+.shimmer-bar {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--surface-secondary);
+}
+.shimmer-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+  animation: shimmerAnim 1.6s infinite ease-in-out;
+}
+.dark .shimmer-bar::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+}
+@keyframes shimmerAnim {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 /* 💎 Neon Financial Luminance */

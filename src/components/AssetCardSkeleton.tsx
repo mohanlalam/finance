@@ -5,7 +5,8 @@ interface AssetCardSkeletonProps {
 
 export function AssetCardSkeleton({ count = 3 }: AssetCardSkeletonProps) {
   return (
-    <div className="space-y-3 sm:space-y-4" role="status" aria-label="Loading assets">
+    <div className="space-y-3 sm:space-y-4" role="status" aria-label="Loading holdings and assets">
+      <span className="sr-only">Loading assets...</span>
       {/* Unified Banner Placeholder to prevent layout shift */}
       <div className="apple-card p-2.5 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-2 sm:space-y-3 animate-fade-in">
         {/* Row 1: Header */}
@@ -44,7 +45,7 @@ export function AssetCardSkeleton({ count = 3 }: AssetCardSkeletonProps) {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="p-5 apple-card flex flex-col justify-between space-y-4 shadow-sm opacity-0 animate-fade-in"
+          className="p-5 apple-card flex flex-col justify-between space-y-4 shadow-sm animate-fade-in"
           style={{ animationDelay: `${(i + 1) * 75}ms` }}
         >
           {/* Header row */}

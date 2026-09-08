@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 // Reusable SVG illustrations styled with design tokens
 function FDIllustration() {
   return (
-    <svg className="w-14 h-14 text-[var(--cyan,#06b6d4)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <svg className="w-16 h-16 text-[var(--cyan,#06b6d4)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <rect x="6" y="14" width="36" height="26" rx="4" className="stroke-[var(--border-subtle)] fill-[var(--surface-secondary)]" strokeWidth="2" />
       <path d="M14 22H34M14 28H26M14 34H22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
       <path d="M24 6L32 14H16L24 6Z" className="stroke-current fill-[var(--cyan,#06b6d4)]" strokeWidth="2" strokeLinejoin="round" fillOpacity="0.2" />
@@ -15,7 +15,7 @@ function FDIllustration() {
 
 function StockIllustration() {
   return (
-    <svg className="w-14 h-14 text-[var(--accent-blue)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <svg className="w-16 h-16 text-[var(--accent-blue)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <rect x="6" y="8" width="36" height="32" rx="4" className="stroke-[var(--border-subtle)] fill-[var(--surface-secondary)]" strokeWidth="2" />
       <path d="M12 32L20 22L28 27L36 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M30 16H36V22" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -28,7 +28,7 @@ function StockIllustration() {
 
 function GoldIllustration() {
   return (
-    <svg className="w-14 h-14 text-[var(--gold,#facc15)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <svg className="w-16 h-16 text-[var(--gold,#facc15)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       {/* Back bullion bar */}
       <path d="M14 16L20 10H38L32 16H14Z" className="stroke-current fill-[var(--gold,#facc15)]" strokeWidth="1.5" strokeLinejoin="round" fillOpacity="0.25" />
       <rect x="14" y="16" width="24" height="10" rx="1" className="stroke-current fill-[var(--surface-secondary)]" strokeWidth="1.5" />
@@ -44,7 +44,7 @@ function GoldIllustration() {
 
 function RealEstateIllustration() {
   return (
-    <svg className="w-14 h-14 text-[var(--positive)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <svg className="w-16 h-16 text-[var(--positive)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       {/* Main building */}
       <rect x="18" y="10" width="22" height="30" rx="2" className="stroke-current fill-[var(--surface-secondary)]" strokeWidth="2" />
       {/* Windows */}
@@ -64,7 +64,7 @@ function RealEstateIllustration() {
 
 function InsuranceIllustration() {
   return (
-    <svg className="w-14 h-14 text-[var(--negative)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <svg className="w-16 h-16 text-[var(--negative)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <path d="M24 6L38 12V22C38 31.5 32 38.5 24 42C16 38.5 10 31.5 10 22V12L24 6Z" className="stroke-current fill-[var(--surface-secondary)]" strokeWidth="2" strokeLinejoin="round" />
       <path d="M18 23L22 27L30 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M24 10V38" stroke="currentColor" strokeWidth="1" strokeDasharray="2 2" opacity="0.3" />
@@ -74,7 +74,7 @@ function InsuranceIllustration() {
 
 function DocumentIllustration() {
   return (
-    <svg className="w-14 h-14 text-[var(--text-secondary)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <svg className="w-16 h-16 text-[var(--text-secondary)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <rect x="10" y="8" width="28" height="34" rx="3" className="stroke-[var(--border-subtle)] fill-[var(--surface-secondary)]" strokeWidth="2" />
       <path d="M28 8V16H38" className="stroke-[var(--border-subtle)] fill-[var(--surface)]" strokeWidth="2" strokeLinejoin="round" />
       <line x1="16" y1="22" x2="32" y2="22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
@@ -89,7 +89,7 @@ function DocumentIllustration() {
 
 function DefaultIllustration() {
   return (
-    <svg className="w-14 h-14 text-[var(--text-tertiary)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <svg className="w-16 h-16 text-[var(--text-tertiary)]" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <circle cx="24" cy="24" r="18" className="stroke-[var(--border-subtle)] fill-[var(--surface-secondary)]" strokeWidth="2" />
       <line x1="24" y1="16" x2="24" y2="26" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
       <circle cx="24" cy="32" r="1.5" className="fill-current" />
@@ -139,9 +139,9 @@ export default function EmptyState({
     <div 
       role="region" 
       aria-label={title}
-      className="flex flex-col items-center justify-center py-12 px-6 text-center bg-[var(--surface)] border border-dashed border-[var(--border-subtle)] rounded-[var(--radius-large)] w-full max-w-lg mx-auto animate-fade-in shadow-xs"
+      className="flex flex-col items-center justify-center py-8 sm:py-10 px-6 text-center bg-[var(--surface)] border border-dashed border-[var(--border-subtle)] rounded-[var(--radius-large)] w-full max-w-lg mx-auto animate-fade-in shadow-xs"
     >
-      <div className="mb-4 p-3.5 bg-gradient-to-b from-[var(--surface-secondary)] to-[var(--surface)] rounded-2xl inline-flex items-center justify-center ring-1 ring-[var(--border-subtle)] shadow-[0_8px_20px_rgba(2,132,199,0.08)] animate-float">
+      <div className="mb-4 p-4 bg-gradient-to-b from-[var(--surface-secondary)] to-[var(--surface)] rounded-2xl inline-flex items-center justify-center ring-1 ring-[var(--border-subtle)] shadow-[0_8px_20px_rgba(2,132,199,0.08)] animate-float">
         {getIllustration()}
       </div>
       <h4 className="text-sm font-bold text-[var(--text-primary)] mb-1.5">{title}</h4>

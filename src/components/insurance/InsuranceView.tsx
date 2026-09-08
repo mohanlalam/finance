@@ -438,8 +438,18 @@ export function InsuranceView({
                   </div>
 
                   {item.policies.length === 0 ? (
-                    <div className="px-4 py-3 text-xs text-[var(--text-tertiary)] italic">
-                      No insurance policies recorded for {item.portfolio.label}
+                    <div className="py-3 px-4 flex items-center justify-between text-xs text-[var(--text-tertiary)] bg-[var(--surface-secondary)]/30">
+                      <div className="flex items-center gap-2">
+                        <Shield size={13} className="text-[var(--text-tertiary)] opacity-60" />
+                        <span>No insurance policies recorded for {item.portfolio.label}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={openAdd}
+                        className="text-xs font-semibold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                      >
+                        + Add Policy
+                      </button>
                     </div>
                   ) : (
                     <div className="divide-y divide-[var(--border-subtle)]">

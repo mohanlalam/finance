@@ -345,6 +345,21 @@ export default function AppShell() {
     await addAsset('stock', portfolioName, payload);
   }, [addAsset]);
 
+  const assetLabels: Record<AssetTab, string> = {
+    home: '',
+    stocks: 'Stocks & ETFs',
+    fd: 'Fixed Deposits',
+    rd: 'Recurring Deposits',
+    sip: 'SIP Mutual Funds',
+    gold: 'Gold Holdings',
+    real_estate: 'Real Estate',
+    insurance: 'Insurance Cover',
+    documents: 'Document Vault',
+    widgets: 'Widgets',
+    tax: 'Tax Harvesting',
+  };
+  const activeAssetLabel = assetLabels[activeAsset] || '';
+
   const visiblePortfolio = portfolio;
 
   if (activeAsset === 'widgets') {
@@ -419,6 +434,7 @@ export default function AppShell() {
         darkMode={darkMode}
         onToggleDarkMode={toggleDarkMode}
         activePortfolioLabel={summaryData.label}
+        activeAssetLabel={activeAssetLabel}
         isPriceStale={isPriceStale}
         isUsingCachedData={isUsingCachedData}
         onChangePinClick={openChangePinModal}
@@ -453,9 +469,9 @@ export default function AppShell() {
         )}
 
         {isPriceStale && priceStatus !== 'error' && (
-          <div className="flex items-center gap-2.5 bg-[var(--warning-soft)] border border-[var(--warning)]/30 text-[var(--warning)] rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm">
-            <AlertCircle size={15} className="shrink-0 text-[var(--warning)]" />
-            <span className="leading-snug">Stock prices may be outdated. Press Ctrl+Shift+R to refresh.</span>
+          <div className="flex items-center gap-2.5 stale-price-banner rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm">
+            <AlertCircle size={15} className="shrink-0 text-amber-700 dark:text-[var(--warning)]" />
+            <span className="leading-snug font-medium">Stock prices may be outdated. Press Ctrl+Shift+R to refresh.</span>
           </div>
         )}
 
@@ -470,7 +486,7 @@ export default function AppShell() {
         )}
 
         {isMobile ? (
-          <main id="main-content" className="space-y-4 overflow-hidden">
+          <main id="main-content" className="space-y-4 overflow-hidden pb-20">
             {/* Family Tabs Row on Mobile */}
             <FamilyTabBar
               portfolios={portfolios}

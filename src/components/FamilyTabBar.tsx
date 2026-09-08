@@ -54,7 +54,8 @@ export default React.memo(function FamilyTabBar({
       <div
         role="tablist"
         aria-label="Family members portfolios"
-        className="flex items-center gap-1.5 bg-[var(--surface-secondary)]/60 backdrop-blur-xl p-1.5 sm:p-1 rounded-[var(--radius-large)] sm:rounded-[var(--radius-medium)] border border-[var(--border-subtle)] w-full sm:w-auto shadow-[var(--shadow-card)] overflow-x-auto scrollbar-none"
+        className="flex items-center gap-1.5 bg-[var(--surface-secondary)]/60 backdrop-blur-xl p-1.5 sm:p-1 rounded-[var(--radius-large)] sm:rounded-[var(--radius-medium)] border border-[var(--border-subtle)] w-full sm:w-auto shadow-[var(--shadow-card)] overflow-x-auto scrollbar-none pr-3 scroll-smooth touch-pan-x"
+        style={{ WebkitOverflowScrolling: 'touch' }}
       >
         {/* Overview Tab */}
         <button
@@ -96,7 +97,7 @@ export default React.memo(function FamilyTabBar({
                   setMenuTarget(null);
                   onTabChange(p.name);
                 }}
-                className={`flex items-center gap-1.5 h-10 sm:h-8 pl-2.5 pr-1.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 cursor-pointer ${
+                className={`flex items-center gap-1.5 h-9 sm:h-8 pl-2 pr-1.5 sm:pl-2.5 sm:pr-1.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 shrink-0 cursor-pointer ${
                   isActive
                     ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-card)] border border-[var(--border-luminous)] ring-1 ring-[var(--accent-blue)]/20'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]/50'
@@ -107,11 +108,11 @@ export default React.memo(function FamilyTabBar({
                   {iconConfig.icon}
                 </div>
 
-                <span className="whitespace-nowrap">{p.label}</span>
+                <span className="whitespace-nowrap shrink-0">{p.label}</span>
 
                 {/* Return Percentage Badge */}
                 <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded tnum transition-colors shrink-0 ${
+                  className={`text-[9px] sm:text-[10px] font-bold px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded tnum transition-colors shrink-0 ${
                     isPositive
                       ? 'bg-[var(--positive-soft)] text-[var(--positive)]'
                       : 'bg-[var(--negative-soft)] text-[var(--negative)]'
@@ -128,7 +129,7 @@ export default React.memo(function FamilyTabBar({
                   e.stopPropagation();
                   setMenuTarget(isMenuOpen ? null : { id: p.id, name: p.name, label: p.label });
                 }}
-                className="sm:hidden min-w-[36px] h-10 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-1 shrink-0 touch-manipulation ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
+                className="sm:hidden w-6 h-9 sm:h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-0.5 shrink-0 touch-manipulation ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
                 title={`Options for ${p.label}`}
                 aria-label={`Options for portfolio ${p.label}`}
                 aria-haspopup="menu"
