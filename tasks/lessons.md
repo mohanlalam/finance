@@ -371,4 +371,13 @@ After **any correction** from the user, append a new entry here with the pattern
 **Mistake**: Switching between the all-members combined view and single-member views caused Real Estate assets to disappear or trigger undefined prop warnings.  
 **Root Cause**: `RealEstateViewProps` defined `properties?: RealEstate[]` while `AssetTabContent.tsx` passed `realEstate={allRealEstate}`, resulting in `properties` evaluating to `undefined` in combined views.  
 **Fix**: Updated `RealEstateViewProps` to accept both `realEstate?: RealEstate[]` and `properties?: RealEstate[]`, normalizing the entity list with `const realEstate = useMemo(() => propRealEstate || propProperties || [], [propRealEstate, propProperties])`.  
-**Rule**: When standardizing container props across asset views (`stocks`, `fixedDeposits`, `sipAccounts`, `goldHoldings`, `realEstate`), ensure container prop names match the domain entity type or provide backwards-compatible dual-prop aliases to prevent missing data in combined or polymorphic views.
+**Rule**: When standardizing container props across asset views (`stocks`, `fixedDeposits`, `sipAccounts`, `goldHoldings`, `realEstate`), ensure container prop names match the domain entity type or provide backwards-compatible Dual-prop aliases to prevent missing data in combined or polymorphic views.
+
+---
+
+### 2026-09-09 — User Authentication Protocol: Never Attempt Automated / Guess PIN Entry in Chrome
+**Mistake**: In automated Chrome / browser sessions, scripts attempted automated or arbitrary PIN entry which enters the wrong PIN, risks security lockouts, and disrupts user session state.  
+**Root Cause**: Automated scripts or browser interactions attempted to auto-fill or simulate PIN passcode inputs rather than prompting the user for authentic entry.  
+**Fix**: Established strict protocol: whenever accessing the project in Chrome / browser where the PIN lock screen is encountered, NEVER attempt to guess, enter an arbitrary PIN, or brute-force passcodes. Always stop and ask the user to enter their PIN directly. Once the user confirms they have entered the PIN, proceed with accessing the application for the remaining task.  
+**Rule**: **Whenever accessing the project in Chrome / browser, never attempt to enter or automate the PIN.** Always ask the user to enter the PIN directly. Wait until the user confirms they have entered the PIN, then proceed with the remaining job.
+

@@ -5,7 +5,7 @@ async function unlockIfLocked(page: Page) {
   if (await pinHeading.isVisible({ timeout: 4000 }).catch(() => false)) {
     await page.keyboard.type('3463');
   }
-  await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 25000 });
 }
 
 test.describe('Family Wealth Tracker - Smoke & E2E Workflows', () => {

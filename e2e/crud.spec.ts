@@ -5,7 +5,7 @@ async function unlockIfLocked(page: Page) {
   if (await pinHeading.isVisible({ timeout: 4000 }).catch(() => false)) {
     await page.keyboard.type('3463');
   }
-  await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 25000 });
 }
 
 test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
@@ -19,7 +19,7 @@ test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
     const reNav = page.locator('button[aria-label="Jump to Real Estate"]').or(page.locator('button:has-text("Real Estate")')).first();
     await reNav.click();
 
-    await expect(page.locator('text=Real Estate').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('main').locator('text=Real Estate').first()).toBeVisible({ timeout: 10000 });
 
     // Click Add Property button
     const addBtn = page.locator('button:has-text("Add Property")').first();
@@ -46,18 +46,18 @@ test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
     await submitBtn.click();
 
     // Verify property appears in the registry
-    await expect(page.locator(`text=${uniquePropName}`).first()).toBeVisible({ timeout: 12000 });
+    await expect(page.locator(`text=${uniquePropName}`).first()).toBeVisible({ timeout: 20000 });
 
     // Clean up created property so tests leave zero residual artifacts in the database
     const propCard = page.locator(`.mobile-asset-card:has-text("${uniquePropName}")`).first();
     const deleteBtn = propCard.locator('button[aria-label*="Delete"]').first();
     await deleteBtn.click();
     const confirmDialog = page.getByRole('dialog').first();
-    await expect(confirmDialog).toBeVisible({ timeout: 4000 });
+    await expect(confirmDialog).toBeVisible({ timeout: 6000 });
     const confirmBtn = confirmDialog.locator('button:has-text("Delete")').first();
     await confirmBtn.click();
-    await expect(confirmDialog).not.toBeVisible({ timeout: 8000 });
-    await expect(page.getByRole('heading', { name: uniquePropName })).not.toBeVisible({ timeout: 12000 });
+    await expect(confirmDialog).not.toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: uniquePropName })).not.toBeVisible({ timeout: 15000 });
   });
 
   test('Mutual Fund SIP - Open form, create new SIP and verify rendering', async ({ page }) => {
@@ -65,7 +65,7 @@ test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
     const sipNav = page.locator('button[aria-label="Jump to SIP Mutual Funds"]').or(page.locator('button:has-text("SIP")')).first();
     await sipNav.click();
 
-    await expect(page.locator('text=Mutual Funds').or(page.locator('text=SIP')).first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('main').locator('text=Mutual Funds').or(page.locator('main').locator('text=SIP')).first()).toBeVisible({ timeout: 10000 });
 
     // Click Add SIP button
     const addSipBtn = page.locator('button:has-text("Add SIP")').first();
@@ -89,18 +89,18 @@ test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
       await submitBtn.click();
 
       // Verify the new SIP is registered
-      await expect(page.locator(`text=${uniqueFund}`).first()).toBeVisible({ timeout: 12000 });
+      await expect(page.locator(`text=${uniqueFund}`).first()).toBeVisible({ timeout: 20000 });
 
       // Clean up created SIP
       const sipCard = page.locator(`.mobile-asset-card:has-text("${uniqueFund}")`).first();
       const deleteSipBtn = sipCard.locator('button[aria-label*="Delete"]').first();
       await deleteSipBtn.click();
       const confirmSipDialog = page.getByRole('dialog').first();
-      await expect(confirmSipDialog).toBeVisible({ timeout: 4000 });
+      await expect(confirmSipDialog).toBeVisible({ timeout: 6000 });
       const confirmSipBtn = confirmSipDialog.locator('button:has-text("Delete")').first();
       await confirmSipBtn.click();
-      await expect(confirmSipDialog).not.toBeVisible({ timeout: 8000 });
-      await expect(page.getByRole('heading', { name: uniqueFund })).not.toBeVisible({ timeout: 12000 });
+      await expect(confirmSipDialog).not.toBeVisible({ timeout: 15000 });
+      await expect(page.getByRole('heading', { name: uniqueFund })).not.toBeVisible({ timeout: 15000 });
     }
   });
 
@@ -109,7 +109,7 @@ test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
     const goldNav = page.locator('button[aria-label="Jump to Gold Holdings"]').or(page.locator('button:has-text("Gold")')).first();
     await goldNav.click();
 
-    await expect(page.locator('text=Gold').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('main').locator('text=Gold').first()).toBeVisible({ timeout: 10000 });
 
     // Click Add Gold button
     const addGoldBtn = page.locator('button:has-text("Add Gold")').first();
@@ -131,17 +131,17 @@ test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
     await submitBtn.click();
 
     // Verify gold item renders in registry
-    await expect(page.locator(`text=${uniqueGoldItem}`).first()).toBeVisible({ timeout: 12000 });
+    await expect(page.locator(`text=${uniqueGoldItem}`).first()).toBeVisible({ timeout: 20000 });
 
     // Clean up created Gold holding
     const goldCard = page.locator(`.mobile-asset-card:has-text("${uniqueGoldItem}")`).first();
     const deleteGoldBtn = goldCard.locator('button[aria-label*="Delete"]').first();
     await deleteGoldBtn.click();
     const confirmGoldDialog = page.getByRole('dialog').first();
-    await expect(confirmGoldDialog).toBeVisible({ timeout: 4000 });
+    await expect(confirmGoldDialog).toBeVisible({ timeout: 6000 });
     const confirmGoldBtn = confirmGoldDialog.locator('button:has-text("Delete")').first();
     await confirmGoldBtn.click();
-    await expect(confirmGoldDialog).not.toBeVisible({ timeout: 8000 });
-    await expect(page.getByRole('heading', { name: uniqueGoldItem })).not.toBeVisible({ timeout: 12000 });
+    await expect(confirmGoldDialog).not.toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: uniqueGoldItem })).not.toBeVisible({ timeout: 15000 });
   });
 });

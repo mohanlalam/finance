@@ -358,7 +358,7 @@ export default function AppShell() {
     widgets: 'Widgets',
     tax: 'Tax Harvesting',
   };
-  const activeAssetLabel = assetLabels[activeAsset] || '';
+  const activeAssetLabel = isMobile ? (assetLabels[activeAsset] || '') : '';
 
   const visiblePortfolio = portfolio;
 
