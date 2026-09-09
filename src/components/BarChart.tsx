@@ -177,13 +177,14 @@ function BarChart({ portfolios }: BarChartProps) {
                     <stop offset="0%" stopColor="var(--text-tertiary)" stopOpacity="0.8" />
                     <stop offset="100%" stopColor="var(--text-tertiary)" stopOpacity="0.45" />
                   </linearGradient>
+                  {/* SVG gradients aligned to --positive and --negative design tokens */}
                   <linearGradient id="barPositiveGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.95" />
-                    <stop offset="100%" stopColor="#059669" stopOpacity="0.75" />
+                    <stop offset="0%" stopColor="var(--positive, #10b981)" stopOpacity="0.95" />
+                    <stop offset="100%" stopColor="var(--positive, #059669)" stopOpacity="0.75" />
                   </linearGradient>
                   <linearGradient id="barNegativeGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.95" />
-                    <stop offset="100%" stopColor="#e11d48" stopOpacity="0.75" />
+                    <stop offset="0%" stopColor="var(--negative, #f43f5e)" stopOpacity="0.95" />
+                    <stop offset="100%" stopColor="var(--negative, #e11d48)" stopOpacity="0.75" />
                   </linearGradient>
                 </defs>
 

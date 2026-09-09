@@ -15,9 +15,9 @@ export function Skeleton({
   ...props
 }: SkeletonProps) {
   const variantClasses = {
-    text: 'rounded-md h-4 w-full',
+    text: 'rounded-[var(--radius-small)] h-4 w-full',
     circular: 'rounded-full',
-    rectangular: 'rounded-xl',
+    rectangular: 'rounded-[var(--radius-medium)]',
   };
 
   const dynamicStyle: React.CSSProperties = {
@@ -32,7 +32,7 @@ export function Skeleton({
       aria-live="polite"
       aria-busy="true"
       aria-label="Loading content"
-      className={`animate-pulse bg-slate-200 dark:bg-slate-800 ${variantClasses[variant]} ${className}`}
+      className={`animate-shimmer bg-[var(--surface-secondary)] ${variantClasses[variant]} ${className}`}
       style={dynamicStyle}
       {...props}
     />

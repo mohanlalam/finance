@@ -39,7 +39,7 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = React.m
           <LazyChartWrapper
             importFunc={() => import('../components/NetWorthTimelineChart')}
             placeholderHeight={300}
-            fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}
+            fallback={<div className="h-[300px] sm:h-[370px] bg-[var(--surface-secondary)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] animate-shimmer" />}
             props={{
               history: netWorthHistory,
               currentNetWorth: (breakdown.stocks || 0) + (breakdown.fd || 0),
@@ -50,7 +50,7 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = React.m
         </SectionErrorBoundary>
         <SectionErrorBoundary sectionName="Asset Class Pie Chart">
           <LazyViewport placeholderHeight={300}>
-            <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
+            <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-[var(--surface-secondary)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] animate-shimmer" />}>
               <PieChart
                 slices={breakdownSlices}
                 title={`Asset Class Breakdown — ${summaryLabel}`}
@@ -61,14 +61,14 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = React.m
         </SectionErrorBoundary>
         <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
           <LazyViewport placeholderHeight={300}>
-            <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-white dark:bg-slate-800 rounded-xl animate-pulse" />}>
+            <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-[var(--surface-secondary)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] animate-shimmer" />}>
               <BarChart portfolios={barChartPortfolios} />
             </Suspense>
           </LazyViewport>
         </SectionErrorBoundary>
         <SectionErrorBoundary sectionName="AI Portfolio Assistant">
           <LazyViewport placeholderHeight={300}>
-            <Suspense fallback={<div className="h-[300px] sm:h-[370px] apple-card rounded-xl animate-pulse" />}>
+            <Suspense fallback={<div className="h-[300px] sm:h-[370px] bg-[var(--surface-secondary)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] animate-shimmer" />}>
               <PortfolioAssistant portfolios={portfolios} onSelectAsset={onSelectAsset} />
             </Suspense>
           </LazyViewport>

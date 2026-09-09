@@ -23,7 +23,7 @@ export const ImportSaveProgress: React.FC<ImportSaveProgressProps> = ({ step, me
   const isSuccess = step === 'SUCCESS';
 
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 p-4 space-y-3 animate-fade-in">
+    <div className="rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] p-4 space-y-3 animate-fade-in">
       <div className="flex items-center gap-3">
         {isSuccess ? (
           <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-600 flex items-center justify-center">
@@ -39,10 +39,10 @@ export const ImportSaveProgress: React.FC<ImportSaveProgressProps> = ({ step, me
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <h5 className="text-xs font-bold text-slate-800 dark:text-slate-200">
+          <h5 className="text-xs font-bold text-[var(--text-primary)]">
             {isSuccess ? 'Import Complete' : isError ? 'Import Failed' : 'Saving Asset & Linking Document'}
           </h5>
-          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+          <p className="text-xs text-[var(--text-tertiary)] truncate mt-0.5">
             {message}
           </p>
         </div>
@@ -61,11 +61,11 @@ export const ImportSaveProgress: React.FC<ImportSaveProgressProps> = ({ step, me
                       ? 'bg-emerald-500'
                       : isCurrent
                       ? 'bg-amber-500 animate-pulse'
-                      : 'bg-slate-200 dark:bg-slate-700'
+                      : 'bg-[var(--surface-tertiary)]'
                   }`}
                 />
                 <span className={`text-[9px] block text-center truncate ${
-                  isCurrent ? 'font-bold text-amber-600 dark:text-amber-400' : 'text-slate-400'
+                  isCurrent ? 'font-bold text-amber-600 dark:text-amber-400' : 'text-[var(--text-tertiary)]'
                 }`}>
                   {item.label}
                 </span>

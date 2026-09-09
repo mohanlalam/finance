@@ -405,13 +405,13 @@ export default function AppShell() {
         </div>
       )}
       {/* Print-only report header */}
-      <div className="print-report-header hidden items-center justify-between px-8 py-6 border-b-2 border-slate-200 mb-6">
+      <div className="print-report-header hidden items-center justify-between px-8 py-6 border-b-2 border-[var(--border-subtle)] mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Family Wealth Report</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Generated on {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Family Wealth Report</h1>
+          <p className="text-sm text-[var(--text-tertiary)] mt-0.5">Generated on {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
         </div>
         <div className="text-right">
-          <p className="text-lg font-bold text-slate-800">{formatINR(summaryData.totalCurrentValue)}</p>
+          <p className="text-lg font-bold text-[var(--text-primary)]">{formatINR(summaryData.totalCurrentValue)}</p>
           <p className={`text-sm font-semibold ${summaryData.totalPnL >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
             {summaryData.totalPnL >= 0 ? '+' : ''}{formatINR(summaryData.totalPnL)} ({formatPercent(summaryData.totalPnLPercent)})
           </p>
@@ -470,7 +470,7 @@ export default function AppShell() {
 
         {isPriceStale && priceStatus !== 'error' && (
           <div className="flex items-center gap-2.5 stale-price-banner rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm">
-            <AlertCircle size={15} className="shrink-0 text-amber-700 dark:text-[var(--warning)]" />
+            <AlertCircle size={15} className="shrink-0 text-[var(--warning)]" />
             <span className="leading-snug font-medium">Stock prices may be outdated. Press Ctrl+Shift+R to refresh.</span>
           </div>
         )}

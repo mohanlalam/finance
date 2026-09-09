@@ -360,7 +360,7 @@ export function FixedDepositView({
       <AssetRegistryContainer
         title="Fixed Deposits"
         createBtnLabel="Add FD"
-        themeColor="bg-indigo-600 hover:bg-indigo-700"
+        themeColor="bg-[var(--accent-blue)] hover:opacity-90"
         emptyType="fd"
         emptyTitle="No Fixed Deposits Added"
         emptyDescription="Keep track of your high-yield fixed deposits, interest rates, and maturity schedules."
@@ -439,7 +439,7 @@ export function FixedDepositView({
                         {item.deposits.length}
                       </span>
                     </div>
-                    <span className="text-xs font-bold text-indigo-500 tnum">
+                    <span className="text-xs font-bold text-[var(--accent-blue)] tnum">
                       {formatINR(item.principal)} {item.current > item.principal ? `(Mat: ${formatINR(item.current)})` : ''}
                     </span>
                   </div>

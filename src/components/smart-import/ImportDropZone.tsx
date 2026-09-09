@@ -45,7 +45,7 @@ export const ImportDropZone: React.FC<ImportDropZoneProps> = ({
     <div
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-500/60 dark:hover:border-amber-500/60 rounded-2xl p-4 sm:p-6 md:p-8 text-center transition-all bg-slate-50/50 dark:bg-slate-900/30 group relative overflow-hidden"
+      className="border-2 border-dashed border-[var(--border-subtle)] hover:border-[var(--warning)] rounded-[var(--radius-xl)] p-4 sm:p-6 md:p-8 text-center transition-all bg-[var(--surface-secondary)]/40 group relative overflow-hidden"
     >
       <input
         ref={fileInputRef}
@@ -76,10 +76,10 @@ export const ImportDropZone: React.FC<ImportDropZoneProps> = ({
         Multi-Document Batch Supported
       </div>
 
-      <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">
+      <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
         Drop Statements or Receipts
       </h4>
-      <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 max-w-sm sm:max-w-md mx-auto leading-snug sm:leading-relaxed">
+      <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] mt-0.5 sm:mt-1 max-w-sm sm:max-w-md mx-auto leading-snug sm:leading-relaxed">
         Upload Zerodha CAS, FD advice, RD slip, Gold bill, or Insurance policies. AI automatically assigns to Rammohan, Padmavathi, or Sai Laxmi.
       </p>
 

@@ -17,7 +17,7 @@ const TYPE_STYLES: Record<Insurance['insurance_type'], { bg: string; text: strin
   term: { bg: 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300', text: 'text-purple-600', label: 'Term Life' },
   life: { bg: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300', text: 'text-emerald-600', label: 'Life' },
   motor: { bg: 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300', text: 'text-amber-600', label: 'Motor' },
-  other: { bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', text: 'text-slate-600', label: 'General' },
+  other: { bg: 'bg-[var(--surface-secondary)] text-[var(--text-secondary)]', text: 'text-[var(--text-secondary)]', label: 'General' },
 };
 
 export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({

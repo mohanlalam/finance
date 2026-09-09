@@ -59,14 +59,14 @@ export const DocumentUploadModal = React.memo(function DocumentUploadModal({
       ariaLabel={`Upload to ${folderLabel}`}
       preventClose={uploading}
     >
-      <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
+      <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
         <div>
-          <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Upload to {folderLabel}</h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate max-w-xs">File: {pendingFile.name}</p>
+          <h3 className="text-base font-bold text-[var(--text-primary)]">Upload to {folderLabel}</h3>
+          <p className="text-xs text-[var(--text-tertiary)] mt-0.5 truncate max-w-xs">File: {pendingFile.name}</p>
         </div>
         <button
           onClick={() => !uploading && onClose()}
-          className="w-8 h-8 rounded-[10px] hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors cursor-pointer"
+          className="w-8 h-8 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           aria-label="Close dialog"
         >
           <X size={16} />
@@ -128,7 +128,7 @@ export const DocumentUploadModal = React.memo(function DocumentUploadModal({
         )}
 
         {uploadError && (
-          <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2" role="alert">{uploadError}</p>
+          <p className="text-xs text-[var(--negative)] bg-[var(--negative-soft)] border border-[var(--negative)]/20 rounded-[var(--radius-medium)] px-3 py-2" role="alert">{uploadError}</p>
         )}
 
         <div className="flex gap-3 pt-2">
@@ -136,14 +136,14 @@ export const DocumentUploadModal = React.memo(function DocumentUploadModal({
             type="button"
             disabled={uploading}
             onClick={onClose}
-            className="flex-1 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm rounded-[14px] h-11 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-xs ios-press transition-colors disabled:opacity-50 cursor-pointer"
+            className="flex-1 border border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--text-primary)] font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:bg-[var(--surface-secondary)] shadow-xs ios-press transition-colors disabled:opacity-50 cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={uploading}
-            className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-900 transition-colors disabled:opacity-50 cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-2 bg-[var(--accent-blue)] text-white font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:opacity-90 transition-colors disabled:opacity-50 cursor-pointer shadow-xs ios-press"
           >
             {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
             {uploading ? 'Uploading...' : 'Upload'}

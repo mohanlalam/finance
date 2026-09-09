@@ -408,7 +408,7 @@ export function RDView({
       <AssetRegistryContainer
         title="Recurring Deposits"
         createBtnLabel="Add RD"
-        themeColor="bg-purple-600 hover:bg-purple-700"
+        themeColor="bg-[var(--accent-violet)] hover:opacity-90"
         emptyType="rd"
         emptyTitle="No Recurring Deposits Added"
         emptyDescription="Track monthly systematic deposits across banks."
@@ -488,7 +488,7 @@ export function RDView({
                         {item.accounts.length}
                       </span>
                     </div>
-                    <span className="text-xs font-bold text-purple-500 tnum">
+                    <span className="text-xs font-bold text-[var(--accent-violet)] tnum">
                       {formatINR(item.monthly)}/mo {item.current > 0 ? `(Val: ${formatINR(item.current)})` : ''}
                     </span>
                   </div>

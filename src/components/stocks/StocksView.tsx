@@ -196,7 +196,7 @@ export default function StocksView({
                   <button
                     type="button"
                     onClick={() => setSelectedMember('all')}
-                    className="text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer"
+                    className="text-[10px] font-bold text-[var(--accent-blue)] hover:underline cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] rounded-sm"
                   >
                     View All
                   </button>
@@ -303,7 +303,7 @@ export default function StocksView({
               <button
                 type="button"
                 onClick={() => setSelectedMember('all')}
-                className="text-xs text-[var(--accent-blue)] hover:underline font-semibold cursor-pointer"
+                className="text-xs text-[var(--accent-blue)] hover:underline font-semibold cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] rounded-sm"
               >
                 Show All Family
               </button>

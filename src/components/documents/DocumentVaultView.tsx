@@ -187,7 +187,7 @@ export default React.memo(function DocumentVaultView({
     const isExpired = daysLeft < 0;
     const isExpiringSoon = daysLeft >= 0 && daysLeft <= 30;
 
-    let badgeColor = "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300";
+    let badgeColor = "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]";
     let text = `Expires ${new Date(expiryDateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 
     if (isExpired) {
@@ -328,7 +328,7 @@ export default React.memo(function DocumentVaultView({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-[var(--border-subtle)] pb-2 sm:pb-2.5">
           {/* Left: Title & Subtitle */}
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[var(--radius-small)] bg-slate-500/20 text-slate-400 border border-slate-500/30 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] border border-[var(--border-subtle)] flex items-center justify-center shrink-0">
               <FileText size={15} />
             </div>
             <div className="min-w-0">
@@ -336,7 +336,7 @@ export default React.memo(function DocumentVaultView({
                 <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Total Family Document Vault
                 </h3>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-slate-500/15 text-slate-400 border border-slate-500/30 uppercase tracking-wider shrink-0">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] border border-[var(--border-subtle)] uppercase tracking-wider shrink-0">
                   Combined
                 </span>
                 <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 tracking-wider shrink-0 flex items-center gap-1">
@@ -415,8 +415,8 @@ export default React.memo(function DocumentVaultView({
                     onClick={() => setSelectedMember((prev) => (prev === m.name ? 'all' : m.name))}
                     className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-1.5 sm:p-2 min-h-[44px] justify-center rounded-[var(--radius-small)] border transition-all cursor-pointer text-left ios-press min-w-0 ${
                       isSelected
-                        ? 'bg-[var(--surface-secondary)] border-slate-400 ring-1 ring-slate-400/30 shadow-xs'
-                        : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-slate-400/40'
+                        ? 'bg-[var(--surface-secondary)] border-[var(--accent-blue)] ring-1 ring-[var(--accent-blue)]/30 shadow-xs'
+                        : 'bg-[var(--surface)] border-[var(--border-subtle)] hover:border-[var(--accent-blue)]/40'
                     }`}
                     title={`Click to filter ${m.label}'s documents`}
                   >
@@ -430,7 +430,7 @@ export default React.memo(function DocumentVaultView({
                             {m.label}
                           </p>
                           {isSelected && (
-                            <span className="hidden xs:inline text-[8px] font-bold px-1 rounded bg-slate-500/20 text-slate-700 dark:text-slate-300">
+                            <span className="hidden xs:inline text-[8px] font-bold px-1 rounded bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]">
                               Active
                             </span>
                           )}

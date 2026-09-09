@@ -50,7 +50,7 @@ export function ContextMenu({ isOpen, position, onClose, items }: ContextMenuPro
         {/* Menu card */}
         <div 
           ref={menuRef}
-          className="bg-white dark:bg-slate-900 border border-[var(--border-subtle)] rounded-xl shadow-xl overflow-hidden min-w-[180px] origin-top-left animate-in fade-in zoom-in-95 duration-200"
+          className="bg-[var(--surface-solid)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] shadow-xl overflow-hidden min-w-[180px] origin-top-left animate-in fade-in zoom-in-95 duration-200"
           style={{ animationTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
         >
           <div className="flex flex-col">
@@ -63,10 +63,10 @@ export function ContextMenu({ isOpen, position, onClose, items }: ContextMenuPro
                   onClose();
                 }}
                 className={`
-                  flex items-center justify-between px-4 py-3 text-sm
-                  transition-colors active:bg-slate-100 dark:active:bg-slate-700
-                  ${index !== items.length - 1 ? 'border-b border-slate-100 dark:border-slate-700/40' : ''}
-                  ${item.danger ? 'text-red-500' : 'text-slate-700 dark:text-slate-200'}
+                  flex items-center justify-between px-4 py-3 text-sm cursor-pointer
+                  transition-colors active:bg-[var(--surface-secondary)] hover:bg-[var(--surface-secondary)]
+                  ${index !== items.length - 1 ? 'border-b border-[var(--border-subtle)]' : ''}
+                  ${item.danger ? 'text-[var(--negative)]' : 'text-[var(--text-primary)]'}
                 `}
               >
                 <span>{item.label}</span>

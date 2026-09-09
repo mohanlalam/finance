@@ -36,7 +36,7 @@ export function LazyViewport({
     >
       {isIntersected ? children : (
         <div 
-          className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 animate-pulse w-full h-full" 
+          className="bg-[var(--surface-secondary)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] animate-shimmer w-full h-full" 
           style={{ minHeight: placeholderHeight }} 
         />
       )}
@@ -97,7 +97,7 @@ export function LazyChartWrapper<TProps extends object>({
         </Suspense>
       ) : (
         <div 
-          className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 animate-pulse w-full h-full" 
+          className="bg-[var(--surface-secondary)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] animate-shimmer w-full h-full" 
           style={{ minHeight: placeholderHeight }} 
         />
       )}

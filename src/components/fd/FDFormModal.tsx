@@ -150,13 +150,13 @@ export const FDFormModal = React.memo(function FDFormModal({
       <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4">
         {portfolioOptions.length > 1 && !editingFd && (
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
               Portfolio
             </label>
             <select
               value={targetPortfolio}
               onChange={(e) => setTargetPortfolio(e.target.value)}
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-[14px] px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             >
               {portfolioOptions.map((p) => (
                 <option key={p.name} value={p.name}>{p.label}</option>
@@ -184,7 +184,7 @@ export const FDFormModal = React.memo(function FDFormModal({
         />
 
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2" role="alert">
+          <p className="text-xs text-[var(--negative)] bg-[var(--negative-soft)] border border-[var(--negative)]/20 rounded-[var(--radius-medium)] px-3 py-2" role="alert">
             {error}
           </p>
         )}
@@ -193,14 +193,14 @@ export const FDFormModal = React.memo(function FDFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm rounded-[14px] py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-xs ios-press transition-colors cursor-pointer"
+            className="flex-1 border border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--text-primary)] font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:bg-[var(--surface-secondary)] shadow-xs ios-press transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-indigo-600 text-white font-semibold text-sm rounded-[14px] py-2.5 hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            className="flex-1 bg-[var(--accent-blue)] text-white font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:opacity-90 transition-colors disabled:opacity-50 ios-press shadow-xs cursor-pointer"
           >
             {loading ? 'Saving...' : editingFd ? 'Save Changes' : 'Add Fixed Deposit'}
           </button>

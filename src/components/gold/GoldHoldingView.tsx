@@ -536,7 +536,7 @@ export function GoldHoldingView({
                 <button
                   type="button"
                   onClick={handleSaveRate}
-                  className="px-4 py-1.5 text-xs font-bold rounded-[var(--radius-small)] bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition-colors flex items-center gap-1.5"
+                  className="px-4 py-1.5 text-xs font-bold rounded-[var(--radius-small)] bg-[var(--warning)] hover:opacity-90 text-white shadow-xs transition-opacity flex items-center gap-1.5 ios-press cursor-pointer"
                 >
                   <Check size={14} />
                   <span>Save Rate</span>
@@ -550,7 +550,7 @@ export function GoldHoldingView({
       <AssetRegistryContainer
         title="Gold &amp; Precious Metals"
         createBtnLabel="Add Gold"
-        themeColor="bg-amber-600 hover:bg-amber-700"
+        themeColor="bg-[var(--warning)] hover:opacity-90"
         emptyType="gold"
         emptyTitle="No Gold Holdings Added"
         emptyDescription="Track physical gold coins, bars, jewelry, or Sovereign Gold Bonds in your portfolio."

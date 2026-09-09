@@ -306,7 +306,7 @@ export function DocumentAttachmentField({
 
       {/* Validation Error Banner */}
       {validationError && (
-        <div className="p-2.5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-[var(--radius-medium)] text-xs text-red-600 dark:text-red-400 flex items-center gap-2">
+        <div className="p-2.5 bg-[var(--negative-soft)] border border-[var(--negative)]/20 rounded-[var(--radius-medium)] text-xs text-[var(--negative)] flex items-center gap-2">
           <AlertCircle size={14} className="shrink-0" />
           <span>{validationError}</span>
         </div>

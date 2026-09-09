@@ -162,7 +162,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
       <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4">
         {portfolioOptions.length > 1 && !editingPolicy && (
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
               Portfolio
             </label>
             <select
@@ -314,14 +314,14 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm rounded-[14px] h-11 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-xs ios-press transition-colors cursor-pointer"
+            className="flex-1 border border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--text-primary)] font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:bg-[var(--surface-secondary)] shadow-xs ios-press transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-rose-600 text-white font-semibold text-sm rounded-[14px] h-11 py-2.5 hover:bg-rose-700 transition-colors disabled:opacity-50 ios-press shadow-xs cursor-pointer"
+            className="flex-1 bg-rose-600 text-white font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:bg-rose-700 transition-colors disabled:opacity-50 ios-press shadow-xs cursor-pointer"
           >
             {loading ? 'Saving...' : editingPolicy ? 'Save Changes' : 'Add Policy'}
           </button>

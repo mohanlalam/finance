@@ -6,7 +6,7 @@ import EmptyState from '../EmptyState';
 interface AssetRegistryContainerProps {
   title: string;
   createBtnLabel: string;
-  themeColor?: string; // e.g. 'bg-amber-600 hover:bg-amber-700'
+  themeColor?: string; // e.g. 'bg-[var(--accent-blue)] hover:opacity-90'
   emptyType: 'fd' | 'rd' | 'sip' | 'stocks' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'default';
   emptyTitle: string;
   emptyDescription: string;
@@ -21,7 +21,7 @@ interface AssetRegistryContainerProps {
 export const AssetRegistryContainer = React.memo(function AssetRegistryContainer({
   title,
   createBtnLabel,
-  themeColor = 'bg-indigo-600 hover:bg-indigo-700',
+  themeColor = 'bg-[var(--accent-blue)] hover:opacity-90',
   emptyType,
   emptyTitle,
   emptyDescription,

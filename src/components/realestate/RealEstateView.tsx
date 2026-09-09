@@ -332,7 +332,7 @@ export function RealEstateView({
       <AssetRegistryContainer
         title="Real Estate"
         createBtnLabel="Add Property"
-        themeColor="bg-emerald-600 hover:bg-emerald-700"
+        themeColor="bg-[var(--positive)] hover:opacity-90"
         emptyType="real_estate"
         emptyTitle="No Properties Added"
         emptyDescription="Monitor land plots, residential apartments, houses, and commercial property valuations."
