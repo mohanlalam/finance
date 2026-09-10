@@ -3,6 +3,7 @@ import { Portfolio } from '../../types/portfolio';
 import { calculateTaxHarvesting, TAX_DISCLAIMER } from '../../domains/taxation/calculations/taxHarvesting';
 import { formatINR } from '../../utils/formatters';
 import { TrendingDown, ShieldAlert } from '../icons/AppIcons';
+import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
 
 interface TaxHarvestingViewProps {
   portfolio: Portfolio | null;
@@ -11,8 +12,22 @@ interface TaxHarvestingViewProps {
 
 export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvestingViewProps) {
   const holdings = React.useMemo(() => {
-    if (portfolio) return portfolio.holdings;
-    return portfolios.flatMap(p => p.holdings);
+    if (portfolio) {
+      return (portfolio.holdings || []).map((h) => ({
+        ...h,
+        portfolio_id: h.portfolio_id || portfolio.id,
+        portfolio_name: portfolio.name,
+        portfolio_label: portfolio.label || portfolio.name,
+      }));
+    }
+    return portfolios.flatMap((p) =>
+      (p.holdings || []).map((h) => ({
+        ...h,
+        portfolio_id: h.portfolio_id || p.id,
+        portfolio_name: p.name,
+        portfolio_label: p.label || p.name,
+      }))
+    );
   }, [portfolio, portfolios]);
 
   const taxData = React.useMemo(() => calculateTaxHarvesting(holdings), [holdings]);
@@ -117,6 +132,7 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
               <thead>
                 <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]/50 text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
                   <th className="px-4 py-3">Stock / Asset</th>
+                  {!portfolio && <th className="px-4 py-3">Owner</th>}
                   <th className="px-4 py-3 text-right">Holding Value</th>
                   <th className="px-4 py-3 text-right">Unrealized Loss</th>
                   <th className="px-4 py-3 text-center">Tax Category</th>
@@ -124,39 +140,57 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-subtle)] text-sm">
-                {taxData.opportunities.map((opp) => (
-                  <tr key={opp.holding.id || opp.holding.ticker} className="hover:bg-[var(--surface-secondary)]/30 transition-colors">
-                    <td className="px-4 py-3 font-semibold text-[var(--text-primary)]">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[var(--negative)]"></div>
-                        {opp.holding.ticker}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium tnum text-[var(--text-secondary)]">
-                      {formatINR(opp.holding.currentValue)}
-                    </td>
-                    <td className="px-4 py-3 text-right font-bold tnum text-[var(--negative)]">
-                      {formatINR(Math.abs(opp.unrealizedPnL))}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-pill)] border ${
-                        opp.isDebtOrGold
-                          ? 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)]'
-                          : opp.isLTCG
-                          ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border-[var(--accent-blue)]/30'
-                          : 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/30'
-                      }`}>
-                        {opp.isDebtOrGold ? 'Slab Rate' : opp.isLTCG ? 'LTCG' : 'STCG'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--positive)] bg-[var(--positive-soft)] border border-[var(--positive)]/30 px-2 py-1 rounded-[var(--radius-small)]">
-                        <TrendingDown size={12} />
-                        Harvest
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {taxData.opportunities.map((opp) => {
+                  const memberName = opp.holding.portfolio_label || opp.holding.portfolio_name;
+                  const memberConfig = memberName ? getFamilyMemberConfig(memberName) : null;
+                  const rowKey = `${opp.holding.id || opp.holding.ticker}-${opp.holding.portfolio_id || memberName || ''}`;
+
+                  return (
+                    <tr key={rowKey} className="hover:bg-[var(--surface-secondary)]/30 transition-colors">
+                      <td className="px-4 py-3 font-semibold text-[var(--text-primary)]">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-[var(--negative)]"></div>
+                          <span>{opp.holding.ticker}</span>
+                        </div>
+                      </td>
+                      {!portfolio && (
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {memberConfig && memberName ? (
+                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold ${memberConfig.bg} ${memberConfig.text}`}>
+                              {memberConfig.icon}
+                              <span>{memberName}</span>
+                            </span>
+                          ) : (
+                            <span className="text-xs text-[var(--text-tertiary)]">—</span>
+                          )}
+                        </td>
+                      )}
+                      <td className="px-4 py-3 text-right font-medium tnum text-[var(--text-secondary)]">
+                        {formatINR(opp.holding.currentValue)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold tnum text-[var(--negative)]">
+                        {formatINR(Math.abs(opp.unrealizedPnL))}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-pill)] border ${
+                          opp.isDebtOrGold
+                            ? 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)]'
+                            : opp.isLTCG
+                            ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border-[var(--accent-blue)]/30'
+                            : 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/30'
+                        }`}>
+                          {opp.isDebtOrGold ? 'Slab Rate' : opp.isLTCG ? 'LTCG' : 'STCG'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--positive)] bg-[var(--positive-soft)] border border-[var(--positive)]/30 px-2 py-1 rounded-[var(--radius-small)]">
+                          <TrendingDown size={12} />
+                          Harvest
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

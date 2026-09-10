@@ -408,7 +408,7 @@ export function RDView({
       <AssetRegistryContainer
         title="Recurring Deposits"
         createBtnLabel="Add RD"
-        themeColor="bg-[var(--accent-violet)] hover:opacity-90"
+        themeColor="bg-[#c2410c] hover:bg-[#9a3412]"
         emptyType="rd"
         emptyTitle="No Recurring Deposits Added"
         emptyDescription="Track monthly systematic deposits across banks."

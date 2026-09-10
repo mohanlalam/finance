@@ -130,7 +130,7 @@ function SummaryCards({
                     <span className="text-[var(--text-primary)] font-bold tnum">
                       {renderValue(val)}
                     </span>
-                    {idx < sortedPortfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1">|</span>}
+                    {idx < sortedPortfolios.length - 1 && <span className="text-[var(--text-tertiary)] opacity-40 mx-1.5">•</span>}
                   </span>
                 );
               })}
@@ -164,7 +164,7 @@ function SummaryCards({
                     <span className="text-[var(--text-primary)] font-bold tnum">
                       {renderValue(val)}
                     </span>
-                    {idx < portfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1">|</span>}
+                    {idx < portfolios.length - 1 && <span className="text-[var(--text-tertiary)] opacity-40 mx-1.5">•</span>}
                   </span>
                 );
               })}
@@ -203,7 +203,7 @@ function SummaryCards({
                     <span className={`font-bold tnum ${localGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                       {isBalancesHidden ? '••••••' : <>{localGain ? '+' : ''}<AnimatedNumber value={pnl} formatter={formatINR} /></>}
                     </span>
-                    {idx < sortedPortfolios.length - 1 && <span className="text-[var(--border-subtle)] ml-1">|</span>}
+                    {idx < sortedPortfolios.length - 1 && <span className="text-[var(--text-tertiary)] opacity-40 mx-1.5">•</span>}
                   </span>
                 );
               })}
@@ -250,7 +250,7 @@ function SummaryCards({
                     <span className={`font-bold tnum ${localTodayGain ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                       {isBalancesHidden ? '••••••' : <>{localTodayGain ? '+' : ''}<AnimatedNumber value={p.todayPnL} formatter={formatINR} /></>}
                     </span>
-                    {idx < memberBreakdowns.length - 1 && <span className="text-[var(--border-subtle)] ml-1">|</span>}
+                    {idx < memberBreakdowns.length - 1 && <span className="text-[var(--text-tertiary)] opacity-40 mx-1.5">•</span>}
                   </span>
                 );
               })}

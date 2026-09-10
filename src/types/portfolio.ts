@@ -26,6 +26,9 @@ export interface Holding {
   weekHigh52?: number;
   created_at?: string;
   purchase_date?: string;
+  portfolio_id?: string;
+  portfolio_name?: string;
+  portfolio_label?: string;
 }
 
 export interface FixedDeposit {

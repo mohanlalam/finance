@@ -377,7 +377,7 @@ export function SIPView({
       <AssetRegistryContainer
         title="Mutual Funds &amp; SIPs"
         createBtnLabel="Add SIP"
-        themeColor="bg-teal-600 hover:bg-teal-700"
+        themeColor="bg-[#9333ea] hover:bg-[#7e22ce]"
         emptyType="sip"
         emptyTitle="No Mutual Funds / SIPs Added"
         emptyDescription="Track AMFI mutual fund schemes, live NAV updates, and monthly systematic contributions."

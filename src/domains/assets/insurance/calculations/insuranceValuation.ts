@@ -48,7 +48,8 @@ export function calculateTotalAnnualPremium(policies: Insurance[]): number {
  */
 export function getPolicyRenewalStatus(
   policy: Insurance,
-  asOfDate: Date = new Date()
+  asOfDate: Date = new Date(),
+  windowDays = 60
 ): PolicyRenewalStatus {
   const targetDateStr = policy.renewal_date;
   if (!targetDateStr) {
@@ -74,7 +75,7 @@ export function getPolicyRenewalStatus(
   const diffDays = Math.ceil((targetTs - asOfTs) / (24 * 3600 * 1000));
 
   const isOverdue = diffDays < 0;
-  const isDueSoon = diffDays >= 0 && diffDays <= 30;
+  const isDueSoon = diffDays >= 0 && diffDays <= windowDays;
 
   let statusText = `${diffDays} days left`;
   if (isOverdue) {
@@ -96,7 +97,8 @@ export function getPolicyRenewalStatus(
  */
 export function calculateInsuranceTotals(
   policies: Insurance[],
-  asOfDate: Date = new Date()
+  asOfDate: Date = new Date(),
+  windowDays = 60
 ): InsuranceTotals {
   if (!Array.isArray(policies) || policies.length === 0) {
     return {
@@ -120,7 +122,7 @@ export function calculateInsuranceTotals(
     totalAnnualPremium += calculateAnnualizedPremium(p);
     activeCount++;
 
-    const renewal = getPolicyRenewalStatus(p, asOfDate);
+    const renewal = getPolicyRenewalStatus(p, asOfDate, windowDays);
     if (renewal.isDueSoon || renewal.isOverdue) {
       expiringSoonCount++;
     }

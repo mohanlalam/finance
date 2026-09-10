@@ -632,8 +632,8 @@ export default React.memo(function PortfolioTable({
 
                     {(onDelete || onUpdate) && (
                       <td className="px-2 py-2 text-center">
-                        {/* Hover Action Dock (Zerodha Style - Accessible on Hover & Keyboard Focus) */}
-                        <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150">
+                        {/* Action Dock (Subtly visible by default, illuminates on hover/focus) */}
+                        <div className="flex items-center justify-center gap-1 opacity-40 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150">
                           <button
                             onClick={() => shareHolding(h, addToast)}
                             className="w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:bg-[var(--accent-blue-soft)] border border-[var(--border-subtle)] shadow-xs ios-press focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"

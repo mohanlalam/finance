@@ -29,7 +29,7 @@ export default function DesktopSidebar({
   const sortedPortfolios = useMemo(() => sortPortfolios(portfolios), [portfolios]);
 
   const getNavItemClass = (isActive: boolean) =>
-    `flex items-center gap-2.5 w-full text-left px-3.5 py-2.5 rounded-[var(--radius-medium)] text-xs ios-press transition-all outline-none ${
+    `flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-[var(--radius-medium)] text-xs ios-press transition-all outline-none ${
       isActive
         ? 'sidebar-item-active border border-[var(--accent-blue)]/30 font-bold'
         : 'text-[var(--text-secondary)] font-semibold hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] border border-transparent'
@@ -39,11 +39,11 @@ export default function DesktopSidebar({
     <nav aria-label="Sidebar navigation" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-60 self-start sticky top-20 max-h-[calc(100vh-5.5rem)] overflow-y-auto">
       {/* AI Smart Import Button */}
       {onOpenSmartImport && (
-        <div className="mb-4">
+        <div className="mb-3">
           <button
             type="button"
             onClick={onOpenSmartImport}
-            className="flex items-center justify-center gap-2 w-full px-3.5 py-2.5 rounded-[var(--radius-medium)] text-xs font-bold text-[var(--accent-blue)] bg-gradient-to-r from-cyan-500/15 via-blue-500/15 to-purple-500/15 hover:from-cyan-500/25 hover:to-purple-500/25 border border-[var(--accent-blue)]/30 shadow-[var(--shadow-card)] transition-all ios-press active:scale-95 cursor-pointer group"
+            className="flex items-center justify-center gap-2 w-full px-3.5 py-2 rounded-[var(--radius-medium)] text-xs font-bold text-[var(--accent-blue)] bg-gradient-to-r from-cyan-500/15 via-blue-500/15 to-purple-500/15 hover:from-cyan-500/25 hover:to-purple-500/25 border border-[var(--accent-blue)]/30 shadow-[var(--shadow-card)] transition-all ios-press active:scale-95 cursor-pointer group"
           >
             <Sparkles size={14} className="text-[var(--accent-blue)] animate-pulse" />
             <span>✨ Smart AI Import</span>
@@ -52,8 +52,8 @@ export default function DesktopSidebar({
       )}
 
       {/* Portfolios Section */}
-      <div className="mb-5">
-        <h2 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-3">
+      <div className="mb-3.5">
+        <h2 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-1.5 px-3">
           Family Members
         </h2>
         <div className="space-y-0.5">
@@ -117,8 +117,8 @@ export default function DesktopSidebar({
       </div>
 
       {/* Assets Section */}
-      <div className="mb-5">
-        <h2 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-3">
+      <div className="mb-3.5">
+        <h2 className="text-label-micro font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-1.5 px-3">
           Assets &amp; Holdings
         </h2>
         <div className="space-y-0.5">

@@ -66,6 +66,15 @@ describe('insuranceValuation', () => {
     const statusFar = getPolicyRenewalStatus(mockPolicies[2], referenceDate);
     expect(statusFar.isDueSoon).toBe(false);
     expect(statusFar.isOverdue).toBe(false);
+
+    // 37-day renewal (like Jeevan Labh) should be detected within 60-day window
+    const policyIn37Days: Insurance = {
+      ...mockPolicies[0],
+      renewal_date: '2026-10-07', // 37 days from 2026-08-31
+    };
+    const status37Days = getPolicyRenewalStatus(policyIn37Days, referenceDate);
+    expect(status37Days.isDueSoon).toBe(true);
+    expect(status37Days.daysRemaining).toBe(37);
   });
 
   it('aggregates total insurance metrics correctly', () => {
