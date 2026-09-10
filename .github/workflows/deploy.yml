@@ -10,6 +10,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write
 
 concurrency:
   group: 'pages'
@@ -53,6 +54,29 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
+      - name: Delete stale github-pages artifact (on re-runs)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const res = await github.rest.actions.listWorkflowRunArtifacts({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: context.runId,
+              });
+              const staleArtifacts = res.data.artifacts.filter(a => a.name === "github-pages");
+              for (const artifact of staleArtifacts) {
+                console.log(`Deleting stale artifact ID: ${artifact.id}`);
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                });
+              }
+            } catch (err) {
+              console.log('Artifact cleanup skipped or not needed:', err.message);
+            }
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
