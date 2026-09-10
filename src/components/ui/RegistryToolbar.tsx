@@ -48,7 +48,7 @@ export function RegistryToolbar<F extends string = string>({
     <div className="px-3 sm:px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-2.5 border-b border-[var(--border-subtle)] bg-[var(--surface)]">
       <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
         {/* Search Input */}
-        <div className="relative flex items-center w-full sm:w-56 shrink-0">
+        <div className="relative flex items-center w-full sm:w-72 md:w-80 shrink-0">
           <Search size={13} className="absolute left-2.5 text-[var(--text-tertiary)] pointer-events-none" aria-hidden="true" />
           <input
             type="text"

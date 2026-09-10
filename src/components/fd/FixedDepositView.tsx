@@ -40,6 +40,9 @@ const SORT_OPTIONS: SortOption<FDSortField>[] = [
   { field: 'bank_name', label: 'Bank' },
 ];
 
+export const isDepositMatured = (fd: FixedDeposit) =>
+  fd.status === 'matured' || Boolean(fd.maturity_date && new Date(fd.maturity_date).getTime() <= Date.now());
+
 export function FixedDepositView({
   fixedDeposits,
   documents,
@@ -53,7 +56,6 @@ export function FixedDepositView({
   const isMutating = useIsMutating();
   const { addToast } = useToastActions();
   const { portfolios } = usePortfolioEntities();
-
   const [selectedMember, setSelectedMember] = useState<string>(portfolioName || 'all');
 
   useEffect(() => {
@@ -80,7 +82,7 @@ export function FixedDepositView({
         const current = getFDEffectiveValue(fd);
         memberPrincipal += principal;
         memberCurrent += current;
-        if (fd.status === 'matured') {
+        if (isDepositMatured(fd)) {
           memberMatured++;
         } else {
           memberActive++;
@@ -146,8 +148,8 @@ export function FixedDepositView({
     customFilter: (item, query) => {
       const matchesFilter =
         activeFilter === 'all' ||
-        (activeFilter === 'active' && item.status !== 'matured') ||
-        (activeFilter === 'matured' && item.status === 'matured');
+        (activeFilter === 'active' && !isDepositMatured(item)) ||
+        (activeFilter === 'matured' && isDepositMatured(item));
       if (!matchesFilter) return false;
       if (!query) return true;
       const q = query.toLowerCase();
@@ -237,7 +239,7 @@ export function FixedDepositView({
           {/* Right: Aggregate Summary Badges */}
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
             <span className="flex items-center gap-1 text-[11px] font-semibold text-[var(--positive)] bg-[var(--positive-soft)] px-2 py-0.5 rounded-[var(--radius-small)] tnum">
-              {familyFDSummary.activeCount} Active FDs
+              {familyFDSummary.activeCount} Active FD{familyFDSummary.activeCount === 1 ? '' : 's'}
             </span>
             <span className="text-[11px] font-medium text-[var(--text-tertiary)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-[var(--radius-small)] hidden sm:inline-block tnum">
               {fixedDeposits.length} Total Deposits &bull; Click member to filter

@@ -120,11 +120,7 @@ export function SIPAccountCard({
           <div>
             <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Exp. CAGR</p>
             <p className="text-xs font-bold text-[var(--accent-blue)] tnum">+{account.expected_cagr}%</p>
-            {invested > 0 && (
-              <p className={`text-[10px] font-semibold tnum ${isProfit ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-                {isProfit ? '+' : ''}{formatPercent(plPercent, 1)}
-              </p>
-            )}
+            <span className="text-[9px] text-[var(--text-tertiary)] font-medium">target</span>
           </div>
           <div>
             <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-wider">Invested</p>
@@ -135,7 +131,7 @@ export function SIPAccountCard({
             <p className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(currentVal)}</p>
             {invested > 0 && (
               <p className={`text-[10px] font-semibold mt-0.5 tnum ${isProfit ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-                {isProfit ? '+' : ''}{formatINR(profitLoss)}
+                {isProfit ? '+' : ''}{formatINR(profitLoss)} ({isProfit ? '+' : ''}{formatPercent(plPercent, 1)})
               </p>
             )}
           </div>

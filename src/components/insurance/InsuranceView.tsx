@@ -227,7 +227,7 @@ export function InsuranceView({
           {/* Right: Aggregate Summary Badges */}
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
             <span className="flex items-center gap-1 text-[11px] font-semibold text-[var(--positive)] bg-[var(--positive-soft)] px-2 py-0.5 rounded-[var(--radius-small)] tnum">
-              {familyInsuranceSummary.activeCount} Active Policies
+              {familyInsuranceSummary.activeCount} Active Polic{familyInsuranceSummary.activeCount === 1 ? 'y' : 'ies'}
             </span>
             <span className="text-[11px] font-medium text-[var(--text-tertiary)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-[var(--radius-small)] hidden sm:inline-block tnum">
               Click member to filter

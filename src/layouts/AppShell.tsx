@@ -469,9 +469,21 @@ export default function AppShell() {
         )}
 
         {isPriceStale && priceStatus !== 'error' && (
-          <div className="flex items-center gap-2.5 stale-price-banner rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm">
-            <AlertCircle size={15} className="shrink-0 text-[var(--warning)]" />
-            <span className="leading-snug font-medium">Stock prices may be outdated. Press Ctrl+Shift+R to refresh.</span>
+          <div className="flex items-center justify-between gap-2.5 stale-price-banner rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <AlertCircle size={15} className="shrink-0 text-[var(--warning)]" />
+              <span className="leading-snug font-medium">
+                {isMobile ? 'Stock prices may be outdated. Pull down or tap Sync to refresh.' : 'Stock prices may be outdated. Press Ctrl+Shift+R or click ↻ to refresh.'}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleFullRefresh}
+              className="text-xs font-bold text-[var(--warning)] hover:underline shrink-0 ml-2 cursor-pointer"
+              title="Refresh prices"
+            >
+              Sync
+            </button>
           </div>
         )}
 
@@ -486,7 +498,7 @@ export default function AppShell() {
         )}
 
         {isMobile ? (
-          <main id="main-content" className="space-y-4 overflow-hidden pb-20">
+          <main id="main-content" className="space-y-4 overflow-hidden pb-32">
             {/* Family Tabs Row on Mobile */}
             <FamilyTabBar
               portfolios={portfolios}

@@ -205,11 +205,14 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
       {valid.map((pw, i) => (
         <div key={i}>
           <p className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5">{pw.portfolioLabel}</p>
-          <div className={`grid gap-1.5 sm:gap-2 ${pw.best && pw.worst ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+          <div className={`grid gap-1.5 sm:gap-2 ${pw.best && pw.worst ? 'grid-cols-1 2xl:grid-cols-2' : 'grid-cols-1'}`}>
             {pw.best && (
-              <div className={`flex items-center gap-1.5 rounded-[var(--radius-medium)] px-2 py-1.5 min-w-0 ${
-                pw.best.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'
-              }`}>
+              <div 
+                className={`flex items-center gap-1.5 rounded-[var(--radius-medium)] px-2 py-1.5 min-w-0 ${
+                  pw.best.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'
+                }`}
+                title={`${pw.best.ticker}: ${formatPercent(pw.best.pnlPercent, 2)}`}
+              >
                 {pw.best.pnlPercent >= 0 ? (
                   <TrendingUp size={10} className="shrink-0" aria-hidden="true" />
                 ) : (
@@ -220,9 +223,12 @@ const BestWorstPerformers = React.memo(function BestWorstPerformers({ items }: {
               </div>
             )}
             {pw.worst && (
-              <div className={`flex items-center gap-1.5 rounded-[var(--radius-medium)] px-2 py-1.5 min-w-0 ${
-                pw.worst.pnlPercent <= 0 ? 'bg-[var(--negative-soft)] text-[var(--negative)]' : 'bg-[var(--positive-soft)] text-[var(--positive)]'
-              }`}>
+              <div 
+                className={`flex items-center gap-1.5 rounded-[var(--radius-medium)] px-2 py-1.5 min-w-0 ${
+                  pw.worst.pnlPercent <= 0 ? 'bg-[var(--negative-soft)] text-[var(--negative)]' : 'bg-[var(--positive-soft)] text-[var(--positive)]'
+                }`}
+                title={`${pw.worst.ticker}: ${formatPercent(pw.worst.pnlPercent, 2)}`}
+              >
                 {pw.worst.pnlPercent <= 0 ? (
                   <TrendingDown size={10} className="shrink-0" aria-hidden="true" />
                 ) : (

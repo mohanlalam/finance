@@ -66,18 +66,18 @@ export function DepositDetailsCard({
   // Helper to compute progress bar percentage
   const getProgressPercent = (item: FixedDeposit) => {
     if (item.status === 'matured') return 100;
-    if (!item.maturity_date) return 100;
+    if (!item.maturity_date) return 0;
     const start = new Date(item.start_date).getTime();
     const end = new Date(item.maturity_date).getTime();
     const now = Date.now();
     if (now >= end) return 100;
     if (now <= start) return 0;
-    return ((now - start) / (end - start)) * 100;
+    return Math.min(Math.max(((now - start) / (end - start)) * 100, 0), 100);
   };
 
   const progress = getProgressPercent(fd);
   const fdDocs = documents.filter((d) => d.asset_type === 'fd' && d.asset_id === fd.id);
-  const isMatured = fd.status === 'matured' || progress >= 100;
+  const isMatured = fd.status === 'matured' || Boolean(fd.maturity_date && new Date(fd.maturity_date).getTime() <= Date.now());
 
   const totalDuration = fd.maturity_date
     ? formatDateDuration(fd.start_date, fd.maturity_date)
