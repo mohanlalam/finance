@@ -52,6 +52,13 @@
   /* Asset Color Token Aliases */
   --cyan: #06b6d4;
   --gold: #facc15;
+  --asset-fd: #06b6d4;
+  --asset-rd: #c2410c;
+  --asset-sip: #9333ea;
+  --asset-gold: #facc15;
+  --asset-realestate: #16a34a;
+  --asset-insurance: #e11d48;
+  --accent-rose: #e11d48;
 
   /* Z-index hierarchy */
   --z-base: 1;
@@ -94,6 +101,14 @@
 
   --warning: #f59e0b;
   --warning-soft: rgba(245, 158, 11, 0.16);
+
+  --accent-rose: #f43f5e;
+  --asset-fd: #06b6d4;
+  --asset-rd: #ea580c;
+  --asset-sip: #a855f7;
+  --asset-gold: #facc15;
+  --asset-realestate: #22c55e;
+  --asset-insurance: #f43f5e;
 
   --border-subtle: rgba(255, 255, 255, 0.09);
   --border-glass: rgba(255, 255, 255, 0.14);

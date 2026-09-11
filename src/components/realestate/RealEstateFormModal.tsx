@@ -40,6 +40,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
   const [location, setLocation] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [currentValuation, setCurrentValuation] = useState('');
+  const [monthlyRent, setMonthlyRent] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
   const [notes, setNotes] = useState('');
   const defaultPortfolio = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
@@ -63,6 +64,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
       setLocation(editingProperty.location || '');
       setPurchasePrice(editingProperty.purchase_price ? String(editingProperty.purchase_price) : '');
       setCurrentValuation(editingProperty.current_valuation ? String(editingProperty.current_valuation) : '');
+      setMonthlyRent(editingProperty.monthly_rent !== undefined && editingProperty.monthly_rent !== null ? String(editingProperty.monthly_rent) : '');
       setPurchaseDate(editingProperty.purchase_date || '');
       setNotes(editingProperty.notes || '');
       setTargetPortfolio(initialPortfolio);
@@ -72,6 +74,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
       setLocation('');
       setPurchasePrice('');
       setCurrentValuation('');
+      setMonthlyRent('');
       setPurchaseDate('');
       setNotes('');
       setTargetPortfolio(initialPortfolio);
@@ -99,6 +102,12 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
       return;
     }
 
+    const rent = monthlyRent ? parseFloat(monthlyRent) : 0;
+    if (isNaN(rent) || rent < 0 || rent > 50_000_000) {
+      setError('Monthly rent cannot exceed ₹5 Crore');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -115,6 +124,8 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
         purchase_price: pPrice,
         currentValuation: cVal,
         current_valuation: cVal,
+        monthlyRent: rent,
+        monthly_rent: rent,
         purchaseDate: purchaseDate || undefined,
         purchase_date: purchaseDate || undefined,
         notes: notes.trim() || undefined,
@@ -233,11 +244,12 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
             <input
               type="number"
               inputMode="decimal"
-              step="0.01"
+              min="0"
+              step="1"
               placeholder="e.g. 7500000"
               value={purchasePrice}
               onChange={(e) => setPurchasePrice(e.target.value)}
-              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors font-medium"
             />
           </div>
           <div>
@@ -247,25 +259,43 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
             <input
               type="number"
               inputMode="decimal"
-              step="0.01"
+              min="0"
+              step="1"
               placeholder="e.g. 9200000"
               value={currentValuation}
               onChange={(e) => setCurrentValuation(e.target.value)}
-              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors font-medium"
             />
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
-            Purchase Date
-          </label>
-          <input
-            type="date"
-            value={purchaseDate}
-            onChange={(e) => setPurchaseDate(e.target.value)}
-            className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+              Monthly Rental Income (₹) <span className="font-normal text-[var(--text-tertiary)]">(optional)</span>
+            </label>
+            <input
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step="1"
+              placeholder="e.g. 25000"
+              value={monthlyRent}
+              onChange={(e) => setMonthlyRent(e.target.value)}
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+              Purchase Date
+            </label>
+            <input
+              type="date"
+              value={purchaseDate}
+              onChange={(e) => setPurchaseDate(e.target.value)}
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+            />
+          </div>
         </div>
 
         <div>

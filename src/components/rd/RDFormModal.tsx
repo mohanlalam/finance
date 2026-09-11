@@ -160,51 +160,38 @@ export function RDFormModal({
       isOpen={isOpen}
       onClose={onClose}
       maxWidth="max-w-lg"
-      ariaLabel={editingAccount ? 'Edit Recurring Deposit' : 'Create Recurring Deposit'}
+      title={editingAccount ? 'Edit Recurring Deposit' : 'Create Recurring Deposit'}
+      preventClose={loading}
     >
-      <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
-        <div>
-          <h3 id="rd-modal-title" className="text-base font-bold text-[var(--text-primary)]">
-            {editingAccount ? 'Edit Recurring Deposit' : 'Create Recurring Deposit'}
-          </h3>
-          <p className="text-xs text-[var(--text-tertiary)] mt-0.5">Enter details to track valuation and timeline</p>
-        </div>
-        <button
-          onClick={onClose}
-          className="w-8 h-8 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors text-xl font-bold ios-press"
-          aria-label="Close modal"
-        >
-          &times;
-        </button>
-      </div>
-
       <form onSubmit={handleSubmit} className="px-4 py-4 sm:px-6 sm:py-5 space-y-3.5 sm:space-y-4 overflow-y-auto min-h-0 flex-1">
-          {/* Portfolio Select */}
+        {/* Portfolio Select - only shown when adding and multiple options exist */}
+        {!editingAccount && portfolioOptions.length > 1 && (
           <div>
             <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Portfolio Owner</label>
             <select
               value={formPortfolio}
               onChange={(e) => setFormPortfolio(e.target.value)}
-              disabled={!!editingAccount}
-              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors disabled:opacity-50"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
               ))}
             </select>
           </div>
+        )}
 
-          {/* Bank / Post Office Name */}
-          <div>
-            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Bank / Post Office Name</label>
-            <input
-              type="text"
-              list="indian-bank-rd-suggestions"
-              placeholder="e.g. HDFC Bank, SBI, Post Office"
-              value={bankName}
-              onChange={(e) => setBankName(e.target.value)}
-              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
-            />
+        {/* Bank / Post Office Name */}
+        <div>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Bank / Post Office Name</label>
+          <input
+            type="text"
+            list="indian-bank-rd-suggestions"
+            placeholder="e.g. HDFC Bank, SBI, Post Office"
+            value={bankName}
+            onChange={(e) => setBankName(e.target.value)}
+            className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+            required
+          />
             <datalist id="indian-bank-rd-suggestions">
               <option value="State Bank of India" />
               <option value="HDFC Bank" />
@@ -225,11 +212,14 @@ export function RDFormModal({
               <input
                 type="number"
                 inputMode="decimal"
+                min="0"
+                step="100"
                 placeholder="0"
                 value={monthlyDeposit}
                 onChange={(e) => setMonthlyDeposit(e.target.value)}
                 onBlur={calculateMaturity}
-                className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors font-medium"
+                required
               />
             </div>
             <div className="min-w-0">
@@ -237,12 +227,15 @@ export function RDFormModal({
               <input
                 type="number"
                 inputMode="decimal"
-                step="0.01"
+                min="0"
+                max="50"
+                step="0.05"
                 placeholder="e.g. 6.80"
                 value={interestRate}
                 onChange={(e) => setInterestRate(e.target.value)}
                 onBlur={calculateMaturity}
                 className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                required
               />
             </div>
           </div>
@@ -257,6 +250,7 @@ export function RDFormModal({
                 onChange={(e) => setStartDate(e.target.value)}
                 onBlur={calculateMaturity}
                 className="w-full h-10 min-w-0 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-2.5 sm:px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                required
               />
             </div>
             <div className="min-w-0 overflow-hidden">
@@ -267,6 +261,7 @@ export function RDFormModal({
                 onChange={(e) => setMaturityDate(e.target.value)}
                 onBlur={calculateMaturity}
                 className="w-full h-10 min-w-0 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-2.5 sm:px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                required
               />
             </div>
           </div>
@@ -277,10 +272,11 @@ export function RDFormModal({
               <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 truncate">Est. Maturity Amount (₹)</label>
               <input
                 type="number"
+                inputMode="decimal"
                 placeholder="Auto-computed"
                 value={maturityAmount}
                 onChange={(e) => setMaturityAmount(e.target.value)}
-                className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors font-medium"
               />
             </div>
             <div className="min-w-0">
@@ -301,7 +297,7 @@ export function RDFormModal({
             <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Notes <span className="font-normal text-[var(--text-tertiary)]">(optional)</span></label>
             <textarea
               rows={2}
-              placeholder="e.g. Linked to child marriage, Post office scheme"
+              placeholder="e.g. Linked to child's education, Post office scheme"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors resize-none"
@@ -327,7 +323,7 @@ export function RDFormModal({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-[var(--accent-blue)] text-white font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50 ios-press shadow-xs cursor-pointer"
+              className="flex-1 bg-[var(--asset-rd)] text-white font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50 ios-press shadow-xs cursor-pointer"
             >
               {loading ? 'Saving...' : editingAccount ? 'Save Changes' : 'Create RD'}
             </button>

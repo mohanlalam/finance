@@ -67,7 +67,7 @@ export function SIPFormFields({
             type="button"
             onClick={onValidateScheme}
             disabled={isValidatingScheme}
-            className="bg-[var(--accent-blue)] hover:opacity-90 text-white text-xs font-semibold px-4 py-2 rounded-[var(--radius-medium)] transition-all disabled:opacity-50 shrink-0 ios-press shadow-xs cursor-pointer"
+            className="bg-[var(--accent-blue)] hover:opacity-90 text-white text-xs font-semibold px-4 min-h-[40px] rounded-[var(--radius-medium)] transition-all disabled:opacity-50 shrink-0 ios-press shadow-xs cursor-pointer flex items-center justify-center"
           >
             {isValidatingScheme ? 'Validating...' : 'Fetch Fund'}
           </button>
@@ -82,6 +82,7 @@ export function SIPFormFields({
           value={fundName}
           onChange={(e) => handleSelectScheme(e.target.value)}
           className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+          required
         />
         <datalist id="indian-mf-schemes">
           {POPULAR_INDIAN_MF_SCHEMES.map((s) => (
@@ -90,20 +91,23 @@ export function SIPFormFields({
         </datalist>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="min-w-0">
-          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 truncate">Monthly SIP (₹)</label>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Monthly SIP (₹)</label>
           <input
             type="number"
             inputMode="decimal"
+            min="0"
+            step="100"
             placeholder="0"
             value={monthlySip}
             onChange={(e) => setMonthlySip(e.target.value)}
-            className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+            className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors font-medium"
+            required
           />
         </div>
         <div className="min-w-0">
-          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 truncate">Exp. CAGR (%)</label>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Exp. CAGR (%)</label>
           <input
             type="number"
             inputMode="decimal"
@@ -112,10 +116,11 @@ export function SIPFormFields({
             value={expectedCagr}
             onChange={(e) => setExpectedCagr(e.target.value)}
             className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+            required
           />
         </div>
         <div className="min-w-0">
-          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 truncate">Units Owned</label>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Units Owned</label>
           <input
             type="number"
             inputMode="decimal"
@@ -123,7 +128,7 @@ export function SIPFormFields({
             placeholder="0.000"
             value={units}
             onChange={(e) => setUnits(e.target.value)}
-            className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+            className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors font-medium"
           />
         </div>
       </div>
@@ -136,6 +141,7 @@ export function SIPFormFields({
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             className="w-full h-10 min-w-0 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-2.5 sm:px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+            required
           />
         </div>
         <div className="min-w-0 overflow-hidden">

@@ -240,12 +240,13 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
             <input
               type="number"
               inputMode="decimal"
-              step="0.01"
+              min="0"
+              step="1"
               required
               placeholder="e.g. 1000000"
               value={sumAssured}
               onChange={(e) => setSumAssured(e.target.value)}
-              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors font-medium"
             />
           </div>
         </div>
@@ -258,11 +259,12 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
             <input
               type="number"
               inputMode="decimal"
-              step="0.01"
+              min="0"
+              step="1"
               placeholder="e.g. 24000"
               value={premiumAmount}
               onChange={(e) => setPremiumAmount(e.target.value)}
-              className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors font-medium"
             />
           </div>
 
@@ -305,7 +307,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
         />
 
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-[14px] px-3 py-2" role="alert">
+          <p className="text-xs text-[var(--negative)] bg-[var(--negative-soft)] border border-[var(--negative)]/20 rounded-[var(--radius-medium)] px-3 py-2" role="alert">
             {error}
           </p>
         )}
@@ -321,7 +323,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-rose-600 text-white font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:bg-rose-700 transition-colors disabled:opacity-50 ios-press shadow-xs cursor-pointer"
+            className="flex-1 bg-[var(--asset-insurance)] text-white font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50 ios-press shadow-xs cursor-pointer"
           >
             {loading ? 'Saving...' : editingPolicy ? 'Save Changes' : 'Add Policy'}
           </button>

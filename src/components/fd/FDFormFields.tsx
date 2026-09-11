@@ -17,6 +17,8 @@ export interface FDFormFieldsProps {
   setMaturityAmount: (val: string) => void;
   status: 'active' | 'matured';
   setStatus: (val: 'active' | 'matured') => void;
+  notes?: string;
+  setNotes?: (val: string) => void;
   calculateMaturity: () => void;
 }
 
@@ -35,6 +37,8 @@ export function FDFormFields({
   setMaturityAmount,
   status,
   setStatus,
+  notes,
+  setNotes,
   calculateMaturity,
 }: FDFormFieldsProps) {
   return (
@@ -62,12 +66,13 @@ export function FDFormFields({
           <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Principal Amount (₹)</label>
           <input
             type="number"
+            inputMode="decimal"
             min="0"
             step="1000"
             placeholder="e.g. 100000"
             value={principalAmount}
             onChange={(e) => setPrincipalAmount(e.target.value)}
-            className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+            className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors font-medium"
             required
           />
         </div>
@@ -75,8 +80,9 @@ export function FDFormFields({
           <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Interest Rate (% p.a.)</label>
           <input
             type="number"
+            inputMode="decimal"
             min="0"
-            max="30"
+            max="50"
             step="0.05"
             placeholder="e.g. 7.10"
             value={interestRate}
@@ -88,17 +94,17 @@ export function FDFormFields({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div>
+        <div className="min-w-0 overflow-hidden">
           <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Start Date</label>
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+            className="w-full h-10 min-w-0 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-2.5 sm:px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             required
           />
         </div>
-        <div>
+        <div className="min-w-0 overflow-hidden">
           <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
             Maturity Date <span className="font-normal text-[var(--text-tertiary)]">(Optional)</span>
           </label>
@@ -106,7 +112,7 @@ export function FDFormFields({
             type="date"
             value={maturityDate}
             onChange={(e) => setMaturityDate(e.target.value)}
-            className="w-full h-10 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+            className="w-full h-10 min-w-0 border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-2.5 sm:px-3 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
           />
         </div>
       </div>
@@ -130,6 +136,7 @@ export function FDFormFields({
         </label>
         <input
           type="number"
+          inputMode="decimal"
           min="0"
           step="100"
           placeholder="e.g. 107250"
@@ -147,7 +154,7 @@ export function FDFormFields({
               key={s}
               type="button"
               onClick={() => setStatus(s)}
-              className={`flex-1 h-9 rounded-[var(--radius-medium)] text-xs font-semibold transition-all capitalize cursor-pointer ${
+              className={`flex-1 h-11 min-h-[44px] rounded-[var(--radius-medium)] text-xs font-semibold transition-all capitalize cursor-pointer flex items-center justify-center ${
                 status === s
                   ? s === 'active'
                     ? 'bg-[var(--positive-soft)] text-[var(--positive)] border-2 border-[var(--positive)]'
@@ -160,6 +167,21 @@ export function FDFormFields({
           ))}
         </div>
       </div>
+
+      {setNotes !== undefined && (
+        <div>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+            Notes <span className="font-normal text-[var(--text-tertiary)]">(optional)</span>
+          </label>
+          <textarea
+            rows={2}
+            placeholder="e.g. Auto-renewal enabled, FDR number, Branch contact"
+            value={notes || ''}
+            onChange={(e) => setNotes(e.target.value)}
+            className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors resize-none"
+          />
+        </div>
+      )}
     </>
   );
 }

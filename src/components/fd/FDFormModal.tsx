@@ -104,12 +104,18 @@ export const FDFormModal = React.memo(function FDFormModal({
       return;
     }
 
-    let matAmt: number | undefined = undefined;
+    let matAmt: number = p;
     if (maturityAmount && maturityAmount.trim() !== '') {
-      matAmt = parseFloat(maturityAmount);
-      if (isNaN(matAmt) || matAmt < 0 || matAmt > 10_000_000_000) {
+      const parsed = parseFloat(maturityAmount);
+      if (isNaN(parsed) || parsed < 0 || parsed > 10_000_000_000) {
         setError('Please enter a valid maturity amount');
         return;
+      }
+      matAmt = parsed;
+    } else if (startDate && maturityDate) {
+      const calculated = calculateFDMaturityValue(p, rate, startDate, maturityDate, 4);
+      if (calculated > 0) {
+        matAmt = calculated;
       }
     }
 
@@ -118,11 +124,17 @@ export const FDFormModal = React.memo(function FDFormModal({
     try {
       const payload = {
         bankName: bankName.trim(),
+        bank_name: bankName.trim(),
         principalAmount: p,
+        principal_amount: p,
         interestRate: rate,
+        interest_rate: rate,
         startDate: startDate,
+        start_date: startDate,
         maturityDate: maturityDate || undefined,
+        maturity_date: maturityDate || undefined,
         maturityAmount: matAmt,
+        maturity_amount: matAmt,
         status: status,
         notes: notes.trim() || undefined,
       };
@@ -180,6 +192,8 @@ export const FDFormModal = React.memo(function FDFormModal({
           setMaturityAmount={setMaturityAmount}
           status={status}
           setStatus={setStatus}
+          notes={notes}
+          setNotes={setNotes}
           calculateMaturity={calculateMaturity}
         />
 
@@ -200,7 +214,7 @@ export const FDFormModal = React.memo(function FDFormModal({
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-[var(--accent-blue)] text-white font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:opacity-90 transition-colors disabled:opacity-50 ios-press shadow-xs cursor-pointer"
+            className="flex-1 bg-[var(--asset-fd)] text-slate-900 font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:opacity-90 transition-colors disabled:opacity-50 ios-press shadow-xs cursor-pointer"
           >
             {loading ? 'Saving...' : editingFd ? 'Save Changes' : 'Add Fixed Deposit'}
           </button>

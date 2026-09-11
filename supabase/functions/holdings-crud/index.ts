@@ -393,21 +393,27 @@ Deno.serve(async (req: Request) => {
         insertData = res.data;
         insertError = res.error;
       } else if (asset_type === "fd" || asset_type === "fixed_deposit") {
+        const principal = Number(payload.principalAmount ?? payload.principal_amount);
+        const matAmountRaw = payload.maturityAmount ?? payload.maturity_amount;
+        const matAmount = (matAmountRaw !== undefined && matAmountRaw !== null && !isNaN(Number(matAmountRaw)))
+          ? Number(matAmountRaw)
+          : (!isNaN(principal) ? principal : 0);
+
         const res = await supabase
           .from("fixed_deposits")
           .insert({
             portfolio_id: portfolio.id,
-            bank_name: String(payload.bankName || '').slice(0, 100),
-            principal_amount: Number(payload.principalAmount),
-            interest_rate: Number(payload.interestRate),
-            start_date: payload.startDate,
-            maturity_date: payload.maturityDate,
-            maturity_amount: Number(payload.maturityAmount),
+            bank_name: String(payload.bankName ?? payload.bank_name ?? '').slice(0, 100),
+            principal_amount: !isNaN(principal) ? principal : 0,
+            interest_rate: Number(payload.interestRate ?? payload.interest_rate) || 0,
+            start_date: payload.startDate ?? payload.start_date,
+            maturity_date: (payload.maturityDate ?? payload.maturity_date) || null,
+            maturity_amount: matAmount,
             status: payload.status || "active",
-            fd_type: payload.fdType || "regular",
+            fd_type: payload.fdType ?? payload.fd_type ?? "regular",
             contributions: payload.contributions || [],
-            mf_scheme_code: payload.mfSchemeCode ? String(payload.mfSchemeCode).slice(0, 50) : null,
-            units: payload.units !== undefined && payload.units !== null ? Number(payload.units) : null,
+            mf_scheme_code: (payload.mfSchemeCode ?? payload.mf_scheme_code) ? String(payload.mfSchemeCode ?? payload.mf_scheme_code).slice(0, 50) : null,
+            units: (payload.units !== undefined && payload.units !== null) ? Number(payload.units) : null,
             notes: payload.notes ? String(payload.notes).slice(0, 1000) : null,
           })
           .select()
@@ -416,16 +422,21 @@ Deno.serve(async (req: Request) => {
         insertError = res.error;
 
       } else if (asset_type === "rd_account" || asset_type === "rd") {
+        const matAmtRaw = payload.maturity_amount ?? payload.maturityAmount;
+        const matAmt = (matAmtRaw !== undefined && matAmtRaw !== null && !isNaN(Number(matAmtRaw)))
+          ? Number(matAmtRaw)
+          : 0;
+
         const res = await supabase
           .from("rd_accounts")
           .insert({
             portfolio_id: portfolio.id,
-            bank_name: String(payload.bank_name || '').slice(0, 100),
-            monthly_deposit: Number(payload.monthly_deposit),
-            interest_rate: Number(payload.interest_rate),
-            start_date: payload.start_date,
-            maturity_date: payload.maturity_date,
-            maturity_amount: Number(payload.maturity_amount),
+            bank_name: String(payload.bank_name ?? payload.bankName ?? '').slice(0, 100),
+            monthly_deposit: Number(payload.monthly_deposit ?? payload.monthlyDeposit) || 0,
+            interest_rate: Number(payload.interest_rate ?? payload.interestRate) || 0,
+            start_date: payload.start_date ?? payload.startDate,
+            maturity_date: (payload.maturity_date ?? payload.maturityDate) || null,
+            maturity_amount: matAmt,
             status: payload.status || "active",
             contributions: payload.contributions || [],
             notes: payload.notes ? String(payload.notes).slice(0, 1000) : null,
@@ -567,27 +578,41 @@ Deno.serve(async (req: Request) => {
         }
       } else if (asset_type === "fd" || asset_type === "fixed_deposit") {
         table = "fixed_deposits";
-        if (payload.bankName !== undefined) updates.bank_name = payload.bankName;
-        if (payload.principalAmount !== undefined) updates.principal_amount = Number(payload.principalAmount);
-        if (payload.interestRate !== undefined) updates.interest_rate = Number(payload.interestRate);
-        if (payload.startDate !== undefined) updates.start_date = payload.startDate;
-        if (payload.maturityDate !== undefined) updates.maturity_date = payload.maturityDate;
-        if (payload.maturityAmount !== undefined) updates.maturity_amount = Number(payload.maturityAmount);
+        const bName = payload.bankName ?? payload.bank_name;
+        if (bName !== undefined) updates.bank_name = bName;
+        const pAmt = payload.principalAmount ?? payload.principal_amount;
+        if (pAmt !== undefined && !isNaN(Number(pAmt))) updates.principal_amount = Number(pAmt);
+        const iRate = payload.interestRate ?? payload.interest_rate;
+        if (iRate !== undefined && !isNaN(Number(iRate))) updates.interest_rate = Number(iRate);
+        const sDate = payload.startDate ?? payload.start_date;
+        if (sDate !== undefined) updates.start_date = sDate;
+        const mDate = payload.maturityDate ?? payload.maturity_date;
+        if (mDate !== undefined) updates.maturity_date = mDate || null;
+        const mAmt = payload.maturityAmount ?? payload.maturity_amount;
+        if (mAmt !== undefined && mAmt !== null && !isNaN(Number(mAmt))) updates.maturity_amount = Number(mAmt);
         if (payload.status !== undefined) updates.status = payload.status;
-        if (payload.fdType !== undefined) updates.fd_type = payload.fdType;
+        const fType = payload.fdType ?? payload.fd_type;
+        if (fType !== undefined) updates.fd_type = fType;
         if (payload.contributions !== undefined) updates.contributions = payload.contributions;
-        if (payload.mfSchemeCode !== undefined) updates.mf_scheme_code = payload.mfSchemeCode;
+        const sCode = payload.mfSchemeCode ?? payload.mf_scheme_code;
+        if (sCode !== undefined) updates.mf_scheme_code = sCode;
         if (payload.units !== undefined) updates.units = payload.units !== null ? Number(payload.units) : null;
         if (payload.notes !== undefined) updates.notes = payload.notes;
 
       } else if (asset_type === "rd_account" || asset_type === "rd") {
         table = "rd_accounts";
-        if (payload.bank_name !== undefined) updates.bank_name = payload.bank_name;
-        if (payload.monthly_deposit !== undefined) updates.monthly_deposit = Number(payload.monthly_deposit);
-        if (payload.interest_rate !== undefined) updates.interest_rate = Number(payload.interest_rate);
-        if (payload.start_date !== undefined) updates.start_date = payload.start_date;
-        if (payload.maturity_date !== undefined) updates.maturity_date = payload.maturity_date;
-        if (payload.maturity_amount !== undefined) updates.maturity_amount = Number(payload.maturity_amount);
+        const bName = payload.bank_name ?? payload.bankName;
+        if (bName !== undefined) updates.bank_name = bName;
+        const mDep = payload.monthly_deposit ?? payload.monthlyDeposit;
+        if (mDep !== undefined && !isNaN(Number(mDep))) updates.monthly_deposit = Number(mDep);
+        const iRate = payload.interest_rate ?? payload.interestRate;
+        if (iRate !== undefined && !isNaN(Number(iRate))) updates.interest_rate = Number(iRate);
+        const sDate = payload.start_date ?? payload.startDate;
+        if (sDate !== undefined) updates.start_date = sDate;
+        const mDate = payload.maturity_date ?? payload.maturityDate;
+        if (mDate !== undefined) updates.maturity_date = mDate || null;
+        const mAmt = payload.maturity_amount ?? payload.maturityAmount;
+        if (mAmt !== undefined && mAmt !== null && !isNaN(Number(mAmt))) updates.maturity_amount = Number(mAmt);
         if (payload.status !== undefined) updates.status = payload.status;
         if (payload.contributions !== undefined) updates.contributions = payload.contributions;
         if (payload.notes !== undefined) updates.notes = payload.notes;

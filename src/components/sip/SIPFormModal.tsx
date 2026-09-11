@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SIPAccount, SIPPayload } from '../../types/portfolio';
 import SIPFormFields from './SIPFormFields';
 import { fetchAMFIScheme } from '../../utils/amfiClient';
@@ -70,7 +70,7 @@ export function SIPFormModal({
     setError('');
   }, [editingAccount, isOpen, portfolioName]);
 
-  const handleValidateScheme = async () => {
+  const handleValidateScheme = useCallback(async () => {
     if (!mfSchemeCode) {
       setError('Please enter a Scheme Code first.');
       return;
@@ -88,7 +88,7 @@ export function SIPFormModal({
     } finally {
       setIsValidatingScheme(false);
     }
-  };
+  }, [mfSchemeCode, units]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,98 +160,84 @@ export function SIPFormModal({
       isOpen={isOpen}
       onClose={onClose}
       maxWidth="max-w-lg"
-      ariaLabel={editingAccount ? 'Edit SIP' : 'Create SIP'}
+      title={editingAccount ? 'Edit SIP' : 'Create SIP'}
+      preventClose={loading}
     >
-      <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex justify-between items-center modal-drag-handle cursor-grab active:cursor-grabbing" data-drag-handle>
-        <div>
-          <h3 id="sip-modal-title" className="text-base font-bold text-[var(--text-primary)]">
-            {editingAccount ? 'Edit SIP' : 'Create SIP'}
-          </h3>
-          <p className="text-xs text-[var(--text-tertiary)] mt-0.5">Enter details to track fund growth and units</p>
-        </div>
-        <button
-          onClick={onClose}
-          className="w-8 h-8 rounded-[var(--radius-small)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors text-xl font-bold ios-press"
-          aria-label="Close modal"
-        >
-          &times;
-        </button>
-      </div>
-
       <form onSubmit={handleSubmit} className="px-4 py-4 sm:px-6 sm:py-5 space-y-3.5 sm:space-y-4 overflow-y-auto min-h-0 flex-1">
-          {/* Portfolio Select */}
+        {/* Portfolio Select - only shown when adding and multiple options exist */}
+        {!editingAccount && portfolioOptions.length > 1 && (
           <div>
             <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Portfolio Owner</label>
             <select
               value={formPortfolio}
               onChange={(e) => setFormPortfolio(e.target.value)}
-              disabled={!!editingAccount}
-              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors disabled:opacity-50"
+              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
             >
               {portfolioOptions.map((o) => (
                 <option key={o.name} value={o.name}>{o.label}</option>
               ))}
             </select>
           </div>
+        )}
 
-          <SIPFormFields
-            mfSchemeCode={mfSchemeCode}
-            setMfSchemeCode={setMfSchemeCode}
-            fundName={fundName}
-            setFundName={setFundName}
-            monthlySip={monthlySip}
-            setMonthlySip={setMonthlySip}
-            expectedCagr={expectedCagr}
-            setExpectedCagr={setExpectedCagr}
-            units={units}
-            setUnits={setUnits}
-            startDate={startDate}
-            setStartDate={setStartDate}
-            nextSipDate={nextSipDate}
-            setNextSipDate={setNextSipDate}
-            fallbackValuation={fallbackValuation}
-            setFallbackValuation={setFallbackValuation}
-            isValidatingScheme={isValidatingScheme}
-            onValidateScheme={handleValidateScheme}
+        <SIPFormFields
+          mfSchemeCode={mfSchemeCode}
+          setMfSchemeCode={setMfSchemeCode}
+          fundName={fundName}
+          setFundName={setFundName}
+          monthlySip={monthlySip}
+          setMonthlySip={setMonthlySip}
+          expectedCagr={expectedCagr}
+          setExpectedCagr={setExpectedCagr}
+          units={units}
+          setUnits={setUnits}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          nextSipDate={nextSipDate}
+          setNextSipDate={setNextSipDate}
+          fallbackValuation={fallbackValuation}
+          setFallbackValuation={setFallbackValuation}
+          isValidatingScheme={isValidatingScheme}
+          onValidateScheme={handleValidateScheme}
+        />
+
+        {/* Notes */}
+        <div>
+          <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Notes <span className="font-normal text-[var(--text-tertiary)]">(optional)</span></label>
+          <textarea
+            rows={2}
+            placeholder="e.g. Linked to child education, monthly auto-debit"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors resize-none"
           />
+        </div>
 
-          {/* Notes */}
-          <div>
-            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Notes <span className="font-normal text-[var(--text-tertiary)]">(optional)</span></label>
-            <textarea
-              rows={2}
-              placeholder="e.g. Linked to child education, monthly auto-debit"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors resize-none"
-            />
-          </div>
+        {/* Error message */}
+        {error && (
+          <p className="text-xs text-[var(--negative)] bg-[var(--negative-soft)] border border-[var(--negative)]/30 rounded-[var(--radius-medium)] px-3 py-2" role="alert">
+            {error}
+          </p>
+        )}
 
-          {/* Error message */}
-          {error && (
-            <p className="text-xs text-[var(--negative)] bg-[var(--negative-soft)] border border-[var(--negative)]/30 rounded-[var(--radius-medium)] px-3 py-2" role="alert">
-              {error}
-            </p>
-          )}
-
-          {/* Action buttons */}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 border border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--text-primary)] font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:bg-[var(--surface-secondary)] shadow-xs ios-press transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-[var(--accent-blue)] text-white font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50 ios-press shadow-xs cursor-pointer"
-            >
-              {loading ? 'Saving...' : editingAccount ? 'Save Changes' : 'Create SIP'}
-            </button>
-          </div>
-        </form>
+        {/* Action buttons */}
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 border border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--text-primary)] font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:bg-[var(--surface-secondary)] shadow-xs ios-press transition-colors cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-[var(--asset-sip)] text-white font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50 ios-press shadow-xs cursor-pointer"
+          >
+            {loading ? 'Saving...' : editingAccount ? 'Save Changes' : 'Create SIP'}
+          </button>
+        </div>
+      </form>
     </Modal>
   );
 }

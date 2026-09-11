@@ -476,7 +476,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-[var(--warning)] text-white font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50 ios-press shadow-xs cursor-pointer"
+            className="flex-1 bg-[var(--asset-gold)] text-amber-950 font-bold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50 ios-press shadow-xs cursor-pointer"
           >
             {loading ? 'Saving...' : editingHolding ? 'Save Changes' : 'Add Gold'}
           </button>
