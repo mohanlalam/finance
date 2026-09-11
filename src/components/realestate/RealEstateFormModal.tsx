@@ -102,8 +102,8 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
       return;
     }
 
-    const rent = monthlyRent ? parseFloat(monthlyRent) : 0;
-    if (isNaN(rent) || rent < 0 || rent > 50_000_000) {
+    const rent = monthlyRent !== '' ? parseFloat(monthlyRent) : undefined;
+    if (rent !== undefined && (isNaN(rent) || rent < 0 || rent > 50_000_000)) {
       setError('Monthly rent cannot exceed ₹5 Crore');
       return;
     }
@@ -124,8 +124,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
         purchase_price: pPrice,
         currentValuation: cVal,
         current_valuation: cVal,
-        monthlyRent: rent,
-        monthly_rent: rent,
+        ...(rent !== undefined && { monthlyRent: rent, monthly_rent: rent }),
         purchaseDate: purchaseDate || undefined,
         purchase_date: purchaseDate || undefined,
         notes: notes.trim() || undefined,

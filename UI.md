@@ -113,6 +113,9 @@ The visual theme is governed by CSS Custom Properties declared in `src/index.css
 | **Mutual Fund SIPs** | `sip` | `#9333ea` | $(271^\circ, 81\%, 56\%)$ | Systematic Growth Violet |
 | **Gold Bullion** | `gold` | `#facc15` | $(50^\circ, 95\%, 53\%)$ | Pure Solar Gold |
 | **Real Estate** | `realEstate` | `#16a34a` | $(142^\circ, 76\%, 36\%)$ | Evergreen Land & Property |
+| **Insurance** | `insurance` | `#e11d48` | $(347^\circ, 77\%, 50\%)$ | Protection Rose-Red (alias: `--accent-rose`) |
+
+> **`--accent-rose`** is a CSS alias for the Insurance asset color (`#e11d48` light / `#f43f5e` dark). Use `--asset-insurance` in asset-specific UI contexts and `--accent-rose` in generic warning/critical UI contexts.
 
 > **Donut / Chart Ring Sequencing Rule**: To avoid contiguous gradient sweeps where adjacent warm/cool colors blur into one another (e.g. Gold next to RD), charts sequence categories in alternating warm and cool hues: **Stocks (Blue) $\rightarrow$ Gold (Yellow) $\rightarrow$ FD (Cyan) $\rightarrow$ RD (Rust) $\rightarrow$ SIP (Violet) $\rightarrow$ Real Estate (Green)**.
 
