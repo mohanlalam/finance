@@ -1,4 +1,5 @@
 import { SIPAccount } from '../../../../types/portfolio';
+import { roundToCurrency } from '../../../../utils/mathUtils';
 import { getElapsedMonthsStandard, parseLocalDate } from '../../rd/calculations/rdCompounding';
 
 /**
@@ -36,11 +37,11 @@ export function getSIPEffectiveValue(
 
   const nav = liveNav !== undefined ? Number(liveNav) : Number(account.liveNav);
   if (!isNaN(nav) && nav > 0) {
-    return nav * units;
+    return roundToCurrency(nav * units);
   }
 
   if (cachedNav !== undefined && !isNaN(cachedNav) && cachedNav > 0) {
-    return cachedNav * units;
+    return roundToCurrency(cachedNav * units);
   }
 
   return validFallback;

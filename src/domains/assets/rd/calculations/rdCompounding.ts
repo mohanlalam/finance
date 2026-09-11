@@ -56,12 +56,14 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
 
   if (account.status === 'matured') {
     const matAmt = Number(account.maturity_amount);
-    return !isNaN(matAmt) && matAmt > 0 ? matAmt : p;
+    if (!isNaN(matAmt) && matAmt > 0) {
+      return matAmt;
+    }
   }
 
   const matDate = parseLocalDate(account.maturity_date);
   const matMs = matDate ? matDate.getTime() : NaN;
-  const endMs = !isNaN(matMs) && matMs < upToDate.getTime() ? matMs : upToDate.getTime();
+  const endMs = !isNaN(matMs) && (account.status === 'matured' || matMs < upToDate.getTime()) ? matMs : upToDate.getTime();
   const end = new Date(endMs);
 
   if (sMs > endMs) return 0;

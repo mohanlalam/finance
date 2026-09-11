@@ -217,7 +217,7 @@ project antigravity/
 The repository enforces strict verification across unit, integration, and browser end-to-end suites:
 
 ```bash
-# Run Vitest test suite across 52 test files and 284 tests (100% passing)
+# Run Vitest test suite across 51 test files and 286 tests (100% passing)
 npm test
 
 # Run Playwright browser E2E tests (9 tests: 6 smoke + 3 deep CRUD workflows)

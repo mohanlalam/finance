@@ -21,17 +21,18 @@ export interface GoldRates {
 
 import {
   DEFAULT_GOLD_RATE_24K,
+  MIN_VALID_GOLD_RATE_24K,
+  MAX_VALID_GOLD_RATE_24K,
   getPurityMultiplier,
   calculateGoldValuation as calcGoldValuationPure,
 } from '../domains/assets/gold/calculations/goldValuation';
 import { mcxGoldDataProvider } from '../infrastructure/market-data/providers/mcxProvider';
 import { logger } from '../infrastructure/logging/logger';
 
-export { DEFAULT_GOLD_RATE_24K, getPurityMultiplier };
+export { DEFAULT_GOLD_RATE_24K, MIN_VALID_GOLD_RATE_24K, MAX_VALID_GOLD_RATE_24K, getPurityMultiplier };
 
 // 15 Minutes in milliseconds for live rate refresh
 export const LIVE_SYNC_INTERVAL_MS = 15 * 60 * 1000;
-
 
 export interface GoldRateSnapshot {
   rate24k: number;
@@ -55,7 +56,7 @@ export function getStoredGoldSnapshot(): GoldRateSnapshot {
     const saved = localStorage.getItem(SNAPSHOT_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed && typeof parsed.rate24k === 'number' && parsed.rate24k >= 10000) {
+      if (parsed && typeof parsed.rate24k === 'number' && parsed.rate24k >= MIN_VALID_GOLD_RATE_24K) {
         memorySnapshot = parsed;
         return parsed;
       }
@@ -133,7 +134,7 @@ export function isGoldRateStale(): boolean {
 export async function fetchLiveGoldRates(forceRefresh = false): Promise<GoldRates> {
   const snapshot = getStoredGoldSnapshot();
 
-  if (!forceRefresh && !isGoldRateStale() && snapshot.rate24k >= 10000) {
+  if (!forceRefresh && !isGoldRateStale() && snapshot.rate24k >= MIN_VALID_GOLD_RATE_24K) {
     return deriveGoldRates();
   }
 

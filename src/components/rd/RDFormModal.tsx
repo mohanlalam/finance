@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { RDAccount, RDPayload } from '../../types/portfolio';
 import { getRDEffectiveValue } from '../../domains/assets/rd/calculations/rdCompounding';
+import { parseLocalDateObj } from '../../utils/dateUtils';
 import Modal from '../Modal';
 
 interface PortfolioOption {
@@ -70,10 +71,10 @@ export function RDFormModal({
   const calculateMaturity = useCallback(() => {
     const p = parseFloat(monthlyDeposit);
     const r = parseFloat(interestRate);
-    const s = new Date(startDate);
-    const m = maturityDate ? new Date(maturityDate) : new Date();
+    const s = parseLocalDateObj(startDate);
+    const m = maturityDate ? parseLocalDateObj(maturityDate) : new Date();
 
-    if (!isNaN(p) && !isNaN(r) && !isNaN(s.getTime()) && !isNaN(m.getTime())) {
+    if (!isNaN(p) && !isNaN(r) && s && m && !isNaN(s.getTime()) && !isNaN(m.getTime())) {
       // Temporary mock object to invoke compound calculator
       const tempAccount: RDAccount = {
         id: '',

@@ -1,12 +1,11 @@
 import { Portfolio } from '../../../types/portfolio';
-import { ASSET_COLORS } from '../../../utils/assetColors';
 
 export interface AssetAllocationItem {
   key: string;
   label: string;
   value: number;
   percentage: number;
-  color: string;
+  color?: string;
 }
 
 export interface AssetClassBreakdown {
@@ -58,7 +57,10 @@ export function classBreakdown(portfolios: Portfolio[], scope: Portfolio | null)
 /**
  * Calculates allocation percentages for donut and pie charts.
  */
-export function calculateAssetAllocations(breakdown: AssetClassBreakdown): AssetAllocationItem[] {
+export function calculateAssetAllocations(
+  breakdown: AssetClassBreakdown,
+  colorMap?: Record<string, string>
+): AssetAllocationItem[] {
   const total =
     breakdown.stocks +
     breakdown.fd +
@@ -70,12 +72,12 @@ export function calculateAssetAllocations(breakdown: AssetClassBreakdown): Asset
   if (total <= 0) return [];
 
   const raw = [
-    { key: 'stocks', label: 'Stocks', value: breakdown.stocks, color: ASSET_COLORS.stocks },
-    { key: 'gold', label: 'Gold Bullion', value: breakdown.gold, color: ASSET_COLORS.gold },
-    { key: 'fd', label: 'Fixed Deposits', value: breakdown.fd, color: ASSET_COLORS.fd },
-    { key: 'rd', label: 'Recurring Deposits', value: breakdown.rd, color: ASSET_COLORS.rd },
-    { key: 'sip', label: 'Mutual Funds / SIP', value: breakdown.sip, color: ASSET_COLORS.sip },
-    { key: 'realEstate', label: 'Real Estate', value: breakdown.realEstate, color: ASSET_COLORS.realEstate },
+    { key: 'stocks', label: 'Stocks', value: breakdown.stocks, color: colorMap?.stocks },
+    { key: 'gold', label: 'Gold Bullion', value: breakdown.gold, color: colorMap?.gold },
+    { key: 'fd', label: 'Fixed Deposits', value: breakdown.fd, color: colorMap?.fd },
+    { key: 'rd', label: 'Recurring Deposits', value: breakdown.rd, color: colorMap?.rd },
+    { key: 'sip', label: 'Mutual Funds / SIP', value: breakdown.sip, color: colorMap?.sip },
+    { key: 'realEstate', label: 'Real Estate', value: breakdown.realEstate, color: colorMap?.realEstate },
   ];
 
   return raw

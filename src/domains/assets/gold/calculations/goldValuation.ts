@@ -3,6 +3,8 @@
  */
 
 export const DEFAULT_GOLD_RATE_24K = 15840;
+export const MIN_VALID_GOLD_RATE_24K = 5000;
+export const MAX_VALID_GOLD_RATE_24K = 25000;
 
 /**
  * Normalizes purity string into multiplier factor

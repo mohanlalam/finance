@@ -3,7 +3,8 @@ import { test, expect, Page } from '@playwright/test';
 async function unlockIfLocked(page: Page) {
   const pinHeading = page.getByRole('heading', { name: 'Enter Passcode' });
   if (await pinHeading.isVisible({ timeout: 4000 }).catch(() => false)) {
-    await page.keyboard.type('3463');
+    const pin = process.env.E2E_APP_PIN || process.env.VITE_APP_PIN || '1234';
+    await page.keyboard.type(pin);
   }
   await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 25000 });
 }
@@ -14,7 +15,7 @@ test.describe('Family Wealth Tracker - Smoke & E2E Workflows', () => {
     await unlockIfLocked(page);
   });
 
-  test('Security Gate - PIN unlock with correct PIN 3463', async ({ page }) => {
+  test('Security Gate - PIN unlock with configured PIN', async ({ page }) => {
     await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible();
   });
 

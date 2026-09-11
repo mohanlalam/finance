@@ -1,4 +1,8 @@
-import { DEFAULT_GOLD_RATE_24K } from '../../../domains/assets/gold/calculations/goldValuation';
+import {
+  DEFAULT_GOLD_RATE_24K,
+  MIN_VALID_GOLD_RATE_24K,
+  MAX_VALID_GOLD_RATE_24K,
+} from '../../../domains/assets/gold/calculations/goldValuation';
 
 export interface GoldSpotQuote {
   rate24k: number;
@@ -17,7 +21,7 @@ function getStoredGoldSnapshot(): { rate24k: number } | null {
       const saved = localStorage.getItem(SNAPSHOT_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed.rate24k === 'number' && parsed.rate24k >= 5000) {
+        if (parsed && typeof parsed.rate24k === 'number' && parsed.rate24k >= MIN_VALID_GOLD_RATE_24K) {
           return parsed;
         }
       }
@@ -44,11 +48,11 @@ export class MCXGoldDataProvider {
       const basePerGram = rawOunceINR / 31.1034768;
       // India retail benchmark includes statutory customs duty + GST (~15.19%)
       const rate24k = Math.round(basePerGram * 1.1519);
-      if (rate24k < 5000 || rate24k > 25000) return null;
+      if (rate24k < MIN_VALID_GOLD_RATE_24K || rate24k > MAX_VALID_GOLD_RATE_24K) return null;
 
       const existingSnapshot = getStoredGoldSnapshot();
       const prevCloseRate =
-        existingSnapshot?.rate24k && existingSnapshot.rate24k >= 5000
+        existingSnapshot?.rate24k && existingSnapshot.rate24k >= MIN_VALID_GOLD_RATE_24K
           ? existingSnapshot.rate24k
           : DEFAULT_GOLD_RATE_24K || rate24k;
 

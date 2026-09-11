@@ -104,4 +104,24 @@ describe('rdUtils', () => {
     const val = getRDEffectiveValue(zeroRateRD, new Date('2025-06-30'));
     expect(val).toBe(30000);
   });
+
+  it('calculates full compounded maturity value for matured RD when maturity_amount is 0', () => {
+    const maturedZeroAmtRD: RDAccount = {
+      id: 'rd-matured-zero',
+      portfolio_id: 'p1',
+      bank_name: 'SBI',
+      monthly_deposit: 10000,
+      interest_rate: 7.0,
+      start_date: '2024-01-01',
+      maturity_date: '2024-12-31',
+      maturity_amount: 0,
+      status: 'matured',
+      contributions: [],
+    };
+    // 12 months at 10000 = 120000 principal. Compounded quarterly at 7% should be ~124634 (not just 10000)
+    const val = getRDEffectiveValue(maturedZeroAmtRD, new Date('2026-01-01'));
+    expect(val).toBeGreaterThan(124000);
+    expect(val).toBeLessThan(126000);
+  });
 });
+

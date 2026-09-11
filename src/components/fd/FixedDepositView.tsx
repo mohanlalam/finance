@@ -40,7 +40,7 @@ const SORT_OPTIONS: SortOption<FDSortField>[] = [
   { field: 'bank_name', label: 'Bank' },
 ];
 
-export const isDepositMatured = (fd: FixedDeposit) =>
+const isDepositMatured = (fd: FixedDeposit) =>
   fd.status === 'matured' || Boolean(fd.maturity_date && new Date(fd.maturity_date).getTime() <= Date.now());
 
 export function FixedDepositView({

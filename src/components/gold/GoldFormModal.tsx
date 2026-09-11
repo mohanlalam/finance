@@ -3,7 +3,7 @@ import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
 import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
 import { useDocumentStorage } from '../../hooks/useDocumentStorage';
-import { normalizeToIsoDate } from '../../utils/aiDocumentExtractor';
+import { normalizeToIsoDate } from '../../utils/dateUtils';
 import { deriveGoldRates } from '../../utils/goldPricing';
 import { formatINR } from '../../utils/formatters';
 

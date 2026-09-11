@@ -73,7 +73,7 @@ External APIs & Databases (PostgreSQL, Supabase Functions, Yahoo Finance, AMFI, 
   * **[swrConfig.ts](src/infrastructure/cache/swrConfig.ts)**: Global SWR deduplication and retry configurations.
 * **Market Data Infrastructure (`src/infrastructure/market-data/`)**:
   * **[marketDataService.ts](src/infrastructure/market-data/marketDataService.ts)**: Unified facade coordinating multi-provider quote lookups, in-flight deduplication, caching, and fallback resolution.
-  * **[providers/yahooProvider.ts](src/infrastructure/market-data/providers/yahooProvider.ts)**: Yahoo Finance equity quote fetcher via Edge Function.
+  * **[providers/yahooProvider.ts](src/infrastructure/market-data/providers/yahooProvider.ts)**: Yahoo Finance equity quote fetcher via Edge Function with persistent `pin_rate_limits` brute-force protection.
   * **[providers/amfiProvider.ts](src/infrastructure/market-data/providers/amfiProvider.ts)**: AMFI India mutual fund daily NAV fetcher.
   * **[providers/mcxProvider.ts](src/infrastructure/market-data/providers/mcxProvider.ts)**: Real-time MCX & IBJA bullion spot rate provider.
   * **[marketDataCache.ts](src/infrastructure/market-data/marketDataCache.ts)**: High-speed TTL in-memory market quote cache.
@@ -172,7 +172,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 52 test files and 284 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 51 test files and 286 unit/integration test cases (100% passing).
 
 ---
 

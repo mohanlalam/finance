@@ -151,3 +151,48 @@ export function formatRelativeTime(date: Date | null | undefined): string {
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
+/** Converts various Indian and International date formats (DD/MM/YYYY, DD-MM-YYYY, DD MMM YYYY, etc.) to standard ISO YYYY-MM-DD */
+export function normalizeToIsoDate(rawDate?: string | null): string {
+  if (!rawDate || typeof rawDate !== 'string') return '';
+  const trimmed = rawDate.trim();
+  if (!trimmed) return '';
+
+  // Already standard ISO YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+
+  // YYYY/MM/DD
+  if (/^\d{4}\/\d{2}\/\d{2}$/.test(trimmed)) {
+    return trimmed.replace(/\//g, '-');
+  }
+
+  // DD/MM/YYYY or DD-MM-YYYY (e.g. 17/10/2026 or 17-10-2026)
+  const dmyMatch = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (dmyMatch) {
+    const day = dmyMatch[1].padStart(2, '0');
+    const month = dmyMatch[2].padStart(2, '0');
+    const year = dmyMatch[3];
+    return `${year}-${month}-${day}`;
+  }
+
+  // DD/MM/YY or DD-MM-YY (e.g. 17/10/26)
+  const dmyShortMatch = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2})$/);
+  if (dmyShortMatch) {
+    const day = dmyShortMatch[1].padStart(2, '0');
+    const month = dmyShortMatch[2].padStart(2, '0');
+    const shortYear = parseInt(dmyShortMatch[3], 10);
+    const fullYear = shortYear > 50 ? 1900 + shortYear : 2000 + shortYear;
+    return `${fullYear}-${month}-${day}`;
+  }
+
+  // Textual date parsing (e.g. "17 Oct 2026" or "October 17, 2026")
+  const parsed = new Date(trimmed);
+  if (!isNaN(parsed.getTime())) {
+    const y = parsed.getFullYear();
+    const m = String(parsed.getMonth() + 1).padStart(2, '0');
+    const d = String(parsed.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  return '';
+}
+
