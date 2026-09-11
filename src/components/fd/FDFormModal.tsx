@@ -117,12 +117,12 @@ export const FDFormModal = React.memo(function FDFormModal({
     setError(null);
     try {
       const payload = {
-        bank_name: bankName.trim(),
-        principal_amount: p,
-        interest_rate: rate,
-        start_date: startDate,
-        maturity_date: maturityDate || undefined,
-        maturity_amount: matAmt,
+        bankName: bankName.trim(),
+        principalAmount: p,
+        interestRate: rate,
+        startDate: startDate,
+        maturityDate: maturityDate || undefined,
+        maturityAmount: matAmt,
         status: status,
         notes: notes.trim() || undefined,
       };
