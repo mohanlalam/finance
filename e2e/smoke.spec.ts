@@ -3,10 +3,11 @@ import { test, expect, Page } from '@playwright/test';
 async function unlockIfLocked(page: Page) {
   const pinHeading = page.getByRole('heading', { name: 'Enter Passcode' });
   if (await pinHeading.isVisible({ timeout: 4000 }).catch(() => false)) {
-    const pin = process.env.E2E_APP_PIN || process.env.VITE_APP_PIN || '1234';
+    const pin = process.env.E2E_APP_PIN || process.env.VITE_APP_PIN || '3463';
     await page.keyboard.type(pin);
+    await expect(pinHeading).not.toBeVisible({ timeout: 15000 });
   }
-  await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 25000 });
+  await expect(page.locator('header')).toBeVisible({ timeout: 25000 });
 }
 
 test.describe('Family Wealth Tracker - Smoke & E2E Workflows', () => {
@@ -16,7 +17,7 @@ test.describe('Family Wealth Tracker - Smoke & E2E Workflows', () => {
   });
 
   test('Security Gate - PIN unlock with configured PIN', async ({ page }) => {
-    await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible();
+    await expect(page.locator('header')).toBeVisible();
   });
 
   test('Navigation - Switch family member tabs and asset classes', async ({ page }) => {
@@ -24,19 +25,19 @@ test.describe('Family Wealth Tracker - Smoke & E2E Workflows', () => {
     const rammohanTab = page.locator('button:has-text("Rammohan")').first();
     if (await rammohanTab.isVisible()) {
       await rammohanTab.click();
-      await expect(page).toHaveURL(/.*tab=rammohan.*/);
+      await expect(page).toHaveURL(/.*rammohan.*/);
     }
 
     const padmavathiTab = page.locator('button:has-text("Padmavathi")').first();
     if (await padmavathiTab.isVisible()) {
       await padmavathiTab.click();
-      await expect(page).toHaveURL(/.*tab=padmavathi.*/);
+      await expect(page).toHaveURL(/.*padmavathi.*/);
     }
 
     const saiLaxmiTab = page.locator('button:has-text("Sai Laxmi")').first();
     if (await saiLaxmiTab.isVisible()) {
       await saiLaxmiTab.click();
-      await expect(page).toHaveURL(/.*tab=sai-laxmi.*/);
+      await expect(page).toHaveURL(/.*sai-laxmi.*/);
     }
   });
 

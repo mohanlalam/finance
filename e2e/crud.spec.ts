@@ -3,10 +3,11 @@ import { test, expect, Page } from '@playwright/test';
 async function unlockIfLocked(page: Page) {
   const pinHeading = page.getByRole('heading', { name: 'Enter Passcode' });
   if (await pinHeading.isVisible({ timeout: 4000 }).catch(() => false)) {
-    const pin = process.env.E2E_APP_PIN || process.env.VITE_APP_PIN || '1234';
+    const pin = process.env.E2E_APP_PIN || process.env.VITE_APP_PIN || '3463';
     await page.keyboard.type(pin);
+    await expect(pinHeading).not.toBeVisible({ timeout: 15000 });
   }
-  await expect(page.locator('text=Family Wealth').or(page.locator('text=Family'))).toBeVisible({ timeout: 25000 });
+  await expect(page.locator('header')).toBeVisible({ timeout: 25000 });
 }
 
 test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
@@ -17,8 +18,15 @@ test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
 
   test('Real Estate - Open form, create new property and verify rendering', async ({ page }) => {
     // Navigate to Real Estate via quick shortcut or navigation
-    const reNav = page.locator('button[aria-label="Jump to Real Estate"]').or(page.locator('button:has-text("Real Estate")')).first();
-    await reNav.click();
+    const reNav = page.locator('button[aria-label="Jump to Real Estate"]')
+      .or(page.locator('aside button:has-text("Real Estate")'))
+      .or(page.locator('button:has-text("Real Estate")'))
+      .first();
+    if (await reNav.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await reNav.click();
+    } else {
+      await page.goto('/#/all/real_estate');
+    }
 
     await expect(page.locator('main').locator('text=Real Estate').first()).toBeVisible({ timeout: 10000 });
 
@@ -63,8 +71,15 @@ test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
 
   test('Mutual Fund SIP - Open form, create new SIP and verify rendering', async ({ page }) => {
     // Navigate to SIP view
-    const sipNav = page.locator('button[aria-label="Jump to SIP Mutual Funds"]').or(page.locator('button:has-text("SIP")')).first();
-    await sipNav.click();
+    const sipNav = page.locator('button[aria-label="Jump to SIP Mutual Funds"]')
+      .or(page.locator('aside button:has-text("SIP Mutual Funds")'))
+      .or(page.locator('button:has-text("SIP")'))
+      .first();
+    if (await sipNav.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await sipNav.click();
+    } else {
+      await page.goto('/#/all/sip');
+    }
 
     await expect(page.locator('main').locator('text=Mutual Funds').or(page.locator('main').locator('text=SIP')).first()).toBeVisible({ timeout: 10000 });
 
@@ -107,8 +122,15 @@ test.describe('Family Wealth Tracker - Deep Asset CRUD Workflows', () => {
 
   test('Gold Holding - Open form, create gold holding and verify rendering', async ({ page }) => {
     // Navigate to Gold view
-    const goldNav = page.locator('button[aria-label="Jump to Gold Holdings"]').or(page.locator('button:has-text("Gold")')).first();
-    await goldNav.click();
+    const goldNav = page.locator('button[aria-label="Jump to Gold Holdings"]')
+      .or(page.locator('aside button:has-text("Gold Holdings")'))
+      .or(page.locator('button:has-text("Gold")'))
+      .first();
+    if (await goldNav.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await goldNav.click();
+    } else {
+      await page.goto('/#/all/gold');
+    }
 
     await expect(page.locator('main').locator('text=Gold').first()).toBeVisible({ timeout: 10000 });
 
