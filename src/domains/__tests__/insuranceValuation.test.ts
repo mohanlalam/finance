@@ -42,7 +42,7 @@ const mockPolicies: Insurance[] = [
 ];
 
 describe('insuranceValuation', () => {
-  it('normalizes annual premiums according to payment frequency', () => {
+  it('calculates annualized premium for a policy', () => {
     expect(calculateAnnualizedPremium(mockPolicies[0])).toBe(12000);
     expect(calculateAnnualizedPremium(mockPolicies[1])).toBe(24000);
   });

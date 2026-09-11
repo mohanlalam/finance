@@ -90,6 +90,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
       return;
     }
     const sum = parseFloat(sumAssured);
+    // 1 Crore = 10,000,000 (10^7). 100 Crore = 1,000,000,000 (10^9).
     if (isNaN(sum) || sum <= 0 || sum > 1_000_000_000) {
       setError('Please enter a valid sum assured up to ₹100 Crore');
       return;
@@ -110,7 +111,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
         provider: provider.trim() || undefined,
         policy_number: policyNumber.trim() || undefined,
         sum_assured: sum,
-        premium_amount: premiumAmount ? parseFloat(premiumAmount) : undefined,
+        premium_amount: prem,
         renewal_date: renewalDate || undefined,
         notes: notes.trim() || undefined,
       };
@@ -159,7 +160,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
       title={editingPolicy ? 'Edit Insurance Policy' : 'Add Insurance Policy'}
       preventClose={loading}
     >
-      <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4">
+      <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4 overflow-y-auto min-h-0 flex-1">
         {portfolioOptions.length > 1 && !editingPolicy && (
           <div>
             <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
@@ -202,7 +203,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
               className="w-full border border-[var(--border-subtle)] rounded-[var(--radius-medium)] px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors capitalize"
             >
               {TYPE_OPTIONS.map((t) => (
-                <option key={t} value={t}>{t}</option>
+                <option key={t} value={t}>{t === 'term' ? 'Term Life' : t.charAt(0).toUpperCase() + t.slice(1)}</option>
               ))}
             </select>
           </div>

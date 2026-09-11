@@ -56,7 +56,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
                 </span>
               ) : (
                 <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] shrink-0">
-                  No Bond
+                  No Doc
                 </span>
               )}
             </div>
@@ -118,7 +118,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
               key={doc.id}
               type="button"
               onClick={() => openSecureDocument(doc.file_path)}
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--negative-soft)] border border-[var(--negative)]/30 text-[var(--negative)] hover:underline font-medium text-[11px] max-w-[220px] truncate cursor-pointer ios-press"
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] border border-[var(--accent-blue)]/30 text-[var(--accent-blue)] hover:underline font-medium text-[11px] max-w-[220px] truncate cursor-pointer ios-press"
               title={`View ${doc.name}`}
               aria-label={`Open document: ${doc.name}`}
             >
@@ -130,7 +130,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
             <button
               type="button"
               onClick={() => onOpenEdit(policy)}
-              className="inline-flex items-center gap-1 text-[11px] text-[var(--text-tertiary)] hover:text-[var(--negative)] transition-colors"
+              className="inline-flex items-center gap-1 text-[11px] text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] transition-colors"
               title="Attach policy document"
             >
               <Paperclip size={11} />

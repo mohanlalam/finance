@@ -353,7 +353,7 @@ export function InsuranceView({
       <AssetRegistryContainer
         title="Insurance Policies"
         createBtnLabel="Add Policy"
-        themeColor="bg-rose-600 hover:bg-rose-700"
+        themeColor="bg-[var(--asset-insurance)] hover:opacity-90"
         emptyType="insurance"
         emptyTitle="No Insurance Policies Added"
         emptyDescription="Keep track of health, term life, motor, and family protection policies in one place."
