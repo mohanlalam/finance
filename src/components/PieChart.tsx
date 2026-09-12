@@ -86,7 +86,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
   const cx = 115;
   const cy = 115;
   const r = 95;
-  const innerR = 58;
+  const innerR = 62;
 
   const paths = useMemo(() => {
     let cumAngle = -Math.PI / 2;
@@ -211,7 +211,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                 <>
                   <text
                     x={cx}
-                    y={cy - 14}
+                    y={cy - 13}
                     textAnchor="middle"
                     className="fill-[var(--text-secondary)] font-bold uppercase tracking-wider text-[10px]"
                   >
@@ -219,7 +219,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                   </text>
                   <text
                     x={cx}
-                    y={cy + 6}
+                    y={cy + 5}
                     textAnchor="middle"
                     className="fill-[var(--text-primary)] font-bold text-sm tnum"
                   >
@@ -227,7 +227,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                   </text>
                   <text
                     x={cx}
-                    y={cy + 22}
+                    y={cy + 21}
                     textAnchor="middle"
                     className="fill-[var(--accent-blue)] font-bold text-[10px] tnum"
                   >
@@ -238,7 +238,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                 <>
                   <text
                     x={cx}
-                    y={cy - 12}
+                    y={cy - 13}
                     textAnchor="middle"
                     className="fill-[var(--text-tertiary)] font-bold text-[9px] uppercase tracking-wider"
                   >
@@ -246,7 +246,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                   </text>
                   <text
                     x={cx}
-                    y={cy + 7}
+                    y={cy + 5}
                     textAnchor="middle"
                     className="fill-[var(--text-primary)] font-bold text-sm tnum"
                   >
@@ -254,7 +254,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                   </text>
                   <text
                     x={cx}
-                    y={cy + 22}
+                    y={cy + 21}
                     textAnchor="middle"
                     className="fill-[var(--text-tertiary)] font-semibold text-[10px]"
                   >
@@ -309,7 +309,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
                         {isBalancesHidden ? '••••••' : formatINR(slice.value)}
                       </span>
                       <span
-                        className="text-[11px] font-bold px-1.5 py-0.2 rounded-[var(--radius-small)] tnum"
+                        className="text-[11px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] tnum"
                         style={{
                           backgroundColor: `${slice.color}18`,
                           color: slice.color,

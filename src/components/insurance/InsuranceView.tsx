@@ -214,7 +214,7 @@ export function InsuranceView({
                 <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Total Family Insurance Policies
                 </h3>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30 uppercase tracking-wider shrink-0">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 sm:py-0.5 rounded-[var(--radius-pill)] bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30 uppercase tracking-wider shrink-0">
                   Combined
                 </span>
               </div>
@@ -432,9 +432,13 @@ export function InsuranceView({
                         {item.policies.length}
                       </span>
                     </div>
-                    <span className="text-xs font-bold text-rose-500 tnum">
-                      Cover: {formatINR(item.sumAssured)} {item.annualPremium > 0 ? `(Prem: ${formatINR(item.annualPremium)}/yr)` : ''}
-                    </span>
+                    {item.policies.length > 0 ? (
+                      <span className="text-xs font-bold text-rose-500 tnum">
+                        Cover: {formatINR(item.sumAssured)} {item.annualPremium > 0 ? `(Prem: ${formatINR(item.annualPremium)}/yr)` : ''}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-[var(--text-tertiary)] font-medium">—</span>
+                    )}
                   </div>
 
                   {item.policies.length === 0 ? (

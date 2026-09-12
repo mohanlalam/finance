@@ -336,10 +336,10 @@ export default React.memo(function DocumentVaultView({
                 <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Total Family Document Vault
                 </h3>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] border border-[var(--border-subtle)] uppercase tracking-wider shrink-0">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 sm:py-0.5 rounded-[var(--radius-pill)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] border border-[var(--border-subtle)] uppercase tracking-wider shrink-0">
                   Combined
                 </span>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 tracking-wider shrink-0 flex items-center gap-1">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 sm:py-0.5 rounded-[var(--radius-pill)] bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 tracking-wider shrink-0 flex items-center gap-1">
                   <Shield size={9} />
                   <span>AES-GCM-256 Encrypted</span>
                 </span>
@@ -482,7 +482,7 @@ export default React.memo(function DocumentVaultView({
                   <span>{f.label}</span>
                   {count > 0 && (
                     <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
                         isActive
                           ? 'bg-white/20 text-white'
                           : 'bg-[var(--surface-secondary)] text-[var(--text-tertiary)]'
@@ -575,7 +575,7 @@ export default React.memo(function DocumentVaultView({
                         <p className="text-sm font-bold text-[var(--text-primary)] truncate" title={doc.name}>{doc.name}</p>
                         <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                           {selectedMember === 'all' && (
-                            <span className={`text-[9.5px] font-bold px-1.5 py-0.2 rounded-full ${memberConfig.bg} ${memberConfig.text} flex items-center gap-1`}>
+                            <span className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded-full ${memberConfig.bg} ${memberConfig.text} flex items-center gap-1`}>
                               {memberConfig.icon}
                               {doc.portfolioLabel}
                             </span>
@@ -631,7 +631,7 @@ export default React.memo(function DocumentVaultView({
                       <p className="text-sm font-bold text-[var(--text-primary)] truncate" title={doc.name}>{doc.name}</p>
                       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         {selectedMember === 'all' && (
-                          <span className={`text-[9.5px] font-bold px-1.5 py-0.2 rounded-full ${memberConfig.bg} ${memberConfig.text} flex items-center gap-1`}>
+                          <span className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded-full ${memberConfig.bg} ${memberConfig.text} flex items-center gap-1`}>
                             {memberConfig.icon}
                             {doc.portfolioLabel}
                           </span>

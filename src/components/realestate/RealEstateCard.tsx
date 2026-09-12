@@ -61,7 +61,7 @@ export const RealEstateCard = React.memo(function RealEstateCard({
             {monthlyRent > 0 && (
               <p className="text-[11px] font-semibold text-[var(--positive)] flex items-center gap-1 mt-0.5">
                 <span>🏠 Rent: {formatINR(monthlyRent)}/mo</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[var(--positive-soft)] border border-[var(--positive)]/30">
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--positive-soft)] border border-[var(--positive)]/30">
                   {formatPercent(rentalYieldPct)} yield
                 </span>
               </p>

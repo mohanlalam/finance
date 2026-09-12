@@ -482,7 +482,7 @@ export async function extractAssetFromDocument(
   let lastError: Error | null = null;
 
   // 1. Attempt extraction via Supabase Edge Function proxy (gemini-proxy) when no override key is supplied
-  if (!apiKeyOverride) {
+  if (apiKeyOverride === undefined) {
     try {
       const proxyResult = await invokeFunction<{ candidates?: { content: { parts: { text: string }[] } }[] }>(
         'gemini-proxy',

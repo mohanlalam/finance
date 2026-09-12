@@ -87,7 +87,7 @@ export const ImportConfidenceBadge: React.FC<ImportConfidenceBadgeProps> = ({
                 Document Evidence
               </span>
               <span
-                className={`text-[9px] font-bold px-1 py-0.2 rounded border ${badgeColor}`}
+                className={`text-[9px] font-bold px-1 py-0.5 rounded border ${badgeColor}`}
               >
                 {pct}% {isHigh ? 'High Confidence' : isMedium ? 'Verify' : 'Low Confidence'}
               </span>

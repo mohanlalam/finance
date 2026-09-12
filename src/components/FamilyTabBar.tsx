@@ -112,7 +112,7 @@ export default React.memo(function FamilyTabBar({
 
                 {/* Return Percentage Badge */}
                 <span
-                  className={`text-[9px] sm:text-[10px] font-bold px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded tnum transition-colors shrink-0 ${
+                  className={`text-[9px] sm:text-[10px] font-bold px-1 py-0.5 sm:px-1.5 sm:py-0.5 rounded tnum transition-colors shrink-0 ${
                     isPositive
                       ? 'bg-[var(--positive-soft)] text-[var(--positive)]'
                       : 'bg-[var(--negative-soft)] text-[var(--negative)]'

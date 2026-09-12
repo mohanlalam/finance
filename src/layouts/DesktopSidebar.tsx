@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, TrendingDown, Pencil, Trash2, Plus, Sparkles } from '../components/icons/AppIcons';
+import { TrendingUp, Landmark, Clock, Coins, Home, Shield, FolderOpen, TrendingDown, Pencil, Trash2, Plus, Sparkles, BarChart3 } from '../components/icons/AppIcons';
 import { Portfolio } from '../types/portfolio';
 import { sortPortfolios } from '../domains/portfolio/calculations/portfolioOrdering';
 
@@ -37,9 +37,9 @@ export default function DesktopSidebar({
 
   return (
     <nav aria-label="Sidebar navigation" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-60 self-start sticky top-20 max-h-[calc(100vh-5.5rem)] overflow-y-auto">
-      {/* AI Smart Import Button */}
+      {/* AI Smart Import Button - Sticky at top */}
       {onOpenSmartImport && (
-        <div className="mb-3">
+        <div className="sticky top-0 bg-[var(--app-background)] z-10 pb-3 pt-0.5">
           <button
             type="button"
             onClick={onOpenSmartImport}
@@ -126,7 +126,7 @@ export default function DesktopSidebar({
             { id: 'stocks', label: 'Stocks & ETFs', icon: <TrendingUp size={14} /> },
             { id: 'fd', label: 'Fixed Deposits', icon: <Landmark size={14} /> },
             { id: 'rd', label: 'Recurring Deposits', icon: <Clock size={14} /> },
-            { id: 'sip', label: 'SIP Mutual Funds', icon: <TrendingUp size={14} /> },
+            { id: 'sip', label: 'SIP Mutual Funds', icon: <BarChart3 size={14} /> },
             { id: 'gold', label: 'Gold Holdings', icon: <Coins size={14} /> },
             { id: 'real_estate', label: 'Real Estate', icon: <Home size={14} /> },
             { id: 'insurance', label: 'Insurance Cover', icon: <Shield size={14} /> },

@@ -461,14 +461,14 @@ export default function AppShell() {
           </div>
         )}
 
-        {priceStatus === 'error' && (
+        {(activeAsset === 'stocks' || activeAsset === 'home') && priceStatus === 'error' && (
           <div className="flex items-center gap-2.5 bg-[var(--warning-soft)] border border-[var(--warning)]/30 text-[var(--warning)] rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm">
             <AlertCircle size={15} className="shrink-0 text-[var(--warning)]" />
             <span className="leading-snug">Could not reach quote provider. Showing last known market data.</span>
           </div>
         )}
 
-        {isPriceStale && priceStatus !== 'error' && (
+        {(activeAsset === 'stocks' || activeAsset === 'home') && isPriceStale && priceStatus !== 'error' && (
           <div className="flex items-center justify-between gap-2.5 stale-price-banner rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm">
             <div className="flex items-center gap-2.5 min-w-0">
               <AlertCircle size={15} className="shrink-0 text-[var(--warning)]" />
@@ -487,7 +487,7 @@ export default function AppShell() {
           </div>
         )}
 
-        {priceStatus === 'success' && failedSymbols.length > 0 && (
+        {(activeAsset === 'stocks' || activeAsset === 'home') && priceStatus === 'success' && failedSymbols.length > 0 && (
           <div className="flex items-center gap-2.5 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm">
             <AlertCircle size={15} className="shrink-0 text-[var(--text-tertiary)]" />
             <span className="leading-snug">
@@ -672,12 +672,12 @@ export default function AppShell() {
                           ))}
                           <button
                             onClick={() => setActiveAsset('insurance')}
-                            style={{ borderLeftColor: '#0ea5e9' }}
-                            className="p-3 rounded-[var(--radius-medium)] border-l-[3px] bg-[var(--surface-secondary)]/40 hover:bg-[var(--surface-secondary)]/90 border border-t-[var(--border-subtle)]/50 border-r-[var(--border-subtle)]/50 border-b-[var(--border-subtle)]/50 flex flex-col justify-between text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] ios-press touch-manipulation active:scale-[0.97] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
+                            style={{ borderLeftColor: '#e11d48' }}
+                            className="p-3 rounded-[var(--radius-medium)] border-l-[3px] bg-[var(--surface-secondary)]/40 hover:bg-[var(--surface-secondary)]/90 border border-t-[var(--border-subtle)]/50 border-r-[var(--border-subtle)]/50 border-b-[var(--border-subtle)]/50 flex flex-col justify-between text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] ios-press touch-manipulation active:scale-[0.97] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group min-h-[78px]"
                           >
                             <div className="flex items-center justify-between w-full">
                               <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">Insurance</span>
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#0ea5e9]" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#e11d48]" />
                             </div>
                             <div>
                               <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] mt-1 tnum truncate">{formatINR(breakdown.insuranceCover)}</p>
@@ -759,10 +759,10 @@ export default function AppShell() {
             <span className="w-5 h-5 rounded-[var(--radius-small)] bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-[10px] font-bold shadow-xs">
               💼
             </span>
-            <p className="text-xs font-medium text-[var(--text-secondary)]">
+            <p className="text-xs font-semibold text-[var(--text-secondary)]">
               Family Wealth Tracker
               {lastUpdated && (
-                <span className="ml-2 text-[var(--text-tertiary)] tnum">
+                <span className="ml-2 text-[var(--text-secondary)] font-normal tnum">
                   — Last updated: {lastUpdated.toLocaleTimeString('en-IN')}
                 </span>
               )}

@@ -272,7 +272,7 @@ export function RDView({
                 <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Total Family Recurring Deposits
                 </h3>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-orange-500/15 text-orange-700 dark:text-orange-400 border border-orange-500/30 uppercase tracking-wider shrink-0">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 sm:py-0.5 rounded-[var(--radius-pill)] bg-orange-500/15 text-orange-700 dark:text-orange-400 border border-orange-500/30 uppercase tracking-wider shrink-0">
                   Combined
                 </span>
               </div>

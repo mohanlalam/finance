@@ -442,7 +442,10 @@ export default function PinLockScreen({ onUnlock }: PinLockScreenProps) {
                 <Fingerprint size={28} className={isBiometricPrompting ? 'animate-pulse text-[var(--positive,#00b074)]' : ''} />
               </button>
             ) : (
-              <div className="w-[75px] h-[75px]" aria-hidden="true" />
+              <div className="w-[75px] h-[75px] flex flex-col items-center justify-center rounded-full text-white/25 select-none pointer-events-none" aria-hidden="true">
+                <Fingerprint size={20} className="opacity-40" />
+                <span className="text-[8px] uppercase tracking-wider font-semibold mt-0.5 opacity-60">PIN Only</span>
+              </div>
             )}
             
             <button

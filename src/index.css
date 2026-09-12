@@ -291,11 +291,15 @@
 /* 💎 Neon Financial Luminance */
 .neon-glow-positive {
   color: var(--positive);
+}
+.dark .neon-glow-positive {
   filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
 }
 
 .neon-glow-negative {
   color: var(--negative);
+}
+.dark .neon-glow-negative {
   filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.4));
 }
 
@@ -385,6 +389,13 @@ h3, .text-card-title {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
+}
+
+.text-label-medium {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.25rem;
 }
 
 .tnum {
@@ -521,14 +532,6 @@ h3, .text-card-title {
   }
 }
 
-/* Sidebar Item Active Style */
-.sidebar-item-active {
-  background: linear-gradient(90deg, var(--accent-blue-soft) 0%, rgba(56, 189, 248, 0.02) 100%);
-  border-left: 3px solid var(--accent-blue) !important;
-  color: var(--accent-blue) !important;
-  font-weight: 700;
-  box-shadow: var(--shadow-card);
-}
 
 /* Unified Design-System Form Controls Focus Ring */
 input:not([type="checkbox"]):not([type="radio"]):focus,

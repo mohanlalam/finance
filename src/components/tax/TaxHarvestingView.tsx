@@ -46,7 +46,7 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
                 <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Tax Loss Harvesting &amp; Optimization
                 </h3>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30 uppercase tracking-wider shrink-0">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 sm:py-0.5 rounded-[var(--radius-pill)] bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30 uppercase tracking-wider shrink-0">
                   {portfolio ? portfolio.label : 'Combined'}
                 </span>
               </div>
@@ -142,20 +142,32 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
               <tbody className="divide-y divide-[var(--border-subtle)] text-sm">
                 {taxData.opportunities.map((opp) => {
                   const memberName = opp.holding.portfolio_label || opp.holding.portfolio_name;
-                  const memberConfig = memberName ? getFamilyMemberConfig(memberName) : null;
+                  const memberConfig = getFamilyMemberConfig(opp.holding.portfolio_name || memberName || '');
                   const rowKey = `${opp.holding.id || opp.holding.ticker}-${opp.holding.portfolio_id || memberName || ''}`;
 
                   return (
                     <tr key={rowKey} className="hover:bg-[var(--surface-secondary)]/30 transition-colors">
                       <td className="px-4 py-3 font-semibold text-[var(--text-primary)]">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-[var(--negative)]"></div>
-                          <span>{opp.holding.ticker}</span>
+                          <div className="w-2 h-2 rounded-full bg-[var(--negative)] shrink-0"></div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-bold">{opp.holding.ticker}</span>
+                              <span className="text-[11px] text-[var(--text-tertiary)] font-normal">
+                                ({opp.holding.qty} shares)
+                              </span>
+                            </div>
+                            {opp.holding.stockName && opp.holding.stockName !== opp.holding.ticker && (
+                              <p className="text-[11px] text-[var(--text-tertiary)] font-normal truncate max-w-[220px]">
+                                {opp.holding.stockName}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </td>
                       {!portfolio && (
                         <td className="px-4 py-3 whitespace-nowrap">
-                          {memberConfig && memberName ? (
+                          {memberName ? (
                             <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold ${memberConfig.bg} ${memberConfig.text}`}>
                               {memberConfig.icon}
                               <span>{memberName}</span>

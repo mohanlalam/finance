@@ -5,6 +5,7 @@
  */
 
 import { logger } from '../infrastructure/logging/logger';
+import { APP_NAME } from '../shared/constants';
 
 const BIOMETRIC_ENROLLED_KEY = 'finance_biometric_enrolled';
 const BIOMETRIC_CREDENTIAL_ID_KEY = 'finance_biometric_cred_id';
@@ -195,7 +196,7 @@ export async function registerBiometrics(pinHash: string): Promise<boolean> {
     const publicKeyCredentialCreationOptions: PublicKeyCredentialCreationOptions = {
       challenge,
       rp: {
-        name: 'Family Portfolio Tracker',
+        name: APP_NAME,
         id: window.location.hostname === 'localhost' ? 'localhost' : window.location.hostname,
       },
       user: {

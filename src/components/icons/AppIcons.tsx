@@ -210,6 +210,17 @@ export function TrendingDown({ size = 24, className = '' }: IconProps) {
   );
 }
 
+export function BarChart3({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M3 3v18h18" />
+      <path d="M18 17V9" />
+      <path d="M13 17V5" />
+      <path d="M8 17v-3" />
+    </svg>
+  );
+}
+
 export function Landmark({ size = 24, className = '' }: IconProps) {
   return (
     <svg {...base(size, className)}>
@@ -704,16 +715,6 @@ export function Target({ size = 24, className = '' }: IconProps) {
   );
 }
 
-export function BarChart3({ size = 24, className = '' }: IconProps) {
-  return (
-    <svg {...base(size, className)}>
-      <path d="M3 3v18h18" />
-      <path d="M18 17V9" />
-      <path d="M13 17V5" />
-      <path d="M8 17v-3" />
-    </svg>
-  );
-}
 
 export function Filter({ size = 24, className = '' }: IconProps) {
   return (

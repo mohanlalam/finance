@@ -3,7 +3,7 @@ import { FixedDeposit, DocumentMetadata, FDPayload } from '../../types/portfolio
 import { formatINR, getFDEffectiveValue } from '../../utils/formatters';
 import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 import { calculateDateDuration, formatDateDuration, toLocalDateString } from '../../utils/dateUtils';
-import { CheckCircle, FileText, Edit2, Trash2, Clock, StickyNote, Share2 } from '../icons/AppIcons';
+import { CheckCircle, Landmark, FileText, Edit2, Trash2, Clock, StickyNote, Share2 } from '../icons/AppIcons';
 import { useLongPress } from '../../hooks/useLongPress';
 import { useToastActions } from '../../contexts/ToastContext';
 import { ContextMenu } from '../ui/ContextMenu';
@@ -29,7 +29,7 @@ interface DepositDetailsCardProps {
 export function DepositDetailsCard({
   fd: itemFd,
   deposit: itemDeposit,
-  cfg = { title: 'Fixed Deposit', principalLabel: 'Principal', themeColor: 'text-amber-600', iconBg: 'bg-amber-500/10 text-amber-600', iconClass: CheckCircle },
+  cfg = { title: 'Fixed Deposit', principalLabel: 'Principal', themeColor: 'text-amber-600', iconBg: 'bg-amber-500/10 text-amber-600', iconClass: Landmark },
   documents,
   onOpenEdit,
   onConfirmDelete,
@@ -77,7 +77,7 @@ export function DepositDetailsCard({
 
   const progress = getProgressPercent(fd);
   const fdDocs = documents.filter((d) => d.asset_type === 'fd' && d.asset_id === fd.id);
-  const isMatured = fd.status === 'matured' || Boolean(fd.maturity_date && new Date(fd.maturity_date).getTime() <= Date.now());
+  const isMatured = Boolean(fd.maturity_date && (fd.status === 'matured' || new Date(fd.maturity_date).getTime() <= Date.now()));
 
   const totalDuration = fd.maturity_date
     ? formatDateDuration(fd.start_date, fd.maturity_date)
@@ -116,9 +116,15 @@ export function DepositDetailsCard({
                   📎 {fdDocs.length} Doc{fdDocs.length > 1 ? 's' : ''}
                 </span>
               ) : (
-                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] shrink-0">
+                <button
+                  type="button"
+                  onClick={() => onOpenEdit(fd)}
+                  className="text-[9px] font-medium px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)]/40 border border-transparent transition-colors shrink-0 cursor-pointer"
+                  title="No document attached — click to attach"
+                  aria-label={`No document attached for ${fd.bank_name}. Click to attach.`}
+                >
                   No Doc
-                </span>
+                </button>
               )}
             </div>
             <p className="text-xs text-[var(--text-tertiary)] mt-0.5 truncate">

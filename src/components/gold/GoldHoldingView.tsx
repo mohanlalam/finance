@@ -300,7 +300,7 @@ export function GoldHoldingView({
                 <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Total Family Gold Holdings
                 </h3>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 uppercase tracking-wider shrink-0">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 sm:py-0.5 rounded-[var(--radius-pill)] bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 uppercase tracking-wider shrink-0">
                   Combined
                 </span>
               </div>
@@ -452,7 +452,14 @@ export function GoldHoldingView({
                     </div>
                     <div className="text-left sm:text-right shrink-0 mt-1 sm:mt-0">
                       {m.count === 0 ? (
-                        <span className="text-xs text-[var(--text-tertiary)] font-normal block">—</span>
+                        <>
+                          <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-60 tnum truncate">
+                            0.0g <span className="text-[9px] font-normal text-[var(--text-tertiary)] opacity-60">(0.0T)</span>
+                          </p>
+                          <p className="text-[10px] font-medium text-[var(--text-tertiary)] opacity-60 tnum truncate">
+                            ₹0
+                          </p>
+                        </>
                       ) : (
                         <>
                           <p className="text-xs font-bold text-amber-700 dark:text-amber-400 tnum truncate">

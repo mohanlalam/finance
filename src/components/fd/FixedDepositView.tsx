@@ -41,7 +41,7 @@ const SORT_OPTIONS: SortOption<FDSortField>[] = [
 ];
 
 const isDepositMatured = (fd: FixedDeposit) =>
-  fd.status === 'matured' || Boolean(fd.maturity_date && new Date(fd.maturity_date).getTime() <= Date.now());
+  Boolean(fd.maturity_date && (fd.status === 'matured' || new Date(fd.maturity_date).getTime() <= Date.now()));
 
 export function FixedDepositView({
   fixedDeposits,
@@ -226,7 +226,7 @@ export function FixedDepositView({
                 <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                   Total Family Fixed Deposits
                 </h3>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 sm:py-0.5 rounded-[var(--radius-pill)] bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border border-cyan-500/30 uppercase tracking-wider shrink-0">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 sm:py-0.5 rounded-[var(--radius-pill)] bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border border-cyan-500/30 uppercase tracking-wider shrink-0">
                   Combined
                 </span>
               </div>

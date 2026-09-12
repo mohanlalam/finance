@@ -224,10 +224,10 @@ export default function NetWorthTimelineChart({
 
   // SVG Chart Layout Bounds
   const { width, height } = dimensions;
-  const paddingLeft = 55;
+  const paddingLeft = 58;
   const paddingRight = 15;
   const paddingTop = 24;
-  const paddingBottom = 32;
+  const paddingBottom = 38;
 
   const chartWidth = Math.max(width - paddingLeft - paddingRight, 10);
   const chartHeight = Math.max(height - paddingTop - paddingBottom, 10);
@@ -583,7 +583,7 @@ export default function NetWorthTimelineChart({
             <text
               key={idx}
               x={item.x}
-              y={height - paddingBottom + 20}
+              y={height - paddingBottom + 22}
               textAnchor="middle"
               className="fill-[var(--text-tertiary)] font-semibold"
               fontSize={9}

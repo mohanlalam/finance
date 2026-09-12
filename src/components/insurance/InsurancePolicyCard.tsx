@@ -13,10 +13,10 @@ interface InsurancePolicyCardProps {
 }
 
 const TYPE_STYLES: Record<Insurance['insurance_type'], { bg: string; text: string; label: string }> = {
-  health: { bg: 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300', text: 'text-blue-600', label: 'Health' },
-  term: { bg: 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300', text: 'text-purple-600', label: 'Term Life' },
-  life: { bg: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300', text: 'text-emerald-600', label: 'Life' },
-  motor: { bg: 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300', text: 'text-amber-600', label: 'Motor' },
+  health: { bg: 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]', text: 'text-[var(--accent-blue)]', label: 'Health' },
+  term: { bg: 'bg-[var(--accent-violet)]/10 text-[var(--accent-violet)]', text: 'text-[var(--accent-violet)]', label: 'Term Life' },
+  life: { bg: 'bg-[var(--positive-soft)] text-[var(--positive)]', text: 'text-[var(--positive)]', label: 'Life' },
+  motor: { bg: 'bg-[var(--warning-soft)] text-[var(--warning)]', text: 'text-[var(--warning)]', label: 'Motor' },
   other: { bg: 'bg-[var(--surface-secondary)] text-[var(--text-secondary)]', text: 'text-[var(--text-secondary)]', label: 'General' },
 };
 
@@ -73,7 +73,11 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
             </span>
             <p className="text-sm font-bold text-[var(--text-primary)] tnum">{formatINR(policy.sum_assured)}</p>
             <p className="text-xs text-[var(--text-tertiary)] tnum">
-              Prem: {formatINR(policy.premium_amount)}/yr
+              {policy.premium_amount && policy.premium_amount > 0 ? (
+                `Prem: ${formatINR(policy.premium_amount)}/yr`
+              ) : (
+                <span className="italic opacity-70">Prem: —</span>
+              )}
             </p>
           </div>
 

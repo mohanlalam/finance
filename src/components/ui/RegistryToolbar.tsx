@@ -90,7 +90,7 @@ export function RegistryToolbar<F extends string = string>({
                 >
                   <span>{opt.label}</span>
                   {opt.count !== undefined && (
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-[var(--border-subtle)] text-[var(--text-tertiary)]'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-[var(--border-subtle)] text-[var(--text-tertiary)]'}`}>
                       {opt.count}
                     </span>
                   )}

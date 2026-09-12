@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { TrendingUp, RefreshCw, Bell, X, Landmark, Shield, Activity, Sun, Moon, LockKeyhole, Eye, EyeOff, FileText, CheckCircle2, Settings, ChevronRight } from './icons/AppIcons';
+import { APP_SHORT_NAME } from '../shared/constants';
 import { FetchStatus } from '../types/portfolio';
 import { Portfolio } from '../types/portfolio';
 import type { ImportRow } from './ExportPanel';
@@ -177,19 +178,19 @@ function Header({
                   {activeAssetLabel ? (
                     <>
                       <span className="sm:hidden">{activeAssetLabel}</span>
-                      <span className="hidden sm:inline">Portfolio Tracker</span>
+                      <span className="hidden sm:inline">{APP_SHORT_NAME}</span>
                     </>
                   ) : (
-                    'Portfolio Tracker'
+                    APP_SHORT_NAME
                   )}
                 </h1>
                 {activePortfolioLabel && (
-                  <span className="hidden sm:inline text-label-micro font-semibold px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                  <span className="hidden sm:inline text-label-micro font-semibold px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)] shrink-0">
                     {activePortfolioLabel}
                   </span>
                 )}
                 {activeAssetLabel && (
-                  <span className="sm:hidden text-[9.5px] font-bold px-1.5 py-0.2 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border border-[var(--accent-blue)]/30 shrink-0">
+                  <span className="sm:hidden text-[9.5px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border border-[var(--accent-blue)]/30 shrink-0">
                     {activePortfolioLabel || 'Family'}
                   </span>
                 )}
@@ -276,7 +277,7 @@ function Header({
                         <div className="flex items-center gap-2">
                           <Bell size={15} className="text-[var(--accent-blue)]" />
                           <h3 className="text-xs font-bold text-[var(--text-primary)]">Notifications &amp; Alerts</h3>
-                          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]">
                             {visibleAlerts.length}
                           </span>
                         </div>
