@@ -226,7 +226,7 @@ function MobileHomeSummary({
     <div className="space-y-3.5 md:hidden">
 
       {/* ── Unified Single Top Net Worth Card ── */}
-      <div className="rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-xs space-y-3.5 apple-card">
+      <div className="rounded-[var(--radius-large)] p-4 space-y-3.5 hero-networth-card">
         {/* Header row: Label & Refresh/Sync Button */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0">

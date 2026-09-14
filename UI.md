@@ -92,12 +92,13 @@ The visual theme is governed by CSS Custom Properties declared in `src/index.css
 | `--text-tertiary` | `#64748b` | `#64748b` | Muted metadata, timestamps, table column headers |
 | `--accent-blue` | `#0284c7` | `#38bdf8` | Primary action buttons, active navigation indicators, cyan highlights |
 | `--accent-blue-soft` | `rgba(2, 132, 199, 0.08)` | `rgba(56, 189, 248, 0.14)` | Selected tab pills, info badges |
-| `--positive` | `#059669` | `#10b981` | Profit indicators, glowing positive gain badges |
+| `--positive` | `#15803d` | `#10b981` | Profit indicators, glowing positive gain badges (WCAG AA compliant `#15803d` in light) |
 | `--positive-soft` | `rgba(16, 185, 129, 0.1)` | `rgba(16, 185, 129, 0.16)` | Positive summary card accent background |
 | `--negative` | `#e11d48` | `#f43f5e` | Loss indicators, glowing negative return badges |
 | `--negative-soft` | `rgba(225, 29, 72, 0.1)` | `rgba(244, 63, 94, 0.16)` | Loss summary card accent background |
-| `--warning` | `#d97706` | `#f59e0b` | Stale price alerts, upcoming maturity/renewal warnings |
+| `--warning` | `#b45309` | `#f59e0b` | Stale price alerts, upcoming maturity/renewal warnings (WCAG AA compliant `#b45309` in light) |
 | `--warning-soft` | `rgba(245, 158, 11, 0.1)` | `rgba(245, 158, 11, 0.16)` | Caution banner backgrounds |
+| `--surface-gold-soft` | `rgba(254, 243, 199, 0.45)` | `transparent` | Warm amber holding card background tint for gold assets in light theme |
 | `--border-subtle` | `rgba(203, 213, 225, 0.6)` | `rgba(255, 255, 255, 0.09)` | 1px clean container & card borders |
 | `--border-glass` | `rgba(255, 255, 255, 0.9)` | `rgba(255, 255, 255, 0.14)` | Glassmorphic floating borders |
 | `--border-luminous` | `rgba(2, 132, 199, 0.25)` | `rgba(56, 189, 248, 0.3)` | Luminous focus and active container borders |
@@ -154,6 +155,8 @@ body {
 | `.neon-glow-cyan` | `#38bdf8` with `drop-shadow(0 0 8px rgba(56, 189, 248, 0.4))` | Blue asset highlights, Kite Sky Blue |
 | `.neon-glow-gold` | `#f59e0b` with `drop-shadow(0 0 8px rgba(245, 158, 11, 0.45))` | Bullion rates, Gold valuation |
 | `.text-gradient-wealth` | `linear-gradient(135deg, var(--text-primary) 20%, var(--accent-blue) 75%, #38bdf8 100%)` | Hero Net Worth title text with luminous drop shadow |
+| `.hero-networth-card` | `linear-gradient(135deg, rgba(224,247,250,0.7) 0%, rgba(240,249,255,0.85) 60%, rgba(255,255,255,0.95) 100%)` (Light) / `linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(6,182,212,0.12) 100%)` (Dark) | Hero net-worth card with visible 30% teal depth tint & luminous border |
+| `.scroll-fade-container` | `linear-gradient(to right, transparent, var(--surface))` right mask | Overflowing mobile tab scroll indicator |
 | `.text-gradient-positive` | `linear-gradient(135deg, #10b981 0%, #059669 100%)` | Highlighted gain metrics |
 | `.text-gradient-negative` | `linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)` | Highlighted loss metrics |
 
@@ -174,7 +177,7 @@ To maintain a compact, crisp financial interface, corner radii and shadows are s
   * `--radius-pill` (`999px`): Status indicators, rounded pill tags.
 
 * **Shadow Tokens**:
-  * `--shadow-card`: `0 1px 2px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.03), 0 1px 0 rgba(255,255,255,0.8) inset` (Light) / `0 1px 3px rgba(0,0,0,0.4), 0 6px 20px rgba(0,0,0,0.35)` (Dark).
+  * `--shadow-card`: `0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95)` (Light) / `0 1px 3px rgba(0,0,0,0.4), 0 6px 20px rgba(0,0,0,0.35)` (Dark).
   * `--shadow-floating`: `0 12px 32px -4px rgba(15,23,42,0.12)` (Light) / `0 16px 40px rgba(0,0,0,0.65)` (Dark) for modals and dropdown menus.
 
 * **Z-Index Scale**:

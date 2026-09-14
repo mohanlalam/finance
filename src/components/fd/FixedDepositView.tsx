@@ -248,29 +248,29 @@ export function FixedDepositView({
         </div>
 
         {/* Row 2: 4 Summary Metrics Ribbon */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 text-xs">
-          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)] divide-y sm:divide-y-0 divide-x-0 sm:divide-x divide-[var(--border-subtle)] text-xs overflow-hidden">
+          <div className="p-2 sm:p-2.5">
             <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Principal Invested</span>
             <span className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] tnum mt-0.5 block truncate">
               {formatINR(familyFDSummary.totalPrincipal)}
             </span>
           </div>
 
-          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+          <div className="p-2 sm:p-2.5">
             <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Current / Maturity Value</span>
             <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block truncate">
               {formatINR(familyFDSummary.totalCurrent)}
             </span>
           </div>
 
-          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+          <div className="p-2 sm:p-2.5">
             <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Accrued Interest</span>
             <span className="text-xs sm:text-sm font-bold text-[var(--positive)] tnum mt-0.5 block truncate">
               +{formatINR(familyFDSummary.accruedInterest)}
             </span>
           </div>
 
-          <div className="p-1.5 sm:p-2 rounded-[var(--radius-small)] bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)]">
+          <div className="p-2 sm:p-2.5">
             <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">Active Deposits</span>
             <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tnum mt-0.5 block truncate">
               {familyFDSummary.activeCount} Act ({familyFDSummary.maturedCount} Mat)

@@ -10,7 +10,12 @@ export function LazyViewport({
   placeholderHeight?: number;
   className?: string;
 }) {
-  const [isIntersected, setIsIntersected] = useState(false);
+  const [isIntersected, setIsIntersected] = useState(() => {
+    if (typeof window !== 'undefined' && Boolean((window as unknown as { __DISABLE_LAZY_VIEWPORT__?: boolean }).__DISABLE_LAZY_VIEWPORT__)) {
+      return true;
+    }
+    return false;
+  });
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,7 +63,12 @@ export function LazyChartWrapper<TProps extends object>({
   placeholderHeight?: number;
   className?: string;
 }) {
-  const [isIntersected, setIsIntersected] = useState(false);
+  const [isIntersected, setIsIntersected] = useState(() => {
+    if (typeof window !== 'undefined' && Boolean((window as unknown as { __DISABLE_LAZY_VIEWPORT__?: boolean }).__DISABLE_LAZY_VIEWPORT__)) {
+      return true;
+    }
+    return false;
+  });
   const ref = useRef<HTMLDivElement>(null);
   const importRef = useRef(importFunc);
   importRef.current = importFunc;

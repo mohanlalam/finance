@@ -322,7 +322,7 @@ export default React.memo(function DocumentVaultView({
   }
 
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <div className="space-y-3 sm:space-y-4 pb-24 sm:pb-8">
       {/* Unified Family Document Vault Banner */}
       <div className="apple-card p-2.5 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-2 sm:space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-[var(--border-subtle)] pb-2 sm:pb-2.5">
@@ -460,40 +460,42 @@ export default React.memo(function DocumentVaultView({
       {/* Main Document Vault Content Card */}
       <div className="apple-card overflow-hidden">
         <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center justify-between flex-wrap gap-2.5">
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none max-w-full pb-1 sm:pb-0">
-            {FOLDERS.map((f) => {
-              const count = allFamilyDocs.filter((d) => {
-                const matchFolder = d.asset_type === f.key;
-                const matchMember = selectedMember === 'all' || d.portfolioName === selectedMember;
-                return matchFolder && matchMember;
-              }).length;
-              const isActive = activeFolder === f.key;
-              return (
-                <button
-                  key={f.key}
-                  onClick={() => setActiveFolder(f.key)}
-                  className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] border transition-all ios-press shrink-0 cursor-pointer ${
-                    isActive
-                      ? 'bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)] text-white border-transparent shadow-[0_2px_10px_rgba(2,132,199,0.25)] scale-[1.02]'
-                      : 'bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-tertiary)] hover:scale-[1.01]'
-                  }`}
-                >
-                  {isActive ? <FolderOpen size={12} /> : <Folder size={12} />}
-                  <span>{f.label}</span>
-                  {count > 0 && (
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                        isActive
-                          ? 'bg-white/20 text-white'
-                          : 'bg-[var(--surface-secondary)] text-[var(--text-tertiary)]'
-                      }`}
-                    >
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+          <div className="scroll-fade-container max-w-full">
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none max-w-full pb-1 sm:pb-0 pr-6">
+              {FOLDERS.map((f) => {
+                const count = allFamilyDocs.filter((d) => {
+                  const matchFolder = d.asset_type === f.key;
+                  const matchMember = selectedMember === 'all' || d.portfolioName === selectedMember;
+                  return matchFolder && matchMember;
+                }).length;
+                const isActive = activeFolder === f.key;
+                return (
+                  <button
+                    key={f.key}
+                    onClick={() => setActiveFolder(f.key)}
+                    className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-small)] border transition-all ios-press shrink-0 cursor-pointer ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)] text-white border-transparent shadow-[0_2px_10px_rgba(2,132,199,0.25)] scale-[1.02]'
+                        : 'bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-tertiary)] hover:scale-[1.01]'
+                    }`}
+                  >
+                    {isActive ? <FolderOpen size={12} /> : <Folder size={12} />}
+                    <span>{f.label}</span>
+                    {count > 0 && (
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                          isActive
+                            ? 'bg-white/20 text-white'
+                            : 'bg-[var(--surface-secondary)] text-[var(--text-tertiary)]'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="shrink-0">
             <input
@@ -539,20 +541,22 @@ export default React.memo(function DocumentVaultView({
             <AssetCardSkeleton count={Math.max(1, folderDocs.length || 3)} />
           </div>
         ) : folderDocs.length === 0 ? (
-          <EmptyState
-            type="documents"
-            title="No Documents in This Folder"
-            description="Upload PDFs, receipts, or policy documents to keep a secure digital record of your assets."
-            actionButton={
-              <label
-                htmlFor="vault-file-upload-input"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)] hover:opacity-95 text-white text-xs font-bold px-5 py-2.5 rounded-[var(--radius-medium)] transition-all shadow-[0_4px_14px_rgba(2,132,199,0.25)] hover:shadow-[0_6px_18px_rgba(2,132,199,0.35)] cursor-pointer select-none ios-press active:scale-[0.98]"
-              >
-                <Upload size={15} />
-                <span>Upload Your First Document</span>
-              </label>
-            }
-          />
+          <div className="p-4 sm:p-8 pb-12 sm:pb-8">
+            <EmptyState
+              type="documents"
+              title="No Documents in This Folder"
+              description="Upload PDFs, receipts, or policy documents to keep a secure digital record of your assets."
+              actionButton={
+                <label
+                  htmlFor="vault-file-upload-input"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)] hover:opacity-95 text-white text-xs font-bold px-5 py-2.5 rounded-[var(--radius-medium)] transition-all shadow-[0_4px_14px_rgba(2,132,199,0.25)] hover:shadow-[0_6px_18px_rgba(2,132,199,0.35)] cursor-pointer select-none ios-press active:scale-[0.98]"
+                >
+                  <Upload size={15} />
+                  <span>Upload Your First Document</span>
+                </label>
+              }
+            />
+          </div>
         ) : folderDocs.length > 10 ? (
           <List
             height={Math.min(folderDocs.length * (isMobile ? 80 : 72), isMobile ? 420 : 540)}

@@ -111,11 +111,21 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
               <Calendar size={12} />
               Renewal: {new Date(policy.renewal_date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
               {daysRemaining !== null && (isExpiringSoon || daysRemaining <= 60) && (
-                <span className={`ml-1 text-[10px] px-1.5 py-0.5 rounded-[var(--radius-pill)] ${isOverdue ? 'bg-[var(--negative-soft)] text-[var(--negative)]' : 'bg-[var(--warning-soft)] text-[var(--warning)]'}`}>
+                <span className={`ml-1 text-[10px] px-1.5 py-0.5 rounded-[var(--radius-pill)] font-bold ${isOverdue ? 'bg-[var(--negative-soft)] text-[var(--negative)]' : 'bg-amber-100 dark:bg-amber-950/70 text-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-700'}`}>
                   {renewalStatus.statusText}
                 </span>
               )}
             </span>
+          )}
+          {policy.renewal_date && (isExpiringSoon || (daysRemaining !== null && daysRemaining <= 60)) && (
+            <button
+              type="button"
+              onClick={() => onOpenEdit(policy)}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--radius-small)] bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] shadow-xs cursor-pointer ios-press transition-colors"
+              title="Pay or renew policy premium"
+            >
+              <span>Pay Premium</span>
+            </button>
           )}
           {docs.map((doc) => (
             <button
@@ -134,7 +144,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
             <button
               type="button"
               onClick={() => onOpenEdit(policy)}
-              className="inline-flex items-center gap-1 text-[11px] text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] transition-colors"
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--accent-blue)] hover:underline bg-[var(--accent-blue-soft)] px-2 py-0.5 rounded-[var(--radius-small)] border border-[var(--accent-blue)]/30 transition-colors cursor-pointer"
               title="Attach policy document"
             >
               <Paperclip size={11} />

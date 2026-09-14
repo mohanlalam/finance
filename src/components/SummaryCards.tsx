@@ -75,7 +75,7 @@ function SummaryCards({
   };
 
   return (
-    <div className="w-full bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-large)] shadow-[var(--shadow-card)] p-5 sm:p-6 transition-all duration-200">
+    <div className="w-full hero-networth-card rounded-[var(--radius-large)] p-5 sm:p-6 transition-all duration-200">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* 1. Net Worth */}

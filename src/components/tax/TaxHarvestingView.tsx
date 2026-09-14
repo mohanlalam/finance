@@ -33,7 +33,7 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
   const taxData = React.useMemo(() => calculateTaxHarvesting(holdings), [holdings]);
 
   return (
-    <div className="space-y-4 max-w-5xl mx-auto pb-12">
+    <div className="space-y-4 max-w-5xl mx-auto pb-24 sm:pb-12">
       {/* Unified Family Tax Loss Harvesting Banner */}
       <div className="apple-card p-2.5 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-2 sm:space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-[var(--border-subtle)] pb-2 sm:pb-2.5">
@@ -127,85 +127,163 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]/50 text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
-                  <th className="px-4 py-3">Stock / Asset</th>
-                  {!portfolio && <th className="px-4 py-3">Owner</th>}
-                  <th className="px-4 py-3 text-right">Holding Value</th>
-                  <th className="px-4 py-3 text-right">Unrealized Loss</th>
-                  <th className="px-4 py-3 text-center">Tax Category</th>
-                  <th className="px-4 py-3 text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border-subtle)] text-sm">
-                {taxData.opportunities.map((opp) => {
-                  const memberName = opp.holding.portfolio_label || opp.holding.portfolio_name;
-                  const memberConfig = getFamilyMemberConfig(opp.holding.portfolio_name || memberName || '');
-                  const rowKey = `${opp.holding.id || opp.holding.ticker}-${opp.holding.portfolio_id || memberName || ''}`;
+          <>
+            {/* Mobile View: Compact Touch Cards (< md) */}
+            <div className="md:hidden p-2.5 sm:p-3 space-y-2.5">
+              {taxData.opportunities.map((opp) => {
+                const memberName = opp.holding.portfolio_label || opp.holding.portfolio_name;
+                const memberConfig = getFamilyMemberConfig(opp.holding.portfolio_name || memberName || '');
+                const rowKey = `m-${opp.holding.id || opp.holding.ticker}-${opp.holding.portfolio_id || memberName || ''}`;
 
-                  return (
-                    <tr key={rowKey} className="hover:bg-[var(--surface-secondary)]/30 transition-colors">
-                      <td className="px-4 py-3 font-semibold text-[var(--text-primary)]">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-[var(--negative)] shrink-0"></div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-bold">{opp.holding.ticker}</span>
-                              <span className="text-[11px] text-[var(--text-tertiary)] font-normal">
-                                ({opp.holding.qty} shares)
-                              </span>
-                            </div>
-                            {opp.holding.stockName && opp.holding.stockName !== opp.holding.ticker && (
-                              <p className="text-[11px] text-[var(--text-tertiary)] font-normal truncate max-w-[220px]">
-                                {opp.holding.stockName}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      {!portfolio && (
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          {memberName ? (
-                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold ${memberConfig.bg} ${memberConfig.text}`}>
-                              {memberConfig.icon}
-                              <span>{memberName}</span>
+                return (
+                  <div key={rowKey} className="p-3.5 space-y-2.5 bg-[var(--surface)] rounded-[var(--radius-medium)] border border-[var(--border-subtle)] shadow-[var(--shadow-card)] mobile-asset-card">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-2 h-2 rounded-full bg-[var(--negative)] shrink-0 mt-0.5" />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-sm text-[var(--text-primary)]">{opp.holding.ticker}</span>
+                            <span className="text-[11px] text-[var(--text-tertiary)] font-normal">
+                              ({opp.holding.qty} shares)
                             </span>
-                          ) : (
-                            <span className="text-xs text-[var(--text-tertiary)]">—</span>
+                          </div>
+                          {opp.holding.stockName && opp.holding.stockName !== opp.holding.ticker && (
+                            <p className="text-[11px] text-[var(--text-tertiary)] font-normal truncate max-w-[200px]">
+                              {opp.holding.stockName}
+                            </p>
                           )}
+                        </div>
+                      </div>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-[var(--radius-pill)] border shrink-0 ${
+                        opp.isDebtOrGold
+                          ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700'
+                          : opp.isLTCG
+                          ? 'bg-sky-100 dark:bg-sky-950/70 text-sky-900 dark:text-sky-200 border-sky-300 dark:border-sky-800'
+                          : 'bg-amber-100 dark:bg-amber-950/70 text-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-800'
+                      }`}>
+                        {opp.isDebtOrGold ? 'Slab Rate' : opp.isLTCG ? 'LTCG' : 'STCG'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs pt-1.5 border-t border-[var(--border-subtle)]/60">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Holding Value</span>
+                        <span className="font-semibold text-[var(--text-secondary)] tnum">
+                          {formatINR(opp.holding.currentValue)}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] block">Unrealized Loss</span>
+                        <span className="font-bold text-[var(--negative)] tnum">
+                          -{formatINR(Math.abs(opp.unrealizedPnL))}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      {!portfolio && memberName ? (
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold ${memberConfig.bg} ${memberConfig.text}`}>
+                          {memberConfig.icon}
+                          <span>{memberName}</span>
+                        </span>
+                      ) : <div />}
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] px-3 py-1.5 rounded-[var(--radius-small)] shadow-xs transition-all cursor-pointer select-none ios-press"
+                      >
+                        <TrendingDown size={13} />
+                        <span>Harvest Opportunity</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop View: Full Data Table (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]/50 text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
+                    <th className="px-4 py-3">Stock / Asset</th>
+                    {!portfolio && <th className="px-4 py-3">Owner</th>}
+                    <th className="px-4 py-3 text-right">Holding Value</th>
+                    <th className="px-4 py-3 text-right">Unrealized Loss</th>
+                    <th className="px-4 py-3 text-center">Tax Category</th>
+                    <th className="px-4 py-3 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-subtle)] text-sm">
+                  {taxData.opportunities.map((opp) => {
+                    const memberName = opp.holding.portfolio_label || opp.holding.portfolio_name;
+                    const memberConfig = getFamilyMemberConfig(opp.holding.portfolio_name || memberName || '');
+                    const rowKey = `${opp.holding.id || opp.holding.ticker}-${opp.holding.portfolio_id || memberName || ''}`;
+
+                    return (
+                      <tr key={rowKey} className="hover:bg-[var(--surface-secondary)]/30 transition-colors">
+                        <td className="px-4 py-3 font-semibold text-[var(--text-primary)]">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[var(--negative)] shrink-0"></div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-bold">{opp.holding.ticker}</span>
+                                <span className="text-[11px] text-[var(--text-tertiary)] font-normal">
+                                  ({opp.holding.qty} shares)
+                                </span>
+                              </div>
+                              {opp.holding.stockName && opp.holding.stockName !== opp.holding.ticker && (
+                                <p className="text-[11px] text-[var(--text-tertiary)] font-normal truncate max-w-[220px]">
+                                  {opp.holding.stockName}
+                                </p>
+                              )}
+                            </div>
+                          </div>
                         </td>
-                      )}
-                      <td className="px-4 py-3 text-right font-medium tnum text-[var(--text-secondary)]">
-                        {formatINR(opp.holding.currentValue)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-bold tnum text-[var(--negative)]">
-                        {formatINR(Math.abs(opp.unrealizedPnL))}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-pill)] border ${
-                          opp.isDebtOrGold
-                            ? 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)]'
-                            : opp.isLTCG
-                            ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border-[var(--accent-blue)]/30'
-                            : 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/30'
-                        }`}>
-                          {opp.isDebtOrGold ? 'Slab Rate' : opp.isLTCG ? 'LTCG' : 'STCG'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--positive)] bg-[var(--positive-soft)] border border-[var(--positive)]/30 px-2 py-1 rounded-[var(--radius-small)]">
-                          <TrendingDown size={12} />
-                          Harvest
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        {!portfolio && (
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            {memberName ? (
+                              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold ${memberConfig.bg} ${memberConfig.text}`}>
+                                {memberConfig.icon}
+                                <span>{memberName}</span>
+                              </span>
+                            ) : (
+                              <span className="text-xs text-[var(--text-tertiary)]">—</span>
+                            )}
+                          </td>
+                        )}
+                        <td className="px-4 py-3 text-right font-medium tnum text-[var(--text-secondary)]">
+                          {formatINR(opp.holding.currentValue)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-bold tnum text-[var(--negative)]">
+                          {formatINR(Math.abs(opp.unrealizedPnL))}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded-[var(--radius-pill)] border ${
+                            opp.isDebtOrGold
+                              ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700'
+                              : opp.isLTCG
+                              ? 'bg-sky-100 dark:bg-sky-950/70 text-sky-900 dark:text-sky-200 border-sky-300 dark:border-sky-800'
+                              : 'bg-amber-100 dark:bg-amber-950/70 text-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-800'
+                          }`}>
+                            {opp.isDebtOrGold ? 'Slab Rate' : opp.isLTCG ? 'LTCG' : 'STCG'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] px-3 py-1 rounded-[var(--radius-small)] shadow-xs transition-all cursor-pointer select-none ios-press"
+                          >
+                            <TrendingDown size={12} />
+                            <span>Harvest</span>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

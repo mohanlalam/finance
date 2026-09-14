@@ -43,7 +43,7 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
   const curPricePerGram = liveRatePerGram > 0 ? liveRatePerGram : (weight > 0 && currentValuation > 0 ? Math.round(currentValuation / weight) : null);
 
   return (
-    <div className="p-3.5 sm:p-4 hover:bg-[var(--surface-secondary)]/50 transition-colors mobile-asset-card">
+    <div className="p-3.5 sm:p-4 bg-[var(--surface-gold-soft)] dark:bg-transparent hover:bg-amber-100/50 dark:hover:bg-[var(--surface-secondary)]/50 transition-colors mobile-asset-card">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2.5">
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--warning-soft)] border border-[var(--warning)]/30 flex items-center justify-center text-[var(--warning)] shrink-0">

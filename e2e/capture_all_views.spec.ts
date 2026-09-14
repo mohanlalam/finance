@@ -1,4 +1,4 @@
-﻿import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
@@ -25,6 +25,22 @@ async function unlockIfLocked(page: Page) {
   await expect(page.locator('header')).toBeVisible({ timeout: 25000 });
 }
 
+async function captureView(page: Page, view: { id: string; route: string }, outDir: string, label: string) {
+  console.log(`Capturing ${label}: ${view.id}`);
+  await page.goto(view.route);
+  await page.waitForLoadState('networkidle').catch(() => {});
+  await page.waitForTimeout(1000);
+
+  // Scroll down then back up to ensure all lazy charts, observers, and DOM elements are mounted
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(400);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(400);
+
+  const filePath = path.join(outDir, view.id + '.png');
+  await page.screenshot({ path: filePath, fullPage: true });
+}
+
 test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
   test.setTimeout(300000);
 
@@ -40,6 +56,10 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
 
     await page.addInitScript(() => {
       localStorage.setItem('theme', 'light');
+      localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
+      (window as unknown as { __DISABLE_LAZY_VIEWPORT__?: boolean }).__DISABLE_LAZY_VIEWPORT__ = true;
+      (window as unknown as { __DISABLE_VIRTUALIZATION__?: boolean }).__DISABLE_VIRTUALIZATION__ = true;
+      document.documentElement.setAttribute('data-capture-mode', 'true');
       document.documentElement.classList.remove('dark');
     });
 
@@ -48,12 +68,7 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
     await page.waitForTimeout(1000);
 
     for (const view of VIEWS) {
-      console.log('Capturing Web Light: ' + view.id);
-      await page.goto(view.route);
-      await page.waitForLoadState('networkidle').catch(() => {});
-      await page.waitForTimeout(1500);
-      const filePath = path.join(outDir, view.id + '.png');
-      await page.screenshot({ path: filePath, fullPage: true });
+      await captureView(page, view, outDir, 'Web Light');
     }
 
     await context.close();
@@ -71,6 +86,10 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
 
     await page.addInitScript(() => {
       localStorage.setItem('theme', 'dark');
+      localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
+      (window as unknown as { __DISABLE_LAZY_VIEWPORT__?: boolean }).__DISABLE_LAZY_VIEWPORT__ = true;
+      (window as unknown as { __DISABLE_VIRTUALIZATION__?: boolean }).__DISABLE_VIRTUALIZATION__ = true;
+      document.documentElement.setAttribute('data-capture-mode', 'true');
       document.documentElement.classList.add('dark');
     });
 
@@ -79,12 +98,7 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
     await page.waitForTimeout(1000);
 
     for (const view of VIEWS) {
-      console.log('Capturing Web Dark: ' + view.id);
-      await page.goto(view.route);
-      await page.waitForLoadState('networkidle').catch(() => {});
-      await page.waitForTimeout(1500);
-      const filePath = path.join(outDir, view.id + '.png');
-      await page.screenshot({ path: filePath, fullPage: true });
+      await captureView(page, view, outDir, 'Web Dark');
     }
 
     await context.close();
@@ -105,6 +119,10 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
 
     await page.addInitScript(() => {
       localStorage.setItem('theme', 'light');
+      localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
+      (window as unknown as { __DISABLE_LAZY_VIEWPORT__?: boolean }).__DISABLE_LAZY_VIEWPORT__ = true;
+      (window as unknown as { __DISABLE_VIRTUALIZATION__?: boolean }).__DISABLE_VIRTUALIZATION__ = true;
+      document.documentElement.setAttribute('data-capture-mode', 'true');
       document.documentElement.classList.remove('dark');
     });
 
@@ -113,12 +131,7 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
     await page.waitForTimeout(1000);
 
     for (const view of VIEWS) {
-      console.log('Capturing Mobile Light: ' + view.id);
-      await page.goto(view.route);
-      await page.waitForLoadState('networkidle').catch(() => {});
-      await page.waitForTimeout(1500);
-      const filePath = path.join(outDir, view.id + '.png');
-      await page.screenshot({ path: filePath, fullPage: true });
+      await captureView(page, view, outDir, 'Mobile Light');
     }
 
     await context.close();
@@ -139,6 +152,10 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
 
     await page.addInitScript(() => {
       localStorage.setItem('theme', 'dark');
+      localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
+      (window as unknown as { __DISABLE_LAZY_VIEWPORT__?: boolean }).__DISABLE_LAZY_VIEWPORT__ = true;
+      (window as unknown as { __DISABLE_VIRTUALIZATION__?: boolean }).__DISABLE_VIRTUALIZATION__ = true;
+      document.documentElement.setAttribute('data-capture-mode', 'true');
       document.documentElement.classList.add('dark');
     });
 
@@ -147,12 +164,7 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
     await page.waitForTimeout(1000);
 
     for (const view of VIEWS) {
-      console.log('Capturing Mobile Dark: ' + view.id);
-      await page.goto(view.route);
-      await page.waitForLoadState('networkidle').catch(() => {});
-      await page.waitForTimeout(1500);
-      const filePath = path.join(outDir, view.id + '.png');
-      await page.screenshot({ path: filePath, fullPage: true });
+      await captureView(page, view, outDir, 'Mobile Dark');
     }
 
     await context.close();

@@ -490,7 +490,7 @@ export default React.memo(function PortfolioTable({
                   description="Add your first stock or ETF to start tracking" 
                 />
               </div>
-            ) : sorted.length > 20 ? (
+            ) : (sorted.length > 80 && !(typeof window !== 'undefined' && Boolean((window as unknown as { __DISABLE_VIRTUALIZATION__?: boolean }).__DISABLE_VIRTUALIZATION__))) ? (
               <List
                 height={Math.min(sorted.length * 125, 540)}
                 itemCount={sorted.length}

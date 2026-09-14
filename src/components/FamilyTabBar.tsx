@@ -51,172 +51,174 @@ export default React.memo(function FamilyTabBar({
   return (
     <div className="flex items-center justify-between gap-2 pb-1 relative w-full min-w-0">
       {/* Segmented Track: Horizontal scroll on mobile, flex on desktop */}
-      <div
-        role="tablist"
-        aria-label="Family members portfolios"
-        className="flex items-center gap-1.5 bg-[var(--surface-secondary)]/60 backdrop-blur-xl p-1.5 sm:p-1 rounded-[var(--radius-large)] sm:rounded-[var(--radius-medium)] border border-[var(--border-subtle)] w-full sm:w-auto shadow-[var(--shadow-card)] overflow-x-auto scrollbar-none pr-3 scroll-smooth touch-pan-x"
-        style={{ WebkitOverflowScrolling: 'touch' }}
-      >
-        {/* Overview Tab */}
-        <button
-          role="tab"
-          aria-selected={activeTab === 'all'}
-          aria-controls="portfolio-content"
-          id="tab-all"
-          onClick={() => {
-            setMenuTarget(null);
-            onTabChange('all');
-          }}
-          className={`flex items-center gap-2 h-9 sm:h-8 px-3 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 shrink-0 cursor-pointer ${
-            activeTab === 'all'
-              ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-card)] border border-[var(--border-luminous)] ring-1 ring-[var(--accent-blue)]/20'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]/50'
-          }`}
+      <div className="scroll-fade-container w-full sm:w-auto min-w-0">
+        <div
+          role="tablist"
+          aria-label="Family members portfolios"
+          className="flex items-center gap-1.5 bg-[var(--surface-secondary)]/60 backdrop-blur-xl p-1.5 sm:p-1 rounded-[var(--radius-large)] sm:rounded-[var(--radius-medium)] border border-[var(--border-subtle)] w-full sm:w-auto shadow-[var(--shadow-card)] overflow-x-auto scrollbar-none pr-6 scroll-smooth touch-pan-x"
+          style={{ WebkitOverflowScrolling: 'touch' }}
         >
-          <div className="w-4 h-4 rounded bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
-            <LayoutDashboard size={12} />
-          </div>
-          <span className="whitespace-nowrap">Family Overview</span>
-        </button>
+          {/* Overview Tab */}
+          <button
+            role="tab"
+            aria-selected={activeTab === 'all'}
+            aria-controls="portfolio-content"
+            id="tab-all"
+            onClick={() => {
+              setMenuTarget(null);
+              onTabChange('all');
+            }}
+            className={`flex items-center gap-2 h-9 sm:h-8 px-3 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 shrink-0 cursor-pointer ${
+              activeTab === 'all'
+                ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-card)] border border-[var(--border-luminous)] ring-1 ring-[var(--accent-blue)]/20'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]/50'
+            }`}
+          >
+            <div className="w-4 h-4 rounded bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] flex items-center justify-center shrink-0">
+              <LayoutDashboard size={12} />
+            </div>
+            <span className="whitespace-nowrap">Family Overview</span>
+          </button>
 
-        {/* Member Tabs */}
-        {sortedPortfolios.map((p) => {
-          const isActive = activeTab === p.name;
-          const iconConfig = getFamilyMemberConfig(p.name);
-          const isPositive = p.totalPnL >= 0;
-          const isMenuOpen = menuTarget?.id === p.id;
+          {/* Member Tabs */}
+          {sortedPortfolios.map((p) => {
+            const isActive = activeTab === p.name;
+            const iconConfig = getFamilyMemberConfig(p.name);
+            const isPositive = p.totalPnL >= 0;
+            const isMenuOpen = menuTarget?.id === p.id;
 
-          return (
-            <div key={p.name} role="presentation" className="relative group flex items-center shrink-0">
-              <button
-                role="tab"
-                aria-selected={isActive}
-                aria-controls="portfolio-content"
-                id={`tab-${p.name}`}
-                onClick={() => {
-                  setMenuTarget(null);
-                  onTabChange(p.name);
-                }}
-                className={`flex items-center gap-1.5 h-9 sm:h-8 pl-2 pr-1.5 sm:pl-2.5 sm:pr-1.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 shrink-0 cursor-pointer ${
-                  isActive
-                    ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-card)] border border-[var(--border-luminous)] ring-1 ring-[var(--accent-blue)]/20'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]/50'
-                }`}
-              >
-                {/* Styled icon badge */}
-                <div className={`w-4 h-4 rounded ${iconConfig.bg} ${iconConfig.text} flex items-center justify-center shrink-0`}>
-                  {iconConfig.icon}
-                </div>
-
-                <span className="whitespace-nowrap shrink-0">{p.label}</span>
-
-                {/* Return Percentage Badge */}
-                <span
-                  className={`text-[9px] sm:text-[10px] font-bold px-1 py-0.5 sm:px-1.5 sm:py-0.5 rounded tnum transition-colors shrink-0 ${
-                    isPositive
-                      ? 'bg-[var(--positive-soft)] text-[var(--positive)]'
-                      : 'bg-[var(--negative-soft)] text-[var(--negative)]'
+            return (
+              <div key={p.name} role="presentation" className="relative group flex items-center shrink-0">
+                <button
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls="portfolio-content"
+                  id={`tab-${p.name}`}
+                  onClick={() => {
+                    setMenuTarget(null);
+                    onTabChange(p.name);
+                  }}
+                  className={`flex items-center gap-1.5 h-9 sm:h-8 pl-2 pr-1.5 sm:pl-2.5 sm:pr-1.5 rounded-[var(--radius-small)] text-xs font-bold transition-all outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 shrink-0 cursor-pointer ${
+                    isActive
+                      ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-card)] border border-[var(--border-luminous)] ring-1 ring-[var(--accent-blue)]/20'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]/50'
                   }`}
                 >
-                  {formatPercent(p.totalPnLPercent, 1)}
-                </span>
-              </button>
+                  {/* Styled icon badge */}
+                  <div className={`w-4 h-4 rounded ${iconConfig.bg} ${iconConfig.text} flex items-center justify-center shrink-0`}>
+                    {iconConfig.icon}
+                  </div>
 
-              {/* Mobile ellipsis menu button */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setMenuTarget(isMenuOpen ? null : { id: p.id, name: p.name, label: p.label });
-                }}
-                className="sm:hidden w-6 h-9 sm:h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-0.5 shrink-0 touch-manipulation ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
-                title={`Options for ${p.label}`}
-                aria-label={`Options for portfolio ${p.label}`}
-                aria-haspopup="menu"
-                aria-expanded={isMenuOpen}
-                aria-controls={`menu-${p.id}`}
-              >
-                <MoreVertical size={13} aria-hidden="true" />
-              </button>
+                  <span className="whitespace-nowrap shrink-0">{p.label}</span>
 
-              {/* Desktop action buttons (pencil, trash) displayed on hover */}
-              <div className="hidden sm:flex items-center gap-0.5 ml-0.5 opacity-40 group-hover:opacity-100 transition-opacity duration-150 shrink-0">
+                  {/* Return Percentage Badge */}
+                  <span
+                    className={`text-[9px] sm:text-[10px] font-bold px-1 py-0.5 sm:px-1.5 sm:py-0.5 rounded tnum transition-colors shrink-0 ${
+                      isPositive
+                        ? 'bg-[var(--positive-soft)] text-[var(--positive)]'
+                        : 'bg-[var(--negative-soft)] text-[var(--negative)]'
+                    }`}
+                  >
+                    {formatPercent(p.totalPnLPercent, 1)}
+                  </span>
+                </button>
+
+                {/* Mobile ellipsis menu button */}
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onRenameClick({ id: p.id, name: p.name, label: p.label });
+                    setMenuTarget(isMenuOpen ? null : { id: p.id, name: p.name, label: p.label });
                   }}
-                  className="w-5 h-5 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
-                  title={`Rename ${p.label}`}
-                  aria-label={`Rename portfolio ${p.label}`}
+                  className="sm:hidden w-6 h-9 sm:h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-0.5 shrink-0 touch-manipulation ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
+                  title={`Options for ${p.label}`}
+                  aria-label={`Options for portfolio ${p.label}`}
+                  aria-haspopup="menu"
+                  aria-expanded={isMenuOpen}
+                  aria-controls={`menu-${p.id}`}
                 >
-                  <Pencil size={11} aria-hidden="true" />
+                  <MoreVertical size={13} aria-hidden="true" />
                 </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteClick({ id: p.id, name: p.name, label: p.label });
-                  }}
-                  className="w-5 h-5 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--negative)]"
-                  title={`Delete ${p.label}`}
-                  aria-label={`Delete portfolio ${p.label}`}
-                >
-                  <Trash2 size={11} aria-hidden="true" />
-                </button>
-              </div>
 
-              {/* Mobile Popover Menu */}
-              {isMenuOpen && (
-                <div
-                  ref={menuRef}
-                  id={`menu-${p.id}`}
-                  role="menu"
-                  aria-label={`Options for ${p.label}`}
-                  className="absolute top-10 right-0 z-50 bg-[var(--surface-solid)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] shadow-xl p-1 min-w-[120px] animate-slide-up sm:hidden"
-                >
+                {/* Desktop action buttons (pencil, trash) displayed on hover */}
+                <div className="hidden sm:flex items-center gap-0.5 ml-0.5 opacity-40 group-hover:opacity-100 transition-opacity duration-150 shrink-0">
                   <button
-                    role="menuitem"
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setMenuTarget(null);
                       onRenameClick({ id: p.id, name: p.name, label: p.label });
                     }}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] rounded-[var(--radius-small)] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
+                    className="w-5 h-5 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
+                    title={`Rename ${p.label}`}
+                    aria-label={`Rename portfolio ${p.label}`}
                   >
-                    <Pencil size={12} className="text-[var(--text-secondary)]" aria-hidden="true" />
-                    <span>Rename</span>
+                    <Pencil size={11} aria-hidden="true" />
                   </button>
                   <button
-                    role="menuitem"
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setMenuTarget(null);
                       onDeleteClick({ id: p.id, name: p.name, label: p.label });
                     }}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-[var(--negative)] hover:bg-[var(--negative-soft)] rounded-[var(--radius-small)] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--negative)]"
+                    className="w-5 h-5 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--negative)]"
+                    title={`Delete ${p.label}`}
+                    aria-label={`Delete portfolio ${p.label}`}
                   >
-                    <Trash2 size={12} aria-hidden="true" />
-                    <span>Delete</span>
+                    <Trash2 size={11} aria-hidden="true" />
                   </button>
                 </div>
-              )}
-            </div>
-          );
-        })}
 
-        {/* Add Member Button inside scroll track */}
-        <button
-          onClick={onAddFamilyClick}
-          className="flex items-center justify-center gap-1.5 px-3 h-9 sm:h-8 rounded-[var(--radius-small)] text-xs font-bold border border-dashed border-[var(--border-subtle)] bg-[var(--surface)] hover:border-[var(--accent-blue)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] ios-press transition-colors shrink-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
-          aria-label="Add family member"
-        >
-          <UserPlus size={13} aria-hidden="true" />
-          <span className="whitespace-nowrap">Add Member</span>
-        </button>
+                {/* Mobile Popover Menu */}
+                {isMenuOpen && (
+                  <div
+                    ref={menuRef}
+                    id={`menu-${p.id}`}
+                    role="menu"
+                    aria-label={`Options for ${p.label}`}
+                    className="absolute top-10 right-0 z-50 bg-[var(--surface-solid)] border border-[var(--border-subtle)] rounded-[var(--radius-medium)] shadow-xl p-1 min-w-[120px] animate-slide-up sm:hidden"
+                  >
+                    <button
+                      role="menuitem"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuTarget(null);
+                        onRenameClick({ id: p.id, name: p.name, label: p.label });
+                      }}
+                      className="w-full flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] rounded-[var(--radius-small)] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
+                    >
+                      <Pencil size={12} className="text-[var(--text-secondary)]" aria-hidden="true" />
+                      <span>Rename</span>
+                    </button>
+                    <button
+                      role="menuitem"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuTarget(null);
+                        onDeleteClick({ id: p.id, name: p.name, label: p.label });
+                      }}
+                      className="w-full flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-[var(--negative)] hover:bg-[var(--negative-soft)] rounded-[var(--radius-small)] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--negative)]"
+                    >
+                      <Trash2 size={12} aria-hidden="true" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Add Member Button inside scroll track */}
+          <button
+            onClick={onAddFamilyClick}
+            className="flex items-center justify-center gap-1.5 px-3 h-9 sm:h-8 rounded-[var(--radius-small)] text-xs font-bold border border-dashed border-[var(--border-subtle)] bg-[var(--surface)] hover:border-[var(--accent-blue)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] ios-press transition-colors shrink-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
+            aria-label="Add family member"
+          >
+            <UserPlus size={13} aria-hidden="true" />
+            <span className="whitespace-nowrap">Add Member</span>
+          </button>
+        </div>
       </div>
 
       {/* Desktop Add family control */}
