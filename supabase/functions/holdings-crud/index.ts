@@ -804,6 +804,20 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    if (req.method === "POST" && action === "list_storage_files") {
+      const { bucket = "investment-documents", path = "" } = await req.json();
+      if (bucket !== "investment-documents") {
+        throw new Error("Invalid storage bucket. Only 'investment-documents' is allowed.");
+      }
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .list(path, { limit: 100 });
+      if (error) throw error;
+      return new Response(JSON.stringify({ files: data }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (req.method === "POST" && action === "get_document_url") {
       const { bucket = "investment-documents", path: rawPath, expiresIn = 300 } = await req.json();
       if (bucket !== "investment-documents") {
@@ -819,9 +833,81 @@ Deno.serve(async (req: Request) => {
       }
 
       const ttl = Math.min(Math.max(Number(expiresIn) || 300, 60), 3600);
-      const { data, error } = await supabase.storage
+      let { data, error } = await supabase.storage
         .from(bucket)
         .createSignedUrl(cleanPath, ttl);
+
+      // If object not found at cleanPath, check if file exists with a different UUID or in a sibling folder
+      if (error) {
+        const segments = cleanPath.split("/");
+        const fileNameWithUuid = segments.pop() || "";
+        const folder = segments.join("/");
+        const rawFileName = fileNameWithUuid.replace(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_/i,
+          ""
+        );
+
+        const foldersToSearch = [
+          folder,
+          "wife/insurance",
+          "personal/insurance",
+          "mother/insurance",
+          "insurance",
+          "wife",
+          "personal",
+          "mother",
+          "",
+        ].filter((f, idx, arr) => arr.indexOf(f) === idx);
+
+        let matchedPath: string | null = null;
+        for (const fld of foldersToSearch) {
+          const { data: listData } = await supabase.storage
+            .from(bucket)
+            .list(fld, { limit: 100 });
+
+          if (listData && listData.length > 0) {
+            const match = listData.find((f) => {
+              if (!f || !f.name) return false;
+              const name = f.name.toLowerCase();
+              const target = rawFileName.toLowerCase();
+              const fullTarget = fileNameWithUuid.toLowerCase();
+              return (
+                name === target ||
+                name === fullTarget ||
+                name.endsWith(`_${target}`) ||
+                name.endsWith(`-${target}`)
+              );
+            });
+
+            if (match) {
+              matchedPath = fld ? `${fld}/${match.name}` : match.name;
+              break;
+            }
+          }
+        }
+
+        if (matchedPath) {
+          console.log(`[get_document_url] Resolved missing "${cleanPath}" to "${matchedPath}"`);
+          const retry = await supabase.storage
+            .from(bucket)
+            .createSignedUrl(matchedPath, ttl);
+
+          if (retry.data?.signedUrl) {
+            data = retry.data;
+            error = null;
+
+            // Auto-heal the documents table so future requests use the direct path
+            try {
+              await supabase
+                .from("documents")
+                .update({ file_path: matchedPath })
+                .eq("file_path", cleanPath);
+            } catch (healErr) {
+              console.warn("Failed to update healed document path:", healErr);
+            }
+          }
+        }
+      }
 
       if (error) throw error;
 

@@ -147,10 +147,11 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
       if (pendingFiles.length > 0) {
         for (const doc of pendingFiles) {
           const storagePath = generateDocumentStoragePath(targetPortfolio, 'real_estate', doc.file.name);
-          await uploadDocumentFile('investment-documents', storagePath, doc.file);
+          const uploadRes = await uploadDocumentFile('investment-documents', storagePath, doc.file);
+          const finalPath = uploadRes?.path || storagePath;
           await onAdd('document', targetPortfolio, {
             name: doc.name.trim() || doc.file.name,
-            filePath: storagePath,
+            filePath: finalPath,
             fileType: doc.file.type,
             linkedAssetType: 'real_estate',
             linkedAssetId: assetId || null,

@@ -290,11 +290,12 @@ export default React.memo(function DocumentVaultView({
     try {
       const storagePath = generateDocumentStoragePath(formPortfolio, activeFolder, pendingFile.name);
 
-      await uploadDocumentFile('investment-documents', storagePath, pendingFile);
+      const uploadRes = await uploadDocumentFile('investment-documents', storagePath, pendingFile);
+      const finalPath = uploadRes?.path || storagePath;
 
       await onAdd('document', formPortfolio, {
         name: documentName || pendingFile.name,
-        filePath: storagePath,
+        filePath: finalPath,
         fileType: pendingFile.type,
         linkedAssetType: activeFolder,
         linkedAssetId: activeFolder === 'general' ? null : linkedAssetId || null,

@@ -343,7 +343,12 @@ export class SupabaseDocumentStorageRepository implements IDocumentStorageReposi
         throw new Error(errorMsg);
       }
 
-      return { path: cleanPath };
+      const resData = await res.json().catch(() => null);
+      const finalPath = (resData && typeof resData === 'object' && 'path' in resData && typeof (resData as { path?: string }).path === 'string')
+        ? (resData as { path: string }).path
+        : cleanPath;
+
+      return { path: finalPath };
     } finally {
       clearTimeout(timeout);
     }

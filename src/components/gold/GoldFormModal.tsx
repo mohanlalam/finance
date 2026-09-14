@@ -257,10 +257,11 @@ export const GoldFormModal = React.memo(function GoldFormModal({
       if (pendingFiles.length > 0) {
         for (const doc of pendingFiles) {
           const storagePath = generateDocumentStoragePath(targetPortfolio, 'gold', doc.file.name);
-          await uploadDocumentFile('investment-documents', storagePath, doc.file);
+          const uploadRes = await uploadDocumentFile('investment-documents', storagePath, doc.file);
+          const finalPath = uploadRes?.path || storagePath;
           await onAdd('document', targetPortfolio, {
             name: doc.name.trim() || doc.file.name,
-            filePath: storagePath,
+            filePath: finalPath,
             fileType: doc.file.type,
             linkedAssetType: 'gold',
             linkedAssetId: assetId || null,
