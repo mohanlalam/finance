@@ -139,7 +139,7 @@ export class SupabaseDocumentStorageRepository implements IDocumentStorageReposi
 
     // Open window synchronously to comply with browser popup blocker policies
     const newWindow = typeof window !== 'undefined' ? window.open('about:blank', '_blank') : null;
-    if (newWindow && 'document' in newWindow && newWindow.document && newWindow.document.body) {
+    if (newWindow && newWindow.document && newWindow.document.body) {
       newWindow.document.title = 'Loading document...';
       newWindow.document.body.innerHTML = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #0b0f19; color: #94a3b8;">
@@ -199,54 +199,53 @@ export class SupabaseDocumentStorageRepository implements IDocumentStorageReposi
         const isImage = mimeType.startsWith('image/') || /\.(png|jpe?g|webp|gif|svg)$/i.test(lowerName);
         const isPdf = mimeType === 'application/pdf' || lowerName.endsWith('.pdf');
 
-        if (newWindow && !newWindow.closed && 'document' in newWindow && newWindow.document && newWindow.document.body) {
-          newWindow.document.title = fileName;
-          if (isImage) {
-            newWindow.document.body.innerHTML = `
-              <style>
-                body { margin: 0; background: #0b0f19; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; box-sizing: border-box; font-family: -apple-system, sans-serif; }
-                .toolbar { position: fixed; top: 12px; right: 16px; display: flex; gap: 8px; z-index: 10; }
-                .btn { background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none; cursor: pointer; }
-                .btn:hover { background: rgba(255,255,255,0.25); }
-                img { max-width: 95vw; max-height: 90vh; object-fit: contain; box-shadow: 0 8px 30px rgba(0,0,0,0.6); border-radius: 8px; }
-              </style>
-              <div class="toolbar">
-                <a href="${objectUrl}" download="${fileName}" class="btn">⬇ Download</a>
-              </div>
-              <img src="${objectUrl}" alt="${fileName}" />
-            `;
-          } else if (isPdf) {
-            newWindow.document.body.innerHTML = `
-              <style>
-                body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #525659; }
-                iframe { width: 100%; height: 100%; border: none; }
-              </style>
-              <iframe src="${objectUrl}" type="application/pdf"></iframe>
-            `;
-          } else {
-            const a = newWindow.document.createElement('a');
-            a.href = objectUrl;
-            a.download = fileName;
-            newWindow.document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-              if (newWindow && !newWindow.closed) newWindow.close();
-            }, 500);
+        if (newWindow && !newWindow.closed) {
+          if (newWindow.document?.body) {
+            newWindow.document.title = fileName;
+            if (isImage) {
+              newWindow.document.body.innerHTML = `
+                <style>
+                  body { margin: 0; background: #0b0f19; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; box-sizing: border-box; font-family: -apple-system, sans-serif; }
+                  .toolbar { position: fixed; top: 12px; right: 16px; display: flex; gap: 8px; z-index: 10; }
+                  .btn { background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none; cursor: pointer; }
+                  .btn:hover { background: rgba(255,255,255,0.25); }
+                  img { max-width: 95vw; max-height: 90vh; object-fit: contain; box-shadow: 0 8px 30px rgba(0,0,0,0.6); border-radius: 8px; }
+                </style>
+                <div class="toolbar">
+                  <a href="${objectUrl}" download="${fileName}" class="btn">⬇ Download</a>
+                </div>
+                <img src="${objectUrl}" alt="${fileName}" />
+              `;
+            } else if (isPdf) {
+              newWindow.document.body.innerHTML = `
+                <style>
+                  body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #525659; }
+                  iframe { width: 100%; height: 100%; border: none; }
+                </style>
+                <iframe src="${objectUrl}" type="application/pdf"></iframe>
+              `;
+            } else {
+              const a = newWindow.document.createElement('a');
+              a.href = objectUrl;
+              a.download = fileName;
+              newWindow.document.body.appendChild(a);
+              a.click();
+              setTimeout(() => {
+                if (newWindow && !newWindow.closed) newWindow.close();
+              }, 500);
+            }
+          } else if (newWindow.location) {
+            newWindow.location.href = signedUrl;
           }
-        } else {
-          // If window doesn't have document (e.g. unit test mock), update location
-          if (newWindow && 'location' in newWindow && !('document' in newWindow)) {
-            (newWindow as any).location.href = signedUrl;
-          } else if (typeof document !== 'undefined') {
-            const a = document.createElement('a');
-            a.href = objectUrl;
-            a.download = fileName;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-          }
+        } else if (typeof document !== 'undefined') {
+          const a = document.createElement('a');
+          a.href = objectUrl;
+          a.download = fileName;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
         }
 
         // Revoke transient URL after 2 minutes to prevent memory leaks
