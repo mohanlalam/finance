@@ -66,7 +66,7 @@ export const AssetRegistryContainer = React.memo(function AssetRegistryContainer
           <AssetCardSkeleton count={Math.max(1, itemCount || 3)} />
         </div>
       ) : itemCount === 0 ? (
-        <div className="p-6 sm:p-8 pb-16 sm:pb-8">
+        <div className="p-4 sm:p-8 pb-28 sm:pb-8">
           <EmptyState
             type={emptyType}
             title={emptyTitle}

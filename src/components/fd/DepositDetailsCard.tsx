@@ -37,6 +37,22 @@ export function DepositDetailsCard({
   const fd = itemFd || itemDeposit!;
   const { openDocument: openSecureDocument } = useDocumentStorage();
   const { addToast } = useToastActions();
+  const [openingDocId, setOpeningDocId] = React.useState<string | null>(null);
+
+  const handleOpenDocument = async (doc: DocumentMetadata) => {
+    if (openingDocId) return;
+    setOpeningDocId(doc.id);
+    try {
+      await openSecureDocument(doc.file_path);
+    } catch (err) {
+      console.error('Failed to open document:', err);
+      const msg = err instanceof Error ? err.message : 'Failed to open document';
+      addToast(`Could not open document: ${msg}`, 'error');
+    } finally {
+      setOpeningDocId(null);
+    }
+  };
+
   const IconComponent = cfg.iconClass;
   const [contextMenu, setContextMenu] = React.useState<{ isOpen: boolean; x: number; y: number }>({
     isOpen: false,
@@ -147,12 +163,17 @@ export function DepositDetailsCard({
               <button
                 key={doc.id}
                 type="button"
-                onClick={() => openSecureDocument(doc.file_path)}
-                className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] ios-press transition-colors cursor-pointer"
+                onClick={() => handleOpenDocument(doc)}
+                disabled={openingDocId === doc.id}
+                className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] ios-press transition-colors cursor-pointer disabled:opacity-50"
                 title={doc.name}
                 aria-label={`Open document: ${doc.name}`}
               >
-                <FileText size={13} aria-hidden="true" />
+                {openingDocId === doc.id ? (
+                  <span className="w-2.5 h-2.5 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <FileText size={13} aria-hidden="true" />
+                )}
               </button>
             ))}
             <button

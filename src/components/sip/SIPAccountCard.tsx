@@ -24,6 +24,22 @@ export function SIPAccountCard({
 }: SIPAccountCardProps) {
   const { openDocument: openSecureDocument } = useDocumentStorage();
   const { addToast } = useToastActions();
+  const [openingDocId, setOpeningDocId] = React.useState<string | null>(null);
+
+  const handleOpenDocument = async (doc: DocumentMetadata) => {
+    if (openingDocId) return;
+    setOpeningDocId(doc.id);
+    try {
+      await openSecureDocument(doc.file_path);
+    } catch (err) {
+      console.error('Failed to open document:', err);
+      const msg = err instanceof Error ? err.message : 'Failed to open document';
+      addToast(`Could not open document: ${msg}`, 'error');
+    } finally {
+      setOpeningDocId(null);
+    }
+  };
+
   const [contextMenu, setContextMenu] = React.useState<{ isOpen: boolean; x: number; y: number }>({
     isOpen: false,
     x: 0,
@@ -142,12 +158,17 @@ export function SIPAccountCard({
           {linkedDocs.length > 0 && (
             <button
               type="button"
-              onClick={() => openSecureDocument(linkedDocs[0].file_path)}
+              onClick={() => handleOpenDocument(linkedDocs[0])}
+              disabled={openingDocId === linkedDocs[0].id}
               title={`View Attached Document: ${linkedDocs[0].name}`}
               aria-label={`Open document: ${linkedDocs[0].name}`}
-              className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press cursor-pointer"
+              className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors ios-press cursor-pointer disabled:opacity-50"
             >
-              <FileText size={13} />
+              {openingDocId === linkedDocs[0].id ? (
+                <span className="w-2.5 h-2.5 border-2 border-[var(--text-primary)] border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <FileText size={13} />
+              )}
             </button>
           )}
           <button

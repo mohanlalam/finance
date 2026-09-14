@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GoldHolding, DocumentMetadata } from '../../types/portfolio';
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 import { useDocumentStorage } from '../../hooks/useDocumentStorage';
+import { useToastActions } from '../../contexts/ToastContext';
 import { deriveGoldRates, calculateGoldValuation, getPurityMultiplier } from '../../utils/goldPricing';
 import { Edit2, Trash2, Scale, Coins, FileText, StickyNote, Paperclip } from '../icons/AppIcons';
 
@@ -19,7 +20,9 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
   onConfirmDelete,
 }: GoldHoldingCardProps) {
   const { openDocument: openSecureDocument } = useDocumentStorage();
+  const { addToast } = useToastActions();
   const [showNotes, setShowNotes] = useState(false);
+  const [openingDocId, setOpeningDocId] = useState<string | null>(null);
 
   const weight = Number(holding.weight_grams) || 0;
   const rates = deriveGoldRates();
@@ -42,6 +45,20 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
   const buyPricePerGram = weight > 0 && purchasePrice > 0 ? Math.round(purchasePrice / weight) : null;
   const curPricePerGram = liveRatePerGram > 0 ? liveRatePerGram : (weight > 0 && currentValuation > 0 ? Math.round(currentValuation / weight) : null);
 
+  const handleOpenDocument = async (doc: DocumentMetadata) => {
+    if (openingDocId) return;
+    setOpeningDocId(doc.id);
+    try {
+      await openSecureDocument(doc.file_path);
+    } catch (err) {
+      console.error('Failed to open document:', err);
+      const msg = err instanceof Error ? err.message : 'Failed to open document';
+      addToast(`Could not open document: ${msg}`, 'error');
+    } finally {
+      setOpeningDocId(null);
+    }
+  };
+
   return (
     <div className="p-3.5 sm:p-4 bg-[var(--surface-gold-soft)] dark:bg-transparent hover:bg-amber-100/50 dark:hover:bg-[var(--surface-secondary)]/50 transition-colors mobile-asset-card">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2.5">
@@ -56,9 +73,21 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
                 {holding.purity}
               </span>
               {docs.length > 0 ? (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--positive-soft)] text-[var(--positive)] border border-[var(--positive)]/30 shrink-0">
-                  📎 {docs.length} Doc{docs.length > 1 ? 's' : ''}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => handleOpenDocument(docs[0])}
+                  disabled={!!openingDocId}
+                  className="text-[9px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--positive-soft)] text-[var(--positive)] border border-[var(--positive)]/30 shrink-0 hover:bg-[var(--positive)]/20 transition-colors cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                  title={docs.length === 1 ? `Open document: ${docs[0].name}` : `Open document: ${docs[0].name} (${docs.length} attached)`}
+                  aria-label={docs.length === 1 ? `Open document: ${docs[0].name}` : `Open document: ${docs[0].name} (${docs.length} attached)`}
+                >
+                  {openingDocId && docs.some((d) => d.id === openingDocId) ? (
+                    <span className="w-2.5 h-2.5 border-2 border-[var(--positive)] border-t-transparent rounded-full animate-spin shrink-0" />
+                  ) : (
+                    <Paperclip size={10} />
+                  )}
+                  <span>{docs.length} Doc{docs.length > 1 ? 's' : ''}</span>
+                </button>
               ) : (
                 <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] shrink-0">
                   No Bill
@@ -123,12 +152,17 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
           <button
             key={doc.id}
             type="button"
-            onClick={() => openSecureDocument(doc.file_path)}
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--warning-soft)] border border-[var(--warning)]/30 text-[var(--warning)] hover:underline font-medium text-[11px] max-w-[220px] truncate cursor-pointer ios-press"
+            onClick={() => handleOpenDocument(doc)}
+            disabled={openingDocId === doc.id}
+            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--warning-soft)] border border-[var(--warning)]/30 text-[var(--warning)] hover:underline font-medium text-[11px] max-w-[220px] truncate cursor-pointer ios-press disabled:opacity-50"
             title={`View ${doc.name}`}
             aria-label={`Open document: ${doc.name}`}
           >
-            <FileText size={11} className="shrink-0" />
+            {openingDocId === doc.id ? (
+              <span className="w-2.5 h-2.5 border-2 border-[var(--warning)] border-t-transparent rounded-full animate-spin shrink-0" />
+            ) : (
+              <FileText size={11} className="shrink-0" />
+            )}
             <span className="truncate">{doc.name}</span>
           </button>
         ))}

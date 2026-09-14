@@ -139,13 +139,13 @@ export default function EmptyState({
     <div 
       role="region" 
       aria-label={title}
-      className="flex flex-col items-center justify-center py-8 sm:py-10 px-6 text-center bg-[var(--surface)] border border-dashed border-[var(--border-subtle)] rounded-[var(--radius-large)] w-full max-w-lg mx-auto animate-fade-in shadow-xs"
+      className="flex flex-col items-center justify-center py-5 sm:py-10 px-4 sm:px-6 text-center bg-[var(--surface)] border border-dashed border-[var(--border-subtle)] rounded-[var(--radius-large)] w-full max-w-lg mx-auto animate-fade-in shadow-xs"
     >
-      <div className="mb-4 p-4 bg-gradient-to-b from-[var(--surface-secondary)] to-[var(--surface)] rounded-2xl inline-flex items-center justify-center ring-1 ring-[var(--border-subtle)] shadow-[0_8px_20px_rgba(2,132,199,0.08)] animate-float">
+      <div className="mb-2.5 sm:mb-4 p-3 sm:p-4 bg-gradient-to-b from-[var(--surface-secondary)] to-[var(--surface)] rounded-2xl inline-flex items-center justify-center ring-1 ring-[var(--border-subtle)] shadow-[0_8px_20px_rgba(2,132,199,0.08)] animate-float">
         {getIllustration()}
       </div>
-      <h4 className="text-sm font-bold text-[var(--text-primary)] mb-1.5">{title}</h4>
-      <p className="text-xs text-[var(--text-secondary)] max-w-sm leading-relaxed mb-6">{description}</p>
+      <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] mb-1">{title}</h4>
+      <p className="text-[11px] sm:text-xs text-[var(--text-secondary)] max-w-sm leading-relaxed mb-3.5 sm:mb-6">{description}</p>
       {actionButton ? (
         actionButton
       ) : actionLabel && onAction ? (

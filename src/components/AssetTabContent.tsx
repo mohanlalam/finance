@@ -103,7 +103,7 @@ export default React.memo(function AssetTabContent({
 
   if (activeAsset === 'tax') {
     return (
-      <div className="tab-transition">
+      <div className="tab-transition pb-28 sm:pb-8">
         <React.Suspense fallback={<AssetCardSkeleton />}>
           <TaxHarvestingView portfolio={visiblePortfolio} portfolios={portfolios} />
         </React.Suspense>
@@ -119,7 +119,7 @@ export default React.memo(function AssetTabContent({
         id="portfolio-content"
         role="tabpanel"
         aria-labelledby={`tab-${visiblePortfolio.name}`}
-        className="space-y-4 tab-transition"
+        className="space-y-4 tab-transition pb-28 sm:pb-8"
       >
         <React.Suspense fallback={<AssetCardSkeleton />}>
           {activeAsset === 'stocks' && (
@@ -235,7 +235,7 @@ export default React.memo(function AssetTabContent({
       id="portfolio-content"
       role="tabpanel"
       aria-labelledby="tab-all"
-      className="space-y-4 tab-transition"
+      className="space-y-4 tab-transition pb-28 sm:pb-8"
     >
       <React.Suspense fallback={<AssetCardSkeleton />}>
         {activeAsset === 'stocks' && (

@@ -251,6 +251,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 4. **Verification Before Done**: Run `npm run verify` (`eslint`, `typecheck`, `build`) and `vitest run` before completing tasks.
 5. **Demand Elegance**: Avoid hacky fixes; ensure clean boundary adherence and type safety.
 6. **User PIN Authentication Protocol**: Whenever accessing or testing the project in Chrome / browser where the PIN lock screen is encountered, NEVER attempt automated, scripted, or placeholder PIN entry. Always pause and ask the USER to enter the PIN directly. Once the user enters the PIN and confirms, proceed with the remaining task.
+7. **Screenshot Refresh & Purge Protocol**: Whenever asked to capture or update any screenshot (single view or complete project suite): ALWAYS remove the old version(s) first from the target directories (`screenshots/web/`, `screenshots/mobile/`). Maintain identical dimensions and 2x Retina accuracy (Desktop: 1920×1080 @ 2x, Mobile: 390×844 @ 2x, fullPage: true) across both Light and Dark modes.
 
 ---
 

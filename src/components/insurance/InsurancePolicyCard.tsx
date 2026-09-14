@@ -3,6 +3,7 @@ import { Insurance, DocumentMetadata } from '../../types/portfolio';
 import { formatINR } from '../../utils/formatters';
 import { getPolicyRenewalStatus } from '../../utils/insuranceUtils';
 import { useDocumentStorage } from '../../hooks/useDocumentStorage';
+import { useToastActions } from '../../contexts/ToastContext';
 import { Edit2, Trash2, Shield, ShieldAlert, Calendar, FileText, StickyNote, Paperclip } from '../icons/AppIcons';
 
 interface InsurancePolicyCardProps {
@@ -27,7 +28,9 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
   onConfirmDelete,
 }: InsurancePolicyCardProps) {
   const { openDocument: openSecureDocument } = useDocumentStorage();
+  const { addToast } = useToastActions();
   const [showNotes, setShowNotes] = useState(false);
+  const [openingDocId, setOpeningDocId] = useState<string | null>(null);
 
   const style = TYPE_STYLES[policy.insurance_type] || TYPE_STYLES.other;
   const docs = documents.filter((d) => d.asset_type === 'insurance' && d.asset_id === policy.id);
@@ -36,6 +39,20 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
   const isExpiringSoon = renewalStatus.isDueSoon || renewalStatus.isOverdue;
   const isOverdue = renewalStatus.isOverdue;
   const daysRemaining = renewalStatus.daysRemaining !== Infinity ? renewalStatus.daysRemaining : null;
+
+  const handleOpenDocument = async (doc: DocumentMetadata) => {
+    if (openingDocId) return;
+    setOpeningDocId(doc.id);
+    try {
+      await openSecureDocument(doc.file_path);
+    } catch (err) {
+      console.error('Failed to open document:', err);
+      const msg = err instanceof Error ? err.message : 'Failed to open document';
+      addToast(`Could not open document: ${msg}`, 'error');
+    } finally {
+      setOpeningDocId(null);
+    }
+  };
 
   return (
     <div className="p-3.5 sm:p-4 hover:bg-[var(--surface-secondary)]/50 transition-colors mobile-asset-card">
@@ -51,9 +68,21 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
                 {style.label}
               </span>
               {docs.length > 0 ? (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--positive-soft)] text-[var(--positive)] border border-[var(--positive)]/30 shrink-0">
-                  📎 {docs.length} Doc{docs.length > 1 ? 's' : ''}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => handleOpenDocument(docs[0])}
+                  disabled={!!openingDocId}
+                  className="text-[9px] font-bold px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--positive-soft)] text-[var(--positive)] border border-[var(--positive)]/30 shrink-0 hover:bg-[var(--positive)]/20 transition-colors cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                  title={docs.length === 1 ? `Open document: ${docs[0].name}` : `Open document: ${docs[0].name} (${docs.length} attached)`}
+                  aria-label={docs.length === 1 ? `Open document: ${docs[0].name}` : `Open document: ${docs[0].name} (${docs.length} attached)`}
+                >
+                  {openingDocId && docs.some((d) => d.id === openingDocId) ? (
+                    <span className="w-2.5 h-2.5 border-2 border-[var(--positive)] border-t-transparent rounded-full animate-spin shrink-0" />
+                  ) : (
+                    <Paperclip size={10} />
+                  )}
+                  <span>{docs.length} Doc{docs.length > 1 ? 's' : ''}</span>
+                </button>
               ) : (
                 <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--text-tertiary)] shrink-0">
                   No Doc
@@ -131,12 +160,17 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
             <button
               key={doc.id}
               type="button"
-              onClick={() => openSecureDocument(doc.file_path)}
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] border border-[var(--accent-blue)]/30 text-[var(--accent-blue)] hover:underline font-medium text-[11px] max-w-[220px] truncate cursor-pointer ios-press"
+              onClick={() => handleOpenDocument(doc)}
+              disabled={openingDocId === doc.id}
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] border border-[var(--accent-blue)]/30 text-[var(--accent-blue)] hover:underline font-medium text-[11px] max-w-[220px] truncate cursor-pointer ios-press disabled:opacity-50"
               title={`View ${doc.name}`}
               aria-label={`Open document: ${doc.name}`}
             >
-              <FileText size={11} className="shrink-0" />
+              {openingDocId === doc.id ? (
+                <span className="w-2.5 h-2.5 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin shrink-0" />
+              ) : (
+                <FileText size={11} className="shrink-0" />
+              )}
               <span className="truncate">{doc.name}</span>
             </button>
           ))}

@@ -163,7 +163,22 @@ export default React.memo(function DocumentVaultView({
   const [expiryDate, setExpiryDate] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<DocumentMetadata | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [openingDocId, setOpeningDocId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleOpenDocument = async (doc: DocumentMetadata) => {
+    if (openingDocId) return;
+    setOpeningDocId(doc.id);
+    try {
+      await openSecureDocument(doc.file_path);
+    } catch (err) {
+      console.error('Failed to open document:', err);
+      const msg = err instanceof Error ? err.message : 'Failed to open document';
+      addToast(`Could not open document: ${msg}`, 'error');
+    } finally {
+      setOpeningDocId(null);
+    }
+  };
 
   useEffect(() => {
     if (selectedMember !== 'all') {
@@ -600,12 +615,17 @@ export default React.memo(function DocumentVaultView({
                     <div className="flex items-center gap-1.5 shrink-0">
                       <button
                         type="button"
-                        onClick={() => openSecureDocument(doc.file_path)}
-                        className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
+                        onClick={() => handleOpenDocument(doc)}
+                        disabled={openingDocId === doc.id}
+                        className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer disabled:opacity-50"
                         title="Open document"
                         aria-label={`Open document: ${doc.name}`}
                       >
-                        <ExternalLink size={13} />
+                        {openingDocId === doc.id ? (
+                          <span className="w-2.5 h-2.5 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <ExternalLink size={13} />
+                        )}
                       </button>
                       <button
                         onClick={() => handleDelete(doc)}
@@ -656,12 +676,17 @@ export default React.memo(function DocumentVaultView({
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       type="button"
-                      onClick={() => openSecureDocument(doc.file_path)}
-                      className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
+                      onClick={() => handleOpenDocument(doc)}
+                      disabled={openingDocId === doc.id}
+                      className="w-8 h-8 rounded-[var(--radius-small)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer disabled:opacity-50"
                       title="Open document"
                       aria-label={`Open document: ${doc.name}`}
                     >
-                      <ExternalLink size={13} />
+                      {openingDocId === doc.id ? (
+                        <span className="w-2.5 h-2.5 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <ExternalLink size={13} />
+                      )}
                     </button>
                     <button
                       onClick={() => handleDelete(doc)}

@@ -30,6 +30,14 @@ After **any correction** from the user, append a new entry here with the pattern
 
 ---
 
+### 2026-09-14 — Screenshot Workflow: Mandatory Stale Version Purge & Sizing Accuracy
+**Mistake**: Retaining or overwriting outdated screenshots without an explicit pre-purge step, which causes audit confusion and leaves stale artifacts behind if view names or counts change.  
+**Root Cause**: Attempting to take new captures in-place without enforcing a clean-slate purge step.  
+**Fix**: Created the `capture-screenshot` skill and standardized the protocol: whenever asked to capture or update any screenshot, ALWAYS remove the old version(s) first from the destination directory before running the capture suite. Maintain exact 2x Retina resolution (Web: 1920×1080 @ 2x, Mobile: 390×844 @ 2x) and wait ~1.5s for charts/animations to settle before full-page capture.  
+**Rule**: **Whenever asked for any screenshot (single view or complete project): ALWAYS delete the old screenshot file(s) first before capturing the new one.** Maintain identical viewports, 2x Retina density, full scrollable height (`fullPage: true`), and support both Light and Dark modes.
+
+---
+
 ### 2026-08-14 — Missing React hook imports (`useMemo`, `useCallback`)
 **Mistake**: `ReferenceError: useMemo is not defined` at runtime.  
 **Root Cause**: Vite with `oxc`/`rolldown` bundler does NOT provide React hooks on the global scope — they must be explicitly named-imported. The hook was used inside a component but the import line was missing.  

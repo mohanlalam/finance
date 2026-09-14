@@ -578,7 +578,7 @@ export default function AppShell() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-4 overflow-hidden">
+              <div className="space-y-4 overflow-hidden pb-20 sm:pb-4">
                 {/* Sticky Mini Refresh Status Bar */}
                 <MobileStatusBar
                   priceStatus={priceStatus}

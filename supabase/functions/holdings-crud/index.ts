@@ -824,7 +824,19 @@ Deno.serve(async (req: Request) => {
         .createSignedUrl(cleanPath, ttl);
 
       if (error) throw error;
-      return new Response(JSON.stringify({ signedUrl: data.signedUrl, expiresIn: ttl }), {
+
+      // Ensure signedUrl is a fully qualified absolute URL including origin & storage path
+      const supabaseUrl = (Deno.env.get("SUPABASE_URL") || "").replace(/\/+$/, "");
+      let fullSignedUrl = (data && data.signedUrl) ? data.signedUrl : "";
+      if (fullSignedUrl.startsWith("/object/sign/")) {
+        fullSignedUrl = `${supabaseUrl}/storage/v1${fullSignedUrl}`;
+      } else if (fullSignedUrl.startsWith("/storage/v1/")) {
+        fullSignedUrl = `${supabaseUrl}${fullSignedUrl}`;
+      } else if (fullSignedUrl.startsWith("/")) {
+        fullSignedUrl = `${supabaseUrl}/storage/v1${fullSignedUrl}`;
+      }
+
+      return new Response(JSON.stringify({ signedUrl: fullSignedUrl, expiresIn: ttl }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
