@@ -260,7 +260,7 @@ export class SupabaseDocumentStorageRepository implements IDocumentStorageReposi
       }
 
       // Legacy unencrypted document or direct fallback
-      if (newWindow && !newWindow.closed && 'location' in newWindow) {
+      if (newWindow && !newWindow.closed && newWindow.location) {
         newWindow.location.href = signedUrl;
       } else if (typeof window !== 'undefined') {
         window.open(signedUrl, '_blank', 'noopener,noreferrer');
