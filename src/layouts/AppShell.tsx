@@ -30,7 +30,7 @@ import { InsightsSkeleton } from '../components/ui/ChartSkeleton';
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { formatINR, formatPercent } from '../utils/formatters';
-import { usePortfolioState, usePortfolioActions } from '../contexts/PortfolioContext';
+import { usePortfolioEntities, usePortfolioStatus, usePortfolioActions } from '../contexts/PortfolioContext';
 import { useToastActions } from '../contexts/ToastContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePortfolioInsights } from '../hooks/usePortfolioInsights';
@@ -44,12 +44,25 @@ import { classBreakdown } from '../domains/portfolio/calculations/allocation';
 import { AssetTab } from '../types/portfolio';
 
 export default function AppShell() {
+  // Fine-grained context consumption: entities (portfolios, tabs) and status
+  // (prices, load state) are split so a price tick only re-renders consumers
+  // of PortfolioStatusContext, not the entire AppShell tree.
   const {
-    portfolios, priceStatus, lastUpdated, failedSymbols,
-    isUsingCachedData, cacheUpdatedAt, isPriceStale,
-    activeTab, activePortfolio, portfolioOptionsForModal,
+    portfolios,
+    activeTab,
+    activePortfolio,
+    portfolioOptionsForModal,
     netWorthHistory,
-  } = usePortfolioState();
+  } = usePortfolioEntities();
+
+  const {
+    priceStatus,
+    lastUpdated,
+    failedSymbols,
+    isUsingCachedData,
+    cacheUpdatedAt,
+    isPriceStale,
+  } = usePortfolioStatus();
 
   const {
     setActiveTab, load, refreshPrices,
@@ -154,8 +167,9 @@ export default function AppShell() {
     ptr.handleTouchCancel();
   }, [swipeNav, ptr]);
 
+
   const portfolio = activePortfolio;
-  const todayPnL = useMemo(() => estimateTodayPnL(portfolio, portfolios), [portfolio, portfolios]);
+
 
   // Imperatively toggle a body class on scroll instead of calling setState.
   // This prevents AppShell (and all its children) from re-rendering on every
@@ -198,7 +212,12 @@ export default function AppShell() {
     }
   }, [setQuickAddTarget, setActiveAsset]);
 
-  const insights = usePortfolioInsights(portfolios);
+  // Gate: insights, breakdown, and chart data are only needed on the Home view.
+  // Skipping these on Stocks/FD/RD/Gold/etc. tabs eliminates ~3-5 pure-JS
+  // computation passes on every portfolio tick when the user isn't on Home.
+  const isHome = activeAsset === 'home';
+
+  const insights = usePortfolioInsights(isHome ? portfolios : []);
 
   const { visibleAlerts, handleDismissAlert, handleDismissAll } = useDismissibleAlerts(portfolios);
 
@@ -243,13 +262,20 @@ export default function AppShell() {
     }
   }, [portfolio, liveTotals]);
 
-  const breakdown = useMemo(() => classBreakdown(portfolios, portfolio), [portfolios, portfolio]);
-  const breakdownSlices = useMemo(() => getBreakdownSlices(breakdown), [breakdown]);
+  // breakdown / chart data: only compute when on the Home view
+  const breakdown = useMemo(
+    () => isHome ? classBreakdown(portfolios, portfolio) : { stocks: 0, fd: 0, rd: 0, sip: 0, gold: 0, realEstate: 0, insuranceCover: 0, insurancePremium: 0 },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isHome, portfolios, portfolio]
+  );
+  const breakdownSlices = useMemo(() => isHome ? getBreakdownSlices(breakdown) : [], [isHome, breakdown]);
+  const todayPnL = useMemo(() => isHome ? estimateTodayPnL(portfolio, portfolios) : 0, [isHome, portfolio, portfolios]);
   const todayPnLPercent = useMemo(() => {
+    if (!isHome) return 0;
     const totalCurrentStocks = portfolio ? (portfolio.stocksValue || 0) : breakdown.stocks;
     const prevCurrentStocks = totalCurrentStocks - todayPnL;
     return prevCurrentStocks > 0 ? (todayPnL / prevCurrentStocks) * 100 : 0;
-  }, [portfolio, breakdown.stocks, todayPnL]);
+  }, [isHome, portfolio, breakdown.stocks, todayPnL]);
 
   const barChartPortfolios = useMemo(
     () => (activeTab === 'all' ? portfolios : (portfolio ? [portfolio] : [])),

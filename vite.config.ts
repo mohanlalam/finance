@@ -16,8 +16,14 @@ export default defineConfig(({ command }): UserConfig => ({
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
+        // Precache only critical-path assets; non-critical feature chunks are
+        // runtime-cached on first navigation so the SW install doesn't balloon.
         globPatterns: [
-          '**/*.{js,css,html,ico,png,svg,woff2}'
+          '**/*.{css,html,ico,woff2}',
+          'assets/vendor-react-*.js',
+          'assets/index-*.js',
+          'assets/MainApp-*.js',
+          'assets/AppShell-*.js',
         ],
         runtimeCaching: [
           {
@@ -67,6 +73,7 @@ export default defineConfig(({ command }): UserConfig => ({
     target: 'es2020',           // ~10-15% smaller output; modern mobile supports all ES2020 features
     cssMinify: true,            // deduplicate CSS selectors across chunks
     reportCompressedSize: false, // skip gzip sizing step to speed up builds
+    chunkSizeWarningLimit: 250, // feature-ai is ~230 kB (lazy-loaded on demand)
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -83,6 +90,37 @@ export default defineConfig(({ command }): UserConfig => ({
             if (id.includes('swr') || id.includes('idb-keyval')) {
               return 'vendor-utils';
             }
+          }
+          // Feature chunks — keep heavy infrequently-used modules isolated so
+          // they are not pulled into the main bundle on cold load.
+          if (
+            id.includes('SmartImportModal') ||
+            id.includes('smart-import') ||
+            id.includes('imageEnhancer') ||
+            id.includes('BatchQuarantineReview') ||
+            id.includes('entityDisambiguationService') ||
+            id.includes('evidenceHeatmapService')
+          ) {
+            return 'feature-import';
+          }
+          if (
+            id.includes('PortfolioAssistant') ||
+            id.includes('assistantEngine') ||
+            id.includes('wealthStrategistEngine') ||
+            id.includes('domains/ai')
+          ) {
+            return 'feature-ai';
+          }
+          if (id.includes('ExportPanel') || id.includes('backupSchema') || id.includes('backupValidator')) {
+            return 'feature-export';
+          }
+          if (
+            id.includes('TaxHarvestingView') ||
+            id.includes('taxHarvesting') ||
+            id.includes('capitalGains') ||
+            id.includes('financialYear')
+          ) {
+            return 'feature-tax';
           }
         }
       }
