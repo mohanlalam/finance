@@ -87,7 +87,7 @@ External APIs & Databases (PostgreSQL, Supabase Functions, Yahoo Finance, AMFI, 
     ```
 * **Workers & Storage**:
   * **[documentCrypto.ts](src/utils/documentCrypto.ts)**: Zero-Trust Client-Side Document Encryption module using native W3C Web Crypto (`AES-GCM-256` + `PBKDF2` with 100,000 rounds of SHA-256). Encrypts binary payloads on the client device prior to storage transmission; decrypts in-memory on demand with zero cloud API keys required.
-  * **[supabaseStorage.ts](src/utils/supabaseStorage.ts)**: Supabase Document Storage with client-side path traversal protection, PIN-authenticated signed URL generation (private bucket), UUID path randomization, and secure Edge Function routing.
+  * **[supabaseStorage.ts](src/utils/supabaseStorage.ts)** & **[SupabaseDocumentStorageRepository.ts](src/infrastructure/supabase/repositories/SupabaseDocumentStorageRepository.ts)**: Supabase Document Storage with client-side path traversal protection, PIN-authenticated signed URL generation (private bucket), server-side UUID path randomization with client-reconciled upload path persistence, resilient multi-directory fallback resolution with automated database self-healing (`get_document_url`), and inline in-browser secure tab previewer (rendering images with download controls and PDFs in full-viewport iframes, preventing Chromium top-frame blob URL navigation restrictions). Clickable document attachment badges (`📎 {count} Doc(s)`) with tactile loading indicators and error toasts across all holding cards (Insurance, Gold, Real Estate, FD, RD, SIP, Document Vault).
   * **[logger.ts](src/infrastructure/logging/logger.ts)**: Lightweight logger with automated regex-based redaction of sensitive credentials (PINs, API keys, tokens, auth headers).
 
 ---

@@ -48,7 +48,10 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 3. **Private Document Storage with Time-Limited Signed URLs**:
    - The `investment-documents` bucket is strictly **private (`public = false`)** with all direct public read/write policies dropped.
    - Attachments are accessed via short-lived signed URLs issued by PIN-authenticated Edge Functions (the client requests 60 seconds; the backend supports 60–3600 seconds with a 300-second default).
-   - Storage upload handler unconditionally strips any client-provided UUID prefix and generates an authoritative server-side UUID to guarantee uniqueness and prevent collision or path spoofing.
+   - Storage upload handler unconditionally strips any client-provided UUID prefix and generates an authoritative server-side UUID to guarantee uniqueness and prevent collision or path spoofing. Client forms capture the server-confirmed `safePath` upon upload to eliminate path desynchronization.
+   - Resilient directory-level fallback in `get_document_url` searches parent and sibling asset directories if an exact key is missing, auto-healing the PostgreSQL database record upon match.
+   - Built-in secure in-tab document previewer renders image attachments centered in a dark viewport with quick download controls and PDF files in full-viewport iframes, circumventing modern browser top-frame blob URL restrictions.
+   - Interactive attachment badges (`📎 {count} Doc(s)`) provide 1-click opening with tactile loading spinners and error toast alerts across all asset cards (Insurance, Gold, Real Estate, FD, RD, SIP, Document Vault).
 4. **Biometric Hardware-Backed Authentication**:
    - WebAuthn platform authenticators enable 1-second FaceID, TouchID, and Windows Hello unlocking without transmitting credentials over the wire.
 
