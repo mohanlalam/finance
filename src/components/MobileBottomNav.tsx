@@ -42,7 +42,7 @@ const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.Reac
 const mainTabs: { id: AssetTab; label: string }[] = [
   { id: 'home',   label: 'Home' },
   { id: 'stocks', label: 'Stocks' },
-  { id: 'sip',    label: 'Mutual Funds' },
+  { id: 'sip',    label: 'Funds' },
   { id: 'fd',     label: 'Deposits' },
 ];
 
@@ -61,33 +61,38 @@ function TabBtn({
       aria-current={isActive ? 'page' : undefined}
       aria-label={label}
       className="relative flex-1 flex flex-col items-center justify-center touch-manipulation outline-none cursor-pointer select-none"
-      style={{ WebkitTapHighlightColor: 'transparent', gap: 4, paddingTop: 10, paddingBottom: 6 }}
+      style={{ WebkitTapHighlightColor: 'transparent', gap: 3, paddingTop: 10, paddingBottom: 8 }}
     >
       <span className="relative flex items-center justify-center">
-        {/* Springy pill indicator — solid accent fill for clear visibility */}
+        {/* Active pill — vivid, unmissable */}
         <span
           aria-hidden="true"
           style={{
             position: 'absolute',
-            inset: 0,
-            borderRadius: 999,
-            padding: '7px 20px',
-            background: isActive ? 'var(--accent-blue-soft, rgba(0,122,255,0.18))' : 'transparent',
-            border: isActive ? '1px solid rgba(0,122,255,0.22)' : '1px solid transparent',
-            transform: isActive ? 'scale(1)' : 'scale(0.4)',
+            inset: '-4px -12px',
+            borderRadius: 14,
+            background: isActive ? 'rgba(0,122,255,0.16)' : 'transparent',
+            border: isActive ? '1.5px solid rgba(0,122,255,0.32)' : '1.5px solid transparent',
+            transform: isActive ? 'scale(1)' : 'scale(0.3)',
             opacity: isActive ? 1 : 0,
-            transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease',
+            transition: 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
           }}
         />
-        {/* Icon */}
+        {/* Icon — 26px active (thick stroke), 22px inactive */}
         <span
+          className={
+            isActive
+              ? '[&_svg]:[stroke-width:2.5] [&_svg]:[stroke-linecap:round]'
+              : '[&_svg]:[stroke-width:1.75] [&_svg]:[stroke-linecap:round]'
+          }
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '7px 20px', borderRadius: 999,
-            color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
-            transform: isActive ? 'scale(1.12)' : 'scale(1)',
-            transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease',
+            color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)',
+            opacity: isActive ? 1 : 0.45,
+            transform: isActive ? 'scale(1.1)' : 'scale(1)',
+            transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), color 0.2s ease, opacity 0.2s ease',
             position: 'relative', zIndex: 1,
+            filter: isActive ? 'drop-shadow(0 0 6px rgba(0,122,255,0.35))' : 'none',
           }}
         >
           {isActive ? activeIcon : icon}
@@ -98,7 +103,7 @@ function TabBtn({
             role="status"
             aria-label={`${badge} notifications`}
             style={{
-              position: 'absolute', top: 0, right: 4,
+              position: 'absolute', top: -4, right: -6,
               minWidth: 18, height: 18, borderRadius: 999,
               background: 'var(--negative, #ef4444)', color: '#fff',
               fontSize: 10, fontWeight: 800,
@@ -114,12 +119,12 @@ function TabBtn({
       {/* Label */}
       <span
         style={{
-          fontSize: 11, fontWeight: isActive ? 700 : 500,
-          letterSpacing: isActive ? '-0.02em' : '-0.01em',
-          color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
-          transition: 'color 0.18s ease', lineHeight: 1,
+          fontSize: 11, fontWeight: isActive ? 700 : 400,
+          letterSpacing: isActive ? '-0.02em' : '0',
+          color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)',
+          opacity: isActive ? 1 : 0.45,
+          transition: 'color 0.2s ease, opacity 0.2s ease', lineHeight: 1,
           maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          paddingInline: 2,
         }}
       >
         {label}
@@ -138,28 +143,36 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
       aria-expanded={isOpen}
       aria-label={isActive ? `More (active)` : 'More asset categories'}
       className="relative flex-1 flex flex-col items-center justify-center touch-manipulation outline-none cursor-pointer select-none"
-      style={{ WebkitTapHighlightColor: 'transparent', gap: 4, paddingTop: 10, paddingBottom: 6 }}
+      style={{ WebkitTapHighlightColor: 'transparent', gap: 3, paddingTop: 10, paddingBottom: 8 }}
     >
       <span className="relative flex items-center justify-center">
         <span
           aria-hidden="true"
           style={{
-            position: 'absolute', inset: 0, borderRadius: 999, padding: '7px 20px',
-            background: lit ? 'var(--accent-blue-soft, rgba(0,122,255,0.18))' : 'transparent',
-            border: lit ? '1px solid rgba(0,122,255,0.22)' : '1px solid transparent',
-            transform: lit ? 'scale(1)' : 'scale(0.4)',
+            position: 'absolute',
+            inset: '-4px -12px',
+            borderRadius: 14,
+            background: lit ? 'rgba(0,122,255,0.16)' : 'transparent',
+            border: lit ? '1.5px solid rgba(0,122,255,0.32)' : '1.5px solid transparent',
+            transform: lit ? 'scale(1)' : 'scale(0.3)',
             opacity: lit ? 1 : 0,
-            transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease',
+            transition: 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
           }}
         />
         <span
+          className={
+            lit
+              ? '[&_svg]:[stroke-width:2.5] [&_svg]:[stroke-linecap:round]'
+              : '[&_svg]:[stroke-width:1.75] [&_svg]:[stroke-linecap:round]'
+          }
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '7px 20px', borderRadius: 999,
-            color: lit ? 'var(--accent-blue)' : 'var(--text-secondary)',
-            transform: isOpen ? 'rotate(90deg) scale(1.12)' : lit ? 'scale(1.12)' : 'scale(1)',
-            transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease',
+            color: lit ? 'var(--accent-blue)' : 'var(--text-primary)',
+            opacity: lit ? 1 : 0.45,
+            transform: isOpen ? 'rotate(90deg) scale(1.1)' : lit ? 'scale(1.1)' : 'scale(1)',
+            transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), color 0.2s ease, opacity 0.2s ease',
             position: 'relative', zIndex: 1,
+            filter: lit ? 'drop-shadow(0 0 6px rgba(0,122,255,0.35))' : 'none',
           }}
         >
           <Menu size={24} aria-hidden="true" />
@@ -167,10 +180,11 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
       </span>
       <span
         style={{
-          fontSize: 11, fontWeight: lit ? 700 : 500,
-          letterSpacing: lit ? '-0.02em' : '-0.01em',
-          color: lit ? 'var(--accent-blue)' : 'var(--text-secondary)',
-          transition: 'color 0.18s ease', lineHeight: 1, whiteSpace: 'nowrap',
+          fontSize: 11, fontWeight: lit ? 700 : 400,
+          letterSpacing: lit ? '-0.02em' : '0',
+          color: lit ? 'var(--accent-blue)' : 'var(--text-primary)',
+          opacity: lit ? 1 : 0.45,
+          transition: 'color 0.2s ease, opacity 0.2s ease', lineHeight: 1, whiteSpace: 'nowrap',
         }}
       >
         More
@@ -422,12 +436,12 @@ function MobileBottomNav({
               }
               activeIcon={
                 tab.id === 'home'
-                  ? <HomeIcon size={24} className="fill-[var(--accent-blue)] stroke-[var(--accent-blue)]" aria-hidden="true" />
+                  ? <HomeIcon size={26} className="fill-[var(--accent-blue)] stroke-[var(--accent-blue)]" aria-hidden="true" />
                   : tab.id === 'stocks'
-                    ? <TrendingUp size={24} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
+                    ? <TrendingUp size={26} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
                     : tab.id === 'sip'
-                      ? <Wallet size={24} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
-                      : <Landmark size={24} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
+                      ? <Wallet size={26} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
+                      : <Landmark size={26} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
               }
             />
           ))}
