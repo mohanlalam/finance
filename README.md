@@ -10,7 +10,7 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 - **Weightless Suspension & Zero-G Atmosphere** — Replaces grounded footers with atmospheric suspension over a deep cosmic void (`#040711`) layered with multi-point ambient radial nebula meshes (cyan `#06b6d4`, celestial violet `#a855f7`, and emerald aura `#10b981`).
 - **Glassmorphic Floating Surfaces** — Translucent cards with `backdrop-blur-2xl`, 1px luminous edge highlights, and zero-G hover ascension.
 - **Cyber-Zen Wide-Tracked Typography & Glowing Metrics** — Wide-tracked category micro-tags with luminous glowing profit (+emerald), loss (-rose), and bullion (amber) indicators.
-- **Floating Island Navigation** — Dynamic Island frosted header and floating mobile bottom dock with spring physics.
+- **WhatsApp iOS 27 Liquid Glass Navigation** — Frosted-glass mobile tab bar (`blur(28px) saturate(1.8)`, 76% opacity, 0.5px border) with springy pill active indicators and a per-category-accented More drawer, fully matching Apple's iOS 27 Liquid Glass standard.
 
 ### 📊 Financial Analytics & Visualizations
 - **Consolidated Financial Net Worth Timeline** — Responsive SVG area chart with interactive hover cards plotting liquid/deposit historical wealth appreciation across Stocks, Fixed Deposits, RDs, and Mutual Funds.
@@ -159,7 +159,7 @@ project antigravity/
 │   │   ├── HoldingDetailDrawer.tsx # Responsive holding detail drawer
 │   │   ├── InsightsPanel.tsx     # Allocation, performer, and reminder insight panels
 │   │   ├── MobileAlertsView.tsx  # Mobile view display for active alerts
-│   │   ├── MobileBottomNav.tsx   # Sticky mobile tabs navigation bar with alert badge count
+│   │   ├── MobileBottomNav.tsx   # WhatsApp iOS 27 Liquid Glass tab bar — frosted blur(28px), springy pill active indicator, LayoutGrid More button that rotates 45° on open, animated frosted More sheet with per-category accent colors
 │   │   ├── MobileHomeSummary.tsx # Mobile view dashboard summary
 │   │   ├── MobileStatusBar.tsx   # Mobile fixed status bar
 │   │   ├── Modal.tsx             # Core reusable styled backdrop modal wrapper
@@ -220,7 +220,7 @@ project antigravity/
 The repository enforces strict verification across unit, integration, and browser end-to-end suites:
 
 ```bash
-# Run Vitest test suite across 51 test files and 286 tests (100% passing)
+# Run Vitest test suite across 52 test files and 288 tests (100% passing)
 npm test
 
 # Run Playwright browser E2E tests (9 tests: 6 smoke + 3 deep CRUD workflows)
@@ -286,7 +286,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | Script | Command | Description |
 |---|---|---|
 | **Dev Server** | `npm run dev` | Start Vite dev server with HMR |
-| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (52 test files / 284 tests, 100% passing) |
+| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (52 test files / 288 tests, 100% passing) |
 | **E2E Tests** | `npm run test:e2e` | Run Playwright browser E2E tests (9 tests across smoke and CRUD specs) |
 | **Build** | `npm run build` | Production build to `dist/` |
 | **Preview** | `npm run preview` | Preview the production build locally |
