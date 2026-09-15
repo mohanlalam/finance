@@ -280,6 +280,7 @@ export default React.memo(
       pf.status === nf.status &&
       pf.principal_amount === nf.principal_amount &&
       pf.interest_rate === nf.interest_rate &&
+      pf.maturity_amount === nf.maturity_amount &&
       pf.start_date === nf.start_date &&
       pf.maturity_date === nf.maturity_date &&
       pf.notes === nf.notes &&

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { portfolioService } from '../../../compositionRoot';
 import { portfolioSyncService } from '../services/portfolioSyncService';
 import { offlineOutboxService } from '../services/offlineOutboxService';
@@ -187,13 +187,16 @@ export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMu
     [onReload, onAuthExpired]
   );
 
-  return {
-    addPortfolio,
-    renamePortfolio,
-    deletePortfolio,
-    addAsset,
-    updateAsset,
-    deleteAsset,
-    drainOutbox: offlineOutboxService.drain.bind(offlineOutboxService),
-  };
+  return useMemo(
+    () => ({
+      addPortfolio,
+      renamePortfolio,
+      deletePortfolio,
+      addAsset,
+      updateAsset,
+      deleteAsset,
+      drainOutbox: offlineOutboxService.drain.bind(offlineOutboxService),
+    }),
+    [addPortfolio, renamePortfolio, deletePortfolio, addAsset, updateAsset, deleteAsset]
+  );
 }

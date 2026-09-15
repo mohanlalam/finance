@@ -182,6 +182,8 @@ export default React.memo(function ExportPanel({ portfolios, onImportCSV, portfo
         ? parsedData
         : Array.isArray(parsedData.portfolios)
         ? parsedData.portfolios
+        : Array.isArray(parsedData.data?.portfolios)
+        ? parsedData.data.portfolios
         : [];
 
       let createdAssets = 0;

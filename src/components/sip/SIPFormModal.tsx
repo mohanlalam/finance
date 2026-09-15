@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SIPAccount, SIPPayload } from '../../types/portfolio';
 import SIPFormFields from './SIPFormFields';
-import { fetchAMFIScheme } from '../../utils/amfiClient';
+import { marketDataService } from '../../infrastructure/market-data/marketDataService';
 import Modal from '../Modal';
 
 interface PortfolioOption {
@@ -78,10 +78,14 @@ export function SIPFormModal({
     setIsValidatingScheme(true);
     setError('');
     try {
-      const details = await fetchAMFIScheme(mfSchemeCode);
-      setFundName(details.schemeName);
-      if (details.latestNav !== null && units) {
-        setFallbackValuation((parseFloat(units) * details.latestNav).toFixed(2));
+      const details = await marketDataService.fetchMutualFundNAV(mfSchemeCode);
+      if (details) {
+        setFundName(details.schemeName);
+        if (details.nav !== null && units) {
+          setFallbackValuation((parseFloat(units) * details.nav).toFixed(2));
+        }
+      } else {
+        setError('Could not find scheme with this code. Please check AMFI scheme code.');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Validation failed');

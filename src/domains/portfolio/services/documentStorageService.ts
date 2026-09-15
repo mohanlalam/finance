@@ -2,7 +2,6 @@ import {
   IDocumentStorageRepository,
   StorageUploadResult,
 } from '../repositories/IDocumentStorageRepository';
-import { supabaseDocumentStorageRepository } from '../../../infrastructure/supabase/repositories/SupabaseDocumentStorageRepository';
 import { isDocumentCryptoSupported } from '../../../utils/documentCrypto';
 
 export class DocumentStorageService {
@@ -40,5 +39,3 @@ export class DocumentStorageService {
     return this.repository.removeDocumentFiles(bucket, paths);
   }
 }
-
-export const documentStorageService = new DocumentStorageService(supabaseDocumentStorageRepository);

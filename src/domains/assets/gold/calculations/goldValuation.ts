@@ -2,7 +2,7 @@
  * Pure Gold Bullion & Hallmark valuation calculations.
  */
 
-export const DEFAULT_GOLD_RATE_24K = 15840;
+export const DEFAULT_GOLD_RATE_24K = 7450;
 export const MIN_VALID_GOLD_RATE_24K = 5000;
 export const MAX_VALID_GOLD_RATE_24K = 25000;
 

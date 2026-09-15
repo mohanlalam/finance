@@ -3,7 +3,7 @@
  * Delegates to the clean architectural domain service (DocumentStorageService).
  */
 
-import { documentStorageService } from '../domains/portfolio/services/documentStorageService';
+import { documentStorageService } from '../compositionRoot';
 import { StorageUploadResult } from '../domains/portfolio/repositories/IDocumentStorageRepository';
 
 export type { StorageUploadResult };

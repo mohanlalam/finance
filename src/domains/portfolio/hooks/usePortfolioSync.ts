@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { portfolioSyncService } from '../services/portfolioSyncService';
 
 export function usePortfolioSync() {
@@ -12,8 +12,11 @@ export function usePortfolioSync() {
     });
   }, []);
 
-  return {
-    isMutating,
-    isMutatingRef,
-  };
+  return useMemo(
+    () => ({
+      isMutating,
+      isMutatingRef,
+    }),
+    [isMutating]
+  );
 }

@@ -12,12 +12,15 @@
  * lucide-react; they'll only pull it on demand.
  */
 
-interface IconProps {
-  size?: number;
+export interface IconProps {
+  size?: number | string;
   className?: string;
+  color?: string;
+  style?: React.CSSProperties;
+  'aria-hidden'?: boolean | 'true' | 'false' | string;
 }
 
-const base = (size: number, className: string) => ({
+const base = (size: number | string, className: string) => ({
   xmlns: 'http://www.w3.org/2000/svg',
   width: size,
   height: size,
@@ -54,6 +57,17 @@ export function ChevronDown({ size = 24, className = '' }: IconProps) {
   return (
     <svg {...base(size, className)}>
       <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
+export function LayoutGrid({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
     </svg>
   );
 }

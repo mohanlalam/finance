@@ -57,7 +57,8 @@ async function signSessionToken(payload: Record<string, unknown>, secret: string
 }
 
 // Persistent rate limiting configuration backed by pin_rate_limits table
-const MAX_ATTEMPTS = 5;
+const MAX_DEVICE_ATTEMPTS = 5;
+const MAX_IP_ATTEMPTS = 25; // Ceiling across devices on the same IP to thwart header-rotation brute-force
 const RATE_WINDOW_MS = 5 * 60 * 1000; // 5-minute window
 
 function getClientIp(req: Request): string {
@@ -71,28 +72,27 @@ function getClientIp(req: Request): string {
 
   // 3. X-Forwarded-For: In the Supabase / Deno Deploy proxy topology, the rightmost IP
   // is appended by the nearest trusted infrastructure reverse proxy (Kong / Deno Edge Gateway).
-  // Picking the last entry ensures an attacker cannot spoof an arbitrary client IP by prepending
-  // falsified headers. Note: If a custom external CDN is ever placed in front, ensure the CDN's
-  // client IP header or trusted hop count is configured accordingly.
   const xff = req.headers.get("x-forwarded-for");
   if (xff) {
     const parts = xff.split(",").map((p) => p.trim()).filter(Boolean);
     if (parts.length > 0) {
-      return parts[parts.length - 1]; // Rightmost proxy-verified IP in Deno Deploy topology
+      return parts[parts.length - 1];
     }
   }
 
   return "unknown";
 }
 
-function getRateLimitKey(req: Request): string {
+function getRateLimitKeys(req: Request): { deviceKey: string; ipKey: string } {
   const clientIp = getClientIp(req);
-  // Composite device/client keying to mitigate Indian mobile CGNAT lockout (Jio/Airtel)
   const deviceId = req.headers.get("x-device-id")?.trim() || req.headers.get("x-client-info")?.trim() || req.headers.get("user-agent")?.trim() || "default-device";
-  return `${clientIp}:${deviceId}`;
+  return {
+    deviceKey: `${clientIp}:${deviceId}`,
+    ipKey: `ip:${clientIp}`,
+  };
 }
 
-async function checkRateLimit(key: string): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
+async function checkSingleLimit(key: string, maxAttempts: number): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
   try {
     const now = Date.now();
     const { data, error } = await supabase
@@ -110,7 +110,7 @@ async function checkRateLimit(key: string): Promise<{ allowed: boolean; retryAft
       return { allowed: true, retryAfterSeconds: 0 };
     }
 
-    if (data.attempt_count >= MAX_ATTEMPTS) {
+    if (data.attempt_count >= maxAttempts) {
       const retryAfterSeconds = Math.max(1, Math.ceil((windowStart + RATE_WINDOW_MS - now) / 1000));
       return { allowed: false, retryAfterSeconds };
     }
@@ -120,6 +120,16 @@ async function checkRateLimit(key: string): Promise<{ allowed: boolean; retryAft
     console.error("Persistent rate limit check failed:", err);
     return { allowed: true, retryAfterSeconds: 0 };
   }
+}
+
+async function checkRateLimit(keys: { deviceKey: string; ipKey: string }): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
+  const [deviceCheck, ipCheck] = await Promise.all([
+    checkSingleLimit(keys.deviceKey, MAX_DEVICE_ATTEMPTS),
+    checkSingleLimit(keys.ipKey, MAX_IP_ATTEMPTS),
+  ]);
+  if (!deviceCheck.allowed) return deviceCheck;
+  if (!ipCheck.allowed) return ipCheck;
+  return { allowed: true, retryAfterSeconds: 0 };
 }
 
 async function recordFailedAttempt(key: string): Promise<void> {
@@ -152,6 +162,13 @@ async function recordFailedAttempt(key: string): Promise<void> {
   }
 }
 
+async function recordFailedAttempts(keys: { deviceKey: string; ipKey: string }): Promise<void> {
+  await Promise.all([
+    recordFailedAttempt(keys.deviceKey),
+    recordFailedAttempt(keys.ipKey),
+  ]);
+}
+
 async function clearRateLimit(key: string): Promise<void> {
   try {
     await supabase
@@ -161,6 +178,13 @@ async function clearRateLimit(key: string): Promise<void> {
   } catch (err) {
     console.error("Clearing rate limit failed:", err);
   }
+}
+
+async function clearRateLimits(keys: { deviceKey: string; ipKey: string }): Promise<void> {
+  await Promise.all([
+    clearRateLimit(keys.deviceKey),
+    clearRateLimit(keys.ipKey),
+  ]);
 }
 
 Deno.serve(async (req: Request) => {
@@ -177,8 +201,8 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const rateLimitKey = getRateLimitKey(req);
-  const rateCheck = await checkRateLimit(rateLimitKey);
+  const rateKeys = getRateLimitKeys(req);
+  const rateCheck = await checkRateLimit(rateKeys);
 
   if (!rateCheck.allowed) {
     return new Response(
@@ -240,7 +264,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!isValid) {
-      await recordFailedAttempt(rateLimitKey);
+      await recordFailedAttempts(rateKeys);
       return new Response(JSON.stringify({ error: "Incorrect PIN", verified: false }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -248,7 +272,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Success — clear rate limit for this client
-    await clearRateLimit(rateLimitKey);
+    await clearRateLimits(rateKeys);
 
     const expiresAt = Date.now() + 12 * 60 * 60 * 1000; // 12 hours
     const sessionToken = await signSessionToken(

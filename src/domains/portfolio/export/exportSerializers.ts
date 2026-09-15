@@ -1,5 +1,5 @@
 import { Portfolio } from '../../../types/portfolio';
-import { getFDEffectiveValue } from '../../../utils/formatters';
+import { getFDEffectiveValue } from '../../assets/fd/calculations/fdCompounding';
 import { getRDEffectiveValue } from '../../assets/rd/calculations/rdCompounding';
 import { getSIPEffectiveValue } from '../../assets/sip/calculations/sipValuation';
 
@@ -38,8 +38,6 @@ export function portfoliosToJSON(portfolios: Portfolio[]): string {
 
   return JSON.stringify({ schema_version: 2, version: 2, portfolios: sanitizedPortfolios, exportedAt: new Date().toISOString() }, null, 2);
 }
-
-export { downloadFile } from '../../../utils/downloadHelper';
 
 export function csvCell(value: unknown): string {
   const text = value === null || value === undefined ? '' : String(value);

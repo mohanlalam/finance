@@ -1,5 +1,7 @@
 import { PortfolioService } from './domains/portfolio/services/portfolioService';
 import { supabasePortfolioRepository } from './infrastructure/supabase/repositories/SupabasePortfolioRepository';
+import { DocumentStorageService } from './domains/portfolio/services/documentStorageService';
+import { supabaseDocumentStorageRepository } from './infrastructure/supabase/repositories/SupabaseDocumentStorageRepository';
 import { offlineOutboxService } from './domains/portfolio/services/offlineOutboxService';
 
 /**
@@ -10,4 +12,6 @@ import { offlineOutboxService } from './domains/portfolio/services/offlineOutbox
 export const portfolioService = new PortfolioService(supabasePortfolioRepository);
 offlineOutboxService.setPortfolioService(portfolioService);
 
-export { PortfolioService };
+export const documentStorageService = new DocumentStorageService(supabaseDocumentStorageRepository);
+
+export { PortfolioService, DocumentStorageService };

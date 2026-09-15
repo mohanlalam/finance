@@ -23,6 +23,28 @@ export function getElapsedMonthsStandard(startDate: Date, endDate: Date = new Da
   return Math.max(0, elapsed);
 }
 
+export function getRDTotalTenureMonths(account: RDAccount): number {
+  if (account.total_tenure_months && account.total_tenure_months > 0) {
+    return account.total_tenure_months;
+  }
+  const s = parseLocalDate(account.start_date);
+  const m = parseLocalDate(account.maturity_date);
+  if (!s || !m || isNaN(s.getTime()) || isNaN(m.getTime()) || m.getTime() < s.getTime()) {
+    return 0;
+  }
+  const yDiff = m.getFullYear() - s.getFullYear();
+  const mDiff = m.getMonth() - s.getMonth();
+  const rawMonths = yDiff * 12 + mDiff;
+  const startDay = s.getDate();
+  const matDay = m.getDate();
+  const lastDayOfMatMonth = getDaysInMonth(m.getFullYear(), m.getMonth());
+
+  if (matDay === lastDayOfMatMonth && matDay !== startDay) {
+    return Math.max(1, rawMonths + 1);
+  }
+  return Math.max(1, rawMonths);
+}
+
 export function getRDInvestedAmount(account: RDAccount, now: Date = new Date()): number {
   if (!account) return 0;
   if (account.contributions && account.contributions.length > 0) {
@@ -42,7 +64,9 @@ export function getRDInvestedAmount(account: RDAccount, now: Date = new Date()):
   const monthly = Math.max(0, Number(account.monthly_deposit) || 0);
   if (!startDate || isNaN(startDate.getTime())) return 0;
 
-  const elapsedMonths = getElapsedMonthsStandard(startDate, now);
+  const maxTenure = getRDTotalTenureMonths(account);
+  const rawElapsed = getElapsedMonthsStandard(startDate, now);
+  const elapsedMonths = maxTenure > 0 ? Math.min(maxTenure, rawElapsed) : rawElapsed;
   return elapsedMonths * monthly;
 }
 
@@ -68,7 +92,9 @@ export function getRDEffectiveValue(account: RDAccount, upToDate: Date = new Dat
 
   if (sMs > endMs) return 0;
 
-  const totalMonths = getElapsedMonthsStandard(s, end);
+  const maxTenure = getRDTotalTenureMonths(account);
+  const rawElapsed = getElapsedMonthsStandard(s, end);
+  const totalMonths = maxTenure > 0 ? Math.min(maxTenure, rawElapsed) : rawElapsed;
   if (totalMonths <= 0) return 0;
 
   if (!isNaN(r) && r >= 0 && p > 0) {

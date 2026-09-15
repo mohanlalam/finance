@@ -1,4 +1,4 @@
-import { documentStorageService } from '../../portfolio/services/documentStorageService';
+import { documentStorageService } from '../../../compositionRoot';
 import { normalizeToIsoDate } from '../../../utils/aiDocumentExtractor';
 import { deriveGoldRates } from '../../../utils/goldPricing';
 import { SmartImportFormData, ImportSaveStep } from '../types';

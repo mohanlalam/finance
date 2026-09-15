@@ -240,6 +240,7 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!isValidPin) {
+    await recordFailedAttempt(rateKey);
     return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -313,10 +314,8 @@ Deno.serve(async (req: Request) => {
           }
 
           if (res.status === 429) {
-            return new Response(JSON.stringify(data), {
-              status: 429,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
+            console.warn(`[gemini-proxy] Model ${m} rate-limited (429), trying next candidate model...`);
+            continue;
           }
         } catch (_err) {
           // Try next model

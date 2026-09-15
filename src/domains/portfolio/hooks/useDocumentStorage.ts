@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { documentStorageService } from '../services/documentStorageService';
+import { documentStorageService } from '../../../compositionRoot';
 import { StorageUploadResult } from '../repositories/IDocumentStorageRepository';
 import { isReauthRequired, updateLastAuthTime } from '../../../utils/sessionStore';
 import { isBiometricsEnrolled, authenticateWithBiometrics } from '../../../utils/biometrics';

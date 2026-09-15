@@ -123,5 +123,27 @@ describe('rdUtils', () => {
     expect(val).toBeGreaterThan(124000);
     expect(val).toBeLessThan(126000);
   });
+
+  it('caps elapsed months at 12 months for a 1-year RD on or after maturity date', () => {
+    const annualRD: RDAccount = {
+      id: 'rd-annual',
+      portfolio_id: 'p1',
+      bank_name: 'HDFC',
+      monthly_deposit: 10000,
+      interest_rate: 6.5,
+      start_date: '2025-01-01',
+      maturity_date: '2026-01-01',
+      maturity_amount: 0,
+      status: 'active',
+      contributions: [],
+    };
+    // On the exact maturity date 2026-01-01, exactly 12 deposits have been made (120,000), not 13 (130,000)
+    const invested = getRDInvestedAmount(annualRD, new Date('2026-01-01'));
+    expect(invested).toBe(120000);
+
+    // After maturity date, invested amount remains capped at 12 months (120,000)
+    const investedLater = getRDInvestedAmount(annualRD, new Date('2026-06-01'));
+    expect(investedLater).toBe(120000);
+  });
 });
 

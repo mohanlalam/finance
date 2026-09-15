@@ -46,8 +46,8 @@ export class MCXGoldDataProvider {
       if (isNaN(rawOunceINR) || rawOunceINR <= 10000) return null;
 
       const basePerGram = rawOunceINR / 31.1034768;
-      // India retail benchmark includes statutory customs duty + GST (~15.19%)
-      const rate24k = Math.round(basePerGram * 1.1519);
+      // India retail benchmark includes statutory customs duty (6% post-July 2024 Budget) + GST (3%) ~1.0918x factor
+      const rate24k = Math.round(basePerGram * 1.0918);
       if (rate24k < MIN_VALID_GOLD_RATE_24K || rate24k > MAX_VALID_GOLD_RATE_24K) return null;
 
       const existingSnapshot = getStoredGoldSnapshot();

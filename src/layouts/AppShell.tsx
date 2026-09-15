@@ -265,7 +265,6 @@ export default function AppShell() {
   // breakdown / chart data: only compute when on the Home view
   const breakdown = useMemo(
     () => isHome ? classBreakdown(portfolios, portfolio) : { stocks: 0, fd: 0, rd: 0, sip: 0, gold: 0, realEstate: 0, insuranceCover: 0, insurancePremium: 0 },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isHome, portfolios, portfolio]
   );
   const breakdownSlices = useMemo(() => isHome ? getBreakdownSlices(breakdown) : [], [isHome, breakdown]);

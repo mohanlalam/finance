@@ -342,4 +342,38 @@ export default React.memo(function AssetTabContent({
       </React.Suspense>
     </div>
   );
+}, (prev, next) => {
+  // If the active asset is not stocks, ignore priceStatus changes during quote polling
+  if (next.activeAsset !== 'stocks' && prev.activeAsset === next.activeAsset) {
+    if (prev.priceStatus !== next.priceStatus) {
+      return (
+        prev.visiblePortfolio === next.visiblePortfolio &&
+        prev.portfolios === next.portfolios &&
+        prev.onAddHoldingClick === next.onAddHoldingClick &&
+        prev.onDeleteStock === next.onDeleteStock &&
+        prev.onUpdateStock === next.onUpdateStock &&
+        prev.onAddAsset === next.onAddAsset &&
+        prev.onUpdateAsset === next.onUpdateAsset &&
+        prev.onDeleteAsset === next.onDeleteAsset &&
+        prev.quickAddTarget === next.quickAddTarget &&
+        prev.onQuickAddComplete === next.onQuickAddComplete &&
+        prev.portfolioOptions === next.portfolioOptions
+      );
+    }
+  }
+  return (
+    prev.activeAsset === next.activeAsset &&
+    prev.visiblePortfolio === next.visiblePortfolio &&
+    prev.portfolios === next.portfolios &&
+    prev.priceStatus === next.priceStatus &&
+    prev.onAddHoldingClick === next.onAddHoldingClick &&
+    prev.onDeleteStock === next.onDeleteStock &&
+    prev.onUpdateStock === next.onUpdateStock &&
+    prev.onAddAsset === next.onAddAsset &&
+    prev.onUpdateAsset === next.onUpdateAsset &&
+    prev.onDeleteAsset === next.onDeleteAsset &&
+    prev.quickAddTarget === next.quickAddTarget &&
+    prev.onQuickAddComplete === next.onQuickAddComplete &&
+    prev.portfolioOptions === next.portfolioOptions
+  );
 });

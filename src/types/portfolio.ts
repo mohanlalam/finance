@@ -61,6 +61,7 @@ export interface RDAccount {
   start_date: string;
   maturity_date: string;
   maturity_amount: number;
+  total_tenure_months?: number;
   status: 'active' | 'matured';
   contributions: { date: string; amount: number }[];
   notes?: string;

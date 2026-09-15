@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { Portfolio } from '../../../types/portfolio';
 import { marketDataService } from '../../../infrastructure/market-data/marketDataService';
 import { portfolioCalculationService } from '../services/portfolioCalculationService';
@@ -108,11 +108,14 @@ export function usePortfolioRefresh({
     return () => clearInterval(timer);
   }, []); // empty deps — timer is stable, refs always hold latest callbacks
 
-  return {
-    priceStatus,
-    failedSymbols,
-    lastPriceFetch,
-    isPriceStale,
-    refreshPrices,
-  };
+  return useMemo(
+    () => ({
+      priceStatus,
+      failedSymbols,
+      lastPriceFetch,
+      isPriceStale,
+      refreshPrices,
+    }),
+    [priceStatus, failedSymbols, lastPriceFetch, isPriceStale, refreshPrices]
+  );
 }
