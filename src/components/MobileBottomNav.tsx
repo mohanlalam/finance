@@ -317,14 +317,14 @@ function MobileBottomNav({
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     boxShadow: '0 4px 12px rgba(139,92,246,0.35)',
                   }}>
-                    <Sparkles size={18} color="#fff" aria-hidden="true" />
+                    <span style={{ color: '#fff', display: 'flex' }}><Sparkles size={18} aria-hidden="true" /></span>
                   </div>
                   <div style={{ textAlign: 'left' }}>
                     <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>✨ Smart AI Import</p>
                     <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>Auto-extract details from a doc or photo</p>
                   </div>
                 </div>
-                <ChevronRight size={14} color="var(--text-tertiary)" aria-hidden="true" />
+                <span style={{ color: 'var(--text-tertiary)', flexShrink: 0, display: 'flex' }}><ChevronRight size={14} aria-hidden="true" /></span>
               </button>
             </div>
           )}
@@ -376,7 +376,7 @@ function MobileBottomNav({
                       }}>{tab.subtext}</p>
                     </div>
                   </div>
-                  <ChevronRight size={14} style={{ color: active ? tab.color : 'var(--text-tertiary)', flexShrink: 0 }} aria-hidden="true" />
+                  <span style={{ color: active ? tab.color : 'var(--text-tertiary)', flexShrink: 0, display: 'flex' }}><ChevronRight size={14} aria-hidden="true" /></span>
                 </button>
               );
             })}
