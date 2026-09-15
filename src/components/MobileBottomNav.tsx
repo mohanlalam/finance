@@ -12,7 +12,7 @@ import {
   ChevronRight,
   X,
   Sparkles,
-  LayoutGrid,
+  Menu,
 } from './icons/AppIcons';
 import { triggerHaptic } from '../utils/haptics';
 
@@ -153,12 +153,12 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: '6px 18px', borderRadius: 999,
             color: lit ? 'var(--accent-blue)' : 'var(--text-tertiary)',
-            transform: isOpen ? 'rotate(45deg) scale(1.1)' : lit ? 'scale(1.1)' : 'scale(1)',
+            transform: isOpen ? 'rotate(90deg) scale(1.1)' : lit ? 'scale(1.1)' : 'scale(1)',
             transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease',
             position: 'relative', zIndex: 1,
           }}
         >
-          <LayoutGrid size={22} aria-hidden="true" />
+          <Menu size={22} aria-hidden="true" />
         </span>
       </span>
       <span
