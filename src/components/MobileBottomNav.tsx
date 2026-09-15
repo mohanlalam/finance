@@ -436,7 +436,7 @@ function MobileBottomNav({
               }
               activeIcon={
                 tab.id === 'home'
-                  ? <HomeIcon size={26} className="fill-[var(--accent-blue)] stroke-[var(--accent-blue)]" aria-hidden="true" />
+                  ? <HomeIcon size={26} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
                   : tab.id === 'stocks'
                     ? <TrendingUp size={26} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
                     : tab.id === 'sip'
