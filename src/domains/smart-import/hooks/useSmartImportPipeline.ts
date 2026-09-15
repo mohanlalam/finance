@@ -218,8 +218,7 @@ export function useSmartImportPipeline({
     // Build raw field map
     const initialFields: Record<string, ExtractedField<unknown>> = {};
     Object.keys(mergedForm).forEach((k) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const val = (mergedForm as any)[k];
+      const val = (mergedForm as Record<string, unknown>)[k];
       if (val) {
         initialFields[k] = {
           value: val,

@@ -153,7 +153,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 * **Modular Domain Components**:
   * **[AssetRegistryContainer.tsx](src/components/ui/AssetRegistryContainer.tsx)**: Standardized shell for asset registry headers, add buttons, and loading fallbacks.
   * **[DocumentAttachmentField.tsx](src/components/ui/DocumentAttachmentField.tsx)**: Document uploader supporting taxonomy tags (`fd_advice`, `policy_schedule`, `title_deed`, `tax_receipt`, `invoice`, `gold_hallmark`, `account_statement`, `general`) with 10MB bounds.
-  * **[ExportPanel.tsx](src/components/ExportPanel.tsx)**: Unified data export panel (JSON/CSV), schema-validated full restore engine, and print-optimized `@media print` A4 PDF statement generator.
+  * **[ExportPanel.tsx](src/components/ExportPanel.tsx)**: Unified export/import orchestrator delegating to modular sub-components: **[ExportDropdown.tsx](src/components/export/ExportDropdown.tsx)** (CSV/JSON/PDF download actions), **[BackupRestoreModal.tsx](src/components/export/BackupRestoreModal.tsx)** (schema-validated full database restore engine with PIN authorization), and **[CSVImportModal.tsx](src/components/export/CSVImportModal.tsx)** (broker & CAS statement parser).
   * **[GoldHoldingView.tsx](src/components/gold/GoldHoldingView.tsx)**, **[GoldHoldingCard.tsx](src/components/gold/GoldHoldingCard.tsx)**, and **[GoldFormModal.tsx](src/components/gold/GoldFormModal.tsx)**.
   * **[RealEstateView.tsx](src/components/realestate/RealEstateView.tsx)**, **[RealEstateCard.tsx](src/components/realestate/RealEstateCard.tsx)**, and **[RealEstateFormModal.tsx](src/components/realestate/RealEstateFormModal.tsx)**.
   * **[InsuranceView.tsx](src/components/insurance/InsuranceView.tsx)**, **[InsurancePolicyCard.tsx](src/components/insurance/InsurancePolicyCard.tsx)**, and **[InsuranceFormModal.tsx](src/components/insurance/InsuranceFormModal.tsx)**.
@@ -172,7 +172,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 52 test files and 288 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 54 test files and 301 unit/integration test cases (100% passing).
 
 ---
 

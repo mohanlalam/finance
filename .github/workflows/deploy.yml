@@ -103,7 +103,8 @@ jobs:
           fi
           PROJECT_REF="${{ secrets.SUPABASE_PROJECT_REF }}"
           if [ -z "$PROJECT_REF" ]; then
-            PROJECT_REF="fkiqpjvzydmqdsuufdpc"
+            echo "SUPABASE_PROJECT_REF secret is not set in GitHub repository secrets. Skipping Edge Function deployment."
+            exit 0
           fi
           supabase functions deploy --project-ref "$PROJECT_REF" --no-verify-jwt
         env:

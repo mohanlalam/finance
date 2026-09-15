@@ -346,7 +346,7 @@ project antigravity/
 The repository enforces strict verification across unit, integration, and browser end-to-end suites:
 
 ```bash
-# Run Vitest test suite across 52 test files and 288 tests (100% passing)
+# Run Vitest test suite across 54 test files and 301 tests (100% passing)
 npm test
 
 # Run Playwright browser E2E tests (9 tests: 6 smoke + 3 deep CRUD workflows)
@@ -364,8 +364,12 @@ npm run verify
 | `src/utils/__tests__/` | 24 | Utility tests (formatters, date utils, math, crypto, biometrics, storage, AI extraction, assistant, security audit, performance) |
 | `src/hooks/__tests__/` | 4 | Hook tests (alerts, asset filter/sort, auto-lock, debounce) |
 | `src/infrastructure/__tests__/` | 1 | Market data fallback chain tests |
-| `src/components/__tests__/` | 2 | Component tests (Header, RegistryToolbar) |
-| **Total** | **52 files / 288 tests** | **100% passing** |
+| `src/components/__tests__/` | 4 | Component tests (Header, RegistryToolbar, PinLockScreen, Modal) |
+| `src/domains/portfolio/services/__tests__/` | 2 | Domain service tests (portfolioService, offlineOutbox) |
+| `src/domains/smart-import/__tests__/` | 2 | Smart import tests (financialValidation, duplicateDetection) |
+| `src/infrastructure/cache/__tests__/` | 1 | Offline cache hydration tests |
+| `src/infrastructure/logging/__tests__/` | 1 | Credential redaction and logging tests |
+| **Total** | **54 files / 301 tests** | **100% passing** |
 
 ---
 
@@ -437,7 +441,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | Script | Command | Description |
 |---|---|---|
 | **Dev Server** | `npm run dev` | Start Vite dev server with HMR |
-| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (52 test files / 288 tests, 100% passing) |
+| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (54 test files / 301 tests, 100% passing) |
 | **E2E Tests** | `npm run test:e2e` | Run Playwright browser E2E tests (9 tests across smoke and CRUD specs) |
 | **Build** | `npm run build` | Production build to `dist/` |
 | **Preview** | `npm run preview` | Preview the production build locally |
