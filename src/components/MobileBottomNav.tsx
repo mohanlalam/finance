@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { 
-  Home as HomeIcon, 
-  TrendingUp, 
-  Landmark, 
-  Wallet, 
-  Menu, 
-  Coins, 
-  Building2, 
-  Shield, 
-  FolderOpen, 
-  Clock, 
-  ChevronRight, 
-  X, 
-  Sparkles 
+import {
+  Home as HomeIcon,
+  TrendingUp,
+  Landmark,
+  Wallet,
+  Coins,
+  Building2,
+  Shield,
+  FolderOpen,
+  Clock,
+  ChevronRight,
+  X,
+  Sparkles,
+  LayoutGrid,
 } from './icons/AppIcons';
 import { triggerHaptic } from '../utils/haptics';
 
@@ -28,167 +28,355 @@ interface MobileBottomNavProps {
   onDrawerStateChange?: (isOpen: boolean) => void;
 }
 
-const ICON_STOCKS = <TrendingUp size={20} aria-hidden="true" />;
-const ICON_SIP = <Wallet size={20} aria-hidden="true" />;
-const ICON_FD = <Landmark size={20} aria-hidden="true" />;
+/* ── More drawer tab definitions ─────────────────────────────────────────── */
+const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.ReactNode; color: string }[] = [
+  { id: 'rd',          label: 'Recurring Deposits',  subtext: 'Quarterly compounding RD accounts',   icon: <Clock size={18} />,      color: '#06b6d4' },
+  { id: 'gold',        label: 'Gold Holdings',        subtext: 'Physical & digital gold bullion',     icon: <Coins size={18} />,      color: '#f59e0b' },
+  { id: 'real_estate', label: 'Real Estate',          subtext: 'Properties, plots & rental yields',  icon: <Building2 size={18} />,  color: '#10b981' },
+  { id: 'insurance',   label: 'Insurance Policies',   subtext: 'Life, health & vehicle policies',    icon: <Shield size={18} />,     color: '#8b5cf6' },
+  { id: 'documents',   label: 'Document Vault',       subtext: 'Digital receipts & policy bonds',    icon: <FolderOpen size={18} />, color: '#f97316' },
+  { id: 'tax',         label: 'Tax Harvesting',       subtext: 'LTCG / STCG tax optimisation',       icon: <TrendingUp size={18} />, color: '#ef4444' },
+];
 
-function HomeNavIcon({ isActive }: { isActive: boolean }) {
-  return <HomeIcon size={20} className={isActive ? 'fill-[var(--accent-blue)] stroke-[var(--accent-blue)]' : ''} aria-hidden="true" />;
+/* ── Main tab list ───────────────────────────────────────────────────────── */
+const mainTabs: { id: AssetTab; label: string }[] = [
+  { id: 'home',   label: 'Home' },
+  { id: 'stocks', label: 'Stocks' },
+  { id: 'sip',    label: 'Mutual Funds' },
+  { id: 'fd',     label: 'Deposits' },
+];
+
+/* ── Individual tab button ───────────────────────────────────────────────── */
+function TabBtn({
+  label, isActive, badge, onClick, icon, activeIcon,
+}: {
+  id: AssetTab; label: string; isActive: boolean;
+  badge?: number; onClick: () => void;
+  icon: React.ReactNode; activeIcon: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={isActive ? 'page' : undefined}
+      aria-label={label}
+      className="relative flex-1 flex flex-col items-center justify-center gap-[3px] pt-[9px] pb-[5px] touch-manipulation outline-none cursor-pointer select-none"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+    >
+      <span className="relative flex items-center justify-center">
+        {/* Springy pill indicator */}
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: 999,
+            padding: '6px 18px',
+            background: isActive ? 'color-mix(in srgb, var(--accent-blue) 15%, transparent)' : 'transparent',
+            transform: isActive ? 'scale(1)' : 'scale(0.5)',
+            opacity: isActive ? 1 : 0,
+            transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
+          }}
+        />
+        {/* Icon */}
+        <span
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '6px 18px', borderRadius: 999,
+            color: isActive ? 'var(--accent-blue)' : 'var(--text-tertiary)',
+            transform: isActive ? 'scale(1.1)' : 'scale(1)',
+            transition: 'transform 0.28s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease',
+            position: 'relative', zIndex: 1,
+          }}
+        >
+          {isActive ? activeIcon : icon}
+        </span>
+        {/* Badge */}
+        {badge != null && badge > 0 && (
+          <span
+            role="status"
+            aria-label={`${badge} notifications`}
+            style={{
+              position: 'absolute', top: 2, right: 6,
+              minWidth: 16, height: 16, borderRadius: 999,
+              background: 'var(--negative, #ef4444)', color: '#fff',
+              fontSize: 9, fontWeight: 800,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '0 3px', zIndex: 2,
+              boxShadow: '0 0 0 2px var(--surface)',
+            }}
+          >
+            {badge > 9 ? '9+' : badge}
+          </span>
+        )}
+      </span>
+      <span
+        style={{
+          fontSize: 10, fontWeight: isActive ? 700 : 500,
+          color: isActive ? 'var(--accent-blue)' : 'var(--text-tertiary)',
+          transition: 'color 0.18s ease', lineHeight: 1,
+          maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          paddingInline: 2,
+        }}
+      >
+        {label}
+      </span>
+    </button>
+  );
 }
 
-const mainTabs: { id: AssetTab; label: string }[] = [
-  { id: 'home', label: 'Home' },
-  { id: 'stocks', label: 'Stocks' },
-  { id: 'sip', label: 'SIP & MF' },
-  { id: 'fd', label: 'Deposits' },
-];
+/* ── "More" tab button with rotating grid icon ──────────────────────────── */
+function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: boolean; onClick: () => void }) {
+  const lit = isActive || isOpen;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-expanded={isOpen}
+      aria-label={isActive ? `More (active)` : 'More asset categories'}
+      className="relative flex-1 flex flex-col items-center justify-center gap-[3px] pt-[9px] pb-[5px] touch-manipulation outline-none cursor-pointer select-none"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+    >
+      <span className="relative flex items-center justify-center">
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute', inset: 0, borderRadius: 999, padding: '6px 18px',
+            background: lit ? 'color-mix(in srgb, var(--accent-blue) 15%, transparent)' : 'transparent',
+            transform: lit ? 'scale(1)' : 'scale(0.5)',
+            opacity: lit ? 1 : 0,
+            transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
+          }}
+        />
+        <span
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '6px 18px', borderRadius: 999,
+            color: lit ? 'var(--accent-blue)' : 'var(--text-tertiary)',
+            transform: isOpen ? 'rotate(45deg) scale(1.1)' : lit ? 'scale(1.1)' : 'scale(1)',
+            transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease',
+            position: 'relative', zIndex: 1,
+          }}
+        >
+          <LayoutGrid size={22} aria-hidden="true" />
+        </span>
+      </span>
+      <span
+        style={{
+          fontSize: 10, fontWeight: lit ? 700 : 500,
+          color: lit ? 'var(--accent-blue)' : 'var(--text-tertiary)',
+          transition: 'color 0.18s ease', lineHeight: 1, whiteSpace: 'nowrap',
+        }}
+      >
+        More
+      </span>
+    </button>
+  );
+}
 
-const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.ReactNode }[] = [
-  { id: 'rd', label: 'Recurring Deposits', subtext: 'Quarterly compounding RD accounts', icon: <Clock size={18} /> },
-  { id: 'gold', label: 'Gold Holdings', subtext: 'Physical & digital gold bullion', icon: <Coins size={18} /> },
-  { id: 'real_estate', label: 'Real Estate', subtext: 'Properties, plots & rental yields', icon: <Building2 size={18} /> },
-  { id: 'insurance', label: 'Insurance Policies', subtext: 'Life, health & vehicle policies', icon: <Shield size={18} /> },
-  { id: 'documents', label: 'Document Vault', subtext: 'Digital receipts & policy bonds', icon: <FolderOpen size={18} /> },
-  { id: 'tax', label: 'Tax Harvesting', subtext: 'LTCG / STCG tax optimization', icon: <TrendingUp size={18} /> },
-];
-
-function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSmartImport, onDrawerStateChange }: MobileBottomNavProps) {
+/* ── Main component ──────────────────────────────────────────────────────── */
+function MobileBottomNav({
+  activeAsset, onChangeAsset, alertCount = 0, onOpenSmartImport, onDrawerStateChange,
+}: MobileBottomNavProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [sheetIn,      setSheetIn]      = useState(false);
   const isDrawerOpenRef = useRef(isDrawerOpen);
   useEffect(() => { isDrawerOpenRef.current = isDrawerOpen; }, [isDrawerOpen]);
 
-  // Notify parent and lock body scroll when drawer is open
+  const openDrawer = useCallback(() => {
+    setIsDrawerOpen(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setSheetIn(true)));
+  }, []);
+
+  const closeDrawer = useCallback(() => {
+    setSheetIn(false);
+    const id = setTimeout(() => setIsDrawerOpen(false), 330);
+    return () => clearTimeout(id);
+  }, []);
+
+  // Scroll lock + parent notify
   useEffect(() => {
     onDrawerStateChange?.(isDrawerOpen);
-    if (isDrawerOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
+    document.body.style.overflow = isDrawerOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
   }, [isDrawerOpen, onDrawerStateChange]);
 
-  // Close drawer when active asset changes
-  useEffect(() => {
-    setIsDrawerOpen(false);
-  }, [activeAsset]);
+  // Close on navigation
+  useEffect(() => { if (isDrawerOpen) closeDrawer(); }, [activeAsset]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Trap Escape key for accessibility
+  // Escape key
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isDrawerOpenRef.current) {
-        setIsDrawerOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    const fn = (e: KeyboardEvent) => { if (e.key === 'Escape' && isDrawerOpenRef.current) closeDrawer(); };
+    window.addEventListener('keydown', fn);
+    return () => window.removeEventListener('keydown', fn);
+  }, [closeDrawer]);
 
   const handleMoreTabClick = useCallback((tabId: typeof moreTabs[number]['id']) => {
     triggerHaptic('selection');
     onChangeAsset(tabId);
-    setIsDrawerOpen(false);
   }, [onChangeAsset]);
 
-  const isMoreActive = moreTabs.some((tab) => tab.id === activeAsset);
+  const toggleDrawer = useCallback(() => {
+    triggerHaptic('selection');
+    if (isDrawerOpen) {
+      closeDrawer();
+    } else {
+      openDrawer();
+    }
+  }, [isDrawerOpen, openDrawer, closeDrawer]);
+
+  const isMoreActive = moreTabs.some((t) => t.id === activeAsset);
 
   return (
     <>
-      {/* Backdrop for More Drawer */}
+      {/* Frosted backdrop */}
       {isDrawerOpen && (
         <div
-          className="fixed inset-0 z-[60] transition-opacity duration-200 md:hidden bg-black/60 backdrop-blur-sm"
-          onClick={() => setIsDrawerOpen(false)}
           aria-hidden="true"
+          onClick={closeDrawer}
+          className="md:hidden"
+          style={{
+            position: 'fixed', inset: 0, zIndex: 60,
+            background: 'rgba(0,0,0,0.44)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            opacity: sheetIn ? 1 : 0,
+            transition: 'opacity 0.3s ease',
+          }}
         />
       )}
 
-      {/* More Drawer - Bottom Sheet with Solid Opaque Background */}
+      {/* Liquid Glass More Sheet */}
       {isDrawerOpen && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="All Asset Categories"
-          className="fixed left-0 right-0 bottom-0 z-[70] bg-[var(--surface-solid)] border-t border-[var(--border-subtle)] rounded-t-3xl shadow-2xl p-4 md:hidden animate-slide-up max-w-lg mx-auto will-change-transform transform-gpu pb-[calc(1rem+env(safe-area-inset-bottom,0px))]"
+          aria-label="All asset categories"
+          className="md:hidden"
           style={{
-            maxHeight: '80vh',
+            position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 70,
+            background: 'color-mix(in srgb, var(--surface-solid) 82%, transparent)',
+            backdropFilter: 'blur(34px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(34px) saturate(1.8)',
+            borderTop: '0.5px solid color-mix(in srgb, var(--border-subtle) 60%, transparent)',
+            borderRadius: '26px 26px 0 0',
+            boxShadow: '0 -14px 60px rgba(0,0,0,0.24)',
+            transform: sheetIn ? 'translateY(0)' : 'translateY(100%)',
+            transition: 'transform 0.33s cubic-bezier(0.32,0.72,0,1)',
+            willChange: 'transform',
+            paddingBottom: 'calc(env(safe-area-inset-bottom,0px) + 68px)',
+            maxHeight: '82vh',
+            display: 'flex', flexDirection: 'column',
           }}
         >
-          <span className="sr-only" role="status" aria-live="polite">
-            More asset categories drawer opened
-          </span>
-          {/* Header with Drag Handle */}
-          <div className="w-10 h-1 rounded-full bg-[var(--border-subtle)] mx-auto mb-3" aria-hidden="true" />
-          <div className="flex items-center justify-between pb-3 mb-2 border-b border-[var(--border-subtle)]">
+          <span className="sr-only" role="status" aria-live="polite">More asset categories drawer opened</span>
+
+          {/* Drag handle */}
+          <div style={{ width: 36, height: 4, borderRadius: 999, background: 'color-mix(in srgb,var(--border-subtle) 80%,transparent)', margin: '10px auto 0', flexShrink: 0 }} aria-hidden="true" />
+
+          {/* Sheet header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px 8px', flexShrink: 0 }}>
             <div>
-              <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
-                More Asset Classes
-              </h4>
-              <p className="text-[11px] text-[var(--text-tertiary)]">Select category to view details</p>
+              <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.022em', lineHeight: 1.1 }}>More</p>
+              <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 1 }}>Asset categories</p>
             </div>
             <button
               type="button"
-              onClick={() => setIsDrawerOpen(false)}
-              className="w-10 h-10 min-w-[40px] min-h-[40px] -mr-2 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] rounded-[var(--radius-medium)] hover:bg-[var(--surface-secondary)] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] cursor-pointer touch-manipulation"
-              aria-label="Close menu"
+              onClick={closeDrawer}
+              aria-label="Close"
+              style={{
+                width: 30, height: 30, borderRadius: 999,
+                background: 'color-mix(in srgb, var(--text-tertiary) 14%, transparent)',
+                border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'var(--text-secondary)', cursor: 'pointer', flexShrink: 0,
+              }}
             >
-              <X size={18} aria-hidden="true" />
+              <X size={15} aria-hidden="true" />
             </button>
           </div>
 
-          {/* Quick Smart AI Import Option inside More Drawer */}
+          {/* Smart Import banner */}
           {onOpenSmartImport && (
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                setIsDrawerOpen(false);
-                onOpenSmartImport();
-              }}
-              className="w-full flex items-center justify-between p-3 mb-3 bg-gradient-to-r from-cyan-500/15 via-blue-500/15 to-purple-500/15 border border-[var(--accent-blue)]/30 rounded-[var(--radius-medium)] text-[var(--text-primary)] hover:from-cyan-500/25 hover:to-purple-500/25 transition-all ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] shadow-xs"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--accent-blue)] text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <Sparkles size={16} aria-hidden="true" />
+            <div style={{ padding: '0 14px 10px', flexShrink: 0 }}>
+              <button
+                type="button"
+                onClick={() => { triggerHaptic('selection'); closeDrawer(); onOpenSmartImport(); }}
+                style={{
+                  width: '100%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '11px 14px', borderRadius: 16,
+                  background: 'linear-gradient(135deg,color-mix(in srgb,#06b6d4 14%,transparent),color-mix(in srgb,#8b5cf6 14%,transparent))',
+                  border: '1px solid color-mix(in srgb,var(--accent-blue) 28%,transparent)',
+                  cursor: 'pointer', outline: 'none', WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                    background: 'linear-gradient(135deg,#06b6d4,#8b5cf6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(139,92,246,0.35)',
+                  }}>
+                    <Sparkles size={18} color="#fff" aria-hidden="true" />
+                  </div>
+                  <div style={{ textAlign: 'left' }}>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>✨ Smart AI Import</p>
+                    <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>Auto-extract details from a doc or photo</p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold text-[var(--accent-blue)]">✨ Smart AI Import</p>
-                  <p className="text-[11px] text-[var(--text-tertiary)]">Auto-extract details from document/photo</p>
-                </div>
-              </div>
-              <ChevronRight size={16} className="text-[var(--accent-blue)] shrink-0" aria-hidden="true" />
-            </button>
+                <ChevronRight size={14} color="var(--text-tertiary)" aria-hidden="true" />
+              </button>
+            </div>
           )}
 
-          {/* Compact Vertical List */}
-          <div className="space-y-1.5 overflow-y-auto max-h-[50vh] pr-1">
+          {/* Divider */}
+          <div style={{ height: 1, background: 'var(--border-subtle)', opacity: 0.45, marginInline: 14, flexShrink: 0 }} />
+
+          {/* Category rows */}
+          <div style={{ overflowY: 'auto', padding: '8px 10px 4px', flex: 1 }}>
             {moreTabs.map((tab) => {
-              const isActive = activeAsset === tab.id;
+              const active = activeAsset === tab.id;
               return (
                 <button
                   key={tab.id}
                   type="button"
                   onClick={() => handleMoreTabClick(tab.id)}
-                  className={`w-full flex items-center justify-between px-3 min-h-[48px] py-2.5 rounded-[var(--radius-medium)] transition-colors text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 cursor-pointer active:scale-[0.99] ${
-                    isActive
-                      ? 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-bold border border-[var(--accent-blue)]/30'
-                      : 'text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] border border-transparent'
-                  }`}
+                  style={{
+                    width: '100%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 12px', marginBottom: 5, borderRadius: 14,
+                    background: active ? `color-mix(in srgb,${tab.color} 13%,transparent)` : 'transparent',
+                    border: `1px solid ${active ? `color-mix(in srgb,${tab.color} 32%,transparent)` : 'transparent'}`,
+                    cursor: 'pointer', outline: 'none', textAlign: 'left',
+                    transition: 'background 0.18s ease, border-color 0.18s ease',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-8 h-8 rounded-[var(--radius-small)] flex items-center justify-center shrink-0 ${
-                      isActive ? 'bg-[var(--accent-blue)] text-white' : 'bg-[var(--surface-secondary)] text-[var(--text-secondary)]'
-                    }`}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 13, minWidth: 0 }}>
+                    <div style={{
+                      width: 38, height: 38, borderRadius: 11, flexShrink: 0,
+                      background: active ? tab.color : `color-mix(in srgb,${tab.color} 18%,var(--surface-secondary))`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: active ? '#fff' : tab.color,
+                      boxShadow: active ? `0 4px 14px color-mix(in srgb,${tab.color} 40%,transparent)` : 'none',
+                      transition: 'background 0.2s ease, box-shadow 0.2s ease',
+                    }}>
                       {tab.icon}
                     </div>
-                    <div className="min-w-0">
-                      <span className="text-xs font-bold block truncate">{tab.label}</span>
-                      <span className="text-[10px] text-[var(--text-tertiary)] block truncate font-normal">{tab.subtext}</span>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{
+                        fontSize: 14, fontWeight: active ? 700 : 600,
+                        color: active ? tab.color : 'var(--text-primary)',
+                        letterSpacing: '-0.01em',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>{tab.label}</p>
+                      <p style={{
+                        fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>{tab.subtext}</p>
                     </div>
                   </div>
-                  <ChevronRight size={15} className={`shrink-0 ${isActive ? 'text-[var(--accent-blue)]' : 'text-[var(--text-tertiary)]'}`} aria-hidden="true" />
+                  <ChevronRight size={14} style={{ color: active ? tab.color : 'var(--text-tertiary)', flexShrink: 0 }} aria-hidden="true" />
                 </button>
               );
             })}
@@ -196,82 +384,48 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
         </div>
       )}
 
-      {/* Persistent Docked Bottom Bar */}
+      {/* ── Liquid Glass Tab Bar ─────────────────────────────────────────── */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--surface)]/95 backdrop-blur-xl border-t border-[var(--border-subtle)] md:hidden select-none will-change-transform transform-gpu shadow-[0_-4px_24px_rgba(0,0,0,0.18)]"
+        className="md:hidden"
         style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
+          background: 'color-mix(in srgb, var(--surface) 76%, transparent)',
+          backdropFilter: 'blur(28px) saturate(1.8)',
+          WebkitBackdropFilter: 'blur(28px) saturate(1.8)',
+          borderTop: '0.5px solid color-mix(in srgb, var(--border-subtle) 50%, transparent)',
+          boxShadow: '0 -1px 16px rgba(0,0,0,0.08)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          willChange: 'transform', transform: 'translateZ(0)', userSelect: 'none',
         }}
       >
-        <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-1">
-          {mainTabs.map((tab) => {
-            const isActive = activeAsset === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => {
-                  triggerHaptic('selection');
-                  onChangeAsset(tab.id);
-                  setIsDrawerOpen(false);
-                }}
-                aria-current={isActive ? 'page' : undefined}
-                className={`relative flex-1 flex flex-col items-center justify-center h-12 py-1 rounded-xl touch-manipulation transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 cursor-pointer active:scale-95 ${
-                  isActive
-                    ? 'text-[var(--accent-blue)] font-bold'
-                    : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                <div className={`relative flex items-center justify-center px-3 py-1 rounded-full transition-all duration-200 ${isActive ? 'bg-[var(--accent-blue-soft)]' : ''}`}>
-                  {tab.id === 'home' ? (
-                    <HomeNavIcon isActive={isActive} />
-                  ) : tab.id === 'stocks' ? (
-                    ICON_STOCKS
-                  ) : tab.id === 'sip' ? (
-                    ICON_SIP
-                  ) : (
-                    ICON_FD
-                  )}
-                  {tab.id === 'home' && alertCount > 0 && (
-                    <span 
-                      role="status"
-                      className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-[var(--negative)] text-white text-[9.5px] font-bold flex items-center justify-center px-1 leading-none shadow-xs tnum"
-                      aria-label={`${alertCount} notifications`}
-                    >
-                      {alertCount > 9 ? '9+' : alertCount}
-                    </span>
-                  )}
-                </div>
-                <span className={`text-[10px] tracking-tight leading-tight max-w-full truncate px-0.5 mt-0.5 ${isActive ? 'font-bold text-[var(--accent-blue)]' : 'font-medium text-[var(--text-secondary)]'}`}>
-                  {tab.label}
-                </span>
-              </button>
-            );
-          })}
-
-          {/* More Tab */}
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('selection');
-              setIsDrawerOpen(!isDrawerOpen);
-            }}
-            aria-expanded={isDrawerOpen}
-            aria-label={isMoreActive ? `More asset categories (currently active: ${activeAsset})` : 'More asset categories'}
-            className={`relative flex-1 flex flex-col items-center justify-center h-12 py-1 rounded-xl touch-manipulation transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1 cursor-pointer active:scale-95 ${
-              isMoreActive || isDrawerOpen
-                ? 'text-[var(--accent-blue)] font-bold'
-                : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            <div className={`relative flex items-center justify-center px-3 py-1 rounded-full transition-all duration-200 ${isMoreActive || isDrawerOpen ? 'bg-[var(--accent-blue-soft)]' : ''}`}>
-              <Menu size={20} aria-hidden="true" />
-            </div>
-            <span className={`text-[10px] tracking-tight leading-tight max-w-full truncate px-0.5 mt-0.5 ${isMoreActive || isDrawerOpen ? 'font-bold text-[var(--accent-blue)]' : 'font-medium text-[var(--text-secondary)]'}`}>
-              More
-            </span>
-          </button>
+        <div style={{ display: 'flex', alignItems: 'stretch', height: 56, maxWidth: 480, margin: '0 auto', paddingInline: 2 }}>
+          {mainTabs.map((tab) => (
+            <TabBtn
+              key={tab.id}
+              id={tab.id}
+              label={tab.label}
+              isActive={activeAsset === tab.id}
+              badge={tab.id === 'home' && alertCount > 0 ? alertCount : undefined}
+              onClick={() => { triggerHaptic('selection'); onChangeAsset(tab.id); if (isDrawerOpen) closeDrawer(); }}
+              icon={
+                tab.id === 'home'   ? <HomeIcon size={22} aria-hidden="true" />   :
+                tab.id === 'stocks' ? <TrendingUp size={22} aria-hidden="true" /> :
+                tab.id === 'sip'    ? <Wallet size={22} aria-hidden="true" />     :
+                                      <Landmark size={22} aria-hidden="true" />
+              }
+              activeIcon={
+                tab.id === 'home'
+                  ? <HomeIcon size={22} className="fill-[var(--accent-blue)] stroke-[var(--accent-blue)]" aria-hidden="true" />
+                  : tab.id === 'stocks'
+                    ? <TrendingUp size={22} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
+                    : tab.id === 'sip'
+                      ? <Wallet size={22} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
+                      : <Landmark size={22} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
+              }
+            />
+          ))}
+          <MoreTabBtn isActive={isMoreActive} isOpen={isDrawerOpen} onClick={toggleDrawer} />
         </div>
       </nav>
     </>
@@ -279,4 +433,3 @@ function MobileBottomNav({ activeAsset, onChangeAsset, alertCount = 0, onOpenSma
 }
 
 export default React.memo(MobileBottomNav);
-
