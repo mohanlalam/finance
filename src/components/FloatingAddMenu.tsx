@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, X, Sparkles } from './icons/AppIcons';
+import { Plus, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, X, Sparkles, BarChart3 } from './icons/AppIcons';
 import { triggerHaptic } from '../utils/haptics';
 
 type FabPosition = 'right' | 'center' | 'left';
@@ -98,7 +98,7 @@ export default function FloatingAddMenu({
       category: 'Market & Wealth',
       items: [
         { label: 'Stock / ETF', subtext: 'Equities & exchange-traded funds', icon: <TrendingUp size={18} aria-hidden="true" />, onClick: () => { triggerHaptic('selection'); onAddStock(); setIsOpen(false); }, color: 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]' },
-        { label: 'SIP Mutual Fund', subtext: 'Systematic investment plans', icon: <TrendingUp size={18} aria-hidden="true" />, onClick: () => { triggerHaptic('selection'); onAddAsset('sip'); setIsOpen(false); }, color: 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)]' },
+        { label: 'SIP Mutual Fund', subtext: 'Systematic investment plans', icon: <BarChart3 size={18} aria-hidden="true" />, onClick: () => { triggerHaptic('selection'); onAddAsset('sip'); setIsOpen(false); }, color: 'bg-purple-500/15 text-purple-600 dark:text-purple-400' },
         { label: 'Gold Holding', subtext: '24K / 22K physical & digital bullion', icon: <Coins size={18} aria-hidden="true" />, onClick: () => { triggerHaptic('selection'); onAddAsset('gold'); setIsOpen(false); }, color: 'bg-[var(--warning-soft)] text-[var(--warning)]' },
       ],
     },
