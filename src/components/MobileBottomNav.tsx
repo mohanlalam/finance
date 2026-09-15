@@ -60,32 +60,33 @@ function TabBtn({
       onClick={onClick}
       aria-current={isActive ? 'page' : undefined}
       aria-label={label}
-      className="relative flex-1 flex flex-col items-center justify-center gap-[3px] pt-[9px] pb-[5px] touch-manipulation outline-none cursor-pointer select-none"
-      style={{ WebkitTapHighlightColor: 'transparent' }}
+      className="relative flex-1 flex flex-col items-center justify-center touch-manipulation outline-none cursor-pointer select-none"
+      style={{ WebkitTapHighlightColor: 'transparent', gap: 4, paddingTop: 10, paddingBottom: 6 }}
     >
       <span className="relative flex items-center justify-center">
-        {/* Springy pill indicator */}
+        {/* Springy pill indicator — solid accent fill for clear visibility */}
         <span
           aria-hidden="true"
           style={{
             position: 'absolute',
             inset: 0,
             borderRadius: 999,
-            padding: '6px 18px',
-            background: isActive ? 'color-mix(in srgb, var(--accent-blue) 15%, transparent)' : 'transparent',
-            transform: isActive ? 'scale(1)' : 'scale(0.5)',
+            padding: '7px 20px',
+            background: isActive ? 'var(--accent-blue-soft, rgba(0,122,255,0.18))' : 'transparent',
+            border: isActive ? '1px solid rgba(0,122,255,0.22)' : '1px solid transparent',
+            transform: isActive ? 'scale(1)' : 'scale(0.4)',
             opacity: isActive ? 1 : 0,
-            transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
+            transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease',
           }}
         />
         {/* Icon */}
         <span
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '6px 18px', borderRadius: 999,
-            color: isActive ? 'var(--accent-blue)' : 'var(--text-tertiary)',
-            transform: isActive ? 'scale(1.1)' : 'scale(1)',
-            transition: 'transform 0.28s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease',
+            padding: '7px 20px', borderRadius: 999,
+            color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
+            transform: isActive ? 'scale(1.12)' : 'scale(1)',
+            transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease',
             position: 'relative', zIndex: 1,
           }}
         >
@@ -97,23 +98,25 @@ function TabBtn({
             role="status"
             aria-label={`${badge} notifications`}
             style={{
-              position: 'absolute', top: 2, right: 6,
-              minWidth: 16, height: 16, borderRadius: 999,
+              position: 'absolute', top: 0, right: 4,
+              minWidth: 18, height: 18, borderRadius: 999,
               background: 'var(--negative, #ef4444)', color: '#fff',
-              fontSize: 9, fontWeight: 800,
+              fontSize: 10, fontWeight: 800,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '0 3px', zIndex: 2,
-              boxShadow: '0 0 0 2px var(--surface)',
+              padding: '0 4px', zIndex: 2,
+              boxShadow: '0 0 0 2.5px var(--surface, #fff)',
             }}
           >
             {badge > 9 ? '9+' : badge}
           </span>
         )}
       </span>
+      {/* Label */}
       <span
         style={{
-          fontSize: 10, fontWeight: isActive ? 700 : 500,
-          color: isActive ? 'var(--accent-blue)' : 'var(--text-tertiary)',
+          fontSize: 11, fontWeight: isActive ? 700 : 500,
+          letterSpacing: isActive ? '-0.02em' : '-0.01em',
+          color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
           transition: 'color 0.18s ease', lineHeight: 1,
           maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           paddingInline: 2,
@@ -134,37 +137,39 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
       onClick={onClick}
       aria-expanded={isOpen}
       aria-label={isActive ? `More (active)` : 'More asset categories'}
-      className="relative flex-1 flex flex-col items-center justify-center gap-[3px] pt-[9px] pb-[5px] touch-manipulation outline-none cursor-pointer select-none"
-      style={{ WebkitTapHighlightColor: 'transparent' }}
+      className="relative flex-1 flex flex-col items-center justify-center touch-manipulation outline-none cursor-pointer select-none"
+      style={{ WebkitTapHighlightColor: 'transparent', gap: 4, paddingTop: 10, paddingBottom: 6 }}
     >
       <span className="relative flex items-center justify-center">
         <span
           aria-hidden="true"
           style={{
-            position: 'absolute', inset: 0, borderRadius: 999, padding: '6px 18px',
-            background: lit ? 'color-mix(in srgb, var(--accent-blue) 15%, transparent)' : 'transparent',
-            transform: lit ? 'scale(1)' : 'scale(0.5)',
+            position: 'absolute', inset: 0, borderRadius: 999, padding: '7px 20px',
+            background: lit ? 'var(--accent-blue-soft, rgba(0,122,255,0.18))' : 'transparent',
+            border: lit ? '1px solid rgba(0,122,255,0.22)' : '1px solid transparent',
+            transform: lit ? 'scale(1)' : 'scale(0.4)',
             opacity: lit ? 1 : 0,
-            transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
+            transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease',
           }}
         />
         <span
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '6px 18px', borderRadius: 999,
-            color: lit ? 'var(--accent-blue)' : 'var(--text-tertiary)',
-            transform: isOpen ? 'rotate(90deg) scale(1.1)' : lit ? 'scale(1.1)' : 'scale(1)',
-            transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease',
+            padding: '7px 20px', borderRadius: 999,
+            color: lit ? 'var(--accent-blue)' : 'var(--text-secondary)',
+            transform: isOpen ? 'rotate(90deg) scale(1.12)' : lit ? 'scale(1.12)' : 'scale(1)',
+            transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease',
             position: 'relative', zIndex: 1,
           }}
         >
-          <Menu size={22} aria-hidden="true" />
+          <Menu size={24} aria-hidden="true" />
         </span>
       </span>
       <span
         style={{
-          fontSize: 10, fontWeight: lit ? 700 : 500,
-          color: lit ? 'var(--accent-blue)' : 'var(--text-tertiary)',
+          fontSize: 11, fontWeight: lit ? 700 : 500,
+          letterSpacing: lit ? '-0.02em' : '-0.01em',
+          color: lit ? 'var(--accent-blue)' : 'var(--text-secondary)',
           transition: 'color 0.18s ease', lineHeight: 1, whiteSpace: 'nowrap',
         }}
       >
@@ -390,16 +395,17 @@ function MobileBottomNav({
         className="md:hidden"
         style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
-          background: 'color-mix(in srgb, var(--surface) 76%, transparent)',
-          backdropFilter: 'blur(28px) saturate(1.8)',
-          WebkitBackdropFilter: 'blur(28px) saturate(1.8)',
-          borderTop: '0.5px solid color-mix(in srgb, var(--border-subtle) 50%, transparent)',
-          boxShadow: '0 -1px 16px rgba(0,0,0,0.08)',
+          /* Solid frosted glass — opaque enough to always be visible */
+          background: 'var(--surface, #fff)',
+          backdropFilter: 'blur(24px) saturate(1.6)',
+          WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
+          borderTop: '1px solid var(--border-subtle, rgba(0,0,0,0.1))',
+          boxShadow: '0 -4px 24px rgba(0,0,0,0.12), 0 -1px 0 rgba(0,0,0,0.06)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
           willChange: 'transform', transform: 'translateZ(0)', userSelect: 'none',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'stretch', height: 56, maxWidth: 480, margin: '0 auto', paddingInline: 2 }}>
+        <div style={{ display: 'flex', alignItems: 'stretch', height: 62, maxWidth: 480, margin: '0 auto', paddingInline: 4 }}>
           {mainTabs.map((tab) => (
             <TabBtn
               key={tab.id}
@@ -409,19 +415,19 @@ function MobileBottomNav({
               badge={tab.id === 'home' && alertCount > 0 ? alertCount : undefined}
               onClick={() => { triggerHaptic('selection'); onChangeAsset(tab.id); if (isDrawerOpen) closeDrawer(); }}
               icon={
-                tab.id === 'home'   ? <HomeIcon size={22} aria-hidden="true" />   :
-                tab.id === 'stocks' ? <TrendingUp size={22} aria-hidden="true" /> :
-                tab.id === 'sip'    ? <Wallet size={22} aria-hidden="true" />     :
-                                      <Landmark size={22} aria-hidden="true" />
+                tab.id === 'home'   ? <HomeIcon size={24} aria-hidden="true" />   :
+                tab.id === 'stocks' ? <TrendingUp size={24} aria-hidden="true" /> :
+                tab.id === 'sip'    ? <Wallet size={24} aria-hidden="true" />     :
+                                      <Landmark size={24} aria-hidden="true" />
               }
               activeIcon={
                 tab.id === 'home'
-                  ? <HomeIcon size={22} className="fill-[var(--accent-blue)] stroke-[var(--accent-blue)]" aria-hidden="true" />
+                  ? <HomeIcon size={24} className="fill-[var(--accent-blue)] stroke-[var(--accent-blue)]" aria-hidden="true" />
                   : tab.id === 'stocks'
-                    ? <TrendingUp size={22} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
+                    ? <TrendingUp size={24} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
                     : tab.id === 'sip'
-                      ? <Wallet size={22} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
-                      : <Landmark size={22} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
+                      ? <Wallet size={24} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
+                      : <Landmark size={24} className="stroke-[var(--accent-blue)]" aria-hidden="true" />
               }
             />
           ))}
