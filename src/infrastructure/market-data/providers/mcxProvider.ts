@@ -46,8 +46,9 @@ export class MCXGoldDataProvider {
       if (isNaN(rawOunceINR) || rawOunceINR <= 10000) return null;
 
       const basePerGram = rawOunceINR / 31.1034768;
-      // India retail benchmark includes statutory customs duty (6% post-July 2024 Budget) + GST (3%) ~1.0918x factor
-      const rate24k = Math.round(basePerGram * 1.0918);
+      // India retail benchmark (Goodreturns / IBJA 24K retail spot) accounts for:
+      // Basic Customs Duty + AIDC + Social Welfare Surcharge + Bank landed premium + 3% GST (~1.1673x factor over London XAU/INR spot)
+      const rate24k = Math.round(basePerGram * 1.1673);
       if (rate24k < MIN_VALID_GOLD_RATE_24K || rate24k > MAX_VALID_GOLD_RATE_24K) return null;
 
       const existingSnapshot = getStoredGoldSnapshot();

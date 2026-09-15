@@ -266,15 +266,18 @@ export function GoldHoldingView({
   const [tempRateInput, setTempRateInput] = useState('');
 
   const handleSaveRate = () => {
-    const val = parseFloat(tempRateInput);
-    if (!isNaN(val) && val >= 5000) {
-      saveStoredGoldRate(val);
-      setRateTick((t) => t + 1);
-      addToast(`Custom 24K Gold rate set to ${formatINR(val)}/g`, 'success');
-      setIsEditingRate(false);
-    } else {
+    let val = parseFloat(tempRateInput);
+    if (isNaN(val) || val < 5000) {
       addToast('Please enter a valid rate greater than ₹5,000/g', 'error');
+      return;
     }
+    if (val > 50000) {
+      val = Math.round(val / 10);
+    }
+    saveStoredGoldRate(val);
+    setRateTick((t) => t + 1);
+    addToast(`24K Gold rate calibrated to ${formatINR(val)}/g (${formatINR(val * 10)}/10g)`, 'success');
+    setIsEditingRate(false);
   };
 
   const handleResetToLive = async () => {
@@ -689,6 +692,71 @@ export function GoldHoldingView({
           onConfirm={() => handleDelete(confirmDeleteItem.id)}
           onClose={() => setConfirmDeleteItem(null)}
         />
+      )}
+
+      {/* 24K Rate Calibration Modal */}
+      {isEditingRate && (
+        <Modal
+          isOpen={isEditingRate}
+          onClose={() => setIsEditingRate(false)}
+          title="Calibrate 24K Gold Spot Rate"
+        >
+          <div className="space-y-4">
+            <p className="text-xs text-[var(--text-secondary)]">
+              Adjust the 24K pure bullion benchmark rate (₹/gram) to match your jeweler or local spot price. All 22K, 18K, and 14K valuations will automatically update.
+            </p>
+
+            <div>
+              <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
+                24K Spot Rate (₹ / gram)
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--text-tertiary)] font-bold">₹</span>
+                <input
+                  type="number"
+                  step="1"
+                  min={5000}
+                  max={35000}
+                  value={tempRateInput}
+                  onChange={(e) => setTempRateInput(e.target.value)}
+                  placeholder="e.g. 15408"
+                  className="apple-input w-full pl-8 pr-12 py-2 text-sm font-bold text-[var(--text-primary)]"
+                  autoFocus
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--text-tertiary)]">/g</span>
+              </div>
+              <p className="text-[11px] text-[var(--text-tertiary)] mt-1">
+                Equivalent 10g rate: {tempRateInput && !isNaN(Number(tempRateInput)) ? formatINR(Number(tempRateInput) > 50000 ? Number(tempRateInput) : Number(tempRateInput) * 10) : '—'}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-[var(--border-subtle)]">
+              <button
+                type="button"
+                onClick={handleResetToLive}
+                className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+              >
+                Reset to Live Spot
+              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingRate(false)}
+                  className="px-3 py-1.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveRate}
+                  className="px-3.5 py-1.5 rounded-[var(--radius-small)] bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 transition-colors shadow-xs cursor-pointer"
+                >
+                  Save Rate
+                </button>
+              </div>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );
