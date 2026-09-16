@@ -40,6 +40,25 @@ function sanitizeValue(key: string, value: unknown): unknown {
   return value;
 }
 
+function sanitizeError(error: unknown): unknown {
+  if (!error) return error;
+  if (error instanceof Error) {
+    const sanitizedObj: Record<string, unknown> = {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+    for (const [k, v] of Object.entries(error)) {
+      sanitizedObj[k] = sanitizeValue(k, v);
+    }
+    return sanitizeValue('error', sanitizedObj);
+  }
+  if (typeof error === 'object') {
+    return sanitizeValue('error', error);
+  }
+  return error;
+}
+
 class Logger {
   private level: LogLevel = import.meta.env?.MODE === 'development' ? 'debug' : 'warn';
 
@@ -80,8 +99,9 @@ class Logger {
 
   error(message: string, error?: unknown, context?: Record<string, unknown>): void {
     if (this.shouldLog('error')) {
-      const sanitized = context ? sanitizeValue('context', context) : undefined;
-      console.error(`[ERROR] ${message}`, error, sanitized || '');
+      const sanitizedError = error !== undefined ? sanitizeError(error) : undefined;
+      const sanitizedContext = context ? sanitizeValue('context', context) : undefined;
+      console.error(`[ERROR] ${message}`, sanitizedError !== undefined ? sanitizedError : '', sanitizedContext || '');
     }
   }
 }

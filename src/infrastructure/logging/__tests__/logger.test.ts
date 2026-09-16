@@ -42,4 +42,26 @@ describe('Logger Infrastructure', () => {
     expect(holdings[1].balance).toBe(5000);
     consoleSpy.mockRestore();
   });
+
+  it('redacts sensitive data in error objects passed to logger.error', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    logger.setLevel('error');
+    
+    const customError = new Error('Database query failed');
+    (customError as unknown as Record<string, unknown>).userPin = '9999';
+    (customError as unknown as Record<string, unknown>).api_key = 'super-secret';
+
+    logger.error('Critical failure', customError, { policy_number: 'LIC-999999' });
+
+    expect(consoleSpy).toHaveBeenCalled();
+    const loggedError = consoleSpy.mock.calls[0][1] as Record<string, unknown>;
+    const loggedContext = consoleSpy.mock.calls[0][2] as Record<string, unknown>;
+
+    expect(loggedError.userPin).toBe('[REDACTED]');
+    expect(loggedError.api_key).toBe('[REDACTED]');
+    expect(loggedError.message).toBe('Database query failed');
+    expect(loggedContext.policy_number).toBe('[REDACTED]');
+
+    consoleSpy.mockRestore();
+  });
 });
