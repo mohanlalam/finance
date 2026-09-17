@@ -567,11 +567,11 @@ function MobileBottomNav({
           left: 0,
           right: 0,
           zIndex: 50,
-          /* Raise pill: padding-bottom = safe-area + 12px lift from edge */
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
+          /* Flush to screen edge; respect notch on real iOS devices */
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
           paddingLeft: 12,
           paddingRight: 12,
-          paddingTop: 0,
+          paddingTop: 8,
           pointerEvents: 'none',
         }}
       >
