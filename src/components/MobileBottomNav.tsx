@@ -23,19 +23,17 @@ interface MobileBottomNavProps {
   onChangeAsset: (tab: AssetTab) => void;
   alertCount?: number;
   onOpenSmartImport?: () => void;
-  onAddStock?: () => void;
-  onAddAsset?: (type: 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
   onDrawerStateChange?: (isOpen: boolean) => void;
 }
 
 /* ── More drawer tab definitions ─────────────────────────────────────────── */
 const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.ReactNode; color: string; gradient: string }[] = [
-  { id: 'rd',          label: 'Recurring Deposits',  subtext: 'Quarterly compounding RD accounts',   icon: <Clock size={18} />,      color: '#f97316', gradient: 'linear-gradient(135deg,#fb923c,#c2410c)' },
-  { id: 'gold',        label: 'Gold Holdings',        subtext: 'Physical & digital gold bullion',     icon: <Coins size={18} />,      color: '#eab308', gradient: 'linear-gradient(135deg,#facc15,#a16207)' },
-  { id: 'real_estate', label: 'Real Estate',          subtext: 'Properties, plots & rental yields',  icon: <Building2 size={18} />,  color: '#22c55e', gradient: 'linear-gradient(135deg,#4ade80,#15803d)' },
-  { id: 'insurance',   label: 'Insurance Policies',   subtext: 'Life, health & vehicle policies',    icon: <Shield size={18} />,     color: '#f43f5e', gradient: 'linear-gradient(135deg,#fb7185,#be123c)' },
-  { id: 'documents',   label: 'Document Vault',       subtext: 'Digital receipts & policy bonds',    icon: <FolderOpen size={18} />, color: '#3b82f6', gradient: 'linear-gradient(135deg,#60a5fa,#1d4ed8)' },
-  { id: 'tax',         label: 'Tax Harvesting',       subtext: 'LTCG / STCG tax optimisation',       icon: <TrendingUp size={18} />, color: '#10b981', gradient: 'linear-gradient(135deg,#34d399,#047857)' },
+  { id: 'rd',          label: 'Recurring Deposits',  subtext: 'Quarterly compounding RD accounts',   icon: <Clock size={18} aria-hidden="true" />,      color: '#f97316', gradient: 'linear-gradient(135deg,#fb923c,#c2410c)' },
+  { id: 'gold',        label: 'Gold Holdings',        subtext: 'Physical & digital gold bullion',     icon: <Coins size={18} aria-hidden="true" />,      color: '#eab308', gradient: 'linear-gradient(135deg,#facc15,#a16207)' },
+  { id: 'real_estate', label: 'Real Estate',          subtext: 'Properties, plots & rental yields',  icon: <Building2 size={18} aria-hidden="true" />,  color: '#22c55e', gradient: 'linear-gradient(135deg,#4ade80,#15803d)' },
+  { id: 'insurance',   label: 'Insurance Policies',   subtext: 'Life, health & vehicle policies',    icon: <Shield size={18} aria-hidden="true" />,     color: '#f43f5e', gradient: 'linear-gradient(135deg,#fb7185,#be123c)' },
+  { id: 'documents',   label: 'Document Vault',       subtext: 'Digital receipts & policy bonds',    icon: <FolderOpen size={18} aria-hidden="true" />, color: '#3b82f6', gradient: 'linear-gradient(135deg,#60a5fa,#1d4ed8)' },
+  { id: 'tax',         label: 'Tax Harvesting',       subtext: 'LTCG / STCG tax optimisation',       icon: <TrendingUp size={18} aria-hidden="true" />, color: '#10b981', gradient: 'linear-gradient(135deg,#34d399,#047857)' },
 ];
 
 /* ── Main tab list ───────────────────────────────────────────────────────── */
@@ -200,6 +198,7 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
     <button
       type="button"
       onClick={onClick}
+      aria-haspopup="dialog"
       aria-expanded={isOpen}
       aria-label={isActive ? 'More (active)' : 'More asset categories'}
       style={{
@@ -318,17 +317,40 @@ function MobileBottomNav({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [sheetIn,      setSheetIn]      = useState(false);
   const isDrawerOpenRef = useRef(isDrawerOpen);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const prevFocusedElementRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => { isDrawerOpenRef.current = isDrawerOpen; }, [isDrawerOpen]);
 
   const openDrawer = useCallback(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
     setIsDrawerOpen(true);
     requestAnimationFrame(() => requestAnimationFrame(() => setSheetIn(true)));
   }, []);
 
   const closeDrawer = useCallback(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+    }
     setSheetIn(false);
-    const id = setTimeout(() => setIsDrawerOpen(false), 360);
-    return () => clearTimeout(id);
+    closeTimerRef.current = setTimeout(() => {
+      setIsDrawerOpen(false);
+      closeTimerRef.current = null;
+    }, 360);
+  }, []);
+
+  // Cleanup close timer on unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
   }, []);
 
   // Scroll lock + parent notify
@@ -338,8 +360,57 @@ function MobileBottomNav({
     return () => { document.body.style.overflow = ''; };
   }, [isDrawerOpen, onDrawerStateChange]);
 
+  // Focus management: autofocus Close button on sheet open & restore previous focus on close
+  useEffect(() => {
+    if (isDrawerOpen) {
+      prevFocusedElementRef.current = document.activeElement as HTMLElement | null;
+      const timer = setTimeout(() => {
+        closeBtnRef.current?.focus();
+      }, 50);
+      return () => {
+        clearTimeout(timer);
+        if (prevFocusedElementRef.current && typeof prevFocusedElementRef.current.focus === 'function') {
+          prevFocusedElementRef.current.focus();
+        }
+      };
+    }
+  }, [isDrawerOpen]);
+
+  // Focus trap inside More sheet
+  useEffect(() => {
+    if (!isDrawerOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Tab') {
+        if (!sheetRef.current) return;
+        const focusableElements = sheetRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusableElements.length) return;
+        const firstEl = focusableElements[0];
+        const lastEl = focusableElements[focusableElements.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === firstEl) {
+            e.preventDefault();
+            lastEl.focus();
+          }
+        } else {
+          if (document.activeElement === lastEl) {
+            e.preventDefault();
+            firstEl.focus();
+          }
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDrawerOpen]);
+
   // Close on navigation
-  useEffect(() => { if (isDrawerOpen) closeDrawer(); }, [activeAsset]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (isDrawerOpen) {
+      closeDrawer();
+    }
+  }, [activeAsset, isDrawerOpen, closeDrawer]);
 
   // Escape key
   useEffect(() => {
@@ -379,6 +450,7 @@ function MobileBottomNav({
             WebkitBackdropFilter: 'blur(12px)',
             opacity: sheetIn ? 1 : 0,
             transition: 'opacity 0.3s ease',
+            touchAction: 'none',
           }}
         />
       )}
@@ -386,6 +458,7 @@ function MobileBottomNav({
       {/* ── iOS 27 Liquid Glass "More" Sheet ─────────────────────────────── */}
       {isDrawerOpen && (
         <div
+          ref={sheetRef}
           role="dialog"
           aria-modal="true"
           aria-label="All asset categories"
@@ -403,7 +476,7 @@ function MobileBottomNav({
             transform: sheetIn ? 'translateY(0)' : 'translateY(105%)',
             transition: 'transform 0.38s cubic-bezier(0.32,0.72,0,1)',
             willChange: 'transform',
-            paddingBottom: 'calc(env(safe-area-inset-bottom,0px) + 76px)',
+            paddingBottom: 'calc(env(safe-area-inset-bottom,0px) + 80px)',
             maxHeight: '80vh',
             display: 'flex', flexDirection: 'column',
           }}
@@ -427,6 +500,7 @@ function MobileBottomNav({
               <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2, letterSpacing: '0.01em' }}>Asset categories</p>
             </div>
             <button
+              ref={closeBtnRef}
               type="button"
               onClick={closeDrawer}
               aria-label="Close"
@@ -487,7 +561,7 @@ function MobileBottomNav({
 
           {/* Category rows — Glass tile cards */}
           <div style={{ overflowY: 'auto', padding: '10px 12px 4px', flex: 1 }}>
-            {moreTabs.map((tab, idx) => {
+            {moreTabs.map((tab) => {
               const active = activeAsset === tab.id;
               return (
                 <button
@@ -512,7 +586,6 @@ function MobileBottomNav({
                     cursor: 'pointer', outline: 'none', textAlign: 'left',
                     transition: 'background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease',
                     WebkitTapHighlightColor: 'transparent',
-                    animationDelay: `${idx * 30}ms`,
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>

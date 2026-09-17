@@ -811,8 +811,6 @@ export default function AppShell() {
           onChangeAsset={setActiveAsset}
           alertCount={visibleAlerts.length}
           onOpenSmartImport={openSmartImport}
-          onAddStock={openAddModal}
-          onAddAsset={handleFloatingAddAsset}
           onDrawerStateChange={setIsMoreDrawerOpen}
         />
       </Suspense>
