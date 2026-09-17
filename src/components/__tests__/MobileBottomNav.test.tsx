@@ -66,6 +66,12 @@ describe('MobileBottomNav Component', () => {
     expect(dialog).toBeDefined();
     expect(dialog.getAttribute('aria-modal')).toBe('true');
     expect(onDrawerStateChange).toHaveBeenCalledWith(true);
+
+    // Verify it stays open indefinitely (does NOT immediately auto-minimize)
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByRole('dialog')).toBeDefined();
   });
 
   it('focuses close button and supports focus trap with Tab key cycling', () => {

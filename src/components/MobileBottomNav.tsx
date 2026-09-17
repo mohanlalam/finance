@@ -405,12 +405,16 @@ function MobileBottomNav({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDrawerOpen]);
 
-  // Close on navigation
+  // Close on navigation (only when activeAsset actually changes)
+  const prevAssetRef = useRef(activeAsset);
   useEffect(() => {
-    if (isDrawerOpen) {
-      closeDrawer();
+    if (prevAssetRef.current !== activeAsset) {
+      prevAssetRef.current = activeAsset;
+      if (isDrawerOpenRef.current) {
+        closeDrawer();
+      }
     }
-  }, [activeAsset, isDrawerOpen, closeDrawer]);
+  }, [activeAsset, closeDrawer]);
 
   // Escape key
   useEffect(() => {
