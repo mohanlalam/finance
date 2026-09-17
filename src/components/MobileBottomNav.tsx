@@ -557,7 +557,7 @@ function MobileBottomNav({
         </div>
       )}
 
-      {/* ── iOS 27 Liquid Glass Tab Bar ───────────────────────────────── */}
+      {/* ── iOS 27 Liquid Glass Floating Tab Bar ─────────────────────────── */}
       <nav
         aria-label="Mobile Navigation"
         className="md:hidden"
@@ -567,49 +567,48 @@ function MobileBottomNav({
           left: 0,
           right: 0,
           zIndex: 50,
-          /* No padding — pill fills full width flush to screen bottom */
+          paddingBottom: 0,
+          paddingLeft: 12,
+          paddingRight: 12,
+          paddingTop: 8,
           pointerEvents: 'none',
         }}
       >
         <div
           style={{
-            width: '100%',
+            maxWidth: 480,
+            margin: '0 auto',
             pointerEvents: 'auto',
-            /* ─── Liquid Glass bar — full width, flat bottom, rounded top ─── */
-            background: 'color-mix(in srgb, var(--surface-solid) 94%, transparent)',
+            /* ─── Liquid Glass floating pill ─── */
+            background: 'color-mix(in srgb, var(--surface-solid) 90%, transparent)',
             backdropFilter: 'blur(52px) saturate(2.6) brightness(1.05)',
             WebkitBackdropFilter: 'blur(52px) saturate(2.6) brightness(1.05)',
-            /* Round ONLY the top corners; bottom is flush with screen edge */
-            borderRadius: '22px 22px 0 0',
-            /* Top border + specular rim only */
-            borderTop: '1px solid color-mix(in srgb, var(--border-subtle) 80%, transparent)',
-            borderLeft: 'none',
-            borderRight: 'none',
-            borderBottom: 'none',
+            borderRadius: 30,
+            border: '1px solid color-mix(in srgb, var(--border-subtle) 85%, transparent)',
             boxShadow: [
-              /* Bright specular top rim — glass edge */
-              'inset 0 2px 0 rgba(255,255,255,0.80)',
-              /* Elevation shadow upward */
-              '0 -4px 24px rgba(0,0,0,0.14)',
-              '0 -1px 8px rgba(0,0,0,0.08)',
+              'inset 0 2px 0 rgba(255,255,255,0.85)',
+              'inset 0 -1px 0 rgba(0,0,0,0.10)',
+              '0 4px 6px rgba(0,0,0,0.06)',
+              '0 10px 28px rgba(0,0,0,0.20)',
+              '0 24px 56px rgba(0,0,0,0.16)',
+              '0 1px 0 rgba(0,0,0,0.08)',
             ].join(', '),
             willChange: 'transform',
             transform: 'translateZ(0)',
             userSelect: 'none',
             overflow: 'hidden',
-            /* Extend fill into safe-area zone (home indicator) */
-            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+            marginBottom: 0,
           }}
         >
-          {/* Shimmer gloss layer — top-only frosted glass sheen */}
+          {/* Shimmer gloss layer — frosted glass sheen */}
           <div
             aria-hidden="true"
             style={{
               position: 'absolute',
               top: 0, left: 0, right: 0,
-              height: '45%',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 70%, rgba(255,255,255,0) 100%)',
-              borderRadius: '22px 22px 0 0',
+              height: '55%',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.08) 60%, rgba(255,255,255,0) 100%)',
+              borderRadius: '30px 30px 0 0',
               pointerEvents: 'none',
               zIndex: 0,
             }}
