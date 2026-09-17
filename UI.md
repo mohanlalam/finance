@@ -26,7 +26,7 @@ This document provides a comprehensive, exhaustive overview of the **User Interf
    - [Passcode Lock Screen (iOS 17/18 Style)](#passcode-lock-screen-ios-1718-style)
    - [Mobile Top Bar & Family Pill Selector](#mobile-top-bar--family-pill-selector)
    - [Mobile Home Wealth Summary View](#mobile-home-wealth-summary-view)
-   - [Mobile Bottom Navigation Bar](#mobile-bottom-navigation-bar)
+   - [Mobile Bottom Navigation Bar (iOS 27 Liquid Glass Floating Island)](#mobile-bottom-navigation-bar-ios-27-liquid-glass-floating-island)
    - [Mobile Floating Add Menu (FAB & Action Sheet)](#mobile-floating-add-menu-fab--action-sheet)
    - [Holding Detail Slide-Over Drawer](#holding-detail-slide-over-drawer)
    - [Mobile Alerts Drawer & Page](#mobile-alerts-drawer--page)
@@ -173,12 +173,17 @@ To maintain a compact, crisp financial interface, corner radii and shadows are s
   * `--radius-small` (`6px`): Badges, table filter pills, small icon buttons.
   * `--radius-medium` (`10px`): Asset cards (`.apple-card`), form text inputs, select dropdowns.
   * `--radius-large` (`14px`): Modal containers, major dashboard chart panels, lock screen keypads.
-  * `--radius-sheet` (`20px`): Mobile bottom sheets and drawer top corners.
-  * `--radius-pill` (`999px`): Status indicators, rounded pill tags.
+  * `--radius-sheet` (`20px`): Standard bottom sheets and modal sheet top corners.
+  * `--radius-liquid-pill` (`30px`): iOS 27 Liquid Glass floating navigation dock container.
+  * `--radius-liquid-capsule` (`17px`): iOS 27 Liquid Glass active navigation tab capsule.
+  * `--radius-liquid-drawer` (`28px`): iOS 27 Liquid Glass More drawer top sheet corners (`28px 28px 0 0`).
+  * `--radius-pill` (`999px`): Status indicators, rounded pill tags, active dot indicator.
 
 * **Shadow Tokens**:
   * `--shadow-card`: `0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95)` (Light) / `0 1px 3px rgba(0,0,0,0.4), 0 6px 20px rgba(0,0,0,0.35)` (Dark).
   * `--shadow-floating`: `0 12px 32px -4px rgba(15,23,42,0.12)` (Light) / `0 16px 40px rgba(0,0,0,0.65)` (Dark) for modals and dropdown menus.
+  * **Liquid Glass Dock Shadows**: 4-layer elevation (`0 4px 6px rgba(0,0,0,0.06)`, `0 10px 28px rgba(0,0,0,0.20)`, `0 24px 56px rgba(0,0,0,0.16)`, `0 1px 0 rgba(0,0,0,0.08)`) with luminous specular glass edge (`inset 0 2px 0 rgba(255,255,255,0.85)`, `inset 0 -1px 0 rgba(0,0,0,0.10)`).
+  * **Liquid Glass Active Capsule Glow**: 5-layer luminous aura (`inset 0 1.5px 0 rgba(255,255,255,0.80)`, `inset 0 -1px 0 rgba(0,80,180,0.18)`, `0 0 0 1.5px rgba(0,122,255,0.30)`, `0 4px 18px rgba(0,122,255,0.38)`, `0 8px 32px rgba(0,122,255,0.18)`).
 
 * **Z-Index Scale**:
   * `--z-base`: `1` (Normal content flow)
@@ -425,17 +430,43 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   * Collapsible quick category cards displaying total balance, asset count, and daily change per category.
   * Single-pass `useMemo` computation loop ensuring smooth 60FPS scrolling.
 
-### Mobile Bottom Navigation Bar
+### Mobile Bottom Navigation Bar (iOS 27 Liquid Glass Floating Island)
 
-* Component: `MobileBottomNav.tsx`
-* Fixed Position: `fixed bottom-0 left-0 right-0 z-50 bg-[var(--surface)]/95 backdrop-blur-xl border-t border-[var(--border-subtle)] shadow-[0_-4px_24px_rgba(0,0,0,0.18)]`.
-* Safe Area: Utilizes `.pb-safe` (`padding-bottom: env(safe-area-inset-bottom, 0px)`) to accommodate iOS home indicator bars.
-* Nav Items:
-  1. **Home**: Directs to overall mobile summary view with unread alert badge counter.
-  2. **Stocks**: Directly switches to Stocks & ETF holdings.
-  3. **SIP & MF**: Directly switches to Mutual Fund SIP accounts.
+* **Component**: `MobileBottomNav.tsx`
+* **Floating Island Dock Geometry**:
+  * Root wrapper: `fixed bottom-0 left-0 right-0 z-50 pointer-events-none md:hidden`.
+  * Safe-Area Lift: `padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px)`, `padding-left: 12px`, `padding-right: 12px`. Lifts the dock cleanly off the display edge and iOS home indicator, creating a weightless suspended island.
+  * Dock Pill Constraint: `max-width: 480px`, `margin: 0 auto`, `height: 64px`, `border-radius: 30px` (`--radius-liquid-pill`), `pointer-events: auto`.
+* **Liquid Glass Material Optics**:
+  * Glass Surface: `background: color-mix(in srgb, var(--surface-solid) 90%, transparent)`.
+  * Deep Optical Diffusion: `backdrop-filter: blur(52px) saturate(2.6) brightness(1.05)` with `-webkit-backdrop-filter` parity.
+  * Specular Glass Edge: `border: 1px solid color-mix(in srgb, var(--border-subtle) 85%, transparent)`, `box-shadow` with luminous top rim `inset 0 2px 0 rgba(255,255,255,0.85)` and subtle bottom depth `inset 0 -1px 0 rgba(0,0,0,0.10)`.
+  * Layered Floating Elevation: 4-layer shadow stack (`0 4px 6px rgba(0,0,0,0.06)`, `0 10px 28px rgba(0,0,0,0.20)`, `0 24px 56px rgba(0,0,0,0.16)`, `0 1px 0 rgba(0,0,0,0.08)`).
+  * Shimmer Sheen & Vignette: Top-half (55% height) specular gloss overlay (`linear-gradient(180deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.08) 60%, transparent 100%)`) with lateral vignette edge gradients (`rgba(255,255,255,0.06)`).
+* **Active Tab Capsule & Interaction**:
+  * Luminous Pill Capsule: `54px × 34px`, `border-radius: 17px` (`--radius-liquid-capsule`), tinted blue gradient (`linear-gradient(180deg, rgba(0,122,255,0.22) 0%, rgba(0,122,255,0.11) 100%)`), `backdrop-filter: blur(20px) saturate(2)`.
+  * Glow Ring & Halo: 5-layer box-shadow (`inset 0 1.5px 0 rgba(255,255,255,0.80)`, `inset 0 -1px 0 rgba(0,80,180,0.18)`, `0 0 0 1.5px rgba(0,122,255,0.30)`, `0 4px 18px rgba(0,122,255,0.38)`, `0 8px 32px rgba(0,122,255,0.18)`).
+  * Active Dot Indicator: `4px` circular dot at bottom (`bottom: 6px`, `left: 50%`) with `background: var(--accent-blue)` and `box-shadow: 0 0 6px rgba(0,122,255,0.7)`.
+  * Physics Animation: Spring curve `cubic-bezier(0.34, 1.56, 0.64, 1)` scaling capsule from `scale(0.3, 0.4)` to `scale(1, 1)`, lifting active icon with `scale(1.1) translateY(-1px)` and glowing drop shadow.
+  * Haptic Feedback: Triggers `triggerHaptic('selection')` on tab tap.
+* **Vertical Divider**:
+  * Ultra-thin `0.5px` vertical divider (`height: 28px`, `background: color-mix(in srgb, var(--border-subtle) 80%, transparent)`) separating primary tabs from More.
+* **Navigation Items**:
+  1. **Home**: Directs to overall mobile summary view. Features notification count badge (`#ef4444` pill with double-ring shadow `0 0 0 2px var(--surface-solid), 0 2px 6px rgba(239,68,68,0.5)`).
+  2. **Stocks**: Directly switches to Stocks & ETF holdings with live ticker status.
+  3. **Funds**: Directly switches to Mutual Fund SIP accounts.
   4. **Deposits**: Directly switches to Fixed Deposits registry.
-  5. **More (Drawer)**: Opens slide-up bottom sheet with **100% solid opaque background** (`bg-[var(--surface-solid)]`, `#ffffff` light / `#0f172a` dark), `z-[70]` tier, backdrop blur (`z-[60] bg-black/60 backdrop-blur-sm`), and automatic body scroll locking (`document.body.style.overflow = 'hidden'`) to access Recurring Deposits, Gold Holdings, Real Estate, Insurance Policies, Document Vault, and Tax Harvesting without background text bleed-through.
+  5. **More (Liquid Glass Drawer)**:
+     - Header: Displays title, subtext, and circular frosted close button with Escape key & backdrop click handling.
+     - Body & Scroll: Fixed `max-height: 80vh`, `border-radius: 28px 28px 0 0` (`--radius-liquid-drawer`), `backdrop-filter: blur(44px) saturate(2)`, `border-top: 0.5px solid rgba(255,255,255,0.45)`, automatic `document.body.style.overflow = 'hidden'` scroll locking.
+     - Smart Import Banner: Gradient action card (`linear-gradient(135deg, color-mix(in srgb,#06b6d4 16%,transparent), color-mix(in srgb,#8b5cf6 16%,transparent))`) with Sparkles icon for fast camera/PDF statement uploads.
+     - Category Tiles: High-contrast glass tiles (`backdrop-filter: blur(16px)`) with saturated gradient icon orbs, active indicator dot, and chevron indicators:
+       - **Recurring Deposits**: Rust Tangerine gradient (`linear-gradient(135deg, #fb923c, #c2410c)`)
+       - **Gold Holdings**: Pure Solar Gold gradient (`linear-gradient(135deg, #facc15, #a16207)`)
+       - **Real Estate**: Evergreen Land gradient (`linear-gradient(135deg, #4ade80, #15803d)`)
+       - **Insurance Policies**: Protection Rose-Red gradient (`linear-gradient(135deg, #fb7185, #be123c)`)
+       - **Document Vault**: Secure Vault Blue gradient (`linear-gradient(135deg, #60a5fa, #1d4ed8)`)
+       - **Tax Harvesting**: Emerald Growth gradient (`linear-gradient(135deg, #34d399, #047857)`)
 
 ### Mobile Floating Add Menu (FAB & Action Sheet)
 
