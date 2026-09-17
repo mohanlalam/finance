@@ -580,24 +580,26 @@ function MobileBottomNav({
             margin: '0 auto',
             pointerEvents: 'auto',
             /* ─── Liquid Glass floating pill ─── */
-            background: 'color-mix(in srgb, var(--surface-solid) 90%, transparent)',
+            background: 'color-mix(in srgb, var(--surface-solid) 96%, transparent)',
             backdropFilter: 'blur(52px) saturate(2.6) brightness(1.05)',
             WebkitBackdropFilter: 'blur(52px) saturate(2.6) brightness(1.05)',
             borderRadius: 30,
-            border: '1px solid color-mix(in srgb, var(--border-subtle) 85%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--border-subtle) 90%, transparent)',
             boxShadow: [
-              'inset 0 2px 0 rgba(255,255,255,0.85)',
-              'inset 0 -1px 0 rgba(0,0,0,0.10)',
-              '0 4px 6px rgba(0,0,0,0.06)',
-              '0 10px 28px rgba(0,0,0,0.20)',
-              '0 24px 56px rgba(0,0,0,0.16)',
-              '0 1px 0 rgba(0,0,0,0.08)',
+              'inset 0 2px 0 rgba(255,255,255,0.90)',
+              'inset 0 -1px 0 rgba(0,0,0,0.12)',
+              /* Strong lift shadow so pill clearly floats */
+              '0 -2px 20px rgba(0,0,0,0.12)',
+              '0 8px 16px rgba(0,0,0,0.12)',
+              '0 16px 40px rgba(0,0,0,0.18)',
+              '0 32px 64px rgba(0,0,0,0.14)',
             ].join(', '),
             willChange: 'transform',
             transform: 'translateZ(0)',
             userSelect: 'none',
             overflow: 'hidden',
-            marginBottom: 0,
+            /* 6px gap between pill bottom and screen edge — clearly floating */
+            marginBottom: 6,
           }}
         >
           {/* Shimmer gloss layer — frosted glass sheen */}
