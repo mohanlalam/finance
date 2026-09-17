@@ -567,7 +567,7 @@ function MobileBottomNav({
           left: 0,
           right: 0,
           zIndex: 50,
-          paddingBottom: 0,
+          paddingBottom: 2,
           paddingLeft: 12,
           paddingRight: 12,
           paddingTop: 8,
