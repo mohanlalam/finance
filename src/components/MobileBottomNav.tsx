@@ -44,6 +44,40 @@ const mainTabs: { id: AssetTab; label: string }[] = [
   { id: 'fd',     label: 'Deposits' },
 ];
 
+/* ── Filled glyphs for active states (Apple SF Symbols style) ─────────────── */
+function HomeFilled({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2.09l-9 7.875A1 1 0 0 0 4 11.5V20a2 2 0 0 0 2 2h4a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h4a2 2 0 0 0 2-2v-8.5a1 1 0 0 0-1-1.525z" />
+    </svg>
+  );
+}
+
+function StocksFilled({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+      <polyline points="17 6 23 6 23 12" />
+    </svg>
+  );
+}
+
+function WalletFilled({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M21 7H4a2 2 0 0 1-2-2 2 2 0 0 1 2-2h17a1 1 0 0 1 0 2H4a.5.5 0 0 0 0 1h17a2 2 0 0 1 2 2v10a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V9.2a3.02 3.02 0 0 0 1 .2H21a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-4a2 2 0 0 1-2-2 2 2 0 0 1 2-2h4a1 1 0 0 0 0-2h-4a4 4 0 0 0-4 4 4 4 0 0 0 4 4h4a3 3 0 0 0 3-3V9a2 2 0 0 0-2-2z" />
+    </svg>
+  );
+}
+
+function LandmarkFilled({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2L2 7h20L12 2zM4 9v9h3V9H4zm5 0v9h3V9H9zm5 0v9h3V9h-3zm5 0v9h3V9h-3zM2 20v2h20v-2H2z" />
+    </svg>
+  );
+}
+
 /* ── Individual tab button — iOS 27 Liquid Glass style ─────────────────── */
 function TabBtn({
   label, isActive, badge, onClick, icon, activeIcon,
@@ -65,9 +99,9 @@ function TabBtn({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 4,
-        paddingTop: 10,
-        paddingBottom: 10,
+        gap: 3,
+        paddingTop: 5,
+        paddingBottom: 5,
         background: 'none',
         border: 'none',
         cursor: 'pointer',
@@ -77,34 +111,31 @@ function TabBtn({
         touchAction: 'manipulation',
       }}
     >
-      {/* Luminous active capsule — vivid glowing glass pill */}
+      {/* Luminous active capsule — integrated liquid glass capsule */}
       <span
         aria-hidden="true"
         style={{
           position: 'absolute',
-          top: 5,
+          top: 3,
           left: '50%',
-          transform: isActive ? 'translateX(-50%) scaleX(1) scaleY(1)' : 'translateX(-50%) scaleX(0.3) scaleY(0.4)',
-          width: 54,
-          height: 34,
-          borderRadius: 17,
-          /* Rich blue-tinted glass with bright top rim */
+          transform: isActive ? 'translateX(-50%) scale(1)' : 'translateX(-50%) scale(0.35)',
+          width: 58,
+          height: 33,
+          borderRadius: 16,
           background: isActive
-            ? 'linear-gradient(180deg, rgba(0,122,255,0.22) 0%, rgba(0,122,255,0.11) 100%)'
+            ? 'linear-gradient(180deg, rgba(0,122,255,0.22) 0%, rgba(0,122,255,0.08) 100%)'
             : 'transparent',
-          backdropFilter: isActive ? 'blur(20px) saturate(2)' : 'none',
-          WebkitBackdropFilter: isActive ? 'blur(20px) saturate(2)' : 'none',
+          backdropFilter: isActive ? 'blur(16px) saturate(2)' : 'none',
+          WebkitBackdropFilter: isActive ? 'blur(16px) saturate(2)' : 'none',
+          border: isActive ? '0.5px solid rgba(0,122,255,0.30)' : 'none',
           boxShadow: isActive
             ? [
-                'inset 0 1.5px 0 rgba(255,255,255,0.80)',
-                'inset 0 -1px 0 rgba(0,80,180,0.18)',
-                '0 0 0 1.5px rgba(0,122,255,0.30)',
-                '0 4px 18px rgba(0,122,255,0.38)',
-                '0 8px 32px rgba(0,122,255,0.18)',
+                'inset 0 1px 0 rgba(255,255,255,0.50)',
+                '0 2px 10px rgba(0,122,255,0.22)',
               ].join(', ')
             : 'none',
           opacity: isActive ? 1 : 0,
-          transition: 'transform 0.42s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease, box-shadow 0.25s ease',
+          transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
           pointerEvents: 'none',
           zIndex: 0,
         }}
@@ -119,10 +150,10 @@ function TabBtn({
           alignItems: 'center',
           justifyContent: 'center',
           color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)',
-          opacity: isActive ? 1 : 0.42,
-          transform: isActive ? 'translateY(-1px) scale(1.1)' : 'translateY(0) scale(1)',
-          transition: 'transform 0.38s cubic-bezier(0.34,1.56,0.64,1), color 0.2s ease, opacity 0.2s ease',
-          filter: isActive ? 'drop-shadow(0 1px 6px rgba(0,122,255,0.5))' : 'none',
+          opacity: isActive ? 1 : 0.65,
+          transform: isActive ? 'scale(1.06)' : 'scale(1)',
+          transition: 'transform 0.28s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease, opacity 0.18s ease',
+          filter: isActive ? 'drop-shadow(0 1px 6px rgba(0,122,255,0.45))' : 'none',
         } as React.CSSProperties}
       >
         {isActive ? activeIcon : icon}
@@ -147,17 +178,17 @@ function TabBtn({
         )}
       </span>
 
-      {/* Label — slides & fades below active icon */}
+      {/* Label */}
       <span
         style={{
-          fontSize: 10.5,
+          fontSize: 10,
           fontWeight: isActive ? 700 : 500,
-          letterSpacing: isActive ? '-0.03em' : '0.005em',
+          letterSpacing: isActive ? '-0.02em' : '0.005em',
           color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)',
-          opacity: isActive ? 1 : 0.4,
-          transform: isActive ? 'translateY(0) scale(1)' : 'translateY(2px) scale(0.95)',
-          transition: 'color 0.2s ease, opacity 0.22s ease, transform 0.32s cubic-bezier(0.34,1.56,0.64,1)',
-          lineHeight: 1,
+          opacity: isActive ? 1 : 0.65,
+          transform: isActive ? 'translateY(0)' : 'translateY(1px)',
+          transition: 'color 0.18s ease, opacity 0.18s ease',
+          lineHeight: 1.1,
           maxWidth: 72,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -168,25 +199,6 @@ function TabBtn({
       >
         {label}
       </span>
-
-      {/* Active dot indicator — bottom anchor */}
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: 6,
-          left: '50%',
-          transform: isActive ? 'translateX(-50%) scale(1)' : 'translateX(-50%) scale(0)',
-          width: 4,
-          height: 4,
-          borderRadius: '50%',
-          background: 'var(--accent-blue)',
-          boxShadow: '0 0 6px rgba(0,122,255,0.7)',
-          opacity: isActive ? 1 : 0,
-          transition: 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
-          pointerEvents: 'none',
-        }}
-      />
     </button>
   );
 }
@@ -208,9 +220,9 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 4,
-        paddingTop: 10,
-        paddingBottom: 10,
+        gap: 3,
+        paddingTop: 5,
+        paddingBottom: 5,
         background: 'none',
         border: 'none',
         cursor: 'pointer',
@@ -225,34 +237,32 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
         aria-hidden="true"
         style={{
           position: 'absolute',
-          top: 5,
+          top: 3,
           left: '50%',
-          transform: lit ? 'translateX(-50%) scaleX(1) scaleY(1)' : 'translateX(-50%) scaleX(0.3) scaleY(0.4)',
-          width: 54,
-          height: 34,
-          borderRadius: 17,
+          transform: lit ? 'translateX(-50%) scale(1)' : 'translateX(-50%) scale(0.35)',
+          width: 58,
+          height: 33,
+          borderRadius: 16,
           background: lit
-            ? 'linear-gradient(180deg, rgba(0,122,255,0.22) 0%, rgba(0,122,255,0.11) 100%)'
+            ? 'linear-gradient(180deg, rgba(0,122,255,0.22) 0%, rgba(0,122,255,0.08) 100%)'
             : 'transparent',
-          backdropFilter: lit ? 'blur(20px) saturate(2)' : 'none',
-          WebkitBackdropFilter: lit ? 'blur(20px) saturate(2)' : 'none',
+          backdropFilter: lit ? 'blur(16px) saturate(2)' : 'none',
+          WebkitBackdropFilter: lit ? 'blur(16px) saturate(2)' : 'none',
+          border: lit ? '0.5px solid rgba(0,122,255,0.30)' : 'none',
           boxShadow: lit
             ? [
-                'inset 0 1.5px 0 rgba(255,255,255,0.80)',
-                'inset 0 -1px 0 rgba(0,80,180,0.18)',
-                '0 0 0 1.5px rgba(0,122,255,0.30)',
-                '0 4px 18px rgba(0,122,255,0.38)',
-                '0 8px 32px rgba(0,122,255,0.18)',
+                'inset 0 1px 0 rgba(255,255,255,0.50)',
+                '0 2px 10px rgba(0,122,255,0.22)',
               ].join(', ')
             : 'none',
           opacity: lit ? 1 : 0,
-          transition: 'transform 0.42s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease, box-shadow 0.25s ease',
+          transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
           pointerEvents: 'none',
           zIndex: 0,
         }}
       />
 
-      {/* Grid icon with rotate-on-open */}
+      {/* Menu icon with rotate-on-open */}
       <span
         style={{
           position: 'relative',
@@ -261,25 +271,25 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
           alignItems: 'center',
           justifyContent: 'center',
           color: lit ? 'var(--accent-blue)' : 'var(--text-primary)',
-          opacity: lit ? 1 : 0.42,
-          transform: isOpen ? 'translateY(-1px) scale(1.1) rotate(90deg)' : lit ? 'translateY(-1px) scale(1.1)' : 'translateY(0) scale(1)',
-          transition: 'transform 0.38s cubic-bezier(0.34,1.56,0.64,1), color 0.2s ease, opacity 0.2s ease',
-          filter: lit ? 'drop-shadow(0 1px 6px rgba(0,122,255,0.5))' : 'none',
+          opacity: lit ? 1 : 0.65,
+          transform: isOpen ? 'scale(1.08) rotate(90deg)' : lit ? 'scale(1.06)' : 'scale(1)',
+          transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease, opacity 0.18s ease',
+          filter: lit ? 'drop-shadow(0 1px 6px rgba(0,122,255,0.45))' : 'none',
         }}
       >
-        <Menu size={23} aria-hidden="true" />
+        <Menu size={22} aria-hidden="true" />
       </span>
 
       <span
         style={{
-          fontSize: 10.5,
+          fontSize: 10,
           fontWeight: lit ? 700 : 500,
-          letterSpacing: lit ? '-0.03em' : '0.005em',
+          letterSpacing: lit ? '-0.02em' : '0.005em',
           color: lit ? 'var(--accent-blue)' : 'var(--text-primary)',
-          opacity: lit ? 1 : 0.4,
-          transform: lit ? 'translateY(0) scale(1)' : 'translateY(2px) scale(0.95)',
-          transition: 'color 0.2s ease, opacity 0.22s ease, transform 0.32s cubic-bezier(0.34,1.56,0.64,1)',
-          lineHeight: 1,
+          opacity: lit ? 1 : 0.65,
+          transform: lit ? 'translateY(0)' : 'translateY(1px)',
+          transition: 'color 0.18s ease, opacity 0.18s ease',
+          lineHeight: 1.1,
           whiteSpace: 'nowrap',
           position: 'relative',
           zIndex: 1,
@@ -287,25 +297,6 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
       >
         More
       </span>
-
-      {/* Active dot indicator */}
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: 6,
-          left: '50%',
-          transform: lit ? 'translateX(-50%) scale(1)' : 'translateX(-50%) scale(0)',
-          width: 4,
-          height: 4,
-          borderRadius: '50%',
-          background: 'var(--accent-blue)',
-          boxShadow: '0 0 6px rgba(0,122,255,0.7)',
-          opacity: lit ? 1 : 0,
-          transition: 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
-          pointerEvents: 'none',
-        }}
-      />
     </button>
   );
 }
@@ -480,7 +471,7 @@ function MobileBottomNav({
             transform: sheetIn ? 'translateY(0)' : 'translateY(105%)',
             transition: 'transform 0.38s cubic-bezier(0.32,0.72,0,1)',
             willChange: 'transform',
-            paddingBottom: 'calc(env(safe-area-inset-bottom,0px) + 80px)',
+            paddingBottom: 'calc(env(safe-area-inset-bottom,0px) + 72px)',
             maxHeight: '80vh',
             display: 'flex', flexDirection: 'column',
           }}
@@ -647,7 +638,7 @@ function MobileBottomNav({
           paddingBottom: 2,
           paddingLeft: 12,
           paddingRight: 12,
-          paddingTop: 8,
+          paddingTop: 6,
           pointerEvents: 'none',
         }}
       >
@@ -656,20 +647,17 @@ function MobileBottomNav({
             maxWidth: 480,
             margin: '0 auto',
             pointerEvents: 'auto',
-            /* ─── Liquid Glass floating pill ─── */
-            background: 'color-mix(in srgb, var(--surface-solid) 96%, transparent)',
-            backdropFilter: 'blur(52px) saturate(2.6) brightness(1.05)',
-            WebkitBackdropFilter: 'blur(52px) saturate(2.6) brightness(1.05)',
-            borderRadius: 30,
-            border: '1px solid color-mix(in srgb, var(--border-subtle) 90%, transparent)',
+            /* ─── Authentic Liquid Glass floating pill ─── */
+            background: 'color-mix(in srgb, var(--surface-solid) 74%, transparent)',
+            backdropFilter: 'blur(36px) saturate(2.2) brightness(1.02)',
+            WebkitBackdropFilter: 'blur(36px) saturate(2.2) brightness(1.02)',
+            borderRadius: 28,
+            border: '0.5px solid color-mix(in srgb, var(--border-glass, rgba(255,255,255,0.30)) 75%, transparent)',
             boxShadow: [
-              'inset 0 2px 0 rgba(255,255,255,0.90)',
-              'inset 0 -1px 0 rgba(0,0,0,0.12)',
-              /* Strong lift shadow so pill clearly floats */
-              '0 -2px 20px rgba(0,0,0,0.12)',
-              '0 8px 16px rgba(0,0,0,0.12)',
-              '0 16px 40px rgba(0,0,0,0.18)',
-              '0 32px 64px rgba(0,0,0,0.14)',
+              'inset 0 1px 0 rgba(255,255,255,0.55)',
+              'inset 0 -0.5px 0 rgba(0,0,0,0.10)',
+              '0 8px 24px -4px rgba(0,0,0,0.12)',
+              '0 16px 40px -8px rgba(0,0,0,0.16)',
             ].join(', '),
             willChange: 'transform',
             transform: 'translateZ(0)',
@@ -685,9 +673,9 @@ function MobileBottomNav({
             style={{
               position: 'absolute',
               top: 0, left: 0, right: 0,
-              height: '55%',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.08) 60%, rgba(255,255,255,0) 100%)',
-              borderRadius: '30px 30px 0 0',
+              height: '50%',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 60%, transparent 100%)',
+              borderRadius: '28px 28px 0 0',
               pointerEvents: 'none',
               zIndex: 0,
             }}
@@ -698,8 +686,8 @@ function MobileBottomNav({
             style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(90deg, rgba(255,255,255,0.06) 0%, transparent 20%, transparent 80%, rgba(255,255,255,0.06) 100%)',
-              borderRadius: 30,
+              background: 'linear-gradient(90deg, rgba(255,255,255,0.05) 0%, transparent 20%, transparent 80%, rgba(255,255,255,0.05) 100%)',
+              borderRadius: 28,
               pointerEvents: 'none',
               zIndex: 0,
             }}
@@ -709,7 +697,7 @@ function MobileBottomNav({
             style={{
               display: 'flex',
               alignItems: 'stretch',
-              height: 64,
+              height: 58,
               paddingInline: 4,
               position: 'relative',
               zIndex: 1,
@@ -724,19 +712,16 @@ function MobileBottomNav({
                 badge={tab.id === 'home' && alertCount > 0 ? alertCount : undefined}
                 onClick={() => { triggerHaptic('selection'); onChangeAsset(tab.id); if (isDrawerOpen) closeDrawer(); }}
                 icon={
-                  tab.id === 'home'   ? <HomeIcon size={23} aria-hidden="true" />   :
-                  tab.id === 'stocks' ? <TrendingUp size={23} aria-hidden="true" /> :
-                  tab.id === 'sip'    ? <Wallet size={23} aria-hidden="true" />     :
-                                        <Landmark size={23} aria-hidden="true" />
+                  tab.id === 'home'   ? <HomeIcon size={22} aria-hidden="true" />   :
+                  tab.id === 'stocks' ? <TrendingUp size={22} aria-hidden="true" /> :
+                  tab.id === 'sip'    ? <Wallet size={22} aria-hidden="true" />     :
+                                        <Landmark size={22} aria-hidden="true" />
                 }
                 activeIcon={
-                  tab.id === 'home'
-                    ? <HomeIcon size={25} aria-hidden="true" />
-                    : tab.id === 'stocks'
-                      ? <TrendingUp size={25} aria-hidden="true" />
-                      : tab.id === 'sip'
-                        ? <Wallet size={25} aria-hidden="true" />
-                        : <Landmark size={25} aria-hidden="true" />
+                  tab.id === 'home'   ? <HomeFilled size={22} />     :
+                  tab.id === 'stocks' ? <StocksFilled size={22} />   :
+                  tab.id === 'sip'    ? <WalletFilled size={22} />   :
+                                        <LandmarkFilled size={22} />
                 }
               />
             ))}
@@ -747,9 +732,10 @@ function MobileBottomNav({
               style={{
                 width: 0.5,
                 alignSelf: 'center',
-                height: 28,
-                background: 'color-mix(in srgb, var(--border-subtle) 80%, transparent)',
+                height: 24,
+                background: 'color-mix(in srgb, var(--border-subtle) 65%, transparent)',
                 flexShrink: 0,
+                opacity: 0.7,
               }}
             />
 
