@@ -175,15 +175,17 @@ To maintain a compact, crisp financial interface, corner radii and shadows are s
   * `--radius-large` (`14px`): Modal containers, major dashboard chart panels, lock screen keypads.
   * `--radius-sheet` (`20px`): Standard bottom sheets and modal sheet top corners.
   * `--radius-liquid-pill` (`30px`): iOS 27 Liquid Glass floating navigation dock container.
-  * `--radius-liquid-capsule` (`17px`): iOS 27 Liquid Glass active navigation tab capsule.
+  * `--radius-liquid-capsule` (`22px`): iOS 27 Liquid Glass active navigation tab capsule (covers full tab: icon + label).
   * `--radius-liquid-drawer` (`28px`): iOS 27 Liquid Glass More drawer top sheet corners (`28px 28px 0 0`).
-  * `--radius-pill` (`999px`): Status indicators, rounded pill tags, active dot indicator.
+  * `--radius-pill` (`999px`): Status indicators, rounded pill tags, circular icon chips.
 
 * **Shadow Tokens**:
   * `--shadow-card`: `0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95)` (Light) / `0 1px 3px rgba(0,0,0,0.4), 0 6px 20px rgba(0,0,0,0.35)` (Dark).
   * `--shadow-floating`: `0 12px 32px -4px rgba(15,23,42,0.12)` (Light) / `0 16px 40px rgba(0,0,0,0.65)` (Dark) for modals and dropdown menus.
   * **Liquid Glass Dock Shadows**: 4-layer elevation (`0 4px 6px rgba(0,0,0,0.06)`, `0 10px 28px rgba(0,0,0,0.20)`, `0 24px 56px rgba(0,0,0,0.16)`, `0 1px 0 rgba(0,0,0,0.08)`) with luminous specular glass edge (`inset 0 2px 0 rgba(255,255,255,0.85)`, `inset 0 -1px 0 rgba(0,0,0,0.10)`).
-  * **Liquid Glass Active Capsule Glow**: 5-layer luminous aura (`inset 0 1.5px 0 rgba(255,255,255,0.80)`, `inset 0 -1px 0 rgba(0,80,180,0.18)`, `0 0 0 1.5px rgba(0,122,255,0.30)`, `0 4px 18px rgba(0,122,255,0.38)`, `0 8px 32px rgba(0,122,255,0.18)`).
+  * **Liquid Glass Active Capsule (`--nav-pill-bg`, `--nav-pill-border`, `--nav-pill-shadow`)**:
+    * Light Mode: `linear-gradient(180deg, rgba(0,122,255,0.16) 0%, rgba(0,122,255,0.06) 100%)`, border `rgba(0,122,255,0.28)`, shadow `inset 0 1px 0 rgba(255,255,255,0.75), 0 3px 12px rgba(0,122,255,0.18)`.
+    * Dark Mode: `linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%)`, border `rgba(255,255,255,0.22)`, shadow `inset 0 1px 0 rgba(255,255,255,0.40), 0 4px 16px rgba(0,0,0,0.35)`.
 
 * **Z-Index Scale**:
   * `--z-base`: `1` (Normal content flow)
@@ -444,10 +446,11 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   * Layered Floating Elevation: 4-layer shadow stack (`0 4px 6px rgba(0,0,0,0.06)`, `0 10px 28px rgba(0,0,0,0.20)`, `0 24px 56px rgba(0,0,0,0.16)`, `0 1px 0 rgba(0,0,0,0.08)`).
   * Shimmer Sheen & Vignette: Top-half (55% height) specular gloss overlay (`linear-gradient(180deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.08) 60%, transparent 100%)`) with lateral vignette edge gradients (`rgba(255,255,255,0.06)`).
 * **Active Tab Capsule & Interaction**:
-  * Luminous Pill Capsule: `54px × 34px`, `border-radius: 17px` (`--radius-liquid-capsule`), tinted blue gradient (`linear-gradient(180deg, rgba(0,122,255,0.22) 0%, rgba(0,122,255,0.11) 100%)`), `backdrop-filter: blur(20px) saturate(2)`.
-  * Glow Ring & Halo: 5-layer box-shadow (`inset 0 1.5px 0 rgba(255,255,255,0.80)`, `inset 0 -1px 0 rgba(0,80,180,0.18)`, `0 0 0 1.5px rgba(0,122,255,0.30)`, `0 4px 18px rgba(0,122,255,0.38)`, `0 8px 32px rgba(0,122,255,0.18)`).
-  * Active Dot Indicator: `4px` circular dot at bottom (`bottom: 6px`, `left: 50%`) with `background: var(--accent-blue)` and `box-shadow: 0 0 6px rgba(0,122,255,0.7)`.
-  * Physics Animation: Spring curve `cubic-bezier(0.34, 1.56, 0.64, 1)` scaling capsule from `scale(0.3, 0.4)` to `scale(1, 1)`, lifting active icon with `scale(1.1) translateY(-1px)` and glowing drop shadow.
+  * Full-Coverage Liquid Glass Capsule: `inset: 4px 4px`, `border-radius: 22px` (`--radius-liquid-capsule`), seamlessly enclosing BOTH the active icon orb and label name without cut-off. Uses `--nav-pill-bg`, `--nav-pill-border`, and `--nav-pill-shadow` with `backdrop-filter: blur(20px) saturate(2)`.
+  * Active Circular Icon Orb: `32px × 32px` circular chip (`border-radius: 999px`) with `background: var(--accent-blue)`, crisp white icon glyph (`size: 18px`), and soft luminous drop-shadow halo (`0 2px 10px color-mix(in srgb, var(--accent-blue) 45%, transparent)`), matching iOS 27 SF Symbol style.
+  * Active & Inactive Labels: Bold `11px` label in `var(--accent-blue)` when active, and crisp `11px` in `var(--text-primary)` (opacity 0.75) when inactive, fully readable without truncation.
+  * Physics Animation: Spring curve `cubic-bezier(0.34, 1.56, 0.64, 1)` scaling capsule from `scale(0.85)` to `scale(1)` on selection.
+  * Full Hit-Target Touch Area: Full button frame (`flex: 1`, `height: 100%`, `minWidth: 56px`) serves as a unified tap target, ensuring tapping the label name or icon triggers immediate selection.
   * Haptic Feedback: Triggers `triggerHaptic('selection')` on tab tap.
 * **Vertical Divider**:
   * Ultra-thin `0.5px` vertical divider (`height: 28px`, `background: color-mix(in srgb, var(--border-subtle) 80%, transparent)`) separating primary tabs from More.

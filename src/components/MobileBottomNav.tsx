@@ -99,9 +99,9 @@ function TabBtn({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 4,
-        paddingTop: 6,
-        paddingBottom: 6,
+        gap: 3,
+        paddingTop: 4,
+        paddingBottom: 4,
         minWidth: 56,
         background: 'none',
         border: 'none',
@@ -112,38 +112,27 @@ function TabBtn({
         touchAction: 'manipulation',
       }}
     >
-      {/* Frosted glass active capsule — iOS 27 prominent bubble */}
+      {/* Full-coverage Liquid Glass active capsule — enclosing BOTH icon orb AND label name */}
       <span
         aria-hidden="true"
         style={{
           position: 'absolute',
-          top: 2,
-          left: '50%',
-          transform: isActive ? 'translateX(-50%) scale(1)' : 'translateX(-50%) scale(0.3)',
-          width: 64,
-          height: 40,
-          borderRadius: 20,
-          background: isActive
-            ? 'linear-gradient(180deg, rgba(0,122,255,0.26) 0%, rgba(0,122,255,0.10) 100%)'
-            : 'transparent',
-          backdropFilter: isActive ? 'blur(20px) saturate(2.2)' : 'none',
-          WebkitBackdropFilter: isActive ? 'blur(20px) saturate(2.2)' : 'none',
-          border: isActive ? '0.5px solid rgba(0,122,255,0.35)' : 'none',
-          boxShadow: isActive
-            ? [
-                'inset 0 1px 0 rgba(255,255,255,0.55)',
-                'inset 0 -0.5px 0 rgba(0,122,255,0.08)',
-                '0 3px 12px rgba(0,122,255,0.25)',
-              ].join(', ')
-            : 'none',
+          inset: '4px 3px',
+          borderRadius: 22,
+          background: isActive ? 'var(--nav-pill-bg)' : 'transparent',
+          backdropFilter: isActive ? 'blur(20px) saturate(2)' : 'none',
+          WebkitBackdropFilter: isActive ? 'blur(20px) saturate(2)' : 'none',
+          border: isActive ? '0.5px solid var(--nav-pill-border)' : 'none',
+          boxShadow: isActive ? 'var(--nav-pill-shadow)' : 'none',
           opacity: isActive ? 1 : 0,
-          transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
+          transform: isActive ? 'scale(1)' : 'scale(0.88)',
+          transition: 'transform 0.28s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
           pointerEvents: 'none',
           zIndex: 0,
         }}
       />
 
-      {/* Icon — 26px active (filled), 22px inactive (outline) */}
+      {/* Circular icon container — 32px blue circular chip when active, matching iOS 27 */}
       <span
         style={{
           position: 'relative',
@@ -151,13 +140,17 @@ function TabBtn({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: isActive ? 26 : 22,
-          height: isActive ? 26 : 22,
-          color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)',
-          opacity: isActive ? 1 : 0.45,
-          transition: 'width 0.28s cubic-bezier(0.34,1.56,0.64,1), height 0.28s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease, opacity 0.18s ease',
-          filter: isActive ? 'drop-shadow(0 1px 8px rgba(0,122,255,0.5))' : 'none',
-        } as React.CSSProperties}
+          width: 32,
+          height: 32,
+          borderRadius: 999,
+          background: isActive ? 'var(--accent-blue)' : 'transparent',
+          color: isActive ? '#ffffff' : 'var(--text-primary)',
+          opacity: isActive ? 1 : 0.75,
+          boxShadow: isActive ? '0 2px 10px color-mix(in srgb, var(--accent-blue) 45%, transparent)' : 'none',
+          transform: isActive ? 'scale(1)' : 'scale(0.95)',
+          transition: 'background-color 0.2s ease, transform 0.25s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease, opacity 0.18s ease, box-shadow 0.2s ease',
+          pointerEvents: 'none',
+        }}
       >
         {isActive ? activeIcon : icon}
 
@@ -167,12 +160,12 @@ function TabBtn({
             role="status"
             aria-label={`${badge} notifications`}
             style={{
-              position: 'absolute', top: -5, right: -7,
-              minWidth: 17, height: 17, borderRadius: 999,
+              position: 'absolute', top: -3, right: -3,
+              minWidth: 16, height: 16, borderRadius: 999,
               background: '#ef4444', color: '#fff',
               fontSize: 9.5, fontWeight: 800,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '0 3px', zIndex: 2,
+              padding: '0 3px', zIndex: 3,
               boxShadow: '0 0 0 2px var(--surface-solid, #fff), 0 2px 6px rgba(239,68,68,0.5)',
             }}
           >
@@ -181,19 +174,20 @@ function TabBtn({
         )}
       </span>
 
-      {/* Label — 11px, clearly readable */}
+      {/* Label — bold accent when active, crisp text when inactive, completely inside the capsule */}
       <span
         style={{
           fontSize: 11,
           fontWeight: isActive ? 700 : 500,
           letterSpacing: isActive ? '-0.02em' : '0.005em',
           color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)',
-          opacity: isActive ? 1 : 0.45,
+          opacity: isActive ? 1 : 0.75,
           transition: 'color 0.18s ease, opacity 0.18s ease, font-weight 0.18s ease',
-          lineHeight: 1.1,
+          lineHeight: 1,
           whiteSpace: 'nowrap',
           position: 'relative',
           zIndex: 1,
+          pointerEvents: 'none',
         }}
       >
         {label}
@@ -219,9 +213,9 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 4,
-        paddingTop: 6,
-        paddingBottom: 6,
+        gap: 3,
+        paddingTop: 4,
+        paddingBottom: 4,
         minWidth: 56,
         background: 'none',
         border: 'none',
@@ -232,38 +226,27 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
         touchAction: 'manipulation',
       }}
     >
-      {/* Frosted glass active capsule */}
+      {/* Full-coverage Liquid Glass active capsule */}
       <span
         aria-hidden="true"
         style={{
           position: 'absolute',
-          top: 2,
-          left: '50%',
-          transform: lit ? 'translateX(-50%) scale(1)' : 'translateX(-50%) scale(0.3)',
-          width: 64,
-          height: 40,
-          borderRadius: 20,
-          background: lit
-            ? 'linear-gradient(180deg, rgba(0,122,255,0.26) 0%, rgba(0,122,255,0.10) 100%)'
-            : 'transparent',
-          backdropFilter: lit ? 'blur(20px) saturate(2.2)' : 'none',
-          WebkitBackdropFilter: lit ? 'blur(20px) saturate(2.2)' : 'none',
-          border: lit ? '0.5px solid rgba(0,122,255,0.35)' : 'none',
-          boxShadow: lit
-            ? [
-                'inset 0 1px 0 rgba(255,255,255,0.55)',
-                'inset 0 -0.5px 0 rgba(0,122,255,0.08)',
-                '0 3px 12px rgba(0,122,255,0.25)',
-              ].join(', ')
-            : 'none',
+          inset: '4px 3px',
+          borderRadius: 22,
+          background: lit ? 'var(--nav-pill-bg)' : 'transparent',
+          backdropFilter: lit ? 'blur(20px) saturate(2)' : 'none',
+          WebkitBackdropFilter: lit ? 'blur(20px) saturate(2)' : 'none',
+          border: lit ? '0.5px solid var(--nav-pill-border)' : 'none',
+          boxShadow: lit ? 'var(--nav-pill-shadow)' : 'none',
           opacity: lit ? 1 : 0,
-          transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
+          transform: lit ? 'scale(1)' : 'scale(0.88)',
+          transition: 'transform 0.28s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
           pointerEvents: 'none',
           zIndex: 0,
         }}
       />
 
-      {/* Menu icon with rotate-on-open */}
+      {/* Circular icon container */}
       <span
         style={{
           position: 'relative',
@@ -271,14 +254,19 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: lit ? 'var(--accent-blue)' : 'var(--text-primary)',
-          opacity: lit ? 1 : 0.45,
-          transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-          transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease, opacity 0.18s ease',
-          filter: lit ? 'drop-shadow(0 1px 8px rgba(0,122,255,0.5))' : 'none',
+          width: 32,
+          height: 32,
+          borderRadius: 999,
+          background: lit ? 'var(--accent-blue)' : 'transparent',
+          color: lit ? '#ffffff' : 'var(--text-primary)',
+          opacity: lit ? 1 : 0.75,
+          boxShadow: lit ? '0 2px 10px color-mix(in srgb, var(--accent-blue) 45%, transparent)' : 'none',
+          transform: isOpen ? 'rotate(90deg)' : 'scale(1)',
+          transition: 'background-color 0.2s ease, transform 0.28s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease, opacity 0.18s ease, box-shadow 0.2s ease',
+          pointerEvents: 'none',
         }}
       >
-        <Menu size={22} aria-hidden="true" />
+        <Menu size={18} aria-hidden="true" />
       </span>
 
       <span
@@ -287,12 +275,13 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
           fontWeight: lit ? 700 : 500,
           letterSpacing: lit ? '-0.02em' : '0.005em',
           color: lit ? 'var(--accent-blue)' : 'var(--text-primary)',
-          opacity: lit ? 1 : 0.45,
+          opacity: lit ? 1 : 0.75,
           transition: 'color 0.18s ease, opacity 0.18s ease',
-          lineHeight: 1.1,
+          lineHeight: 1,
           whiteSpace: 'nowrap',
           position: 'relative',
           zIndex: 1,
+          pointerEvents: 'none',
         }}
       >
         More
@@ -711,16 +700,16 @@ function MobileBottomNav({
                 badge={tab.id === 'home' && alertCount > 0 ? alertCount : undefined}
                 onClick={() => { triggerHaptic('selection'); onChangeAsset(tab.id); if (isDrawerOpen) closeDrawer(); }}
                 icon={
-                  tab.id === 'home'   ? <HomeIcon size={22} aria-hidden="true" />   :
-                  tab.id === 'stocks' ? <TrendingUp size={22} aria-hidden="true" /> :
-                  tab.id === 'sip'    ? <Wallet size={22} aria-hidden="true" />     :
-                                        <Landmark size={22} aria-hidden="true" />
+                  tab.id === 'home'   ? <HomeIcon size={21} aria-hidden="true" />   :
+                  tab.id === 'stocks' ? <TrendingUp size={21} aria-hidden="true" /> :
+                  tab.id === 'sip'    ? <Wallet size={21} aria-hidden="true" />     :
+                                        <Landmark size={21} aria-hidden="true" />
                 }
                 activeIcon={
-                  tab.id === 'home'   ? <HomeFilled size={26} />     :
-                  tab.id === 'stocks' ? <StocksFilled size={26} />   :
-                  tab.id === 'sip'    ? <WalletFilled size={26} />   :
-                                        <LandmarkFilled size={26} />
+                  tab.id === 'home'   ? <HomeFilled size={18} />     :
+                  tab.id === 'stocks' ? <StocksFilled size={18} />   :
+                  tab.id === 'sip'    ? <WalletFilled size={18} />   :
+                                        <LandmarkFilled size={18} />
                 }
               />
             ))}
