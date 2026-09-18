@@ -99,9 +99,10 @@ function TabBtn({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 3,
-        paddingTop: 5,
-        paddingBottom: 5,
+        gap: 4,
+        paddingTop: 6,
+        paddingBottom: 6,
+        minWidth: 56,
         background: 'none',
         border: 'none',
         cursor: 'pointer',
@@ -111,27 +112,28 @@ function TabBtn({
         touchAction: 'manipulation',
       }}
     >
-      {/* Luminous active capsule — integrated liquid glass capsule */}
+      {/* Frosted glass active capsule — iOS 27 prominent bubble */}
       <span
         aria-hidden="true"
         style={{
           position: 'absolute',
-          top: 3,
+          top: 2,
           left: '50%',
-          transform: isActive ? 'translateX(-50%) scale(1)' : 'translateX(-50%) scale(0.35)',
-          width: 58,
-          height: 33,
-          borderRadius: 16,
+          transform: isActive ? 'translateX(-50%) scale(1)' : 'translateX(-50%) scale(0.3)',
+          width: 64,
+          height: 40,
+          borderRadius: 20,
           background: isActive
-            ? 'linear-gradient(180deg, rgba(0,122,255,0.22) 0%, rgba(0,122,255,0.08) 100%)'
+            ? 'linear-gradient(180deg, rgba(0,122,255,0.26) 0%, rgba(0,122,255,0.10) 100%)'
             : 'transparent',
-          backdropFilter: isActive ? 'blur(16px) saturate(2)' : 'none',
-          WebkitBackdropFilter: isActive ? 'blur(16px) saturate(2)' : 'none',
-          border: isActive ? '0.5px solid rgba(0,122,255,0.30)' : 'none',
+          backdropFilter: isActive ? 'blur(20px) saturate(2.2)' : 'none',
+          WebkitBackdropFilter: isActive ? 'blur(20px) saturate(2.2)' : 'none',
+          border: isActive ? '0.5px solid rgba(0,122,255,0.35)' : 'none',
           boxShadow: isActive
             ? [
-                'inset 0 1px 0 rgba(255,255,255,0.50)',
-                '0 2px 10px rgba(0,122,255,0.22)',
+                'inset 0 1px 0 rgba(255,255,255,0.55)',
+                'inset 0 -0.5px 0 rgba(0,122,255,0.08)',
+                '0 3px 12px rgba(0,122,255,0.25)',
               ].join(', ')
             : 'none',
           opacity: isActive ? 1 : 0,
@@ -141,7 +143,7 @@ function TabBtn({
         }}
       />
 
-      {/* Icon */}
+      {/* Icon — 26px active (filled), 22px inactive (outline) */}
       <span
         style={{
           position: 'relative',
@@ -149,11 +151,12 @@ function TabBtn({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          width: isActive ? 26 : 22,
+          height: isActive ? 26 : 22,
           color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)',
-          opacity: isActive ? 1 : 0.65,
-          transform: isActive ? 'scale(1.06)' : 'scale(1)',
-          transition: 'transform 0.28s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease, opacity 0.18s ease',
-          filter: isActive ? 'drop-shadow(0 1px 6px rgba(0,122,255,0.45))' : 'none',
+          opacity: isActive ? 1 : 0.45,
+          transition: 'width 0.28s cubic-bezier(0.34,1.56,0.64,1), height 0.28s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease, opacity 0.18s ease',
+          filter: isActive ? 'drop-shadow(0 1px 8px rgba(0,122,255,0.5))' : 'none',
         } as React.CSSProperties}
       >
         {isActive ? activeIcon : icon}
@@ -178,20 +181,16 @@ function TabBtn({
         )}
       </span>
 
-      {/* Label */}
+      {/* Label — 11px, clearly readable */}
       <span
         style={{
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: isActive ? 700 : 500,
           letterSpacing: isActive ? '-0.02em' : '0.005em',
           color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)',
-          opacity: isActive ? 1 : 0.65,
-          transform: isActive ? 'translateY(0)' : 'translateY(1px)',
-          transition: 'color 0.18s ease, opacity 0.18s ease',
+          opacity: isActive ? 1 : 0.45,
+          transition: 'color 0.18s ease, opacity 0.18s ease, font-weight 0.18s ease',
           lineHeight: 1.1,
-          maxWidth: 72,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
           position: 'relative',
           zIndex: 1,
@@ -220,9 +219,10 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 3,
-        paddingTop: 5,
-        paddingBottom: 5,
+        gap: 4,
+        paddingTop: 6,
+        paddingBottom: 6,
+        minWidth: 56,
         background: 'none',
         border: 'none',
         cursor: 'pointer',
@@ -232,27 +232,28 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
         touchAction: 'manipulation',
       }}
     >
-      {/* Luminous active capsule */}
+      {/* Frosted glass active capsule */}
       <span
         aria-hidden="true"
         style={{
           position: 'absolute',
-          top: 3,
+          top: 2,
           left: '50%',
-          transform: lit ? 'translateX(-50%) scale(1)' : 'translateX(-50%) scale(0.35)',
-          width: 58,
-          height: 33,
-          borderRadius: 16,
+          transform: lit ? 'translateX(-50%) scale(1)' : 'translateX(-50%) scale(0.3)',
+          width: 64,
+          height: 40,
+          borderRadius: 20,
           background: lit
-            ? 'linear-gradient(180deg, rgba(0,122,255,0.22) 0%, rgba(0,122,255,0.08) 100%)'
+            ? 'linear-gradient(180deg, rgba(0,122,255,0.26) 0%, rgba(0,122,255,0.10) 100%)'
             : 'transparent',
-          backdropFilter: lit ? 'blur(16px) saturate(2)' : 'none',
-          WebkitBackdropFilter: lit ? 'blur(16px) saturate(2)' : 'none',
-          border: lit ? '0.5px solid rgba(0,122,255,0.30)' : 'none',
+          backdropFilter: lit ? 'blur(20px) saturate(2.2)' : 'none',
+          WebkitBackdropFilter: lit ? 'blur(20px) saturate(2.2)' : 'none',
+          border: lit ? '0.5px solid rgba(0,122,255,0.35)' : 'none',
           boxShadow: lit
             ? [
-                'inset 0 1px 0 rgba(255,255,255,0.50)',
-                '0 2px 10px rgba(0,122,255,0.22)',
+                'inset 0 1px 0 rgba(255,255,255,0.55)',
+                'inset 0 -0.5px 0 rgba(0,122,255,0.08)',
+                '0 3px 12px rgba(0,122,255,0.25)',
               ].join(', ')
             : 'none',
           opacity: lit ? 1 : 0,
@@ -271,10 +272,10 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
           alignItems: 'center',
           justifyContent: 'center',
           color: lit ? 'var(--accent-blue)' : 'var(--text-primary)',
-          opacity: lit ? 1 : 0.65,
-          transform: isOpen ? 'scale(1.08) rotate(90deg)' : lit ? 'scale(1.06)' : 'scale(1)',
+          opacity: lit ? 1 : 0.45,
+          transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
           transition: 'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease, opacity 0.18s ease',
-          filter: lit ? 'drop-shadow(0 1px 6px rgba(0,122,255,0.45))' : 'none',
+          filter: lit ? 'drop-shadow(0 1px 8px rgba(0,122,255,0.5))' : 'none',
         }}
       >
         <Menu size={22} aria-hidden="true" />
@@ -282,12 +283,11 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
 
       <span
         style={{
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: lit ? 700 : 500,
           letterSpacing: lit ? '-0.02em' : '0.005em',
           color: lit ? 'var(--accent-blue)' : 'var(--text-primary)',
-          opacity: lit ? 1 : 0.65,
-          transform: lit ? 'translateY(0)' : 'translateY(1px)',
+          opacity: lit ? 1 : 0.45,
           transition: 'color 0.18s ease, opacity 0.18s ease',
           lineHeight: 1.1,
           whiteSpace: 'nowrap',
@@ -635,7 +635,7 @@ function MobileBottomNav({
           left: 0,
           right: 0,
           zIndex: 50,
-          paddingBottom: 2,
+          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 6px)',
           paddingLeft: 12,
           paddingRight: 12,
           paddingTop: 6,
@@ -648,23 +648,22 @@ function MobileBottomNav({
             margin: '0 auto',
             pointerEvents: 'auto',
             /* ─── Authentic Liquid Glass floating pill ─── */
-            background: 'color-mix(in srgb, var(--surface-solid) 74%, transparent)',
-            backdropFilter: 'blur(36px) saturate(2.2) brightness(1.02)',
-            WebkitBackdropFilter: 'blur(36px) saturate(2.2) brightness(1.02)',
+            background: 'color-mix(in srgb, var(--surface-solid) 68%, transparent)',
+            backdropFilter: 'blur(40px) saturate(2.4) brightness(1.02)',
+            WebkitBackdropFilter: 'blur(40px) saturate(2.4) brightness(1.02)',
             borderRadius: 28,
             border: '0.5px solid color-mix(in srgb, var(--border-glass, rgba(255,255,255,0.30)) 75%, transparent)',
             boxShadow: [
               'inset 0 1px 0 rgba(255,255,255,0.55)',
               'inset 0 -0.5px 0 rgba(0,0,0,0.10)',
-              '0 8px 24px -4px rgba(0,0,0,0.12)',
-              '0 16px 40px -8px rgba(0,0,0,0.16)',
+              '0 8px 24px -4px rgba(0,0,0,0.14)',
+              '0 16px 40px -8px rgba(0,0,0,0.18)',
             ].join(', '),
             willChange: 'transform',
             transform: 'translateZ(0)',
             userSelect: 'none',
             overflow: 'hidden',
-            /* 6px gap between pill bottom and screen edge — clearly floating */
-            marginBottom: 6,
+            marginBottom: 2,
           }}
         >
           {/* Shimmer gloss layer — frosted glass sheen */}
@@ -674,7 +673,7 @@ function MobileBottomNav({
               position: 'absolute',
               top: 0, left: 0, right: 0,
               height: '50%',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 60%, transparent 100%)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 60%, transparent 100%)',
               borderRadius: '28px 28px 0 0',
               pointerEvents: 'none',
               zIndex: 0,
@@ -697,7 +696,7 @@ function MobileBottomNav({
             style={{
               display: 'flex',
               alignItems: 'stretch',
-              height: 58,
+              height: 64,
               paddingInline: 4,
               position: 'relative',
               zIndex: 1,
@@ -718,10 +717,10 @@ function MobileBottomNav({
                                         <Landmark size={22} aria-hidden="true" />
                 }
                 activeIcon={
-                  tab.id === 'home'   ? <HomeFilled size={22} />     :
-                  tab.id === 'stocks' ? <StocksFilled size={22} />   :
-                  tab.id === 'sip'    ? <WalletFilled size={22} />   :
-                                        <LandmarkFilled size={22} />
+                  tab.id === 'home'   ? <HomeFilled size={26} />     :
+                  tab.id === 'stocks' ? <StocksFilled size={26} />   :
+                  tab.id === 'sip'    ? <WalletFilled size={26} />   :
+                                        <LandmarkFilled size={26} />
                 }
               />
             ))}
