@@ -129,27 +129,27 @@ function TabBtn({
       >
         {isActive ? activeIcon : icon}
 
-        {/* Badge */}
+        {/* Badge — cleanly anchored to icon without loud glow */}
         {badge != null && badge > 0 && (
           <span
             role="status"
             aria-label={`${badge} notifications`}
             style={{
               position: 'absolute',
-              top: -4,
-              right: -7,
-              minWidth: 16,
-              height: 16,
+              top: -3,
+              right: -5,
+              minWidth: 15,
+              height: 15,
               borderRadius: 999,
               background: '#ef4444',
               color: '#fff',
-              fontSize: 9.5,
-              fontWeight: 800,
+              fontSize: 9,
+              fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               padding: '0 3px',
-              boxShadow: '0 0 0 2px var(--surface-solid, #fff), 0 2px 6px rgba(239, 68, 68, 0.5)',
+              boxShadow: '0 0 0 1.5px var(--surface-solid, #fff)',
             }}
           >
             {badge > 9 ? '9+' : badge}
@@ -161,11 +161,11 @@ function TabBtn({
       <span
         style={{
           fontSize: 10.5,
-          fontWeight: isActive ? 600 : 500,
+          fontWeight: 500,
           letterSpacing: 0,
           color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
           opacity: isActive ? 1 : 0.7,
-          transition: 'color 0.18s ease, opacity 0.18s ease, font-weight 0.18s ease',
+          transition: 'color 0.18s ease, opacity 0.18s ease',
           lineHeight: 1,
           whiteSpace: 'nowrap',
         }}
@@ -220,17 +220,17 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
           transition: 'color 0.18s ease, opacity 0.18s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
         }}
       >
-        <Menu size={22} aria-hidden="true" />
+        <Menu size={21} aria-hidden="true" />
       </span>
 
       <span
         style={{
           fontSize: 10.5,
-          fontWeight: lit ? 600 : 500,
+          fontWeight: 500,
           letterSpacing: 0,
           color: lit ? 'var(--accent-blue)' : 'var(--text-secondary)',
           opacity: lit ? 1 : 0.7,
-          transition: 'color 0.18s ease, opacity 0.18s ease, font-weight 0.18s ease',
+          transition: 'color 0.18s ease, opacity 0.18s ease',
           lineHeight: 1,
           whiteSpace: 'nowrap',
         }}
@@ -248,7 +248,8 @@ function MobileBottomNav({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [sheetIn,      setSheetIn]      = useState(false);
   const [isVisible,    setIsVisible]    = useState(true);
-  const lastScrollYRef = useRef(0);
+  const lastScrollMapRef = useRef(new WeakMap<Element, number>());
+  const lastWindowScrollYRef = useRef(0);
 
   const isDrawerOpenRef = useRef(isDrawerOpen);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -291,12 +292,21 @@ function MobileBottomNav({
           // If content is short (no significant scroll range), always keep dock visible
           if (scrollHeight - clientHeight < 80) {
             setIsVisible(true);
-            lastScrollYRef.current = 0;
+            if (target) {
+              lastScrollMapRef.current.set(target, 0);
+            } else {
+              lastWindowScrollYRef.current = 0;
+            }
             ticking = false;
             return;
           }
 
-          const delta = currentScrollY - lastScrollYRef.current;
+          // Retrieve previous scroll position for this specific target
+          const previousScrollY = target
+            ? (lastScrollMapRef.current.get(target) ?? currentScrollY)
+            : lastWindowScrollYRef.current;
+
+          const delta = currentScrollY - previousScrollY;
 
           // Always visible at the top
           if (currentScrollY < 40) {
@@ -306,7 +316,11 @@ function MobileBottomNav({
             setIsVisible(delta < 0);
           }
 
-          lastScrollYRef.current = Math.max(0, currentScrollY);
+          if (target) {
+            lastScrollMapRef.current.set(target, Math.max(0, currentScrollY));
+          } else {
+            lastWindowScrollYRef.current = Math.max(0, currentScrollY);
+          }
           ticking = false;
         });
         ticking = true;
@@ -654,7 +668,7 @@ function MobileBottomNav({
             background: 'var(--nav-glass-bg)',
             backdropFilter: 'blur(20px) saturate(1.8)',
             WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
-            borderRadius: 30,
+            borderRadius: 28,
             border: '0.5px solid var(--nav-glass-border)',
             boxShadow: 'var(--nav-glass-shadow)',
             userSelect: 'none',
@@ -665,7 +679,7 @@ function MobileBottomNav({
             style={{
               display: 'flex',
               alignItems: 'center',
-              height: 60,
+              height: 56,
               paddingInline: 6,
             }}
           >
@@ -678,16 +692,16 @@ function MobileBottomNav({
                 badge={tab.id === 'home' && alertCount > 0 ? alertCount : undefined}
                 onClick={() => { triggerHaptic('selection'); onChangeAsset(tab.id); if (isDrawerOpen) closeDrawer(); }}
                 icon={
-                  tab.id === 'home'   ? <HomeIcon size={22} aria-hidden="true" />   :
-                  tab.id === 'stocks' ? <TrendingUp size={22} aria-hidden="true" /> :
-                  tab.id === 'sip'    ? <Wallet size={22} aria-hidden="true" />     :
-                                        <Landmark size={22} aria-hidden="true" />
+                  tab.id === 'home'   ? <HomeIcon size={21} aria-hidden="true" />   :
+                  tab.id === 'stocks' ? <TrendingUp size={21} aria-hidden="true" /> :
+                  tab.id === 'sip'    ? <Wallet size={21} aria-hidden="true" />     :
+                                        <Landmark size={21} aria-hidden="true" />
                 }
                 activeIcon={
-                  tab.id === 'home'   ? <HomeFilled size={22} />     :
-                  tab.id === 'stocks' ? <StocksFilled size={22} />   :
-                  tab.id === 'sip'    ? <WalletFilled size={22} />   :
-                                        <LandmarkFilled size={22} />
+                  tab.id === 'home'   ? <HomeFilled size={21} />     :
+                  tab.id === 'stocks' ? <StocksFilled size={21} />   :
+                  tab.id === 'sip'    ? <WalletFilled size={21} />   :
+                                        <LandmarkFilled size={21} />
                 }
               />
             ))}
@@ -697,7 +711,7 @@ function MobileBottomNav({
               aria-hidden="true"
               style={{
                 width: 0.5,
-                height: 22,
+                height: 18,
                 background: 'color-mix(in srgb, var(--border-subtle) 50%, transparent)',
                 flexShrink: 0,
                 opacity: 0.5,

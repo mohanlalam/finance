@@ -174,7 +174,7 @@ To maintain a compact, crisp financial interface, corner radii and shadows are s
   * `--radius-medium` (`10px`): Asset cards (`.apple-card`), form text inputs, select dropdowns.
   * `--radius-large` (`14px`): Modal containers, major dashboard chart panels, lock screen keypads.
   * `--radius-sheet` (`20px`): Standard bottom sheets and modal sheet top corners.
-  * `--radius-liquid-pill` (`30px`): Liquid Glass floating navigation dock container.
+  * `--radius-liquid-pill` (`28px`): Liquid Glass floating navigation dock container.
   * `--radius-liquid-drawer` (`28px`): Liquid Glass More drawer top sheet corners (`28px 28px 0 0`).
   * `--radius-pill` (`999px`): Status indicators, rounded pill tags, circular badges.
 
@@ -436,8 +436,8 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 * **Floating Island Dock Geometry**:
   * Root wrapper: `fixed bottom-0 left-0 right-0 z-50 pointer-events-none md:hidden`.
   * Safe-Area Lift: `padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px)`, `padding-left: 12px`, `padding-right: 12px`. Lifts the dock cleanly off the display edge and iOS home indicator.
-  * Dock Pill Constraint: `max-width: 440px`, `margin: 0 auto`, `height: 60px`, `border-radius: 30px` (`--radius-liquid-pill`), `pointer-events: auto`.
-  * Scroll-Aware Minimization: Automatically hides smoothly on scroll down (`transform: translateY(calc(100% + 24px))`, `opacity: 0`) with Apple spring curve `cubic-bezier(0.16, 1, 0.3, 1)`, and restores instantly on scroll up or near page top (`scrollY < 40`).
+  * Dock Pill Constraint: `max-width: 440px`, `margin: 0 auto`, `height: 56px`, `border-radius: 28px` (`--radius-liquid-pill`), `pointer-events: auto`.
+  * Scroll-Aware Minimization: Automatically hides smoothly on scroll down (`transform: translateY(calc(100% + 24px))`, `opacity: 0`) with Apple spring curve `cubic-bezier(0.16, 1, 0.3, 1)`, and restores instantly on scroll up or near page top (`scrollY < 40`). Tracks scroll position per container via `WeakMap<Element, number>` with window fallback to eliminate multi-container jump glitches.
 * **Liquid Glass Material Optics**:
   * Glass Surface: `background: var(--nav-glass-bg)`.
   * Natural Optical Diffusion: `backdrop-filter: blur(20px) saturate(1.8)` with `-webkit-backdrop-filter` parity.
@@ -445,12 +445,12 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   * Floating Elevation Shadow: `box-shadow: var(--nav-glass-shadow)`.
 * **Tab Item State & Interaction (Apple HIG SF Symbol Standard)**:
   * Selection Model: Shared floating glass dock without nested per-tab capsules or loud circular icon chips.
-  * Active Tab: Filled SF Symbol glyph in `var(--accent-blue)` (`size: 22px`), paired with semibold label (`10.5px`, `fontWeight: 600`, `color: 'var(--accent-blue)'`).
-  * Inactive Tab: Outline SF Symbol glyph and label in `var(--text-secondary)` (`size: 22px`, `opacity: 0.7`).
+  * Active Tab: Filled SF Symbol glyph in `var(--accent-blue)` (`size: 21px`), paired with clean neutral label (`10.5px`, `fontWeight: 500`, `color: 'var(--accent-blue)'`).
+  * Inactive Tab: Outline SF Symbol glyph and label in `var(--text-secondary)` (`size: 21px`, `opacity: 0.7`, `fontWeight: 500`).
   * Tactile Feedback: `.ios-press` scale transition on tap (`scale(0.965)`).
   * Haptic Feedback: Triggers `triggerHaptic('selection')` on tab tap.
 * **Navigation Items**:
-  1. **Home**: Directs to overall mobile summary view. Features notification count badge (`#ef4444` pill with double-ring shadow `0 0 0 2px var(--surface-solid), 0 2px 6px rgba(239,68,68,0.5)`).
+  1. **Home**: Directs to overall mobile summary view. Features notification count badge (`#ef4444` anchored badge with clean 1.5px rim: `box-shadow: 0 0 0 1.5px var(--surface-solid)`).
   2. **Stocks**: Directly switches to Stocks & ETF holdings with live ticker status.
   3. **Funds**: Directly switches to Mutual Fund SIP accounts.
   4. **Deposits**: Directly switches to Fixed Deposits registry.
