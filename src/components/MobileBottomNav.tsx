@@ -157,12 +157,12 @@ function TabBtn({
         )}
       </span>
 
-      {/* Label — Clean Apple HIG typography */}
+      {/* Label — Clean Apple HIG typography with stable neutral tracking */}
       <span
         style={{
           fontSize: 10.5,
           fontWeight: isActive ? 600 : 500,
-          letterSpacing: isActive ? '-0.02em' : '0.005em',
+          letterSpacing: 0,
           color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
           opacity: isActive ? 1 : 0.7,
           transition: 'color 0.18s ease, opacity 0.18s ease, font-weight 0.18s ease',
@@ -227,7 +227,7 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
         style={{
           fontSize: 10.5,
           fontWeight: lit ? 600 : 500,
-          letterSpacing: lit ? '-0.02em' : '0.005em',
+          letterSpacing: 0,
           color: lit ? 'var(--accent-blue)' : 'var(--text-secondary)',
           opacity: lit ? 1 : 0.7,
           transition: 'color 0.18s ease, opacity 0.18s ease, font-weight 0.18s ease',
@@ -258,7 +258,7 @@ function MobileBottomNav({
 
   useEffect(() => { isDrawerOpenRef.current = isDrawerOpen; }, [isDrawerOpen]);
 
-  // Scroll collapse behavior: smoothly hide dock on scroll down, restore on scroll up or near top
+  // Scroll collapse behavior: resilient across window, short content, and inner scroll containers
   useEffect(() => {
     if (isDrawerOpen) {
       setIsVisible(true);
@@ -268,15 +268,41 @@ function MobileBottomNav({
     let ticking = false;
     const threshold = 12;
 
-    const handleScroll = () => {
+    const handleScroll = (e?: Event) => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+          // Identify scrolling target: inner element or document window
+          const target = (e?.target && e.target !== document && (e.target as HTMLElement).scrollTop !== undefined)
+            ? (e.target as HTMLElement)
+            : null;
+
+          const currentScrollY = target
+            ? target.scrollTop
+            : (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0);
+
+          const scrollHeight = target
+            ? target.scrollHeight
+            : Math.max(document.documentElement.scrollHeight, document.body.scrollHeight || 0);
+
+          const clientHeight = target
+            ? target.clientHeight
+            : (window.innerHeight || document.documentElement.clientHeight || 0);
+
+          // If content is short (no significant scroll range), always keep dock visible
+          if (scrollHeight - clientHeight < 80) {
+            setIsVisible(true);
+            lastScrollYRef.current = 0;
+            ticking = false;
+            return;
+          }
+
           const delta = currentScrollY - lastScrollYRef.current;
 
+          // Always visible at the top
           if (currentScrollY < 40) {
             setIsVisible(true);
           } else if (Math.abs(delta) > threshold) {
+            // Hide on scroll down, show on scroll up
             setIsVisible(delta < 0);
           }
 
@@ -287,8 +313,9 @@ function MobileBottomNav({
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    // Capture phase listens to window and bubbling/contained scroll events
+    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+    return () => window.removeEventListener('scroll', handleScroll, { capture: true } as EventListenerOptions);
   }, [isDrawerOpen]);
 
   const openDrawer = useCallback(() => {

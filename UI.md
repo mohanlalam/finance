@@ -183,7 +183,7 @@ To maintain a compact, crisp financial interface, corner radii and shadows are s
   * `--shadow-floating`: `0 12px 32px -4px rgba(15,23,42,0.12)` (Light) / `0 16px 40px rgba(0,0,0,0.65)` (Dark) for modals and dropdown menus.
   * **Liquid Glass Dock (`--nav-glass-bg`, `--nav-glass-border`, `--nav-glass-shadow`)**:
     * Light Mode: `color-mix(in srgb, var(--surface-solid) 78%, transparent)`, border `color-mix(in srgb, var(--border-glass) 50%, transparent)`, shadow `0 8px 28px -4px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.35)`.
-    * Dark Mode: `rgba(15, 23, 42, 0.75)`, border `rgba(255, 255, 255, 0.12)`, shadow `0 12px 36px -4px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.15)`.
+    * Dark Mode: `rgba(15, 23, 42, 0.65)`, border `rgba(255, 255, 255, 0.12)`, shadow `0 12px 36px -4px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.15)`.
 
 * **Z-Index Scale**:
   * `--z-base`: `1` (Normal content flow)
