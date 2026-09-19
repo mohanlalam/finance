@@ -1,6 +1,6 @@
 # 💼 Family Portfolio Tracker — GEMINI.md (Project Architecture)
 
-_Last updated: 2026-09-15 — Architecture v3.0 (iOS 27 Liquid Glass Mobile Navigation)_
+_Last updated: 2026-09-15 — Architecture v3.0 (Liquid Glass Inspired Mobile Navigation)_
 
 This document provides a high-level overview of the folder structure, clean architecture boundaries, domain/infrastructure data flow, state management, database mappings, error handling, testing strategies, and performance optimizations of the Family Portfolio Tracker application. It is designed to help developers and AI agents navigate the codebase efficiently.
 
@@ -218,9 +218,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
 * **Cosmic Canvas**: Deep `#040711` obsidian background with multi-point atmospheric ambient radial nebula meshes (cyan `#06b6d4`, violet `#a855f7`, emerald `#10b981`) in dark mode, and `#f8fafc` crystalline prism canvas in light mode.
 * **Translucent Glassmorphic Surfaces (`.apple-card`, `.antigravity-card`)**: Solid/frosted surfaces (`var(--surface)`), 1px crisp luminous specular borders (`var(--border-subtle)`), and weightless ambient levitation shadows (`var(--shadow-card)`).
 * **Cyber-Zen Wide-Tracked Typography & Glowing Accents**: Wide-tracked micro labels (`tracking-wider`/`tracking-widest`), glowing profit green (`.neon-glow-positive`), loss rose (`.neon-glow-negative`), and gold amber (`.neon-glow-gold`).
-* **High-Density Holdings Ribbon**: Horizontal overview strip (*Holdings count, Total inv., Current val., Overall P&L, Day's P&L*) above asset tables.
-* **WhatsApp iOS 27 Liquid Glass Bottom Navigation** ([`MobileBottomNav.tsx`](src/components/MobileBottomNav.tsx)): Translucent frosted tab bar (`blur(28px) saturate(1.8)`, 76% opacity, ultra-thin 0.5px border) matching Apple's iOS 27 Liquid Glass standard. Active tab uses a springy pill indicator (`cubic-bezier(0.34, 1.56, 0.64, 1)`) that scales from `0.5→1` and icons scale `1.1×`. The `LayoutGrid` More tab rotates `45°` when open. The More drawer is a frosted-glass bottom sheet (`blur(34px) saturate(1.8)`) that animates via two-phase `requestAnimationFrame` + `cubic-bezier(0.32, 0.72, 0, 1)` iOS spring easing, with per-category accent colors (cyan RD, amber Gold, green Real Estate, purple Insurance, orange Documents, red Tax) and glow-shadow icon squares.
-* **Tactile Spring Feedback**: Unified `.ios-press` tactile transition scaling triggers (`active:scale(0.965)`).
+* **Liquid Glass Inspired Bottom Navigation** ([`MobileBottomNav.tsx`](src/components/MobileBottomNav.tsx)): Floating translucent frosted tab bar (`blur(20px) saturate(1.8)`, `max-width: 440px`, height `60px`, `border-radius: 30px`) matching Apple's HIG tab bar guidance. Selection is expressed through filled SF Symbol glyphs and semibold labels in `var(--accent-blue)` without nested capsules or circular chips. Features scroll-aware minimization (hides on scroll-down, restores on scroll-up or page top) and a calm, functional frosted-glass More drawer with clean asset category tiles.
 * **Accessibility & Measurement Standards**: Enforces WCAG 2.1 contrast ratios (4.5:1 text, 3.0:1 UI) per `UI.md §11`.
 
 ---

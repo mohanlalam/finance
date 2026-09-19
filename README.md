@@ -9,8 +9,7 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 ### 🌌 Antigravity Cyber-Zen UI & Visual Experience
 - **Weightless Suspension & Zero-G Atmosphere** — Replaces grounded footers with atmospheric suspension over a deep cosmic void (`#040711`) layered with multi-point ambient radial nebula meshes (cyan `#06b6d4`, celestial violet `#a855f7`, and emerald aura `#10b981`).
 - **Glassmorphic Floating Surfaces** — Translucent cards with `backdrop-blur-2xl`, 1px luminous edge highlights, and zero-G hover ascension.
-- **Cyber-Zen Wide-Tracked Typography & Glowing Metrics** — Wide-tracked category micro-tags with luminous glowing profit (+emerald), loss (-rose), and bullion (amber) indicators.
-- **iOS 27 Liquid Glass Floating Island Navigation** — Elevated floating pill tab bar (`blur(52px) saturate(2.6) brightness(1.05)`, 90% surface opacity, 1px luminous edge border, specular top rim `inset 0 2px 0 rgba(255,255,255,0.85)`, and 4-layer elevation shadow stack) lifted `calc(env(safe-area-inset-bottom, 0px) + 12px)` off the screen bottom, featuring springy glowing blue active capsules (`blur(20px) saturate(2)`), active dot indicator, and a per-category-gradient-accented Liquid Glass More drawer.
+- **Liquid Glass Floating Island Navigation** — Elevated floating pill tab bar (`blur(20px) saturate(1.8)`, `max-width: 440px`, height `60px`, `border-radius: 30px`) lifted off the screen bottom with scroll-reactive minimization, featuring clean Apple SF Symbol selection states without heavy capsules, and a calm functional Liquid Glass More drawer.
 
 ### 📊 Financial Analytics & Visualizations
 - **Consolidated Financial Net Worth Timeline** — Responsive SVG area chart with interactive hover cards plotting liquid/deposit historical wealth appreciation across Stocks, Fixed Deposits, RDs, and Mutual Funds.
@@ -41,8 +40,7 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 ### 🔍 Search & Navigation
 - **Fuzzy Global Search Palette** — `Cmd/Ctrl + K` activated search palette with fuzzy matching across all assets, family members, and holdings.
 - **Keyboard Shortcuts** — Global hotkeys for quick asset navigation, search, and actions.
-- **Mobile Gesture Suite** — Long press context menus, swipe navigation between asset categories, and pull-to-refresh with haptic feedback.
-- **iOS 27 Liquid Glass Floating Dock** — Suspended floating pill navigation with high-refraction frosted glass, spring-physics active tab capsule, and slide-up More drawer with categorized gradient tiles and Smart Import quick trigger.
+- **Liquid Glass Floating Dock** — Suspended floating pill navigation with natural diffusion frosted glass, Apple SF Symbol selection states, scroll-aware collapse, and slide-up More drawer with categorized glass tiles and Smart Import quick trigger.
 
 ---
 
@@ -233,7 +231,7 @@ project antigravity/
 │   │   ├── HoldingDetailDrawer.tsx # Responsive holding detail drawer
 │   │   ├── InsightsPanel.tsx     # Allocation, performer, and reminder insight panels
 │   │   ├── MobileAlertsView.tsx  # Mobile view display for active alerts
-│   │   ├── MobileBottomNav.tsx   # WhatsApp iOS 27 Liquid Glass tab bar
+│   │   ├── MobileBottomNav.tsx   # Liquid Glass inspired floating tab bar
 │   │   ├── MobileHomeSummary.tsx  # Mobile view dashboard summary
 │   │   ├── MobileStatusBar.tsx   # Mobile fixed status bar
 │   │   ├── Modal.tsx             # Core reusable styled backdrop modal wrapper
