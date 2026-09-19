@@ -174,16 +174,16 @@ To maintain a compact, crisp financial interface, corner radii and shadows are s
   * `--radius-medium` (`10px`): Asset cards (`.apple-card`), form text inputs, select dropdowns.
   * `--radius-large` (`14px`): Modal containers, major dashboard chart panels, lock screen keypads.
   * `--radius-sheet` (`20px`): Standard bottom sheets and modal sheet top corners.
-  * `--radius-liquid-pill` (`28px`): Liquid Glass floating navigation dock container.
+  * `--radius-liquid-pill` (`28px`): Liquid Glass selected tab lens and floating dock curvature.
   * `--radius-liquid-drawer` (`28px`): Liquid Glass More drawer top sheet corners (`28px 28px 0 0`).
   * `--radius-pill` (`999px`): Status indicators, rounded pill tags, circular badges.
 
 * **Shadow Tokens**:
   * `--shadow-card`: `0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95)` (Light) / `0 1px 3px rgba(0,0,0,0.4), 0 6px 20px rgba(0,0,0,0.35)` (Dark).
   * `--shadow-floating`: `0 12px 32px -4px rgba(15,23,42,0.12)` (Light) / `0 16px 40px rgba(0,0,0,0.65)` (Dark) for modals and dropdown menus.
-  * **Liquid Glass Dock (`--nav-glass-bg`, `--nav-glass-border`, `--nav-glass-shadow`)**:
-    * Light Mode: `color-mix(in srgb, var(--surface-solid) 78%, transparent)`, border `color-mix(in srgb, var(--border-glass) 50%, transparent)`, shadow `0 8px 28px -4px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.35)`.
-    * Dark Mode: `rgba(15, 23, 42, 0.65)`, border `rgba(255, 255, 255, 0.12)`, shadow `0 12px 36px -4px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.15)`.
+  * **Liquid Glass Dock (`--nav-glass-*`, `--nav-selected-*`)**:
+    * Light Mode: Tinted pink/white/blue gradient glass with a bright specular border and soft floating elevation.
+    * Dark Mode: Tinted pink/navy/cyan gradient glass with a subtle selected tab lens for iOS 27-style selection.
 
 * **Z-Index Scale**:
   * `--z-base`: `1` (Normal content flow)
@@ -436,16 +436,16 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 * **Floating Island Dock Geometry**:
   * Root wrapper: `fixed bottom-0 left-0 right-0 z-50 pointer-events-none md:hidden`.
   * Safe-Area Lift: `padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px)`, `padding-left: 12px`, `padding-right: 12px`. Lifts the dock cleanly off the display edge and iOS home indicator.
-  * Dock Pill Constraint: `max-width: 440px`, `margin: 0 auto`, `height: 56px`, `border-radius: 28px` (`--radius-liquid-pill`), `pointer-events: auto`.
+  * Dock Pill Constraint: `max-width: 440px`, `margin: 0 auto`, `height: 62px`, `border-radius: 28px` (`--radius-liquid-pill`), `pointer-events: auto`.
   * Scroll-Aware Minimization: Automatically hides smoothly on scroll down (`transform: translateY(calc(100% + 24px))`, `opacity: 0`) with Apple spring curve `cubic-bezier(0.16, 1, 0.3, 1)`, and restores instantly on scroll up or near page top (`scrollY < 40`). Tracks scroll position per container via `WeakMap<Element, number>` with window fallback to eliminate multi-container jump glitches.
 * **Liquid Glass Material Optics**:
   * Glass Surface: `background: var(--nav-glass-bg)`.
   * Natural Optical Diffusion: `backdrop-filter: blur(20px) saturate(1.8)` with `-webkit-backdrop-filter` parity.
   * Specular Glass Edge: `border: 0.5px solid var(--nav-glass-border)`.
   * Floating Elevation Shadow: `box-shadow: var(--nav-glass-shadow)`.
-* **Tab Item State & Interaction (Apple HIG SF Symbol Standard)**:
-  * Selection Model: Shared floating glass dock without nested per-tab capsules or loud circular icon chips.
-  * Active Tab: Filled SF Symbol glyph in `var(--accent-blue)` (`size: 21px`), paired with clean neutral label (`10.5px`, `fontWeight: 500`, `color: 'var(--accent-blue)'`).
+* **Tab Item State & Interaction (iOS 27-Style Liquid Glass Reference)**:
+  * Selection Model: Shared floating glass dock with one translucent selected tab lens; no blue circular icon chips.
+  * Active Tab: Filled SF Symbol glyph in `var(--accent-blue)` (`size: 21px`) inside the selected lens, paired with clean neutral label (`10.5px`, `fontWeight: 500`, `color: 'var(--accent-blue)'`).
   * Inactive Tab: Outline SF Symbol glyph and label in `var(--text-secondary)` (`size: 21px`, `opacity: 0.7`, `fontWeight: 500`).
   * Tactile Feedback: `.ios-press` scale transition on tap (`scale(0.965)`).
   * Haptic Feedback: Triggers `triggerHaptic('selection')` on tab tap.

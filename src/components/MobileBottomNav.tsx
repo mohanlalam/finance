@@ -114,10 +114,28 @@ function TabBtn({
         touchAction: 'manipulation',
       }}
     >
+      {/* Active Liquid Glass lens — matches iOS 27-style selected tab plate */}
+      <span
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: '3px 5px',
+          borderRadius: 24,
+          background: isActive ? 'var(--nav-selected-bg)' : 'transparent',
+          border: isActive ? '0.5px solid var(--nav-selected-border)' : 'none',
+          boxShadow: isActive ? 'var(--nav-selected-shadow)' : 'none',
+          opacity: isActive ? 1 : 0,
+          transform: isActive ? 'scale(1)' : 'scale(0.92)',
+          transition: 'opacity 0.18s ease, transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          pointerEvents: 'none',
+        }}
+      />
+
       {/* Icon — SF Symbol active filled tint vs inactive outline */}
       <span
         style={{
           position: 'relative',
+          zIndex: 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -168,6 +186,8 @@ function TabBtn({
           transition: 'color 0.18s ease, opacity 0.18s ease',
           lineHeight: 1,
           whiteSpace: 'nowrap',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
         {label}
@@ -209,8 +229,25 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
       }}
     >
       <span
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: '3px 5px',
+          borderRadius: 24,
+          background: lit ? 'var(--nav-selected-bg)' : 'transparent',
+          border: lit ? '0.5px solid var(--nav-selected-border)' : 'none',
+          boxShadow: lit ? 'var(--nav-selected-shadow)' : 'none',
+          opacity: lit ? 1 : 0,
+          transform: lit ? 'scale(1)' : 'scale(0.92)',
+          transition: 'opacity 0.18s ease, transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <span
         style={{
           position: 'relative',
+          zIndex: 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -233,6 +270,8 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
           transition: 'color 0.18s ease, opacity 0.18s ease',
           lineHeight: 1,
           whiteSpace: 'nowrap',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
         More
@@ -679,7 +718,7 @@ function MobileBottomNav({
             style={{
               display: 'flex',
               alignItems: 'center',
-              height: 56,
+              height: 62,
               paddingInline: 6,
             }}
           >
@@ -705,19 +744,6 @@ function MobileBottomNav({
                 }
               />
             ))}
-
-            {/* Subtle separator */}
-            <div
-              aria-hidden="true"
-              style={{
-                width: 0.5,
-                height: 18,
-                background: 'color-mix(in srgb, var(--border-subtle) 50%, transparent)',
-                flexShrink: 0,
-                opacity: 0.5,
-                marginInline: 2,
-              }}
-            />
 
             <MoreTabBtn isActive={isMoreActive} isOpen={isDrawerOpen} onClick={toggleDrawer} />
           </div>

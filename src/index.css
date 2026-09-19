@@ -52,9 +52,12 @@
   --shadow-modal: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 0 20px rgba(2, 132, 199, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95);
 
   /* Liquid Glass Floating Navigation Dock */
-  --nav-glass-bg: color-mix(in srgb, var(--surface-solid) 78%, transparent);
-  --nav-glass-border: color-mix(in srgb, var(--border-glass) 50%, transparent);
-  --nav-glass-shadow: 0 8px 28px -4px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  --nav-glass-bg: linear-gradient(105deg, rgba(255, 186, 218, 0.48) 0%, rgba(255, 255, 255, 0.76) 42%, rgba(129, 211, 255, 0.46) 100%);
+  --nav-glass-border: rgba(255, 255, 255, 0.72);
+  --nav-glass-shadow: 0 8px 28px -4px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.70);
+  --nav-selected-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(243, 249, 255, 0.72) 100%);
+  --nav-selected-border: rgba(255, 255, 255, 0.82);
+  --nav-selected-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 4px 16px rgba(2, 132, 199, 0.16);
 
   /* Asset Color Token Aliases */
   --cyan: #06b6d4;
@@ -130,9 +133,12 @@
   --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 30px rgba(56, 189, 248, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.16);
 
   /* Liquid Glass Floating Navigation Dock */
-  --nav-glass-bg: rgba(15, 23, 42, 0.65);
-  --nav-glass-border: rgba(255, 255, 255, 0.12);
-  --nav-glass-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  --nav-glass-bg: linear-gradient(105deg, rgba(255, 128, 190, 0.32) 0%, rgba(15, 23, 42, 0.62) 43%, rgba(56, 189, 248, 0.34) 100%);
+  --nav-glass-border: rgba(255, 255, 255, 0.20);
+  --nav-glass-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  --nav-selected-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(226, 244, 255, 0.18) 100%);
+  --nav-selected-border: rgba(255, 255, 255, 0.34);
+  --nav-selected-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 18px rgba(56, 189, 248, 0.20);
 }
 
 /* 🌌 Ambient Cosmic Background Atmosphere */
