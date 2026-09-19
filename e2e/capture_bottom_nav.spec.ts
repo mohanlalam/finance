@@ -1,4 +1,4 @@
-﻿import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import path from 'path';
 
 async function unlockIfLocked(page: Page) {
@@ -80,6 +80,17 @@ test.describe('Mobile Bottom Navigation Screenshot Capture', () => {
     const lightDockPath = path.resolve('screenshots/mobile/light/bottom-nav-dock.png');
     await page.screenshot({ path: lightDockPath, clip: { x: 0, y: 720, width: 390, height: 124 } });
     console.log('Saved Light Bottom Nav Dock:', lightDockPath);
+
+    // Open More drawer and capture
+    const moreBtn = page.getByRole('button', { name: /More/i });
+    await moreBtn.click();
+    await page.waitForTimeout(600);
+    const moreDrawer = page.locator('div[role="dialog"][aria-label="All asset categories"]');
+    await expect(moreDrawer).toBeVisible();
+
+    const moreDrawerPath = path.resolve('screenshots/mobile/light/more-drawer.png');
+    await page.screenshot({ path: moreDrawerPath });
+    console.log('Saved Light More Drawer:', moreDrawerPath);
 
     await context.close();
   });

@@ -506,7 +506,7 @@ function MobileBottomNav({
           onClick={closeDrawer}
           className="md:hidden"
           style={{
-            position: 'fixed', inset: 0, zIndex: 60,
+            position: 'fixed', inset: 0, zIndex: 300,
             background: 'rgba(0,0,0,0.5)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
@@ -526,7 +526,7 @@ function MobileBottomNav({
           aria-label="All asset categories"
           className="md:hidden"
           style={{
-            position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 70,
+            position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 310,
             background: 'color-mix(in srgb, var(--surface-solid) 80%, transparent)',
             backdropFilter: 'blur(32px) saturate(1.8)',
             WebkitBackdropFilter: 'blur(32px) saturate(1.8)',
@@ -536,8 +536,8 @@ function MobileBottomNav({
             transform: sheetIn ? 'translateY(0)' : 'translateY(105%)',
             transition: 'transform 0.36s cubic-bezier(0.16,1,0.3,1)',
             willChange: 'transform',
-            paddingBottom: 'calc(env(safe-area-inset-bottom,0px) + 72px)',
-            maxHeight: '80vh',
+            paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)',
+            maxHeight: '88vh',
             display: 'flex', flexDirection: 'column',
           }}
         >
@@ -546,18 +546,18 @@ function MobileBottomNav({
           {/* Drag handle */}
           <div
             style={{
-              width: 36, height: 4.5, borderRadius: 999,
+              width: 36, height: 4, borderRadius: 999,
               background: 'color-mix(in srgb, var(--text-primary) 18%, transparent)',
-              margin: '12px auto 0', flexShrink: 0,
+              margin: '10px auto 0', flexShrink: 0,
             }}
             aria-hidden="true"
           />
 
           {/* Sheet header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px 10px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 18px 8px', flexShrink: 0 }}>
             <div>
-              <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>More</p>
-              <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>Asset categories</p>
+              <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>More</p>
+              <p style={{ fontSize: 11.5, color: 'var(--text-tertiary)', marginTop: 1 }}>Asset categories</p>
             </div>
             <button
               ref={closeBtnRef}
@@ -566,7 +566,7 @@ function MobileBottomNav({
               aria-label="Close"
               className="ios-press"
               style={{
-                width: 32, height: 32, borderRadius: 999,
+                width: 30, height: 30, borderRadius: 999,
                 background: 'color-mix(in srgb, var(--text-primary) 8%, transparent)',
                 backdropFilter: 'blur(8px)',
                 WebkitBackdropFilter: 'blur(8px)',
@@ -581,7 +581,7 @@ function MobileBottomNav({
 
           {/* Smart Import banner — refined functional glass card */}
           {onOpenSmartImport && (
-            <div style={{ padding: '0 14px 10px', flexShrink: 0 }}>
+            <div style={{ padding: '0 12px 8px', flexShrink: 0 }}>
               <button
                 type="button"
                 onClick={() => { triggerHaptic('selection'); closeDrawer(); onOpenSmartImport(); }}
@@ -589,7 +589,7 @@ function MobileBottomNav({
                 style={{
                   width: '100%',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '12px 14px', borderRadius: 16,
+                  padding: '10px 12px', borderRadius: 14,
                   background: 'color-mix(in srgb, var(--surface-secondary) 75%, transparent)',
                   backdropFilter: 'blur(16px)',
                   WebkitBackdropFilter: 'blur(16px)',
@@ -598,19 +598,19 @@ function MobileBottomNav({
                   cursor: 'pointer', outline: 'none', WebkitTapHighlightColor: 'transparent',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{
-                    width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                    width: 34, height: 34, borderRadius: 10, flexShrink: 0,
                     background: 'color-mix(in srgb, var(--accent-blue) 14%, var(--surface-secondary))',
                     border: '0.5px solid color-mix(in srgb, var(--accent-blue) 25%, transparent)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color: 'var(--accent-blue)',
                   }}>
-                    <Sparkles size={18} aria-hidden="true" />
+                    <Sparkles size={16} aria-hidden="true" />
                   </div>
                   <div style={{ textAlign: 'left' }}>
-                    <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>Smart AI Import</p>
-                    <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>Auto-extract details from a doc or photo</p>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>Smart AI Import</p>
+                    <p style={{ fontSize: 10.5, color: 'var(--text-tertiary)', marginTop: 0.5 }}>Auto-extract details from a doc or photo</p>
                   </div>
                 </div>
                 <span style={{ color: 'var(--text-tertiary)', flexShrink: 0, display: 'flex' }}><ChevronRight size={14} aria-hidden="true" /></span>
@@ -619,10 +619,10 @@ function MobileBottomNav({
           )}
 
           {/* Divider */}
-          <div style={{ height: 0.5, background: 'var(--border-subtle)', opacity: 0.5, marginInline: 14, flexShrink: 0 }} />
+          <div style={{ height: 0.5, background: 'var(--border-subtle)', opacity: 0.5, marginInline: 12, flexShrink: 0 }} />
 
           {/* Category rows — Calm functional glass tile cards */}
-          <div style={{ overflowY: 'auto', padding: '10px 12px 4px', flex: 1 }}>
+          <div style={{ overflowY: 'auto', padding: '8px 12px 4px', flex: 1, overscrollBehavior: 'contain' }}>
             {moreTabs.map((tab) => {
               const active = activeAsset === tab.id;
               return (
@@ -634,7 +634,7 @@ function MobileBottomNav({
                   style={{
                     width: '100%',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '11px 14px', marginBottom: 6, borderRadius: 14,
+                    padding: '9px 12px', marginBottom: 5, borderRadius: 13,
                     background: active
                       ? 'color-mix(in srgb, var(--accent-blue) 12%, var(--surface-secondary))'
                       : 'color-mix(in srgb, var(--surface-secondary) 55%, transparent)',
@@ -651,10 +651,10 @@ function MobileBottomNav({
                     WebkitTapHighlightColor: 'transparent',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 13, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 11, minWidth: 0 }}>
                     {/* Clean icon container */}
                     <div style={{
-                      width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+                      width: 34, height: 34, borderRadius: 9, flexShrink: 0,
                       background: `color-mix(in srgb, ${tab.color} 12%, var(--surface-secondary))`,
                       border: `0.5px solid color-mix(in srgb, ${tab.color} 20%, transparent)`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -664,13 +664,13 @@ function MobileBottomNav({
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <p style={{
-                        fontSize: 14, fontWeight: active ? 600 : 500,
+                        fontSize: 13.5, fontWeight: active ? 600 : 500,
                         color: active ? 'var(--accent-blue)' : 'var(--text-primary)',
                         letterSpacing: '-0.01em',
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>{tab.label}</p>
                       <p style={{
-                        fontSize: 11.5, color: 'var(--text-tertiary)', marginTop: 1,
+                        fontSize: 11, color: 'var(--text-tertiary)', marginTop: 0.5,
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>{tab.subtext}</p>
                     </div>

@@ -456,7 +456,7 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   4. **Deposits**: Directly switches to Fixed Deposits registry.
   5. **More (Liquid Glass Drawer)**:
      - Header: Displays title, subtext, and circular frosted close button with Escape key & backdrop click handling.
-     - Body & Scroll: Fixed `max-height: 80vh`, `border-radius: 28px 28px 0 0` (`--radius-liquid-drawer`), `backdrop-filter: blur(32px) saturate(1.8)`, `border-top: 0.5px solid rgba(255,255,255,0.25)`, automatic `document.body.style.overflow = 'hidden'` scroll locking.
+     - Body & Scroll: Flexible `max-height: 88vh` with safe-area bottom padding `max(env(safe-area-inset-bottom, 0px), 16px)`, `border-radius: 28px 28px 0 0` (`--radius-liquid-drawer`), `backdrop-filter: blur(32px) saturate(1.8)`, `border-top: 0.5px solid rgba(255,255,255,0.25)`, and automatic `document.body.style.overflow = 'hidden'` scroll locking. All categories and Smart Import fit fully without clipping or dead bottom space.
      - Smart Import Banner: Refined functional glass action card with subtle blue/violet accent border and icon tile.
      - Category Tiles: Clean, functional glass tiles (`backdrop-filter: blur(16px)`) with subtle canonical asset color icons:
        - **Recurring Deposits**: Rust Tangerine accent (`#c2410c`)
