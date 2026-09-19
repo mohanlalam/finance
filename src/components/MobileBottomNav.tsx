@@ -80,11 +80,12 @@ function LandmarkFilled({ size = 22 }: { size?: number }) {
 
 /* ── Individual tab button — Liquid Glass inspired style ─────────────────── */
 function TabBtn({
-  label, isActive, badge, onClick, icon, activeIcon,
+  label, isActive, badge, onClick, icon, activeIcon, isFirst, isLast,
 }: {
   id: AssetTab; label: string; isActive: boolean;
   badge?: number; onClick: () => void;
   icon: React.ReactNode; activeIcon: React.ReactNode;
+  isFirst?: boolean; isLast?: boolean;
 }) {
   return (
     <button
@@ -114,13 +115,20 @@ function TabBtn({
         touchAction: 'manipulation',
       }}
     >
-      {/* Active Liquid Glass lens — matches iOS 27-style selected tab plate */}
+      {/* Active Liquid Glass lens — concentric with outer dock pill */}
       <span
         aria-hidden="true"
         style={{
           position: 'absolute',
-          inset: '3px 5px',
-          borderRadius: 24,
+          top: 0,
+          bottom: 0,
+          left: isFirst ? 0 : 2,
+          right: isLast ? 0 : 2,
+          borderRadius: isFirst
+            ? '25px 20px 20px 25px'
+            : isLast
+            ? '20px 25px 25px 20px'
+            : 20,
           background: isActive ? 'var(--nav-selected-bg)' : 'transparent',
           border: isActive ? '0.5px solid var(--nav-selected-border)' : 'none',
           boxShadow: isActive ? 'var(--nav-selected-shadow)' : 'none',
@@ -232,8 +240,11 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
         aria-hidden="true"
         style={{
           position: 'absolute',
-          inset: '3px 5px',
-          borderRadius: 24,
+          top: 0,
+          bottom: 0,
+          left: 2,
+          right: 0,
+          borderRadius: '20px 25px 25px 20px',
           background: lit ? 'var(--nav-selected-bg)' : 'transparent',
           border: lit ? '0.5px solid var(--nav-selected-border)' : 'none',
           boxShadow: lit ? 'var(--nav-selected-shadow)' : 'none',
@@ -707,7 +718,7 @@ function MobileBottomNav({
             background: 'var(--nav-glass-bg)',
             backdropFilter: 'blur(20px) saturate(1.8)',
             WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
-            borderRadius: 28,
+            borderRadius: 29,
             border: '0.5px solid var(--nav-glass-border)',
             boxShadow: 'var(--nav-glass-shadow)',
             userSelect: 'none',
@@ -717,17 +728,19 @@ function MobileBottomNav({
           <div
             style={{
               display: 'flex',
-              alignItems: 'center',
-              height: 62,
-              paddingInline: 6,
+              alignItems: 'stretch',
+              height: 58,
+              padding: 4,
             }}
           >
-            {mainTabs.map((tab) => (
+            {mainTabs.map((tab, idx) => (
               <TabBtn
                 key={tab.id}
                 id={tab.id}
                 label={tab.label}
                 isActive={activeAsset === tab.id}
+                isFirst={idx === 0}
+                isLast={false}
                 badge={tab.id === 'home' && alertCount > 0 ? alertCount : undefined}
                 onClick={() => { triggerHaptic('selection'); onChangeAsset(tab.id); if (isDrawerOpen) closeDrawer(); }}
                 icon={

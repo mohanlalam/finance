@@ -436,15 +436,15 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
 * **Floating Island Dock Geometry**:
   * Root wrapper: `fixed bottom-0 left-0 right-0 z-50 pointer-events-none md:hidden`.
   * Safe-Area Lift: `padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px)`, `padding-left: 12px`, `padding-right: 12px`. Lifts the dock cleanly off the display edge and iOS home indicator.
-  * Dock Pill Constraint: `max-width: 440px`, `margin: 0 auto`, `height: 62px`, `border-radius: 28px` (`--radius-liquid-pill`), `pointer-events: auto`.
+  * Dock Pill Constraint: `max-width: 440px`, `margin: 0 auto`, `height: 58px`, `border-radius: 29px` (`--radius-liquid-pill`), `padding: 4px`, `pointer-events: auto`.
   * Scroll-Aware Minimization: Automatically hides smoothly on scroll down (`transform: translateY(calc(100% + 24px))`, `opacity: 0`) with Apple spring curve `cubic-bezier(0.16, 1, 0.3, 1)`, and restores instantly on scroll up or near page top (`scrollY < 40`). Tracks scroll position per container via `WeakMap<Element, number>` with window fallback to eliminate multi-container jump glitches.
 * **Liquid Glass Material Optics**:
   * Glass Surface: `background: var(--nav-glass-bg)`.
   * Natural Optical Diffusion: `backdrop-filter: blur(20px) saturate(1.8)` with `-webkit-backdrop-filter` parity.
   * Specular Glass Edge: `border: 0.5px solid var(--nav-glass-border)`.
   * Floating Elevation Shadow: `box-shadow: var(--nav-glass-shadow)`.
-* **Tab Item State & Interaction (iOS 27-Style Liquid Glass Reference)**:
-  * Selection Model: Shared floating glass dock with one translucent selected tab lens; no blue circular icon chips.
+* **Tab Item State & Interaction (Concentric Liquid Glass Lens Standard)**:
+  * Selection Model: Shared floating glass dock with concentric selected tab lens (25px inner radius nesting smoothly within 29px outer dock curve with uniform 4px margin).
   * Active Tab: Filled SF Symbol glyph in `var(--accent-blue)` (`size: 21px`) inside the selected lens, paired with clean neutral label (`10.5px`, `fontWeight: 500`, `color: 'var(--accent-blue)'`).
   * Inactive Tab: Outline SF Symbol glyph and label in `var(--text-secondary)` (`size: 21px`, `opacity: 0.7`, `fontWeight: 500`).
   * Tactile Feedback: `.ios-press` scale transition on tap (`scale(0.965)`).
