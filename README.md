@@ -9,7 +9,7 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 ### 🌌 Antigravity Cyber-Zen UI & Visual Experience
 - **Weightless Suspension & Zero-G Atmosphere** — Replaces grounded footers with atmospheric suspension over a deep cosmic void (`#040711`) layered with multi-point ambient radial nebula meshes (cyan `#06b6d4`, celestial violet `#a855f7`, and emerald aura `#10b981`).
 - **Glassmorphic Floating Surfaces** — Translucent cards with `backdrop-blur-2xl`, 1px luminous edge highlights, and zero-G hover ascension.
-- **Liquid Glass Floating Island Navigation** — Elevated floating pill tab bar (`blur(20px) saturate(1.8)`, `max-width: 440px`, height `60px`, `border-radius: 30px`) lifted off the screen bottom with scroll-reactive minimization, featuring clean Apple SF Symbol selection states without heavy capsules, and a calm functional Liquid Glass More drawer.
+- **Liquid Glass Floating Island Navigation** — Elevated floating pill tab bar (`blur(20px) saturate(1.8)`, `max-width: 440px`, height `58px`, `border-radius: 29px`, uniform `4px` inset padding) lifted off the screen bottom with scroll-reactive collapse and per-container `WeakMap` scroll-position tracking. Selected tabs are highlighted by a **concentric inner lens plate** — a frosted glass capsule fitted precisely inside the pill with matching `25px` inner radius — styled with CSS Custom Property gradient optics (`--nav-glass-bg` light: rose→white→cyan, dark: magenta→navy→cyan). Monochrome unselected icons keep the dock calm; active icons switch to filled glyphs. A slide-up **More drawer** (`maxHeight: 88vh`) exposes all 7 remaining asset categories (Smart AI Import → Tax Harvesting) on categorised glass tiles, fully visible without scrolling.
 
 ### 📊 Financial Analytics & Visualizations
 - **Consolidated Financial Net Worth Timeline** — Responsive SVG area chart with interactive hover cards plotting liquid/deposit historical wealth appreciation across Stocks, Fixed Deposits, RDs, and Mutual Funds.
@@ -40,7 +40,7 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 ### 🔍 Search & Navigation
 - **Fuzzy Global Search Palette** — `Cmd/Ctrl + K` activated search palette with fuzzy matching across all assets, family members, and holdings.
 - **Keyboard Shortcuts** — Global hotkeys for quick asset navigation, search, and actions.
-- **Liquid Glass Floating Dock** — Suspended floating pill navigation with natural diffusion frosted glass, Apple SF Symbol selection states, scroll-aware collapse, and slide-up More drawer with categorized glass tiles and Smart Import quick trigger.
+- **Liquid Glass Floating Dock** — Suspended floating pill navigation (`58px` height, `29px` radius, `4px` uniform padding) with natural diffusion frosted glass gradient optics, concentric selected-tab lens plate (inner `25px` radius, filled active glyphs), per-container `WeakMap` scroll-collapse tracking, and a slide-up More drawer (`88vh`) with categorized glass tiles and Smart Import quick trigger.
 
 ---
 
@@ -231,7 +231,7 @@ project antigravity/
 │   │   ├── HoldingDetailDrawer.tsx # Responsive holding detail drawer
 │   │   ├── InsightsPanel.tsx     # Allocation, performer, and reminder insight panels
 │   │   ├── MobileAlertsView.tsx  # Mobile view display for active alerts
-│   │   ├── MobileBottomNav.tsx   # Liquid Glass inspired floating tab bar
+│   │   ├── MobileBottomNav.tsx   # Liquid Glass v3 floating dock — 58px pill, concentric lens plate, WeakMap scroll collapse, 88vh More drawer
 │   │   ├── MobileHomeSummary.tsx  # Mobile view dashboard summary
 │   │   ├── MobileStatusBar.tsx   # Mobile fixed status bar
 │   │   ├── Modal.tsx             # Core reusable styled backdrop modal wrapper
@@ -345,7 +345,7 @@ project antigravity/
 The repository enforces strict verification across unit, integration, and browser end-to-end suites:
 
 ```bash
-# Run Vitest test suite across 54 test files and 301 tests (100% passing)
+# Run Vitest test suite across 55 test files and 309 tests (100% passing)
 npm test
 
 # Run Playwright browser E2E tests (9 tests: 6 smoke + 3 deep CRUD workflows)
@@ -440,7 +440,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | Script | Command | Description |
 |---|---|---|
 | **Dev Server** | `npm run dev` | Start Vite dev server with HMR |
-| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (54 test files / 301 tests, 100% passing) |
+| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (55 test files / 309 tests, 100% passing) |
 | **E2E Tests** | `npm run test:e2e` | Run Playwright browser E2E tests (9 tests across smoke and CRUD specs) |
 | **Build** | `npm run build` | Production build to `dist/` |
 | **Preview** | `npm run preview` | Preview the production build locally |
