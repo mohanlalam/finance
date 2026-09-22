@@ -819,7 +819,7 @@ export default function AppShell() {
       {/* Floating Add Menu (FAB) */}
       <Suspense fallback={null}>
         <FloatingAddMenu
-          isHidden={isAnyModalOpen || isMoreDrawerOpen}
+          isHidden={isAnyModalOpen || isMoreDrawerOpen || activeAsset === 'tax'}
           onAddStock={openAddModal}
           onAddAsset={handleFloatingAddAsset}
           onOpenSmartImport={openSmartImport}

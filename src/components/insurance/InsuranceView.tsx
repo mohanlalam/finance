@@ -289,6 +289,12 @@ export function InsuranceView({
               const sumAssured = Number(policy.sum_assured) || 0;
               const premium = Number(policy.premium_amount) || 0;
               const typeLabel = policy.insurance_type ? (policy.insurance_type.charAt(0).toUpperCase() + policy.insurance_type.slice(1)) : 'Policy';
+              const daysToRenewal = policy.renewal_date
+                ? Math.ceil((new Date(policy.renewal_date).getTime() - Date.now()) / (1000 * 3600 * 24))
+                : null;
+              const isUrgent = daysToRenewal !== null && daysToRenewal >= 0 && daysToRenewal <= 30;
+              const isOverdue = daysToRenewal !== null && daysToRenewal < 0;
+
               return (
                 <div
                   key={policy.id}
@@ -311,10 +317,21 @@ export function InsuranceView({
                       <h4 className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
                         {policy.policy_name}
                       </h4>
-                      <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
-                        {policy.provider} &bull; {typeLabel}
-                        {policy.renewal_date && ` &bull; Due ${policy.renewal_date}`}
-                      </p>
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        <span className="text-xs text-[var(--text-tertiary)] font-medium truncate">
+                          {policy.provider} &bull; {typeLabel}
+                        </span>
+                        {isUrgent && (
+                          <AppBadge variant="urgency" isPulsing>
+                            Due in {daysToRenewal}d
+                          </AppBadge>
+                        )}
+                        {isOverdue && (
+                          <AppBadge variant="negative">
+                            Renewal Overdue
+                          </AppBadge>
+                        )}
+                      </div>
                     </div>
                   </div>
 

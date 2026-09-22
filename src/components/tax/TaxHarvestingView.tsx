@@ -76,9 +76,15 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
         heroSubtitle="Offset taxable capital gains before March 31st"
         icon={<TrendingDown size={16} />}
         primaryBadge={
-          <AppBadge variant="positive">
-            Save up to {formatINR(taxData.potentialTaxSavings)}
-          </AppBadge>
+          taxData.potentialTaxSavings > 0 ? (
+            <AppBadge variant="positive">
+              Save up to {formatINR(taxData.potentialTaxSavings)}
+            </AppBadge>
+          ) : (
+            <AppBadge variant="info">
+              All Holdings Optimal
+            </AppBadge>
+          )
         }
         secondaryMetrics={[
           { label: 'Estimated Tax', value: formatINR(taxData.totalEstimatedTax) },
@@ -123,9 +129,9 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
                       <h4 className="text-sm font-bold text-[var(--text-primary)] truncate">
                         {opp.holding.ticker}
                       </h4>
-                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                      <AppBadge variant="info">
                         {tag}
-                      </span>
+                      </AppBadge>
                     </div>
                     <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
                       {opp.holding.qty} shares &bull; Value {formatINR(opp.holding.currentValue)}
@@ -134,7 +140,7 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2.5 shrink-0">
                   <div className="text-right">
                     <div className="text-sm font-bold text-[var(--negative)] tnum">
                       -{formatINR(loss)}
@@ -143,7 +149,13 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
                       Save ~{formatINR(taxSaved)}
                     </div>
                   </div>
-                  <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-[var(--radius-small)] bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 shadow-xs ios-press cursor-pointer shrink-0"
+                  >
+                    <span>Harvest</span>
+                    <ChevronRight size={12} />
+                  </button>
                 </div>
               </div>
             );
