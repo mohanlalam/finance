@@ -181,9 +181,11 @@ To maintain a compact, crisp financial interface, corner radii and shadows are s
 * **Shadow Tokens**:
   * `--shadow-card`: `0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95)` (Light) / `0 1px 3px rgba(0,0,0,0.4), 0 6px 20px rgba(0,0,0,0.35)` (Dark).
   * `--shadow-floating`: `0 12px 32px -4px rgba(15,23,42,0.12)` (Light) / `0 16px 40px rgba(0,0,0,0.65)` (Dark) for modals and dropdown menus.
-  * **Liquid Glass Dock (`--nav-glass-*`, `--nav-selected-*`)**:
-    * Light Mode: Tinted pink/white/blue gradient glass with a bright specular border and soft floating elevation.
-    * Dark Mode: Tinted pink/navy/cyan gradient glass with a subtle selected tab lens for iOS 27-style selection.
+  * **Liquid Glass Dock (iOS 26 Concave Inset — `--nav-glass-*`, `--nav-tab-idle-*`, `--nav-selected-*`, `--nav-icon-plate-*`)**:
+    * **Dock Glass**: Warm translucent fill (light: `rgba(235,228,220,0.52)`, dark: `rgba(18,18,22,0.62)`) with `blur(28px) saturate(1.8)`.
+    * **Idle Lozenges**: All tabs render subtle glass capsules (`--nav-tab-idle-bg/border/shadow`) — always visible, creating per-tab separation.
+    * **Concave Active Well**: Active tab darkens with inset shadows (`--nav-selected-shadow`) for pressed-into-glass depth.
+    * **Icon Plate**: `--nav-icon-plate-bg` rounded-rect behind active icon for depth separation.
 
 * **Z-Index Scale**:
   * `--z-base`: `1` (Normal content flow)
@@ -430,7 +432,7 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   * Collapsible quick category cards displaying total balance, asset count, and daily change per category.
   * Single-pass `useMemo` computation loop ensuring smooth 60FPS scrolling.
 
-### Mobile Bottom Navigation Bar (Liquid Glass Inspired Floating Island)
+### Mobile Bottom Navigation Bar (iOS 26 Liquid Glass Concave Inset Dock)
 
 * **Component**: `MobileBottomNav.tsx`
 * **Floating Island Dock Geometry**:
@@ -438,23 +440,28 @@ The mobile view adapts to viewports under `768px`, substituting sidebars with bo
   * Safe-Area Lift: `padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px)`, `padding-left: 12px`, `padding-right: 12px`. Lifts the dock cleanly off the display edge and iOS home indicator.
   * Dock Pill Constraint: `max-width: 440px`, `margin: 0 auto`, `height: 58px`, `border-radius: 29px` (`--radius-liquid-pill`), `padding: 4px`, `pointer-events: auto`.
   * Scroll-Aware Minimization: Automatically hides smoothly on scroll down (`transform: translateY(calc(100% + 24px))`, `opacity: 0`) with Apple spring curve `cubic-bezier(0.16, 1, 0.3, 1)`, and restores instantly on scroll up or near page top (`scrollY < 40`). Tracks scroll position per container via `WeakMap<Element, number>` with window fallback to eliminate multi-container jump glitches.
-* **Liquid Glass Material Optics**:
-  * Glass Surface: `background: var(--nav-glass-bg)`.
-  * Natural Optical Diffusion: `backdrop-filter: blur(20px) saturate(1.8)` with `-webkit-backdrop-filter` parity.
+* **Liquid Glass Material Optics (iOS 26 Authentic)**:
+  * Glass Surface: `background: var(--nav-glass-bg)` — warm translucent fill (light: `rgba(235, 228, 220, 0.52)`, dark: `rgba(18, 18, 22, 0.62)`) for high content passthrough.
+  * Natural Optical Diffusion: `backdrop-filter: blur(28px) saturate(1.8)` with `-webkit-backdrop-filter` parity.
   * Specular Glass Edge: `border: 0.5px solid var(--nav-glass-border)`.
   * Floating Elevation Shadow: `box-shadow: var(--nav-glass-shadow)`.
-* **Tab Item State & Interaction (Concentric Liquid Glass Lens Standard)**:
-  * Selection Model: Shared floating glass dock with concentric selected tab lens (25px inner radius nesting smoothly within 29px outer dock curve with uniform 4px margin).
-  * Active Tab: Filled SF Symbol glyph in `var(--accent-blue)` (`size: 21px`) inside the selected lens, paired with clean neutral label (`10.5px`, `fontWeight: 500`, `color: 'var(--accent-blue)'`).
-  * Inactive Tab: Outline SF Symbol glyph and label in `var(--text-secondary)` (`size: 21px`, `opacity: 0.7`, `fontWeight: 500`).
+* **Tab Glass Lozenge System (All Tabs Have Lozenges)**:
+  * **Idle Lozenges (always visible)**: Every tab, active or inactive, renders a subtle glass capsule using `--nav-tab-idle-bg` (light: `rgba(255,255,255,0.38)`, dark: `rgba(255,255,255,0.065)`), `--nav-tab-idle-border`, and `--nav-tab-idle-shadow` with soft inner highlight.
+  * **Concave Inset Active Well**: Active tab lozenge switches to `--nav-selected-bg` (light: `rgba(0,0,0,0.085)`, dark: `rgba(0,0,0,0.32)`) with strong inset box-shadows (`--nav-selected-shadow`: `inset 0 2px 5px rgba(0,0,0,0.14)`) creating a pressed-into-glass concave depth illusion.
+  * **Colored Icon Plate**: A `32×28px` rounded-rect (`border-radius: 9px`) with `--nav-icon-plate-bg` sits behind the active icon, providing depth separation.
+  * **Per-Tab Accent Colors**: Each tab has its own unique active accent color (Home=`#0284c7` blue, Stocks=`#059669` emerald, Funds=`#7c3aed` violet, Deposits=`#0891b2` teal, More=`#e11d48` rose).
+  * Concentric curvature: First tab `borderRadius: 25px 20px 20px 25px`, last tab `20px 25px 25px 20px`, middle tabs `20px`.
+* **Tab Item State & Interaction**:
+  * Active Tab: Filled SF Symbol glyph in per-tab accent color (`size: 21px`) inside the concave well and icon plate, paired with semibold label (`10px`, `fontWeight: 600`).
+  * Inactive Tab: Outline SF Symbol glyph and label in `var(--text-secondary)` (`size: 21px`, `opacity: 0.55`, `fontWeight: 500`).
   * Tactile Feedback: `.ios-press` scale transition on tap (`scale(0.965)`).
   * Haptic Feedback: Triggers `triggerHaptic('selection')` on tab tap.
 * **Navigation Items**:
-  1. **Home**: Directs to overall mobile summary view. Features notification count badge (`#ef4444` anchored badge with clean 1.5px rim: `box-shadow: 0 0 0 1.5px var(--surface-solid)`).
-  2. **Stocks**: Directly switches to Stocks & ETF holdings with live ticker status.
-  3. **Funds**: Directly switches to Mutual Fund SIP accounts.
-  4. **Deposits**: Directly switches to Fixed Deposits registry.
-  5. **More (Liquid Glass Drawer)**:
+  1. **Home** (accent `#0284c7`): Directs to overall mobile summary view. Features notification count badge (`#ef4444` anchored badge with clean 1.5px rim: `box-shadow: 0 0 0 1.5px var(--surface-solid)`).
+  2. **Stocks** (accent `#059669`): Directly switches to Stocks & ETF holdings with live ticker status.
+  3. **Funds** (accent `#7c3aed`): Directly switches to Mutual Fund SIP accounts.
+  4. **Deposits** (accent `#0891b2`): Directly switches to Fixed Deposits registry.
+  5. **More** (accent `#e11d48`, Liquid Glass Drawer):
      - Header: Displays title, subtext, and circular frosted close button with Escape key & backdrop click handling.
      - Body & Scroll: Flexible `max-height: 88vh` with safe-area bottom padding `max(env(safe-area-inset-bottom, 0px), 16px)`, `border-radius: 28px 28px 0 0` (`--radius-liquid-drawer`), `backdrop-filter: blur(32px) saturate(1.8)`, `border-top: 0.5px solid rgba(255,255,255,0.25)`, and automatic `document.body.style.overflow = 'hidden'` scroll locking. All categories and Smart Import fit fully without clipping or dead bottom space.
      - Smart Import Banner: Refined functional glass action card with subtle blue/violet accent border and icon tile.

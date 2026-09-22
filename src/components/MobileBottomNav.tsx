@@ -36,12 +36,12 @@ const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.Reac
   { id: 'tax',         label: 'Tax Harvesting',       subtext: 'LTCG / STCG tax optimisation',       icon: <TrendingUp size={18} aria-hidden="true" />, color: '#10b981' },
 ];
 
-/* ── Main tab list ───────────────────────────────────────────────────────── */
-const mainTabs: { id: AssetTab; label: string }[] = [
-  { id: 'home',   label: 'Home' },
-  { id: 'stocks', label: 'Stocks' },
-  { id: 'sip',    label: 'Funds' },
-  { id: 'fd',     label: 'Deposits' },
+/* ── Main tab list with per-tab accent colors (iOS 26 style) ─────────── */
+const mainTabs: { id: AssetTab; label: string; accent: string }[] = [
+  { id: 'home',   label: 'Home',     accent: '#0284c7' },
+  { id: 'stocks', label: 'Stocks',   accent: '#059669' },
+  { id: 'sip',    label: 'Funds',    accent: '#7c3aed' },
+  { id: 'fd',     label: 'Deposits', accent: '#0891b2' },
 ];
 
 /* ── Filled glyphs for active states (Apple SF Symbols style) ─────────────── */
@@ -78,15 +78,17 @@ function LandmarkFilled({ size = 22 }: { size?: number }) {
   );
 }
 
-/* ── Individual tab button — Liquid Glass inspired style ─────────────────── */
+/* ── Individual tab button — iOS 26 Liquid Glass Concave Inset ───────────── */
 function TabBtn({
-  label, isActive, badge, onClick, icon, activeIcon, isFirst, isLast,
+  label, isActive, badge, onClick, icon, activeIcon, isFirst, isLast, accent,
 }: {
   id: AssetTab; label: string; isActive: boolean;
   badge?: number; onClick: () => void;
   icon: React.ReactNode; activeIcon: React.ReactNode;
   isFirst?: boolean; isLast?: boolean;
+  accent?: string;
 }) {
+  const activeColor = accent || 'var(--accent-blue)';
   return (
     <button
       type="button"
@@ -101,9 +103,9 @@ function TabBtn({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 3,
-        paddingTop: 4,
-        paddingBottom: 4,
+        gap: 2,
+        paddingTop: 3,
+        paddingBottom: 3,
         minWidth: 56,
         height: '100%',
         background: 'none',
@@ -115,7 +117,7 @@ function TabBtn({
         touchAction: 'manipulation',
       }}
     >
-      {/* Active Liquid Glass lens — concentric with outer dock pill */}
+      {/* Glass lozenge — always visible (idle or active concave inset) */}
       <span
         aria-hidden="true"
         style={{
@@ -129,17 +131,17 @@ function TabBtn({
             : isLast
             ? '20px 25px 25px 20px'
             : 20,
-          background: isActive ? 'var(--nav-selected-bg)' : 'transparent',
-          border: isActive ? '0.5px solid var(--nav-selected-border)' : 'none',
-          boxShadow: isActive ? 'var(--nav-selected-shadow)' : 'none',
-          opacity: isActive ? 1 : 0,
-          transform: isActive ? 'scale(1)' : 'scale(0.92)',
-          transition: 'opacity 0.18s ease, transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          background: isActive ? 'var(--nav-selected-bg)' : 'var(--nav-tab-idle-bg)',
+          border: isActive
+            ? '0.5px solid var(--nav-selected-border)'
+            : '0.5px solid var(--nav-tab-idle-border)',
+          boxShadow: isActive ? 'var(--nav-selected-shadow)' : 'var(--nav-tab-idle-shadow)',
+          transition: 'background 0.22s ease, border-color 0.22s ease, box-shadow 0.26s ease',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Icon — SF Symbol active filled tint vs inactive outline */}
+      {/* Icon wrapper with colored plate behind active icon */}
       <span
         style={{
           position: 'relative',
@@ -147,13 +149,26 @@ function TabBtn({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
-          opacity: isActive ? 1 : 0.7,
-          transform: isActive ? 'scale(1.04)' : 'scale(1)',
-          transition: 'color 0.18s ease, opacity 0.18s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          width: 32,
+          height: 28,
+          borderRadius: 9,
+          background: isActive ? 'var(--nav-icon-plate-bg)' : 'transparent',
+          transition: 'background 0.22s ease',
         }}
       >
-        {isActive ? activeIcon : icon}
+        <span
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: isActive ? activeColor : 'var(--text-secondary)',
+            opacity: isActive ? 1 : 0.55,
+            transform: isActive ? 'scale(1.06)' : 'scale(1)',
+            transition: 'color 0.18s ease, opacity 0.18s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
+        >
+          {isActive ? activeIcon : icon}
+        </span>
 
         {/* Badge — cleanly anchored to icon without loud glow */}
         {badge != null && badge > 0 && (
@@ -162,8 +177,8 @@ function TabBtn({
             aria-label={`${badge} notifications`}
             style={{
               position: 'absolute',
-              top: -3,
-              right: -5,
+              top: -2,
+              right: -4,
               minWidth: 15,
               height: 15,
               borderRadius: 999,
@@ -183,14 +198,14 @@ function TabBtn({
         )}
       </span>
 
-      {/* Label — Clean Apple HIG typography with stable neutral tracking */}
+      {/* Label — Clean Apple HIG typography */}
       <span
         style={{
-          fontSize: 10.5,
-          fontWeight: 500,
+          fontSize: 10,
+          fontWeight: isActive ? 600 : 500,
           letterSpacing: 0,
-          color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
-          opacity: isActive ? 1 : 0.7,
+          color: isActive ? activeColor : 'var(--text-secondary)',
+          opacity: isActive ? 1 : 0.55,
           transition: 'color 0.18s ease, opacity 0.18s ease',
           lineHeight: 1,
           whiteSpace: 'nowrap',
@@ -204,9 +219,10 @@ function TabBtn({
   );
 }
 
-/* ── "More" tab button ──────────────────────────────────────────────────── */
+/* ── "More" tab button — iOS 26 Liquid Glass Concave Inset ────────────── */
 function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: boolean; onClick: () => void }) {
   const lit = isActive || isOpen;
+  const activeColor = '#e11d48'; // Rose accent for More
   return (
     <button
       type="button"
@@ -222,9 +238,9 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 3,
-        paddingTop: 4,
-        paddingBottom: 4,
+        gap: 2,
+        paddingTop: 3,
+        paddingBottom: 3,
         minWidth: 56,
         height: '100%',
         background: 'none',
@@ -236,6 +252,7 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
         touchAction: 'manipulation',
       }}
     >
+      {/* Glass lozenge — always visible (idle or concave inset) */}
       <span
         aria-hidden="true"
         style={{
@@ -245,16 +262,17 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
           left: 2,
           right: 0,
           borderRadius: '20px 25px 25px 20px',
-          background: lit ? 'var(--nav-selected-bg)' : 'transparent',
-          border: lit ? '0.5px solid var(--nav-selected-border)' : 'none',
-          boxShadow: lit ? 'var(--nav-selected-shadow)' : 'none',
-          opacity: lit ? 1 : 0,
-          transform: lit ? 'scale(1)' : 'scale(0.92)',
-          transition: 'opacity 0.18s ease, transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          background: lit ? 'var(--nav-selected-bg)' : 'var(--nav-tab-idle-bg)',
+          border: lit
+            ? '0.5px solid var(--nav-selected-border)'
+            : '0.5px solid var(--nav-tab-idle-border)',
+          boxShadow: lit ? 'var(--nav-selected-shadow)' : 'var(--nav-tab-idle-shadow)',
+          transition: 'background 0.22s ease, border-color 0.22s ease, box-shadow 0.26s ease',
           pointerEvents: 'none',
         }}
       />
 
+      {/* Icon wrapper with colored plate */}
       <span
         style={{
           position: 'relative',
@@ -262,22 +280,35 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: lit ? 'var(--accent-blue)' : 'var(--text-secondary)',
-          opacity: lit ? 1 : 0.7,
-          transform: isOpen ? 'rotate(90deg) scale(1.04)' : lit ? 'scale(1.04)' : 'scale(1)',
-          transition: 'color 0.18s ease, opacity 0.18s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          width: 32,
+          height: 28,
+          borderRadius: 9,
+          background: lit ? 'var(--nav-icon-plate-bg)' : 'transparent',
+          transition: 'background 0.22s ease',
         }}
       >
-        <Menu size={21} aria-hidden="true" />
+        <span
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: lit ? activeColor : 'var(--text-secondary)',
+            opacity: lit ? 1 : 0.55,
+            transform: isOpen ? 'rotate(90deg) scale(1.06)' : lit ? 'scale(1.06)' : 'scale(1)',
+            transition: 'color 0.18s ease, opacity 0.18s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
+        >
+          <Menu size={21} aria-hidden="true" />
+        </span>
       </span>
 
       <span
         style={{
-          fontSize: 10.5,
-          fontWeight: 500,
+          fontSize: 10,
+          fontWeight: lit ? 600 : 500,
           letterSpacing: 0,
-          color: lit ? 'var(--accent-blue)' : 'var(--text-secondary)',
-          opacity: lit ? 1 : 0.7,
+          color: lit ? activeColor : 'var(--text-secondary)',
+          opacity: lit ? 1 : 0.55,
           transition: 'color 0.18s ease, opacity 0.18s ease',
           lineHeight: 1,
           whiteSpace: 'nowrap',
@@ -716,8 +747,8 @@ function MobileBottomNav({
             margin: '0 auto',
             pointerEvents: 'auto',
             background: 'var(--nav-glass-bg)',
-            backdropFilter: 'blur(20px) saturate(1.8)',
-            WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+            backdropFilter: 'blur(28px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(28px) saturate(1.8)',
             borderRadius: 29,
             border: '0.5px solid var(--nav-glass-border)',
             boxShadow: 'var(--nav-glass-shadow)',
@@ -741,6 +772,7 @@ function MobileBottomNav({
                 isActive={activeAsset === tab.id}
                 isFirst={idx === 0}
                 isLast={false}
+                accent={tab.accent}
                 badge={tab.id === 'home' && alertCount > 0 ? alertCount : undefined}
                 onClick={() => { triggerHaptic('selection'); onChangeAsset(tab.id); if (isDrawerOpen) closeDrawer(); }}
                 icon={
