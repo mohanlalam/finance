@@ -11,12 +11,13 @@ import {
   DocumentPayload,
 } from '../../types/portfolio';
 import { useDocumentStorage } from '../../hooks/useDocumentStorage';
-import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Paperclip, Shield } from '../icons/AppIcons';
+import { Upload, Trash2, FileText, Folder, FolderOpen, ExternalLink, Paperclip, Shield, Plus } from '../icons/AppIcons';
 import ConfirmModal from '../ConfirmModal';
 import { DocumentUploadModal } from './DocumentUploadModal';
 import { useIsMutating } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import MobileAssetRegistry from '../ui/MobileAssetRegistry';
 import { FixedSizeList as List } from 'react-window';
 import AssetCardSkeleton from '../AssetCardSkeleton';
 import EmptyState from '../EmptyState';
@@ -335,6 +336,190 @@ export default React.memo(function DocumentVaultView({
     } finally {
       setIsDeleting(false);
     }
+  }
+
+  const [mobileSearch, setMobileSearch] = useState('');
+
+  const mobileFilteredDocs = useMemo(() => {
+    let docs = selectedMember === 'all'
+      ? allFamilyDocs
+      : allFamilyDocs.filter((d) => d.portfolioName === selectedMember);
+    if (mobileSearch.trim()) {
+      const q = mobileSearch.toLowerCase();
+      docs = docs.filter((d) =>
+        d.name.toLowerCase().includes(q) ||
+        (d.file_type && d.file_type.toLowerCase().includes(q)) ||
+        (d.asset_id && (assetLabelMap.get(d.asset_id) || '').toLowerCase().includes(q))
+      );
+    }
+    return docs;
+  }, [allFamilyDocs, selectedMember, mobileSearch, assetLabelMap]);
+
+  if (isMobile) {
+    const activeMember = selectedMember === 'all' ? null : familyDocSummary.memberBreakdown.find((m) => m.name === selectedMember);
+    const displayDocs = mobileFilteredDocs;
+
+    const filterOptions = [
+      { id: 'all', label: 'All Family', count: familyDocSummary.totalDocs },
+      ...familyDocSummary.memberBreakdown.map((m) => ({
+        id: m.name,
+        label: m.label,
+        count: m.count,
+      })),
+    ];
+
+    return (
+      <>
+        <input
+          id="vault-file-upload-mobile"
+          ref={fileInputRef}
+          type="file"
+          className="sr-only"
+          onChange={handleFilePick}
+          accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.xlsx,.csv"
+        />
+        <MobileAssetRegistry
+          title={selectedMember === 'all' ? 'Family Document Vault' : `${activeMember?.label || ''} Documents`}
+          heroValue={`${displayDocs.length} Files`}
+          heroSubtitle="Zero-knowledge AES-GCM-256 encrypted records"
+          icon={<FileText size={16} />}
+          primaryBadge={
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+              familyDocSummary.expiringSoonCount > 0 ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300' : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+            }`}>
+              {familyDocSummary.expiringSoonCount > 0 ? `⚠️ ${familyDocSummary.expiringSoonCount} Expiring` : '✓ All Current'}
+            </span>
+          }
+          secondaryMetrics={[
+            { label: 'Asset Linked', value: `${familyDocSummary.linkedDocs} Files` },
+            {
+              label: 'General Records',
+              value: `${familyDocSummary.generalDocs} Files`,
+            },
+          ]}
+          filterOptions={filterOptions}
+          selectedFilter={selectedMember}
+          onSelectFilter={setSelectedMember}
+          searchPlaceholder="Search documents or linked assets..."
+          searchValue={mobileSearch}
+          onSearchChange={setMobileSearch}
+          isEmpty={displayDocs.length === 0}
+          emptyState={
+            <EmptyState
+              type="documents"
+              title="No documents found"
+              description={selectedMember === 'all' ? 'Upload deeds, insurance policies, or tax statements.' : `No documents found for ${activeMember?.label}.`}
+              actionButton={
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-cyan)] text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] ios-press cursor-pointer"
+                >
+                  <Plus size={13} />
+                  Upload Document
+                </button>
+              }
+            />
+          }
+        >
+          <div className="bg-[var(--surface)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] shadow-xs">
+            {displayDocs.map((doc) => {
+              const linkedLabel = doc.asset_id ? assetLabelMap.get(doc.asset_id) || null : null;
+              const isOpening = openingDocId === doc.id;
+
+              return (
+                <div
+                  key={doc.id}
+                  onClick={() => handleOpenDocument(doc)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleOpenDocument(doc);
+                    }
+                  }}
+                  className="p-3.5 flex items-center justify-between gap-3 min-h-[56px] ios-press cursor-pointer hover:bg-[var(--surface-secondary)]/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-[var(--surface-secondary)] text-[var(--accent-blue)]">
+                      {isOpening ? (
+                        <span className="w-4 h-4 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <FileText size={18} />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
+                        {doc.name}
+                      </h4>
+                      <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
+                        {doc.file_type?.toUpperCase() || 'DOCUMENT'}
+                        {linkedLabel ? ` &bull; ${linkedLabel}` : ' &bull; General'}
+                        {doc.expiry_date && ` &bull; Exp: ${doc.expiry_date}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenDocument(doc)}
+                      disabled={isOpening}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
+                      title="Open Document"
+                    >
+                      <ExternalLink size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(doc)}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-tertiary)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors ios-press cursor-pointer"
+                      title="Delete Document"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </MobileAssetRegistry>
+
+        <DocumentUploadModal
+          isOpen={showLinkModal && !!pendingFile}
+          onClose={() => setShowLinkModal(false)}
+          folderLabel={FOLDERS.find((f) => f.key === activeFolder)?.label || 'Folder'}
+          activeFolder={activeFolder}
+          pendingFile={pendingFile}
+          portfolioOptions={portfolioOptions}
+          assetOptions={assetOptions}
+          formPortfolio={formPortfolio}
+          setFormPortfolio={setFormPortfolio}
+          documentName={documentName}
+          setDocumentName={setDocumentName}
+          expiryDate={expiryDate}
+          setExpiryDate={setExpiryDate}
+          linkedAssetId={linkedAssetId}
+          setLinkedAssetId={setLinkedAssetId}
+          uploadError={uploadError}
+          uploading={uploading}
+          onUpload={handleUpload}
+        />
+
+        <ConfirmModal
+          isOpen={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={handleConfirmDelete}
+          title="Delete Document"
+          message={`Delete "${deleteTarget?.name}"? This removes the storage file and the record.`}
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          variant="danger"
+          isLoading={isDeleting}
+        />
+      </>
+    );
   }
 
   return (

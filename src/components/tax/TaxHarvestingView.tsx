@@ -4,6 +4,9 @@ import { calculateTaxHarvesting, TAX_DISCLAIMER } from '../../domains/taxation/c
 import { formatINR } from '../../utils/formatters';
 import { TrendingDown, ShieldAlert } from '../icons/AppIcons';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import EmptyState from '../EmptyState';
 
 interface TaxHarvestingViewProps {
   portfolio: Portfolio | null;
@@ -31,6 +34,119 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
   }, [portfolio, portfolios]);
 
   const taxData = React.useMemo(() => calculateTaxHarvesting(holdings), [holdings]);
+
+  const isMobile = useIsMobile();
+  const [mobileSearch, setMobileSearch] = React.useState('');
+  const [mobileFilter, setMobileFilter] = React.useState('all');
+
+  const filteredOpportunities = React.useMemo(() => {
+    let opps = taxData.opportunities;
+    if (mobileFilter === 'stcg') {
+      opps = opps.filter((o) => !o.isLTCG && !o.isDebtOrGold);
+    } else if (mobileFilter === 'ltcg') {
+      opps = opps.filter((o) => o.isLTCG);
+    } else if (mobileFilter === 'slab') {
+      opps = opps.filter((o) => o.isDebtOrGold);
+    }
+
+    if (mobileSearch.trim()) {
+      const q = mobileSearch.toLowerCase();
+      opps = opps.filter(
+        (o) =>
+          o.holding.ticker.toLowerCase().includes(q) ||
+          (o.holding.stockName && o.holding.stockName.toLowerCase().includes(q))
+      );
+    }
+    return opps;
+  }, [taxData.opportunities, mobileFilter, mobileSearch]);
+
+  if (isMobile) {
+    const filterOptions = [
+      { id: 'all', label: 'All', count: taxData.opportunities.length },
+      { id: 'stcg', label: 'STCG', count: taxData.opportunities.filter((o) => !o.isLTCG && !o.isDebtOrGold).length },
+      { id: 'ltcg', label: 'LTCG', count: taxData.opportunities.filter((o) => o.isLTCG).length },
+    ];
+
+    return (
+      <MobileAssetRegistry
+        title="Tax Loss Harvesting"
+        heroValue={formatINR(taxData.harvestableLosses)}
+        heroSubtitle="Offset taxable capital gains before March 31st"
+        icon={<TrendingDown size={16} />}
+        primaryBadge={
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+            Save up to {formatINR(taxData.potentialTaxSavings)}
+          </span>
+        }
+        secondaryMetrics={[
+          { label: 'Estimated Tax', value: formatINR(taxData.totalEstimatedTax) },
+          {
+            label: 'LTCG Exemption',
+            value: `${formatINR(taxData.ltcgExemptionUsed)} / 1.25L`,
+          },
+        ]}
+        filterOptions={filterOptions}
+        selectedFilter={mobileFilter}
+        onSelectFilter={setMobileFilter}
+        searchPlaceholder="Search opportunities by ticker..."
+        searchValue={mobileSearch}
+        onSearchChange={setMobileSearch}
+        isEmpty={filteredOpportunities.length === 0}
+        emptyState={
+          <EmptyState
+            type="default"
+            title="No harvesting opportunities"
+            description="All your holdings are currently profitable or no tax-loss harvesting candidates found."
+          />
+        }
+      >
+        <div className="bg-[var(--surface)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] shadow-xs">
+          {filteredOpportunities.map((opp) => {
+            const memberName = opp.holding.portfolio_label || opp.holding.portfolio_name;
+            const tag = opp.isDebtOrGold ? 'Slab' : opp.isLTCG ? 'LTCG' : 'STCG';
+            const loss = Math.abs(opp.unrealizedPnL);
+            const taxSaved = loss * (opp.isDebtOrGold ? 0.30 : opp.isLTCG ? 0.125 : 0.20);
+
+            return (
+              <div
+                key={`tax-${opp.holding.id || opp.holding.ticker}`}
+                className="p-3.5 flex items-center justify-between gap-3 min-h-[56px] ios-press hover:bg-[var(--surface-secondary)]/50 transition-colors"
+              >
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-rose-500/15 text-rose-600 dark:text-rose-400">
+                    <TrendingDown size={18} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h4 className="text-sm font-bold text-[var(--text-primary)] truncate">
+                        {opp.holding.ticker}
+                      </h4>
+                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                        {tag}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
+                      {opp.holding.qty} shares &bull; Value {formatINR(opp.holding.currentValue)}
+                      {memberName && ` &bull; ${memberName}`}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <div className="text-sm font-bold text-[var(--negative)] tnum">
+                    -{formatINR(loss)}
+                  </div>
+                  <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 tnum mt-0.5">
+                    Save ~{formatINR(taxSaved)}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </MobileAssetRegistry>
+    );
+  }
 
   return (
     <div className="space-y-4 max-w-5xl mx-auto pb-24 sm:pb-12">

@@ -13,7 +13,10 @@ import { getRDInvestedAmount, getRDEffectiveValue } from '../../domains/assets/r
 import { formatINR } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { Clock } from '../icons/AppIcons';
+import { Clock, Plus } from '../icons/AppIcons';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import EmptyState from '../EmptyState';
 
 interface PortfolioOption {
   name: string;
@@ -256,6 +259,144 @@ export function RDView({
       setDeleting(false);
     }
   }, [confirmDeleteItem, onDelete, deleteRDAccount, addToast, setConfirmDeleteItem]);
+
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    const activeMember = selectedMember === 'all' ? null : familyRDSummary.memberBreakdown.find((m) => m.name === selectedMember);
+    const displayCurrent = selectedMember === 'all' ? familyRDSummary.totalCurrent : (activeMember?.current || 0);
+    const displayInvested = selectedMember === 'all' ? familyRDSummary.totalInvested : (activeMember?.invested || 0);
+    const displayMonthly = selectedMember === 'all' ? familyRDSummary.totalMonthly : (activeMember?.monthly || 0);
+    const displayAccrued = Math.max(0, displayCurrent - displayInvested);
+    const displayAccounts = activeAccountsForMember;
+
+    const filterOptions = [
+      { id: 'all', label: 'All Family', count: familyRDSummary.totalCount },
+      ...familyRDSummary.memberBreakdown.map((m) => ({
+        id: m.name,
+        label: m.label,
+        count: m.count,
+      })),
+    ];
+
+    return (
+      <>
+        <MobileAssetRegistry
+          title={selectedMember === 'all' ? 'Total Recurring Deposits' : `${activeMember?.label || ''} RD Accounts`}
+          heroValue={formatINR(displayCurrent)}
+          heroSubtitle={`Monthly Commitment: ${formatINR(displayMonthly)}/mo`}
+          icon={<Clock size={16} />}
+          primaryBadge={
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-700 dark:text-orange-300">
+              {familyRDSummary.activeCount} Active RDs
+            </span>
+          }
+          secondaryMetrics={[
+            { label: 'Total Invested', value: formatINR(displayInvested) },
+            {
+              label: 'Accrued Interest',
+              value: `+${formatINR(displayAccrued)}`,
+              isPositive: true,
+            },
+          ]}
+          filterOptions={filterOptions}
+          selectedFilter={selectedMember}
+          onSelectFilter={setSelectedMember}
+          searchPlaceholder="Search deposits by bank..."
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          isEmpty={displayAccounts.length === 0}
+          emptyState={
+            <EmptyState
+              type="rd"
+              title="No recurring deposits"
+              description={selectedMember === 'all' ? 'Add monthly recurring deposit accounts to track compounding.' : `No RDs recorded for ${activeMember?.label}.`}
+              actionButton={
+                <button
+                  onClick={openAdd}
+                  className="inline-flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] ios-press cursor-pointer"
+                >
+                  <Plus size={13} />
+                  Add Recurring Deposit
+                </button>
+              }
+            />
+          }
+        >
+          <div className="bg-[var(--surface)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] shadow-xs">
+            {displayAccounts.map((rd) => {
+              const effVal = getRDEffectiveValue(rd);
+              const monthly = Number(rd.monthly_deposit) || 0;
+              const isMatured = rd.status === 'matured';
+
+              return (
+                <div
+                  key={rd.id}
+                  onClick={() => openEdit(rd)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openEdit(rd);
+                    }
+                  }}
+                  className="p-3.5 flex items-center justify-between gap-3 min-h-[56px] ios-press cursor-pointer hover:bg-[var(--surface-secondary)]/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                      isMatured ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-orange-500/15 text-orange-600 dark:text-orange-400'
+                    }`}>
+                      <Clock size={18} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
+                        {rd.bank_name}
+                      </h4>
+                      <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
+                        {formatINR(monthly)}/mo &bull; {rd.interest_rate}% p.a.
+                        {rd.maturity_date && ` &bull; Matures ${rd.maturity_date}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-bold text-[var(--text-primary)] tnum">
+                      {formatINR(effVal)}
+                    </div>
+                    <div className={`text-xs font-semibold tnum mt-0.5 ${isMatured ? 'text-[var(--positive)]' : 'text-[var(--text-tertiary)]'}`}>
+                      {isMatured ? 'Matured' : 'Active'}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </MobileAssetRegistry>
+
+        <RDFormModal
+          isOpen={showModal}
+          onClose={closeModal}
+          editingAccount={editingItem}
+          portfolioName={selectedMember !== 'all' ? selectedMember : (portfolioName !== 'all' ? portfolioName : (portfolios?.[0]?.name || 'personal'))}
+          portfolioOptions={portfolioOptions}
+          onAdd={handleAddRD}
+          onUpdate={handleUpdateRD}
+        />
+
+        <ConfirmModal
+          isOpen={!!confirmDeleteItem}
+          onClose={() => setConfirmDeleteItem(null)}
+          onConfirm={() => { void handleDelete(); }}
+          title="Delete Recurring Deposit"
+          message={confirmDeleteItem ? `Are you sure you want to delete this RD at ${confirmDeleteItem.bank_name}? This action cannot be undone.` : ''}
+          confirmLabel="Delete"
+          variant="danger"
+          isLoading={deleting}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="space-y-3 sm:space-y-4">

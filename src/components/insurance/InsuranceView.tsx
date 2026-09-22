@@ -13,7 +13,10 @@ import { calculateInsuranceTotals } from '../../utils/insuranceUtils';
 import { formatINR } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { Shield } from '../icons/AppIcons';
+import { Shield, Plus } from '../icons/AppIcons';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import EmptyState from '../EmptyState';
 
 interface PortfolioOption {
   name: string;
@@ -198,6 +201,164 @@ export function InsuranceView({
       setDeleting(false);
     }
   }, [onDelete, addToast, setConfirmDeleteItem]);
+
+  const isMobile = useIsMobile();
+
+  const nearestRenewal = useMemo(() => {
+    const now = Date.now();
+    let nearest: { name: string; days: number } | null = null;
+    for (const p of insurances) {
+      if (p.renewal_date) {
+        const days = Math.ceil((new Date(p.renewal_date).getTime() - now) / (1000 * 60 * 60 * 24));
+        if (days >= 0 && (nearest === null || days < nearest.days)) {
+          nearest = { name: p.policy_name, days };
+        }
+      }
+    }
+    return nearest;
+  }, [insurances]);
+
+  if (isMobile) {
+    const activeMember = selectedMember === 'all' ? null : familyInsuranceSummary.memberBreakdown.find((m) => m.name === selectedMember);
+    const displaySum = selectedMember === 'all' ? familyInsuranceSummary.totalSumAssured : (activeMember?.sumAssured || 0);
+    const displayPremium = selectedMember === 'all' ? familyInsuranceSummary.totalAnnualPremium : (activeMember?.annualPremium || 0);
+    const displayPolicies = activePoliciesForMember;
+
+    const filterOptions = [
+      { id: 'all', label: 'All Family', count: familyInsuranceSummary.totalCount },
+      ...familyInsuranceSummary.memberBreakdown.map((m) => ({
+        id: m.name,
+        label: m.label,
+        count: m.count,
+      })),
+    ];
+
+    return (
+      <>
+        <MobileAssetRegistry
+          title={selectedMember === 'all' ? 'Family Insurance Coverage' : `${activeMember?.label || ''} Policies`}
+          heroValue={formatINR(displaySum)}
+          heroSubtitle={selectedMember === 'all' ? 'Total life, health & general sum assured' : `${displayPolicies.length} policies recorded`}
+          icon={<Shield size={16} />}
+          primaryBadge={
+            nearestRenewal ? (
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                nearestRenewal.days <= 30
+                  ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300'
+                  : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+              }`}>
+                {nearestRenewal.days <= 30 ? `Renewal in ${nearestRenewal.days}d` : `${familyInsuranceSummary.activeCount} Active`}
+              </span>
+            ) : (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-700 dark:text-rose-300">
+                {familyInsuranceSummary.activeCount} Active
+              </span>
+            )
+          }
+          secondaryMetrics={[
+            { label: 'Annual Premium', value: `${formatINR(displayPremium)}/yr` },
+            {
+              label: 'Active Cover',
+              value: `${selectedMember === 'all' ? familyInsuranceSummary.activeCount : (activeMember?.activeCount || 0)} Policies`,
+            },
+          ]}
+          filterOptions={filterOptions}
+          selectedFilter={selectedMember}
+          onSelectFilter={setSelectedMember}
+          searchPlaceholder="Search policies by provider or name..."
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          isEmpty={displayPolicies.length === 0}
+          emptyState={
+            <EmptyState
+              type="insurance"
+              title="No insurance policies"
+              description={selectedMember === 'all' ? 'Add term, health, or vehicle policies to track renewals.' : `No policies recorded for ${activeMember?.label}.`}
+              actionButton={
+                <button
+                  onClick={openAdd}
+                  className="inline-flex items-center gap-1.5 bg-[var(--accent-blue)] text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] ios-press cursor-pointer"
+                >
+                  <Plus size={13} />
+                  Add Policy
+                </button>
+              }
+            />
+          }
+        >
+          <div className="bg-[var(--surface)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] shadow-xs">
+            {displayPolicies.map((policy) => {
+              const sumAssured = Number(policy.sum_assured) || 0;
+              const premium = Number(policy.premium_amount) || 0;
+              const typeLabel = policy.insurance_type ? (policy.insurance_type.charAt(0).toUpperCase() + policy.insurance_type.slice(1)) : 'Policy';
+              return (
+                <div
+                  key={policy.id}
+                  onClick={() => openEdit(policy)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openEdit(policy);
+                    }
+                  }}
+                  className="p-3.5 flex items-center justify-between gap-3 min-h-[56px] ios-press cursor-pointer hover:bg-[var(--surface-secondary)]/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-rose-500/15 text-rose-600 dark:text-rose-400">
+                      <Shield size={18} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
+                        {policy.policy_name}
+                      </h4>
+                      <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
+                        {policy.provider} &bull; {typeLabel}
+                        {policy.renewal_date && ` &bull; Due ${policy.renewal_date}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-bold text-[var(--text-primary)] tnum">
+                      {formatINR(sumAssured)}
+                    </div>
+                    {premium > 0 && (
+                      <div className="text-xs font-semibold text-rose-600 dark:text-rose-400 tnum mt-0.5">
+                        {formatINR(premium)}/yr
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </MobileAssetRegistry>
+
+        <InsuranceFormModal
+          isOpen={showModal}
+          onClose={closeModal}
+          editingPolicy={editingItem}
+          portfolioName={selectedMember !== 'all' ? selectedMember : (portfolioName !== 'all' ? portfolioName : (portfolios?.[0]?.name || 'personal'))}
+          portfolioOptions={portfolioOptions}
+          onAdd={onAdd}
+          onUpdate={onUpdate}
+        />
+
+        <ConfirmModal
+          isOpen={!!confirmDeleteItem}
+          onClose={() => setConfirmDeleteItem(null)}
+          onConfirm={() => { if (confirmDeleteItem) void handleDelete(confirmDeleteItem.id); }}
+          title="Delete Insurance Policy"
+          message={confirmDeleteItem ? `Are you sure you want to delete the policy "${confirmDeleteItem.policy_name}"? This cannot be undone.` : ''}
+          confirmLabel="Delete"
+          variant="danger"
+          isLoading={deleting}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="space-y-3 sm:space-y-4">

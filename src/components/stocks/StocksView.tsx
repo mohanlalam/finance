@@ -7,6 +7,8 @@ import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { calcHoldingTodayPnL } from '../../domains/portfolio/calculations/portfolioTotals';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import MobileAssetRegistry from '../ui/MobileAssetRegistry';
 
 interface PortfolioOption {
   name: string;
@@ -101,6 +103,103 @@ export default function StocksView({
     if (selectedMember === 'all') return null;
     return familyStocksSummary.memberBreakdown.find((m) => m.name === selectedMember) || null;
   }, [selectedMember, familyStocksSummary.memberBreakdown]);
+
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    const currentHoldings = selectedMember === 'all'
+      ? familyStocksSummary.memberBreakdown.flatMap((m) => m.holdings)
+      : (activeMember?.holdings || []);
+
+    const currentInvested = selectedMember === 'all'
+      ? familyStocksSummary.totalInvested
+      : (activeMember?.invested || 0);
+
+    const currentVal = selectedMember === 'all'
+      ? familyStocksSummary.totalCurrent
+      : (activeMember?.current || 0);
+
+    const currentPnL = selectedMember === 'all'
+      ? familyStocksSummary.totalPnL
+      : (activeMember?.pnl || 0);
+
+    const currentPnLPct = selectedMember === 'all'
+      ? familyStocksSummary.totalPnLPct
+      : (activeMember?.pnlPct || 0);
+
+    const currentTodayPnL = selectedMember === 'all'
+      ? familyStocksSummary.totalTodayPnL
+      : (activeMember?.todayPnL || 0);
+
+    const currentTodayPnLPct = selectedMember === 'all'
+      ? familyStocksSummary.totalTodayPnLPct
+      : (activeMember?.todayPnLPct || 0);
+
+    const filterOptions = [
+      { id: 'all', label: 'All Family', count: familyStocksSummary.totalCount },
+      ...familyStocksSummary.memberBreakdown.map((m) => ({
+        id: m.name,
+        label: m.label,
+        count: m.count,
+      })),
+    ];
+
+    return (
+      <MobileAssetRegistry
+        title={selectedMember === 'all' ? 'Total Stocks & ETFs' : `${activeMember?.label || ''} Stocks`}
+        heroValue={formatINR(currentVal)}
+        heroSubtitle={selectedMember === 'all' ? 'Aggregated across family portfolios' : `${currentHoldings.length} stocks recorded`}
+        icon={<TrendingUp size={16} />}
+        primaryBadge={
+          <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full ${
+            currentTodayPnL >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'
+          }`}>
+            <span>{currentTodayPnL >= 0 ? '+' : ''}{formatPercent(currentTodayPnLPct)} Today</span>
+          </span>
+        }
+        secondaryMetrics={[
+          { label: 'Invested', value: formatINR(currentInvested) },
+          {
+            label: 'Total Return',
+            value: `${currentPnL >= 0 ? '+' : ''}${formatINR(currentPnL)}`,
+            subValue: `(${formatPercent(currentPnLPct)})`,
+            isPositive: currentPnL >= 0,
+          },
+        ]}
+        filterOptions={filterOptions}
+        selectedFilter={selectedMember}
+        onSelectFilter={setSelectedMember}
+        isEmpty={currentHoldings.length === 0}
+        emptyState={
+          <EmptyState
+            type="stocks"
+            title="No stock holdings"
+            description={selectedMember === 'all' ? 'Add stocks or ETFs to start tracking live prices.' : `No stocks recorded for ${activeMember?.label}.`}
+            actionButton={
+              <button
+                onClick={onAddHoldingClick}
+                className="inline-flex items-center gap-1.5 bg-[var(--accent-blue)] text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] ios-press cursor-pointer"
+              >
+                <Plus size={13} />
+                Add Holding
+              </button>
+            }
+          />
+        }
+      >
+        <PortfolioTable
+          holdings={currentHoldings}
+          totalInvested={currentInvested}
+          totalCurrentValue={currentVal}
+          totalPnL={currentPnL}
+          totalPnLPercent={currentPnLPct}
+          onDelete={onDeleteStock}
+          onUpdate={onUpdateStock}
+          hideOverviewRibbon={true}
+        />
+      </MobileAssetRegistry>
+    );
+  }
 
   return (
     <div className="space-y-3 sm:space-y-4">

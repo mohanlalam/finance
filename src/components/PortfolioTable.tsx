@@ -97,11 +97,11 @@ interface MobileStockRowProps {
   isDeleting: boolean;
   isBalancesHidden: boolean;
   onSelectDetail: (h: Holding) => void;
-  onStartEdit: (h: Holding) => void;
-  onDelete: (h: Holding) => void;
-  onShare: (h: Holding) => void;
-  canUpdate: boolean;
-  canDelete: boolean;
+  onStartEdit?: (h: Holding) => void;
+  onDelete?: (h: Holding) => void;
+  onShare?: (h: Holding) => void;
+  canUpdate?: boolean;
+  canDelete?: boolean;
   renderValue: (val: number) => React.ReactNode;
   isVirtualized?: boolean;
 }
@@ -111,104 +111,52 @@ const MobileStockRow = React.memo(function MobileStockRow({
   isDeleting,
   isBalancesHidden,
   onSelectDetail,
-  onStartEdit,
-  onDelete,
-  onShare,
-  canUpdate,
-  canDelete,
   renderValue,
   isVirtualized = false,
 }: MobileStockRowProps) {
+  const isUp = (h.todayPnLPercent ?? 0) >= 0;
+
   return (
     <div
-      className={`p-3.5 sm:p-4 flex flex-col gap-2.5 transition-opacity hover:bg-[var(--surface-secondary)]/50 select-none ${isVirtualized ? '' : 'mobile-asset-card'} ${isDeleting ? 'opacity-40' : ''}`}
+      onClick={() => onSelectDetail(h)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelectDetail(h);
+        }
+      }}
+      aria-label={`View details for ${h.stockName}`}
+      className={`p-3.5 rounded-[var(--radius-large)] border border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)] transition-all select-none cursor-pointer ios-press flex items-center justify-between gap-3 min-h-[58px] ${
+        isVirtualized ? '' : 'mobile-asset-card'
+      } ${isDeleting ? 'opacity-40' : ''}`}
     >
-      {/* Row 1: Instrument Name on Left, Current Value on Right */}
-      <div className="flex justify-between items-start gap-2.5">
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-bold text-xs flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
-            {h.ticker.slice(0, 2)}
-          </div>
-          <div className="min-w-0 flex-1">
-            <button
-              onClick={() => onSelectDetail(h)}
-              className="text-sm font-bold text-[var(--text-primary)] tracking-tight block text-left hover:text-[var(--accent-blue)] transition-colors ios-press truncate max-w-full"
-              title={h.stockName}
-            >
-              {h.ticker}
-            </button>
-            <span className="text-xs text-[var(--text-tertiary)] block mt-0.5 truncate max-w-full font-medium">
-              {h.stockName}
-            </span>
-          </div>
+      {/* Left: Round Avatar Badge + Instrument Name & Subtitle */}
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="w-10 h-10 rounded-full bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] font-extrabold text-xs flex items-center justify-center shrink-0 border border-[var(--border-subtle)] uppercase">
+          {h.ticker.slice(0, 2)}
         </div>
-
-        <div className="text-right shrink-0 flex flex-col items-end">
-          <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider block">
-            Current Value
-          </span>
-          <p className="text-sm font-bold text-[var(--text-primary)] tnum mt-0.5">
-            {renderValue(h.currentValue)}
+        <div className="min-w-0 flex-1">
+          <h4 className="text-sm font-bold text-[var(--text-primary)] tracking-tight truncate leading-tight">
+            {h.stockName}
+          </h4>
+          <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
+            {isBalancesHidden ? '•••• shares' : `${formatNumber(h.qty, 0)} shares`} &bull; LTP ₹{formatNumber(h.ltp)}
           </p>
         </div>
       </div>
 
-      {/* Row 2: Shares & LTP on Left, P&L on Right */}
-      <div className="flex justify-between items-center text-xs gap-2 pt-0.5">
-        <div className="text-xs text-[var(--text-secondary)] font-medium flex items-center gap-1.5 flex-wrap">
-          <span>{isBalancesHidden ? '••••••' : `${formatNumber(h.qty, 0)} shares @ ₹${formatNumber(h.avgPrice)}`}</span>
-          <span className="text-[var(--text-tertiary)]">·</span>
-          <span>LTP: <span className="font-bold text-[var(--text-primary)] tnum">₹{formatNumber(h.ltp)}</span></span>
-        </div>
-
-        <div className="flex items-center gap-1.5 justify-end shrink-0">
-          <span className={`text-xs font-bold whitespace-nowrap tnum ${h.unrealizedPnL >= 0 ? 'neon-glow-positive' : 'neon-glow-negative'}`}>
-            {isBalancesHidden ? '••••••' : <>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</>}
-          </span>
-          <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-[var(--radius-pill)] whitespace-nowrap tnum ${h.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
-            <span className="text-[9px] font-bold" aria-hidden="true">{h.pnlPercent >= 0 ? '↗' : '↘'}</span>
-            {isBalancesHidden ? '••••••' : formatPercent(h.pnlPercent)}
-          </span>
-        </div>
-      </div>
-
-      {/* Row 3: Allocation, Today P&L on Left, Actions on Right */}
-      <div className="flex justify-between items-center text-xs text-[var(--text-secondary)] pt-2 border-t border-[var(--border-subtle)] gap-2">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <span>Alloc: <span className="font-bold text-[var(--text-primary)] tnum">{h._allocation.toFixed(1)}%</span></span>
-          <span>Today: <span className={`font-bold tnum ${(h.todayPnLPercent ?? 0) >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>{formatPercent(h.todayPnLPercent ?? 0)}</span></span>
-        </div>
-
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            onClick={() => onShare(h)}
-            className="w-9 h-9 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press transition-colors touch-manipulation cursor-pointer"
-            title="Share holding"
-            aria-label="Share holding summary"
-          >
-            <Share2 size={14} aria-hidden="true" />
-          </button>
-          {canUpdate && (
-            <button
-              onClick={() => onStartEdit(h)}
-              className="w-9 h-9 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press transition-colors touch-manipulation cursor-pointer"
-              aria-label="Edit holding quantity and price"
-              title="Edit holding"
-            >
-              <Pencil size={14} aria-hidden="true" />
-            </button>
-          )}
-          {canDelete && (
-            <button
-              onClick={() => onDelete(h)}
-              className="w-9 h-9 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--negative)] hover:border-[var(--negative)] border border-[var(--border-subtle)] shadow-xs ios-press transition-colors touch-manipulation cursor-pointer"
-              aria-label="Delete holding"
-              title="Delete holding"
-            >
-              <Trash2 size={14} aria-hidden="true" />
-            </button>
-          )}
-        </div>
+      {/* Right: Current Value & Return Badge */}
+      <div className="text-right shrink-0 flex flex-col items-end justify-center">
+        <p className="text-sm font-extrabold text-[var(--text-primary)] tnum leading-tight">
+          {renderValue(h.currentValue)}
+        </p>
+        <span className={`inline-flex items-center gap-0.5 text-xs font-bold tnum mt-0.5 ${
+          isUp ? 'text-[var(--positive)]' : 'text-[var(--negative)]'
+        }`}>
+          <span>{isUp ? '+' : ''}{formatPercent(h.todayPnLPercent ?? 0)} Today</span>
+        </span>
       </div>
     </div>
   );

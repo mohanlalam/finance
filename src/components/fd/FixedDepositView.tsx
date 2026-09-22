@@ -13,7 +13,10 @@ import { getFDInvestedAmount, getFDEffectiveValue } from '../../domains/assets/f
 import { formatINR } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { Landmark } from '../icons/AppIcons';
+import { Landmark, Plus } from '../icons/AppIcons';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import EmptyState from '../EmptyState';
 
 interface PortfolioOption {
   name: string;
@@ -210,6 +213,162 @@ export function FixedDepositView({
       setDeleting(false);
     }
   }, [onDelete, addToast, setConfirmDeleteItem]);
+
+  const isMobile = useIsMobile();
+
+  const nearestMaturity = useMemo(() => {
+    const now = Date.now();
+    let nearest: { bank: string; days: number } | null = null;
+    for (const fd of fixedDeposits) {
+      if (fd.maturity_date && !isDepositMatured(fd)) {
+        const days = Math.ceil((new Date(fd.maturity_date).getTime() - now) / (1000 * 60 * 60 * 24));
+        if (days >= 0 && (nearest === null || days < nearest.days)) {
+          nearest = { bank: fd.bank_name, days };
+        }
+      }
+    }
+    return nearest;
+  }, [fixedDeposits]);
+
+  if (isMobile) {
+    const activeMember = selectedMember === 'all' ? null : familyFDSummary.memberBreakdown.find((m) => m.name === selectedMember);
+    const displayCurrent = selectedMember === 'all' ? familyFDSummary.totalCurrent : (activeMember?.current || 0);
+    const displayPrincipal = selectedMember === 'all' ? familyFDSummary.totalPrincipal : (activeMember?.principal || 0);
+    const displayAccrued = Math.max(0, displayCurrent - displayPrincipal);
+    const displayDeposits = activeDepositsForMember;
+
+    const filterOptions = [
+      { id: 'all', label: 'All Family', count: familyFDSummary.totalCount },
+      ...familyFDSummary.memberBreakdown.map((m) => ({
+        id: m.name,
+        label: m.label,
+        count: m.count,
+      })),
+    ];
+
+    return (
+      <>
+        <MobileAssetRegistry
+          title={selectedMember === 'all' ? 'Total Fixed Deposits' : `${activeMember?.label || ''} Fixed Deposits`}
+          heroValue={formatINR(displayCurrent)}
+          heroSubtitle={selectedMember === 'all' ? 'Aggregated across family portfolios' : `${displayDeposits.length} deposits recorded`}
+          icon={<Landmark size={16} />}
+          primaryBadge={
+            nearestMaturity ? (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                Next: {nearestMaturity.bank} in {nearestMaturity.days}d
+              </span>
+            ) : (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-700 dark:text-cyan-300">
+                {familyFDSummary.activeCount} Active
+              </span>
+            )
+          }
+          secondaryMetrics={[
+            { label: 'Principal', value: formatINR(displayPrincipal) },
+            {
+              label: 'Accrued Interest',
+              value: `+${formatINR(displayAccrued)}`,
+              isPositive: true,
+            },
+          ]}
+          filterOptions={filterOptions}
+          selectedFilter={selectedMember}
+          onSelectFilter={setSelectedMember}
+          searchPlaceholder="Search deposits by bank..."
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          isEmpty={displayDeposits.length === 0}
+          emptyState={
+            <EmptyState
+              type="fd"
+              title="No fixed deposits"
+              description={selectedMember === 'all' ? 'Add term deposits to track interest compounding.' : `No deposits recorded for ${activeMember?.label}.`}
+              actionButton={
+                <button
+                  onClick={openAdd}
+                  className="inline-flex items-center gap-1.5 bg-[var(--accent-blue)] text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] ios-press cursor-pointer"
+                >
+                  <Plus size={13} />
+                  Add Fixed Deposit
+                </button>
+              }
+            />
+          }
+        >
+          <div className="bg-[var(--surface)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] shadow-xs">
+            {displayDeposits.map((fd) => {
+              const isMatured = isDepositMatured(fd);
+              const effVal = getFDEffectiveValue(fd);
+              const principal = getFDInvestedAmount(fd);
+              return (
+                <div
+                  key={fd.id}
+                  onClick={() => openEdit(fd)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openEdit(fd);
+                    }
+                  }}
+                  className="p-3.5 flex items-center justify-between gap-3 min-h-[56px] ios-press cursor-pointer hover:bg-[var(--surface-secondary)]/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                      isMatured ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400'
+                    }`}>
+                      <Landmark size={18} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
+                        {fd.bank_name}
+                      </h4>
+                      <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
+                        {fd.interest_rate}% p.a. &bull; {fd.maturity_date ? `Matures ${fd.maturity_date}` : 'Ongoing'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-extrabold text-[var(--text-primary)] tnum leading-tight">
+                      {formatINR(effVal)}
+                    </p>
+                    <span className={`text-[11px] font-bold tnum mt-0.5 block ${
+                      isMatured ? 'text-[var(--positive)]' : 'text-[var(--text-tertiary)]'
+                    }`}>
+                      {isMatured ? 'Matured' : `Principal ${formatINR(principal)}`}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </MobileAssetRegistry>
+
+        <FDFormModal
+          isOpen={showModal}
+          onClose={closeModal}
+          editingFd={editingItem}
+          portfolioName={selectedMember !== 'all' ? selectedMember : (portfolioName !== 'all' ? portfolioName : (portfolios?.[0]?.name || 'personal'))}
+          portfolioOptions={portfolioOptions}
+          onAdd={onAdd}
+          onUpdate={onUpdate}
+        />
+
+        <ConfirmModal
+          isOpen={!!confirmDeleteItem}
+          onClose={() => setConfirmDeleteItem(null)}
+          onConfirm={() => { if (confirmDeleteItem) void handleDelete(confirmDeleteItem.id); }}
+          title="Delete Fixed Deposit"
+          message={confirmDeleteItem ? `Are you sure you want to delete the Fixed Deposit at "${confirmDeleteItem.bank_name}"? This cannot be undone.` : ''}
+          confirmLabel="Delete"
+          variant="danger"
+          isLoading={deleting}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="space-y-3 sm:space-y-4">

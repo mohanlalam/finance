@@ -13,7 +13,10 @@ import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../domains/assets
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { TrendingUp } from '../icons/AppIcons';
+import { TrendingUp, Plus } from '../icons/AppIcons';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import EmptyState from '../EmptyState';
 
 interface PortfolioOption {
   name: string;
@@ -225,6 +228,148 @@ export function SIPView({
       setDeleting(false);
     }
   }, [confirmDeleteItem, onDelete, deleteSIPAccount, addToast, setConfirmDeleteItem]);
+
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    const activeMember = selectedMember === 'all' ? null : familySIPSummary.memberBreakdown.find((m) => m.name === selectedMember);
+    const displayCurrent = selectedMember === 'all' ? familySIPSummary.totalCurrent : (activeMember?.current || 0);
+    const displayInvested = selectedMember === 'all' ? familySIPSummary.totalInvested : (activeMember?.invested || 0);
+    const displayMonthly = selectedMember === 'all' ? familySIPSummary.totalMonthly : (activeMember?.monthly || 0);
+    const displayPnL = displayCurrent - displayInvested;
+    const displayPnLPct = displayInvested > 0 ? (displayPnL / displayInvested) * 100 : 0;
+    const displayAccounts = activeAccountsForMember;
+
+    const filterOptions = [
+      { id: 'all', label: 'All Family', count: familySIPSummary.totalCount },
+      ...familySIPSummary.memberBreakdown.map((m) => ({
+        id: m.name,
+        label: m.label,
+        count: m.count,
+      })),
+    ];
+
+    return (
+      <>
+        <MobileAssetRegistry
+          title={selectedMember === 'all' ? 'Total Mutual Funds & SIPs' : `${activeMember?.label || ''} Mutual Funds`}
+          heroValue={formatINR(displayCurrent)}
+          heroSubtitle={`Monthly Inflow: ${formatINR(displayMonthly)}/mo across active SIPs`}
+          icon={<TrendingUp size={16} />}
+          primaryBadge={
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+              displayPnL >= 0 ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-rose-500/20 text-rose-700 dark:text-rose-300'
+            }`}>
+              {displayPnL >= 0 ? '+' : ''}{formatINR(displayPnL)} ({formatPercent(displayPnLPct)})
+            </span>
+          }
+          secondaryMetrics={[
+            { label: 'Total Invested', value: formatINR(displayInvested) },
+            {
+              label: 'Monthly SIP',
+              value: `${formatINR(displayMonthly)}/mo`,
+            },
+          ]}
+          filterOptions={filterOptions}
+          selectedFilter={selectedMember}
+          onSelectFilter={setSelectedMember}
+          searchPlaceholder="Search mutual funds by name or code..."
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          isEmpty={displayAccounts.length === 0}
+          emptyState={
+            <EmptyState
+              type="sip"
+              title="No mutual funds or SIPs"
+              description={selectedMember === 'all' ? 'Track mutual funds, active SIPs, and AMFI daily NAV ticks.' : `No mutual funds recorded for ${activeMember?.label}.`}
+              actionButton={
+                <button
+                  onClick={openAdd}
+                  className="inline-flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] ios-press cursor-pointer"
+                >
+                  <Plus size={13} />
+                  Add Mutual Fund / SIP
+                </button>
+              }
+            />
+          }
+        >
+          <div className="bg-[var(--surface)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] shadow-xs">
+            {displayAccounts.map((sip) => {
+              const effVal = getSIPEffectiveValue(sip);
+              const invested = getSIPInvestedAmount(sip);
+              const pnl = effVal - invested;
+              const pnlPct = invested > 0 ? (pnl / invested) * 100 : 0;
+              const monthly = Number(sip.monthly_sip) || 0;
+
+              return (
+                <div
+                  key={sip.id}
+                  onClick={() => openEdit(sip)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openEdit(sip);
+                    }
+                  }}
+                  className="p-3.5 flex items-center justify-between gap-3 min-h-[56px] ios-press cursor-pointer hover:bg-[var(--surface-secondary)]/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-purple-500/15 text-purple-600 dark:text-purple-400">
+                      <TrendingUp size={18} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
+                        {sip.fund_name}
+                      </h4>
+                      <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
+                        {monthly > 0 ? `${formatINR(monthly)}/mo SIP` : 'Lump-sum'}
+                        {sip.units ? ` &bull; ${Number(sip.units).toFixed(2)} units` : ''}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-bold text-[var(--text-primary)] tnum">
+                      {formatINR(effVal)}
+                    </div>
+                    {invested > 0 && (
+                      <div className={`text-xs font-semibold tnum mt-0.5 ${pnlColor(pnl)}`}>
+                        {pnl >= 0 ? '+' : ''}{formatINR(pnl)} ({formatPercent(pnlPct)})
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </MobileAssetRegistry>
+
+        <SIPFormModal
+          isOpen={showModal}
+          onClose={closeModal}
+          editingAccount={editingItem}
+          portfolioName={selectedMember !== 'all' ? selectedMember : (portfolioName !== 'all' ? portfolioName : (portfolios?.[0]?.name || 'personal'))}
+          portfolioOptions={portfolioOptions}
+          onAdd={handleAddSIP}
+          onUpdate={handleUpdateSIP}
+        />
+
+        <ConfirmModal
+          isOpen={!!confirmDeleteItem}
+          onClose={() => setConfirmDeleteItem(null)}
+          onConfirm={() => { void handleDelete(); }}
+          title="Delete Mutual Fund / SIP"
+          message={confirmDeleteItem ? `Are you sure you want to delete ${confirmDeleteItem.fund_name}? This action cannot be undone.` : ''}
+          confirmLabel="Delete"
+          variant="danger"
+          isLoading={deleting}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="space-y-3 sm:space-y-4">

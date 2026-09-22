@@ -12,7 +12,10 @@ import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { Building2 } from '../icons/AppIcons';
+import { Building2, Plus } from '../icons/AppIcons';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import EmptyState from '../EmptyState';
 
 interface PortfolioOption {
   name: string;
@@ -180,6 +183,146 @@ export function RealEstateView({
       setDeleting(false);
     }
   }, [confirmDeleteItem, onDelete, addToast, setConfirmDeleteItem]);
+
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    const activeMember = selectedMember === 'all' ? null : familyRealEstateSummary.memberBreakdown.find((m) => m.name === selectedMember);
+    const displayValuation = selectedMember === 'all' ? familyRealEstateSummary.totalValuation : (activeMember?.valuation || 0);
+    const displayInvested = selectedMember === 'all' ? familyRealEstateSummary.totalInvested : (activeMember?.invested || 0);
+    const displayPnL = displayValuation - displayInvested;
+    const displayPnLPct = displayInvested > 0 ? (displayPnL / displayInvested) * 100 : 0;
+    const displayProperties = activePropertiesForMember;
+
+    const filterOptions = [
+      { id: 'all', label: 'All Family', count: familyRealEstateSummary.totalProperties },
+      ...familyRealEstateSummary.memberBreakdown.map((m) => ({
+        id: m.name,
+        label: m.label,
+        count: m.count,
+      })),
+    ];
+
+    return (
+      <>
+        <MobileAssetRegistry
+          title={selectedMember === 'all' ? 'Total Real Estate' : `${activeMember?.label || ''} Real Estate`}
+          heroValue={formatINR(displayValuation)}
+          heroSubtitle={`${displayProperties.length} properties across family portfolios`}
+          icon={<Building2 size={16} />}
+          primaryBadge={
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+              displayPnL >= 0 ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-rose-500/20 text-rose-700 dark:text-rose-300'
+            }`}>
+              {displayPnL >= 0 ? '+' : ''}{formatINR(displayPnL)} ({formatPercent(displayPnLPct)})
+            </span>
+          }
+          secondaryMetrics={[
+            { label: 'Total Invested', value: formatINR(displayInvested) },
+            {
+              label: 'Properties',
+              value: `${displayProperties.length} Assets`,
+            },
+          ]}
+          filterOptions={filterOptions}
+          selectedFilter={selectedMember}
+          onSelectFilter={setSelectedMember}
+          searchPlaceholder="Search properties by name or location..."
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          isEmpty={displayProperties.length === 0}
+          emptyState={
+            <EmptyState
+              type="real_estate"
+              title="No real estate recorded"
+              description={selectedMember === 'all' ? 'Track land parcels, commercial properties, and residential real estate.' : `No properties recorded for ${activeMember?.label}.`}
+              actionButton={
+                <button
+                  onClick={openAdd}
+                  className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] ios-press cursor-pointer"
+                >
+                  <Plus size={13} />
+                  Add Property
+                </button>
+              }
+            />
+          }
+        >
+          <div className="bg-[var(--surface)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] shadow-xs">
+            {displayProperties.map((prop) => {
+              const val = Number(prop.current_valuation) || 0;
+              const invested = Number(prop.purchase_price) || 0;
+              const gain = val - invested;
+              const gainPct = invested > 0 ? (gain / invested) * 100 : 0;
+
+              return (
+                <div
+                  key={prop.id}
+                  onClick={() => openEdit(prop)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openEdit(prop);
+                    }
+                  }}
+                  className="p-3.5 flex items-center justify-between gap-3 min-h-[56px] ios-press cursor-pointer hover:bg-[var(--surface-secondary)]/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                      <Building2 size={18} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
+                        {prop.property_name}
+                      </h4>
+                      <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
+                        {prop.location || 'Real Estate'}
+                        {prop.property_type ? ` &bull; ${prop.property_type}` : ''}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-bold text-[var(--text-primary)] tnum">
+                      {formatINR(val)}
+                    </div>
+                    {invested > 0 && (
+                      <div className={`text-xs font-semibold tnum mt-0.5 ${pnlColor(gain)}`}>
+                        {gain >= 0 ? '+' : ''}{formatINR(gain)} ({formatPercent(gainPct)})
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </MobileAssetRegistry>
+
+        <RealEstateFormModal
+          isOpen={showModal}
+          onClose={closeModal}
+          editingProperty={editingItem}
+          portfolioName={selectedMember !== 'all' ? selectedMember : (portfolioName !== 'all' ? portfolioName : (portfolios?.[0]?.name || 'personal'))}
+          portfolioOptions={portfolioOptions}
+          onAdd={onAdd}
+          onUpdate={onUpdate}
+        />
+
+        <ConfirmModal
+          isOpen={!!confirmDeleteItem}
+          onClose={() => setConfirmDeleteItem(null)}
+          onConfirm={() => { void handleDelete(); }}
+          title="Delete Property"
+          message={confirmDeleteItem ? `Are you sure you want to delete ${confirmDeleteItem.property_name}? This action cannot be undone.` : ''}
+          confirmLabel="Delete"
+          variant="danger"
+          isLoading={deleting}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="space-y-3 sm:space-y-4">

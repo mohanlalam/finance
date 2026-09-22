@@ -10,7 +10,10 @@ import { useIsMutating, usePortfolioEntities } from '../../contexts/PortfolioCon
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
 import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
-import { RotateCw, Coins, Check } from '../icons/AppIcons';
+import { RotateCw, Coins, Check, Plus } from '../icons/AppIcons';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import EmptyState from '../EmptyState';
 import { 
   deriveGoldRates, 
   saveStoredGoldRate, 
@@ -287,6 +290,214 @@ export function GoldHoldingView({
     addToast('Reverted to Live MCX & IBJA Bullion rates', 'success');
     setIsEditingRate(false);
   };
+
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    const activeMember = selectedMember === 'all' ? null : familyGoldSummary.memberBreakdown.find((m) => m.name === selectedMember);
+    const displayValue = selectedMember === 'all' ? familyGoldSummary.totalValue : (activeMember?.value || 0);
+    const displayInvested = selectedMember === 'all' ? familyGoldSummary.totalInvested : (activeMember?.invested || 0);
+    const displayGrams = selectedMember === 'all' ? familyGoldSummary.totalGrams : (activeMember?.grams || 0);
+    const displayGain = displayValue - displayInvested;
+    const displayGainPct = displayInvested > 0 ? (displayGain / displayInvested) * 100 : 0;
+    const displayHoldings = activeHoldingsForMember;
+
+    const filterOptions = [
+      { id: 'all', label: 'All Family', count: familyGoldSummary.memberBreakdown.reduce((sum, m) => sum + m.count, 0) },
+      ...familyGoldSummary.memberBreakdown.map((m) => ({
+        id: m.name,
+        label: m.label,
+        count: m.count,
+      })),
+    ];
+
+    return (
+      <>
+        <MobileAssetRegistry
+          title={selectedMember === 'all' ? 'Total Gold Holdings' : `${activeMember?.label || ''} Gold`}
+          heroValue={formatINR(displayValue)}
+          heroSubtitle={`${displayGrams.toFixed(1)}g total bullion (${(displayGrams / 11.6638).toFixed(2)} tola)`}
+          icon={<Coins size={16} />}
+          primaryBadge={
+            <button
+              type="button"
+              onClick={() => {
+                setTempRateInput(String(rates.rate24kPerGram));
+                setIsEditingRate(true);
+              }}
+              className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center gap-1 cursor-pointer"
+            >
+              <span>24K: {formatINR(rates.rate24kPerGram)}/g</span>
+              <span className="opacity-70 text-[9px]">✎</span>
+            </button>
+          }
+          secondaryMetrics={[
+            { label: 'Invested', value: formatINR(displayInvested) },
+            {
+              label: 'Total Gain',
+              value: `${displayGain >= 0 ? '+' : ''}${formatINR(displayGain)} (${formatPercent(displayGainPct)})`,
+              isPositive: displayGain >= 0,
+            },
+          ]}
+          filterOptions={filterOptions}
+          selectedFilter={selectedMember}
+          onSelectFilter={setSelectedMember}
+          searchPlaceholder="Search holdings by name or purity..."
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          isEmpty={displayHoldings.length === 0}
+          emptyState={
+            <EmptyState
+              type="gold"
+              title="No gold holdings"
+              description={selectedMember === 'all' ? 'Track 24K bars, 22K jewelry, and bullion.' : `No gold recorded for ${activeMember?.label}.`}
+              actionButton={
+                <button
+                  onClick={openAdd}
+                  className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] ios-press cursor-pointer"
+                >
+                  <Plus size={13} />
+                  Add Gold
+                </button>
+              }
+            />
+          }
+        >
+          <div className="bg-[var(--surface)] rounded-[var(--radius-large)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] shadow-xs">
+            {displayHoldings.map((holding) => {
+              const w = Number(holding.weight_grams) || 0;
+              const rawVal = Number(holding.current_valuation) || 0;
+              const isCorrupt = w > 0 && rawVal > 0 && (rawVal / w) < 2000;
+              const liveVal = w > 0 ? calculateGoldValuation(w, holding.purity, rates.rate24kPerGram) : 0;
+              const val = (isCorrupt || rawVal <= 0) ? liveVal : rawVal;
+              const invested = Number(holding.purchase_price) || 0;
+              const gain = val - invested;
+              const gainPct = invested > 0 ? (gain / invested) * 100 : 0;
+
+              return (
+                <div
+                  key={holding.id}
+                  onClick={() => openEdit(holding)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openEdit(holding);
+                    }
+                  }}
+                  className="p-3.5 flex items-center justify-between gap-3 min-h-[56px] ios-press cursor-pointer hover:bg-[var(--surface-secondary)]/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                      <Coins size={18} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
+                        {holding.item_name}
+                      </h4>
+                      <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
+                        {holding.purity} &bull; {w}g ({(w / 11.6638).toFixed(2)} tola)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-bold text-[var(--text-primary)] tnum">
+                      {formatINR(val)}
+                    </div>
+                    {invested > 0 && (
+                      <div className={`text-xs font-semibold tnum mt-0.5 ${pnlColor(gain)}`}>
+                        {gain >= 0 ? '+' : ''}{formatINR(gain)} ({formatPercent(gainPct)})
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </MobileAssetRegistry>
+
+        <GoldFormModal
+          isOpen={showModal}
+          onClose={closeModal}
+          editingHolding={editingItem}
+          portfolioName={selectedMember !== 'all' ? selectedMember : (portfolioName !== 'all' ? portfolioName : (portfolios?.[0]?.name || 'personal'))}
+          portfolioOptions={portfolioOptions}
+          onAdd={onAdd}
+          onUpdate={onUpdate}
+        />
+
+        <ConfirmModal
+          isOpen={!!confirmDeleteItem}
+          onClose={() => setConfirmDeleteItem(null)}
+          onConfirm={() => { if (confirmDeleteItem) void handleDelete(confirmDeleteItem.id); }}
+          title="Delete Gold Holding"
+          message={confirmDeleteItem ? `Are you sure you want to delete "${confirmDeleteItem.item_name}"? This cannot be undone.` : ''}
+          confirmLabel="Delete"
+          variant="danger"
+          isLoading={deleting}
+        />
+
+        {isEditingRate && (
+          <Modal
+            isOpen={isEditingRate}
+            onClose={() => setIsEditingRate(false)}
+            title="Calibrate Gold Spot Rates"
+          >
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+                  Custom 24K Rate (₹ per gram)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-[var(--text-tertiary)]">₹</span>
+                  <input
+                    type="number"
+                    step="1"
+                    min={5000}
+                    max={35000}
+                    value={tempRateInput}
+                    onChange={(e) => setTempRateInput(e.target.value)}
+                    placeholder="e.g. 15408"
+                    className="apple-input w-full pl-8 pr-12 py-2 text-sm font-bold text-[var(--text-primary)]"
+                    autoFocus
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--text-tertiary)]">/g</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-[var(--border-subtle)]">
+                <button
+                  type="button"
+                  onClick={handleResetToLive}
+                  className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                >
+                  Reset to Live Spot
+                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingRate(false)}
+                    className="px-3 py-1.5 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveRate}
+                    className="px-3.5 py-1.5 rounded-[var(--radius-small)] bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 transition-colors shadow-xs cursor-pointer"
+                  >
+                    Save Rate
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Modal>
+        )}
+      </>
+    );
+  }
 
   return (
     <div className="space-y-3 sm:space-y-4">
