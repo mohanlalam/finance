@@ -743,6 +743,14 @@ input[type="week"] {
   overscroll-behavior-y: contain;
 }
 
+/* Safe Area Inset Helpers for iOS Notch & Home Indicator */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+}
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top, 0px), 12px);
+}
+
 .mobile-asset-card {
   transition: transform 0.16s var(--ios-spring), box-shadow 0.18s ease, background-color 0.18s ease;
 }

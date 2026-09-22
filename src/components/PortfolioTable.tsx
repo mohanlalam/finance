@@ -182,30 +182,30 @@ const MobileStockRow = React.memo(function MobileStockRow({
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => onShare(h)}
-            className="w-8 h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press transition-colors"
+            className="w-9 h-9 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press transition-colors touch-manipulation cursor-pointer"
             title="Share holding"
             aria-label="Share holding summary"
           >
-            <Share2 size={13} aria-hidden="true" />
+            <Share2 size={14} aria-hidden="true" />
           </button>
           {canUpdate && (
             <button
               onClick={() => onStartEdit(h)}
-              className="w-8 h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press transition-colors"
+              className="w-9 h-9 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)] border border-[var(--border-subtle)] shadow-xs ios-press transition-colors touch-manipulation cursor-pointer"
               aria-label="Edit holding quantity and price"
               title="Edit holding"
             >
-              <Pencil size={13} aria-hidden="true" />
+              <Pencil size={14} aria-hidden="true" />
             </button>
           )}
           {canDelete && (
             <button
               onClick={() => onDelete(h)}
-              className="w-8 h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--negative)] hover:border-[var(--negative)] border border-[var(--border-subtle)] shadow-xs ios-press transition-colors"
+              className="w-9 h-9 sm:w-8 sm:h-8 rounded-[var(--radius-small)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--negative)] hover:border-[var(--negative)] border border-[var(--border-subtle)] shadow-xs ios-press transition-colors touch-manipulation cursor-pointer"
               aria-label="Delete holding"
               title="Delete holding"
             >
-              <Trash2 size={13} aria-hidden="true" />
+              <Trash2 size={14} aria-hidden="true" />
             </button>
           )}
         </div>

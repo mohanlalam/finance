@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, TrendingUp, Landmark, Coins, Building2, Shield, FolderOpen, Clock, X, Sparkles, BarChart3 } from './icons/AppIcons';
 import { triggerHaptic } from '../utils/haptics';
+import { lockScroll, unlockScroll } from '../utils/scrollLock';
 
 type FabPosition = 'right' | 'center' | 'left';
 
@@ -48,16 +49,13 @@ export default function FloatingAddMenu({
     } catch { /* ignore */ }
   };
 
-  // Lock body scroll when menu is open
+  // Lock body scroll when menu is open — use shared reference-counted lock
+  // to prevent race conditions with MobileBottomNav's More drawer.
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+      lockScroll();
+      return () => unlockScroll();
     }
-    return () => {
-      document.body.style.overflow = '';
-    };
   }, [isOpen]);
 
   // Close & restore focus on Escape key
@@ -161,7 +159,7 @@ export default function FloatingAddMenu({
           <div className="flex items-center justify-between pb-3 mb-2 border-b border-[var(--border-subtle)] gap-2">
             <div>
               <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
-                ✨ Quick Add Asset
+                <span aria-hidden="true">✨</span> Quick Add Asset
               </h4>
               <p className="text-[11px] text-[var(--text-tertiary)]">Select category to add to portfolio</p>
             </div>
@@ -172,7 +170,7 @@ export default function FloatingAddMenu({
               <button
                 type="button"
                 onClick={() => changePosition('left')}
-                className={`px-2 py-1 min-h-[24px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${position === 'left' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                className={`px-3 py-1 min-h-[36px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${position === 'left' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
                 title="Dock button on Left"
                 aria-checked={position === 'left'}
                 role="radio"
@@ -182,7 +180,7 @@ export default function FloatingAddMenu({
               <button
                 type="button"
                 onClick={() => changePosition('right')}
-                className={`px-2 py-1 min-h-[24px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${position === 'right' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
+                className={`px-3 py-1 min-h-[36px] rounded-[var(--radius-small)] font-bold transition-colors ios-press touch-manipulation cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] ${position === 'right' ? 'bg-[var(--accent-blue)] text-white shadow-xs' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'}`}
                 title="Dock button on Right"
                 aria-checked={position === 'right'}
                 role="radio"
@@ -245,7 +243,8 @@ export default function FloatingAddMenu({
       )}
 
       {/* Floating Action Button (FAB) Docked Cleanly Above Navigation */}
-      <div className={`fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] z-[55] transition-all duration-300 ease-out ${isOpen ? 'opacity-0 pointer-events-none scale-75' : 'fab-scroll-hide opacity-100 scale-100'} ${getFabButtonPositionClass()}`}>
+      {/* FAB offset: 5rem (80px) clears the 58px dock + 6px top pad + 16px gap on all safe-area devices */}
+      <div className={`fixed bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] z-[55] transition-all duration-300 ease-out ${isOpen ? 'opacity-0 pointer-events-none scale-75' : 'fab-scroll-hide opacity-100 scale-100'} ${getFabButtonPositionClass()}`}>
         <button
           ref={fabButtonRef}
           type="button"

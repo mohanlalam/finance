@@ -17,7 +17,10 @@ export default {
       },
       transitionDuration: {
         350: '350ms',
-      }
+      },
+      screens: {
+        xs: '390px',
+      },
     },
   },
   plugins: [],

@@ -51,6 +51,8 @@ interface MobileHomeSummaryProps {
   isLoadingPrices: boolean;
   onNavigateAsset: (asset: 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents') => void;
   onOpenAlerts: () => void;
+  /** Optional: tap a member card to switch to that member's portfolio view. */
+  onNavigateMember?: (portfolioName: string) => void;
   portfolios: Portfolio[];
   activePortfolio: Portfolio | null;
   netWorthHistory?: NetWorthSnapshot[];
@@ -69,6 +71,7 @@ function MobileHomeSummary({
   isLoadingPrices,
   onNavigateAsset,
   onOpenAlerts,
+  onNavigateMember,
   portfolios,
   activePortfolio,
   netWorthHistory = EMPTY_HISTORY,
@@ -321,11 +324,24 @@ function MobileHomeSummary({
               const pTodayPnL = p.pTodayPnL;
               const isGain = p.totalPnL >= 0;
               const isTodayGain = pTodayPnL >= 0;
+              const isNavigable = !!onNavigateMember;
               return (
-                <div key={p.id} className="p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] space-y-2">
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={isNavigable ? () => onNavigateMember!(p.name) : undefined}
+                  disabled={!isNavigable}
+                  aria-label={isNavigable ? `View ${p.label}'s portfolio` : undefined}
+                  className={`w-full text-left p-3 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] space-y-2 transition-all${
+                    isNavigable ? ' ios-press cursor-pointer hover:border-[var(--border-luminous)] hover:bg-[var(--surface-secondary)]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]' : ' cursor-default'
+                  }`}
+                >
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-bold text-[var(--text-primary)] truncate">{p.label} Portfolio</span>
-                    <span className="text-xs font-bold text-[var(--text-primary)] tnum shrink-0">{renderValue(p.totalCurrentValue)}</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-xs font-bold text-[var(--text-primary)] tnum">{renderValue(p.totalCurrentValue)}</span>
+                      {isNavigable && <ChevronRight size={12} className="text-[var(--text-tertiary)]" aria-hidden="true" />}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-[var(--border-subtle)] text-xs">
@@ -346,7 +362,7 @@ function MobileHomeSummary({
                       </span>
                     </div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>

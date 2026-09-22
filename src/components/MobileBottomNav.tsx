@@ -15,6 +15,7 @@ import {
   Menu,
 } from './icons/AppIcons';
 import { triggerHaptic } from '../utils/haptics';
+import { lockScroll, unlockScroll } from '../utils/scrollLock';
 
 type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
 
@@ -161,8 +162,8 @@ function TabBtn({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: isActive ? activeColor : 'var(--text-secondary)',
-            opacity: isActive ? 1 : 0.55,
+            color: isActive ? activeColor : 'var(--text-primary)',
+            opacity: isActive ? 1 : 0.65,
             transform: isActive ? 'scale(1.06)' : 'scale(1)',
             transition: 'color 0.18s ease, opacity 0.18s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
@@ -204,8 +205,8 @@ function TabBtn({
           fontSize: 10,
           fontWeight: isActive ? 600 : 500,
           letterSpacing: 0,
-          color: isActive ? activeColor : 'var(--text-secondary)',
-          opacity: isActive ? 1 : 0.55,
+          color: isActive ? activeColor : 'var(--text-primary)',
+          opacity: isActive ? 1 : 0.65,
           transition: 'color 0.18s ease, opacity 0.18s ease',
           lineHeight: 1,
           whiteSpace: 'nowrap',
@@ -292,8 +293,8 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: lit ? activeColor : 'var(--text-secondary)',
-            opacity: lit ? 1 : 0.55,
+            color: lit ? activeColor : 'var(--text-primary)',
+            opacity: lit ? 1 : 0.65,
             transform: isOpen ? 'rotate(90deg) scale(1.06)' : lit ? 'scale(1.06)' : 'scale(1)',
             transition: 'color 0.18s ease, opacity 0.18s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
@@ -307,8 +308,8 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
           fontSize: 10,
           fontWeight: lit ? 600 : 500,
           letterSpacing: 0,
-          color: lit ? activeColor : 'var(--text-secondary)',
-          opacity: lit ? 1 : 0.55,
+          color: lit ? activeColor : 'var(--text-primary)',
+          opacity: lit ? 1 : 0.65,
           transition: 'color 0.18s ease, opacity 0.18s ease',
           lineHeight: 1,
           whiteSpace: 'nowrap',
@@ -348,7 +349,7 @@ function MobileBottomNav({
     }
 
     let ticking = false;
-    const threshold = 12;
+    const threshold = 20; // 20px prevents dock flicker on slow scroll momentum
 
     const handleScroll = (e?: Event) => {
       if (!ticking) {
@@ -442,11 +443,13 @@ function MobileBottomNav({
     };
   }, []);
 
-  // Scroll lock + parent notify
+  // Scroll lock + parent notify — use shared reference-counted lock
   useEffect(() => {
     onDrawerStateChange?.(isDrawerOpen);
-    document.body.style.overflow = isDrawerOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (isDrawerOpen) {
+      lockScroll();
+      return () => unlockScroll();
+    }
   }, [isDrawerOpen, onDrawerStateChange]);
 
   // Focus management: autofocus Close button on sheet open & restore previous focus on close
@@ -574,15 +577,52 @@ function MobileBottomNav({
         >
           <span className="sr-only" role="status" aria-live="polite">More asset categories drawer opened</span>
 
-          {/* Drag handle */}
+          {/* Drag handle — touch-enabled for swipe-down dismiss */}
           <div
+            role="button"
+            aria-label="Swipe down to close"
+            tabIndex={-1}
+            onTouchStart={(e) => {
+              const touch = e.touches[0];
+              (e.currentTarget as HTMLElement).dataset.swipeStartY = String(touch.clientY);
+            }}
+            onTouchMove={(e) => {
+              const startY = parseFloat((e.currentTarget as HTMLElement).dataset.swipeStartY || '0');
+              const delta = e.touches[0].clientY - startY;
+              if (delta > 0) {
+                // Provide visual resistance feedback during drag
+                if (sheetRef.current) {
+                  sheetRef.current.style.transform = `translateY(${Math.min(delta * 0.5, 60)}px)`;
+                  sheetRef.current.style.transition = 'none';
+                }
+              }
+            }}
+            onTouchEnd={(e) => {
+              const startY = parseFloat((e.currentTarget as HTMLElement).dataset.swipeStartY || '0');
+              const delta = e.changedTouches[0].clientY - startY;
+              // Restore sheet transition
+              if (sheetRef.current) {
+                sheetRef.current.style.transform = '';
+                sheetRef.current.style.transition = '';
+              }
+              // Velocity-based dismiss: > 80px swipe down closes the sheet
+              if (delta > 80) {
+                triggerHaptic('selection');
+                closeDrawer();
+              }
+            }}
             style={{
               width: 36, height: 4, borderRadius: 999,
               background: 'color-mix(in srgb, var(--text-primary) 18%, transparent)',
               margin: '10px auto 0', flexShrink: 0,
+              cursor: 'grab', touchAction: 'none',
+              padding: '12px 40px', // Extend hit area vertically
+              boxSizing: 'content-box',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
-            aria-hidden="true"
-          />
+          >
+            <div style={{ width: 36, height: 4, borderRadius: 999, background: 'color-mix(in srgb, var(--text-primary) 18%, transparent)' }} />
+          </div>
 
           {/* Sheet header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 18px 8px', flexShrink: 0 }}>
@@ -597,7 +637,7 @@ function MobileBottomNav({
               aria-label="Close"
               className="ios-press"
               style={{
-                width: 30, height: 30, borderRadius: 999,
+                width: 36, height: 36, borderRadius: 999,
                 background: 'color-mix(in srgb, var(--text-primary) 8%, transparent)',
                 backdropFilter: 'blur(8px)',
                 WebkitBackdropFilter: 'blur(8px)',
@@ -665,7 +705,7 @@ function MobileBottomNav({
                   style={{
                     width: '100%',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '9px 12px', marginBottom: 5, borderRadius: 13,
+                    padding: '9px 12px', marginBottom: 5, borderRadius: 13, minHeight: 44,
                     background: active
                       ? 'color-mix(in srgb, var(--accent-blue) 12%, var(--surface-secondary))'
                       : 'color-mix(in srgb, var(--surface-secondary) 55%, transparent)',
