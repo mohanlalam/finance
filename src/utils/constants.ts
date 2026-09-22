@@ -13,9 +13,6 @@ export const AUTO_REFRESH_INTERVAL = 3_600_000;     // 1 hour automatic backgrou
 export const FD_MATURITY_WARNING_DAYS = 30;
 export const INSURANCE_RENEWAL_WARNING_DAYS = 60;
 
-// Rebalancing algorithms
-export const REBALANCING_MIN_ACTION = 5000; // Minimum action value threshold (pure INR)
-
 // Market Symbol Aliases for Indian stock ticker resolution
 export const SYMBOL_ALIASES: Record<string, string[]> = {
   MOMENTUM50: ['MOM50.NS', 'MOMENTUM.NS', 'MOM30.NS', 'MOMENTUM50.NS'],

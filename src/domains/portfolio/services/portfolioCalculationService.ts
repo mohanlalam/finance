@@ -5,6 +5,7 @@ import { getRDInvestedAmount, getRDEffectiveValue } from '../../assets/rd/calcul
 import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../assets/sip/calculations/sipValuation';
 import { calculateRealEstateValuation } from '../../assets/real-estate/calculations/realEstateValuation';
 import { calculateGoldValuation } from '../../assets/gold/calculations/goldValuation';
+import { roundToDecimals } from '../../../utils/mathUtils';
 
 export class PortfolioCalculationService {
   recalculateSinglePortfolio(portfolio: Portfolio): Portfolio {
@@ -100,9 +101,9 @@ export class PortfolioCalculationService {
       const updatedHoldings = portfolio.holdings.map((h) => {
         const live = priceMap[h.yahooSymbol];
         if (!live) return h;
-        const currentValue = h.qty * live.ltp;
-        const unrealizedPnL = currentValue - h.amountInvested;
-        const pnlPercent = h.amountInvested > 0 ? (unrealizedPnL / h.amountInvested) * 100 : 0;
+        const currentValue = roundToDecimals(h.qty * live.ltp, 2);
+        const unrealizedPnL = roundToDecimals(currentValue - h.amountInvested, 2);
+        const pnlPercent = h.amountInvested > 0 ? roundToDecimals((unrealizedPnL / h.amountInvested) * 100, 2) : 0;
         return {
           ...h,
           ltp: live.ltp,
@@ -136,7 +137,7 @@ export class PortfolioCalculationService {
         if (s.mf_scheme_code && navMap[s.mf_scheme_code] !== undefined) {
           const nav = navMap[s.mf_scheme_code];
           const units = Number(s.units || 0);
-          const currentValue = units * nav;
+          const currentValue = roundToDecimals(units * nav, 2);
           const navIsStale = staleSchemes.has(s.mf_scheme_code);
           return { ...s, fallback_valuation: currentValue, navIsStale, liveNav: nav };
         } else if (s.mf_scheme_code) {

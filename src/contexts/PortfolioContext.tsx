@@ -3,7 +3,6 @@ import { createContext, useContext, useEffect, useCallback, useRef, useMemo, Rea
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Portfolio, PortfolioName, RDPayload, SIPPayload } from '../types/portfolio';
 import { NetWorthSnapshot, usePortfolioData, LoadStatus } from '../hooks/usePortfolioData';
-import { portfolioService } from '../compositionRoot';
 import { logger } from '../infrastructure/logging/logger';
 
 
@@ -123,6 +122,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     addAsset,
     updateAsset,
     deleteAsset,
+    triggerNetWorthSnapshot,
   } = usePortfolioData(portfolioOptions);
 
   const location = useLocation();
@@ -194,7 +194,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     snapshotFiredRef.current = true;
     // Small delay to ensure PIN hash is fully cached after first successful load
     const timer = setTimeout(() => {
-      portfolioService.triggerNetWorthSnapshot()
+      triggerNetWorthSnapshot()
         .then(() => {
           localStorage.setItem('finance_last_snapshot_date', todayStr);
           logger.info('[portfolio] daily net worth snapshot recorded', { date: todayStr });
@@ -207,7 +207,7 @@ export function PortfolioProvider({ children, onAuthExpired }: PortfolioProvider
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [loadStatus]);
+  }, [loadStatus, triggerNetWorthSnapshot]);
 
 
   const addRDAccount = useCallback(async (portfolioName: string, payload: RDPayload) => {

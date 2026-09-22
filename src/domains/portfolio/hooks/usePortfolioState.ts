@@ -52,6 +52,7 @@ export function usePortfolioState({ onAuthExpired }: UsePortfolioStateOptions = 
       addAsset: mutations.addAsset,
       updateAsset: mutations.updateAsset,
       deleteAsset: mutations.deleteAsset,
+      triggerNetWorthSnapshot: mutations.triggerNetWorthSnapshot,
     }),
     [query, mutations, refresh, sync, refreshSnapshot]
   );

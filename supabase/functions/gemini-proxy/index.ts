@@ -6,6 +6,7 @@ import {
   timingSafeEqual,
   verifySessionToken,
   getRateLimitKey,
+  recordFailedAttempt,
 } from "../_shared/auth.ts";
 
 const supabase = createClient(
@@ -148,7 +149,7 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!isValidPin) {
-    await recordFailedAttempt(rateKey);
+    await recordFailedAttempt(supabase, rateLimitKey);
     return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

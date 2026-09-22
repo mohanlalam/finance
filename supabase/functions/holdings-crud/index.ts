@@ -5,10 +5,10 @@ import {
   getCorsHeaders,
   timingSafeEqual,
   verifySessionToken,
-  getRateLimitKey,
-  checkSingleLimit,
-  recordFailedAttempt,
-  clearRateLimit,
+  getRateLimitKeys,
+  checkDualRateLimit,
+  recordFailedAttempts,
+  clearRateLimits,
 } from "../_shared/auth.ts";
 
 const supabase = createClient(
@@ -32,8 +32,8 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const rateLimitKey = getRateLimitKey(req);
-  const rateCheck = await checkSingleLimit(supabase, rateLimitKey);
+  const rateKeys = getRateLimitKeys(req);
+  const rateCheck = await checkDualRateLimit(supabase, rateKeys);
   if (!rateCheck.allowed) {
     return new Response(
       JSON.stringify({
@@ -83,7 +83,7 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!isValid) {
-    await recordFailedAttempt(supabase, rateLimitKey);
+    await recordFailedAttempts(supabase, rateKeys);
     return new Response(JSON.stringify({ error: "Unauthorized: Invalid PIN" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -91,7 +91,7 @@ Deno.serve(async (req: Request) => {
   }
 
   // Valid PIN: clear failed attempts for this composite client key
-  await clearRateLimit(supabase, rateLimitKey);
+  await clearRateLimits(supabase, rateKeys);
 
   try {
     const url = new URL(req.url);

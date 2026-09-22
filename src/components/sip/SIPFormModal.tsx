@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SIPAccount, SIPPayload } from '../../types/portfolio';
 import SIPFormFields from './SIPFormFields';
-import { marketDataService } from '../../infrastructure/market-data/marketDataService';
+import { useMutualFundLookup } from '../../hooks/useMutualFundLookup';
 import Modal from '../Modal';
 
 interface PortfolioOption {
@@ -41,6 +41,7 @@ export function SIPFormModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isValidatingScheme, setIsValidatingScheme] = useState(false);
+  const { lookupScheme } = useMutualFundLookup();
 
   // Auto-fill values when editing
   useEffect(() => {
@@ -78,7 +79,7 @@ export function SIPFormModal({
     setIsValidatingScheme(true);
     setError('');
     try {
-      const details = await marketDataService.fetchMutualFundNAV(mfSchemeCode);
+      const details = await lookupScheme(mfSchemeCode);
       if (details) {
         setFundName(details.schemeName);
         if (details.nav !== null && units) {
@@ -92,7 +93,7 @@ export function SIPFormModal({
     } finally {
       setIsValidatingScheme(false);
     }
-  }, [mfSchemeCode, units]);
+  }, [lookupScheme, mfSchemeCode, units]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

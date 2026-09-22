@@ -187,6 +187,10 @@ export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMu
     [onReload, onAuthExpired]
   );
 
+  const triggerNetWorthSnapshot = useCallback(async () => {
+    return portfolioService.triggerNetWorthSnapshot();
+  }, []);
+
   return useMemo(
     () => ({
       addPortfolio,
@@ -195,8 +199,9 @@ export function usePortfolioMutation({ onReload, onAuthExpired }: UsePortfolioMu
       addAsset,
       updateAsset,
       deleteAsset,
+      triggerNetWorthSnapshot,
       drainOutbox: offlineOutboxService.drain.bind(offlineOutboxService),
     }),
-    [addPortfolio, renamePortfolio, deletePortfolio, addAsset, updateAsset, deleteAsset]
+    [addPortfolio, renamePortfolio, deletePortfolio, addAsset, updateAsset, deleteAsset, triggerNetWorthSnapshot]
   );
 }

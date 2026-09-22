@@ -1,4 +1,5 @@
 import { getFinancialYear } from './financialYear';
+import { roundToDecimals } from '../../../utils/mathUtils';
 
 export interface CapitalGainsRates {
   equitySTCG: number; // 20% (post-July 2024) or 15% (pre-July 2024)
@@ -58,10 +59,10 @@ export function calculateEquityCapitalGainsTax(
   ltcgGross: number,
   rates: CapitalGainsRates = INDIAN_TAX_RATES_2024
 ): { stcgTax: number; ltcgTax: number; taxableLtcg: number; totalTax: number } {
-  const stcgTax = Math.max(0, stcgGross) * rates.equitySTCG;
-  const taxableLtcg = Math.max(0, Math.max(0, ltcgGross) - rates.ltcgExemption);
-  const ltcgTax = taxableLtcg * rates.equityLTCG;
-  const totalTax = stcgTax + ltcgTax;
+  const stcgTax = roundToDecimals(Math.max(0, stcgGross) * rates.equitySTCG, 2);
+  const taxableLtcg = roundToDecimals(Math.max(0, Math.max(0, ltcgGross) - rates.ltcgExemption), 2);
+  const ltcgTax = roundToDecimals(taxableLtcg * rates.equityLTCG, 2);
+  const totalTax = roundToDecimals(stcgTax + ltcgTax, 2);
 
   return { stcgTax, ltcgTax, taxableLtcg, totalTax };
 }
