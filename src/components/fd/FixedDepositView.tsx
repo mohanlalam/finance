@@ -13,9 +13,10 @@ import { getFDInvestedAmount, getFDEffectiveValue } from '../../domains/assets/f
 import { formatINR } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { Landmark, Plus } from '../icons/AppIcons';
+import { Landmark, Plus, ChevronRight } from '../icons/AppIcons';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import AppBadge from '../ui/AppBadge';
 import EmptyState from '../EmptyState';
 
 interface PortfolioOption {
@@ -249,19 +250,20 @@ export function FixedDepositView({
     return (
       <>
         <MobileAssetRegistry
-          title={selectedMember === 'all' ? 'Total Fixed Deposits' : `${activeMember?.label || ''} Fixed Deposits`}
+          title={selectedMember === 'all' ? 'Fixed Deposits' : `${activeMember?.label || ''} Fixed Deposits`}
+          question="How much is locked and what matures next?"
           heroValue={formatINR(displayCurrent)}
           heroSubtitle={selectedMember === 'all' ? 'Aggregated across family portfolios' : `${displayDeposits.length} deposits recorded`}
           icon={<Landmark size={16} />}
           primaryBadge={
             nearestMaturity ? (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300">
+              <AppBadge variant={nearestMaturity.days <= 30 ? 'urgency' : 'warning'} isPulsing={nearestMaturity.days <= 30}>
                 Next: {nearestMaturity.bank} in {nearestMaturity.days}d
-              </span>
+              </AppBadge>
             ) : (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-700 dark:text-cyan-300">
+              <AppBadge variant="info">
                 {familyFDSummary.activeCount} Active
-              </span>
+              </AppBadge>
             )
           }
           secondaryMetrics={[
@@ -330,15 +332,18 @@ export function FixedDepositView({
                       </p>
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-extrabold text-[var(--text-primary)] tnum leading-tight">
-                      {formatINR(effVal)}
-                    </p>
-                    <span className={`text-[11px] font-bold tnum mt-0.5 block ${
-                      isMatured ? 'text-[var(--positive)]' : 'text-[var(--text-tertiary)]'
-                    }`}>
-                      {isMatured ? 'Matured' : `Principal ${formatINR(principal)}`}
-                    </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="text-right">
+                      <p className="text-sm font-extrabold text-[var(--text-primary)] tnum leading-tight">
+                        {formatINR(effVal)}
+                      </p>
+                      <span className={`text-[11px] font-bold tnum mt-0.5 block ${
+                        isMatured ? 'text-[var(--positive)]' : 'text-[var(--text-tertiary)]'
+                      }`}>
+                        {isMatured ? 'Matured' : `Principal ${formatINR(principal)}`}
+                      </span>
+                    </div>
+                    <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>
                 </div>
               );

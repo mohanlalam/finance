@@ -10,9 +10,10 @@ import { useIsMutating, usePortfolioEntities } from '../../contexts/PortfolioCon
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
 import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
-import { RotateCw, Coins, Check, Plus } from '../icons/AppIcons';
+import { RotateCw, Coins, Check, Plus, ChevronRight } from '../icons/AppIcons';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import AppBadge from '../ui/AppBadge';
 import EmptyState from '../EmptyState';
 import { 
   deriveGoldRates, 
@@ -314,22 +315,21 @@ export function GoldHoldingView({
     return (
       <>
         <MobileAssetRegistry
-          title={selectedMember === 'all' ? 'Total Gold Holdings' : `${activeMember?.label || ''} Gold`}
+          title={selectedMember === 'all' ? 'Gold Holdings' : `${activeMember?.label || ''} Gold`}
+          question="What is our bullion worth today?"
           heroValue={formatINR(displayValue)}
           heroSubtitle={`${displayGrams.toFixed(1)}g total bullion (${(displayGrams / 11.6638).toFixed(2)} tola)`}
           icon={<Coins size={16} />}
           primaryBadge={
-            <button
-              type="button"
+            <AppBadge
+              variant="warning"
               onClick={() => {
                 setTempRateInput(String(rates.rate24kPerGram));
                 setIsEditingRate(true);
               }}
-              className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center gap-1 cursor-pointer"
             >
-              <span>24K: {formatINR(rates.rate24kPerGram)}/g</span>
-              <span className="opacity-70 text-[9px]">✎</span>
-            </button>
+              24K: {formatINR(rates.rate24kPerGram)}/g ✎
+            </AppBadge>
           }
           secondaryMetrics={[
             { label: 'Invested', value: formatINR(displayInvested) },
@@ -402,15 +402,18 @@ export function GoldHoldingView({
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <div className="text-sm font-bold text-[var(--text-primary)] tnum">
-                      {formatINR(val)}
-                    </div>
-                    {invested > 0 && (
-                      <div className={`text-xs font-semibold tnum mt-0.5 ${pnlColor(gain)}`}>
-                        {gain >= 0 ? '+' : ''}{formatINR(gain)} ({formatPercent(gainPct)})
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-[var(--text-primary)] tnum">
+                        {formatINR(val)}
                       </div>
-                    )}
+                      {invested > 0 && (
+                        <div className={`text-xs font-semibold tnum mt-0.5 ${pnlColor(gain)}`}>
+                          {gain >= 0 ? '+' : ''}{formatINR(gain)} ({formatPercent(gainPct)})
+                        </div>
+                      )}
+                    </div>
+                    <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>
                 </div>
               );

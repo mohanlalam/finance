@@ -13,9 +13,10 @@ import { calculateInsuranceTotals } from '../../utils/insuranceUtils';
 import { formatINR } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { Shield, Plus } from '../icons/AppIcons';
+import { Shield, Plus, ChevronRight } from '../icons/AppIcons';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import AppBadge from '../ui/AppBadge';
 import EmptyState from '../EmptyState';
 
 interface PortfolioOption {
@@ -236,23 +237,20 @@ export function InsuranceView({
     return (
       <>
         <MobileAssetRegistry
-          title={selectedMember === 'all' ? 'Family Insurance Coverage' : `${activeMember?.label || ''} Policies`}
+          title={selectedMember === 'all' ? 'Insurance Cover' : `${activeMember?.label || ''} Policies`}
+          question="How much cover do we have and what needs renewal?"
           heroValue={formatINR(displaySum)}
           heroSubtitle={selectedMember === 'all' ? 'Total life, health & general sum assured' : `${displayPolicies.length} policies recorded`}
           icon={<Shield size={16} />}
           primaryBadge={
             nearestRenewal ? (
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                nearestRenewal.days <= 30
-                  ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300'
-                  : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
-              }`}>
+              <AppBadge variant={nearestRenewal.days <= 30 ? 'urgency' : 'info'} isPulsing={nearestRenewal.days <= 30}>
                 {nearestRenewal.days <= 30 ? `Renewal in ${nearestRenewal.days}d` : `${familyInsuranceSummary.activeCount} Active`}
-              </span>
+              </AppBadge>
             ) : (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-700 dark:text-rose-300">
+              <AppBadge variant="info">
                 {familyInsuranceSummary.activeCount} Active
-              </span>
+              </AppBadge>
             )
           }
           secondaryMetrics={[
@@ -320,15 +318,18 @@ export function InsuranceView({
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <div className="text-sm font-bold text-[var(--text-primary)] tnum">
-                      {formatINR(sumAssured)}
-                    </div>
-                    {premium > 0 && (
-                      <div className="text-xs font-semibold text-rose-600 dark:text-rose-400 tnum mt-0.5">
-                        {formatINR(premium)}/yr
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-[var(--text-primary)] tnum">
+                        {formatINR(sumAssured)}
                       </div>
-                    )}
+                      {premium > 0 && (
+                        <div className="text-xs font-semibold text-rose-600 dark:text-rose-400 tnum mt-0.5">
+                          {formatINR(premium)}/yr
+                        </div>
+                      )}
+                    </div>
+                    <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>
                 </div>
               );

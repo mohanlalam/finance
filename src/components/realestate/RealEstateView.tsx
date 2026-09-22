@@ -12,9 +12,10 @@ import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { Building2, Plus } from '../icons/AppIcons';
+import { Building2, Plus, ChevronRight } from '../icons/AppIcons';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import AppBadge from '../ui/AppBadge';
 import EmptyState from '../EmptyState';
 
 interface PortfolioOption {
@@ -206,16 +207,15 @@ export function RealEstateView({
     return (
       <>
         <MobileAssetRegistry
-          title={selectedMember === 'all' ? 'Total Real Estate' : `${activeMember?.label || ''} Real Estate`}
+          title={selectedMember === 'all' ? 'Real Estate' : `${activeMember?.label || ''} Real Estate`}
+          question="What is our property worth today?"
           heroValue={formatINR(displayValuation)}
           heroSubtitle={`${displayProperties.length} properties across family portfolios`}
           icon={<Building2 size={16} />}
           primaryBadge={
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-              displayPnL >= 0 ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-rose-500/20 text-rose-700 dark:text-rose-300'
-            }`}>
+            <AppBadge variant={displayPnL >= 0 ? 'positive' : 'negative'}>
               {displayPnL >= 0 ? '+' : ''}{formatINR(displayPnL)} ({formatPercent(displayPnLPct)})
-            </span>
+            </AppBadge>
           }
           secondaryMetrics={[
             { label: 'Total Invested', value: formatINR(displayInvested) },
@@ -284,15 +284,18 @@ export function RealEstateView({
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <div className="text-sm font-bold text-[var(--text-primary)] tnum">
-                      {formatINR(val)}
-                    </div>
-                    {invested > 0 && (
-                      <div className={`text-xs font-semibold tnum mt-0.5 ${pnlColor(gain)}`}>
-                        {gain >= 0 ? '+' : ''}{formatINR(gain)} ({formatPercent(gainPct)})
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-[var(--text-primary)] tnum">
+                        {formatINR(val)}
                       </div>
-                    )}
+                      {invested > 0 && (
+                        <div className={`text-xs font-semibold tnum mt-0.5 ${pnlColor(gain)}`}>
+                          {gain >= 0 ? '+' : ''}{formatINR(gain)} ({formatPercent(gainPct)})
+                        </div>
+                      )}
+                    </div>
+                    <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>
                 </div>
               );

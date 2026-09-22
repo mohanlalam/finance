@@ -16,15 +16,17 @@ export interface MobileFilterOption {
 }
 
 export interface MobileAssetRegistryProps {
-  /** Primary question/category title, e.g. "Total Stocks & ETFs" */
+  /** Category title, e.g. "Stocks & ETFs" */
   title: string;
+  /** Primary question answering the screen's core purpose in plain language, e.g. "What are my holdings worth today?" */
+  question?: string;
   /** Primary metric value answering the screen's core question, e.g. "₹18,50,000" */
   heroValue: React.ReactNode;
   /** Sub-caption or time indicator, e.g. "Aggregated equity across family" */
   heroSubtitle?: string;
   /** Prominent badge, e.g. "+1.8% Today" or "Next maturity in 18d" */
   primaryBadge?: React.ReactNode;
-  /** Secondary supporting metric tiles inside hero */
+  /** Secondary supporting metric tiles inside hero (strictly capped at 2) */
   secondaryMetrics?: MetricHighlight[];
   /** Optional icon component */
   icon?: React.ReactNode;
@@ -48,6 +50,7 @@ export interface MobileAssetRegistryProps {
 
 export const MobileAssetRegistry: React.FC<MobileAssetRegistryProps> = memo(({
   title,
+  question,
   heroValue,
   heroSubtitle,
   primaryBadge,
@@ -63,10 +66,13 @@ export const MobileAssetRegistry: React.FC<MobileAssetRegistryProps> = memo(({
   isEmpty = false,
   emptyState,
 }) => {
+  // Enforce strictly max 2 secondary metrics to preserve visual hierarchy
+  const cappedMetrics = secondaryMetrics ? secondaryMetrics.slice(0, 2) : [];
+
   return (
-    <div className="space-y-3.5 md:hidden">
+    <div className="space-y-3 md:hidden">
       {/* ── 1. Hero Primary Question Card ── */}
-      <div className="hero-networth-card rounded-[var(--radius-large)] p-4 space-y-3 shadow-xs">
+      <div className="hero-networth-card rounded-[var(--radius-large)] p-3.5 space-y-2.5 shadow-xs">
         {/* Row 1: Title & Badge */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
@@ -76,14 +82,18 @@ export const MobileAssetRegistry: React.FC<MobileAssetRegistryProps> = memo(({
               </div>
             )}
             <div className="min-w-0">
-              <h2 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider truncate">
+              <h2 className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider truncate">
                 {title}
               </h2>
-              {heroSubtitle && (
+              {question ? (
+                <p className="text-xs font-bold text-[var(--text-primary)] line-clamp-2 leading-tight">
+                  {question}
+                </p>
+              ) : heroSubtitle ? (
                 <p className="text-[10px] text-[var(--text-tertiary)] truncate">
                   {heroSubtitle}
                 </p>
-              )}
+              ) : null}
             </div>
           </div>
           {primaryBadge && (
@@ -98,14 +108,17 @@ export const MobileAssetRegistry: React.FC<MobileAssetRegistryProps> = memo(({
           <div className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tnum tracking-tight leading-none">
             {heroValue}
           </div>
+          {question && heroSubtitle && (
+            <p className="text-[10px] text-[var(--text-tertiary)] font-medium mt-1 truncate">
+              {heroSubtitle}
+            </p>
+          )}
         </div>
 
-        {/* Row 3: Secondary Metrics Grid (if provided) */}
-        {secondaryMetrics && secondaryMetrics.length > 0 && (
-          <div className={`grid gap-2 pt-2.5 border-t border-[var(--border-subtle)] ${
-            secondaryMetrics.length === 2 ? 'grid-cols-2' : secondaryMetrics.length === 3 ? 'grid-cols-3' : 'grid-cols-2'
-          }`}>
-            {secondaryMetrics.map((m, idx) => (
+        {/* Row 3: Secondary Metrics Grid (Strictly capped at 2) */}
+        {cappedMetrics.length > 0 && (
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--border-subtle)]">
+            {cappedMetrics.map((m, idx) => (
               <div key={idx} className="p-2 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)]/70 border border-[var(--border-subtle)] min-w-0">
                 <span className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider block truncate">
                   {m.label}

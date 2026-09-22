@@ -13,9 +13,10 @@ import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../domains/assets
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { TrendingUp, Plus } from '../icons/AppIcons';
+import { TrendingUp, Plus, ChevronRight } from '../icons/AppIcons';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import AppBadge from '../ui/AppBadge';
 import EmptyState from '../EmptyState';
 
 interface PortfolioOption {
@@ -252,16 +253,15 @@ export function SIPView({
     return (
       <>
         <MobileAssetRegistry
-          title={selectedMember === 'all' ? 'Total Mutual Funds & SIPs' : `${activeMember?.label || ''} Mutual Funds`}
+          title={selectedMember === 'all' ? 'Mutual Funds & SIPs' : `${activeMember?.label || ''} Mutual Funds`}
+          question="What are our mutual funds worth today?"
           heroValue={formatINR(displayCurrent)}
           heroSubtitle={`Monthly Inflow: ${formatINR(displayMonthly)}/mo across active SIPs`}
           icon={<TrendingUp size={16} />}
           primaryBadge={
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-              displayPnL >= 0 ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-rose-500/20 text-rose-700 dark:text-rose-300'
-            }`}>
+            <AppBadge variant={displayPnL >= 0 ? 'positive' : 'negative'}>
               {displayPnL >= 0 ? '+' : ''}{formatINR(displayPnL)} ({formatPercent(displayPnLPct)})
-            </span>
+            </AppBadge>
           }
           secondaryMetrics={[
             { label: 'Total Invested', value: formatINR(displayInvested) },
@@ -331,15 +331,18 @@ export function SIPView({
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <div className="text-sm font-bold text-[var(--text-primary)] tnum">
-                      {formatINR(effVal)}
-                    </div>
-                    {invested > 0 && (
-                      <div className={`text-xs font-semibold tnum mt-0.5 ${pnlColor(pnl)}`}>
-                        {pnl >= 0 ? '+' : ''}{formatINR(pnl)} ({formatPercent(pnlPct)})
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-[var(--text-primary)] tnum">
+                        {formatINR(effVal)}
                       </div>
-                    )}
+                      {invested > 0 && (
+                        <div className={`text-xs font-semibold tnum mt-0.5 ${pnlColor(pnl)}`}>
+                          {pnl >= 0 ? '+' : ''}{formatINR(pnl)} ({formatPercent(pnlPct)})
+                        </div>
+                      )}
+                    </div>
+                    <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>
                 </div>
               );

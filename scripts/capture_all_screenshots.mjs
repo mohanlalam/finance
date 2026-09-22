@@ -765,6 +765,35 @@ async function run() {
   await navigate('#/all/gold');
   await takeScreenshot('26_mobile_dark_gold_holdings.png', 390, 844, 3);
 
+  // Mobile Insurance
+  await navigate('#/all/insurance');
+  await takeScreenshot('29_mobile_dark_insurance.png', 390, 844, 3);
+
+  // Mobile Real Estate
+  await navigate('#/all/real_estate');
+  await takeScreenshot('30_mobile_dark_real_estate.png', 390, 844, 3);
+
+  // Mobile Document Vault
+  await navigate('#/all/documents');
+  await takeScreenshot('31_mobile_dark_documents.png', 390, 844, 3);
+
+  // Mobile Tax Harvesting
+  await navigate('#/all/tax');
+  await takeScreenshot('32_mobile_dark_tax_harvesting.png', 390, 844, 3);
+
+  console.log('\n📱 5. Capturing iPhone SE Compact Views (375x667)...');
+  await navigate('#/all/stocks');
+  await takeScreenshot('33_mobile_iphonese_dark_stocks.png', 375, 667, 2);
+
+  await navigate('#/all/fd');
+  await takeScreenshot('34_mobile_iphonese_dark_fd.png', 375, 667, 2);
+
+  await navigate('#/all/insurance');
+  await takeScreenshot('35_mobile_iphonese_dark_insurance.png', 375, 667, 2);
+
+  await navigate('#/all/documents');
+  await takeScreenshot('36_mobile_iphonese_dark_documents.png', 375, 667, 2);
+
   // Mobile Light Mode
   await setTheme('light');
   await navigate('#/all/home');
@@ -773,7 +802,7 @@ async function run() {
   await navigate('#/all/stocks');
   await takeScreenshot('28_mobile_light_stocks.png', 390, 844, 3);
 
-  console.log('\n🎉 ALL 28 REAL APP SCREENSHOTS CAPTURED PERFECTLY!');
+  console.log('\n🎉 ALL SCREENSHOTS CAPTURED PERFECTLY!');
   ws.close();
   chromeProc.kill();
   process.exit(0);

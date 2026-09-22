@@ -18,6 +18,7 @@ import { useIsMutating } from '../../contexts/PortfolioContext';
 import { useToastActions } from '../../contexts/ToastContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import AppBadge from '../ui/AppBadge';
 import { FixedSizeList as List } from 'react-window';
 import AssetCardSkeleton from '../AssetCardSkeleton';
 import EmptyState from '../EmptyState';
@@ -379,16 +380,21 @@ export default React.memo(function DocumentVaultView({
           accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.xlsx,.csv"
         />
         <MobileAssetRegistry
-          title={selectedMember === 'all' ? 'Family Document Vault' : `${activeMember?.label || ''} Documents`}
-          heroValue={`${displayDocs.length} Files`}
+          title={selectedMember === 'all' ? 'Document Vault' : `${activeMember?.label || ''} Documents`}
+          question="Are our records safe and current?"
+          heroValue={`${displayDocs.length} ${displayDocs.length === 1 ? 'Record' : 'Records'}`}
           heroSubtitle="Zero-knowledge AES-GCM-256 encrypted records"
           icon={<FileText size={16} />}
           primaryBadge={
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-              familyDocSummary.expiringSoonCount > 0 ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300' : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
-            }`}>
-              {familyDocSummary.expiringSoonCount > 0 ? `⚠️ ${familyDocSummary.expiringSoonCount} Expiring` : '✓ All Current'}
-            </span>
+            familyDocSummary.expiringSoonCount > 0 ? (
+              <AppBadge variant="urgency" isPulsing>
+                {familyDocSummary.expiringSoonCount} Expiring
+              </AppBadge>
+            ) : (
+              <AppBadge variant="encrypted">
+                AES-256 Encrypted
+              </AppBadge>
+            )
           }
           secondaryMetrics={[
             { label: 'Asset Linked', value: `${familyDocSummary.linkedDocs} Files` },
@@ -461,23 +467,28 @@ export default React.memo(function DocumentVaultView({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                     <button
                       type="button"
                       onClick={() => handleOpenDocument(doc)}
                       disabled={isOpening}
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:bg-[var(--surface-secondary)] transition-colors ios-press cursor-pointer"
-                      title="Open Document"
+                      className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/10 transition-colors ios-press cursor-pointer"
+                      title="Secure Preview"
                     >
-                      <ExternalLink size={14} />
+                      {isOpening ? (
+                        <span className="w-3 h-3 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <ExternalLink size={12} />
+                      )}
+                      <span>View</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDelete(doc)}
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-tertiary)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors ios-press cursor-pointer"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press cursor-pointer"
                       title="Delete Document"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 </div>

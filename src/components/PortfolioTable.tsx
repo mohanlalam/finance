@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Trash2, Pencil, SlidersHorizontal, Share2, Search, X } from './icons/AppIcons';
+import { Trash2, Pencil, SlidersHorizontal, Share2, Search, X, ChevronRight } from './icons/AppIcons';
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent } from '../utils/formatters';
 import { usePrivacy } from '../contexts/PrivacyContext';
@@ -147,16 +147,19 @@ const MobileStockRow = React.memo(function MobileStockRow({
         </div>
       </div>
 
-      {/* Right: Current Value & Return Badge */}
-      <div className="text-right shrink-0 flex flex-col items-end justify-center">
-        <p className="text-sm font-extrabold text-[var(--text-primary)] tnum leading-tight">
-          {renderValue(h.currentValue)}
-        </p>
-        <span className={`inline-flex items-center gap-0.5 text-xs font-bold tnum mt-0.5 ${
-          isUp ? 'text-[var(--positive)]' : 'text-[var(--negative)]'
-        }`}>
-          <span>{isUp ? '+' : ''}{formatPercent(h.todayPnLPercent ?? 0)} Today</span>
-        </span>
+      {/* Right: Current Value & Return Badge + Subtle Chevron */}
+      <div className="flex items-center gap-1.5 shrink-0">
+        <div className="text-right flex flex-col items-end justify-center">
+          <p className="text-sm font-extrabold text-[var(--text-primary)] tnum leading-tight">
+            {renderValue(h.currentValue)}
+          </p>
+          <span className={`inline-flex items-center gap-0.5 text-xs font-bold tnum mt-0.5 ${
+            isUp ? 'text-[var(--positive)]' : 'text-[var(--negative)]'
+          }`}>
+            <span>{isUp ? '+' : ''}{formatPercent(h.todayPnLPercent ?? 0)} Today</span>
+          </span>
+        </div>
+        <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
       </div>
     </div>
   );

@@ -2,10 +2,11 @@ import React from 'react';
 import { Portfolio } from '../../types/portfolio';
 import { calculateTaxHarvesting, TAX_DISCLAIMER } from '../../domains/taxation/calculations/taxHarvesting';
 import { formatINR } from '../../utils/formatters';
-import { TrendingDown, ShieldAlert } from '../icons/AppIcons';
+import { TrendingDown, ShieldAlert, ChevronRight } from '../icons/AppIcons';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import AppBadge from '../ui/AppBadge';
 import EmptyState from '../EmptyState';
 
 interface TaxHarvestingViewProps {
@@ -69,14 +70,15 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
 
     return (
       <MobileAssetRegistry
-        title="Tax Loss Harvesting"
+        title="Tax Harvesting"
+        question="How much loss can be harvested?"
         heroValue={formatINR(taxData.harvestableLosses)}
         heroSubtitle="Offset taxable capital gains before March 31st"
         icon={<TrendingDown size={16} />}
         primaryBadge={
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+          <AppBadge variant="positive">
             Save up to {formatINR(taxData.potentialTaxSavings)}
-          </span>
+          </AppBadge>
         }
         secondaryMetrics={[
           { label: 'Estimated Tax', value: formatINR(taxData.totalEstimatedTax) },
@@ -132,13 +134,16 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
                   </div>
                 </div>
 
-                <div className="text-right shrink-0">
-                  <div className="text-sm font-bold text-[var(--negative)] tnum">
-                    -{formatINR(loss)}
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="text-right">
+                    <div className="text-sm font-bold text-[var(--negative)] tnum">
+                      -{formatINR(loss)}
+                    </div>
+                    <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 tnum mt-0.5">
+                      Save ~{formatINR(taxSaved)}
+                    </div>
                   </div>
-                  <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 tnum mt-0.5">
-                    Save ~{formatINR(taxSaved)}
-                  </div>
+                  <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                 </div>
               </div>
             );

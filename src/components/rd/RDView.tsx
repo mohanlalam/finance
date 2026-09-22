@@ -13,9 +13,10 @@ import { getRDInvestedAmount, getRDEffectiveValue } from '../../domains/assets/r
 import { formatINR } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { Clock, Plus } from '../icons/AppIcons';
+import { Clock, Plus, ChevronRight } from '../icons/AppIcons';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import AppBadge from '../ui/AppBadge';
 import EmptyState from '../EmptyState';
 
 interface PortfolioOption {
@@ -282,14 +283,15 @@ export function RDView({
     return (
       <>
         <MobileAssetRegistry
-          title={selectedMember === 'all' ? 'Total Recurring Deposits' : `${activeMember?.label || ''} RD Accounts`}
+          title={selectedMember === 'all' ? 'Recurring Deposits' : `${activeMember?.label || ''} RD Accounts`}
+          question="How much is locked and what matures next?"
           heroValue={formatINR(displayCurrent)}
           heroSubtitle={`Monthly Commitment: ${formatINR(displayMonthly)}/mo`}
           icon={<Clock size={16} />}
           primaryBadge={
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-700 dark:text-orange-300">
+            <AppBadge variant="info">
               {familyRDSummary.activeCount} Active RDs
-            </span>
+            </AppBadge>
           }
           secondaryMetrics={[
             { label: 'Total Invested', value: formatINR(displayInvested) },
@@ -360,13 +362,16 @@ export function RDView({
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <div className="text-sm font-bold text-[var(--text-primary)] tnum">
-                      {formatINR(effVal)}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-[var(--text-primary)] tnum">
+                        {formatINR(effVal)}
+                      </div>
+                      <div className={`text-xs font-semibold tnum mt-0.5 ${isMatured ? 'text-[var(--positive)]' : 'text-[var(--text-tertiary)]'}`}>
+                        {isMatured ? 'Matured' : 'Active'}
+                      </div>
                     </div>
-                    <div className={`text-xs font-semibold tnum mt-0.5 ${isMatured ? 'text-[var(--positive)]' : 'text-[var(--text-tertiary)]'}`}>
-                      {isMatured ? 'Matured' : 'Active'}
-                    </div>
+                    <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>
                 </div>
               );

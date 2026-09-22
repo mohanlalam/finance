@@ -9,6 +9,7 @@ import { calcHoldingTodayPnL } from '../../domains/portfolio/calculations/portfo
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
+import AppBadge from '../ui/AppBadge';
 
 interface PortfolioOption {
   name: string;
@@ -146,16 +147,15 @@ export default function StocksView({
 
     return (
       <MobileAssetRegistry
-        title={selectedMember === 'all' ? 'Total Stocks & ETFs' : `${activeMember?.label || ''} Stocks`}
+        title={selectedMember === 'all' ? 'Stocks & ETFs' : `${activeMember?.label || ''} Stocks`}
+        question="What are my holdings worth today?"
         heroValue={formatINR(currentVal)}
         heroSubtitle={selectedMember === 'all' ? 'Aggregated across family portfolios' : `${currentHoldings.length} stocks recorded`}
         icon={<TrendingUp size={16} />}
         primaryBadge={
-          <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full ${
-            currentTodayPnL >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'
-          }`}>
-            <span>{currentTodayPnL >= 0 ? '+' : ''}{formatPercent(currentTodayPnLPct)} Today</span>
-          </span>
+          <AppBadge variant={currentTodayPnL >= 0 ? 'positive' : 'negative'}>
+            {formatPercent(currentTodayPnLPct)} Today
+          </AppBadge>
         }
         secondaryMetrics={[
           { label: 'Invested', value: formatINR(currentInvested) },
