@@ -37,11 +37,11 @@ const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.Reac
 ];
 
 /* ── Main tab list — WhatsApp iOS style ──────────────────────────────────── */
-const mainTabs: { id: AssetTab; label: string }[] = [
-  { id: 'home',   label: 'Home' },
-  { id: 'stocks', label: 'Stocks' },
-  { id: 'sip',    label: 'Funds' },
-  { id: 'fd',     label: 'Deposits' },
+const mainTabs: { id: AssetTab; label: string; accent: string }[] = [
+  { id: 'home',   label: 'Home',     accent: 'var(--accent-blue)' },
+  { id: 'stocks', label: 'Stocks',   accent: 'var(--positive)' },
+  { id: 'sip',    label: 'Funds',    accent: 'var(--asset-sip)' },
+  { id: 'fd',     label: 'Deposits', accent: 'var(--asset-fd)' },
 ];
 
 /* ── Filled glyphs for active states (Apple SF Symbols style) ─────────────── */
@@ -78,16 +78,39 @@ function LandmarkFilled({ size = 22 }: { size?: number }) {
   );
 }
 
-/* ── Individual tab button — WhatsApp iOS Floating Pill Style ───────────── */
+/* ── More Grid Icons for More Tab ────────────────────────────────────────── */
+function MoreGridFilled({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    </svg>
+  );
+}
+
+function MoreGridOutline({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    </svg>
+  );
+}
+
+/* ── Individual tab button — Asset-Colored Pill wrapping BOTH Icon & Label ── */
 function TabBtn({
-  label, isActive, badge, onClick, icon, activeIcon,
+  label, isActive, badge, onClick, icon, activeIcon, accent,
 }: {
   id: AssetTab; label: string; isActive: boolean;
   badge?: number; onClick: () => void;
   icon: React.ReactNode; activeIcon: React.ReactNode;
-  isFirst?: boolean; isLast?: boolean;
-  accent?: string;
+  accent: string;
 }) {
+  const activeColor = accent;
   return (
     <button
       type="button"
@@ -99,7 +122,6 @@ function TabBtn({
         position: 'relative',
         flex: 1,
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
@@ -111,86 +133,122 @@ function TabBtn({
         WebkitTapHighlightColor: 'transparent',
         userSelect: 'none',
         touchAction: 'manipulation',
-        padding: '3px 0',
+        padding: '2px',
       }}
     >
-      {/* Icon container with WhatsApp active emerald capsule highlight */}
+      {/* Pill container — When active, surrounds BOTH icon AND name in asset color */}
       <span
         style={{
-          position: 'relative',
+          width: '100%',
+          maxWidth: 66,
+          height: 46,
+          borderRadius: 14,
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 52,
-          height: 28,
-          borderRadius: 9999,
-          background: isActive ? 'var(--nav-whatsapp-green-soft)' : 'transparent',
-          transition: 'background 0.2s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          gap: 1.5,
+          padding: '2px 4px',
+          background: isActive
+            ? `color-mix(in srgb, ${activeColor} 18%, transparent)`
+            : 'transparent',
+          border: isActive
+            ? `0.5px solid color-mix(in srgb, ${activeColor} 35%, transparent)`
+            : '0.5px solid transparent',
+          boxShadow: isActive
+            ? `0 2px 10px color-mix(in srgb, ${activeColor} 18%, transparent)`
+            : 'none',
+          transform: isActive ? 'scale(1.02)' : 'scale(1)',
+          transition: 'background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
         }}
       >
+        {/* Icon wrapper */}
         <span
           style={{
+            position: 'relative',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: isActive ? 'var(--nav-whatsapp-green)' : 'var(--text-tertiary)',
-            transform: isActive ? 'scale(1.05)' : 'scale(1)',
-            transition: 'color 0.18s ease, transform 0.2s ease',
+            width: 26,
+            height: 22,
           }}
         >
-          {isActive ? activeIcon : icon}
-        </span>
-
-        {/* Badge — cleanly anchored to icon */}
-        {badge != null && badge > 0 && (
           <span
-            role="status"
-            aria-label={`${badge} notifications`}
             style={{
-              position: 'absolute',
-              top: -2,
-              right: 6,
-              minWidth: 15,
-              height: 15,
-              borderRadius: 999,
-              background: '#ef4444',
-              color: '#fff',
-              fontSize: 9,
-              fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '0 3px',
-              boxShadow: '0 0 0 1.5px var(--surface-solid, #fff)',
+              color: isActive ? activeColor : 'var(--text-tertiary)',
+              transform: isActive ? 'scale(1.06)' : 'scale(1)',
+              transition: 'color 0.18s ease, transform 0.2s ease',
             }}
           >
-            {badge > 9 ? '9+' : badge}
+            {isActive ? activeIcon : icon}
           </span>
-        )}
-      </span>
 
-      {/* Label directly underneath icon */}
-      <span
-        style={{
-          fontSize: 10.5,
-          fontWeight: isActive ? 600 : 500,
-          letterSpacing: '-0.01em',
-          color: isActive ? 'var(--nav-whatsapp-green)' : 'var(--text-tertiary)',
-          lineHeight: 1,
-          marginTop: 2,
-          whiteSpace: 'nowrap',
-          transition: 'color 0.18s ease, font-weight 0.18s ease',
-        }}
-      >
-        {label}
+          {/* Badge — cleanly anchored to top-right of icon */}
+          {badge != null && badge > 0 && (
+            <span
+              role="status"
+              aria-label={`${badge} notifications`}
+              style={{
+                position: 'absolute',
+                top: -3,
+                right: -8,
+                minWidth: 15,
+                height: 15,
+                borderRadius: 999,
+                background: '#ef4444',
+                color: '#fff',
+                fontSize: 9,
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0 3px',
+                boxShadow: '0 0 0 1.5px var(--surface-solid, #fff)',
+              }}
+            >
+              {badge > 9 ? '9+' : badge}
+            </span>
+          )}
+        </span>
+
+        {/* Label — INSIDE the active pill */}
+        <span
+          style={{
+            fontSize: 10.5,
+            fontWeight: isActive ? 600 : 500,
+            letterSpacing: '-0.01em',
+            color: isActive ? activeColor : 'var(--text-tertiary)',
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+            transition: 'color 0.18s ease, font-weight 0.18s ease',
+          }}
+        >
+          {label}
+        </span>
       </span>
     </button>
   );
 }
 
-/* ── "You" tab button — WhatsApp iOS Avatar Profile Style ───────────────── */
-function YouTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: boolean; onClick: () => void }) {
+/* ── "More" tab button — Asset-Colored Pill wrapping BOTH Icon & "More" ──── */
+function MoreTabBtn({
+  isActive,
+  isOpen,
+  activeAsset,
+  onClick,
+}: {
+  isActive: boolean;
+  isOpen: boolean;
+  activeAsset: AssetTab;
+  onClick: () => void;
+}) {
   const lit = isActive || isOpen;
+  const activeTabObj = moreTabs.find((t) => t.id === activeAsset);
+  const activeColor = activeTabObj ? activeTabObj.color : 'var(--accent-rose)';
+
   return (
     <button
       type="button"
@@ -198,13 +256,12 @@ function YouTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: b
       aria-haspopup="dialog"
       aria-expanded={isOpen}
       aria-label={lit ? 'More (active)' : 'More asset categories'}
-      title="You - More Assets"
+      title="More asset categories"
       className="ios-press"
       style={{
         position: 'relative',
         flex: 1,
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
@@ -216,59 +273,74 @@ function YouTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: b
         WebkitTapHighlightColor: 'transparent',
         userSelect: 'none',
         touchAction: 'manipulation',
-        padding: '3px 0',
+        padding: '2px',
       }}
     >
-      {/* Avatar Container with Active Green Ring (matching WhatsApp frame 00:15) */}
+      {/* Pill container — When active, surrounds BOTH icon AND "More" text in asset color */}
       <span
         style={{
-          position: 'relative',
+          width: '100%',
+          maxWidth: 66,
+          height: 46,
+          borderRadius: 14,
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 52,
-          height: 28,
+          gap: 1.5,
+          padding: '2px 4px',
+          background: lit
+            ? `color-mix(in srgb, ${activeColor} 18%, transparent)`
+            : 'transparent',
+          border: lit
+            ? `0.5px solid color-mix(in srgb, ${activeColor} 35%, transparent)`
+            : '0.5px solid transparent',
+          boxShadow: lit
+            ? `0 2px 10px color-mix(in srgb, ${activeColor} 18%, transparent)`
+            : 'none',
+          transform: lit ? 'scale(1.02)' : 'scale(1)',
+          transition: 'background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
         }}
       >
+        {/* Icon wrapper */}
         <span
           style={{
-            width: 25,
-            height: 25,
-            borderRadius: 9999,
+            position: 'relative',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
-            boxShadow: lit
-              ? '0 0 0 2px var(--nav-whatsapp-green), 0 0 8px rgba(37, 211, 102, 0.4)'
-              : '0 0 0 1.5px rgba(255, 255, 255, 0.25)',
-            transform: lit ? 'scale(1.05)' : 'scale(1)',
-            transition: 'box-shadow 0.2s ease, transform 0.2s ease',
-            color: '#ffffff',
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: '0.02em',
-            overflow: 'hidden',
+            width: 26,
+            height: 22,
           }}
         >
-          <span>RM</span>
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: lit ? activeColor : 'var(--text-tertiary)',
+              transform: isOpen ? 'rotate(90deg) scale(1.06)' : lit ? 'scale(1.06)' : 'scale(1)',
+              transition: 'color 0.18s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            }}
+          >
+            {lit ? <MoreGridFilled size={20} /> : <MoreGridOutline size={20} />}
+          </span>
         </span>
-      </span>
 
-      {/* Label: You */}
-      <span
-        style={{
-          fontSize: 10.5,
-          fontWeight: lit ? 600 : 500,
-          letterSpacing: '-0.01em',
-          color: lit ? 'var(--nav-whatsapp-green)' : 'var(--text-tertiary)',
-          lineHeight: 1,
-          marginTop: 2,
-          whiteSpace: 'nowrap',
-          transition: 'color 0.18s ease, font-weight 0.18s ease',
-        }}
-      >
-        You
+        {/* Label: More — INSIDE the active pill */}
+        <span
+          style={{
+            fontSize: 10.5,
+            fontWeight: lit ? 600 : 500,
+            letterSpacing: '-0.01em',
+            color: lit ? activeColor : 'var(--text-tertiary)',
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+            transition: 'color 0.18s ease, font-weight 0.18s ease',
+          }}
+        >
+          More
+        </span>
       </span>
     </button>
   );
@@ -761,25 +833,31 @@ function MobileBottomNav({
                 key={tab.id}
                 id={tab.id}
                 label={tab.label}
+                accent={tab.accent}
                 isActive={activeAsset === tab.id}
                 badge={tab.id === 'home' && alertCount > 0 ? alertCount : undefined}
                 onClick={() => { triggerHaptic('selection'); onChangeAsset(tab.id); if (isDrawerOpen) closeDrawer(); }}
                 icon={
-                  tab.id === 'home'   ? <HomeIcon size={22} aria-hidden="true" />   :
-                  tab.id === 'stocks' ? <TrendingUp size={22} aria-hidden="true" /> :
-                  tab.id === 'sip'    ? <Wallet size={22} aria-hidden="true" />     :
-                                        <Landmark size={22} aria-hidden="true" />
+                  tab.id === 'home'   ? <HomeIcon size={21} aria-hidden="true" />   :
+                  tab.id === 'stocks' ? <TrendingUp size={21} aria-hidden="true" /> :
+                  tab.id === 'sip'    ? <Wallet size={21} aria-hidden="true" />     :
+                                        <Landmark size={21} aria-hidden="true" />
                 }
                 activeIcon={
-                  tab.id === 'home'   ? <HomeFilled size={22} />     :
-                  tab.id === 'stocks' ? <StocksFilled size={22} />   :
-                  tab.id === 'sip'    ? <WalletFilled size={22} />   :
-                                        <LandmarkFilled size={22} />
+                  tab.id === 'home'   ? <HomeFilled size={21} />     :
+                  tab.id === 'stocks' ? <StocksFilled size={21} />   :
+                  tab.id === 'sip'    ? <WalletFilled size={21} />   :
+                                        <LandmarkFilled size={21} />
                 }
               />
             ))}
 
-            <YouTabBtn isActive={isMoreActive} isOpen={isDrawerOpen} onClick={toggleDrawer} />
+            <MoreTabBtn
+              isActive={isMoreActive}
+              isOpen={isDrawerOpen}
+              activeAsset={activeAsset}
+              onClick={toggleDrawer}
+            />
           </div>
         </div>
       </nav>
