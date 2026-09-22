@@ -1,10 +1,16 @@
-# 💼 Family Portfolio Tracker — GEMINI.md (Project Architecture)
+# 💼 Family Portfolio Tracker — GEMINI.md (Project Architecture & Rules)
 
-_Last updated: 2026-09-15 — Architecture v3.0 (Liquid Glass Inspired Mobile Navigation)_
+_Last updated: 2026-09-22 — Architecture v3.0 (Liquid Glass Navigation & Standardized Documentation)_
 
-This document provides a high-level overview of the folder structure, clean architecture boundaries, domain/infrastructure data flow, state management, database mappings, error handling, testing strategies, and performance optimizations of the Family Portfolio Tracker application. It is designed to help developers and AI agents navigate the codebase efficiently.
+> 📚 **Authoritative Documentation Suite (In One Place - Project Root)**:
+> 1. **[`PRD.md`](PRD.md)** — Product Requirements Document (Vision, Personas, Functional Specs, AI Engine, NFRs)
+> 2. **[`Architecture.md`](Architecture.md)** — System Architecture & Technical Specs (Clean Architecture, Repositories, Caching, Threat Model)
+> 3. **[`Design.md`](Design.md)** — Single Authoritative Source for Design Tokens, Visual Guidelines & Mobile Design Contract
+> 4. **[`rules.md`](rules.md)** — Engineering Standards, Coding Guidelines & "Do Not Regress" Rules
+> 5. **[`task.md`](task.md)** — Project Roadmap, Active Tasks & 36-Screen Visual QA Checklist
+> 6. **[`memory.md`](memory.md)** — Architectural Decision Records (ADRs) & Engineering Lessons Learned
 
-> ⚠️ **Design Token Rule**: [`UI.md`](UI.md) is the single authoritative source of truth for all visual tokens. Never introduce a new color hex, corner radius, shadow, or typography token in code or docs without first declaring it in `UI.md §2` and `src/index.css`.
+> ⚠️ **Design Token Rule**: [`Design.md`](Design.md) (and `src/index.css`) is the single authoritative source of truth for all visual tokens. Never introduce a new color hex, corner radius, shadow, or typography token in code or docs without first declaring it in `Design.md §2` and `src/index.css`.
 
 ---
 

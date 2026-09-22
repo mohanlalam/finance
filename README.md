@@ -4,6 +4,19 @@ A high-performance, privacy-first multi-asset portfolio tracker designed to mana
 
 ---
 
+## 📚 Standard Project Documentation
+
+The project's authoritative documentation is organized across 6 standardized files:
+
+1. **[`PRD.md`](PRD.md)** — Product Requirements Document (Vision, Personas, Functional Specs, AI Engine, NFRs)
+2. **[`Architecture.md`](Architecture.md)** — System Architecture & Technical Specs (Clean Architecture, Repositories, Caching, Threat Model)
+3. **[`Design.md`](Design.md)** — Design System & Visual Specification (Tokens, Cyber-Zen & Liquid Glass, Mobile Contract)
+4. **[`rules.md`](rules.md)** — Engineering Standards, Coding Guidelines & "Do Not Regress" Rules
+5. **[`task.md`](task.md)** — Project Roadmap, Active Tasks & 36-Screen Visual QA Checklist
+6. **[`memory.md`](memory.md)** — Architectural Decision Records (ADRs) & Engineering Lessons Learned
+
+---
+
 ## ✨ Key Features
 
 ### 🌌 Antigravity Cyber-Zen UI & Visual Experience
