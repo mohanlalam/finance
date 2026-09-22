@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, TrendingUp, TrendingDown, Pencil, Trash2, Share2, ExternalLink } from './icons/AppIcons';
 import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent } from '../utils/formatters';
@@ -79,8 +80,8 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
   const isOverallProfit = (holding.unrealizedPnL ?? 0) >= 0;
   const todayPnLAmount = calcHoldingTodayPnL(holding);
 
-  return (
-    <div className="fixed inset-0 z-[300] flex items-end sm:items-stretch justify-center sm:justify-end" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+  const drawerContent = (
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-stretch justify-center sm:justify-end" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-[var(--backdrop-overlay)] backdrop-blur-xs transition-opacity duration-300 animate-fade-in"
@@ -91,7 +92,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
       {/* Slide-Over Drawer Container (Desktop) & Bottom Sheet (Mobile) */}
       <div 
         ref={drawerRef}
-        className="relative z-10 w-full sm:max-w-md max-h-[88vh] sm:max-h-full h-auto sm:h-full bg-[var(--surface)] border-t sm:border-t-0 sm:border-l border-[var(--border-subtle)] rounded-t-2xl sm:rounded-none shadow-2xl flex flex-col overflow-hidden transition-transform duration-300 animate-slide-in pb-safe"
+        className="relative z-10 w-full sm:max-w-md max-h-[88vh] sm:max-h-full h-auto sm:h-full bg-[var(--surface)] border-t sm:border-t-0 sm:border-l border-[var(--border-subtle)] rounded-t-2xl sm:rounded-none shadow-2xl flex flex-col overflow-hidden transition-transform duration-300 animate-drawer-bottom sm:animate-drawer-right pb-[max(env(safe-area-inset-bottom,0px),1rem)] sm:pb-0"
       >
         {/* Mobile Drag Indicator Handle */}
         <div className="w-10 h-1 rounded-full bg-[var(--border-subtle)] mx-auto mt-2.5 mb-1 sm:hidden" aria-hidden="true" />
@@ -261,6 +262,8 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(drawerContent, document.body) : drawerContent;
 };
 
 export default React.memo(HoldingDetailDrawer);

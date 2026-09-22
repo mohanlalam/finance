@@ -432,7 +432,7 @@ export default React.memo(function PortfolioTable({
       {/* Single-pass responsive layout selection */}
       {isMobile ? (
         <div className="block">
-          <div className={`divide-y divide-[var(--border-subtle)] ${hideOverviewRibbon ? '' : 'pb-24'}`}>
+          <div className="divide-y divide-[var(--border-subtle)]">
             {sorted.length === 0 ? (
               <div className="py-4">
                 <EmptyState 

@@ -12,7 +12,6 @@ import {
   ChevronRight,
   X,
   Sparkles,
-  Menu,
 } from './icons/AppIcons';
 import { triggerHaptic } from '../utils/haptics';
 import { lockScroll, unlockScroll } from '../utils/scrollLock';
@@ -37,12 +36,12 @@ const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.Reac
   { id: 'tax',         label: 'Tax Harvesting',       subtext: 'LTCG / STCG tax optimisation',       icon: <TrendingUp size={18} aria-hidden="true" />, color: '#10b981' },
 ];
 
-/* ── Main tab list with per-tab accent colors (iOS 26 style) ─────────── */
-const mainTabs: { id: AssetTab; label: string; accent: string }[] = [
-  { id: 'home',   label: 'Home',     accent: '#0284c7' },
-  { id: 'stocks', label: 'Stocks',   accent: '#059669' },
-  { id: 'sip',    label: 'Funds',    accent: '#7c3aed' },
-  { id: 'fd',     label: 'Deposits', accent: '#0891b2' },
+/* ── Main tab list — WhatsApp iOS style ──────────────────────────────────── */
+const mainTabs: { id: AssetTab; label: string }[] = [
+  { id: 'home',   label: 'Home' },
+  { id: 'stocks', label: 'Stocks' },
+  { id: 'sip',    label: 'Funds' },
+  { id: 'fd',     label: 'Deposits' },
 ];
 
 /* ── Filled glyphs for active states (Apple SF Symbols style) ─────────────── */
@@ -79,9 +78,9 @@ function LandmarkFilled({ size = 22 }: { size?: number }) {
   );
 }
 
-/* ── Individual tab button — iOS 26 Liquid Glass Concave Inset ───────────── */
+/* ── Individual tab button — WhatsApp iOS Floating Pill Style ───────────── */
 function TabBtn({
-  label, isActive, badge, onClick, icon, activeIcon, isFirst, isLast, accent,
+  label, isActive, badge, onClick, icon, activeIcon,
 }: {
   id: AssetTab; label: string; isActive: boolean;
   badge?: number; onClick: () => void;
@@ -89,7 +88,6 @@ function TabBtn({
   isFirst?: boolean; isLast?: boolean;
   accent?: string;
 }) {
-  const activeColor = accent || 'var(--accent-blue)';
   return (
     <button
       type="button"
@@ -104,11 +102,8 @@ function TabBtn({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 2,
-        paddingTop: 3,
-        paddingBottom: 3,
-        minWidth: 56,
         height: '100%',
+        minHeight: 44,
         background: 'none',
         border: 'none',
         cursor: 'pointer',
@@ -116,45 +111,21 @@ function TabBtn({
         WebkitTapHighlightColor: 'transparent',
         userSelect: 'none',
         touchAction: 'manipulation',
+        padding: '3px 0',
       }}
     >
-      {/* Glass lozenge — always visible (idle or active concave inset) */}
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          left: isFirst ? 0 : 2,
-          right: isLast ? 0 : 2,
-          borderRadius: isFirst
-            ? '25px 20px 20px 25px'
-            : isLast
-            ? '20px 25px 25px 20px'
-            : 20,
-          background: isActive ? 'var(--nav-selected-bg)' : 'var(--nav-tab-idle-bg)',
-          border: isActive
-            ? '0.5px solid var(--nav-selected-border)'
-            : '0.5px solid var(--nav-tab-idle-border)',
-          boxShadow: isActive ? 'var(--nav-selected-shadow)' : 'var(--nav-tab-idle-shadow)',
-          transition: 'background 0.22s ease, border-color 0.22s ease, box-shadow 0.26s ease',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Icon wrapper with colored plate behind active icon */}
+      {/* Icon container with WhatsApp active emerald capsule highlight */}
       <span
         style={{
           position: 'relative',
-          zIndex: 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 32,
+          width: 52,
           height: 28,
-          borderRadius: 9,
-          background: isActive ? 'var(--nav-icon-plate-bg)' : 'transparent',
-          transition: 'background 0.22s ease',
+          borderRadius: 9999,
+          background: isActive ? 'var(--nav-whatsapp-green-soft)' : 'transparent',
+          transition: 'background 0.2s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
         }}
       >
         <span
@@ -162,16 +133,15 @@ function TabBtn({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: isActive ? activeColor : 'var(--text-primary)',
-            opacity: isActive ? 1 : 0.65,
-            transform: isActive ? 'scale(1.06)' : 'scale(1)',
-            transition: 'color 0.18s ease, opacity 0.18s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            color: isActive ? 'var(--nav-whatsapp-green)' : 'var(--text-tertiary)',
+            transform: isActive ? 'scale(1.05)' : 'scale(1)',
+            transition: 'color 0.18s ease, transform 0.2s ease',
           }}
         >
           {isActive ? activeIcon : icon}
         </span>
 
-        {/* Badge — cleanly anchored to icon without loud glow */}
+        {/* Badge — cleanly anchored to icon */}
         {badge != null && badge > 0 && (
           <span
             role="status"
@@ -179,7 +149,7 @@ function TabBtn({
             style={{
               position: 'absolute',
               top: -2,
-              right: -4,
+              right: 6,
               minWidth: 15,
               height: 15,
               borderRadius: 999,
@@ -199,19 +169,17 @@ function TabBtn({
         )}
       </span>
 
-      {/* Label — Clean Apple HIG typography */}
+      {/* Label directly underneath icon */}
       <span
         style={{
-          fontSize: 10,
+          fontSize: 10.5,
           fontWeight: isActive ? 600 : 500,
-          letterSpacing: 0,
-          color: isActive ? activeColor : 'var(--text-primary)',
-          opacity: isActive ? 1 : 0.65,
-          transition: 'color 0.18s ease, opacity 0.18s ease',
+          letterSpacing: '-0.01em',
+          color: isActive ? 'var(--nav-whatsapp-green)' : 'var(--text-tertiary)',
           lineHeight: 1,
+          marginTop: 2,
           whiteSpace: 'nowrap',
-          position: 'relative',
-          zIndex: 1,
+          transition: 'color 0.18s ease, font-weight 0.18s ease',
         }}
       >
         {label}
@@ -220,17 +188,17 @@ function TabBtn({
   );
 }
 
-/* ── "More" tab button — iOS 26 Liquid Glass Concave Inset ────────────── */
-function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: boolean; onClick: () => void }) {
+/* ── "You" tab button — WhatsApp iOS Avatar Profile Style ───────────────── */
+function YouTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: boolean; onClick: () => void }) {
   const lit = isActive || isOpen;
-  const activeColor = '#e11d48'; // Rose accent for More
   return (
     <button
       type="button"
       onClick={onClick}
       aria-haspopup="dialog"
       aria-expanded={isOpen}
-      aria-label={isActive ? 'More (active)' : 'More asset categories'}
+      aria-label={lit ? 'More (active)' : 'More asset categories'}
+      title="You - More Assets"
       className="ios-press"
       style={{
         position: 'relative',
@@ -239,11 +207,8 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 2,
-        paddingTop: 3,
-        paddingBottom: 3,
-        minWidth: 56,
         height: '100%',
+        minHeight: 44,
         background: 'none',
         border: 'none',
         cursor: 'pointer',
@@ -251,73 +216,59 @@ function MoreTabBtn({ isActive, isOpen, onClick }: { isActive: boolean; isOpen: 
         WebkitTapHighlightColor: 'transparent',
         userSelect: 'none',
         touchAction: 'manipulation',
+        padding: '3px 0',
       }}
     >
-      {/* Glass lozenge — always visible (idle or concave inset) */}
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          left: 2,
-          right: 0,
-          borderRadius: '20px 25px 25px 20px',
-          background: lit ? 'var(--nav-selected-bg)' : 'var(--nav-tab-idle-bg)',
-          border: lit
-            ? '0.5px solid var(--nav-selected-border)'
-            : '0.5px solid var(--nav-tab-idle-border)',
-          boxShadow: lit ? 'var(--nav-selected-shadow)' : 'var(--nav-tab-idle-shadow)',
-          transition: 'background 0.22s ease, border-color 0.22s ease, box-shadow 0.26s ease',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Icon wrapper with colored plate */}
+      {/* Avatar Container with Active Green Ring (matching WhatsApp frame 00:15) */}
       <span
         style={{
           position: 'relative',
-          zIndex: 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 32,
+          width: 52,
           height: 28,
-          borderRadius: 9,
-          background: lit ? 'var(--nav-icon-plate-bg)' : 'transparent',
-          transition: 'background 0.22s ease',
         }}
       >
         <span
           style={{
+            width: 25,
+            height: 25,
+            borderRadius: 9999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: lit ? activeColor : 'var(--text-primary)',
-            opacity: lit ? 1 : 0.65,
-            transform: isOpen ? 'rotate(90deg) scale(1.06)' : lit ? 'scale(1.06)' : 'scale(1)',
-            transition: 'color 0.18s ease, opacity 0.18s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+            boxShadow: lit
+              ? '0 0 0 2px var(--nav-whatsapp-green), 0 0 8px rgba(37, 211, 102, 0.4)'
+              : '0 0 0 1.5px rgba(255, 255, 255, 0.25)',
+            transform: lit ? 'scale(1.05)' : 'scale(1)',
+            transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+            color: '#ffffff',
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: '0.02em',
+            overflow: 'hidden',
           }}
         >
-          <Menu size={21} aria-hidden="true" />
+          <span>RM</span>
         </span>
       </span>
 
+      {/* Label: You */}
       <span
         style={{
-          fontSize: 10,
+          fontSize: 10.5,
           fontWeight: lit ? 600 : 500,
-          letterSpacing: 0,
-          color: lit ? activeColor : 'var(--text-primary)',
-          opacity: lit ? 1 : 0.65,
-          transition: 'color 0.18s ease, opacity 0.18s ease',
+          letterSpacing: '-0.01em',
+          color: lit ? 'var(--nav-whatsapp-green)' : 'var(--text-tertiary)',
           lineHeight: 1,
+          marginTop: 2,
           whiteSpace: 'nowrap',
-          position: 'relative',
-          zIndex: 1,
+          transition: 'color 0.18s ease, font-weight 0.18s ease',
         }}
       >
-        More
+        You
       </span>
     </button>
   );
@@ -771,10 +722,10 @@ function MobileBottomNav({
           left: 0,
           right: 0,
           zIndex: 50,
-          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)',
-          paddingLeft: 12,
-          paddingRight: 12,
-          paddingTop: 6,
+          paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 8px, 12px)',
+          paddingLeft: 14,
+          paddingRight: 14,
+          paddingTop: 0,
           pointerEvents: 'none',
           transform: isVisible ? 'translateY(0)' : 'translateY(calc(100% + 24px))',
           opacity: isVisible ? 1 : 0,
@@ -783,54 +734,52 @@ function MobileBottomNav({
       >
         <div
           style={{
-            maxWidth: 440,
+            maxWidth: 410,
             margin: '0 auto',
             pointerEvents: 'auto',
             background: 'var(--nav-glass-bg)',
             backdropFilter: 'blur(28px) saturate(1.8)',
             WebkitBackdropFilter: 'blur(28px) saturate(1.8)',
-            borderRadius: 29,
+            borderRadius: 9999,
             border: '0.5px solid var(--nav-glass-border)',
             boxShadow: 'var(--nav-glass-shadow)',
             userSelect: 'none',
             overflow: 'hidden',
+            padding: '3px 6px',
           }}
         >
           <div
             style={{
               display: 'flex',
-              alignItems: 'stretch',
-              height: 58,
-              padding: 4,
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              height: 52,
             }}
           >
-            {mainTabs.map((tab, idx) => (
+            {mainTabs.map((tab) => (
               <TabBtn
                 key={tab.id}
                 id={tab.id}
                 label={tab.label}
                 isActive={activeAsset === tab.id}
-                isFirst={idx === 0}
-                isLast={false}
-                accent={tab.accent}
                 badge={tab.id === 'home' && alertCount > 0 ? alertCount : undefined}
                 onClick={() => { triggerHaptic('selection'); onChangeAsset(tab.id); if (isDrawerOpen) closeDrawer(); }}
                 icon={
-                  tab.id === 'home'   ? <HomeIcon size={21} aria-hidden="true" />   :
-                  tab.id === 'stocks' ? <TrendingUp size={21} aria-hidden="true" /> :
-                  tab.id === 'sip'    ? <Wallet size={21} aria-hidden="true" />     :
-                                        <Landmark size={21} aria-hidden="true" />
+                  tab.id === 'home'   ? <HomeIcon size={22} aria-hidden="true" />   :
+                  tab.id === 'stocks' ? <TrendingUp size={22} aria-hidden="true" /> :
+                  tab.id === 'sip'    ? <Wallet size={22} aria-hidden="true" />     :
+                                        <Landmark size={22} aria-hidden="true" />
                 }
                 activeIcon={
-                  tab.id === 'home'   ? <HomeFilled size={21} />     :
-                  tab.id === 'stocks' ? <StocksFilled size={21} />   :
-                  tab.id === 'sip'    ? <WalletFilled size={21} />   :
-                                        <LandmarkFilled size={21} />
+                  tab.id === 'home'   ? <HomeFilled size={22} />     :
+                  tab.id === 'stocks' ? <StocksFilled size={22} />   :
+                  tab.id === 'sip'    ? <WalletFilled size={22} />   :
+                                        <LandmarkFilled size={22} />
                 }
               />
             ))}
 
-            <MoreTabBtn isActive={isMoreActive} isOpen={isDrawerOpen} onClick={toggleDrawer} />
+            <YouTabBtn isActive={isMoreActive} isOpen={isDrawerOpen} onClick={toggleDrawer} />
           </div>
         </div>
       </nav>

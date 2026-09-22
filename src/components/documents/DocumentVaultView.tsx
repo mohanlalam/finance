@@ -534,7 +534,7 @@ export default React.memo(function DocumentVaultView({
   }
 
   return (
-    <div className="space-y-3 sm:space-y-4 pb-24 sm:pb-8">
+    <div className="space-y-3 sm:space-y-4 pb-2 sm:pb-6">
       {/* Unified Family Document Vault Banner */}
       <div className="apple-card p-2.5 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-2 sm:space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-[var(--border-subtle)] pb-2 sm:pb-2.5">

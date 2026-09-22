@@ -166,7 +166,7 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
   }
 
   return (
-    <div className="space-y-4 max-w-5xl mx-auto pb-24 sm:pb-12">
+    <div className="space-y-4 max-w-5xl mx-auto pb-2 sm:pb-6">
       {/* Unified Family Tax Loss Harvesting Banner */}
       <div className="apple-card p-2.5 sm:p-3.5 bg-[var(--surface)] border border-[var(--border-subtle)] space-y-2 sm:space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-[var(--border-subtle)] pb-2 sm:pb-2.5">

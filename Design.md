@@ -47,6 +47,7 @@ The user interface embodies weightless suspension, calm cognitive clarity, and t
 | **Warning / Reminder** | `--warning`: `#f59e0b` | `--warning-soft`: `rgba(245, 158, 11, 0.15)` | $> 4.5:1$ (AA compliant) |
 | **Primary Accent** | `--accent-blue`: `#3b82f6` | `--accent-blue-soft`: `rgba(59, 130, 246, 0.15)` | $> 4.5:1$ (AA compliant) |
 | **Bullion / Gold** | `--accent-gold`: `#eab308` | `--accent-gold-soft`: `rgba(234, 179, 8, 0.15)` | $> 4.5:1$ (AA compliant) |
+| **WhatsApp Green** | `--nav-whatsapp-green`: `#25D366` / `#10b981` | `--nav-whatsapp-green-soft`: `rgba(37, 211, 102, 0.22)` | $> 4.5:1$ (AA compliant) |
 
 ### 2.4 Radii & Shadow Tokens
 
@@ -71,9 +72,12 @@ The user interface embodies weightless suspension, calm cognitive clarity, and t
   3. **Asset Registries** (`Stocks`, `Fixed Deposits`, `Recurring Deposits`, `SIPs`, `Gold`, `Real Estate`, `Insurance`, `Document Vault`, `Tax Harvesting`)
   4. **System Tools** (`Smart Import`, `Backup/Restore`, `Lock Application`)
 
-### 3.2 Liquid Glass Suspended Mobile Dock (`< 768px`)
-- **Dimensions & Offset**: Width `max-w-[440px]`, Height `58px`, Corner radius `29px`, Inset padding `4px`.
-- **Concentric Lens Plate**: Selected tab sits inside a matching `25px` frosted glass capsule with directional gradient optics (`--nav-glass-bg`).
+### 3.2 WhatsApp iOS Floating Pill Mobile Dock (`< 768px`)
+- **Dimensions & Offset**: Max width `410px` centered (`mx-auto`), Height `58px`, Curvature `rounded-full` (`9999px`), Floating bottom clearance `max(env(safe-area-inset-bottom, 0px) + 8px, 12px)`.
+- **Surface**: Frosted liquid glass (`--nav-glass-bg`, `backdrop-filter: blur(28px) saturate(1.8)`) with subtle specular perimeter border (`--nav-glass-border`) and soft elevation shadow (`--nav-glass-shadow`).
+- **5-Tab Hierarchy**: `Home`, `Stocks`, `Funds`, `Deposits`, `You`.
+- **Active Pill Indicator**: Active tab renders a horizontal emerald green capsule (`52px × 28px`, `rounded-full`, `--nav-whatsapp-green-soft`) behind the active glyph, with bold label in `--nav-whatsapp-green`.
+- **"You" Tab**: Renders a circular profile avatar with status ring (`ring-2 ring-[#25D366]` when active) opening the secondary assets & Smart Import drawer.
 - **More Asset Classes Drawer**: Slide-up sheet (`max-height: 88vh`, solid background `bg-[var(--surface-solid)]`) exposing all secondary categories in a 2-column grid.
 
 ---

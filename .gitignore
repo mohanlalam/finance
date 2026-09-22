@@ -55,7 +55,8 @@ scratch/
 test-results/
 playwright-report/
 
-# Screenshots
+# Screenshots & recordings
 screenshots/
 *.png.temp
+*.mp4
 
