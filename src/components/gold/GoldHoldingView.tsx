@@ -419,11 +419,11 @@ export function GoldHoldingView({
                         e.stopPropagation();
                         setConfirmDeleteItem(holding);
                       }}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer"
+                      className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer touch-manipulation"
                       title="Delete Gold Holding"
                       aria-label={`Delete ${holding.item_name}`}
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={16} />
                     </button>
                     <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>

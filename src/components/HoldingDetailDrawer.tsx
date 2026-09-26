@@ -223,7 +223,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
             <button
               type="button"
               onClick={() => onShare(holding)}
-              className="flex-1 py-2.5 px-3 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-xs font-bold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
+              className="flex-1 min-h-[44px] py-2.5 px-3 rounded-[var(--radius-medium)] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-xs font-bold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
             >
               <Share2 size={14} aria-hidden="true" />
               Share
@@ -237,7 +237,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
                 onClose();
                 onEdit(holding);
               }}
-              className="flex-1 py-2.5 px-3 rounded-[var(--radius-medium)] bg-[var(--accent-blue)] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-opacity hover:opacity-90 ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1"
+              className="flex-1 min-h-[44px] py-2.5 px-3 rounded-[var(--radius-medium)] bg-[var(--accent-blue)] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-opacity hover:opacity-90 ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-1"
             >
               <Pencil size={14} aria-hidden="true" />
               Edit Holding
@@ -251,11 +251,11 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
                 onClose();
                 onDelete(holding);
               }}
-              className="py-2.5 px-3 rounded-[var(--radius-medium)] border border-[var(--negative)]/30 text-[var(--negative)] hover:bg-[var(--negative-soft)] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--negative)]"
+              className="min-h-[44px] min-w-[44px] py-2.5 px-3.5 rounded-[var(--radius-medium)] border border-[var(--negative)]/30 text-[var(--negative)] hover:bg-[var(--negative-soft)] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ios-press cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--negative)]"
               title="Delete holding"
               aria-label="Delete holding"
             >
-              <Trash2 size={14} aria-hidden="true" />
+              <Trash2 size={15} aria-hidden="true" />
             </button>
           )}
         </div>

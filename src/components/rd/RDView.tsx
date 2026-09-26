@@ -357,7 +357,7 @@ export function RDView({
                       </h4>
                       <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
                         {formatINR(monthly)}/mo &bull; {rd.interest_rate}% p.a.
-                        {rd.maturity_date && ` &bull; Matures ${rd.maturity_date}`}
+                        {rd.maturity_date && ` • Matures ${rd.maturity_date}`}
                       </p>
                     </div>
                   </div>
@@ -377,11 +377,11 @@ export function RDView({
                         e.stopPropagation();
                         setConfirmDeleteItem(rd);
                       }}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer"
+                      className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer touch-manipulation"
                       title="Delete Recurring Deposit"
                       aria-label={`Delete RD at ${rd.bank_name}`}
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={16} />
                     </button>
                     <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>

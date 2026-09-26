@@ -46,6 +46,17 @@ test.describe('Mobile Bottom Navigation Screenshot Capture', () => {
     await page.screenshot({ path: darkDockPath, clip: { x: 0, y: 720, width: 390, height: 124 } });
     console.log('Saved Dark Bottom Nav Dock:', darkDockPath);
 
+    // Open More drawer and capture
+    const moreBtn = page.getByRole('button', { name: /More/i });
+    await moreBtn.click();
+    await page.waitForTimeout(600);
+    const moreDrawer = page.locator('div[role="dialog"][aria-label="All asset categories"]');
+    await expect(moreDrawer).toBeVisible();
+
+    const moreDrawerPath = path.resolve('screenshots/mobile/dark/more-drawer.png');
+    await page.screenshot({ path: moreDrawerPath });
+    console.log('Saved Dark More Drawer:', moreDrawerPath);
+
     await context.close();
   });
 

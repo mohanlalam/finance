@@ -672,6 +672,7 @@ export default React.memo(function PortfolioTable({
             addToast(`Updated ${editingHolding.ticker} holding`, 'success');
             setEditingHolding(null);
           }}
+          onDelete={onDelete ? handleDelete : undefined}
         />
       )}
 

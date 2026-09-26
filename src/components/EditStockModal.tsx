@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Check, Loader2, TrendingUp, TrendingDown, ArrowRightLeft } from './icons/AppIcons';
+import { X, Check, Loader2, TrendingUp, TrendingDown, ArrowRightLeft, Trash2 } from './icons/AppIcons';
 import Modal from './Modal';
 import { Button } from './ui/Button';
 import { IconButton } from './ui/IconButton';
@@ -11,6 +11,7 @@ interface EditStockModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (holdingId: string, qty: number, avgPrice: number, targetPortfolioId?: string) => Promise<void>;
+  onDelete?: (holding: Holding) => void;
   portfolioOptions?: { id?: string; name: string; label: string }[];
   currentPortfolioName?: string;
 }
@@ -20,6 +21,7 @@ export default function EditStockModal({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   portfolioOptions = [],
   currentPortfolioName,
 }: EditStockModalProps) {
@@ -257,6 +259,24 @@ export default function EditStockModal({
             {saving ? 'Updating...' : 'Save Changes'}
           </Button>
         </div>
+
+        {/* Delete Stock Holding */}
+        {onDelete && (
+          <div className="pt-2 border-t border-[var(--border-subtle)]">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onDelete(holding);
+              }}
+              disabled={saving}
+              className="w-full py-2.5 px-4 rounded-[var(--radius-medium)] border border-[var(--negative)]/40 text-[var(--negative)] hover:bg-[var(--negative-soft)] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ios-press cursor-pointer min-h-[44px]"
+            >
+              <Trash2 size={14} aria-hidden="true" />
+              Delete Stock Holding
+            </button>
+          </div>
+        )}
       </form>
     </Modal>
   );

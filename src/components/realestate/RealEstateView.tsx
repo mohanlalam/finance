@@ -279,7 +279,7 @@ export function RealEstateView({
                       </h4>
                       <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
                         {prop.location || 'Real Estate'}
-                        {prop.property_type ? ` &bull; ${prop.property_type}` : ''}
+                        {prop.property_type ? ` • ${prop.property_type}` : ''}
                       </p>
                     </div>
                   </div>
@@ -301,11 +301,11 @@ export function RealEstateView({
                         e.stopPropagation();
                         setConfirmDeleteItem(prop);
                       }}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer"
+                      className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer touch-manipulation"
                       title="Delete Property"
                       aria-label={`Delete ${prop.property_name}`}
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={16} />
                     </button>
                     <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>

@@ -41,7 +41,9 @@
 - [x] **Unified Tokenized Badges**: Created [`AppBadge.tsx`](src/components/ui/AppBadge.tsx) standardizing `positive`, `negative`, `warning`, `urgency`, `info`, and `encrypted` variants.
 - [x] **56px Touch Row Rhythm**: All list rows equipped with trailing `ChevronRight` icons and `ios-press` feedback.
 - [x] **Mobile Stock Rows Complete Metrics**: Displays Current Value, Total P&L amount & percentage (`+₹X (Y%)`), and Day change (`Day Z%`), resolving the missing overall return and removing the double plus bug.
-- [x] **Mobile Asset Delete Actions**: Added direct row-level trash buttons and prominent "Delete [Asset]" modal actions across FD, RD, SIP, Gold, Real Estate, and Insurance views with confirmation gates.
+- [x] **Mobile Asset Delete Actions**: Added direct row-level trash buttons and prominent "Delete [Asset]" modal actions across FD, RD, SIP, Gold, Real Estate, Insurance, and Stock (`EditStockModal` & `HoldingDetailDrawer`) with confirmation gates.
+- [x] **Touch Target & Accessibility Upgrades**: Expanded all row-level action buttons (trash & view icons) to ≥36-44px touch targets with `touch-manipulation` preventing accidental row opens.
+- [x] **JSX Template Literal Entity Fixes**: Replaced raw `&bull;` string templates with Unicode `•` across Document Vault, Recurring Deposits, SIP, Real Estate, and Tax Harvesting views.
 - [x] **Action Priority Elevation**: Pulsing urgency badges for upcoming insurance renewals; prominent "Harvest" chips for tax loss candidates; FAB suppressed on Tax Harvesting.
 - [x] **iPhone SE Compact Optimization**: Verified at 375×667 with zero text clipping and safe-area dock clearance.
 

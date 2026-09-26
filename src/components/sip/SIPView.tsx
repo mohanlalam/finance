@@ -326,7 +326,7 @@ export function SIPView({
                       </h4>
                       <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
                         {monthly > 0 ? `${formatINR(monthly)}/mo SIP` : 'Lump-sum'}
-                        {sip.units ? ` &bull; ${Number(sip.units).toFixed(2)} units` : ''}
+                        {sip.units ? ` • ${Number(sip.units).toFixed(2)} units` : ''}
                       </p>
                     </div>
                   </div>
@@ -348,11 +348,11 @@ export function SIPView({
                         e.stopPropagation();
                         setConfirmDeleteItem(sip);
                       }}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer"
+                      className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer touch-manipulation"
                       title="Delete Mutual Fund / SIP"
                       aria-label={`Delete ${sip.fund_name}`}
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={16} />
                     </button>
                     <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>

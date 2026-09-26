@@ -461,8 +461,8 @@ export default React.memo(function DocumentVaultView({
                       </h4>
                       <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
                         {doc.file_type?.toUpperCase() || 'DOCUMENT'}
-                        {linkedLabel ? ` &bull; ${linkedLabel}` : ' &bull; General'}
-                        {doc.expiry_date && ` &bull; Exp: ${doc.expiry_date}`}
+                        {linkedLabel ? ` • ${linkedLabel}` : ' • General'}
+                        {doc.expiry_date && ` • Exp: ${doc.expiry_date}`}
                       </p>
                     </div>
                   </div>
@@ -472,23 +472,24 @@ export default React.memo(function DocumentVaultView({
                       type="button"
                       onClick={() => handleOpenDocument(doc)}
                       disabled={isOpening}
-                      className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/10 transition-colors ios-press cursor-pointer"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 min-h-[36px] rounded-[var(--radius-small)] bg-[var(--surface-secondary)] text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/10 transition-colors ios-press cursor-pointer touch-manipulation"
                       title="Secure Preview"
                     >
                       {isOpening ? (
-                        <span className="w-3 h-3 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+                        <span className="w-3.5 h-3.5 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <ExternalLink size={12} />
+                        <ExternalLink size={13} />
                       )}
                       <span>View</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDelete(doc)}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press cursor-pointer"
+                      className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-lg flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors ios-press cursor-pointer touch-manipulation"
                       title="Delete Document"
+                      aria-label={`Delete ${doc.name}`}
                     >
-                      <Trash2 size={13} />
+                      <Trash2 size={15} />
                     </button>
                   </div>
                 </div>
