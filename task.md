@@ -40,6 +40,8 @@
 - [x] **Strict 2-Metric Secondary Cap**: Capped with `.slice(0, 2)` to eliminate hero bloat on small screens.
 - [x] **Unified Tokenized Badges**: Created [`AppBadge.tsx`](src/components/ui/AppBadge.tsx) standardizing `positive`, `negative`, `warning`, `urgency`, `info`, and `encrypted` variants.
 - [x] **56px Touch Row Rhythm**: All list rows equipped with trailing `ChevronRight` icons and `ios-press` feedback.
+- [x] **Mobile Stock Rows Complete Metrics**: Displays Current Value, Total P&L amount & percentage (`+₹X (Y%)`), and Day change (`Day Z%`), resolving the missing overall return and removing the double plus bug.
+- [x] **Mobile Asset Delete Actions**: Added direct row-level trash buttons and prominent "Delete [Asset]" modal actions across FD, RD, SIP, Gold, Real Estate, and Insurance views with confirmation gates.
 - [x] **Action Priority Elevation**: Pulsing urgency badges for upcoming insurance renewals; prominent "Harvest" chips for tax loss candidates; FAB suppressed on Tax Harvesting.
 - [x] **iPhone SE Compact Optimization**: Verified at 375×667 with zero text clipping and safe-area dock clearance.
 
