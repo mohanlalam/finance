@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback, useState, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { lockScroll, unlockScroll } from '../utils/scrollLock';
 
 interface ModalProps {
   isOpen: boolean;
@@ -74,7 +75,7 @@ export default function Modal({
       if (document.activeElement instanceof HTMLElement) {
         previouslyFocused.current = document.activeElement;
       }
-      document.body.style.overflow = 'hidden';
+      lockScroll();
 
       const rafId = requestAnimationFrame(() => {
         const focusable = contentRef.current?.querySelectorAll<HTMLElement>(
@@ -86,17 +87,15 @@ export default function Modal({
           contentRef.current?.focus();
         }
       });
-      return () => cancelAnimationFrame(rafId);
+      return () => {
+        cancelAnimationFrame(rafId);
+        unlockScroll();
+      };
     } else if (!isRendered) {
-      document.body.style.overflow = '';
       if (previouslyFocused.current && document.body.contains(previouslyFocused.current)) {
         previouslyFocused.current.focus();
       }
     }
-
-    return () => {
-      document.body.style.overflow = '';
-    };
   }, [isRendered, isExiting]);
 
   // Escape key handler checking defaultPrevented

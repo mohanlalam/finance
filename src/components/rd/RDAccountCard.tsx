@@ -109,11 +109,11 @@ export function RDAccountCard({
           
           <div className="flex items-center gap-2.5 text-xs text-[var(--text-tertiary)] flex-wrap">
             <span>Started: <strong className="text-[var(--text-secondary)]">{account.start_date}</strong></span>
-            <span className="hidden sm:inline">&bull;</span>
+            <span className="hidden sm:inline">•</span>
             <span>Matures: <strong className="text-[var(--text-secondary)]">{account.maturity_date}</strong></span>
             {!isMatured && daysRemaining !== null && (
               <>
-                <span className="hidden sm:inline">&bull;</span>
+                <span className="hidden sm:inline">•</span>
                 <span className="font-semibold text-[var(--accent-blue)]">
                   {daysRemaining <= 0 ? 'Matures today' : `${daysRemaining}d left`}
                 </span>

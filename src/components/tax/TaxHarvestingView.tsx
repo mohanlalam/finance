@@ -134,7 +134,7 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
                       </AppBadge>
                     </div>
                     <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
-                      {opp.holding.qty} shares &bull; Value {formatINR(opp.holding.currentValue)}
+                      {opp.holding.qty} shares • Value {formatINR(opp.holding.currentValue)}
                       {memberName && ` • ${memberName}`}
                     </p>
                   </div>

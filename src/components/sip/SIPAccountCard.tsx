@@ -107,13 +107,13 @@ export function SIPAccountCard({
             <span>Started: <strong className="text-[var(--text-secondary)]">{account.start_date}</strong></span>
             {account.next_sip_date && (
               <>
-                <span className="hidden sm:inline">&bull;</span>
+                <span className="hidden sm:inline">•</span>
                 <span>Next SIP: <strong className="text-[var(--text-secondary)]">{account.next_sip_date}</strong></span>
               </>
             )}
             {account.units > 0 && (
               <>
-                <span className="hidden sm:inline">&bull;</span>
+                <span className="hidden sm:inline">•</span>
                 <span>Units: <strong className="text-[var(--text-secondary)] tnum">{account.units.toFixed(3)}</strong></span>
               </>
             )}

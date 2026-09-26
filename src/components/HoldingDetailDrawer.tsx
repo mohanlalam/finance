@@ -5,6 +5,7 @@ import { Holding } from '../types/portfolio';
 import { formatINR, formatNumber, formatPercent } from '../utils/formatters';
 import { usePrivacy } from '../contexts/PrivacyContext';
 import { calcHoldingTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
+import { lockScroll, unlockScroll } from '../utils/scrollLock';
 
 
 interface HoldingDetailDrawerProps {
@@ -31,7 +32,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
   useEffect(() => {
     if (!isOpen) return;
     triggerRef.current = document.activeElement as HTMLElement;
-    document.body.style.overflow = 'hidden';
+    lockScroll();
 
     // Auto-focus first interactive element
     const rafId = requestAnimationFrame(() => {
@@ -63,7 +64,7 @@ export const HoldingDetailDrawer: React.FC<HoldingDetailDrawerProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       cancelAnimationFrame(rafId);
-      document.body.style.overflow = '';
+      unlockScroll();
       window.removeEventListener('keydown', handleKeyDown);
       triggerRef.current?.focus();
     };

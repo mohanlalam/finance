@@ -240,7 +240,7 @@ export default function StocksView({
               </span>
             )}
             <span className="text-[11px] font-medium text-[var(--text-tertiary)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-[var(--radius-small)] hidden sm:inline-block">
-              {familyStocksSummary.totalCount} stocks &bull; Click column to sort
+              {familyStocksSummary.totalCount} stocks • Click column to sort
             </span>
             <button
               onClick={onAddHoldingClick}

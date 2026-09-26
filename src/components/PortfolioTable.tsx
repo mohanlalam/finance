@@ -143,7 +143,7 @@ const MobileStockRow = React.memo(function MobileStockRow({
             {h.stockName}
           </h4>
           <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
-            {isBalancesHidden ? '•••• shares' : `${formatNumber(h.qty, 0)} shares`} &bull; LTP ₹{formatNumber(h.ltp)}
+            {isBalancesHidden ? '•••• shares' : `${formatNumber(h.qty, 0)} shares`} • LTP ₹{formatNumber(h.ltp)}
           </p>
         </div>
       </div>

@@ -43,7 +43,9 @@
 - [x] **Mobile Stock Rows Complete Metrics**: Displays Current Value, Total P&L amount & percentage (`+₹X (Y%)`), and Day change (`Day Z%`), resolving the missing overall return and removing the double plus bug.
 - [x] **Mobile Asset Delete Actions**: Added direct row-level trash buttons and prominent "Delete [Asset]" modal actions across FD, RD, SIP, Gold, Real Estate, Insurance, and Stock (`EditStockModal` & `HoldingDetailDrawer`) with confirmation gates.
 - [x] **Touch Target & Accessibility Upgrades**: Expanded all row-level action buttons (trash & view icons) to ≥36-44px touch targets with `touch-manipulation` preventing accidental row opens.
-- [x] **JSX Template Literal Entity Fixes**: Replaced raw `&bull;` string templates with Unicode `•` across Document Vault, Recurring Deposits, SIP, Real Estate, and Tax Harvesting views.
+- [x] **JSX Template Literal Entity Fixes**: Replaced all remaining raw `&bull;` string templates with Unicode `•` across Stocks, Fixed Deposits, Insurance, Document Vault, Recurring Deposits, SIP, Gold, Real Estate, and Tax Harvesting views.
+- [x] **PWA Install Banner Ergonomics & Dock Overlap Fix**: Repositioned `PWAInstallBanner` below the header on mobile (`top-16`) with downward iOS instruction tooltip, completely eliminating vertical tap contention with the bottom navigation dock and FAB.
+- [x] **Global Reference-Counted Body Scroll Lock**: Converted [`Modal.tsx`](src/components/Modal.tsx) and [`HoldingDetailDrawer.tsx`](src/components/HoldingDetailDrawer.tsx) to use [`scrollLock.ts`](src/utils/scrollLock.ts) reference counting, eliminating scroll lock collisions during modal/sheet transitions.
 - [x] **Action Priority Elevation**: Pulsing urgency badges for upcoming insurance renewals; prominent "Harvest" chips for tax loss candidates; FAB suppressed on Tax Harvesting.
 - [x] **iPhone SE Compact Optimization**: Verified at 375×667 with zero text clipping and safe-area dock clearance.
 

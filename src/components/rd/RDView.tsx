@@ -356,7 +356,7 @@ export function RDView({
                         {rd.bank_name}
                       </h4>
                       <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
-                        {formatINR(monthly)}/mo &bull; {rd.interest_rate}% p.a.
+                        {formatINR(monthly)}/mo • {rd.interest_rate}% p.a.
                         {rd.maturity_date && ` • Matures ${rd.maturity_date}`}
                       </p>
                     </div>
@@ -447,7 +447,7 @@ export function RDView({
               {familyRDSummary.activeCount} Active RD{familyRDSummary.activeCount === 1 ? '' : 's'}
             </span>
             <span className="text-[11px] font-medium text-[var(--text-tertiary)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-[var(--radius-small)] hidden sm:inline-block tnum">
-              {familyRDSummary.totalCount} Total Accounts &bull; Click member to filter
+              {familyRDSummary.totalCount} Total Accounts • Click member to filter
             </span>
           </div>
         </div>

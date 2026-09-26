@@ -319,7 +319,7 @@ export function InsuranceView({
                       </h4>
                       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <span className="text-xs text-[var(--text-tertiary)] font-medium truncate">
-                          {policy.provider} &bull; {typeLabel}
+                          {policy.provider} • {typeLabel}
                         </span>
                         {isUrgent && (
                           <AppBadge variant="urgency" isPulsing>

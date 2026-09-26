@@ -397,7 +397,7 @@ export function GoldHoldingView({
                         {holding.item_name}
                       </h4>
                       <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
-                        {holding.purity} &bull; {w}g ({(w / 11.6638).toFixed(2)} tola)
+                        {holding.purity} • {w}g ({(w / 11.6638).toFixed(2)} tola)
                       </p>
                     </div>
                   </div>

@@ -328,7 +328,7 @@ export function FixedDepositView({
                         {fd.bank_name}
                       </h4>
                       <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
-                        {fd.interest_rate}% p.a. &bull; {fd.maturity_date ? `Matures ${fd.maturity_date}` : 'Ongoing'}
+                        {fd.interest_rate}% p.a. • {fd.maturity_date ? `Matures ${fd.maturity_date}` : 'Ongoing'}
                       </p>
                     </div>
                   </div>
@@ -419,7 +419,7 @@ export function FixedDepositView({
               {familyFDSummary.activeCount} Active FD{familyFDSummary.activeCount === 1 ? '' : 's'}
             </span>
             <span className="text-[11px] font-medium text-[var(--text-tertiary)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-[var(--radius-small)] hidden sm:inline-block tnum">
-              {fixedDeposits.length} Total Deposits &bull; Click member to filter
+              {fixedDeposits.length} Total Deposits • Click member to filter
             </span>
           </div>
         </div>

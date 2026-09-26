@@ -87,9 +87,9 @@ export default function PWAInstallBanner() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-16 left-4 right-4 md:left-auto md:right-6 md:bottom-6 md:w-96 z-[250] animate-slide-up">
+    <div className="fixed top-16 left-4 right-4 md:top-auto md:bottom-6 md:left-auto md:right-6 md:w-96 z-[250] animate-slide-down md:animate-slide-up">
       {showInstructions && isIOS && (
-        <div className="absolute bottom-full mb-2 left-0 right-0 bg-[var(--surface-solid)] text-[var(--text-primary)] text-sm p-3 rounded-[var(--radius-medium)] shadow-xl border border-[var(--border-subtle)]">
+        <div className="absolute top-full mt-2 left-0 right-0 md:top-auto md:bottom-full md:mb-2 bg-[var(--surface-solid)] text-[var(--text-primary)] text-sm p-3 rounded-[var(--radius-medium)] shadow-xl border border-[var(--border-subtle)]">
           <div className="flex items-center gap-2">
             <span>Tap</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-[var(--accent-blue)] shrink-0" aria-hidden="true">
@@ -97,7 +97,8 @@ export default function PWAInstallBanner() {
             </svg>
             <span>then <strong>Add to Home Screen</strong></span>
           </div>
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-[var(--surface-solid)]" />
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-[var(--surface-solid)] md:hidden" />
+          <div className="hidden md:block absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-[var(--surface-solid)]" />
         </div>
       )}
       

@@ -26,6 +26,7 @@ test.describe('Mobile Bottom Navigation Screenshot Capture', () => {
 
     await page.addInitScript(() => {
       localStorage.setItem('theme', 'dark');
+      localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
       document.documentElement.classList.add('dark');
     });
 
@@ -72,6 +73,7 @@ test.describe('Mobile Bottom Navigation Screenshot Capture', () => {
 
     await page.addInitScript(() => {
       localStorage.setItem('theme', 'light');
+      localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
       document.documentElement.classList.remove('dark');
     });
 

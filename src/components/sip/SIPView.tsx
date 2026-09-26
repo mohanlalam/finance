@@ -418,7 +418,7 @@ export function SIPView({
               {familySIPSummary.totalCount} Active Scheme{familySIPSummary.totalCount === 1 ? '' : 's'}
             </span>
             <span className="text-[11px] font-medium text-[var(--text-tertiary)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-[var(--radius-small)] hidden sm:inline-block tnum">
-              {formatINR(familySIPSummary.totalMonthly)}/mo SIP &bull; Click member to filter
+              {formatINR(familySIPSummary.totalMonthly)}/mo SIP • Click member to filter
             </span>
           </div>
         </div>
