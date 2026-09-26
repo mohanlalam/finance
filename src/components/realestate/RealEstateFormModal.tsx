@@ -3,6 +3,7 @@ import { RealEstate, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
 import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
 import { useDocumentStorage } from '../../hooks/useDocumentStorage';
+import { Trash2 } from '../icons/AppIcons';
 
 interface PortfolioOption {
   name: string;
@@ -19,6 +20,7 @@ interface RealEstateFormModalProps {
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<{ id?: string; data?: { id?: string } } | void>;
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDeleteDoc?: (assetType: string, id: string) => Promise<void>;
+  onDelete?: (prop: RealEstate) => void;
 }
 
 const TYPE_OPTIONS: Array<RealEstate['property_type']> = ['apartment', 'house', 'plot', 'commercial'];
@@ -33,6 +35,7 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
   onAdd,
   onUpdate,
   onDeleteDoc,
+  onDelete,
 }: RealEstateFormModalProps) {
   const { uploadFile: uploadDocumentFile, generateStoragePath: generateDocumentStoragePath } = useDocumentStorage();
   const [propertyName, setPropertyName] = useState('');
@@ -345,6 +348,22 @@ export const RealEstateFormModal = React.memo(function RealEstateFormModal({
             {loading ? 'Saving...' : editingProperty ? 'Save Changes' : 'Add Property'}
           </button>
         </div>
+
+        {editingProperty && onDelete && (
+          <div className="pt-2 border-t border-[var(--border-subtle)]">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onDelete(editingProperty);
+              }}
+              className="w-full flex items-center justify-center gap-2 text-[var(--negative)] bg-[var(--negative-soft)] hover:bg-[var(--negative)]/15 font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 transition-colors cursor-pointer border border-[var(--negative)]/30 ios-press"
+            >
+              <Trash2 size={16} />
+              Delete Property
+            </button>
+          </div>
+        )}
       </form>
     </Modal>
   );

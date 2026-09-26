@@ -13,7 +13,7 @@ import { getRDInvestedAmount, getRDEffectiveValue } from '../../domains/assets/r
 import { formatINR } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { Clock, Plus, ChevronRight } from '../icons/AppIcons';
+import { Clock, Plus, ChevronRight, Trash2 } from '../icons/AppIcons';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
 import AppBadge from '../ui/AppBadge';
@@ -362,7 +362,7 @@ export function RDView({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <div className="text-right">
                       <div className="text-sm font-bold text-[var(--text-primary)] tnum">
                         {formatINR(effVal)}
@@ -371,6 +371,18 @@ export function RDView({
                         {isMatured ? 'Matured' : 'Active'}
                       </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmDeleteItem(rd);
+                      }}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer"
+                      title="Delete Recurring Deposit"
+                      aria-label={`Delete RD at ${rd.bank_name}`}
+                    >
+                      <Trash2 size={15} />
+                    </button>
                     <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>
                 </div>
@@ -387,6 +399,7 @@ export function RDView({
           portfolioOptions={portfolioOptions}
           onAdd={handleAddRD}
           onUpdate={handleUpdateRD}
+          onDelete={setConfirmDeleteItem}
         />
 
         <ConfirmModal
@@ -672,6 +685,7 @@ export function RDView({
         portfolioOptions={portfolioOptions}
         onAdd={handleAddRD}
         onUpdate={handleUpdateRD}
+        onDelete={setConfirmDeleteItem}
       />
 
       <ConfirmModal

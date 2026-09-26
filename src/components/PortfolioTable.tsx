@@ -114,7 +114,8 @@ const MobileStockRow = React.memo(function MobileStockRow({
   renderValue,
   isVirtualized = false,
 }: MobileStockRowProps) {
-  const isUp = (h.todayPnLPercent ?? 0) >= 0;
+  const isTotalPositive = (h.unrealizedPnL ?? 0) >= 0;
+  const isTodayPositive = (h.todayPnLPercent ?? 0) >= 0;
 
   return (
     <div
@@ -147,16 +148,28 @@ const MobileStockRow = React.memo(function MobileStockRow({
         </div>
       </div>
 
-      {/* Right: Current Value & Return Badge + Subtle Chevron */}
+      {/* Right: Current Value, Overall Return & Today's Movement + Subtle Chevron */}
       <div className="flex items-center gap-1.5 shrink-0">
         <div className="text-right flex flex-col items-end justify-center">
           <p className="text-sm font-extrabold text-[var(--text-primary)] tnum leading-tight">
             {renderValue(h.currentValue)}
           </p>
-          <span className={`inline-flex items-center gap-0.5 text-xs font-bold tnum mt-0.5 ${
-            isUp ? 'text-[var(--positive)]' : 'text-[var(--negative)]'
+          <span className={`inline-flex items-center text-xs font-bold tnum mt-0.5 ${
+            isTotalPositive ? 'text-[var(--positive)]' : 'text-[var(--negative)]'
           }`}>
-            <span>{isUp ? '+' : ''}{formatPercent(h.todayPnLPercent ?? 0)} Today</span>
+            {isBalancesHidden ? (
+              '••••••'
+            ) : (
+              <>
+                {isTotalPositive ? '+' : ''}{formatINR(h.unrealizedPnL)} ({formatPercent(h.pnlPercent)})
+              </>
+            )}
+          </span>
+          <span className="text-[11px] text-[var(--text-tertiary)] font-medium tnum flex items-center gap-1 mt-0.5">
+            <span>Day</span>
+            <span className={`font-semibold ${isTodayPositive ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+              {formatPercent(h.todayPnLPercent ?? 0)}
+            </span>
           </span>
         </div>
         <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />

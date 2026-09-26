@@ -3,6 +3,7 @@ import { FixedDeposit } from '../../types/portfolio';
 import { calculateFDMaturityValue } from '../../domains/assets/fd/calculations/fdCompounding';
 import Modal from '../Modal';
 import FDFormFields from './FDFormFields';
+import { Trash2 } from '../icons/AppIcons';
 
 interface PortfolioOption {
   name: string;
@@ -17,6 +18,7 @@ interface FDFormModalProps {
   portfolioOptions: PortfolioOption[];
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<unknown>;
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
+  onDelete?: (fd: FixedDeposit) => void;
 }
 
 export const FDFormModal = React.memo(function FDFormModal({
@@ -27,6 +29,7 @@ export const FDFormModal = React.memo(function FDFormModal({
   portfolioOptions,
   onAdd,
   onUpdate,
+  onDelete,
 }: FDFormModalProps) {
   const [bankName, setBankName] = useState('');
   const [principal, setPrincipal] = useState('');
@@ -219,6 +222,22 @@ export const FDFormModal = React.memo(function FDFormModal({
             {loading ? 'Saving...' : editingFd ? 'Save Changes' : 'Add Fixed Deposit'}
           </button>
         </div>
+
+        {editingFd && onDelete && (
+          <div className="pt-2 border-t border-[var(--border-subtle)]">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onDelete(editingFd);
+              }}
+              className="w-full flex items-center justify-center gap-2 text-[var(--negative)] bg-[var(--negative-soft)] hover:bg-[var(--negative)]/15 font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 transition-colors cursor-pointer border border-[var(--negative)]/30 ios-press"
+            >
+              <Trash2 size={16} />
+              Delete Fixed Deposit
+            </button>
+          </div>
+        )}
       </form>
     </Modal>
   );

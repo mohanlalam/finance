@@ -13,7 +13,7 @@ import { getSIPInvestedAmount, getSIPEffectiveValue } from '../../domains/assets
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { TrendingUp, Plus, ChevronRight } from '../icons/AppIcons';
+import { TrendingUp, Plus, ChevronRight, Trash2 } from '../icons/AppIcons';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
 import AppBadge from '../ui/AppBadge';
@@ -331,7 +331,7 @@ export function SIPView({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <div className="text-right">
                       <div className="text-sm font-bold text-[var(--text-primary)] tnum">
                         {formatINR(effVal)}
@@ -342,6 +342,18 @@ export function SIPView({
                         </div>
                       )}
                     </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmDeleteItem(sip);
+                      }}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer"
+                      title="Delete Mutual Fund / SIP"
+                      aria-label={`Delete ${sip.fund_name}`}
+                    >
+                      <Trash2 size={15} />
+                    </button>
                     <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>
                 </div>
@@ -358,6 +370,7 @@ export function SIPView({
           portfolioOptions={portfolioOptions}
           onAdd={handleAddSIP}
           onUpdate={handleUpdateSIP}
+          onDelete={setConfirmDeleteItem}
         />
 
         <ConfirmModal
@@ -638,6 +651,7 @@ export function SIPView({
         portfolioOptions={portfolioOptions}
         onAdd={handleAddSIP}
         onUpdate={handleUpdateSIP}
+        onDelete={setConfirmDeleteItem}
       />
 
       <ConfirmModal

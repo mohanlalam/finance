@@ -12,7 +12,7 @@ import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
 import { formatINR, formatPercent, pnlColor } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { Building2, Plus, ChevronRight } from '../icons/AppIcons';
+import { Building2, Plus, ChevronRight, Trash2 } from '../icons/AppIcons';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
 import AppBadge from '../ui/AppBadge';
@@ -284,7 +284,7 @@ export function RealEstateView({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <div className="text-right">
                       <div className="text-sm font-bold text-[var(--text-primary)] tnum">
                         {formatINR(val)}
@@ -295,6 +295,18 @@ export function RealEstateView({
                         </div>
                       )}
                     </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmDeleteItem(prop);
+                      }}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer"
+                      title="Delete Property"
+                      aria-label={`Delete ${prop.property_name}`}
+                    >
+                      <Trash2 size={15} />
+                    </button>
                     <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>
                 </div>
@@ -311,6 +323,7 @@ export function RealEstateView({
           portfolioOptions={portfolioOptions}
           onAdd={onAdd}
           onUpdate={onUpdate}
+          onDelete={setConfirmDeleteItem}
         />
 
         <ConfirmModal
@@ -591,6 +604,7 @@ export function RealEstateView({
         portfolioOptions={portfolioOptions}
         onAdd={onAdd}
         onUpdate={onUpdate}
+        onDelete={setConfirmDeleteItem}
       />
 
       <ConfirmModal

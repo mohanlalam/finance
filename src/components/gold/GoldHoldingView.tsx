@@ -10,7 +10,7 @@ import { useIsMutating, usePortfolioEntities } from '../../contexts/PortfolioCon
 import { useToastActions } from '../../contexts/ToastContext';
 import { useAssetModal } from '../../hooks/useAssetModal';
 import { useAssetFilterSort } from '../../hooks/useAssetFilterSort';
-import { RotateCw, Coins, Check, Plus, ChevronRight } from '../icons/AppIcons';
+import { RotateCw, Coins, Check, Plus, ChevronRight, Trash2 } from '../icons/AppIcons';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
 import AppBadge from '../ui/AppBadge';
@@ -402,7 +402,7 @@ export function GoldHoldingView({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <div className="text-right">
                       <div className="text-sm font-bold text-[var(--text-primary)] tnum">
                         {formatINR(val)}
@@ -413,6 +413,18 @@ export function GoldHoldingView({
                         </div>
                       )}
                     </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmDeleteItem(holding);
+                      }}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer"
+                      title="Delete Gold Holding"
+                      aria-label={`Delete ${holding.item_name}`}
+                    >
+                      <Trash2 size={15} />
+                    </button>
                     <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>
                 </div>
@@ -429,6 +441,7 @@ export function GoldHoldingView({
           portfolioOptions={portfolioOptions}
           onAdd={onAdd}
           onUpdate={onUpdate}
+          onDelete={setConfirmDeleteItem}
         />
 
         <ConfirmModal
@@ -891,6 +904,7 @@ export function GoldHoldingView({
           onAdd={onAdd}
           onUpdate={onUpdate}
           onDeleteDoc={onDelete}
+          onDelete={setConfirmDeleteItem}
         />
       )}
 

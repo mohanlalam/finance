@@ -3,6 +3,7 @@ import { RDAccount, RDPayload } from '../../types/portfolio';
 import { getRDEffectiveValue } from '../../domains/assets/rd/calculations/rdCompounding';
 import { parseLocalDateObj } from '../../utils/dateUtils';
 import Modal from '../Modal';
+import { Trash2 } from '../icons/AppIcons';
 
 interface PortfolioOption {
   name: string;
@@ -17,6 +18,7 @@ interface RDFormModalProps {
   portfolioOptions: PortfolioOption[];
   onAdd: (portfolioName: string, payload: RDPayload) => Promise<void>;
   onUpdate: (id: string, payload: Partial<RDPayload>) => Promise<void>;
+  onDelete?: (account: RDAccount) => void;
 }
 
 export function RDFormModal({
@@ -27,6 +29,7 @@ export function RDFormModal({
   portfolioOptions,
   onAdd,
   onUpdate,
+  onDelete,
 }: RDFormModalProps) {
   const defaultPortfolio = portfolioName === 'all' ? (portfolioOptions[0]?.name || 'rammohan') : portfolioName;
   const [formPortfolio, setFormPortfolio] = useState(() => defaultPortfolio);
@@ -329,6 +332,22 @@ export function RDFormModal({
               {loading ? 'Saving...' : editingAccount ? 'Save Changes' : 'Create RD'}
             </button>
           </div>
+
+          {editingAccount && onDelete && (
+            <div className="pt-2 border-t border-[var(--border-subtle)]">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onDelete(editingAccount);
+                }}
+                className="w-full flex items-center justify-center gap-2 text-[var(--negative)] bg-[var(--negative-soft)] hover:bg-[var(--negative)]/15 font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 transition-colors cursor-pointer border border-[var(--negative)]/30 ios-press"
+              >
+                <Trash2 size={16} />
+                Delete Recurring Deposit
+              </button>
+            </div>
+          )}
         </form>
     </Modal>
   );

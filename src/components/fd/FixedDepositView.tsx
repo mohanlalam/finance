@@ -13,7 +13,7 @@ import { getFDInvestedAmount, getFDEffectiveValue } from '../../domains/assets/f
 import { formatINR } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { Landmark, Plus, ChevronRight } from '../icons/AppIcons';
+import { Landmark, Plus, ChevronRight, Trash2 } from '../icons/AppIcons';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
 import AppBadge from '../ui/AppBadge';
@@ -332,7 +332,7 @@ export function FixedDepositView({
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <div className="text-right">
                       <p className="text-sm font-extrabold text-[var(--text-primary)] tnum leading-tight">
                         {formatINR(effVal)}
@@ -343,6 +343,18 @@ export function FixedDepositView({
                         {isMatured ? 'Matured' : `Principal ${formatINR(principal)}`}
                       </span>
                     </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmDeleteItem(fd);
+                      }}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--negative)] hover:bg-[var(--negative-soft)] transition-colors shrink-0 ios-press cursor-pointer"
+                      title="Delete Fixed Deposit"
+                      aria-label={`Delete fixed deposit at ${fd.bank_name}`}
+                    >
+                      <Trash2 size={15} />
+                    </button>
                     <ChevronRight size={14} className="text-[var(--text-tertiary)] opacity-40 shrink-0" />
                   </div>
                 </div>
@@ -359,6 +371,7 @@ export function FixedDepositView({
           portfolioOptions={portfolioOptions}
           onAdd={onAdd}
           onUpdate={onUpdate}
+          onDelete={setConfirmDeleteItem}
         />
 
         <ConfirmModal
@@ -642,6 +655,7 @@ export function FixedDepositView({
         portfolioOptions={portfolioOptions}
         onAdd={onAdd}
         onUpdate={onUpdate}
+        onDelete={setConfirmDeleteItem}
       />
 
       <ConfirmModal

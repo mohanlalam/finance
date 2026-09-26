@@ -6,6 +6,7 @@ import { useDocumentStorage } from '../../hooks/useDocumentStorage';
 import { normalizeToIsoDate } from '../../utils/dateUtils';
 import { deriveGoldRates } from '../../utils/goldPricing';
 import { formatINR } from '../../utils/formatters';
+import { Trash2 } from '../icons/AppIcons';
 
 interface PortfolioOption {
   name: string;
@@ -22,6 +23,7 @@ interface GoldFormModalProps {
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<{ id?: string; data?: { id?: string } } | void>;
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDeleteDoc?: (assetType: string, id: string) => Promise<void>;
+  onDelete?: (holding: GoldHolding) => void;
 }
 
 const PURITY_OPTIONS: Array<GoldHolding['purity']> = ['24K', '22K', '18K', '14K', 'other'];
@@ -36,6 +38,7 @@ export const GoldFormModal = React.memo(function GoldFormModal({
   onAdd,
   onUpdate,
   onDeleteDoc,
+  onDelete,
 }: GoldFormModalProps) {
   const { uploadFile: uploadDocumentFile, generateStoragePath: generateDocumentStoragePath } = useDocumentStorage();
   const [itemName, setItemName] = useState('');
@@ -482,6 +485,22 @@ export const GoldFormModal = React.memo(function GoldFormModal({
             {loading ? 'Saving...' : editingHolding ? 'Save Changes' : 'Add Gold'}
           </button>
         </div>
+
+        {editingHolding && onDelete && (
+          <div className="pt-2 border-t border-[var(--border-subtle)]">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onDelete(editingHolding);
+              }}
+              className="w-full flex items-center justify-center gap-2 text-[var(--negative)] bg-[var(--negative-soft)] hover:bg-[var(--negative)]/15 font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 transition-colors cursor-pointer border border-[var(--negative)]/30 ios-press"
+            >
+              <Trash2 size={16} />
+              Delete Gold Holding
+            </button>
+          </div>
+        )}
       </form>
     </Modal>
   );

@@ -3,6 +3,7 @@ import { Insurance, DocumentMetadata } from '../../types/portfolio';
 import Modal from '../Modal';
 import { DocumentAttachmentField, PendingDocument } from '../ui/DocumentAttachmentField';
 import { useDocumentStorage } from '../../hooks/useDocumentStorage';
+import { Trash2 } from '../icons/AppIcons';
 
 interface PortfolioOption {
   name: string;
@@ -19,6 +20,7 @@ interface InsuranceFormModalProps {
   onAdd: (assetType: string, portfolioName: string, payload: Record<string, unknown>) => Promise<{ id?: string; data?: { id?: string } } | void>;
   onUpdate: (assetType: string, id: string, payload: Record<string, unknown>) => Promise<void>;
   onDeleteDoc?: (assetType: string, id: string) => Promise<void>;
+  onDelete?: (policy: Insurance) => void;
 }
 
 const TYPE_OPTIONS: Array<Insurance['insurance_type']> = ['health', 'term', 'life', 'motor', 'other'];
@@ -33,6 +35,7 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
   onAdd,
   onUpdate,
   onDeleteDoc,
+  onDelete,
 }: InsuranceFormModalProps) {
   const { uploadFile: uploadDocumentFile, generateStoragePath: generateDocumentStoragePath } = useDocumentStorage();
   const [policyName, setPolicyName] = useState('');
@@ -330,6 +333,22 @@ export const InsuranceFormModal = React.memo(function InsuranceFormModal({
             {loading ? 'Saving...' : editingPolicy ? 'Save Changes' : 'Add Policy'}
           </button>
         </div>
+
+        {editingPolicy && onDelete && (
+          <div className="pt-2 border-t border-[var(--border-subtle)]">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onDelete(editingPolicy);
+              }}
+              className="w-full flex items-center justify-center gap-2 text-[var(--negative)] bg-[var(--negative-soft)] hover:bg-[var(--negative)]/15 font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 transition-colors cursor-pointer border border-[var(--negative)]/30 ios-press"
+            >
+              <Trash2 size={16} />
+              Delete Policy
+            </button>
+          </div>
+        )}
       </form>
     </Modal>
   );

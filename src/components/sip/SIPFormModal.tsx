@@ -3,6 +3,7 @@ import { SIPAccount, SIPPayload } from '../../types/portfolio';
 import SIPFormFields from './SIPFormFields';
 import { useMutualFundLookup } from '../../hooks/useMutualFundLookup';
 import Modal from '../Modal';
+import { Trash2 } from '../icons/AppIcons';
 
 interface PortfolioOption {
   name: string;
@@ -17,6 +18,7 @@ interface SIPFormModalProps {
   portfolioOptions: PortfolioOption[];
   onAdd: (portfolioName: string, payload: SIPPayload) => Promise<void>;
   onUpdate: (id: string, payload: Partial<SIPPayload>) => Promise<void>;
+  onDelete?: (account: SIPAccount) => void;
 }
 
 export function SIPFormModal({
@@ -27,6 +29,7 @@ export function SIPFormModal({
   portfolioOptions,
   onAdd,
   onUpdate,
+  onDelete,
 }: SIPFormModalProps) {
   const [formPortfolio, setFormPortfolio] = useState(() => portfolioName);
   const [fundName, setFundName] = useState('');
@@ -242,6 +245,22 @@ export function SIPFormModal({
             {loading ? 'Saving...' : editingAccount ? 'Save Changes' : 'Create SIP'}
           </button>
         </div>
+
+        {editingAccount && onDelete && (
+          <div className="pt-2 border-t border-[var(--border-subtle)]">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onDelete(editingAccount);
+              }}
+              className="w-full flex items-center justify-center gap-2 text-[var(--negative)] bg-[var(--negative-soft)] hover:bg-[var(--negative)]/15 font-semibold text-sm rounded-[var(--radius-medium)] h-11 py-2.5 transition-colors cursor-pointer border border-[var(--negative)]/30 ios-press"
+            >
+              <Trash2 size={16} />
+              Delete Mutual Fund / SIP
+            </button>
+          </div>
+        )}
       </form>
     </Modal>
   );
