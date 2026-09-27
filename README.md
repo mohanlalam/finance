@@ -1,29 +1,33 @@
-# 🌌 Family Portfolio Vault
+# 📜 Indian Family Wealth Ledger & Heirloom Vault
 
-A high-performance, privacy-first multi-asset portfolio tracker designed to manage consolidated family wealth. Elevated with the **Antigravity Cyber-Zen Design Aesthetic** (weightless suspension, deep cosmic obsidian canvas `#040711`, frosted glassmorphism `backdrop-blur-2xl`, glowing neon metrics, and floating dock navigation), Clean Architecture v3.0, zero-dependency SVG iconography, sub-second instant loads, and multi-provider market quote integration.
+A high-performance, privacy-first multi-asset wealth ledger engineered specifically to manage consolidated household wealth for **Rammohan, Padmavathi, and Sai Laxmi**. Designed with the **Indian Family Wealth Ledger & Heirloom Vault Aesthetic** (Warm Antique Brass & Heritage Gold primary identity `#c89b3c` / `#d4af37`, `Newsreader` display serif valuations, Archival Vellum & Basalt Vault canvas, generational stewardship financial semantics, and Suspended Ledger Dock navigation), Clean Architecture v4.0, zero-dependency SVG iconography, sub-second instant loads, and multi-provider market quote integration.
 
 ---
 
 ## 📚 Standard Project Documentation
 
-The project's authoritative documentation is organized across 6 standardized files:
+The project's authoritative documentation is organized across 7 standardized files:
 
 1. **[`PRD.md`](PRD.md)** — Product Requirements Document (Vision, Personas, Functional Specs, AI Engine, NFRs)
 2. **[`Architecture.md`](Architecture.md)** — System Architecture & Technical Specs (Clean Architecture, Repositories, Caching, Threat Model)
-3. **[`Design.md`](Design.md)** — Design System & Visual Specification (Tokens, Cyber-Zen & Liquid Glass, Mobile Contract)
+3. **[`Design.md`](Design.md)** — Design System & Visual Specification (Indian Family Wealth Ledger, Typography, Tokens, Mobile Contract)
 4. **[`rules.md`](rules.md)** — Engineering Standards, Coding Guidelines & "Do Not Regress" Rules
 5. **[`task.md`](task.md)** — Project Roadmap, Active Tasks & 36-Screen Visual QA Checklist
 6. **[`memory.md`](memory.md)** — Architectural Decision Records (ADRs) & Engineering Lessons Learned
-7. **[`.agents/skills/front-end-design/SKILL.md`](.agents/skills/front-end-design/SKILL.md)** — High-Agency Frontend Design Taste Skill (Anti-Generic Layouts, Bento 2.0, Liquid Glass Refraction)
+7. **[`SCREENSHOTS.md`](SCREENSHOTS.md)** — Visual Registry & Screenshot Catalog (46 Full-Size Views across Web & Mobile in Light/Dark)
+8. **[`.agents/skills/front-end-design/SKILL.md`](.agents/skills/front-end-design/SKILL.md)** — High-Agency Frontend Design Taste Skill (Anti-Generic Layouts, Bento 2.0, Liquid Glass Refraction)
 
 ---
 
 ## ✨ Key Features
 
-### 🌌 Antigravity Cyber-Zen UI & Visual Experience
-- **Weightless Suspension & Zero-G Atmosphere** — Replaces grounded footers with atmospheric suspension over a deep cosmic void (`#040711`) layered with multi-point ambient radial nebula meshes (cyan `#06b6d4`, celestial violet `#a855f7`, and emerald aura `#10b981`).
-- **Glassmorphic Floating Surfaces** — Translucent cards with `backdrop-blur-2xl`, 1px luminous edge highlights, and zero-G hover ascension.
-- **Liquid Glass Floating Island Navigation** — Elevated floating pill tab bar (`blur(20px) saturate(1.8)`, `max-width: 440px`, height `58px`, `border-radius: 29px`, uniform `4px` inset padding) lifted off the screen bottom with scroll-reactive collapse and per-container `WeakMap` scroll-position tracking. Selected tabs are highlighted by a **concentric inner lens plate** — a frosted glass capsule fitted precisely inside the pill with matching `25px` inner radius — styled with CSS Custom Property gradient optics (`--nav-glass-bg` light: rose→white→cyan, dark: magenta→navy→cyan). Monochrome unselected icons keep the dock calm; active icons switch to filled glyphs. A slide-up **More drawer** (`maxHeight: 88vh`) exposes all 7 remaining asset categories (Smart AI Import → Tax Harvesting) on categorised glass tiles, fully visible without scrolling.
+### 🏛️ Indian Family Wealth Ledger & Heirloom Vault Aesthetic
+- **Generational Stewardship over Speculative Trading** — Calibrated specifically for authentic Indian household multi-asset portfolios: physical gold bullion and sovereign bonds, compounding term bank deposits (FDs/RDs), real estate holdings, family health/life cover, alongside mutual fund SIPs and equities.
+- **Named 3-Tier Typography Hierarchy** — **Newsreader** (Google Fonts Display Serif) delivers archival elegance and engraved bond pedigree for net worth figures and large valuations (`.text-financial`, `.font-ledger`); **Plus Jakarta Sans** provides humanistic clarity for interface chrome; **JetBrains Mono** powers precision tabular metrics (gram weights, tolas, interest rates).
+- **Warm Antique Brass & Heritage Gold Palette** — Replaces generic fintech blue with culturally resonant Warm Brass & Gold (`#c89b3c` / `#d4af37`), celebrating gold as an anchor of Indian household stability.
+- **Non-Alarmist Financial Semantics** — Replaces crypto day-trading red/green with Stately Forest Jade (`#166534` / `#22c55e`) for appreciation and Terracotta Garnet (`#991b1b` / `#e05353`) for drawdowns and liabilities.
+- **Archival Vellum & Basalt Vault Surfaces** — Crisp parchment canvas in Light mode (`#fbfbfa`); deep basalt slate vault in Dark mode (`#090c10`) with burnished gold hairline dividers and ambient warm illumination.
+- **Suspended Ledger Dock Navigation** — Suspended floating pill navigation (`58px` height, `29px` radius) with warm gold active tab capsule and two-phase slide-up secondary asset drawer (`88vh`).
 
 ### 📊 Financial Analytics & Visualizations
 - **Bento 2.0 Asymmetric Dashboard Grid** — 12-column layout pairing a prominent 70% width Net Worth Timeline Hero (`lg:col-span-8`) with an agile 30% Asset Allocation Donut pillar (`lg:col-span-4`), supported by a 50/50 foundation row for Member Returns and the AI Assistant.

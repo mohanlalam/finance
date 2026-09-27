@@ -43,6 +43,11 @@
 - **Decision**: Replaced the 2x2 equalized layout with an asymmetric 70/30 Hero row (`lg:col-span-8` Net Worth Timeline / `lg:col-span-4` Asset Allocation Donut) and a 50/50 secondary foundation row (`lg:col-span-6` each for Member Returns and AI Assistant). Added 1px specular inner refraction highlights (`box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.08)`) across cards and badges, and integrated High-Agency Frontend Design skill rules (`design-taste-frontend`), locking Tailwind CSS v3 and strictly enforcing zero-dependency SVG iconography from `src/components/icons/AppIcons.tsx`.
 - **Consequence**: Clear visual hierarchy, responsive layout resilience without chart crowding, crisp optical refraction depth, and 100% test pass rate with zero dependency bloat.
 
+### ADR-008: Indian Family Wealth Ledger Identity & Heirloom Typography System
+- **Context**: The previous aesthetic relied on generic fintech SaaS tropes (corporate blue primary, hyper-saturated red/green day-trading indicators, neon purple gradients, and borrowed WhatsApp dock nomenclature). Crucially, no typography system was specified, defaulting the product's personality to generic system sans-serif.
+- **Decision**: Transformed the identity into an authentic **Indian Family Wealth Ledger & Heirloom Vault** tailored for Rammohan, Padmavathi, and Sai Laxmi. Enforced a 3-tier named typography system (`Newsreader` display serif for large valuations, `Plus Jakarta Sans` for clean UI chrome, and `JetBrains Mono` for bullion weights, tolas, and compounding rates). Replaced generic blue with Warm Antique Brass & Heritage Gold (`--accent-gold`, `--accent-brass`), calibrated financial semantics to non-alarmist generational stewardship tones (Stately Forest Jade and Terracotta Garnet), and purged borrowed token aliases.
+- **Consequence**: Studio-grade visual distinctiveness, timeless heirloom ledger feel, elevated cultural resonance for Indian multi-asset wealth, and zero breakage in verified mobile interactions.
+
 ---
 
 ## 2. Engineering Lessons Learned & Incident Post-Mortems

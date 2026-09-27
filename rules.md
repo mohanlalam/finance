@@ -1,6 +1,6 @@
 # ⚖️ Engineering Rules & "Do Not Regress" Standards — Family Portfolio Tracker
 
-**Document Version**: 3.0  
+**Document Version**: 4.0  
 **Enforcement**: Strict CI/CD pipeline, pre-commit validation, and agent self-correction  
 **Scope**: All source code, hooks, domain services, infrastructure, and test suites  
 
@@ -57,6 +57,10 @@
    - Use `min-h-[100dvh]` instead of `h-screen` for full-height screen sections to prevent layout thrashing on mobile browsers (iOS Safari dynamic toolbar).
 9. **Liquid Glass Specular Highlight**:
    - All elevated/translucent cards (`.apple-card`, `.antigravity-card`, `.hero-networth-card`) and pills must incorporate the 1px specular inner refraction highlight (`inset 0 1px 0 rgba(255, 255, 255, 0.08)`) simulating physical glass edges.
+10. **Heirloom Typography Hierarchy**:
+   - Primary wealth valuation figures and net worth totals must use the Display Serif stack (`Newsreader`, `.text-financial`, `.font-ledger`) with tabular figures (`tabular-nums`). Interface chrome must use `Plus Jakarta Sans` (`--font-sans`), and precision quantities (gram weights, tolas, rates, folios) must use `JetBrains Mono` (`--font-mono`).
+11. **Generational Stewardship Palette**:
+   - The primary brand identity accent is Warm Antique Brass & Heritage Gold (`--accent-gold`, `--accent-brass`). Never revert to generic fintech blue as the primary lead. Semantic colors must remain dignified and non-alarmist (Stately Forest Jade for appreciation, Terracotta Garnet for drawdowns, Saffron Amber for reminders).
 
 ---
 
