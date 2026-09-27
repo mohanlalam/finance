@@ -1,8 +1,7 @@
 # 🏛️ System Architecture — Family Portfolio Tracker
 
-**Document Version**: 4.0  
+**Document Version**: 3.0  
 **Architecture Pattern**: Clean Architecture & Domain-Driven Design (DDD) with Strict Dependency Inversion  
-**Design System**: Indian Family Wealth Ledger & Heirloom Vault (`Newsreader` display serif + `Plus Jakarta Sans` interface sans)  
 **Runtime Environment**: Progressive Web App (Vite 8, React 18.3, TypeScript 5.6, Tailwind CSS 3.4, Supabase PostgreSQL & Edge Functions)  
 
 ---

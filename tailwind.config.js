@@ -5,16 +5,15 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        serif: ['Newsreader', 'Georgia', 'serif'],
-        display: ['Newsreader', 'Georgia', 'serif'],
         sans: [
-          '"Plus Jakarta Sans"',
           '-apple-system',
           'BlinkMacSystemFont',
+          '"SF Pro Display"',
+          '"SF Pro Text"',
           '"Segoe UI"',
           'sans-serif'
         ],
-        mono: ['"JetBrains Mono"', '"SF Mono"', 'ui-monospace', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+        mono: ['"SF Mono"', 'ui-monospace', 'Menlo', 'Monaco', 'Consolas', 'monospace']
       },
       transitionDuration: {
         350: '350ms',

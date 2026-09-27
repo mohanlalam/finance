@@ -2,92 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── 🏛️ The Indian Family Wealth Ledger & Heirloom Vault System ── */
+/* ── 🌌 Antigravity Design Token & Cyber-Zen Theme System ── */
 :root {
-  /* Typography Hierarchy — Heirloom Ledger System */
-  --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
-
-  /* Color Tokens - Light Archival Vellum & Crisp Parchment Canvas */
-  --app-background: #fbfbfa;
-  --surface: rgba(255, 255, 255, 0.88);
+  /* Color Tokens - Light Crystalline Prism Canvas */
+  --app-background: #f8fafc;
+  --surface: rgba(255, 255, 255, 0.78);
   --surface-solid: #ffffff;
-  --surface-secondary: rgba(246, 244, 238, 0.85);
-  --surface-tertiary: rgba(238, 234, 224, 0.90);
-  --surface-glass: rgba(255, 255, 255, 0.82);
+  --surface-secondary: rgba(241, 245, 249, 0.85);
+  --surface-tertiary: rgba(226, 232, 240, 0.9);
+  --surface-glass: rgba(255, 255, 255, 0.75);
 
-  --text-primary: #1c1917;
-  --text-secondary: #44403c;
-  --text-tertiary: #78716c;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-tertiary: #475569;
 
-  /* Primary Identity Accent: Warm Antique Brass & Heritage Gold */
-  --accent-gold: #c89b3c;
-  --accent-gold-soft: rgba(200, 155, 60, 0.12);
-  --accent-brass: #a16207;
-  --accent-brass-soft: rgba(161, 98, 7, 0.10);
-  --accent-blue: #1d4ed8;
-  --accent-blue-soft: rgba(29, 78, 216, 0.08);
-  --accent-cyan: #0d9488;
-  --accent-violet: #7e22ce;
+  --accent-blue: #0284c7;
+  --accent-blue-soft: rgba(2, 132, 199, 0.08);
+  --accent-cyan: #06b6d4;
+  --accent-violet: #8b5cf6;
 
-  /* Generational Stewardship Semantic Financial Colors (Calibrated, Non-Alarmist) */
-  --positive: #166534;
-  --positive-soft: rgba(22, 101, 52, 0.10);
+  --positive: #15803d;
+  --positive-soft: rgba(16, 185, 129, 0.1);
 
-  --negative: #991b1b;
-  --negative-soft: rgba(153, 27, 27, 0.09);
+  --negative: #e11d48;
+  --negative-soft: rgba(225, 29, 72, 0.1);
 
   --warning: #b45309;
-  --warning-soft: rgba(180, 83, 9, 0.10);
+  --warning-soft: rgba(245, 158, 11, 0.1);
 
-  --surface-gold-soft: rgba(254, 243, 199, 0.55);
+  --surface-gold-soft: rgba(254, 243, 199, 0.45);
 
-  --border-subtle: rgba(180, 160, 130, 0.25);
-  --border-glass: rgba(255, 255, 255, 0.95);
-  --border-luminous: rgba(200, 155, 60, 0.35);
-  --backdrop-overlay: rgba(28, 25, 23, 0.45);
+  --border-subtle: rgba(203, 213, 225, 0.6);
+  --border-glass: rgba(255, 255, 255, 0.9);
+  --border-luminous: rgba(2, 132, 199, 0.25);
+  --backdrop-overlay: rgba(15, 23, 42, 0.35);
 
-  /* Radius Tokens - Distinctive Architectural Curvatures */
-  --radius-small: 6px;
-  --radius-medium: 10px;
+  /* Radius Tokens - Smooth Antigravity curvature */
+  --radius-small: 8px;
+  --radius-medium: 12px;
   --radius-large: 16px;
-  --radius-xl: 20px;
+  --radius-xl: 22px;
   --radius-sheet: 24px;
   --radius-pill: 9999px;
 
-  /* Shadows - Archival Warm Elevation */
-  --shadow-card: 0 2px 8px rgba(28, 25, 23, 0.06), 0 1px 3px rgba(180, 160, 130, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  --shadow-floating: 0 16px 36px -10px rgba(28, 25, 23, 0.10), 0 0 20px rgba(200, 155, 60, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  --shadow-luminous: 0 0 25px rgba(200, 155, 60, 0.18);
-  --shadow-modal: 0 20px 40px -10px rgba(28, 25, 23, 0.12), 0 0 20px rgba(200, 155, 60, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  /* Shadows - Weightless Levitation */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --shadow-floating: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 0 20px rgba(2, 132, 199, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --shadow-luminous: 0 0 25px rgba(2, 132, 199, 0.18);
+  --shadow-modal: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 0 20px rgba(2, 132, 199, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95);
 
-  /* Suspended Vault Navigation Dock */
-  --nav-glass-bg: rgba(255, 255, 255, 0.90);
-  --nav-glass-border: rgba(180, 160, 130, 0.25);
-  --nav-glass-shadow: 0 10px 32px -4px rgba(28, 25, 23, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-  --nav-ledger-accent: #c89b3c;
-  --nav-ledger-accent-soft: rgba(200, 155, 60, 0.16);
-  --nav-whatsapp-green: var(--nav-ledger-accent);
-  --nav-whatsapp-green-soft: var(--nav-ledger-accent-soft);
-  --nav-tab-idle-bg: rgba(246, 244, 238, 0.50);
-  --nav-tab-idle-border: rgba(180, 160, 130, 0.30);
+  /* WhatsApp iOS Floating Pill Navigation Dock */
+  --nav-glass-bg: rgba(255, 255, 255, 0.88);
+  --nav-glass-border: rgba(0, 0, 0, 0.08);
+  --nav-glass-shadow: 0 10px 32px -4px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08);
+  --nav-whatsapp-green: #10b981;
+  --nav-whatsapp-green-soft: rgba(16, 185, 129, 0.16);
+  --nav-tab-idle-bg: rgba(255, 255, 255, 0.38);
+  --nav-tab-idle-border: rgba(255, 255, 255, 0.50);
   --nav-tab-idle-shadow: inset 0 0.5px 1.5px rgba(0, 0, 0, 0.04), 0 0.5px 0 rgba(255, 255, 255, 0.60);
-  --nav-selected-bg: rgba(200, 155, 60, 0.12);
-  --nav-selected-border: rgba(200, 155, 60, 0.25);
-  --nav-selected-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.08), inset 0 0.5px 1.5px rgba(0, 0, 0, 0.06);
-  --nav-icon-plate-bg: rgba(200, 155, 60, 0.08);
+  --nav-selected-bg: rgba(0, 0, 0, 0.085);
+  --nav-selected-border: rgba(0, 0, 0, 0.06);
+  --nav-selected-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14), inset 0 0.5px 1.5px rgba(0, 0, 0, 0.10);
+  --nav-icon-plate-bg: rgba(0, 0, 0, 0.07);
 
   /* Asset Color Token Aliases */
-  --cyan: #0d9488;
-  --gold: #d4af37;
-  --asset-fd: #0d9488;
+  --cyan: #06b6d4;
+  --gold: #facc15;
+  --asset-fd: #06b6d4;
   --asset-rd: #c2410c;
-  --asset-sip: #7e22ce;
-  --asset-gold: #d4af37;
-  --asset-realestate: #15803d;
-  --asset-insurance: #991b1b;
-  --accent-rose: #991b1b;
+  --asset-sip: #9333ea;
+  --asset-gold: #facc15;
+  --asset-realestate: #16a34a;
+  --asset-insurance: #e11d48;
+  --accent-rose: #e11d48;
 
   /* Z-index hierarchy */
   --z-base: 1;
@@ -105,76 +92,68 @@
 }
 
 .dark {
-  /* Color Tokens - Deep Basalt Vault & Archival Slate */
-  --app-background: #090c10;
-  --surface: rgba(15, 20, 28, 0.72);
-  --surface-solid: #0d1219;
-  --surface-secondary: rgba(24, 30, 42, 0.75);
-  --surface-tertiary: rgba(36, 45, 62, 0.75);
-  --surface-glass: rgba(15, 20, 28, 0.78);
+  /* Color Tokens - Deep Cosmic Obsidian Void */
+  --app-background: #040711;
+  --surface: rgba(15, 23, 42, 0.65);
+  --surface-solid: #0b1120;
+  --surface-secondary: rgba(30, 41, 59, 0.7);
+  --surface-tertiary: rgba(51, 65, 85, 0.7);
+  --surface-glass: rgba(15, 23, 42, 0.7);
 
-  --text-primary: #f5f5f4;
-  --text-secondary: #d6d3d1;
-  --text-tertiary: #a8a29e;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
 
-  /* Primary Identity Accent: Burnished Gold & Radiant Brass */
-  --accent-gold: #d4af37;
-  --accent-gold-soft: rgba(212, 175, 55, 0.15);
-  --accent-brass: #e5b869;
-  --accent-brass-soft: rgba(229, 184, 105, 0.14);
-  --accent-blue: #60a5fa;
-  --accent-blue-soft: rgba(96, 165, 250, 0.14);
-  --accent-cyan: #2dd4bf;
-  --accent-violet: #c084fc;
+  --accent-blue: #38bdf8;
+  --accent-blue-soft: rgba(56, 189, 248, 0.14);
+  --accent-cyan: #06b6d4;
+  --accent-violet: #a855f7;
 
-  /* Generational Stewardship Semantic Financial Colors (Calibrated, Non-Alarmist) */
-  --positive: #22c55e;
-  --positive-soft: rgba(34, 197, 94, 0.14);
+  --positive: #10b981;
+  --positive-soft: rgba(16, 185, 129, 0.16);
 
-  --negative: #e05353;
-  --negative-soft: rgba(224, 83, 83, 0.14);
+  --negative: #f43f5e;
+  --negative-soft: rgba(244, 63, 94, 0.16);
 
   --warning: #f59e0b;
-  --warning-soft: rgba(245, 158, 11, 0.15);
+  --warning-soft: rgba(245, 158, 11, 0.16);
 
-  --accent-rose: #e05353;
-  --asset-fd: #2dd4bf;
-  --asset-rd: #fb923c;
-  --asset-sip: #c084fc;
-  --asset-gold: #d4af37;
-  --asset-realestate: #4ade80;
-  --asset-insurance: #e05353;
+  --accent-rose: #f43f5e;
+  --asset-fd: #06b6d4;
+  --asset-rd: #ea580c;
+  --asset-sip: #a855f7;
+  --asset-gold: #facc15;
+  --asset-realestate: #22c55e;
+  --asset-insurance: #f43f5e;
   --surface-gold-soft: transparent;
 
-  --border-subtle: rgba(212, 175, 55, 0.14);
+  --border-subtle: rgba(255, 255, 255, 0.09);
   --border-glass: rgba(255, 255, 255, 0.14);
-  --border-luminous: rgba(212, 175, 55, 0.32);
-  --backdrop-overlay: rgba(5, 7, 10, 0.85);
+  --border-luminous: rgba(56, 189, 248, 0.3);
+  --backdrop-overlay: rgba(2, 6, 23, 0.8);
 
-  /* Shadows - Deep Vault Elevation with Burnished Gold Specular */
-  --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --shadow-floating: 0 25px 50px -12px rgba(0, 0, 0, 0.80), 0 0 30px rgba(212, 175, 55, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.14);
-  --shadow-luminous: 0 0 30px rgba(212, 175, 55, 0.20);
-  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.80), 0 0 30px rgba(212, 175, 55, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  /* Shadows - Zero-G Cosmic Glow */
+  --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --shadow-floating: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 30px rgba(56, 189, 248, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  --shadow-luminous: 0 0 30px rgba(56, 189, 248, 0.25);
+  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 30px rgba(56, 189, 248, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.16);
 
-  /* Suspended Vault Navigation Dock */
-  --nav-glass-bg: rgba(16, 21, 30, 0.88);
-  --nav-glass-border: rgba(212, 175, 55, 0.16);
-  --nav-glass-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.65), 0 2px 10px rgba(0, 0, 0, 0.40);
-  --nav-ledger-accent: #d4af37;
-  --nav-ledger-accent-soft: rgba(212, 175, 55, 0.20);
-  --nav-whatsapp-green: var(--nav-ledger-accent);
-  --nav-whatsapp-green-soft: var(--nav-ledger-accent-soft);
-  --nav-tab-idle-bg: rgba(255, 255, 255, 0.05);
-  --nav-tab-idle-border: rgba(212, 175, 55, 0.10);
-  --nav-tab-idle-shadow: inset 0 0.5px 1.5px rgba(0, 0, 0, 0.15), 0 0.5px 0 rgba(255, 255, 255, 0.05);
-  --nav-selected-bg: rgba(212, 175, 55, 0.16);
-  --nav-selected-border: rgba(212, 175, 55, 0.25);
-  --nav-selected-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.40), inset 0 0.5px 2px rgba(0, 0, 0, 0.25);
-  --nav-icon-plate-bg: rgba(212, 175, 55, 0.10);
+  /* WhatsApp iOS Floating Pill Navigation Dock */
+  --nav-glass-bg: rgba(20, 24, 32, 0.86);
+  --nav-glass-border: rgba(255, 255, 255, 0.12);
+  --nav-glass-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.55), 0 2px 10px rgba(0, 0, 0, 0.35);
+  --nav-whatsapp-green: #25D366;
+  --nav-whatsapp-green-soft: rgba(37, 211, 102, 0.22);
+  --nav-tab-idle-bg: rgba(255, 255, 255, 0.065);
+  --nav-tab-idle-border: rgba(255, 255, 255, 0.10);
+  --nav-tab-idle-shadow: inset 0 0.5px 1.5px rgba(0, 0, 0, 0.12), 0 0.5px 0 rgba(255, 255, 255, 0.06);
+  --nav-selected-bg: rgba(0, 0, 0, 0.32);
+  --nav-selected-border: rgba(0, 0, 0, 0.18);
+  --nav-selected-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35), inset 0 0.5px 2px rgba(0, 0, 0, 0.20);
+  --nav-icon-plate-bg: rgba(255, 255, 255, 0.08);
 }
 
-/* 🏛️ Ambient Archival & Basalt Vault Atmosphere */
+/* 🌌 Ambient Cosmic Background Atmosphere */
 .antigravity-bg {
   position: fixed;
   inset: 0;
@@ -191,7 +170,7 @@
   width: 60vw;
   height: 60vw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, rgba(180, 130, 20, 0.02) 45%, transparent 70%);
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.07) 0%, rgba(99, 102, 241, 0.04) 45%, transparent 70%);
   filter: blur(80px);
   animation: nebulaDrift 25s ease-in-out infinite alternate;
 }
@@ -204,7 +183,7 @@
   width: 55vw;
   height: 55vw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(200, 155, 60, 0.04) 0%, rgba(34, 197, 94, 0.02) 45%, transparent 70%);
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.06) 0%, rgba(16, 185, 129, 0.03) 45%, transparent 70%);
   filter: blur(90px);
   animation: nebulaDrift2 30s ease-in-out infinite alternate;
 }
@@ -217,7 +196,7 @@
   width: 50vw;
   height: 50vw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(200, 155, 60, 0.04) 0%, rgba(161, 98, 7, 0.02) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(2, 132, 199, 0.05) 0%, rgba(147, 51, 234, 0.03) 50%, transparent 70%);
   filter: blur(70px);
   animation: nebulaDrift 25s ease-in-out infinite alternate;
 }
@@ -230,9 +209,9 @@
   width: 45vw;
   height: 45vw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(200, 155, 60, 0.03) 0%, rgba(22, 101, 52, 0.02) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(147, 51, 234, 0.04) 0%, rgba(250, 204, 21, 0.02) 50%, transparent 70%);
   filter: blur(75px);
-  animation: nebulaDrift2 30s ease-in-out infinite alternate;
+  animation: nebulaDrift2 28s ease-in-out infinite alternate;
 }
 
 @keyframes nebulaDrift {
@@ -376,25 +355,25 @@
   filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.45));
 }
 
-/* 🏛️ Hero Net Worth Gradient Accent — Burnished Gold & Brass */
+/* Hero Net Worth Gradient Accent */
 .text-gradient-wealth {
-  background: linear-gradient(135deg, var(--text-primary) 25%, var(--accent-gold) 72%, #b45309 100%);
+  background: linear-gradient(135deg, var(--text-primary) 20%, var(--accent-blue) 75%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.15));
+  filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.12));
 }
 
-/* 🏛️ Hero Net Worth Depth Card — Archival Vellum & Basalt Vault */
+/* 🏆 Hero Net Worth Depth Card (C1) */
 .hero-networth-card {
-  background: linear-gradient(135deg, rgba(254, 252, 246, 0.96) 0%, rgba(253, 248, 237, 0.90) 60%, rgba(255, 255, 255, 0.98) 100%);
-  border: 1px solid rgba(200, 155, 60, 0.35);
-  box-shadow: 0 4px 20px -2px rgba(180, 130, 20, 0.08), var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  background: linear-gradient(135deg, rgba(224, 247, 250, 0.7) 0%, rgba(240, 249, 255, 0.85) 60%, rgba(255, 255, 255, 0.95) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.28);
+  box-shadow: 0 4px 20px -2px rgba(6, 182, 212, 0.12), var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 .dark .hero-networth-card {
-  background: linear-gradient(135deg, rgba(16, 21, 30, 0.94) 0%, rgba(30, 25, 16, 0.65) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.28);
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 0 25px rgba(212, 175, 55, 0.05);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(6, 182, 212, 0.12) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 /* 📜 Mobile Horizontal Scroll Fade Indicator (M3) */
@@ -418,20 +397,15 @@
   z-index: 5;
 }
 
-/* 🏛️ Heirloom Ledger Typography System */
+/* Wide-Tracked Cyber-Zen Typography */
 body {
-  font-family: var(--font-sans);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
   background-color: var(--app-background);
   color: var(--text-primary);
   letter-spacing: -0.011em;
   transition: background-color 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-.font-ledger, .font-display {
-  font-family: var(--font-display);
-  font-variant-numeric: tabular-nums;
 }
 
 h1, .text-page-title {
@@ -467,16 +441,15 @@ h3, .text-card-title {
 }
 
 .text-financial {
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font-feature-settings: "tnum" 1, "cv05" 1, "cv01" 1;
 }
 @media (min-width: 640px) {
   .text-financial {
-    font-size: 28px;
+    font-size: 26px;
   }
 }
 

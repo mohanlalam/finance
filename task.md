@@ -1,7 +1,7 @@
 # 📋 Project Roadmap & Task Status — Family Portfolio Tracker
 
-**Document Version**: 4.0  
-**Current Release Status**: Milestone 4.0 (Indian Family Wealth Ledger & Heirloom Typography System) Complete  
+**Document Version**: 3.1  
+**Current Release Status**: Milestone 3.1 (High-Agency Frontend Design Taste & Bento 2.0 Grid) Complete  
 **Verification Pipeline**: 100% Passing (ESLint: 0, TypeScript: 0, Vitest: 309/309, Build: Clean)  
 
 ---
@@ -55,13 +55,6 @@
 - [x] **Specular Liquid Glass Refraction**: Inner 1px refraction highlight (`box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.08)`) across `.apple-card`, `.antigravity-card`, `.hero-networth-card`, and `AppBadge`.
 - [x] **Perpetual Intraday Live Indicator**: Pulsing emerald beacon (`animate-pulse`) on Today's Return.
 - [x] **Frontend Design Skill Integration**: Integrated `.agents/skills/front-end-design/SKILL.md` aligned with project constraints (Tailwind CSS v3 lock, zero-dependency SVG icon system in `src/components/icons/AppIcons.tsx`).
-
-### ✅ Pillar 7: Indian Family Wealth Ledger & Heirloom Typography System
-- [x] **Named Typography System**: `Newsreader` (optical size `6..72`) Display Serif for valuations and net worth, `Plus Jakarta Sans` for clean UI chrome, and `JetBrains Mono` for bullion weights, tolas, and compounding rates.
-- [x] **Cultural Identity & Warm Brass Palette**: Primary accent shifted to Warm Antique Brass & Heritage Gold (`--accent-gold: #d4af37`, `--accent-brass: #e5b869`) representing Indian family gold and generational wealth.
-- [x] **Stewardship Semantics**: Calibrated non-alarmist financial tones (Stately Forest Jade `#166534` for growth, Terracotta Garnet `#991b1b` for liabilities).
-- [x] **Archival Vellum & Basalt Vault Canvas**: Replaced generic cyan/purple neon nebulas with warm archival vellum (light) and basalt obsidian slate (dark).
-- [x] **Purged Borrowed Tropes**: Retired `--nav-whatsapp-green` and VisionOS Apple naming in favor of the Suspended Ledger Dock.
 
 ---
 
