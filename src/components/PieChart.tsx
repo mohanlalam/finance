@@ -149,7 +149,7 @@ function PieChart({ holdings, slices: customSlices, title = 'Asset allocation', 
           <span className="text-[10px] mt-1">Add stocks, FDs, SIPs or gold to populate allocation</span>
         </div>
       ) : (
-        <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-center justify-between flex-1 min-h-0">
+        <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-4 sm:gap-5 items-center justify-between flex-1 min-h-0">
           {/* Donut Visualizer with Interactive Center HUD */}
           <div className="relative shrink-0 flex items-center justify-center py-1">
             <svg

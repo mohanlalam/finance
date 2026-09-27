@@ -401,7 +401,7 @@ export default function AppShell() {
       onTouchMove={handleCombinedTouchMove}
       onTouchEnd={handleCombinedTouchEnd}
       onTouchCancel={handleCombinedTouchCancel}
-      className="min-h-screen bg-[var(--app-background)] md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden"
+      className="min-h-[100dvh] bg-[var(--app-background)] md:pb-0 text-[var(--text-primary)] transition-colors relative overflow-x-hidden"
     >
       {/* 🌌 Antigravity Cosmic Ambient Atmosphere */}
       <div className="antigravity-bg" aria-hidden="true" />
@@ -687,7 +687,7 @@ export default function AppShell() {
                               key={item.label}
                               onClick={() => setActiveAsset(item.id as AssetTab)}
                               style={{ borderLeftColor: item.color }}
-                              className="p-3 rounded-[var(--radius-medium)] border-l-[3px] bg-[var(--surface-secondary)]/40 hover:bg-[var(--surface-secondary)]/90 border border-t-[var(--border-subtle)]/50 border-r-[var(--border-subtle)]/50 border-b-[var(--border-subtle)]/50 flex flex-col justify-between text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] ios-press touch-manipulation active:scale-[0.97] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group"
+                              className={`p-3 rounded-[var(--radius-medium)] border-l-[3px] bg-[var(--surface-secondary)]/40 hover:bg-[var(--surface-secondary)]/90 border border-t-[var(--border-subtle)]/50 border-r-[var(--border-subtle)]/50 border-b-[var(--border-subtle)]/50 flex flex-col justify-between text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] ios-press touch-manipulation active:scale-[0.97] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group ${item.value > 0 ? 'opacity-100' : 'opacity-75 hover:opacity-100'}`}
                             >
                               <div className="flex items-center justify-between w-full">
                                 <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">{item.label}</span>
@@ -699,7 +699,7 @@ export default function AppShell() {
                           <button
                             onClick={() => setActiveAsset('insurance')}
                             style={{ borderLeftColor: '#e11d48' }}
-                            className="p-3 rounded-[var(--radius-medium)] border-l-[3px] bg-[var(--surface-secondary)]/40 hover:bg-[var(--surface-secondary)]/90 border border-t-[var(--border-subtle)]/50 border-r-[var(--border-subtle)]/50 border-b-[var(--border-subtle)]/50 flex flex-col justify-between text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] ios-press touch-manipulation active:scale-[0.97] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group min-h-[78px]"
+                            className={`p-3 rounded-[var(--radius-medium)] border-l-[3px] bg-[var(--surface-secondary)]/40 hover:bg-[var(--surface-secondary)]/90 border border-t-[var(--border-subtle)]/50 border-r-[var(--border-subtle)]/50 border-b-[var(--border-subtle)]/50 flex flex-col justify-between text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] ios-press touch-manipulation active:scale-[0.97] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] group min-h-[78px] ${breakdown.insuranceCover > 0 ? 'opacity-100' : 'opacity-75 hover:opacity-100'}`}
                           >
                             <div className="flex items-center justify-between w-full">
                               <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-wider transition-colors">Insurance</span>

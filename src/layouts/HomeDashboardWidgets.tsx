@@ -78,46 +78,61 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = React.m
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch auto-rows-fr">
-      <SectionErrorBoundary sectionName="Net Worth Timeline">
-        <LazyChartWrapper
-          className="h-full flex flex-col"
-          importFunc={() => import('../components/NetWorthTimelineChart')}
-          placeholderHeight={420}
-          fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}
-          props={{
-            history: netWorthHistory,
-            currentNetWorth: (breakdown.stocks || 0) + (breakdown.fd || 0),
-            currentStocks: breakdown.stocks,
-            currentFD: breakdown.fd,
-          }}
-        />
-      </SectionErrorBoundary>
-      <SectionErrorBoundary sectionName="Asset Class Pie Chart">
-        <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
-          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
-            <PieChart
-              slices={breakdownSlices}
-              title={`Asset Class Breakdown — ${summaryLabel}`}
-              onSelectSlice={onSliceClick}
-            />
-          </Suspense>
-        </LazyViewport>
-      </SectionErrorBoundary>
-      <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
-        <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
-          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
-            <BarChart portfolios={barChartPortfolios} />
-          </Suspense>
-        </LazyViewport>
-      </SectionErrorBoundary>
-      <SectionErrorBoundary sectionName="AI Portfolio Assistant">
-        <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
-          <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
-            <PortfolioAssistant portfolios={portfolios} onSelectAsset={onSelectAsset} />
-          </Suspense>
-        </LazyViewport>
-      </SectionErrorBoundary>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+      {/* Bento Hero Block (70%): Net Worth Timeline */}
+      <div className="lg:col-span-8 flex flex-col min-h-0">
+        <SectionErrorBoundary sectionName="Net Worth Timeline">
+          <LazyChartWrapper
+            className="h-full flex flex-col"
+            importFunc={() => import('../components/NetWorthTimelineChart')}
+            placeholderHeight={420}
+            fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}
+            props={{
+              history: netWorthHistory,
+              currentNetWorth: (breakdown.stocks || 0) + (breakdown.fd || 0),
+              currentStocks: breakdown.stocks,
+              currentFD: breakdown.fd,
+            }}
+          />
+        </SectionErrorBoundary>
+      </div>
+
+      {/* Bento Companion Pillar (30%): Asset Class Allocation */}
+      <div className="lg:col-span-4 flex flex-col min-h-0">
+        <SectionErrorBoundary sectionName="Asset Class Pie Chart">
+          <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
+            <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
+              <PieChart
+                slices={breakdownSlices}
+                title={`Asset Allocation — ${summaryLabel}`}
+                onSelectSlice={onSliceClick}
+              />
+            </Suspense>
+          </LazyViewport>
+        </SectionErrorBoundary>
+      </div>
+
+      {/* Bento Row 2 Left (50%): Asset Comparison Bar Chart */}
+      <div className="lg:col-span-6 flex flex-col min-h-0">
+        <SectionErrorBoundary sectionName="Asset Comparison Bar Chart">
+          <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
+            <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
+              <BarChart portfolios={barChartPortfolios} />
+            </Suspense>
+          </LazyViewport>
+        </SectionErrorBoundary>
+      </div>
+
+      {/* Bento Row 2 Right (50%): AI Portfolio Assistant */}
+      <div className="lg:col-span-6 flex flex-col min-h-0">
+        <SectionErrorBoundary sectionName="AI Portfolio Assistant">
+          <LazyViewport placeholderHeight={420} className="h-full flex flex-col">
+            <Suspense fallback={<div className="h-full min-h-[380px] lg:h-[420px] rounded-xl animate-shimmer border border-[var(--border-subtle)]" />}>
+              <PortfolioAssistant portfolios={portfolios} onSelectAsset={onSelectAsset} />
+            </Suspense>
+          </LazyViewport>
+        </SectionErrorBoundary>
+      </div>
     </div>
   );
 });

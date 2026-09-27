@@ -12,12 +12,12 @@ export interface AppBadgeProps {
 }
 
 const VARIANT_STYLES: Record<BadgeVariant, string> = {
-  positive: 'bg-[var(--positive-soft)] text-[var(--positive)] border-[var(--positive)]/30',
-  negative: 'bg-[var(--negative-soft)] text-[var(--negative)] border-[var(--negative)]/30',
-  warning: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/30',
-  info: 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border-[var(--accent-blue)]/30',
-  encrypted: 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] font-mono tracking-tight',
-  urgency: 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30',
+  positive: 'bg-[var(--positive-soft)] text-[var(--positive)] border-[var(--positive)]/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]',
+  negative: 'bg-[var(--negative-soft)] text-[var(--negative)] border-[var(--negative)]/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]',
+  warning: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]',
+  info: 'bg-[var(--accent-blue-soft)] text-[var(--accent-blue)] border-[var(--accent-blue)]/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]',
+  encrypted: 'bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] font-mono tracking-tight shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]',
+  urgency: 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]',
 };
 
 export const AppBadge: React.FC<AppBadgeProps> = ({

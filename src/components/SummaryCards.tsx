@@ -214,7 +214,10 @@ function SummaryCards({
         {/* 4. Today's Return */}
         <div className="flex flex-col justify-between gap-1 summary-col-divider">
           <div className="flex items-center justify-between">
-            <span className="text-label-small text-[var(--text-secondary)] font-semibold">Today's Return</span>
+            <span className="text-label-small text-[var(--text-secondary)] font-semibold flex items-center gap-1.5">
+              <span>Today's Return</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--positive)] animate-pulse shrink-0" title="Live intraday movement" aria-hidden="true" />
+            </span>
             <span className={`w-6 h-6 rounded-[var(--radius-small)] flex items-center justify-center ${
               isTodayGain ? 'bg-[var(--positive-soft)]' : 'bg-[var(--negative-soft)]'
             }`}>

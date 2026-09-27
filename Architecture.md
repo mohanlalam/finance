@@ -2,7 +2,7 @@
 
 **Document Version**: 3.0  
 **Architecture Pattern**: Clean Architecture & Domain-Driven Design (DDD) with Strict Dependency Inversion  
-**Runtime Environment**: Progressive Web App (Vite, React 19, TypeScript 5.8, Tailwind CSS, Supabase PostgreSQL & Edge Functions)  
+**Runtime Environment**: Progressive Web App (Vite 8, React 18.3, TypeScript 5.6, Tailwind CSS 3.4, Supabase PostgreSQL & Edge Functions)  
 
 ---
 

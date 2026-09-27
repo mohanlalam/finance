@@ -57,7 +57,8 @@ The user interface embodies weightless suspension, calm cognitive clarity, and t
 | | `--radius-medium` | `14px` | List items, action chips, inner cards |
 | | `--radius-large` | `20px` | Primary cards, modal dialogs, sheets |
 | | `--radius-pill` | `9999px` | Navigation pills, filter capsules |
-| **Elevations** | `--shadow-card` | `0 4px 20px rgba(0, 0, 0, 0.25)` | Translucent card depth |
+| **Elevations** | `--shadow-card` | `0 4px 20px rgba(0, 0, 0, 0.25)` | Translucent card depth with specular inner refraction (`inset 0 1px 0 rgba(255, 255, 255, 0.08)`) |
+| | `--shadow-floating` | `0 20px 40px -10px rgba(15, 23, 42, 0.12)` | Floating elevation with top specular highlight |
 | | `--shadow-glow` | `0 0 24px rgba(59, 130, 246, 0.25)` | Active element luminous aura |
 
 ---
@@ -131,3 +132,26 @@ All pills and badges across the application must use `AppBadge`. Supported varia
 - **Harvest Actions**: Tax harvesting rows display a high-contrast green **"Harvest"** action chip taking visual priority over generic taps.
 - **FAB Suppression**: The Floating Action Button (`+`) is hidden on pure analytical screens (`activeAsset === 'tax'`) so it never competes with harvest actions.
 - **Safe-Area Clearance**: Content containers reserve `pb-28` (112px), and the FAB is elevated (`bottom-[calc(5rem+env(safe-area-inset-bottom,0px))]`) above the 58px bottom dock.
+
+---
+
+## 5. Dashboard Bento 2.0 Grid & High-Agency Frontend Design
+
+To enforce high-agency visual design and anti-generic visual rhythm, the Home dashboard overview employs the **Bento 2.0** architecture governed by [`.agents/skills/front-end-design/SKILL.md`](.agents/skills/front-end-design/SKILL.md):
+
+### 5.1 Asymmetric 70/30 Hero Hierarchy
+Instead of uniform equalized cards, [`HomeDashboardWidgets.tsx`](src/layouts/HomeDashboardWidgets.tsx) adopts a 12-column grid layout:
+- **Hero Block (`lg:col-span-8` / 70% width)**: Houses the interactive **Net Worth Timeline Chart**, giving primary financial trajectory prominence.
+- **Companion Pillar (`lg:col-span-4` / 30% width)**: Houses the **Asset Class Allocation Donut**. On large desktop viewports (`lg:`), the visualizer adapts with responsive flex wrapping (`lg:flex-col xl:flex-row`), maintaining full readability for the central HUD and slice percentages without crowding.
+- **Row 2 Symmetrical Foundation (`lg:col-span-6` each)**: Asset Comparison Bar Chart side-by-side with the AI Portfolio Assistant.
+
+### 5.2 Liquid Glass Specular Refraction
+All cards (`.apple-card`, `.antigravity-card`, `.hero-networth-card`) and tokenized pills ([`AppBadge.tsx`](src/components/ui/AppBadge.tsx)) feature physical liquid glass refraction optics:
+- **Dark Mode**: 1px specular inner refraction border: `box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.08)`.
+- **Light Mode**: Luminous glass highlight: `box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.95)`.
+- **Hover Ascension**: Spring ascension (`translateY(-2px)`) with intensified specular inner shadow (`inset 0 1px 0 rgba(255, 255, 255, 0.12)`).
+
+### 5.3 Perpetual Live Motion & Tactile Feedback
+- **Live Market Indicator**: A pulsing emerald live beacon (`w-1.5 h-1.5 rounded-full bg-[var(--positive)] animate-pulse`) next to "Today's Return" in [`SummaryCards.tsx`](src/components/SummaryCards.tsx) signals active intraday price movement.
+- **Tactile Spring Press**: `.ios-press` uses refined cubic-bezier spring physics with `-translate-y-0.5` on hover and `scale(0.97)` on active press.
+

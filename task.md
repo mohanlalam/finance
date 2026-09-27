@@ -1,7 +1,7 @@
 # 📋 Project Roadmap & Task Status — Family Portfolio Tracker
 
-**Document Version**: 3.0  
-**Current Release Status**: Milestone 3.0 (Liquid Glass Mobile Navigation & De-densification) Complete  
+**Document Version**: 3.1  
+**Current Release Status**: Milestone 3.1 (High-Agency Frontend Design Taste & Bento 2.0 Grid) Complete  
 **Verification Pipeline**: 100% Passing (ESLint: 0, TypeScript: 0, Vitest: 309/309, Build: Clean)  
 
 ---
@@ -49,13 +49,20 @@
 - [x] **Action Priority Elevation**: Pulsing urgency badges for upcoming insurance renewals; prominent "Harvest" chips for tax loss candidates; FAB suppressed on Tax Harvesting.
 - [x] **iPhone SE Compact Optimization**: Verified at 375×667 with zero text clipping and safe-area dock clearance.
 
+### ✅ Pillar 6: High-Agency Frontend Design Taste & Bento 2.0 Dashboard Architecture
+- [x] **Bento 2.0 Asymmetric Dashboard Layout**: 12-column grid with 70/30 Hero row (`lg:col-span-8` Net Worth Timeline / `lg:col-span-4` Asset Allocation Donut) + 50/50 Row 2 (`lg:col-span-6` Member Returns / `lg:col-span-6` AI Assistant).
+- [x] **Responsive Donut Visualizer**: `lg:flex-col xl:flex-row` flex wrapping preventing center HUD and slice legend crowding.
+- [x] **Specular Liquid Glass Refraction**: Inner 1px refraction highlight (`box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.08)`) across `.apple-card`, `.antigravity-card`, `.hero-networth-card`, and `AppBadge`.
+- [x] **Perpetual Intraday Live Indicator**: Pulsing emerald beacon (`animate-pulse`) on Today's Return.
+- [x] **Frontend Design Skill Integration**: Integrated `.agents/skills/front-end-design/SKILL.md` aligned with project constraints (Tailwind CSS v3 lock, zero-dependency SVG icon system in `src/components/icons/AppIcons.tsx`).
+
 ---
 
 ## 2. Active Verification Checklist (36 Screenshots System)
 
 - [x] `01_desktop_dark_pin_lock_screen.png` — Aurora gradient passcode gate (1440×900)
 - [x] `02_desktop_dark_stocks_holdings.png` — Virtualized stocks table with sorting (1440×900)
-- [x] `03_desktop_dark_summary_analytics_widgets.png` — 2x2 dashboard analytics grid (1440×900)
+- [x] `03_desktop_dark_summary_analytics_widgets.png` — Bento 2.0 dashboard analytics grid (1440×900)
 - [x] `04_desktop_dark_fixed_deposits.png` — Unified FD banner & deposit cards (1440×900)
 - [x] `05_desktop_dark_recurring_deposits.png` — RD installment tracker (1440×900)
 - [x] `06_desktop_dark_sip_mutual_funds.png` — Mutual funds with live AMFI NAV (1440×900)

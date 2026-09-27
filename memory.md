@@ -38,6 +38,11 @@
 - **Decision**: Enforce a strict mobile contract: single plain-language hero question, hard cap of at most 2 secondary metrics via `.slice(0, 2)`, 56px interactive touch rows with trailing chevrons, and tokenized `AppBadge` variants.
 - **Consequence**: Clean visual hierarchy, zero text clipping on compact 375×667 viewports (iPhone SE), and zero dock overlap.
 
+### ADR-007: Bento 2.0 Asymmetric Dashboard Layout & Specular Liquid Glass Refraction
+- **Context**: The previous 2x2 equalized widget grid gave equal visual weight to the Net Worth Timeline and Asset Allocation Donut, causing visual monotony. Additionally, flat translucent cards lacked physical edge definition.
+- **Decision**: Replaced the 2x2 equalized layout with an asymmetric 70/30 Hero row (`lg:col-span-8` Net Worth Timeline / `lg:col-span-4` Asset Allocation Donut) and a 50/50 secondary foundation row (`lg:col-span-6` each for Member Returns and AI Assistant). Added 1px specular inner refraction highlights (`box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.08)`) across cards and badges, and integrated High-Agency Frontend Design skill rules (`design-taste-frontend`), locking Tailwind CSS v3 and strictly enforcing zero-dependency SVG iconography from `src/components/icons/AppIcons.tsx`.
+- **Consequence**: Clear visual hierarchy, responsive layout resilience without chart crowding, crisp optical refraction depth, and 100% test pass rate with zero dependency bloat.
+
 ---
 
 ## 2. Engineering Lessons Learned & Incident Post-Mortems

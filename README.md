@@ -14,6 +14,7 @@ The project's authoritative documentation is organized across 6 standardized fil
 4. **[`rules.md`](rules.md)** — Engineering Standards, Coding Guidelines & "Do Not Regress" Rules
 5. **[`task.md`](task.md)** — Project Roadmap, Active Tasks & 36-Screen Visual QA Checklist
 6. **[`memory.md`](memory.md)** — Architectural Decision Records (ADRs) & Engineering Lessons Learned
+7. **[`.agents/skills/front-end-design/SKILL.md`](.agents/skills/front-end-design/SKILL.md)** — High-Agency Frontend Design Taste Skill (Anti-Generic Layouts, Bento 2.0, Liquid Glass Refraction)
 
 ---
 
@@ -25,8 +26,10 @@ The project's authoritative documentation is organized across 6 standardized fil
 - **Liquid Glass Floating Island Navigation** — Elevated floating pill tab bar (`blur(20px) saturate(1.8)`, `max-width: 440px`, height `58px`, `border-radius: 29px`, uniform `4px` inset padding) lifted off the screen bottom with scroll-reactive collapse and per-container `WeakMap` scroll-position tracking. Selected tabs are highlighted by a **concentric inner lens plate** — a frosted glass capsule fitted precisely inside the pill with matching `25px` inner radius — styled with CSS Custom Property gradient optics (`--nav-glass-bg` light: rose→white→cyan, dark: magenta→navy→cyan). Monochrome unselected icons keep the dock calm; active icons switch to filled glyphs. A slide-up **More drawer** (`maxHeight: 88vh`) exposes all 7 remaining asset categories (Smart AI Import → Tax Harvesting) on categorised glass tiles, fully visible without scrolling.
 
 ### 📊 Financial Analytics & Visualizations
+- **Bento 2.0 Asymmetric Dashboard Grid** — 12-column layout pairing a prominent 70% width Net Worth Timeline Hero (`lg:col-span-8`) with an agile 30% Asset Allocation Donut pillar (`lg:col-span-4`), supported by a 50/50 foundation row for Member Returns and the AI Assistant.
+- **Liquid Glass Specular Refraction** — Physical 1px inner refraction specular edges (`box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.08)`) and live intraday pulsing market beacon on Today's Return.
 - **Consolidated Financial Net Worth Timeline** — Responsive SVG area chart with interactive hover cards plotting liquid/deposit historical wealth appreciation across Stocks, Fixed Deposits, RDs, and Mutual Funds.
-- **Asset Allocation Donut** — Multi-category distribution chart across Stocks, Fixed Deposits, RDs, Mutual Funds, Gold Bullion, and Real Estate.
+- **Asset Allocation Donut** — Multi-category distribution chart across Stocks, Fixed Deposits, RDs, Mutual Funds, Gold Bullion, and Real Estate with dynamic responsive flex orientation (`lg:flex-col xl:flex-row`).
 - **Live Market Data Hub** — Multi-provider quotes coordinator with automated background polling, in-memory TTL caching, and offline fallback (Yahoo Finance for equities, AMFI India for Mutual Fund NAVs, and MCX/IBJA for bullion).
 - **Tax Loss Harvesting Opportunity Finder** — Indian Income Tax FY24-25 analyzer distinguishing equity STCG (20%) / LTCG (12.5% over ₹1.25L) from debt and gold slab rates.
 - **Portfolio Comparison Bar Chart** — Side-by-side family member bar chart with animated value transitions.
@@ -264,7 +267,7 @@ project antigravity/
 │   │   ├── AppShell.tsx          # Main dashboard layout (responsive switcher, lazy panel views)
 │   │   ├── AppShellModals.tsx    # Extracted modal orchestrator for AppShell
 │   │   ├── DesktopSidebar.tsx    # Desktop sidebar navigation
-│   │   └── HomeDashboardWidgets.tsx # Home page 2x2 equalized dashboard widget grid
+│   │   └── HomeDashboardWidgets.tsx # Home page Bento 2.0 asymmetric dashboard widget grid
 │   ├── contexts/
 │   │   ├── MobileContext.tsx     # Mobile viewport state context
 │   │   ├── PortfolioContext.tsx  # Global portfolio state provider (Entities, Status, Actions)

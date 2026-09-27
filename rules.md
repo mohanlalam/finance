@@ -47,6 +47,16 @@
    - All function parameters, return types, and interface properties must be strictly typed.
 4. **Design Token Integrity**:
    - Never introduce hardcoded hex color codes or arbitrary corner radii. Reference CSS custom properties declared in `src/index.css`.
+5. **Zero-Dependency SVG Iconography & Package Guard**:
+   - Before importing any 3rd-party library, check `package.json`. Never import external icon libraries (`lucide-react`, `@phosphor-icons/react`, `@radix-ui/react-icons`). All application icons must use the project's zero-dependency SVG icon system in `src/components/icons/AppIcons.tsx`.
+6. **Anti-Emoji Policy in UI Code**:
+   - Never render raw emojis in UI markup, buttons, headers, or alt text. Replace symbols with high-quality SVG icons from `AppIcons.tsx` or clean Unicode typographical primitives (`•`).
+7. **Tailwind CSS v3 Syntax Lock**:
+   - The project is strictly pinned to Tailwind CSS v3 (`^3.4.1`). Never introduce Tailwind v4-only configuration or syntax.
+8. **Viewport Height Stability**:
+   - Use `min-h-[100dvh]` instead of `h-screen` for full-height screen sections to prevent layout thrashing on mobile browsers (iOS Safari dynamic toolbar).
+9. **Liquid Glass Specular Highlight**:
+   - All elevated/translucent cards (`.apple-card`, `.antigravity-card`, `.hero-networth-card`) and pills must incorporate the 1px specular inner refraction highlight (`inset 0 1px 0 rgba(255, 255, 255, 0.08)`) simulating physical glass edges.
 
 ---
 

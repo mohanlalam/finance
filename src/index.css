@@ -233,14 +233,22 @@
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-large);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   transition: transform 0.28s var(--ios-spring), box-shadow 0.28s var(--ios-spring), border-color 0.28s ease;
+}
+
+:root:not(.dark) .apple-card, :root:not(.dark) .antigravity-card {
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 .apple-card:hover, .antigravity-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-floating);
+  box-shadow: var(--shadow-floating), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   border-color: var(--border-luminous);
+}
+
+:root:not(.dark) .apple-card:hover, :root:not(.dark) .antigravity-card:hover {
+  box-shadow: var(--shadow-floating), inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 /* Floating Glass Island */
@@ -255,10 +263,13 @@
 
 /* Tactile Spring Press Feedback */
 .ios-press {
-  transition: transform 0.16s var(--ios-spring), background-color 0.15s ease, opacity 0.15s ease, box-shadow 0.2s ease;
+  transition: transform 0.18s var(--ios-spring), background-color 0.15s ease, opacity 0.15s ease, box-shadow 0.2s ease;
+}
+.ios-press:hover {
+  transform: translateY(-1px);
 }
 .ios-press:active {
-  transform: scale(0.965);
+  transform: scale(0.97);
   opacity: 0.9;
 }
 
@@ -267,13 +278,13 @@
   background: var(--accent-blue-soft) !important;
   color: var(--accent-blue) !important;
   border-color: rgba(2, 132, 199, 0.35) !important;
-  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08);
+  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 .dark .sidebar-item-active {
   background: rgba(56, 189, 248, 0.14) !important;
   color: var(--accent-blue) !important;
   border-color: rgba(56, 189, 248, 0.35) !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 /* ⚠️ Stale Price Warning Banner */
@@ -357,12 +368,12 @@
 .hero-networth-card {
   background: linear-gradient(135deg, rgba(224, 247, 250, 0.7) 0%, rgba(240, 249, 255, 0.85) 60%, rgba(255, 255, 255, 0.95) 100%);
   border: 1px solid rgba(6, 182, 212, 0.28);
-  box-shadow: 0 4px 20px -2px rgba(6, 182, 212, 0.12), var(--shadow-card);
+  box-shadow: 0 4px 20px -2px rgba(6, 182, 212, 0.12), var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 .dark .hero-networth-card {
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(6, 182, 212, 0.12) 100%);
   border: 1px solid rgba(56, 189, 248, 0.25);
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 /* 📜 Mobile Horizontal Scroll Fade Indicator (M3) */
