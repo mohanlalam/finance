@@ -123,6 +123,7 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
       (window as unknown as { __DISABLE_LAZY_VIEWPORT__?: boolean }).__DISABLE_LAZY_VIEWPORT__ = true;
       (window as unknown as { __DISABLE_VIRTUALIZATION__?: boolean }).__DISABLE_VIRTUALIZATION__ = true;
       document.documentElement.setAttribute('data-capture-mode', 'true');
+      document.documentElement.setAttribute('data-capture-hide-nav', 'true');
       document.documentElement.classList.remove('dark');
     });
 
@@ -156,6 +157,7 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
       (window as unknown as { __DISABLE_LAZY_VIEWPORT__?: boolean }).__DISABLE_LAZY_VIEWPORT__ = true;
       (window as unknown as { __DISABLE_VIRTUALIZATION__?: boolean }).__DISABLE_VIRTUALIZATION__ = true;
       document.documentElement.setAttribute('data-capture-mode', 'true');
+      document.documentElement.setAttribute('data-capture-hide-nav', 'true');
       document.documentElement.classList.add('dark');
     });
 

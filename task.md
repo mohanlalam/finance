@@ -58,44 +58,61 @@
 
 ---
 
-## 2. Active Verification Checklist (36 Screenshots System)
+## 2. Active Verification Checklist (46 Screenshots System)
 
-- [x] `01_desktop_dark_pin_lock_screen.png` — Aurora gradient passcode gate (1440×900)
-- [x] `02_desktop_dark_stocks_holdings.png` — Virtualized stocks table with sorting (1440×900)
-- [x] `03_desktop_dark_summary_analytics_widgets.png` — Bento 2.0 dashboard analytics grid (1440×900)
-- [x] `04_desktop_dark_fixed_deposits.png` — Unified FD banner & deposit cards (1440×900)
-- [x] `05_desktop_dark_recurring_deposits.png` — RD installment tracker (1440×900)
-- [x] `06_desktop_dark_sip_mutual_funds.png` — Mutual funds with live AMFI NAV (1440×900)
-- [x] `07_desktop_dark_gold_bullion_vault.png` — Gold vault with live MCX spot rate (1440×900)
-- [x] `08_desktop_dark_real_estate_registry.png` — Standalone property registry & yields (1440×900)
-- [x] `09_desktop_dark_insurance_policies.png` — Life, health & motor policy cover (1440×900)
-- [x] `10_desktop_dark_document_vault.png` — Zero-knowledge encrypted records (1440×900)
-- [x] `11_desktop_dark_tax_harvesting.png` — Indian FY24-25 capital gains & loss harvester (1440×900)
-- [x] `12_desktop_dark_family_member_father.png` — Single-member filtered view (1440×900)
-- [x] `13_desktop_dark_ai_assistant_panel.png` — Deterministic NLP assistant panel (1440×900)
-- [x] `14_desktop_dark_modal_add_holding.png` — Stock holding entry modal (1440×900)
-- [x] `15_desktop_dark_modal_add_gold.png` — Gold holding entry modal (1440×900)
-- [x] `16_desktop_light_stocks_holdings.png` — Stocks in Light mode (1440×900)
-- [x] `17_desktop_light_summary_analytics_widgets.png` — Summary widgets in Light mode (1440×900)
-- [x] `18_desktop_light_gold_bullion.png` — Bullion vault in Light mode (1440×900)
-- [x] `19_desktop_light_fixed_deposits.png` — Fixed deposits in Light mode (1440×900)
-- [x] `20_desktop_light_sip_mutual_funds.png` — Mutual funds in Light mode (1440×900)
-- [x] `21_mobile_dark_pin_lock.png` — Mobile PIN lock screen (390×844)
-- [x] `22_mobile_dark_home_summary.png` — Mobile home summary with liquid dock (390×844)
-- [x] `23_mobile_dark_stocks_holdings.png` — Mobile stocks registry with hero question (390×844)
-- [x] `24_mobile_dark_fixed_deposits.png` — Mobile FD registry with maturity badge (390×844)
-- [x] `25_mobile_dark_sip_mutual_funds.png` — Mobile mutual funds registry (390×844)
-- [x] `26_mobile_dark_gold_holdings.png` — Mobile bullion vault with 24K spot badge (390×844)
-- [x] `27_mobile_light_home_summary.png` — Mobile home in Light mode (390×844)
-- [x] `28_mobile_light_stocks.png` — Mobile stocks in Light mode (390×844)
-- [x] `29_mobile_dark_insurance.png` — Mobile insurance cover with renewal urgency (390×844)
-- [x] `30_mobile_dark_real_estate.png` — Mobile real estate registry (390×844)
-- [x] `31_mobile_dark_documents.png` — Mobile document vault with AES-256 badge (390×844)
-- [x] `32_mobile_dark_tax_harvesting.png` — Mobile tax harvesting with "Harvest" chips (390×844)
-- [x] `33_mobile_iphonese_dark_stocks.png` — iPhone SE compact stocks view (375×667)
-- [x] `34_mobile_iphonese_dark_fd.png` — iPhone SE compact FD view (375×667)
-- [x] `35_mobile_iphonese_dark_insurance.png` — iPhone SE compact insurance view (375×667)
-- [x] `36_mobile_iphonese_dark_documents.png` — iPhone SE compact document vault (375×667)
+### A. Web Desktop Dark Mode (`screenshots/web/dark/` — 1920×1080 @2x Retina)
+- [x] `01-family-overview.png` — Bento 2.0 asymmetric dashboard layout (70/30 Hero + 50/50 Row 2)
+- [x] `02-stocks-etfs.png` — Virtualized multi-member stocks table with active search & filters
+- [x] `03-fixed-deposits.png` — Unified 3-row FD banner with bank breakdown & maturity schedule
+- [x] `04-recurring-deposits.png` — Recurring deposit quarterly compounding registry
+- [x] `05-sip-mutual-funds.png` — AMFI mutual funds portfolio valuation registry
+- [x] `06-gold-holdings.png` — Bullion vault calibrated against live MCX spot rates & hallmark cards
+- [x] `07-real-estate.png` — Property registry with valuation and rental yield metrics
+- [x] `08-insurance-cover.png` — Life, health & motor policies with renewal countdown badges
+- [x] `09-document-vault.png` — Zero-trust client-side encrypted document storage & tags
+- [x] `10-tax-harvesting.png` — FY25-26 capital gains analyzer with loss harvesting opportunities
+
+### B. Web Desktop Light Mode (`screenshots/web/light/` — 1920×1080 @2x Retina)
+- [x] `01-family-overview.png` — Bento 2.0 dashboard in crisp porcelain light theme
+- [x] `02-stocks-etfs.png` — Stocks registry in light theme with high-contrast text
+- [x] `03-fixed-deposits.png` — Fixed deposits registry in light theme
+- [x] `04-recurring-deposits.png` — Recurring deposits registry in light theme
+- [x] `05-sip-mutual-funds.png` — SIP mutual funds registry in light theme
+- [x] `06-gold-holdings.png` — Gold bullion vault in light theme
+- [x] `07-real-estate.png` — Real estate registry in light theme
+- [x] `08-insurance-cover.png` — Insurance coverage registry in light theme
+- [x] `09-document-vault.png` — Document vault in light theme
+- [x] `10-tax-harvesting.png` — Tax harvesting analyzer in light theme
+
+### C. Mobile Dark Mode (`screenshots/mobile/dark/` — 390×844 @2x Retina)
+- [x] `01-family-overview.png` — Mobile overview with conversational hero question
+- [x] `02-stocks-etfs.png` — Mobile stocks registry with 2-metric secondary cap
+- [x] `03-fixed-deposits.png` — Mobile FD registry with maturity countdown
+- [x] `04-recurring-deposits.png` — Mobile RD savings registry
+- [x] `05-sip-mutual-funds.png` — Mobile SIP flow and valuation registry
+- [x] `06-gold-holdings.png` — Mobile gold bullion reserve with hallmark badges
+- [x] `07-real-estate.png` — Mobile property registry and equity breakdown
+- [x] `08-insurance-cover.png` — Mobile insurance cover with pulsing renewal urgency badge
+- [x] `09-document-vault.png` — Mobile document vault with encrypted file tags
+- [x] `10-tax-harvesting.png` — Mobile tax harvester with FAB suppressed
+- [x] `bottom-nav-bar.png` — Isolated 58px liquid glass capsule navigation pill
+- [x] `bottom-nav-dock.png` — Suspended dock in viewport context with floating FAB
+- [x] `more-drawer.png` — High-opacity slide-up drawer for secondary asset registries
+
+### D. Mobile Light Mode (`screenshots/mobile/light/` — 390×844 @2x Retina)
+- [x] `01-family-overview.png` — Mobile home overview in light theme
+- [x] `02-stocks-etfs.png` — Mobile stocks registry in light theme
+- [x] `03-fixed-deposits.png` — Mobile FD registry in light theme
+- [x] `04-recurring-deposits.png` — Mobile RD savings in light theme
+- [x] `05-sip-mutual-funds.png` — Mobile SIP flow in light theme
+- [x] `06-gold-holdings.png` — Mobile gold bullion in light theme
+- [x] `07-real-estate.png` — Mobile property registry in light theme
+- [x] `08-insurance-cover.png` — Mobile insurance cover in light theme
+- [x] `09-document-vault.png` — Mobile document vault in light theme
+- [x] `10-tax-harvesting.png` — Mobile tax harvester in light theme
+- [x] `bottom-nav-bar.png` — Light mode liquid glass capsule navigation pill
+- [x] `bottom-nav-dock.png` — Light mode dock in viewport context
+- [x] `more-drawer.png` — Light mode secondary asset drawer sheet
 
 ---
 

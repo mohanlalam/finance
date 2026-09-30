@@ -943,3 +943,13 @@ body.is-scrolling-down .fab-scroll-hide {
 .animate-shake {
   animation: shake 0.5s ease-in-out;
 }
+
+/* ── Automated Screenshot Capture Mode Polish ───────────────────────────── */
+html[data-capture-mode="true"] .stale-price-banner {
+  display: none !important;
+}
+
+html[data-capture-mode="true"][data-capture-hide-nav="true"] nav[aria-label="Mobile Navigation"],
+html[data-capture-mode="true"][data-capture-hide-nav="true"] .fab-scroll-hide {
+  display: none !important;
+}
