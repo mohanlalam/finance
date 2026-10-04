@@ -393,7 +393,7 @@ export function GoldHoldingView({
                       <Coins size={18} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h4 className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
+                      <h4 className="text-sm font-bold text-[var(--text-primary)] line-clamp-2 leading-tight">
                         {holding.item_name}
                       </h4>
                       <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
