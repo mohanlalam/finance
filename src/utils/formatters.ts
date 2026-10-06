@@ -41,11 +41,11 @@ export function formatPercent(value: number, decimals = 2): string {
 }
 
 export function pnlColor(value: number): string {
-  return value >= 0 ? 'text-emerald-600' : 'text-red-500';
+  return value >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]';
 }
 
 export function pnlBg(value: number): string {
-  return value >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600';
+  return value >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]';
 }
 
 export {

@@ -49,6 +49,10 @@ export async function getCachedPortfolioData(maxAgeMs: number = MAX_CACHE_AGE_MS
   if (isValidCachedData(data, maxAgeMs)) {
     return data;
   }
+  // Self-heal: purge invalid or expired cache entry from IndexedDB
+  if (data != null) {
+    removeFromIDBCache(PORTFOLIO_CACHE_KEY).catch(() => {});
+  }
   return null;
 }
 

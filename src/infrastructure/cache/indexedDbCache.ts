@@ -27,6 +27,8 @@ export async function getFromIDBCache<T>(key: string, timeoutMs = 1500): Promise
     return typeof raw === 'string' ? (JSON.parse(raw) as T) : (raw as T);
   } catch (err) {
     logger.warn(`Failed to read key '${key}' from IndexedDB:`, { error: String(err) });
+    // Self-heal: purge corrupted record to prevent boot-loop JSON parse failures
+    idb.del(key).catch(() => {});
     return null;
   }
 }

@@ -74,7 +74,7 @@ export default function App() {
 
   return (
     <Suspense fallback={<DashboardLoading />}>
-      <MainApp onAuthExpired={() => setPinVerified(false)} />
+      <MainApp onAuthExpired={handleLock} />
     </Suspense>
   );
 }

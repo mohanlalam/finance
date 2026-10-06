@@ -34,7 +34,7 @@ export default class AppErrorBoundary extends Component<AppErrorBoundaryProps, A
     if (this.state.hasError) {
       return (
         <DashboardError
-          message="Something unexpected happened while rendering the dashboard."
+          message={this.state.message || 'Something unexpected happened while rendering the dashboard.'}
           onRetry={() => window.location.reload()}
         />
       );
