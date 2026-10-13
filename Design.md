@@ -47,7 +47,7 @@ The user interface embodies weightless suspension, calm cognitive clarity, and t
 | **Warning / Reminder** | `--warning`: `#f59e0b` | `--warning-soft`: `rgba(245, 158, 11, 0.15)` | $> 4.5:1$ (AA compliant) |
 | **Primary Accent** | `--accent-blue`: `#3b82f6` | `--accent-blue-soft`: `rgba(59, 130, 246, 0.15)` | $> 4.5:1$ (AA compliant) |
 | **Bullion / Gold** | `--accent-gold`: `#eab308` | `--accent-gold-soft`: `rgba(234, 179, 8, 0.15)` | $> 4.5:1$ (AA compliant) |
-| **WhatsApp Green** | `--nav-whatsapp-green`: `#25D366` / `#10b981` | `--nav-whatsapp-green-soft`: `rgba(37, 211, 102, 0.22)` | $> 4.5:1$ (AA compliant) |
+| **Navigation Active Glass** | `--nav-selected-bg`: `rgba(0, 0, 0, 0.085)` / `0.32` | `--nav-tab-idle-bg`: `rgba(255, 255, 255, 0.38)` / `0.065` | $> 4.5:1$ (AA compliant) |
 
 ### 2.4 Radii & Shadow Tokens
 
@@ -73,13 +73,19 @@ The user interface embodies weightless suspension, calm cognitive clarity, and t
   3. **Asset Registries** (`Stocks`, `Fixed Deposits`, `Recurring Deposits`, `SIPs`, `Gold`, `Real Estate`, `Insurance`, `Document Vault`, `Tax Harvesting`)
   4. **System Tools** (`Smart Import`, `Backup/Restore`, `Lock Application`)
 
-### 3.2 WhatsApp iOS Floating Pill Mobile Dock (`< 768px`)
-- **Dimensions & Offset**: Max width `410px` centered (`mx-auto`), Height `58px`, Curvature `rounded-full` (`9999px`), Floating bottom clearance `max(env(safe-area-inset-bottom, 0px) + 8px, 12px)`.
+### 3.2 Liquid Glass Suspended Mobile Dock (`< 768px`)
+- **Dimensions & Offset**: Max width `440px` centered (`mx-auto`), Height `58px`, Curvature `rounded-full` (`29px` radius), Floating bottom clearance `max(env(safe-area-inset-bottom, 0px) + 8px, 12px)`.
 - **Surface**: Frosted liquid glass (`--nav-glass-bg`, `backdrop-filter: blur(28px) saturate(1.8)`) with subtle specular perimeter border (`--nav-glass-border`) and soft elevation shadow (`--nav-glass-shadow`).
-- **5-Tab Hierarchy**: `Home`, `Stocks`, `Funds`, `Deposits`, `You`.
-- **Active Pill Indicator**: Active tab renders a horizontal emerald green capsule (`52px × 28px`, `rounded-full`, `--nav-whatsapp-green-soft`) behind the active glyph, with bold label in `--nav-whatsapp-green`.
-- **"You" Tab**: Renders a circular profile avatar with status ring (`ring-2 ring-[#25D366]` when active) opening the secondary assets & Smart Import drawer.
-- **More Asset Classes Drawer**: Slide-up sheet (`max-height: 88vh`, solid background `bg-[var(--surface-solid)]`) exposing all secondary categories in a 2-column grid.
+- **5-Tab Hierarchy**: `Home`, `Stocks`, `Funds`, `Deposits`, `More`.
+- **Active Pill Lens Indicator**: Active tab renders an asset-colored frosted capsule wrapping both icon and label (`borderRadius: 14px`, `color-mix(in srgb, ${accent} 18%, transparent)` with 0.5px specular edge and soft colored glow).
+- **Per-Tab Accent Colors**:
+  - `Home`: Sky Blue (`var(--accent-blue)`)
+  - `Stocks`: Emerald (`var(--positive)`)
+  - `Funds`: Purple (`var(--asset-sip)`)
+  - `Deposits`: Cyan (`var(--asset-fd)`)
+  - `More`: Rose Accent (`#e11d48`)
+- **Scroll-Aware Minimization**: Tracks scroll position per container via `WeakMap<Element, number>`; automatically collapses smoothly on scroll down (`translateY(calc(100% + 24px))`) and restores on scroll up or near page top (`scrollY < 40`).
+- **More Asset Classes Drawer**: Slide-up sheet (`max-height: 88vh`, solid background `bg-[var(--surface-solid)]`, `backdrop-filter: blur(32px) saturate(1.8)`) exposing Smart AI Import and all secondary categories in a responsive 2-column grid.
 
 ---
 
