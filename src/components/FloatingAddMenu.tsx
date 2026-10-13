@@ -242,9 +242,8 @@ export default function FloatingAddMenu({
         </div>
       )}
 
-      {/* Floating Action Button (FAB) Docked Cleanly Above Navigation */}
-      {/* FAB offset: 5rem (80px) clears the 58px dock + 6px top pad + 16px gap on all safe-area devices */}
-      <div className={`fixed bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] z-[55] transition-all duration-300 ease-out ${isOpen ? 'opacity-0 pointer-events-none scale-75' : 'fab-scroll-hide opacity-100 scale-100'} ${getFabButtonPositionClass()}`}>
+      {/* Floating Action Button (FAB) docked above the taller mobile tab bar. */}
+      <div className={`fixed bottom-[calc(6.75rem+env(safe-area-inset-bottom,0px))] z-[45] transition-all duration-300 ease-out ${isOpen ? 'opacity-0 pointer-events-none scale-75' : 'fab-scroll-hide opacity-100 scale-100'} ${getFabButtonPositionClass()}`}>
         <button
           ref={fabButtonRef}
           type="button"

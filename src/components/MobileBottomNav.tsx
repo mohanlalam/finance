@@ -125,7 +125,7 @@ function TabBtn({
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
-        minHeight: 44,
+        minHeight: 60,
         background: 'none',
         border: 'none',
         cursor: 'pointer',
@@ -136,30 +136,30 @@ function TabBtn({
         padding: '2px',
       }}
     >
-      {/* Pill container — When active, surrounds BOTH icon AND name in asset color */}
+      {/* Pill container — native-style selected tab tile */}
       <span
         style={{
           width: '100%',
-          maxWidth: 66,
-          height: 46,
-          borderRadius: 14,
+          maxWidth: 72,
+          height: 60,
+          borderRadius: 24,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 1.5,
-          padding: '2px 4px',
+          gap: 3,
+          padding: '6px 4px 5px',
           background: isActive
-            ? `color-mix(in srgb, ${activeColor} 18%, transparent)`
+            ? `color-mix(in srgb, ${activeColor} 19%, var(--surface-solid))`
             : 'transparent',
           border: isActive
-            ? `0.5px solid color-mix(in srgb, ${activeColor} 35%, transparent)`
+            ? `0.5px solid color-mix(in srgb, ${activeColor} 38%, transparent)`
             : '0.5px solid transparent',
           boxShadow: isActive
-            ? `0 2px 10px color-mix(in srgb, ${activeColor} 18%, transparent)`
+            ? `0 10px 22px -16px ${activeColor}, inset 0 1px 0 rgba(255,255,255,0.72)`
             : 'none',
-          transform: isActive ? 'scale(1.02)' : 'scale(1)',
-          transition: 'background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          transform: isActive ? 'translateY(-1px)' : 'translateY(0)',
+          transition: 'background 0.24s var(--ios-spring), border-color 0.24s ease, box-shadow 0.24s ease, transform 0.24s var(--ios-bounce)',
         }}
       >
         {/* Icon wrapper */}
@@ -170,7 +170,7 @@ function TabBtn({
             alignItems: 'center',
             justifyContent: 'center',
             width: 26,
-            height: 22,
+            height: 28,
           }}
         >
           <span
@@ -179,8 +179,9 @@ function TabBtn({
               alignItems: 'center',
               justifyContent: 'center',
               color: isActive ? activeColor : 'var(--text-tertiary)',
-              transform: isActive ? 'scale(1.06)' : 'scale(1)',
-              transition: 'color 0.18s ease, transform 0.2s ease',
+              transform: isActive ? 'scale(1.08)' : 'scale(1)',
+              filter: isActive ? 'drop-shadow(0 1px 0 rgba(255,255,255,0.35))' : 'none',
+              transition: 'color 0.18s ease, filter 0.18s ease, transform 0.2s var(--ios-bounce)',
             }}
           >
             {isActive ? activeIcon : icon}
@@ -193,20 +194,21 @@ function TabBtn({
               aria-label={`${badge} notifications`}
               style={{
                 position: 'absolute',
-                top: -3,
-                right: -8,
-                minWidth: 15,
-                height: 15,
+                top: -8,
+                right: -14,
+                minWidth: 20,
+                height: 20,
                 borderRadius: 999,
                 background: '#ef4444',
                 color: '#fff',
-                fontSize: 9,
-                fontWeight: 700,
+                fontSize: 11,
+                fontWeight: 800,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '0 3px',
-                boxShadow: '0 0 0 1.5px var(--surface-solid, #fff)',
+                padding: '0 5px',
+                border: '2px solid var(--surface-solid, #fff)',
+                boxShadow: '0 4px 10px rgba(239,68,68,0.28)',
               }}
             >
               {badge > 9 ? '9+' : badge}
@@ -217,11 +219,11 @@ function TabBtn({
         {/* Label — INSIDE the active pill */}
         <span
           style={{
-            fontSize: 10.5,
-            fontWeight: isActive ? 600 : 500,
-            letterSpacing: '-0.01em',
+            fontSize: 11.5,
+            fontWeight: isActive ? 700 : 600,
+            letterSpacing: 0,
             color: isActive ? activeColor : 'var(--text-tertiary)',
-            lineHeight: 1,
+            lineHeight: 1.05,
             whiteSpace: 'nowrap',
             transition: 'color 0.18s ease, font-weight 0.18s ease',
           }}
@@ -265,7 +267,7 @@ function MoreTabBtn({
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
-        minHeight: 44,
+        minHeight: 60,
         background: 'none',
         border: 'none',
         cursor: 'pointer',
@@ -276,30 +278,30 @@ function MoreTabBtn({
         padding: '2px',
       }}
     >
-      {/* Pill container — When active, surrounds BOTH icon AND "More" text in asset color */}
+      {/* Pill container — matches the main tab selected tile */}
       <span
         style={{
           width: '100%',
-          maxWidth: 66,
-          height: 46,
-          borderRadius: 14,
+          maxWidth: 72,
+          height: 60,
+          borderRadius: 24,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 1.5,
-          padding: '2px 4px',
+          gap: 3,
+          padding: '6px 4px 5px',
           background: lit
-            ? `color-mix(in srgb, ${activeColor} 18%, transparent)`
+            ? `color-mix(in srgb, ${activeColor} 19%, var(--surface-solid))`
             : 'transparent',
           border: lit
-            ? `0.5px solid color-mix(in srgb, ${activeColor} 35%, transparent)`
+            ? `0.5px solid color-mix(in srgb, ${activeColor} 38%, transparent)`
             : '0.5px solid transparent',
           boxShadow: lit
-            ? `0 2px 10px color-mix(in srgb, ${activeColor} 18%, transparent)`
+            ? `0 10px 22px -16px ${activeColor}, inset 0 1px 0 rgba(255,255,255,0.72)`
             : 'none',
-          transform: lit ? 'scale(1.02)' : 'scale(1)',
-          transition: 'background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          transform: lit ? 'translateY(-1px)' : 'translateY(0)',
+          transition: 'background 0.24s var(--ios-spring), border-color 0.24s ease, box-shadow 0.24s ease, transform 0.24s var(--ios-bounce)',
         }}
       >
         {/* Icon wrapper */}
@@ -310,7 +312,7 @@ function MoreTabBtn({
             alignItems: 'center',
             justifyContent: 'center',
             width: 26,
-            height: 22,
+            height: 28,
           }}
         >
           <span
@@ -320,21 +322,22 @@ function MoreTabBtn({
               justifyContent: 'center',
               color: lit ? activeColor : 'var(--text-tertiary)',
               transform: isOpen ? 'rotate(90deg) scale(1.06)' : lit ? 'scale(1.06)' : 'scale(1)',
-              transition: 'color 0.18s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              filter: lit ? 'drop-shadow(0 1px 0 rgba(255,255,255,0.35))' : 'none',
+              transition: 'color 0.18s ease, filter 0.18s ease, transform 0.22s var(--ios-bounce)',
             }}
           >
-            {lit ? <MoreGridFilled size={20} /> : <MoreGridOutline size={20} />}
+            {lit ? <MoreGridFilled size={25} /> : <MoreGridOutline size={25} />}
           </span>
         </span>
 
         {/* Label: More — INSIDE the active pill */}
         <span
           style={{
-            fontSize: 10.5,
-            fontWeight: lit ? 600 : 500,
-            letterSpacing: '-0.01em',
+            fontSize: 11.5,
+            fontWeight: lit ? 700 : 600,
+            letterSpacing: 0,
             color: lit ? activeColor : 'var(--text-tertiary)',
-            lineHeight: 1,
+            lineHeight: 1.05,
             whiteSpace: 'nowrap',
             transition: 'color 0.18s ease, font-weight 0.18s ease',
           }}
@@ -794,9 +797,9 @@ function MobileBottomNav({
           left: 0,
           right: 0,
           zIndex: 50,
-          paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 8px, 12px)',
-          paddingLeft: 14,
-          paddingRight: 14,
+          paddingBottom: 'max(calc(env(safe-area-inset-bottom, 0px) + 12px), 16px)',
+          paddingLeft: 12,
+          paddingRight: 12,
           paddingTop: 0,
           pointerEvents: 'none',
           transform: isVisible ? 'translateY(0)' : 'translateY(calc(100% + 24px))',
@@ -806,18 +809,18 @@ function MobileBottomNav({
       >
         <div
           style={{
-            maxWidth: 410,
+            maxWidth: 420,
             margin: '0 auto',
             pointerEvents: 'auto',
             background: 'var(--nav-glass-bg)',
-            backdropFilter: 'blur(28px) saturate(1.8)',
-            WebkitBackdropFilter: 'blur(28px) saturate(1.8)',
+            backdropFilter: 'blur(30px) saturate(1.65)',
+            WebkitBackdropFilter: 'blur(30px) saturate(1.65)',
             borderRadius: 9999,
             border: '0.5px solid var(--nav-glass-border)',
             boxShadow: 'var(--nav-glass-shadow)',
             userSelect: 'none',
             overflow: 'hidden',
-            padding: '3px 6px',
+            padding: '6px 8px',
           }}
         >
           <div
@@ -825,7 +828,7 @@ function MobileBottomNav({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              height: 52,
+              height: 68,
             }}
           >
             {mainTabs.map((tab) => (
@@ -838,16 +841,16 @@ function MobileBottomNav({
                 badge={tab.id === 'home' && alertCount > 0 ? alertCount : undefined}
                 onClick={() => { triggerHaptic('selection'); onChangeAsset(tab.id); if (isDrawerOpen) closeDrawer(); }}
                 icon={
-                  tab.id === 'home'   ? <HomeIcon size={21} aria-hidden="true" />   :
-                  tab.id === 'stocks' ? <TrendingUp size={21} aria-hidden="true" /> :
-                  tab.id === 'sip'    ? <Wallet size={21} aria-hidden="true" />     :
-                                        <Landmark size={21} aria-hidden="true" />
+                  tab.id === 'home'   ? <HomeIcon size={25} aria-hidden="true" />   :
+                  tab.id === 'stocks' ? <TrendingUp size={25} aria-hidden="true" /> :
+                  tab.id === 'sip'    ? <Wallet size={25} aria-hidden="true" />     :
+                                        <Landmark size={25} aria-hidden="true" />
                 }
                 activeIcon={
-                  tab.id === 'home'   ? <HomeFilled size={21} />     :
-                  tab.id === 'stocks' ? <StocksFilled size={21} />   :
-                  tab.id === 'sip'    ? <WalletFilled size={21} />   :
-                                        <LandmarkFilled size={21} />
+                  tab.id === 'home'   ? <HomeFilled size={25} />     :
+                  tab.id === 'stocks' ? <StocksFilled size={25} />   :
+                  tab.id === 'sip'    ? <WalletFilled size={25} />   :
+                                        <LandmarkFilled size={25} />
                 }
               />
             ))}
