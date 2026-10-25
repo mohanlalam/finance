@@ -138,6 +138,8 @@ All pills and badges across the application must use `AppBadge`. Supported varia
 - **Harvest Actions**: Tax harvesting rows display a high-contrast green **"Harvest"** action chip taking visual priority over generic taps.
 - **FAB Suppression**: The Floating Action Button (`+`) is hidden on pure analytical screens (`activeAsset === 'tax'`) so it never competes with harvest actions.
 - **Safe-Area Clearance**: Content containers reserve `pb-28` (112px), and the FAB is elevated (`bottom-[calc(5rem+env(safe-area-inset-bottom,0px))]`) above the 58px bottom dock.
+- **Automated Capture Hygiene**: Automated screenshot capture mode (`data-capture-mode="true"`) suppresses transient price warning alerts (`.stale-price-banner`), and `data-capture-hide-nav="true"` cleanly hides `.fab-container` and bottom navigation dock, preventing mid-page button freezing during full-page document captures.
+- **Multi-Line Asset Titles**: Long asset names on mobile cards (e.g. `GoldHoldingCard.tsx`) wrap gracefully via `line-clamp-2 leading-tight break-words` with top-aligned icons, eliminating premature text clipping.
 
 ---
 

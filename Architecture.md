@@ -144,6 +144,7 @@ Market quote lookups are coordinated by [`marketDataService.ts`](src/infrastruct
 - Client authenticates with a 4-digit PIN hashed via SHA-256 (`crypto.subtle.digest`) transmitted over the `X-App-Pin` header.
 - Supabase Edge Functions (`holdings-crud`, `verify-pin`, `snapshot-net-worth`, `gemini-proxy`) validate this hash using constant-time byte comparison (`timingSafeEqual`) against the server environment secret `APP_PIN_HASH`.
 - **Fail-Closed Guarantee**: If `APP_PIN_HASH` is unset or unconfigured, the backend returns **HTTP 503 Service Unavailable** immediately.
+- **Dependency Pinning**: All Supabase Edge Functions strictly pin the immutable release `npm:@supabase/supabase-js@2.49.1`, preventing upstream Deno ESM resolution drift during deployments.
 
 ### 5.2 Anti-Brute Force Rate Limiting
 - Composite sliding-window rate limiter keyed on `IP + Client Device Identifier`.
@@ -163,11 +164,19 @@ Market quote lookups are coordinated by [`marketDataService.ts`](src/infrastruct
 
 ## 6. Off-Thread Computation & Offline-First Cache
 
-### 6.1 Web Workers (`xirr.worker.ts`)
-- Computations requiring heavy numerical solving (such as Newton-Raphson XIRR solvers over thousands of historical cash flows) run inside dedicated Web Workers, ensuring the UI main thread never drops below 60 FPS.
+### 6.1 Web Workers & Frame-Drop Telemetry (`xirr.worker.ts`, `xirrClient.ts`)
+- Computations requiring heavy numerical solving run inside dedicated Web Workers off the main thread.
+- **Main-Thread Telemetry**: When falling back to synchronous execution (non-worker environments or worker timeouts), `calculateXIRRSyncWithTelemetry()` measures duration via `performance.now()`. If computation exceeds the **16.0ms** frame budget (60 FPS), a structured warning is emitted via `logger.warn`.
+- `calculateXIRRWithMetrics()` in `xirr.ts` maintains 100% calculation purity with zero side effects.
 
 ### 6.2 Offline-First PWA Hydration
 1. **Boot**: App hydrates immediately and synchronously from IndexedDB (`idb-keyval`) via [`offlineHydration.ts`](src/infrastructure/cache/offlineHydration.ts), displaying full portfolio metrics in $< 50\text{ms}$ with zero skeleton layout shifts.
 2. **Network Phase**: SWR issues a background revalidation to Supabase.
 3. **Reconciliation**: State updates seamlessly without clearing existing data.
 4. **Offline Outbox**: Mutations executed without an internet connection are written to an IndexedDB outbox and replayed in FIFO order upon network reconnection.
+
+### 6.3 IndexedDB Storage Quota & LRU Eviction Policy (`indexedDbCache.ts`)
+- **Storage Budget**: Max **50 MB** (`DEFAULT_MAX_STORAGE_BYTES`) or **100 entries** (`DEFAULT_MAX_CACHE_ENTRIES`).
+- **LRU Metadata Table**: Access timestamps and entry sizes are tracked under `_agy_cache_lru_meta_v1`.
+- **Protected Keys**: Critical queues (`portfolio_offline_outbox_v1`, `finance_portfolio_cache_v1`) are never evicted.
+- **Telemetry & Self-Healing**: `getCacheStorageMetrics()` exposes live storage footprint diagnostics, and corrupted records are automatically purged (`idb.del`) to prevent JSON parsing boot loops.

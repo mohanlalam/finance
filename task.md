@@ -1,8 +1,8 @@
 # 📋 Project Roadmap & Task Status — Family Portfolio Tracker
 
-**Document Version**: 3.1  
-**Current Release Status**: Milestone 3.1 (High-Agency Frontend Design Taste & Bento 2.0 Grid) Complete  
-**Verification Pipeline**: 100% Passing (ESLint: 0, TypeScript: 0, Vitest: 309/309, Build: Clean)  
+**Document Version**: 3.2  
+**Current Release Status**: Milestone 3.2 (System Architecture Hardening & Audit Hygiene) Complete  
+**Verification Pipeline**: 100% Passing (ESLint: 0, TypeScript: 0, Vitest: 314/314, Build: Clean)  
 
 ---
 
@@ -55,6 +55,13 @@
 - [x] **Specular Liquid Glass Refraction**: Inner 1px refraction highlight (`box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.08)`) across `.apple-card`, `.antigravity-card`, `.hero-networth-card`, and `AppBadge`.
 - [x] **Perpetual Intraday Live Indicator**: Pulsing emerald beacon (`animate-pulse`) on Today's Return.
 - [x] **Frontend Design Skill Integration**: Integrated `.agents/skills/front-end-design/SKILL.md` aligned with project constraints (Tailwind CSS v3 lock, zero-dependency SVG icon system in `src/components/icons/AppIcons.tsx`).
+
+### ✅ Pillar 7: System Architecture Hardening & Audit Hygiene
+- [x] **IndexedDB Storage Quota & LRU Eviction**: 50MB storage budget and LRU cache eviction policy with protected outbox keys (`lruCache.test.ts`).
+- [x] **Edge Function Version Pinning**: Locked `npm:@supabase/supabase-js@2.49.1` across all 6 Edge Functions.
+- [x] **Web Worker XIRR Frame-Drop Telemetry**: `calculateXIRRSyncWithTelemetry()` alerting whenever numerical solvers exceed the 16.0ms frame budget.
+- [x] **Automated Capture Hygiene Polish**: Suppressed FAB occlusion and stale price warning banners during automated Playwright full-page captures.
+- [x] **Long Asset Title Multi-Line Wrapping**: Configured `line-clamp-2 leading-tight break-words` on mobile cards in `GoldHoldingCard.tsx`.
 
 ---
 

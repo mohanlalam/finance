@@ -71,6 +71,12 @@
    - The application logger ([`logger.ts`](src/infrastructure/logging/logger.ts)) must automatically redact sensitive values (PIN hashes, API tokens, auth headers, private keys) before emitting console output.
 4. **Zero-Trust Document Encryption**:
    - All Document Vault records must be encrypted client-side using `AES-GCM-256` before transmission. Keys are derived in-memory and never sent to cloud databases.
+5. **Pinned Edge Function Dependencies**:
+   - All Supabase Edge Functions must pin explicit minor/patch versions (`npm:@supabase/supabase-js@2.49.1`) rather than floating major tags (`@2`).
+6. **Storage Quota & Outbox Protection**:
+   - IndexedDB caching must adhere to the 50MB storage budget and LRU eviction policy while safeguarding mission-critical outbox and portfolio cache keys.
+7. **Frame Budget Telemetry**:
+   - Any numerical financial solvers falling back to synchronous execution on the main UI thread must monitor execution duration against the 16.0ms (60 FPS) frame budget.
 
 ---
 
@@ -83,7 +89,7 @@
      ```
      This command sequentially runs `eslint .`, `tsc --noEmit -p tsconfig.app.json`, `tsc --noEmit -p tsconfig.node.json`, `vitest run`, and `vite build`. All steps must exit with code 0.
 2. **100% Test Pass Invariant**:
-   - All 55 test suites and 309+ test cases must pass with zero failures.
+   - All 56 test suites and 314+ test cases must pass with zero failures.
 3. **Environment Isolation for Node/Vitest**:
    - Browser storage APIs (`indexedDB`, `localStorage`, `Notification`) must always be wrapped in safety guards (`typeof indexedDB === 'undefined'`) with in-memory fallbacks so tests execute deterministically in Node.js test runners.
 4. **Clean-Slate Screenshot Protocol**:

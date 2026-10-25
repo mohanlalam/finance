@@ -43,6 +43,16 @@
 - **Decision**: Replaced the 2x2 equalized layout with an asymmetric 70/30 Hero row (`lg:col-span-8` Net Worth Timeline / `lg:col-span-4` Asset Allocation Donut) and a 50/50 secondary foundation row (`lg:col-span-6` each for Member Returns and AI Assistant). Added 1px specular inner refraction highlights (`box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.08)`) across cards and badges, and integrated High-Agency Frontend Design skill rules (`design-taste-frontend`), locking Tailwind CSS v3 and strictly enforcing zero-dependency SVG iconography from `src/components/icons/AppIcons.tsx`.
 - **Consequence**: Clear visual hierarchy, responsive layout resilience without chart crowding, crisp optical refraction depth, and 100% test pass rate with zero dependency bloat.
 
+### ADR-008: IndexedDB 50MB Storage Budget & LRU Eviction Policy
+- **Context**: Unbounded caching of decrypted document previews and data snapshots in IndexedDB risked exhausting mobile device browser storage quotas.
+- **Decision**: Implemented an LRU metadata tracker (`_agy_cache_lru_meta_v1`) with 50MB budget (`DEFAULT_MAX_STORAGE_BYTES`) and 100-entry watermark. Outbox and portfolio cache keys are strictly protected from eviction.
+- **Consequence**: Controlled storage footprint, zero device quota warnings, and self-healing corruption recovery.
+
+### ADR-009: Pinned Edge Function Dependencies & Main-Thread XIRR Frame-Drop Telemetry
+- **Context**: Floating `npm:@supabase/supabase-js@2` risked upstream build breaks, and complex synchronous XIRR fallback lacked frame-drop observability.
+- **Decision**: Pinned exact `@supabase/supabase-js@2.49.1` across all Edge Functions and introduced a 16.0ms performance telemetry wrapper (`calculateXIRRSyncWithTelemetry`) logging structured warnings whenever solving exceeds 1 frame.
+- **Consequence**: 100% reproducible Deno builds and real-time observability into UI thread performance.
+
 ---
 
 ## 2. Engineering Lessons Learned & Incident Post-Mortems

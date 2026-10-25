@@ -178,7 +178,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 55 test files and 309 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 56 test files and 314 unit/integration test cases (100% passing).
 
 ---
 
