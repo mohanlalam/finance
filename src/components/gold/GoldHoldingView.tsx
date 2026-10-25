@@ -581,6 +581,16 @@ export function GoldHoldingView({
               <RotateCw size={11} className={isSyncing ? 'animate-spin text-amber-500' : ''} />
               <span className="hidden xs:inline">{isSyncing ? 'Syncing...' : 'Sync'}</span>
             </button>
+
+            {/* Add Gold Button (CC3 Standardized Placement) */}
+            <button
+              type="button"
+              onClick={openAdd}
+              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] transition-colors shadow-xs ios-press cursor-pointer shrink-0"
+            >
+              <Plus size={13} />
+              Add Gold
+            </button>
           </div>
         </div>
 
@@ -869,8 +879,18 @@ export function GoldHoldingView({
                   </div>
 
                   {item.holdings.length === 0 ? (
-                    <div className="px-4 py-3 text-xs text-[var(--text-tertiary)] italic">
-                      No gold holdings recorded for {item.portfolio.label}
+                    <div className="p-4 sm:p-5 text-center bg-[var(--surface)]/40 rounded-b-[var(--radius-small)] border-t border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5">
+                      <div className="w-7 h-7 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                        <Coins size={14} />
+                      </div>
+                      <p className="text-xs font-medium text-[var(--text-secondary)]">No gold holdings recorded for {item.portfolio.label}</p>
+                      <button
+                        type="button"
+                        onClick={openAdd}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                      >
+                        <Plus size={12} /> Add gold for {item.portfolio.label}
+                      </button>
                     </div>
                   ) : (
                     <div className="divide-y divide-[var(--border-subtle)]">

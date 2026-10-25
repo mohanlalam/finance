@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { TrendingUp, Wifi, WifiOff, Plus } from '../icons/AppIcons';
+import { TrendingUp, Wifi, WifiOff, Plus, ChevronDown, ChevronRight } from '../icons/AppIcons';
 import { Portfolio, PortfolioName, FetchStatus } from '../../types/portfolio';
 import PortfolioTable from '../PortfolioTable';
 import EmptyState from '../EmptyState';
@@ -35,6 +35,19 @@ export default function StocksView({
   onUpdateStock,
 }: StocksViewProps) {
   const [selectedMember, setSelectedMember] = useState<string>(portfolioName || 'all');
+  const [collapsedMembers, setCollapsedMembers] = useState<Record<string, boolean>>(() => {
+    return {
+      padmavathi: true,
+      sai_laxmi: true,
+    };
+  });
+
+  const toggleMemberCollapse = (name: string) => {
+    setCollapsedMembers((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  };
 
   useEffect(() => {
     setSelectedMember(portfolioName || 'all');
@@ -429,9 +442,15 @@ export default function StocksView({
         <div className="space-y-4">
           {familyStocksSummary.memberBreakdown.map((m) => {
             const config = getFamilyMemberConfig(m.name);
+            const isCollapsed = Boolean(collapsedMembers[m.name]);
             return (
               <div key={m.name} className="space-y-1.5">
-                <div className="px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/60 flex items-center justify-between border border-[var(--border-subtle)] rounded-t-[var(--radius-small)]">
+                <button
+                  type="button"
+                  onClick={() => toggleMemberCollapse(m.name)}
+                  aria-expanded={!isCollapsed}
+                  className="w-full px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/60 hover:bg-[var(--surface-secondary)] flex items-center justify-between border border-[var(--border-subtle)] rounded-t-[var(--radius-small)] transition-colors cursor-pointer text-left select-none ios-press"
+                >
                   <div className="flex items-center gap-2">
                     <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
                       {config.icon}
@@ -442,6 +461,11 @@ export default function StocksView({
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
                       {m.count}
                     </span>
+                    {isCollapsed ? (
+                      <ChevronRight size={13} className="text-[var(--text-tertiary)] ml-1 shrink-0" />
+                    ) : (
+                      <ChevronDown size={13} className="text-[var(--text-tertiary)] ml-1 shrink-0" />
+                    )}
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <span className="font-bold text-[var(--text-primary)] tnum">
@@ -451,22 +475,24 @@ export default function StocksView({
                       {m.pnl >= 0 ? '+' : ''}{formatINR(m.pnl)} ({formatPercent(m.pnlPct)})
                     </span>
                   </div>
-                </div>
-                {m.count === 0 ? (
-                  <div className="px-4 py-4 text-center text-xs text-[var(--text-tertiary)] italic bg-[var(--surface)] border border-t-0 border-[var(--border-subtle)] rounded-b-[var(--radius-small)]">
-                    No stock holdings for {m.label}
-                  </div>
-                ) : (
-                  <PortfolioTable
-                    holdings={m.holdings}
-                    totalInvested={m.invested}
-                    totalCurrentValue={m.current}
-                    totalPnL={m.pnl}
-                    totalPnLPercent={m.pnlPct}
-                    onDelete={onDeleteStock}
-                    onUpdate={onUpdateStock}
-                    hideOverviewRibbon={true}
-                  />
+                </button>
+                {!isCollapsed && (
+                  m.count === 0 ? (
+                    <div className="px-4 py-4 text-center text-xs text-[var(--text-tertiary)] italic bg-[var(--surface)] border border-t-0 border-[var(--border-subtle)] rounded-b-[var(--radius-small)]">
+                      No stock holdings for {m.label}
+                    </div>
+                  ) : (
+                    <PortfolioTable
+                      holdings={m.holdings}
+                      totalInvested={m.invested}
+                      totalCurrentValue={m.current}
+                      totalPnL={m.pnl}
+                      totalPnLPercent={m.pnlPct}
+                      onDelete={onDeleteStock}
+                      onUpdate={onUpdateStock}
+                      hideOverviewRibbon={true}
+                    />
+                  )
                 )}
               </div>
             );

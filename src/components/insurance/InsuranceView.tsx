@@ -102,6 +102,28 @@ export function InsuranceView({
     };
   }, [portfolios, insurances.length]);
 
+  const categoryBreakdown = useMemo(() => {
+    const allPolicies = portfolios.flatMap((p) => p.insurances || []);
+    const counts: Record<string, { count: number; sumAssured: number; label: string; color: string }> = {
+      term: { count: 0, sumAssured: 0, label: 'Term Life', color: 'text-[var(--accent-violet)] bg-[var(--accent-violet)]/10 border-[var(--accent-violet)]/30' },
+      health: { count: 0, sumAssured: 0, label: 'Health', color: 'text-[var(--accent-blue)] bg-[var(--accent-blue-soft)] border-[var(--accent-blue)]/30' },
+      life: { count: 0, sumAssured: 0, label: 'Life', color: 'text-[var(--positive)] bg-[var(--positive-soft)] border-[var(--positive)]/30' },
+      motor: { count: 0, sumAssured: 0, label: 'Motor', color: 'text-[var(--warning)] bg-[var(--warning-soft)] border-[var(--warning)]/30' },
+      other: { count: 0, sumAssured: 0, label: 'General', color: 'text-[var(--text-secondary)] bg-[var(--surface-secondary)] border-[var(--border-subtle)]' },
+    };
+
+    for (const pol of allPolicies) {
+      const type = pol.insurance_type || 'other';
+      if (!counts[type]) {
+        counts[type] = { count: 0, sumAssured: 0, label: type, color: 'text-[var(--text-secondary)] bg-[var(--surface-secondary)] border-[var(--border-subtle)]' };
+      }
+      counts[type].count++;
+      counts[type].sumAssured += Number(pol.sum_assured) || 0;
+    }
+
+    return Object.entries(counts).filter(([, d]) => d.count > 0);
+  }, [portfolios]);
+
   const {
     showModal,
     editingItem,
@@ -416,14 +438,19 @@ export function InsuranceView({
             </div>
           </div>
 
-          {/* Right: Aggregate Summary Badges */}
+          {/* Right: Aggregate Summary Badges & Add Button (CC3 Standardized Placement) */}
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
             <span className="flex items-center gap-1 text-[11px] font-semibold text-[var(--positive)] bg-[var(--positive-soft)] px-2 py-0.5 rounded-[var(--radius-small)] tnum">
               {familyInsuranceSummary.activeCount} Active Polic{familyInsuranceSummary.activeCount === 1 ? 'y' : 'ies'}
             </span>
-            <span className="text-[11px] font-medium text-[var(--text-tertiary)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-[var(--radius-small)] hidden sm:inline-block tnum">
-              Click member to filter
-            </span>
+            <button
+              type="button"
+              onClick={openAdd}
+              className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-small)] transition-colors shadow-xs ios-press cursor-pointer shrink-0"
+            >
+              <Plus size={13} />
+              Add Policy
+            </button>
           </div>
         </div>
 
@@ -537,6 +564,24 @@ export function InsuranceView({
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {/* Row 4: Coverage Categories Breakdown Strip (H3) */}
+        {categoryBreakdown.length > 0 && (
+          <div className="pt-1.5 sm:pt-2 border-t border-[var(--border-subtle)] flex items-center gap-2 flex-wrap text-xs">
+            <span className="text-[10px] uppercase font-bold text-[var(--text-tertiary)] tracking-wider mr-1">
+              Coverage Categories:
+            </span>
+            {categoryBreakdown.map(([key, cat]) => (
+              <span
+                key={key}
+                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-small)] border text-[11px] font-semibold ${cat.color}`}
+              >
+                <span>{cat.label}</span>
+                <span className="font-bold opacity-80">({cat.count} • {formatINR(cat.sumAssured)})</span>
+              </span>
+            ))}
           </div>
         )}
       </div>

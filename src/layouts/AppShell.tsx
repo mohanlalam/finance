@@ -467,7 +467,7 @@ export default function AppShell() {
         onOpenMobileAlerts={openMobileAlerts}
       />
 
-      <div className="max-w-[1720px] mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-6 space-y-3.5 sm:space-y-6 pb-[calc(env(safe-area-inset-bottom,0px)+5.5rem)] sm:pb-8">
+      <div className="max-w-[1720px] mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-6 space-y-3.5 sm:space-y-6 pb-[calc(env(safe-area-inset-bottom,0px)+7rem)] sm:pb-8">
         {isUsingCachedData && (
           <div className="flex flex-col gap-2 rounded-[var(--radius-medium)] border border-[var(--accent-blue)]/30 bg-[var(--accent-blue-soft)] px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-[var(--accent-blue)] sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2.5 min-w-0">

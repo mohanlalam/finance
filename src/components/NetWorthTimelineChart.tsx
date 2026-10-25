@@ -4,6 +4,7 @@ import { formatINR, formatPercent } from '../utils/formatters';
 import { SegmentedControl } from './ui/SegmentedControl';
 import { TrendingUp, TrendingDown, Layers, Landmark } from './icons/AppIcons';
 import { AreaChartSkeleton } from './ui/ChartSkeleton';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface NetWorthTimelineChartProps {
   history: NetWorthSnapshot[];
@@ -52,6 +53,8 @@ export default function NetWorthTimelineChart({
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [range, setRange] = useState<DateRange>('ALL');
   const [seriesMode, setSeriesMode] = useState<SeriesMode>('total');
+  const { darkMode } = useTheme();
+  const strokeColor = darkMode ? '#38bdf8' : '#0284c7';
 
   // Resize tracking
   const containerRef = useRef<HTMLDivElement>(null);
@@ -531,26 +534,26 @@ export default function NetWorthTimelineChart({
           {/* Gradients & Filters */}
           <defs>
             <linearGradient id="totalAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#387ed1" stopOpacity="0.45" />
-              <stop offset="35%" stopColor="#2563eb" stopOpacity="0.2" />
-              <stop offset="70%" stopColor="#387ed1" stopOpacity="0.05" />
-              <stop offset="100%" stopColor="#387ed1" stopOpacity="0.0" />
+              <stop offset="0%" stopColor={strokeColor} stopOpacity={darkMode ? '0.45' : '0.50'} />
+              <stop offset="35%" stopColor={darkMode ? '#2563eb' : '#0369a1'} stopOpacity={darkMode ? '0.20' : '0.25'} />
+              <stop offset="70%" stopColor={strokeColor} stopOpacity={darkMode ? '0.05' : '0.10'} />
+              <stop offset="100%" stopColor={strokeColor} stopOpacity={darkMode ? '0.0' : '0.02'} />
             </linearGradient>
             <linearGradient id="stocksAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#387ed1" stopOpacity="0.38" />
-              <stop offset="50%" stopColor="#2563eb" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#387ed1" stopOpacity="0.0" />
+              <stop offset="0%" stopColor={strokeColor} stopOpacity={darkMode ? '0.38' : '0.42'} />
+              <stop offset="50%" stopColor={darkMode ? '#2563eb' : '#0369a1'} stopOpacity={darkMode ? '0.12' : '0.18'} />
+              <stop offset="100%" stopColor={strokeColor} stopOpacity={darkMode ? '0.0' : '0.02'} />
             </linearGradient>
             <linearGradient id="fdAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.38" />
-              <stop offset="50%" stopColor="#0891b2" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#06b6d4" stopOpacity={darkMode ? '0.38' : '0.42'} />
+              <stop offset="50%" stopColor="#0891b2" stopOpacity={darkMode ? '0.12' : '0.18'} />
+              <stop offset="100%" stopColor="#06b6d4" stopOpacity={darkMode ? '0.0' : '0.02'} />
             </linearGradient>
             <filter id="lineGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#387ed1" floodOpacity="0.4" />
+              <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor={strokeColor} floodOpacity={darkMode ? '0.4' : '0.25'} />
             </filter>
             <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#387ed1" floodOpacity="0.6" />
+              <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={strokeColor} floodOpacity={darkMode ? '0.6' : '0.4'} />
             </filter>
           </defs>
 
@@ -599,7 +602,7 @@ export default function NetWorthTimelineChart({
               <path
                 d={totalPaths.linePath}
                 fill="none"
-                stroke="#387ed1"
+                stroke={strokeColor}
                 strokeWidth={2.5}
                 strokeLinecap="round"
                 strokeLinejoin="round"

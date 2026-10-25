@@ -148,7 +148,14 @@ const BiggestMovers = React.memo(function BiggestMovers({ movers }: { movers: Ho
 });
 
 const FDReminders = React.memo(function FDReminders({ alerts }: { alerts: FDMaturityAlert[] }) {
-  if (alerts.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No FDs maturing in the next 30 days</p>;
+  if (alerts.length === 0) {
+    return (
+      <div className="flex items-center gap-2 py-2 px-2.5 text-xs text-[var(--text-secondary)] bg-[var(--surface-secondary)]/50 rounded-[var(--radius-small)] border border-[var(--border-subtle)]">
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--positive)] shrink-0" />
+        <span>No FDs maturing in next 30 days • All deposits healthy</span>
+      </div>
+    );
+  }
   return (
     <div className="space-y-2">
       {alerts.map((a) => {
@@ -173,7 +180,14 @@ const FDReminders = React.memo(function FDReminders({ alerts }: { alerts: FDMatu
 });
 
 const InsuranceReminders = React.memo(function InsuranceReminders({ alerts }: { alerts: InsuranceRenewalAlert[] }) {
-  if (alerts.length === 0) return <p className="text-xs text-[var(--text-tertiary)]">No renewals in next 60 days</p>;
+  if (alerts.length === 0) {
+    return (
+      <div className="flex items-center gap-2 py-2 px-2.5 text-xs text-[var(--text-secondary)] bg-[var(--surface-secondary)]/50 rounded-[var(--radius-small)] border border-[var(--border-subtle)]">
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--positive)] shrink-0" />
+        <span>No renewals due in next 60 days • Coverage active</span>
+      </div>
+    );
+  }
   return (
     <div className="space-y-2">
       {alerts.map((a) => {

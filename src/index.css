@@ -22,10 +22,10 @@
   --accent-violet: #8b5cf6;
 
   --positive: #15803d;
-  --positive-soft: rgba(16, 185, 129, 0.1);
+  --positive-soft: rgba(21, 128, 61, 0.14);
 
   --negative: #e11d48;
-  --negative-soft: rgba(225, 29, 72, 0.1);
+  --negative-soft: rgba(225, 29, 72, 0.12);
 
   --warning: #b45309;
   --warning-soft: rgba(245, 158, 11, 0.1);
@@ -273,7 +273,17 @@
   opacity: 0.9;
 }
 
-/* 🧭 Desktop Sidebar Active Navigation */
+/* 🧭 Desktop Sidebar Active Navigation & Rail */
+.desktop-sidebar-nav,
+nav[aria-label="Sidebar navigation"] {
+  border-right: 1px solid var(--border-subtle);
+}
+:root:not(.dark) .desktop-sidebar-nav,
+:root:not(.dark) nav[aria-label="Sidebar navigation"] {
+  border-right: 1px solid rgba(203, 213, 225, 0.85);
+  box-shadow: 2px 0 10px rgba(15, 23, 42, 0.04);
+}
+
 .sidebar-item-active {
   background: var(--accent-blue-soft) !important;
   color: var(--accent-blue) !important;
@@ -388,13 +398,43 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 28px;
+  width: 32px;
   pointer-events: none;
-  background: linear-gradient(to right, transparent, var(--surface));
+  background: linear-gradient(to right, transparent, var(--app-background));
   border-top-right-radius: inherit;
   border-bottom-right-radius: inherit;
   opacity: 0.95;
   z-index: 5;
+}
+@media (min-width: 640px) {
+  .scroll-fade-container::after {
+    display: none;
+  }
+}
+
+/* 🏷️ High-Contrast P&L Semantic Badges (LM2 & Dark Mode) */
+.badge-gain {
+  background-color: hsl(145 60% 92%);
+  color: #15803d;
+}
+.badge-loss {
+  background-color: hsl(0 80% 94%);
+  color: #b91c1c;
+}
+.dark .badge-gain {
+  background-color: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+}
+.dark .badge-loss {
+  background-color: rgba(244, 63, 94, 0.18);
+  color: #f43f5e;
+}
+
+/* ♿ Universal Keyboard Focus-Visible Rings (A2) */
+:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+  border-radius: var(--radius-small);
 }
 
 /* Wide-Tracked Cyber-Zen Typography */

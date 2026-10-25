@@ -70,7 +70,7 @@ export const MobileAssetRegistry: React.FC<MobileAssetRegistryProps> = memo(({
   const cappedMetrics = secondaryMetrics ? secondaryMetrics.slice(0, 2) : [];
 
   return (
-    <div className="space-y-3 md:hidden">
+    <div className="space-y-3 md:hidden pb-28">
       {/* ── 1. Hero Primary Question Card ── */}
       <div className="hero-networth-card rounded-[var(--radius-large)] p-3.5 space-y-2.5 shadow-xs">
         {/* Row 1: Title & Badge */}

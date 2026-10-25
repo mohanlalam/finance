@@ -151,6 +151,7 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
                   </div>
                   <button
                     type="button"
+                    aria-label={`Harvest tax loss for ${opp.holding.ticker}`}
                     className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-[var(--radius-small)] bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 shadow-xs ios-press cursor-pointer shrink-0"
                   >
                     <span>Harvest</span>
@@ -404,6 +405,7 @@ export default function TaxHarvestingView({ portfolio, portfolios }: TaxHarvesti
                         <td className="px-4 py-3 text-center">
                           <button
                             type="button"
+                            aria-label={`Harvest tax loss for ${opp.holding.ticker}`}
                             className="inline-flex items-center gap-1 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] px-3 py-1 rounded-[var(--radius-small)] shadow-xs transition-all cursor-pointer select-none ios-press"
                           >
                             <TrendingDown size={12} />

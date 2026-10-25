@@ -13,7 +13,7 @@ import { getFDInvestedAmount, getFDEffectiveValue } from '../../domains/assets/f
 import { formatINR } from '../../utils/formatters';
 import { sortPortfolios } from '../../domains/portfolio/calculations/portfolioOrdering';
 import { getFamilyMemberConfig } from '../../utils/familyMemberConfig';
-import { Landmark, Plus, ChevronRight, Trash2 } from '../icons/AppIcons';
+import { Landmark, Plus, ChevronRight, ChevronDown, Trash2 } from '../icons/AppIcons';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import MobileAssetRegistry from '../ui/MobileAssetRegistry';
 import AppBadge from '../ui/AppBadge';
@@ -61,6 +61,19 @@ export function FixedDepositView({
   const { addToast } = useToastActions();
   const { portfolios } = usePortfolioEntities();
   const [selectedMember, setSelectedMember] = useState<string>(portfolioName || 'all');
+  const [collapsedMembers, setCollapsedMembers] = useState<Record<string, boolean>>(() => {
+    return {
+      padmavathi: true,
+      sai_laxmi: true,
+    };
+  });
+
+  const toggleMemberCollapse = (name: string) => {
+    setCollapsedMembers((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  };
 
   useEffect(() => {
     setSelectedMember(portfolioName || 'all');
@@ -606,9 +619,15 @@ export function FixedDepositView({
           <div className="divide-y divide-[var(--border-subtle)]">
             {displayDepositsByMember.map((item) => {
               const config = getFamilyMemberConfig(item.portfolio.name);
+              const isCollapsed = Boolean(collapsedMembers[item.portfolio.name]);
               return (
                 <div key={item.portfolio.name} className="border-b border-[var(--border-subtle)] last:border-b-0">
-                  <div className="px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/60 flex items-center justify-between border-b border-[var(--border-subtle)]">
+                  <button
+                    type="button"
+                    onClick={() => toggleMemberCollapse(item.portfolio.name)}
+                    aria-expanded={!isCollapsed}
+                    className="w-full px-3.5 sm:px-4 py-2 bg-[var(--surface-secondary)]/60 hover:bg-[var(--surface-secondary)] flex items-center justify-between border-b border-[var(--border-subtle)] transition-colors cursor-pointer text-left select-none ios-press"
+                  >
                     <div className="flex items-center gap-2">
                       <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${config.bg} ${config.text}`}>
                         {config.icon}
@@ -617,28 +636,35 @@ export function FixedDepositView({
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
                         {item.deposits.length}
                       </span>
+                      {isCollapsed ? (
+                        <ChevronRight size={13} className="text-[var(--text-tertiary)] ml-1 shrink-0" />
+                      ) : (
+                        <ChevronDown size={13} className="text-[var(--text-tertiary)] ml-1 shrink-0" />
+                      )}
                     </div>
                     <span className="text-xs font-bold text-[var(--accent-blue)] tnum">
                       {formatINR(item.principal)} {item.current > item.principal ? `(Mat: ${formatINR(item.current)})` : ''}
                     </span>
-                  </div>
+                  </button>
 
-                  {item.deposits.length === 0 ? (
-                    <div className="px-4 py-3 text-xs text-[var(--text-tertiary)] italic">
-                      No fixed deposits recorded for {item.portfolio.label}
-                    </div>
-                  ) : (
-                    <div className="divide-y divide-[var(--border-subtle)]">
-                      {item.deposits.map((deposit) => (
-                        <DepositDetailsCard
-                          key={deposit.id}
-                          deposit={deposit}
-                          documents={documents}
-                          onOpenEdit={openEdit}
-                          onConfirmDelete={setConfirmDeleteItem}
-                        />
-                      ))}
-                    </div>
+                  {!isCollapsed && (
+                    item.deposits.length === 0 ? (
+                      <div className="px-4 py-3 text-xs text-[var(--text-tertiary)] italic">
+                        No fixed deposits recorded for {item.portfolio.label}
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-[var(--border-subtle)]">
+                        {item.deposits.map((deposit) => (
+                          <DepositDetailsCard
+                            key={deposit.id}
+                            deposit={deposit}
+                            documents={documents}
+                            onOpenEdit={openEdit}
+                            onConfirmDelete={setConfirmDeleteItem}
+                          />
+                        ))}
+                      </div>
+                    )
                   )}
                 </div>
               );

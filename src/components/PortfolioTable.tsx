@@ -139,7 +139,7 @@ const MobileStockRow = React.memo(function MobileStockRow({
           {h.ticker.slice(0, 2)}
         </div>
         <div className="min-w-0 flex-1">
-          <h4 className="text-sm font-bold text-[var(--text-primary)] tracking-tight truncate leading-tight">
+          <h4 className="text-sm font-bold text-[var(--text-primary)] tracking-tight line-clamp-2 leading-tight">
             {h.stockName}
           </h4>
           <p className="text-xs text-[var(--text-tertiary)] font-medium mt-0.5 truncate">
@@ -161,13 +161,15 @@ const MobileStockRow = React.memo(function MobileStockRow({
               '••••••'
             ) : (
               <>
+                <span className="text-[10px] mr-1" aria-hidden="true">{isTotalPositive ? '▲' : '▼'}</span>
                 {isTotalPositive ? '+' : ''}{formatINR(h.unrealizedPnL)} ({formatPercent(h.pnlPercent)})
               </>
             )}
           </span>
           <span className="text-[11px] text-[var(--text-tertiary)] font-medium tnum flex items-center gap-1 mt-0.5">
             <span>Day</span>
-            <span className={`font-semibold ${isTodayPositive ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+            <span className={`font-semibold flex items-center gap-0.5 ${isTodayPositive ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
+              <span className="text-[9px]" aria-hidden="true">{isTodayPositive ? '▲' : '▼'}</span>
               {formatPercent(h.todayPnLPercent ?? 0)}
             </span>
           </span>
@@ -576,18 +578,28 @@ export default React.memo(function PortfolioTable({
                     <td className="px-3 py-2.5 text-[var(--text-secondary)] text-right tnum">{renderValue(h.amountInvested)}</td>
                     
                     <td className={`px-3 py-2.5 font-bold text-right tnum ${h.unrealizedPnL >= 0 ? 'neon-glow-positive' : 'neon-glow-negative'}`}>
-                      {isBalancesHidden ? '••••••' : <>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</>}
+                      {isBalancesHidden ? '••••••' : (
+                        <span className="inline-flex items-center gap-0.5">
+                          <span className="text-[9px]" aria-hidden="true">{h.unrealizedPnL >= 0 ? '▲' : '▼'}</span>
+                          <span>{h.unrealizedPnL >= 0 ? '+' : ''}{formatINR(h.unrealizedPnL)}</span>
+                        </span>
+                      )}
                     </td>
 
                     <td className="px-3 py-2.5 text-right">
-                      <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-[var(--radius-pill)] tnum ${h.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
-                        <span className="text-[9px]" aria-hidden="true">{h.pnlPercent >= 0 ? '↗' : '↘'}</span>
-                        {isBalancesHidden ? '••••••' : formatPercent(h.pnlPercent)}
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-[var(--radius-pill)] tnum ${h.pnlPercent >= 0 ? 'bg-[var(--positive-soft)] text-[var(--positive)]' : 'bg-[var(--negative-soft)] text-[var(--negative)]'}`}>
+                        <span className="text-[9px]" aria-hidden="true">{h.pnlPercent >= 0 ? '▲' : '▼'}</span>
+                        <span>{isBalancesHidden ? '••••••' : formatPercent(h.pnlPercent)}</span>
                       </span>
                     </td>
 
                     <td className={`px-3 py-2.5 font-bold text-right tnum ${h.todayPnLPercent >= 0 ? 'neon-glow-positive' : 'neon-glow-negative'}`}>
-                      {isBalancesHidden ? '••••••' : formatPercent(h.todayPnLPercent)}
+                      {isBalancesHidden ? '••••••' : (
+                        <span className="inline-flex items-center gap-0.5">
+                          <span className="text-[9px]" aria-hidden="true">{h.todayPnLPercent >= 0 ? '▲' : '▼'}</span>
+                          <span>{formatPercent(h.todayPnLPercent)}</span>
+                        </span>
+                      )}
                     </td>
 
                     <td className="px-3 py-2.5 text-[var(--text-tertiary)] text-right tnum">

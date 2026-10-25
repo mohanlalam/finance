@@ -36,7 +36,7 @@ export default function DesktopSidebar({
     }`;
 
   return (
-    <nav aria-label="Sidebar navigation" className="hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-60 self-start sticky top-20 max-h-[calc(100vh-5.5rem)] overflow-y-auto">
+    <nav aria-label="Sidebar navigation" className="desktop-sidebar-nav hidden md:flex flex-col border-r border-[var(--border-subtle)] pr-4 mr-4 shrink-0 w-60 self-start sticky top-20 max-h-[calc(100vh-5.5rem)] overflow-y-auto">
       {/* AI Smart Import Button - Sticky at top */}
       {onOpenSmartImport && (
         <div className="sticky top-0 bg-[var(--app-background)] z-10 pb-3 pt-0.5">

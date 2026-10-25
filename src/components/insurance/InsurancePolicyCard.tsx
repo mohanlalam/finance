@@ -150,7 +150,7 @@ export const InsurancePolicyCard = React.memo(function InsurancePolicyCard({
             <button
               type="button"
               onClick={() => onOpenEdit(policy)}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--radius-small)] bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] shadow-xs cursor-pointer ios-press transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--radius-small)] bg-[var(--warning)] hover:brightness-110 text-white font-bold text-[11px] shadow-xs cursor-pointer ios-press transition-colors"
               title="Pay or renew policy premium"
             >
               <span>Pay Premium</span>
