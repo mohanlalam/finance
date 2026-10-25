@@ -942,6 +942,64 @@ export function ArrowDown({ size = 24, className = '' }: IconProps) {
   );
 }
 
+// ─── Filled & Specialized Bottom Navigation Glyphs (iOS / Antigravity Style) ──
+
+export function HomeFilled({ size = 22, className = '' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className || undefined}>
+      <path d="M12 2.09l-9 7.875A1 1 0 0 0 4 11.5V20a2 2 0 0 0 2 2h4a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h4a2 2 0 0 0 2-2v-8.5a1 1 0 0 0-1-1.525z" />
+    </svg>
+  );
+}
+
+export function StocksFilled({ size = 22, className = '' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={className || undefined}>
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+      <polyline points="17 6 23 6 23 12" />
+    </svg>
+  );
+}
+
+export function WalletFilled({ size = 22, className = '' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className || undefined}>
+      <path d="M21 7H4a2 2 0 0 1-2-2 2 2 0 0 1 2-2h17a1 1 0 0 1 0 2H4a.5.5 0 0 0 0 1h17a2 2 0 0 1 2 2v10a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V9.2a3.02 3.02 0 0 0 1 .2H21a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-4a2 2 0 0 1-2-2 2 2 0 0 1 2-2h4a1 1 0 0 0 0-2h-4a4 4 0 0 0-4 4 4 4 0 0 0 4 4h4a3 3 0 0 0 3-3V9a2 2 0 0 0-2-2z" />
+    </svg>
+  );
+}
+
+export function LandmarkFilled({ size = 22, className = '' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className || undefined}>
+      <path d="M12 2L2 7h20L12 2zM4 9v9h3V9H4zm5 0v9h3V9H9zm5 0v9h3V9h-3zm5 0v9h3V9h-3zM2 20v2h20v-2H2z" />
+    </svg>
+  );
+}
+
+export function MoreGridFilled({ size = 20, className = '' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true" className={className || undefined}>
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    </svg>
+  );
+}
+
+export function MoreGridOutline({ size = 20, className = '' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={className || undefined}>
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    </svg>
+  );
+}
+
+
 
 
 

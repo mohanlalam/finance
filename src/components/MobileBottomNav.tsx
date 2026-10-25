@@ -12,6 +12,12 @@ import {
   ChevronRight,
   X,
   Sparkles,
+  HomeFilled,
+  StocksFilled,
+  WalletFilled,
+  LandmarkFilled,
+  MoreGridFilled,
+  MoreGridOutline,
 } from './icons/AppIcons';
 import { triggerHaptic } from '../utils/haptics';
 import { lockScroll, unlockScroll } from '../utils/scrollLock';
@@ -26,14 +32,25 @@ interface MobileBottomNavProps {
   onDrawerStateChange?: (isOpen: boolean) => void;
 }
 
-/* ── More drawer tab definitions ─────────────────────────────────────────── */
+/* ── UI Dimensions & Threshold Constants ───────────────────────────────────── */
+const NAV_CONSTANTS = {
+  MAX_NAV_WIDTH: 420,
+  NAV_ROW_HEIGHT: 68,
+  TAB_PILL_MAX_WIDTH: 72,
+  TAB_PILL_HEIGHT: 60,
+  SWIPE_DISMISS_THRESHOLD: 80,
+  CLOSE_ANIMATION_MS: 360,
+  SCROLL_COLLAPSE_THRESHOLD: 20,
+};
+
+/* ── More drawer tab definitions with Design Token Custom Properties ───────── */
 const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.ReactNode; color: string }[] = [
-  { id: 'rd',          label: 'Recurring Deposits',  subtext: 'Quarterly compounding RD accounts',   icon: <Clock size={18} aria-hidden="true" />,      color: '#c2410c' },
-  { id: 'gold',        label: 'Gold Holdings',        subtext: 'Physical & digital gold bullion',     icon: <Coins size={18} aria-hidden="true" />,      color: '#facc15' },
-  { id: 'real_estate', label: 'Real Estate',          subtext: 'Properties, plots & rental yields',  icon: <Building2 size={18} aria-hidden="true" />,  color: '#16a34a' },
-  { id: 'insurance',   label: 'Insurance Policies',   subtext: 'Life, health & vehicle policies',    icon: <Shield size={18} aria-hidden="true" />,     color: '#e11d48' },
-  { id: 'documents',   label: 'Document Vault',       subtext: 'Digital receipts & policy bonds',    icon: <FolderOpen size={18} aria-hidden="true" />, color: '#0284c7' },
-  { id: 'tax',         label: 'Tax Harvesting',       subtext: 'LTCG / STCG tax optimisation',       icon: <TrendingUp size={18} aria-hidden="true" />, color: '#10b981' },
+  { id: 'rd',          label: 'Recurring Deposits',  subtext: 'Quarterly compounding RD accounts',   icon: <Clock size={18} aria-hidden="true" />,      color: 'var(--asset-rd)' },
+  { id: 'gold',        label: 'Gold Holdings',        subtext: 'Physical & digital gold bullion',     icon: <Coins size={18} aria-hidden="true" />,      color: 'var(--asset-gold)' },
+  { id: 'real_estate', label: 'Real Estate',          subtext: 'Properties, plots & rental yields',  icon: <Building2 size={18} aria-hidden="true" />,  color: 'var(--asset-realestate)' },
+  { id: 'insurance',   label: 'Insurance Policies',   subtext: 'Life, health & vehicle policies',    icon: <Shield size={18} aria-hidden="true" />,     color: 'var(--asset-insurance)' },
+  { id: 'documents',   label: 'Document Vault',       subtext: 'Digital receipts & policy bonds',    icon: <FolderOpen size={18} aria-hidden="true" />, color: 'var(--accent-blue)' },
+  { id: 'tax',         label: 'Tax Harvesting',       subtext: 'LTCG / STCG tax optimisation',       icon: <TrendingUp size={18} aria-hidden="true" />, color: 'var(--positive)' },
 ];
 
 /* ── Main tab list — WhatsApp iOS style ──────────────────────────────────── */
@@ -44,68 +61,11 @@ const mainTabs: { id: AssetTab; label: string; accent: string }[] = [
   { id: 'fd',     label: 'Deposits', accent: 'var(--asset-fd)' },
 ];
 
-/* ── Filled glyphs for active states (Apple SF Symbols style) ─────────────── */
-function HomeFilled({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12 2.09l-9 7.875A1 1 0 0 0 4 11.5V20a2 2 0 0 0 2 2h4a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h4a2 2 0 0 0 2-2v-8.5a1 1 0 0 0-1-1.525z" />
-    </svg>
-  );
-}
-
-function StocksFilled({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-      <polyline points="17 6 23 6 23 12" />
-    </svg>
-  );
-}
-
-function WalletFilled({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M21 7H4a2 2 0 0 1-2-2 2 2 0 0 1 2-2h17a1 1 0 0 1 0 2H4a.5.5 0 0 0 0 1h17a2 2 0 0 1 2 2v10a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V9.2a3.02 3.02 0 0 0 1 .2H21a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-4a2 2 0 0 1-2-2 2 2 0 0 1 2-2h4a1 1 0 0 0 0-2h-4a4 4 0 0 0-4 4 4 4 0 0 0 4 4h4a3 3 0 0 0 3-3V9a2 2 0 0 0-2-2z" />
-    </svg>
-  );
-}
-
-function LandmarkFilled({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12 2L2 7h20L12 2zM4 9v9h3V9H4zm5 0v9h3V9H9zm5 0v9h3V9h-3zm5 0v9h3V9h-3zM2 20v2h20v-2H2z" />
-    </svg>
-  );
-}
-
-/* ── More Grid Icons for More Tab ────────────────────────────────────────── */
-function MoreGridFilled({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
-      <rect x="3" y="3" width="7" height="7" rx="1.5" />
-      <rect x="14" y="3" width="7" height="7" rx="1.5" />
-      <rect x="14" y="14" width="7" height="7" rx="1.5" />
-      <rect x="3" y="14" width="7" height="7" rx="1.5" />
-    </svg>
-  );
-}
-
-function MoreGridOutline({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3" y="3" width="7" height="7" rx="1.5" />
-      <rect x="14" y="3" width="7" height="7" rx="1.5" />
-      <rect x="14" y="14" width="7" height="7" rx="1.5" />
-      <rect x="3" y="14" width="7" height="7" rx="1.5" />
-    </svg>
-  );
-}
-
 /* ── Individual tab button — Asset-Colored Pill wrapping BOTH Icon & Label ── */
 function TabBtn({
   label, isActive, badge, onClick, icon, activeIcon, accent,
 }: {
-  id: AssetTab; label: string; isActive: boolean;
+  label: string; isActive: boolean;
   badge?: number; onClick: () => void;
   icon: React.ReactNode; activeIcon: React.ReactNode;
   accent: string;
@@ -125,7 +85,7 @@ function TabBtn({
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
-        minHeight: 60,
+        minHeight: NAV_CONSTANTS.TAB_PILL_HEIGHT,
         background: 'none',
         border: 'none',
         cursor: 'pointer',
@@ -140,8 +100,8 @@ function TabBtn({
       <span
         style={{
           width: '100%',
-          maxWidth: 72,
-          height: 60,
+          maxWidth: NAV_CONSTANTS.TAB_PILL_MAX_WIDTH,
+          height: NAV_CONSTANTS.TAB_PILL_HEIGHT,
           borderRadius: 24,
           display: 'flex',
           flexDirection: 'column',
@@ -199,7 +159,7 @@ function TabBtn({
                 minWidth: 20,
                 height: 20,
                 borderRadius: 999,
-                background: '#ef4444',
+                background: 'var(--negative)',
                 color: '#fff',
                 fontSize: 11,
                 fontWeight: 800,
@@ -208,7 +168,7 @@ function TabBtn({
                 justifyContent: 'center',
                 padding: '0 5px',
                 border: '2px solid var(--surface-solid, #fff)',
-                boxShadow: '0 4px 10px rgba(239,68,68,0.28)',
+                boxShadow: '0 4px 10px color-mix(in srgb, var(--negative) 32%, transparent)',
               }}
             >
               {badge > 9 ? '9+' : badge}
@@ -267,7 +227,7 @@ function MoreTabBtn({
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
-        minHeight: 60,
+        minHeight: NAV_CONSTANTS.TAB_PILL_HEIGHT,
         background: 'none',
         border: 'none',
         cursor: 'pointer',
@@ -282,8 +242,8 @@ function MoreTabBtn({
       <span
         style={{
           width: '100%',
-          maxWidth: 72,
-          height: 60,
+          maxWidth: NAV_CONSTANTS.TAB_PILL_MAX_WIDTH,
+          height: NAV_CONSTANTS.TAB_PILL_HEIGHT,
           borderRadius: 24,
           display: 'flex',
           flexDirection: 'column',
@@ -365,6 +325,12 @@ function MobileBottomNav({
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const prevFocusedElementRef = useRef<HTMLElement | null>(null);
 
+  // Keep ref synchronized with current callback prop to prevent stale closures or effect thrashing
+  const onDrawerStateChangeRef = useRef(onDrawerStateChange);
+  useEffect(() => {
+    onDrawerStateChangeRef.current = onDrawerStateChange;
+  }, [onDrawerStateChange]);
+
   useEffect(() => { isDrawerOpenRef.current = isDrawerOpen; }, [isDrawerOpen]);
 
   // Scroll collapse behavior: resilient across window, short content, and inner scroll containers
@@ -375,7 +341,7 @@ function MobileBottomNav({
     }
 
     let ticking = false;
-    const threshold = 20; // 20px prevents dock flicker on slow scroll momentum
+    const threshold = NAV_CONSTANTS.SCROLL_COLLAPSE_THRESHOLD;
 
     const handleScroll = (e?: Event) => {
       if (!ticking) {
@@ -457,7 +423,7 @@ function MobileBottomNav({
     closeTimerRef.current = setTimeout(() => {
       setIsDrawerOpen(false);
       closeTimerRef.current = null;
-    }, 360);
+    }, NAV_CONSTANTS.CLOSE_ANIMATION_MS);
   }, []);
 
   // Cleanup close timer on unmount
@@ -471,12 +437,12 @@ function MobileBottomNav({
 
   // Scroll lock + parent notify — use shared reference-counted lock
   useEffect(() => {
-    onDrawerStateChange?.(isDrawerOpen);
+    onDrawerStateChangeRef.current?.(isDrawerOpen);
     if (isDrawerOpen) {
       lockScroll();
       return () => unlockScroll();
     }
-  }, [isDrawerOpen, onDrawerStateChange]);
+  }, [isDrawerOpen]);
 
   // Focus management: autofocus Close button on sheet open & restore previous focus on close
   useEffect(() => {
@@ -494,10 +460,15 @@ function MobileBottomNav({
     }
   }, [isDrawerOpen]);
 
-  // Focus trap inside More sheet
+  // Unified keyboard navigation: Escape to dismiss & tab focus trap inside More sheet
   useEffect(() => {
     if (!isDrawerOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeDrawer();
+        return;
+      }
+
       if (e.key === 'Tab') {
         if (!sheetRef.current) return;
         const focusableElements = sheetRef.current.querySelectorAll<HTMLElement>(
@@ -521,7 +492,7 @@ function MobileBottomNav({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDrawerOpen]);
+  }, [isDrawerOpen, closeDrawer]);
 
   // Close on navigation (only when activeAsset actually changes)
   const prevAssetRef = useRef(activeAsset);
@@ -533,13 +504,6 @@ function MobileBottomNav({
       }
     }
   }, [activeAsset, closeDrawer]);
-
-  // Escape key
-  useEffect(() => {
-    const fn = (e: KeyboardEvent) => { if (e.key === 'Escape' && isDrawerOpenRef.current) closeDrawer(); };
-    window.addEventListener('keydown', fn);
-    return () => window.removeEventListener('keydown', fn);
-  }, [closeDrawer]);
 
   const handleMoreTabClick = useCallback((tabId: typeof moreTabs[number]['id']) => {
     triggerHaptic('selection');
@@ -566,8 +530,8 @@ function MobileBottomNav({
           onClick={closeDrawer}
           className="md:hidden"
           style={{
-            position: 'fixed', inset: 0, zIndex: 300,
-            background: 'rgba(0,0,0,0.5)',
+            position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)',
+            background: 'var(--backdrop-overlay, rgba(0,0,0,0.5))',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
             opacity: sheetIn ? 1 : 0,
@@ -586,7 +550,7 @@ function MobileBottomNav({
           aria-label="All asset categories"
           className="md:hidden"
           style={{
-            position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 310,
+            position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 'var(--z-modal)',
             background: 'color-mix(in srgb, var(--surface-solid) 80%, transparent)',
             backdropFilter: 'blur(32px) saturate(1.8)',
             WebkitBackdropFilter: 'blur(32px) saturate(1.8)',
@@ -595,7 +559,6 @@ function MobileBottomNav({
             boxShadow: '0 -12px 48px rgba(0,0,0,0.24)',
             transform: sheetIn ? 'translateY(0)' : 'translateY(105%)',
             transition: 'transform 0.36s cubic-bezier(0.16,1,0.3,1)',
-            willChange: 'transform',
             paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)',
             maxHeight: '88vh',
             display: 'flex', flexDirection: 'column',
@@ -631,20 +594,22 @@ function MobileBottomNav({
                 sheetRef.current.style.transform = '';
                 sheetRef.current.style.transition = '';
               }
-              // Velocity-based dismiss: > 80px swipe down closes the sheet
-              if (delta > 80) {
+              // Velocity-based dismiss: threshold swipe down closes the sheet
+              if (delta > NAV_CONSTANTS.SWIPE_DISMISS_THRESHOLD) {
                 triggerHaptic('selection');
                 closeDrawer();
               }
             }}
             style={{
-              width: 36, height: 4, borderRadius: 999,
-              background: 'color-mix(in srgb, var(--text-primary) 18%, transparent)',
-              margin: '10px auto 0', flexShrink: 0,
-              cursor: 'grab', touchAction: 'none',
+              margin: '10px auto 0',
+              flexShrink: 0,
+              cursor: 'grab',
+              touchAction: 'none',
               padding: '12px 40px', // Extend hit area vertically
               boxSizing: 'content-box',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
             <div style={{ width: 36, height: 4, borderRadius: 999, background: 'color-mix(in srgb, var(--text-primary) 18%, transparent)' }} />
@@ -796,7 +761,7 @@ function MobileBottomNav({
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: 50,
+          zIndex: 'var(--z-dropdown)',
           paddingBottom: 'max(calc(env(safe-area-inset-bottom, 0px) + 12px), 16px)',
           paddingLeft: 12,
           paddingRight: 12,
@@ -809,13 +774,13 @@ function MobileBottomNav({
       >
         <div
           style={{
-            maxWidth: 420,
+            maxWidth: NAV_CONSTANTS.MAX_NAV_WIDTH,
             margin: '0 auto',
             pointerEvents: 'auto',
             background: 'var(--nav-glass-bg)',
             backdropFilter: 'blur(30px) saturate(1.65)',
             WebkitBackdropFilter: 'blur(30px) saturate(1.65)',
-            borderRadius: 9999,
+            borderRadius: 'var(--radius-pill)',
             border: '0.5px solid var(--nav-glass-border)',
             boxShadow: 'var(--nav-glass-shadow)',
             userSelect: 'none',
@@ -828,13 +793,12 @@ function MobileBottomNav({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              height: 68,
+              height: NAV_CONSTANTS.NAV_ROW_HEIGHT,
             }}
           >
             {mainTabs.map((tab) => (
               <TabBtn
                 key={tab.id}
-                id={tab.id}
                 label={tab.label}
                 accent={tab.accent}
                 isActive={activeAsset === tab.id}
