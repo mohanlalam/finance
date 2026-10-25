@@ -62,13 +62,13 @@ export const GoldHoldingCard = React.memo(function GoldHoldingCard({
   return (
     <div className="p-3.5 sm:p-4 bg-[var(--surface-gold-soft)] dark:bg-transparent hover:bg-amber-100/50 dark:hover:bg-[var(--surface-secondary)]/50 transition-colors mobile-asset-card">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2.5">
-        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--warning-soft)] border border-[var(--warning)]/30 flex items-center justify-center text-[var(--warning)] shrink-0">
+        <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-[var(--radius-small)] bg-[var(--warning-soft)] border border-[var(--warning)]/30 flex items-center justify-center text-[var(--warning)] shrink-0 mt-0.5 sm:mt-0">
             <Coins size={16} />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="font-bold text-[var(--text-primary)] text-sm truncate">{holding.item_name}</h4>
+              <h4 className="font-bold text-[var(--text-primary)] text-sm line-clamp-2 leading-tight break-words" title={holding.item_name}>{holding.item_name}</h4>
               <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-[var(--radius-pill)] bg-[var(--warning-soft)] text-[var(--warning)] shrink-0">
                 {holding.purity}
               </span>

@@ -130,7 +130,7 @@ export default function FloatingAddMenu({
   };
 
   return (
-    <div className="md:hidden">
+    <div className="md:hidden fab-container">
       {/* Backdrop for Bottom Sheet Modal */}
       {isOpen && (
         <div

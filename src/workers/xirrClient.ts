@@ -1,8 +1,29 @@
 import { calculateXIRR, CashFlow } from '../domains/performance/calculations/xirr';
+import { logger } from '../infrastructure/logging/logger';
 
 let workerInstance: Worker | null = null;
 let taskIdCounter = 0;
 const pendingTasks = new Map<string, { resolve: (rate: number) => void; reject: (err: Error) => void }>();
+
+export const FRAME_BUDGET_MS = 16.0; // 60 FPS frame duration threshold
+
+/**
+ * Executes calculateXIRR synchronously while logging frame-drop telemetry
+ * if calculation duration exceeds the 16.0ms budget.
+ */
+export function calculateXIRRSyncWithTelemetry(cashflows: CashFlow[], label = 'sync-fallback'): number {
+  const start = typeof performance !== 'undefined' ? performance.now() : 0;
+  const rate = calculateXIRR(cashflows);
+  if (start > 0 && typeof performance !== 'undefined') {
+    const elapsed = performance.now() - start;
+    if (elapsed > FRAME_BUDGET_MS) {
+      logger.warn(
+        `[XIRR Telemetry] Main-thread calculation exceeded ${FRAME_BUDGET_MS}ms budget (${label}): ${elapsed.toFixed(2)}ms for ${cashflows.length} cashflows`
+      );
+    }
+  }
+  return rate;
+}
 
 function getWorker(): Worker | null {
   if (typeof window === 'undefined' || typeof Worker === 'undefined') {
@@ -46,7 +67,7 @@ export async function calculateXIRRAsync(cashflows: CashFlow[]): Promise<number>
   const worker = getWorker();
   if (!worker) {
     // Synchronous fallback in non-worker environments (JSDOM/Node/unsupported browsers)
-    return calculateXIRR(cashflows);
+    return calculateXIRRSyncWithTelemetry(cashflows, 'no-worker-env');
   }
 
   return new Promise<number>((resolve) => {
@@ -55,7 +76,8 @@ export async function calculateXIRRAsync(cashflows: CashFlow[]): Promise<number>
       if (pendingTasks.has(taskId)) {
         pendingTasks.delete(taskId);
         // Fallback to synchronous calculation on timeout
-        resolve(calculateXIRR(cashflows));
+        logger.warn(`[XIRR Worker] Worker calculation timed out for task ${taskId}; using sync fallback`);
+        resolve(calculateXIRRSyncWithTelemetry(cashflows, 'worker-timeout'));
       }
     }, 2000);
 
@@ -67,8 +89,8 @@ export async function calculateXIRRAsync(cashflows: CashFlow[]): Promise<number>
       reject: (err) => {
         clearTimeout(timeout);
         // Fallback to sync on worker reject
-        console.warn('[xirr worker fallback]', err);
-        resolve(calculateXIRR(cashflows));
+        logger.warn(`[XIRR Worker] Worker rejected task ${taskId}:`, { error: String(err) });
+        resolve(calculateXIRRSyncWithTelemetry(cashflows, 'worker-rejected'));
       },
     });
 

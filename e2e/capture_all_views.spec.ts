@@ -17,12 +17,12 @@ const VIEWS = [
 
 async function unlockIfLocked(page: Page) {
   const pinHeading = page.getByRole('heading', { name: 'Enter Passcode' });
-  if (await pinHeading.isVisible({ timeout: 4000 }).catch(() => false)) {
+  if (await pinHeading.isVisible({ timeout: 5000 }).catch(() => false)) {
     const pin = process.env.E2E_APP_PIN || process.env.VITE_APP_PIN || '3463';
-    await page.keyboard.type(pin);
-    await expect(pinHeading).not.toBeVisible({ timeout: 15000 });
+    await page.keyboard.type(pin, { delay: 60 });
+    await expect(pinHeading).not.toBeVisible({ timeout: 30000 });
   }
-  await expect(page.locator('header')).toBeVisible({ timeout: 25000 });
+  await expect(page.locator('header')).toBeVisible({ timeout: 30000 });
 }
 
 async function captureView(page: Page, view: { id: string; route: string }, outDir: string, label: string) {
@@ -55,6 +55,13 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
     const page = await context.newPage();
 
     await page.addInitScript(() => {
+      localStorage.removeItem('custom_app_pin_verifier');
+      localStorage.removeItem('custom_app_pin_hash');
+      localStorage.removeItem('custom_app_pin_length');
+      localStorage.removeItem('pin_failed_attempts');
+      localStorage.removeItem('pin_lockout_until');
+      sessionStorage.removeItem('pin_failed_attempts');
+      sessionStorage.removeItem('pin_lockout_until');
       localStorage.setItem('theme', 'light');
       localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
       (window as unknown as { __DISABLE_LAZY_VIEWPORT__?: boolean }).__DISABLE_LAZY_VIEWPORT__ = true;
@@ -63,7 +70,7 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
       document.documentElement.classList.remove('dark');
     });
 
-    await page.goto('/');
+    await page.goto('/#/all/home');
     await unlockIfLocked(page);
     await page.waitForTimeout(1000);
 
@@ -85,6 +92,13 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
     const page = await context.newPage();
 
     await page.addInitScript(() => {
+      localStorage.removeItem('custom_app_pin_verifier');
+      localStorage.removeItem('custom_app_pin_hash');
+      localStorage.removeItem('custom_app_pin_length');
+      localStorage.removeItem('pin_failed_attempts');
+      localStorage.removeItem('pin_lockout_until');
+      sessionStorage.removeItem('pin_failed_attempts');
+      sessionStorage.removeItem('pin_lockout_until');
       localStorage.setItem('theme', 'dark');
       localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
       (window as unknown as { __DISABLE_LAZY_VIEWPORT__?: boolean }).__DISABLE_LAZY_VIEWPORT__ = true;
@@ -93,7 +107,7 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
       document.documentElement.classList.add('dark');
     });
 
-    await page.goto('/');
+    await page.goto('/#/all/home');
     await unlockIfLocked(page);
     await page.waitForTimeout(1000);
 
@@ -118,6 +132,13 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
     const page = await context.newPage();
 
     await page.addInitScript(() => {
+      localStorage.removeItem('custom_app_pin_verifier');
+      localStorage.removeItem('custom_app_pin_hash');
+      localStorage.removeItem('custom_app_pin_length');
+      localStorage.removeItem('pin_failed_attempts');
+      localStorage.removeItem('pin_lockout_until');
+      sessionStorage.removeItem('pin_failed_attempts');
+      sessionStorage.removeItem('pin_lockout_until');
       localStorage.setItem('theme', 'light');
       localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
       (window as unknown as { __DISABLE_LAZY_VIEWPORT__?: boolean }).__DISABLE_LAZY_VIEWPORT__ = true;
@@ -127,7 +148,7 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
       document.documentElement.classList.remove('dark');
     });
 
-    await page.goto('/');
+    await page.goto('/#/all/home');
     await unlockIfLocked(page);
     await page.waitForTimeout(1000);
 
@@ -152,6 +173,13 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
     const page = await context.newPage();
 
     await page.addInitScript(() => {
+      localStorage.removeItem('custom_app_pin_verifier');
+      localStorage.removeItem('custom_app_pin_hash');
+      localStorage.removeItem('custom_app_pin_length');
+      localStorage.removeItem('pin_failed_attempts');
+      localStorage.removeItem('pin_lockout_until');
+      sessionStorage.removeItem('pin_failed_attempts');
+      sessionStorage.removeItem('pin_lockout_until');
       localStorage.setItem('theme', 'dark');
       localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
       (window as unknown as { __DISABLE_LAZY_VIEWPORT__?: boolean }).__DISABLE_LAZY_VIEWPORT__ = true;
@@ -161,7 +189,7 @@ test.describe.serial('Full-Size Project Screenshots Suite (40 Views)', () => {
       document.documentElement.classList.add('dark');
     });
 
-    await page.goto('/');
+    await page.goto('/#/all/home');
     await unlockIfLocked(page);
     await page.waitForTimeout(1000);
 

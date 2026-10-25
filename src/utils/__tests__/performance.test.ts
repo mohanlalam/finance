@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { calculateCAGR } from '../../domains/performance/calculations/cagr';
-import { calculateXIRR, CashFlow } from '../../domains/performance/calculations/xirr';
+import { calculateXIRR, calculateXIRRWithMetrics, CashFlow } from '../../domains/performance/calculations/xirr';
+import { calculateXIRRSyncWithTelemetry } from '../../workers/xirrClient';
 import { calculateWeightedAge, getPortfolioAnnualizedReturn } from '../../domains/performance/calculations/returns';
 import { getBenchmarkReturns } from '../../domains/performance/calculations/benchmark';
 import { Portfolio } from '../../types/portfolio';
@@ -244,5 +245,27 @@ describe('getBenchmarkReturns', () => {
     const longTerm = getBenchmarkReturns(5);
     expect(longTerm.nifty50).toBe(14.2);
     expect(longTerm.sp500).toBe(11.8);
+  });
+});
+
+describe('XIRR Telemetry & Metrics', () => {
+  it('returns calculation duration and rate in calculateXIRRWithMetrics', () => {
+    const cashflows: CashFlow[] = [
+      { date: '2025-01-01', amount: -10000 },
+      { date: '2026-01-01', amount: 11000 },
+    ];
+    const metrics = calculateXIRRWithMetrics(cashflows);
+    expect(metrics.rate).toBeCloseTo(0.10, 4);
+    expect(metrics.cashFlowCount).toBe(2);
+    expect(metrics.durationMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it('runs synchronous calculation with telemetry in calculateXIRRSyncWithTelemetry', () => {
+    const cashflows: CashFlow[] = [
+      { date: '2025-01-01', amount: -10000 },
+      { date: '2026-01-01', amount: 11000 },
+    ];
+    const rate = calculateXIRRSyncWithTelemetry(cashflows, 'test-unit');
+    expect(rate).toBeCloseTo(0.10, 4);
   });
 });

@@ -487,7 +487,7 @@ export default function AppShell() {
         )}
 
         {(activeAsset === 'stocks' || activeAsset === 'home') && priceStatus === 'error' && (
-          <div className="flex items-center gap-2.5 bg-[var(--warning-soft)] border border-[var(--warning)]/30 text-[var(--warning)] rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm">
+          <div className="flex items-center gap-2.5 bg-[var(--warning-soft)] border border-[var(--warning)]/30 text-[var(--warning)] rounded-[var(--radius-medium)] px-3.5 sm:px-4 py-2 text-xs sm:text-sm stale-price-banner">
             <AlertCircle size={15} className="shrink-0 text-[var(--warning)]" />
             <span className="leading-snug">Could not reach quote provider. Showing last known market data.</span>
           </div>

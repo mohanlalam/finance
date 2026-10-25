@@ -102,3 +102,23 @@ export function calculateXIRR(cashflows: CashFlow[]): number {
 
   return 0;
 }
+
+export interface XIRRMetricsResult {
+  rate: number;
+  durationMs: number;
+  cashFlowCount: number;
+}
+
+/**
+ * Calculates XIRR while returning microsecond duration metrics.
+ */
+export function calculateXIRRWithMetrics(cashflows: CashFlow[]): XIRRMetricsResult {
+  const start = typeof performance !== 'undefined' ? performance.now() : 0;
+  const rate = calculateXIRR(cashflows);
+  const durationMs = start > 0 && typeof performance !== 'undefined' ? performance.now() - start : 0;
+  return {
+    rate,
+    durationMs,
+    cashFlowCount: cashflows?.length || 0,
+  };
+}

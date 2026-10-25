@@ -1,7 +1,7 @@
 // Supabase Edge Functions Shared Security & Rate Limiting Module
 // Architecture v3.0 - Single-Family Zero-Trust Security Gateway
 
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2.49.1";
 
 export const DEFAULT_RATE_WINDOW_MS = 5 * 60 * 1000; // 5-minute window
 export const MAX_DEVICE_ATTEMPTS = 5;

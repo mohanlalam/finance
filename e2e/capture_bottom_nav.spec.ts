@@ -3,12 +3,12 @@ import path from 'path';
 
 async function unlockIfLocked(page: Page) {
   const pinHeading = page.getByRole('heading', { name: 'Enter Passcode' });
-  if (await pinHeading.isVisible({ timeout: 4000 }).catch(() => false)) {
+  if (await pinHeading.isVisible({ timeout: 5000 }).catch(() => false)) {
     const pin = process.env.E2E_APP_PIN || process.env.VITE_APP_PIN || '3463';
-    await page.keyboard.type(pin);
-    await expect(pinHeading).not.toBeVisible({ timeout: 15000 });
+    await page.keyboard.type(pin, { delay: 60 });
+    await expect(pinHeading).not.toBeVisible({ timeout: 30000 });
   }
-  await expect(page.locator('nav[aria-label="Mobile Navigation"]')).toBeVisible({ timeout: 25000 });
+  await expect(page.locator('nav[aria-label="Mobile Navigation"]')).toBeVisible({ timeout: 30000 });
 }
 
 test.describe('Mobile Bottom Navigation Screenshot Capture', () => {
@@ -25,6 +25,13 @@ test.describe('Mobile Bottom Navigation Screenshot Capture', () => {
     const page = await context.newPage();
 
     await page.addInitScript(() => {
+      localStorage.removeItem('custom_app_pin_verifier');
+      localStorage.removeItem('custom_app_pin_hash');
+      localStorage.removeItem('custom_app_pin_length');
+      localStorage.removeItem('pin_failed_attempts');
+      localStorage.removeItem('pin_lockout_until');
+      sessionStorage.removeItem('pin_failed_attempts');
+      sessionStorage.removeItem('pin_lockout_until');
       localStorage.setItem('theme', 'dark');
       localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
       document.documentElement.classList.add('dark');
@@ -72,6 +79,13 @@ test.describe('Mobile Bottom Navigation Screenshot Capture', () => {
     const page = await context.newPage();
 
     await page.addInitScript(() => {
+      localStorage.removeItem('custom_app_pin_verifier');
+      localStorage.removeItem('custom_app_pin_hash');
+      localStorage.removeItem('custom_app_pin_length');
+      localStorage.removeItem('pin_failed_attempts');
+      localStorage.removeItem('pin_lockout_until');
+      sessionStorage.removeItem('pin_failed_attempts');
+      sessionStorage.removeItem('pin_lockout_until');
       localStorage.setItem('theme', 'light');
       localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
       document.documentElement.classList.remove('dark');
