@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import {
   Home as HomeIcon,
   TrendingUp,
@@ -41,7 +41,31 @@ const NAV_CONSTANTS = {
   SWIPE_DISMISS_THRESHOLD: 80,
   CLOSE_ANIMATION_MS: 360,
   SCROLL_COLLAPSE_THRESHOLD: 20,
-};
+  STAGGER_DELAY_MS: 40,
+} as const;
+
+/* ── Reduced Motion Hook ──────────────────────────────────────────────────── */
+function useReducedMotion(): boolean {
+  const [prefersReduced, setPrefersReduced] = useState(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches ?? false;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handler = (e: MediaQueryListEvent) => setPrefersReduced(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
+
+  return prefersReduced;
+}
+
+/* ── Transition helpers that respect prefers-reduced-motion ──────────────── */
+function getTransition(cssTransition: string, reducedMotion: boolean): string {
+  return reducedMotion ? 'none' : cssTransition;
+}
 
 /* ── More drawer tab definitions with Design Token Custom Properties ───────── */
 const moreTabs: { id: AssetTab; label: string; subtext: string; icon: React.ReactNode; color: string }[] = [
@@ -61,14 +85,21 @@ const mainTabs: { id: AssetTab; label: string; accent: string }[] = [
   { id: 'fd',     label: 'Deposits', accent: 'var(--asset-fd)' },
 ];
 
+/* ── Format badge value with overflow handling ─────────────────────────────── */
+function formatBadge(count: number): string {
+  if (count > 99) return '99+';
+  if (count > 9) return '9+';
+  return String(count);
+}
+
 /* ── Individual tab button — Asset-Colored Pill wrapping BOTH Icon & Label ── */
 function TabBtn({
-  label, isActive, badge, onClick, icon, activeIcon, accent,
+  label, isActive, badge, onClick, icon, activeIcon, accent, reducedMotion,
 }: {
   label: string; isActive: boolean;
   badge?: number; onClick: () => void;
   icon: React.ReactNode; activeIcon: React.ReactNode;
-  accent: string;
+  accent: string; reducedMotion: boolean;
 }) {
   const activeColor = accent;
   return (
@@ -119,7 +150,10 @@ function TabBtn({
             ? `0 10px 22px -16px ${activeColor}, inset 0 1px 0 rgba(255,255,255,0.72)`
             : 'none',
           transform: isActive ? 'translateY(-1px)' : 'translateY(0)',
-          transition: 'background 0.24s var(--ios-spring), border-color 0.24s ease, box-shadow 0.24s ease, transform 0.24s var(--ios-bounce)',
+          transition: getTransition(
+            'background 0.24s var(--ios-spring), border-color 0.24s ease, box-shadow 0.24s ease, transform 0.24s var(--ios-bounce)',
+            reducedMotion
+          ),
         }}
       >
         {/* Icon wrapper */}
@@ -141,7 +175,7 @@ function TabBtn({
               color: isActive ? activeColor : 'var(--text-tertiary)',
               transform: isActive ? 'scale(1.08)' : 'scale(1)',
               filter: isActive ? 'drop-shadow(0 1px 0 rgba(255,255,255,0.35))' : 'none',
-              transition: 'color 0.18s ease, filter 0.18s ease, transform 0.2s var(--ios-bounce)',
+              transition: getTransition('color 0.18s ease, filter 0.18s ease, transform 0.2s var(--ios-bounce)', reducedMotion),
             }}
           >
             {isActive ? activeIcon : icon}
@@ -151,7 +185,7 @@ function TabBtn({
           {badge != null && badge > 0 && (
             <span
               role="status"
-              aria-label={`${badge} notifications`}
+              aria-label={`${badge} notification${badge !== 1 ? 's' : ''}`}
               style={{
                 position: 'absolute',
                 top: -8,
@@ -171,7 +205,7 @@ function TabBtn({
                 boxShadow: '0 4px 10px color-mix(in srgb, var(--negative) 32%, transparent)',
               }}
             >
-              {badge > 9 ? '9+' : badge}
+              {formatBadge(badge)}
             </span>
           )}
         </span>
@@ -185,7 +219,7 @@ function TabBtn({
             color: isActive ? activeColor : 'var(--text-tertiary)',
             lineHeight: 1.05,
             whiteSpace: 'nowrap',
-            transition: 'color 0.18s ease, font-weight 0.18s ease',
+            transition: getTransition('color 0.18s ease, font-weight 0.18s ease', reducedMotion),
           }}
         >
           {label}
@@ -201,11 +235,13 @@ function MoreTabBtn({
   isOpen,
   activeAsset,
   onClick,
+  reducedMotion,
 }: {
   isActive: boolean;
   isOpen: boolean;
   activeAsset: AssetTab;
   onClick: () => void;
+  reducedMotion: boolean;
 }) {
   const lit = isActive || isOpen;
   const activeTabObj = moreTabs.find((t) => t.id === activeAsset);
@@ -261,7 +297,10 @@ function MoreTabBtn({
             ? `0 10px 22px -16px ${activeColor}, inset 0 1px 0 rgba(255,255,255,0.72)`
             : 'none',
           transform: lit ? 'translateY(-1px)' : 'translateY(0)',
-          transition: 'background 0.24s var(--ios-spring), border-color 0.24s ease, box-shadow 0.24s ease, transform 0.24s var(--ios-bounce)',
+          transition: getTransition(
+            'background 0.24s var(--ios-spring), border-color 0.24s ease, box-shadow 0.24s ease, transform 0.24s var(--ios-bounce)',
+            reducedMotion
+          ),
         }}
       >
         {/* Icon wrapper */}
@@ -283,7 +322,7 @@ function MoreTabBtn({
               color: lit ? activeColor : 'var(--text-tertiary)',
               transform: isOpen ? 'rotate(90deg) scale(1.06)' : lit ? 'scale(1.06)' : 'scale(1)',
               filter: lit ? 'drop-shadow(0 1px 0 rgba(255,255,255,0.35))' : 'none',
-              transition: 'color 0.18s ease, filter 0.18s ease, transform 0.22s var(--ios-bounce)',
+              transition: getTransition('color 0.18s ease, filter 0.18s ease, transform 0.22s var(--ios-bounce)', reducedMotion),
             }}
           >
             {lit ? <MoreGridFilled size={25} /> : <MoreGridOutline size={25} />}
@@ -299,11 +338,96 @@ function MoreTabBtn({
             color: lit ? activeColor : 'var(--text-tertiary)',
             lineHeight: 1.05,
             whiteSpace: 'nowrap',
-            transition: 'color 0.18s ease, font-weight 0.18s ease',
+            transition: getTransition('color 0.18s ease, font-weight 0.18s ease', reducedMotion),
           }}
         >
           More
         </span>
+      </span>
+    </button>
+  );
+}
+
+/* ── Drawer item row with staggered entrance animation ─────────────────── */
+function DrawerItem({
+  tab,
+  isActive,
+  index,
+  sheetIn,
+  reducedMotion,
+  onClick,
+}: {
+  tab: typeof moreTabs[number];
+  isActive: boolean;
+  index: number;
+  sheetIn: boolean;
+  reducedMotion: boolean;
+  onClick: () => void;
+}) {
+  const staggerDelay = reducedMotion ? 0 : index * NAV_CONSTANTS.STAGGER_DELAY_MS;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={isActive ? 'page' : undefined}
+      className="ios-press"
+      style={{
+        width: '100%',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '9px 12px', marginBottom: 5, borderRadius: 13, minHeight: 44,
+        background: isActive
+          ? 'color-mix(in srgb, var(--accent-blue) 12%, var(--surface-secondary))'
+          : 'color-mix(in srgb, var(--surface-secondary) 55%, transparent)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        border: isActive
+          ? '0.5px solid color-mix(in srgb, var(--accent-blue) 30%, transparent)'
+          : '0.5px solid color-mix(in srgb, var(--border-subtle) 60%, transparent)',
+        boxShadow: isActive
+          ? '0 2px 8px color-mix(in srgb, var(--accent-blue) 12%, transparent)'
+          : 'none',
+        cursor: 'pointer', outline: 'none', textAlign: 'left',
+        opacity: sheetIn ? 1 : 0,
+        transform: sheetIn ? 'translateY(0)' : 'translateY(8px)',
+        transition: getTransition(
+          `background 0.2s ease, border-color 0.2s ease, opacity 0.28s ease ${staggerDelay}ms, transform 0.28s var(--ios-spring) ${staggerDelay}ms`,
+          reducedMotion
+        ),
+        WebkitTapHighlightColor: 'transparent',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 11, minWidth: 0 }}>
+        {/* Clean icon container */}
+        <div style={{
+          width: 34, height: 34, borderRadius: 9, flexShrink: 0,
+          background: `color-mix(in srgb, ${tab.color} 12%, var(--surface-secondary))`,
+          border: `0.5px solid color-mix(in srgb, ${tab.color} 20%, transparent)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: tab.color,
+        }}>
+          {tab.icon}
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <p style={{
+            fontSize: 13.5, fontWeight: isActive ? 600 : 500,
+            color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)',
+            letterSpacing: '-0.01em',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>{tab.label}</p>
+          <p style={{
+            fontSize: 11, color: 'var(--text-tertiary)', marginTop: 0.5,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>{tab.subtext}</p>
+        </div>
+      </div>
+      <span style={{
+        color: isActive ? 'var(--accent-blue)' : 'var(--text-tertiary)',
+        flexShrink: 0, display: 'flex',
+        transform: isActive ? 'translateX(2px)' : 'translateX(0)',
+        transition: getTransition('transform 0.2s ease', reducedMotion),
+      }}>
+        <ChevronRight size={14} aria-hidden="true" />
       </span>
     </button>
   );
@@ -319,11 +443,15 @@ function MobileBottomNav({
   const lastScrollMapRef = useRef(new WeakMap<Element, number>());
   const lastWindowScrollYRef = useRef(0);
 
+  const reducedMotion = useReducedMotion();
+
   const isDrawerOpenRef = useRef(isDrawerOpen);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const prevFocusedElementRef = useRef<HTMLElement | null>(null);
+  const rAFRef = useRef<number | null>(null);
+  const swipeStartYRef = useRef<number | null>(null);
 
   // Keep ref synchronized with current callback prop to prevent stale closures or effect thrashing
   const onDrawerStateChangeRef = useRef(onDrawerStateChange);
@@ -332,6 +460,9 @@ function MobileBottomNav({
   }, [onDrawerStateChange]);
 
   useEffect(() => { isDrawerOpenRef.current = isDrawerOpen; }, [isDrawerOpen]);
+
+  // Memoize the set of "more" tab IDs for O(1) lookups
+  const moreTabIds = useMemo(() => new Set(moreTabs.map((t) => t.id)), []);
 
   // Scroll collapse behavior: resilient across window, short content, and inner scroll containers
   useEffect(() => {
@@ -345,7 +476,7 @@ function MobileBottomNav({
 
     const handleScroll = (e?: Event) => {
       if (!ticking) {
-        window.requestAnimationFrame(() => {
+        rAFRef.current = window.requestAnimationFrame(() => {
           // Identify scrolling target: inner element or document window
           const target = (e?.target && e.target !== document && (e.target as HTMLElement).scrollTop !== undefined)
             ? (e.target as HTMLElement)
@@ -403,7 +534,14 @@ function MobileBottomNav({
 
     // Capture phase listens to window and bubbling/contained scroll events
     window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
-    return () => window.removeEventListener('scroll', handleScroll, { capture: true } as EventListenerOptions);
+    return () => {
+      window.removeEventListener('scroll', handleScroll, { capture: true } as EventListenerOptions);
+      // Cancel any pending rAF to prevent state updates after unmount
+      if (rAFRef.current != null) {
+        window.cancelAnimationFrame(rAFRef.current);
+        rAFRef.current = null;
+      }
+    };
   }, [isDrawerOpen]);
 
   const openDrawer = useCallback(() => {
@@ -423,8 +561,8 @@ function MobileBottomNav({
     closeTimerRef.current = setTimeout(() => {
       setIsDrawerOpen(false);
       closeTimerRef.current = null;
-    }, NAV_CONSTANTS.CLOSE_ANIMATION_MS);
-  }, []);
+    }, reducedMotion ? 0 : NAV_CONSTANTS.CLOSE_ANIMATION_MS);
+  }, [reducedMotion]);
 
   // Cleanup close timer on unmount
   useEffect(() => {
@@ -519,7 +657,38 @@ function MobileBottomNav({
     }
   }, [isDrawerOpen, openDrawer, closeDrawer]);
 
-  const isMoreActive = moreTabs.some((t) => t.id === activeAsset);
+  /* ── Swipe gesture handlers using ref-tracked startY ─────────────────── */
+  const handleSwipeTouchStart = useCallback((e: React.TouchEvent) => {
+    swipeStartYRef.current = e.touches[0].clientY;
+  }, []);
+
+  const handleSwipeTouchMove = useCallback((e: React.TouchEvent) => {
+    if (swipeStartYRef.current == null) return;
+    const delta = e.touches[0].clientY - swipeStartYRef.current;
+    if (delta > 0 && sheetRef.current) {
+      // Provide visual resistance feedback during drag
+      sheetRef.current.style.transform = `translateY(${Math.min(delta * 0.5, 60)}px)`;
+      sheetRef.current.style.transition = 'none';
+    }
+  }, []);
+
+  const handleSwipeTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (swipeStartYRef.current == null) return;
+    const delta = e.changedTouches[0].clientY - swipeStartYRef.current;
+    // Restore sheet transition
+    if (sheetRef.current) {
+      sheetRef.current.style.transform = '';
+      sheetRef.current.style.transition = '';
+    }
+    // Velocity-based dismiss: threshold swipe down closes the sheet
+    if (delta > NAV_CONSTANTS.SWIPE_DISMISS_THRESHOLD) {
+      triggerHaptic('selection');
+      closeDrawer();
+    }
+    swipeStartYRef.current = null;
+  }, [closeDrawer]);
+
+  const isMoreActive = moreTabIds.has(activeAsset);
 
   return (
     <>
@@ -529,13 +698,14 @@ function MobileBottomNav({
           aria-hidden="true"
           onClick={closeDrawer}
           className="md:hidden"
+          data-testid="drawer-backdrop"
           style={{
             position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)',
             background: 'var(--backdrop-overlay, rgba(0,0,0,0.5))',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
             opacity: sheetIn ? 1 : 0,
-            transition: 'opacity 0.3s ease',
+            transition: getTransition('opacity 0.3s ease', reducedMotion),
             touchAction: 'none',
           }}
         />
@@ -548,6 +718,7 @@ function MobileBottomNav({
           role="dialog"
           aria-modal="true"
           aria-label="All asset categories"
+          aria-describedby="drawer-desc"
           className="md:hidden"
           style={{
             position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 'var(--z-modal)',
@@ -558,48 +729,23 @@ function MobileBottomNav({
             borderTop: '0.5px solid rgba(255,255,255,0.25)',
             boxShadow: '0 -12px 48px rgba(0,0,0,0.24)',
             transform: sheetIn ? 'translateY(0)' : 'translateY(105%)',
-            transition: 'transform 0.36s cubic-bezier(0.16,1,0.3,1)',
+            transition: getTransition('transform 0.36s cubic-bezier(0.16,1,0.3,1)', reducedMotion),
             paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)',
             maxHeight: '88vh',
             display: 'flex', flexDirection: 'column',
           }}
         >
           <span className="sr-only" role="status" aria-live="polite">More asset categories drawer opened</span>
+          <span id="drawer-desc" className="sr-only">Browse additional asset categories including deposits, gold, real estate, insurance, documents, and tax harvesting.</span>
 
           {/* Drag handle — touch-enabled for swipe-down dismiss */}
           <div
             role="button"
             aria-label="Swipe down to close"
             tabIndex={-1}
-            onTouchStart={(e) => {
-              const touch = e.touches[0];
-              (e.currentTarget as HTMLElement).dataset.swipeStartY = String(touch.clientY);
-            }}
-            onTouchMove={(e) => {
-              const startY = parseFloat((e.currentTarget as HTMLElement).dataset.swipeStartY || '0');
-              const delta = e.touches[0].clientY - startY;
-              if (delta > 0) {
-                // Provide visual resistance feedback during drag
-                if (sheetRef.current) {
-                  sheetRef.current.style.transform = `translateY(${Math.min(delta * 0.5, 60)}px)`;
-                  sheetRef.current.style.transition = 'none';
-                }
-              }
-            }}
-            onTouchEnd={(e) => {
-              const startY = parseFloat((e.currentTarget as HTMLElement).dataset.swipeStartY || '0');
-              const delta = e.changedTouches[0].clientY - startY;
-              // Restore sheet transition
-              if (sheetRef.current) {
-                sheetRef.current.style.transform = '';
-                sheetRef.current.style.transition = '';
-              }
-              // Velocity-based dismiss: threshold swipe down closes the sheet
-              if (delta > NAV_CONSTANTS.SWIPE_DISMISS_THRESHOLD) {
-                triggerHaptic('selection');
-                closeDrawer();
-              }
-            }}
+            onTouchStart={handleSwipeTouchStart}
+            onTouchMove={handleSwipeTouchMove}
+            onTouchEnd={handleSwipeTouchEnd}
             style={{
               margin: '10px auto 0',
               flexShrink: 0,
@@ -647,6 +793,7 @@ function MobileBottomNav({
               <button
                 type="button"
                 onClick={() => { triggerHaptic('selection'); closeDrawer(); onOpenSmartImport(); }}
+                aria-label="Smart AI Import — Auto-extract details from a doc or photo"
                 className="ios-press"
                 style={{
                   width: '100%',
@@ -681,73 +828,21 @@ function MobileBottomNav({
           )}
 
           {/* Divider */}
-          <div style={{ height: 0.5, background: 'var(--border-subtle)', opacity: 0.5, marginInline: 12, flexShrink: 0 }} />
+          <div role="separator" style={{ height: 0.5, background: 'var(--border-subtle)', opacity: 0.5, marginInline: 12, flexShrink: 0 }} />
 
-          {/* Category rows — Calm functional glass tile cards */}
+          {/* Category rows — Calm functional glass tile cards with stagger animation */}
           <div style={{ overflowY: 'auto', padding: '8px 12px 4px', flex: 1, overscrollBehavior: 'contain' }}>
-            {moreTabs.map((tab) => {
-              const active = activeAsset === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => handleMoreTabClick(tab.id)}
-                  className="ios-press"
-                  style={{
-                    width: '100%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '9px 12px', marginBottom: 5, borderRadius: 13, minHeight: 44,
-                    background: active
-                      ? 'color-mix(in srgb, var(--accent-blue) 12%, var(--surface-secondary))'
-                      : 'color-mix(in srgb, var(--surface-secondary) 55%, transparent)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
-                    border: active
-                      ? '0.5px solid color-mix(in srgb, var(--accent-blue) 30%, transparent)'
-                      : '0.5px solid color-mix(in srgb, var(--border-subtle) 60%, transparent)',
-                    boxShadow: active
-                      ? '0 2px 8px color-mix(in srgb, var(--accent-blue) 12%, transparent)'
-                      : 'none',
-                    cursor: 'pointer', outline: 'none', textAlign: 'left',
-                    transition: 'background 0.2s ease, border-color 0.2s ease',
-                    WebkitTapHighlightColor: 'transparent',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 11, minWidth: 0 }}>
-                    {/* Clean icon container */}
-                    <div style={{
-                      width: 34, height: 34, borderRadius: 9, flexShrink: 0,
-                      background: `color-mix(in srgb, ${tab.color} 12%, var(--surface-secondary))`,
-                      border: `0.5px solid color-mix(in srgb, ${tab.color} 20%, transparent)`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: tab.color,
-                    }}>
-                      {tab.icon}
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{
-                        fontSize: 13.5, fontWeight: active ? 600 : 500,
-                        color: active ? 'var(--accent-blue)' : 'var(--text-primary)',
-                        letterSpacing: '-0.01em',
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>{tab.label}</p>
-                      <p style={{
-                        fontSize: 11, color: 'var(--text-tertiary)', marginTop: 0.5,
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>{tab.subtext}</p>
-                    </div>
-                  </div>
-                  <span style={{
-                    color: active ? 'var(--accent-blue)' : 'var(--text-tertiary)',
-                    flexShrink: 0, display: 'flex',
-                    transform: active ? 'translateX(2px)' : 'translateX(0)',
-                    transition: 'transform 0.2s ease',
-                  }}>
-                    <ChevronRight size={14} aria-hidden="true" />
-                  </span>
-                </button>
-              );
-            })}
+            {moreTabs.map((tab, index) => (
+              <DrawerItem
+                key={tab.id}
+                tab={tab}
+                isActive={activeAsset === tab.id}
+                index={index}
+                sheetIn={sheetIn}
+                reducedMotion={reducedMotion}
+                onClick={() => handleMoreTabClick(tab.id)}
+              />
+            ))}
           </div>
         </div>
       )}
@@ -769,7 +864,7 @@ function MobileBottomNav({
           pointerEvents: 'none',
           transform: isVisible ? 'translateY(0)' : 'translateY(calc(100% + 24px))',
           opacity: isVisible ? 1 : 0,
-          transition: 'transform 0.36s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease',
+          transition: getTransition('transform 0.36s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease', reducedMotion),
         }}
       >
         <div
@@ -804,6 +899,7 @@ function MobileBottomNav({
                 isActive={activeAsset === tab.id}
                 badge={tab.id === 'home' && alertCount > 0 ? alertCount : undefined}
                 onClick={() => { triggerHaptic('selection'); onChangeAsset(tab.id); if (isDrawerOpen) closeDrawer(); }}
+                reducedMotion={reducedMotion}
                 icon={
                   tab.id === 'home'   ? <HomeIcon size={25} aria-hidden="true" />   :
                   tab.id === 'stocks' ? <TrendingUp size={25} aria-hidden="true" /> :
@@ -824,6 +920,7 @@ function MobileBottomNav({
               isOpen={isDrawerOpen}
               activeAsset={activeAsset}
               onClick={toggleDrawer}
+              reducedMotion={reducedMotion}
             />
           </div>
         </div>
