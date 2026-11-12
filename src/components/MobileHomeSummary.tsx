@@ -9,7 +9,7 @@ import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { AnimatedNumber } from './ui/AnimatedNumber';
 import { usePrivacy } from '../contexts/PrivacyContext';
 import { sortPortfolios } from '../domains/portfolio/calculations/portfolioOrdering';
-import { useDayRange } from '../hooks/useDayRange';
+import { useDayRange, formatPnLValue } from '../hooks/useDayRange';
 
 
 // Hoist static icon elements at module level — prevents new React element
@@ -81,7 +81,6 @@ function MobileHomeSummary({
   }, [isBalancesHidden]);
 
   const { dayHigh, dayLow } = useDayRange(
-    summaryData.totalCurrentValue,
     todayPnL,
     activePortfolio?.id ?? null
   );
@@ -268,26 +267,24 @@ function MobileHomeSummary({
             </div>
           </div>
 
-          {/* Day Range: Day High / Low recorded */}
-          {summaryData.totalCurrentValue > 0 && (
-            <div
-              className="shrink-0 flex flex-col justify-center px-2 py-1 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-right self-end mb-0.5"
-              title="Day's high and low recorded"
-              aria-label={`Day high ${formatINR(dayHigh)}, Day low ${formatINR(dayLow)}`}
-            >
-              <div className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-0.5 text-right">
-                Day Range
-              </div>
-              <div className="flex items-center justify-end gap-1.5 text-[11px] font-bold tnum text-[var(--text-primary)]">
-                <span className="text-[9px] px-1 py-0.2 rounded font-extrabold bg-[var(--positive-soft)] text-[var(--positive)] leading-none">H</span>
-                <span>{renderValue(dayHigh)}</span>
-              </div>
-              <div className="flex items-center justify-end gap-1.5 text-[11px] font-bold tnum text-[var(--text-primary)] mt-1">
-                <span className="text-[9px] px-1 py-0.2 rounded font-extrabold bg-[var(--negative-soft)] text-[var(--negative)] leading-none">L</span>
-                <span>{renderValue(dayLow)}</span>
-              </div>
+          {/* Day Range: Day High / Low recorded Profit/Loss */}
+          <div
+            className="shrink-0 flex flex-col justify-center px-2 py-1 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-right self-end mb-0.5"
+            title="Day's high and low profit or loss recorded"
+            aria-label={`Day high profit ${formatPnLValue(dayHigh)}, Day low ${formatPnLValue(dayLow)}`}
+          >
+            <div className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-0.5 text-right">
+              Day Range
             </div>
-          )}
+            <div className="flex items-center justify-end gap-1.5 text-[11px] font-bold tnum text-[var(--text-primary)]">
+              <span className="text-[9px] px-1 py-0.2 rounded font-extrabold bg-[var(--positive-soft)] text-[var(--positive)] leading-none">H</span>
+              <span className={dayHigh > 0 ? 'text-[var(--positive)]' : ''}>{renderValue(dayHigh, (v) => formatPnLValue(v))}</span>
+            </div>
+            <div className="flex items-center justify-end gap-1.5 text-[11px] font-bold tnum text-[var(--text-primary)] mt-1">
+              <span className="text-[9px] px-1 py-0.2 rounded font-extrabold bg-[var(--negative-soft)] text-[var(--negative)] leading-none">L</span>
+              <span className={dayLow < 0 ? 'text-[var(--negative)]' : ''}>{renderValue(dayLow, (v) => formatPnLValue(v))}</span>
+            </div>
+          </div>
         </div>
 
         {/* Metrics Row: Invested | Total Return */}

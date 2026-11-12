@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatFullINR, formatINR } from '../utils/formatters';
 
 export interface DayRange {
   dayHigh: number;
@@ -6,27 +7,37 @@ export interface DayRange {
 }
 
 /**
- * Computes Day High and Day Low considering the day's baseline (previous close vs current valuation)
- * and any previously recorded highs/lows for today.
+ * Formats a P&L amount with appropriate currency symbols and +/- indicators.
  */
-export function computeDayRange(
-  currentValue: number,
+export function formatPnLValue(val: number): string {
+  if (Math.abs(val) >= 10000000) {
+    const formatted = formatINR(val);
+    return val > 0 ? `+${formatted}` : formatted;
+  }
+  const formatted = formatFullINR(val, 0);
+  return val > 0 ? `+${formatted}` : formatted;
+}
+
+/**
+ * Computes Day High and Day Low for today's P&L movement, considering baseline (0 vs current todayPnL)
+ * and any previously recorded intraday extremes today.
+ */
+export function computeDayPnLRange(
   todayPnL: number,
   storedRange?: { high: number; low: number } | null
 ): DayRange {
-  if (!currentValue || currentValue <= 0) {
+  if (typeof todayPnL !== 'number' || isNaN(todayPnL)) {
     return { dayHigh: 0, dayLow: 0 };
   }
 
-  const prevClose = currentValue - todayPnL;
-  const validPrev = prevClose > 0 ? prevClose : currentValue;
-  const baseHigh = Math.max(validPrev, currentValue);
-  const baseLow = Math.min(validPrev, currentValue);
+  // Baseline for today: the day starts with 0 P&L.
+  const baseHigh = Math.max(0, todayPnL);
+  const baseLow = Math.min(0, todayPnL);
 
   if (storedRange && typeof storedRange.high === 'number' && typeof storedRange.low === 'number') {
     return {
-      dayHigh: Math.max(storedRange.high, baseHigh, currentValue),
-      dayLow: Math.min(storedRange.low, baseLow, currentValue),
+      dayHigh: Math.max(storedRange.high, baseHigh, todayPnL),
+      dayLow: Math.min(storedRange.low, baseLow, todayPnL),
     };
   }
 
@@ -37,25 +48,23 @@ export function computeDayRange(
 }
 
 /**
- * Custom hook tracking and persisting today's high and low recorded valuation.
- * - Computes baseline range from today's movement (previous close vs current value).
- * - Tracks intraday price extremes recorded during the session in localStorage.
+ * Custom hook tracking and persisting today's high and low recorded Profit/Loss (P&L).
+ * - Tracks intraday P&L extremes recorded during the session in localStorage.
  * - Automatically rolls over each day based on date string.
  */
 export function useDayRange(
-  currentValue: number,
   todayPnL: number,
   portfolioId?: string | null
 ): DayRange {
   const [range, setRange] = useState<DayRange>(() => {
-    return computeDayRange(currentValue, todayPnL);
+    return computeDayPnLRange(todayPnL);
   });
 
   useEffect(() => {
-    if (!currentValue || currentValue <= 0) return;
+    if (typeof todayPnL !== 'number' || isNaN(todayPnL)) return;
 
     const todayStr = new Date().toISOString().split('T')[0];
-    const storageKey = `portfolio_day_range_${portfolioId || 'all'}_${todayStr}`;
+    const storageKey = `portfolio_day_pnl_range_${portfolioId || 'all'}_${todayStr}`;
 
     let storedRange: { high: number; low: number } | null = null;
     try {
@@ -69,7 +78,7 @@ export function useDayRange(
       // localStorage may fail in test or private browsing environments
     }
 
-    const next = computeDayRange(currentValue, todayPnL, storedRange);
+    const next = computeDayPnLRange(todayPnL, storedRange);
     setRange(next);
 
     try {
@@ -82,7 +91,7 @@ export function useDayRange(
     } catch {
       // Ignore quota/security errors
     }
-  }, [currentValue, todayPnL, portfolioId]);
+  }, [todayPnL, portfolioId]);
 
   return range;
 }

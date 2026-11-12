@@ -1,44 +1,63 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { computeDayRange, useDayRange } from '../useDayRange';
+import { computeDayPnLRange, useDayRange, formatPnLValue } from '../useDayRange';
 
-describe('computeDayRange', () => {
-  it('returns zeros when currentValue is 0 or negative', () => {
-    expect(computeDayRange(0, 0)).toEqual({ dayHigh: 0, dayLow: 0 });
-    expect(computeDayRange(-100, 10)).toEqual({ dayHigh: 0, dayLow: 0 });
+describe('formatPnLValue', () => {
+  it('formats positive PnL with plus sign and full INR format', () => {
+    expect(formatPnLValue(43155)).toBe('+₹43,155');
   });
 
+  it('formats negative PnL with minus sign', () => {
+    expect(formatPnLValue(-5000)).toBe('-₹5,000');
+  });
+
+  it('formats zero PnL as ₹0', () => {
+    expect(formatPnLValue(0)).toBe('₹0');
+  });
+
+  it('formats large values with Cr suffix', () => {
+    expect(formatPnLValue(12500000)).toBe('+₹1.25Cr');
+    expect(formatPnLValue(-12500000)).toBe('-₹1.25Cr');
+  });
+});
+
+describe('computeDayPnLRange', () => {
   it('computes baseline high and low correctly for positive today PnL', () => {
-    // Current value = 1000, today gain = 100 -> previous close was 900
-    // So high = 1000, low = 900
-    const result = computeDayRange(1000, 100);
-    expect(result.dayHigh).toBe(1000);
-    expect(result.dayLow).toBe(900);
+    // Today gain = +50,000 -> High = +50,000, Low = 0
+    const result = computeDayPnLRange(50000);
+    expect(result.dayHigh).toBe(50000);
+    expect(result.dayLow).toBe(0);
   });
 
   it('computes baseline high and low correctly for negative today PnL', () => {
-    // Current value = 900, today loss = -100 -> previous close was 1000
-    // So high = 1000, low = 900
-    const result = computeDayRange(900, -100);
-    expect(result.dayHigh).toBe(1000);
-    expect(result.dayLow).toBe(900);
+    // Today loss = -15,000 -> High = 0, Low = -15,000
+    const result = computeDayPnLRange(-15000);
+    expect(result.dayHigh).toBe(0);
+    expect(result.dayLow).toBe(-15000);
   });
 
   it('incorporates stored high and low when provided', () => {
-    // Current = 950, todayPnL = 50 (prev = 900).
-    // Stored had a higher recorded high of 1050 and lower low of 880
-    const stored = { high: 1050, low: 880 };
-    const result = computeDayRange(950, 50, stored);
-    expect(result.dayHigh).toBe(1050);
-    expect(result.dayLow).toBe(880);
+    // Stored had a recorded high of +60,000 and low of -10,000.
+    // Current is +25,000.
+    const stored = { high: 60000, low: -10000 };
+    const result = computeDayPnLRange(25000, stored);
+    expect(result.dayHigh).toBe(60000);
+    expect(result.dayLow).toBe(-10000);
   });
 
-  it('updates high if current value surpasses stored high', () => {
-    const stored = { high: 1050, low: 880 };
-    const result = computeDayRange(1100, 200, stored);
-    expect(result.dayHigh).toBe(1100);
-    expect(result.dayLow).toBe(880);
+  it('updates high if current PnL surpasses stored high', () => {
+    const stored = { high: 60000, low: -10000 };
+    const result = computeDayPnLRange(75000, stored);
+    expect(result.dayHigh).toBe(75000);
+    expect(result.dayLow).toBe(-10000);
+  });
+
+  it('updates low if current PnL drops below stored low', () => {
+    const stored = { high: 60000, low: -10000 };
+    const result = computeDayPnLRange(-20000, stored);
+    expect(result.dayHigh).toBe(60000);
+    expect(result.dayLow).toBe(-20000);
   });
 });
 
@@ -47,32 +66,37 @@ describe('useDayRange hook', () => {
     window.localStorage.clear();
   });
 
-  it('initializes and saves to localStorage', () => {
-    const { result } = renderHook(() => useDayRange(5000000, 50000, 'member-1'));
-    expect(result.current.dayHigh).toBe(5000000);
-    expect(result.current.dayLow).toBe(4950000);
+  it('initializes and saves PnL range to localStorage', () => {
+    const { result } = renderHook(() => useDayRange(43155, 'member-1'));
+    expect(result.current.dayHigh).toBe(43155);
+    expect(result.current.dayLow).toBe(0);
 
     const todayStr = new Date().toISOString().split('T')[0];
-    const stored = JSON.parse(window.localStorage.getItem(`portfolio_day_range_member-1_${todayStr}`) || '{}');
-    expect(stored.high).toBe(5000000);
-    expect(stored.low).toBe(4950000);
+    const stored = JSON.parse(window.localStorage.getItem(`portfolio_day_pnl_range_member-1_${todayStr}`) || '{}');
+    expect(stored.high).toBe(43155);
+    expect(stored.low).toBe(0);
   });
 
-  it('updates when currentValue increases dynamically', () => {
-    const val = 5000000;
-    const pnl = 50000;
+  it('updates dynamically as today PnL updates', () => {
     const { result, rerender } = renderHook(
-      ({ value, change }) => useDayRange(value, change, 'member-1'),
-      { initialProps: { value: val, change: pnl } }
+      ({ pnl }) => useDayRange(pnl, 'member-1'),
+      { initialProps: { pnl: 43155 } }
     );
 
-    expect(result.current.dayHigh).toBe(5000000);
+    expect(result.current.dayHigh).toBe(43155);
 
-    // Value jumps to 5200000
+    // PnL rises to 65000
     act(() => {
-      rerender({ value: 5200000, change: 250000 });
+      rerender({ pnl: 65000 });
     });
-    expect(result.current.dayHigh).toBe(5200000);
-    expect(result.current.dayLow).toBe(4950000);
+    expect(result.current.dayHigh).toBe(65000);
+    expect(result.current.dayLow).toBe(0);
+
+    // PnL drops to -5000
+    act(() => {
+      rerender({ pnl: -5000 });
+    });
+    expect(result.current.dayHigh).toBe(65000);
+    expect(result.current.dayLow).toBe(-5000);
   });
 });
