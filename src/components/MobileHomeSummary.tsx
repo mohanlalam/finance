@@ -6,10 +6,10 @@ import { Alert } from '../hooks/useAlerts';
 import { estimateTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
 
 import { NetWorthSnapshot } from '../hooks/usePortfolioData';
-import { Sparkline } from './ui/Sparkline';
 import { AnimatedNumber } from './ui/AnimatedNumber';
 import { usePrivacy } from '../contexts/PrivacyContext';
 import { sortPortfolios } from '../domains/portfolio/calculations/portfolioOrdering';
+import { useDayRange } from '../hooks/useDayRange';
 
 
 // Hoist static icon elements at module level — prevents new React element
@@ -58,8 +58,6 @@ interface MobileHomeSummaryProps {
   netWorthHistory?: NetWorthSnapshot[];
 }
 
-const EMPTY_HISTORY: NetWorthSnapshot[] = [];
-
 function MobileHomeSummary({
   summaryData,
   todayPnL,
@@ -74,7 +72,6 @@ function MobileHomeSummary({
   onNavigateMember,
   portfolios,
   activePortfolio,
-  netWorthHistory = EMPTY_HISTORY,
 }: MobileHomeSummaryProps) {
   const { isBalancesHidden } = usePrivacy();
 
@@ -83,15 +80,11 @@ function MobileHomeSummary({
     return <AnimatedNumber value={val} formatter={formatter} />;
   }, [isBalancesHidden]);
 
-  const sparklineData = useMemo(() => {
-    if (!netWorthHistory || netWorthHistory.length === 0) return [];
-    return netWorthHistory.slice(-7).map((snap) => snap.total_value);
-  }, [netWorthHistory]);
-
-  const sparklineColor = useMemo(() => {
-    if (sparklineData.length < 2) return 'var(--positive)';
-    return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? 'var(--positive)' : 'var(--negative)';
-  }, [sparklineData]);
+  const { dayHigh, dayLow } = useDayRange(
+    summaryData.totalCurrentValue,
+    todayPnL,
+    activePortfolio?.id ?? null
+  );
 
   // Precalculate family member summaries to avoid un-memoized estimateTodayPnL in render loop
   const memberSummaries = useMemo(() => {
@@ -274,9 +267,25 @@ function MobileHomeSummary({
               </span>
             </div>
           </div>
-          {sparklineData.length > 1 && (
-            <div className="shrink-0 mb-0.5">
-              <Sparkline data={sparklineData} color={sparklineColor} width={68} height={26} />
+
+          {/* Day Range: Day High / Low recorded */}
+          {summaryData.totalCurrentValue > 0 && (
+            <div
+              className="shrink-0 flex flex-col justify-center px-2 py-1 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-right self-end mb-0.5"
+              title="Day's high and low recorded"
+              aria-label={`Day high ${formatINR(dayHigh)}, Day low ${formatINR(dayLow)}`}
+            >
+              <div className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-0.5 text-right">
+                Day Range
+              </div>
+              <div className="flex items-center justify-end gap-1.5 text-[11px] font-bold tnum text-[var(--text-primary)]">
+                <span className="text-[9px] px-1 py-0.2 rounded font-extrabold bg-[var(--positive-soft)] text-[var(--positive)] leading-none">H</span>
+                <span>{renderValue(dayHigh)}</span>
+              </div>
+              <div className="flex items-center justify-end gap-1.5 text-[11px] font-bold tnum text-[var(--text-primary)] mt-1">
+                <span className="text-[9px] px-1 py-0.2 rounded font-extrabold bg-[var(--negative-soft)] text-[var(--negative)] leading-none">L</span>
+                <span>{renderValue(dayLow)}</span>
+              </div>
             </div>
           )}
         </div>

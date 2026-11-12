@@ -5,7 +5,6 @@ import { Portfolio } from '../types/portfolio';
 import { estimateTodayPnL } from '../domains/portfolio/calculations/portfolioTotals';
 
 import { NetWorthSnapshot } from '../hooks/usePortfolioData';
-import { Sparkline } from './ui/Sparkline';
 import { AnimatedNumber } from './ui/AnimatedNumber';
 import { usePrivacy } from '../contexts/PrivacyContext';
 import { sharePortfolioSummary } from '../utils/shareUtils';
@@ -26,7 +25,6 @@ interface SummaryCardsProps {
 }
 
 const EMPTY_PORTFOLIOS: Portfolio[] = [];
-const EMPTY_HISTORY: NetWorthSnapshot[] = [];
 
 function SummaryCards({
   totalInvested,
@@ -38,7 +36,6 @@ function SummaryCards({
   isLoading = false,
   portfolios = EMPTY_PORTFOLIOS,
   activePortfolio = null,
-  netWorthHistory = EMPTY_HISTORY,
 }: SummaryCardsProps) {
   const isGain = totalPnL >= 0;
   const isTodayGain = todayPnL !== undefined ? todayPnL >= 0 : true;
@@ -55,16 +52,6 @@ function SummaryCards({
       todayPnL: p.todayPnL ?? estimateTodayPnL(p, [p]),
     }));
   }, [sortedPortfolios]);
-
-  const sparklineData = React.useMemo(() => {
-    if (!netWorthHistory || netWorthHistory.length === 0) return [];
-    return netWorthHistory.slice(-7).map((snap) => snap.total_value);
-  }, [netWorthHistory]);
-
-  const sparklineColor = React.useMemo(() => {
-    if (sparklineData.length < 2) return 'var(--positive)';
-    return sparklineData[sparklineData.length - 1] >= sparklineData[0] ? 'var(--positive)' : 'var(--negative)';
-  }, [sparklineData]);
 
   const { isBalancesHidden } = usePrivacy();
   const { addToast } = useToastActions();
@@ -113,11 +100,6 @@ function SummaryCards({
                 )}
               </div>
             </div>
-            {sparklineData.length > 1 && (
-              <div className="mb-1 ml-2 shrink-0">
-                <Sparkline data={sparklineData} color={sparklineColor} />
-              </div>
-            )}
           </div>
 
           {activePortfolio === null && sortedPortfolios && sortedPortfolios.length > 0 && (

@@ -1,6 +1,6 @@
 # ⚖️ Engineering Rules & "Do Not Regress" Standards — Family Portfolio Tracker
 
-**Document Version**: 3.0  
+**Document Version**: 3.3  
 **Enforcement**: Strict CI/CD pipeline, pre-commit validation, and agent self-correction  
 **Scope**: All source code, hooks, domain services, infrastructure, and test suites  
 
@@ -34,6 +34,8 @@
    - On the Tax Harvesting view, the Floating Add Menu (`+`) is hidden to eliminate visual competition with "Harvest" buttons.
 6. **Bottom Dock & Safe-Area Clearance**:
    - Content containers must reserve `pb-28` (112px) list padding. The FAB must float at `bottom-[calc(5rem+env(safe-area-inset-bottom,0px))]`, clearing the 58px bottom dock with a 16px safety gap on all devices.
+7. **Accessible Motion & Focus Invariant**:
+   - All interactive UI sheets and navigation components must respect `prefers-reduced-motion: reduce` by suppressing spring-bounce transitions. Modals and drawers must trap focus while open and restore focus to trigger elements upon dismissal.
 
 ---
 
@@ -89,7 +91,7 @@
      ```
      This command sequentially runs `eslint .`, `tsc --noEmit -p tsconfig.app.json`, `tsc --noEmit -p tsconfig.node.json`, `vitest run`, and `vite build`. All steps must exit with code 0.
 2. **100% Test Pass Invariant**:
-   - All 56 test suites and 314+ test cases must pass with zero failures.
+   - All 56 test suites and 350+ test cases must pass with zero failures.
 3. **Environment Isolation for Node/Vitest**:
    - Browser storage APIs (`indexedDB`, `localStorage`, `Notification`) must always be wrapped in safety guards (`typeof indexedDB === 'undefined'`) with in-memory fallbacks so tests execute deterministically in Node.js test runners.
 4. **Clean-Slate Screenshot Protocol**:

@@ -1,6 +1,6 @@
 # 📄 Product Requirements Document (PRD) — Family Portfolio Tracker
 
-**Document Version**: 3.0  
+**Document Version**: 3.3  
 **Status**: Approved & In Production  
 **Author**: Engineering & Product Architecture  
 **Target Platform**: Progressive Web Application (Desktop, Tablet, iOS & Android Mobile)  
@@ -133,5 +133,5 @@ The system natively models family wealth across three canonical member registrie
 ## 6. Release Criteria & Milestones
 
 - **Code Quality**: Strict TypeScript compilation (`tsc --noEmit`), zero ESLint errors or warnings.
-- **Automated Testing**: 100% pass rate across all 55 test suites (309+ unit & integration tests).
+- **Automated Testing**: 100% pass rate across all 56 test suites (350+ unit & integration tests).
 - **Visual Verification**: All 36 desktop and mobile layouts visually verified on real Chrome DevTools viewports (Desktop 1440×900, iPhone 14 Pro 390×844, iPhone SE 375×667).

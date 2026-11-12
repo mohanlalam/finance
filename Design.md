@@ -1,6 +1,6 @@
 # 🎨 Design System & Visual Specification — Family Portfolio Tracker
 
-**Document Version**: 3.0  
+**Document Version**: 3.3  
 **Design Philosophy**: Antigravity Cyber-Zen & Liquid Glass Dynamic Navigation  
 **Authoritative Token Source**: `src/index.css` & `Design.md §2`  
 
@@ -86,6 +86,7 @@ The user interface embodies weightless suspension, calm cognitive clarity, and t
   - `More`: Rose Accent (`#e11d48`)
 - **Scroll-Aware Minimization**: Tracks scroll position per container via `WeakMap<Element, number>`; automatically collapses smoothly on scroll down (`translateY(calc(100% + 24px))`) and restores on scroll up or near page top (`scrollY < 40`).
 - **More Asset Classes Drawer**: Slide-up sheet (`max-height: 88vh`, solid background `bg-[var(--surface-solid)]`, `backdrop-filter: blur(32px) saturate(1.8)`) exposing Smart AI Import and all secondary categories in a responsive 2-column grid.
+- **Accessible Motion & Reduced-Motion Mode**: Honors `prefers-reduced-motion: reduce` by zeroing out spring transitions and bounce physics via `useReducedMotion()`. All tab buttons and drawer items provide ARIA attributes (`aria-current="page"`, `aria-label`, `role="status"` on badges) and automatic keyboard focus restoration upon sheet dismissal.
 
 ---
 

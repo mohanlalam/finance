@@ -1,6 +1,6 @@
 # 💼 Family Portfolio Tracker — GEMINI.md (Project Architecture & Rules)
 
-_Last updated: 2026-09-22 — Architecture v3.0 (Liquid Glass Navigation & Standardized Documentation)_
+_Last updated: 2026-11-02 — Architecture v3.3 (Mobile Navigation Hardening, Reduced Motion & Test Expansion)_
 
 > 📚 **Authoritative Documentation Suite (In One Place - Project Root)**:
 > 1. **[`PRD.md`](PRD.md)** — Product Requirements Document (Vision, Personas, Functional Specs, AI Engine, NFRs)
@@ -178,7 +178,7 @@ All core financial calculations are pure functions with zero UI, React, or datab
   * Browser storage (`indexedDB`, `localStorage`, `Notification`) and Web Worker APIs are wrapped in memory fallbacks and environment guards so tests execute cleanly in standard Node/JSDOM runners without mock leaks.
 * **Verification Pipeline**:
   * `npm run verify` orchestrates lint (`eslint .`), strict TypeScript checking (`tsc --noEmit`), and Vite bundle building (`vite build`).
-  * `npm test` (`vitest run`) executes the complete test suite across 56 test files and 314 unit/integration test cases (100% passing).
+  * `npm test` (`vitest run`) executes the complete test suite across 56 test files and 350 unit/integration test cases (100% passing).
 
 ---
 
@@ -218,14 +218,14 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 ## 🎨 Clean Data-First Design System Architecture (Antigravity Aesthetic)
 
-> **Single Source of Truth**: All design tokens, canonical hex values, typography scales, and accessibility requirements are authoritatively governed by [`UI.md`](UI.md) (specifically `UI.md §2` and `UI.md §11`) and implemented via CSS custom properties in `src/index.css` alongside Tailwind CSS utility classes.
+> **Single Source of Truth**: All design tokens, canonical hex values, typography scales, and accessibility requirements are authoritatively governed by [`Design.md`](Design.md) (specifically `Design.md §2` and `Design.md §4`) and implemented via CSS custom properties in `src/index.css` alongside Tailwind CSS utility classes.
 
 * **Hybrid Styling Stack**: Tailwind CSS utility framework (`tailwind.config.js`) mapped to semantic CSS custom variables (`var(--surface)`, `var(--border-subtle)`, etc.) declared in `src/index.css`.
 * **Cosmic Canvas**: Deep `#040711` obsidian background with multi-point atmospheric ambient radial nebula meshes (cyan `#06b6d4`, violet `#a855f7`, emerald `#10b981`) in dark mode, and `#f8fafc` crystalline prism canvas in light mode.
 * **Translucent Glassmorphic Surfaces (`.apple-card`, `.antigravity-card`)**: Solid/frosted surfaces (`var(--surface)`), 1px crisp luminous specular borders (`var(--border-subtle)`), and weightless ambient levitation shadows (`var(--shadow-card)`).
 * **Cyber-Zen Wide-Tracked Typography & Glowing Accents**: Wide-tracked micro labels (`tracking-wider`/`tracking-widest`), glowing profit green (`.neon-glow-positive`), loss rose (`.neon-glow-negative`), and gold amber (`.neon-glow-gold`).
 * **Liquid Glass Inspired Bottom Navigation** ([`MobileBottomNav.tsx`](src/components/MobileBottomNav.tsx)): Floating translucent frosted tab bar (`blur(20px) saturate(1.8)`, `max-width: 440px`, height `60px`, `border-radius: 30px`) matching Apple's HIG tab bar guidance. Selection is expressed through filled SF Symbol glyphs and semibold labels in `var(--accent-blue)` without nested capsules or circular chips. Features scroll-aware minimization (hides on scroll-down, restores on scroll-up or page top) and a calm, functional frosted-glass More drawer with clean asset category tiles.
-* **Accessibility & Measurement Standards**: Enforces WCAG 2.1 contrast ratios (4.5:1 text, 3.0:1 UI) per `UI.md §11`.
+* **Accessibility & Measurement Standards**: Enforces WCAG 2.1 contrast ratios (4.5:1 text, 3.0:1 UI) per `Design.md §2`.
 
 ---
 
@@ -263,6 +263,8 @@ All core financial calculations are pure functions with zero UI, React, or datab
 
 | Date | Version | Key Changes & Milestones |
 | :--- | :--- | :--- |
+| **2026-11-02** | `v3.3` | **Mobile Navigation Hardening, Reduced-Motion Compliance & Test Suite Expansion**: (1) Upgraded `MobileBottomNav.tsx` with `useReducedMotion()` hook and `getTransition()` helpers respecting `prefers-reduced-motion` media queries across all tab buttons and drawer sheet animations; (2) Hardened accessibility with ARIA roles (`role="status"`, `aria-label`), keyboard navigation, and robust focus trapping/restoration on drawer open/close; (3) Expanded test coverage with 43 comprehensive unit tests in `MobileBottomNav.test.tsx`; (4) Verified 56 test files / 350 tests passing (100%). |
+| **2026-10-25** | `v3.2` | **System Architecture Hardening & Automated Audit Hygiene**: (1) Implemented IndexedDB 50MB storage budget & LRU cache eviction policy with protected outbox and cache keys (`indexedDbCache.ts`, `lruCache.test.ts`); (2) Pinned `@supabase/supabase-js@2.49.1` across all 6 Supabase Edge Functions; (3) Added Web Worker & main-thread XIRR frame-drop telemetry alerting on calculations exceeding 16.0ms; (4) Resolved mobile screenshot FAB occlusion and suppressed stale price warning banners during automated Playwright captures; (5) Enabled multi-line title wrapping for long bullion item names on mobile cards; (6) Verified 56 test files / 314 tests passing (100%). |
 | **2026-09-27** | `v3.1` | **High-Agency Frontend Design Taste & Bento 2.0 Dashboard Architecture**: (1) Upgraded Home dashboard overview to Bento 2.0 asymmetric 12-column grid — 70/30 Hero row (`lg:col-span-8` Net Worth Timeline / `lg:col-span-4` Asset Allocation Donut) + 50/50 Row 2 (`lg:col-span-6` Member Returns / `lg:col-span-6` AI Assistant); (2) Adapted Donut visualizer with dynamic responsive flex wrapping (`lg:flex-col xl:flex-row`); (3) Liquid glass specular inner refraction highlights (`inset 0 1px 0 rgba(255, 255, 255, 0.08)`) across `.apple-card`, `.antigravity-card`, `.hero-networth-card`, and `AppBadge`; (4) Live intraday market movement indicator beacon on Today's Return; (5) Integrated High-Agency Frontend Design Skill (`.agents/skills/front-end-design/SKILL.md`) with zero-dependency SVG icon invariants; (6) Verified 55 test files / 309 tests passing (100%). |
 | **2026-09-15** | `v3.0` | **WhatsApp iOS 27 Liquid Glass Mobile Navigation Redesign**: (1) Redesigned `MobileBottomNav.tsx` from solid-backdrop to full iOS 27 Liquid Glass — tab bar uses `backdrop-filter: blur(28px) saturate(1.8)` at 76% surface opacity with an ultra-thin 0.5px border; (2) Replaced flat active-tab highlight with a springy pill indicator using `cubic-bezier(0.34, 1.56, 0.64, 1)` spring physics (`scale 0.5→1`) and `1.1×` icon scale-up on active; (3) Replaced `Menu` hamburger with `LayoutGrid` icon that rotates `45°` on open; (4) More drawer upgraded to a two-phase animated frosted bottom sheet (`blur(34px) saturate(1.8)`, iOS-native `cubic-bezier(0.32, 0.72, 0, 1)` spring) with frosted `rgba(0,0,0,0.44)` + `blur(10px)` backdrop; (5) Each More-drawer category now has a unique accent color (cyan, amber, green, purple, orange, red) with colored icon squares that fill solid with a glow shadow when active. |
 | **2026-09-04** | `v2.9` | **Security Hardening, Concurrency Testing & Design Token Parity**: (1) Constant-time byte comparison (`timingSafeEqual`) across all 4 Edge Functions (`verify-pin`, `holdings-crud`, `gemini-proxy`, `market-data`); (2) Server-side enforced UUID path randomization on storage uploads; (3) Resolved layout shift conflict between `content-visibility: auto` and `react-window` virtualization (`isVirtualized` prop); (4) Aligned FD day count compounding with Indian Banking 365.0-day convention; (5) Added `PortfolioSyncService` concurrency mutex unit test suite covering timeouts and queue unblocking; (6) Verified 51 test files / 271 tests passing (100%). |

@@ -1,6 +1,6 @@
 # 🧠 Architectural Memory & Engineering Lessons — Family Portfolio Tracker
 
-**Document Version**: 3.0  
+**Document Version**: 3.3  
 **Purpose**: Persistent engineering memory, incident post-mortems, and architectural decision records (ADRs).  
 **Protocol**: After any bug fix, user correction, or major architectural decision, append an entry to prevent regression.  
 
@@ -52,6 +52,11 @@
 - **Context**: Floating `npm:@supabase/supabase-js@2` risked upstream build breaks, and complex synchronous XIRR fallback lacked frame-drop observability.
 - **Decision**: Pinned exact `@supabase/supabase-js@2.49.1` across all Edge Functions and introduced a 16.0ms performance telemetry wrapper (`calculateXIRRSyncWithTelemetry`) logging structured warnings whenever solving exceeds 1 frame.
 - **Consequence**: 100% reproducible Deno builds and real-time observability into UI thread performance.
+
+### ADR-010: Accessible Motion (`prefers-reduced-motion`) and Focus Restoration in Mobile Bottom Navigation
+- **Context**: Spring-physics and bounce transitions in `MobileBottomNav.tsx` can trigger vestibular motion sensitivity, and opening/closing the More drawer previously lost the user's active keyboard focus context.
+- **Decision**: Introduced `useReducedMotion()` and `getTransition()` helper to instantly disable transitions when the OS preference `prefers-reduced-motion: reduce` is enabled. Added focus trapping within the open sheet and deterministic focus restoration to trigger elements upon dismissal.
+- **Consequence**: Full WCAG 2.1 Level AA compliance, robust assistive technology support, and expanded test coverage with 43 dedicated unit tests.
 
 ---
 

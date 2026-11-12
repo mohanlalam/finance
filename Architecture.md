@@ -1,6 +1,6 @@
 # 🏛️ System Architecture — Family Portfolio Tracker
 
-**Document Version**: 3.0  
+**Document Version**: 3.3  
 **Architecture Pattern**: Clean Architecture & Domain-Driven Design (DDD) with Strict Dependency Inversion  
 **Runtime Environment**: Progressive Web App (Vite 8, React 18.3, TypeScript 5.6, Tailwind CSS 3.4, Supabase PostgreSQL & Edge Functions)  
 
@@ -180,3 +180,8 @@ Market quote lookups are coordinated by [`marketDataService.ts`](src/infrastruct
 - **LRU Metadata Table**: Access timestamps and entry sizes are tracked under `_agy_cache_lru_meta_v1`.
 - **Protected Keys**: Critical queues (`portfolio_offline_outbox_v1`, `finance_portfolio_cache_v1`) are never evicted.
 - **Telemetry & Self-Healing**: `getCacheStorageMetrics()` exposes live storage footprint diagnostics, and corrupted records are automatically purged (`idb.del`) to prevent JSON parsing boot loops.
+
+### 6.4 Accessible Motion & Dynamic Ergonomics (`MobileBottomNav.tsx`)
+- **Reduced-Motion Compliance**: `useReducedMotion()` listens to the `(prefers-reduced-motion: reduce)` system media query. When active, `getTransition()` immediately switches spring-physics and bounce curves to `none`, preventing vestibular motion sickness while preserving structural state updates.
+- **Dynamic Focus Management**: Opening the More category bottom sheet traps focus within the dialog; closing or selecting an asset restores keyboard focus directly to the original trigger element.
+- **Live Region Telemetry**: Badge counters apply `role="status"` and pluralized accessible strings (`aria-label="${n} notification(s)"`) ensuring screen reader parity without interrupting primary announcements.

@@ -169,7 +169,7 @@ project antigravity/
 │   ├── App.tsx                   # Lightweight entry gate with PIN Lock screen
 │   ├── MainApp.tsx               # Context providers, routing, and dashboard load gates
 │   ├── main.tsx                  # React DOM root mounting
-│   ├── index.css                 # Global styles and design tokens (UI.md single source of truth)
+│   ├── index.css                 # Global styles and design tokens (Design.md single source of truth)
 │   ├── components/
 │   │   ├── icons/
 │   │   │   └── AppIcons.tsx      # Zero-dependency inline SVG icon library
@@ -332,7 +332,7 @@ project antigravity/
 │   │   └── e2e.yml               # Playwright E2E CI workflow
 │   └── dependabot.yml            # Automated dependency updates
 ├── GEMINI.md                     # Full architecture & AI agent navigation guide
-├── UI.md                         # Design token single source of truth
+├── Design.md                     # Design token single source of truth
 ├── CONTRIBUTING.md               # Contributor guidelines
 └── package.json
 ```
@@ -361,7 +361,7 @@ project antigravity/
 The repository enforces strict verification across unit, integration, and browser end-to-end suites:
 
 ```bash
-# Run Vitest test suite across 55 test files and 309 tests (100% passing)
+# Run Vitest test suite across 56 test files and 350 tests (100% passing)
 npm test
 
 # Run Playwright browser E2E tests (9 tests: 6 smoke + 3 deep CRUD workflows)
@@ -379,12 +379,12 @@ npm run verify
 | `src/utils/__tests__/` | 24 | Utility tests (formatters, date utils, math, crypto, biometrics, storage, AI extraction, assistant, security audit, performance) |
 | `src/hooks/__tests__/` | 4 | Hook tests (alerts, asset filter/sort, auto-lock, debounce) |
 | `src/infrastructure/__tests__/` | 1 | Market data fallback chain tests |
-| `src/components/__tests__/` | 4 | Component tests (Header, RegistryToolbar, PinLockScreen, Modal) |
-| `src/domains/portfolio/services/__tests__/` | 2 | Domain service tests (portfolioService, offlineOutbox) |
+| `src/components/__tests__/` | 5 | Component tests (Header, RegistryToolbar, PinLockScreen, Modal, MobileBottomNav) |
+| `src/domains/portfolio/services/__tests__/` | 3 | Domain service tests (portfolioService, offlineOutbox, portfolioSyncService) |
 | `src/domains/smart-import/__tests__/` | 2 | Smart import tests (financialValidation, duplicateDetection) |
-| `src/infrastructure/cache/__tests__/` | 1 | Offline cache hydration tests |
+| `src/infrastructure/cache/__tests__/` | 2 | Offline cache hydration & LRU cache tests (offlineHydration, lruCache) |
 | `src/infrastructure/logging/__tests__/` | 1 | Credential redaction and logging tests |
-| **Total** | **54 files / 301 tests** | **100% passing** |
+| **Total** | **56 files / 350 tests** | **100% passing** |
 
 ---
 
@@ -456,7 +456,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | Script | Command | Description |
 |---|---|---|
 | **Dev Server** | `npm run dev` | Start Vite dev server with HMR |
-| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (55 test files / 309 tests, 100% passing) |
+| **Unit Tests** | `npm test` | Run Vitest unit & integration tests (56 test files / 350 tests, 100% passing) |
 | **E2E Tests** | `npm run test:e2e` | Run Playwright browser E2E tests (9 tests across smoke and CRUD specs) |
 | **Build** | `npm run build` | Production build to `dist/` |
 | **Preview** | `npm run preview` | Preview the production build locally |

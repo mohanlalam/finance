@@ -1,8 +1,8 @@
 # 📋 Project Roadmap & Task Status — Family Portfolio Tracker
 
-**Document Version**: 3.2  
-**Current Release Status**: Milestone 3.2 (System Architecture Hardening & Audit Hygiene) Complete  
-**Verification Pipeline**: 100% Passing (ESLint: 0, TypeScript: 0, Vitest: 314/314, Build: Clean)  
+**Document Version**: 3.3  
+**Current Release Status**: Milestone 3.3 (Mobile Navigation Accessibility, Reduced-Motion Compliance & Test Expansion) Complete  
+**Verification Pipeline**: 100% Passing (ESLint: 0, TypeScript: 0, Vitest: 350/350, Build: Clean)  
 
 ---
 
@@ -62,6 +62,13 @@
 - [x] **Web Worker XIRR Frame-Drop Telemetry**: `calculateXIRRSyncWithTelemetry()` alerting whenever numerical solvers exceed the 16.0ms frame budget.
 - [x] **Automated Capture Hygiene Polish**: Suppressed FAB occlusion and stale price warning banners during automated Playwright full-page captures.
 - [x] **Long Asset Title Multi-Line Wrapping**: Configured `line-clamp-2 leading-tight break-words` on mobile cards in `GoldHoldingCard.tsx`.
+
+### ✅ Pillar 8: Mobile Navigation Accessibility, Reduced-Motion Compliance & Test Expansion
+- [x] **Reduced-Motion Hook & Transitions**: Integrated `useReducedMotion()` and `getTransition()` helper across `MobileBottomNav.tsx` suppressing spring animations when `prefers-reduced-motion: reduce` is enabled.
+- [x] **Screen Reader & Keyboard Accessibility**: Configured ARIA live/status notifications (`role="status"`, `aria-label`), keyboard navigation, and focus restoration to the trigger element upon drawer dismissal.
+- [x] **Notification Badge Formatting**: Formatted badge counters with graceful overflow limits (`9+`, `99+`) and pluralized accessibility labels.
+- [x] **Expanded Unit Test Coverage**: Added 43 unit tests in `MobileBottomNav.test.tsx` verifying tab transitions, drawer opening/closing, focus management, and reduced motion.
+- [x] **Test Suite Milestone**: Reached 56 test files and 350 unit/integration tests with 100% pass rate.
 
 ---
 
