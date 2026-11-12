@@ -20,6 +20,9 @@ interface QuoteResult {
   ticker: string;
   ltp: number | null;
   todayPct: number | null;
+  dayHigh?: number | null;
+  dayLow?: number | null;
+  prevClose?: number | null;
   error?: string;
 }
 
@@ -56,9 +59,11 @@ async function fetchQuote(ticker: string, yahooSymbol: string): Promise<Omit<Quo
 
     const ltp: number = meta.regularMarketPrice ?? meta.previousClose;
     const prevClose: number = meta.chartPreviousClose ?? meta.previousClose;
+    const dayHigh: number | null = typeof meta.regularMarketDayHigh === 'number' ? meta.regularMarketDayHigh : null;
+    const dayLow: number | null = typeof meta.regularMarketDayLow === 'number' ? meta.regularMarketDayLow : null;
     const todayPct = prevClose && ltp ? ((ltp - prevClose) / prevClose) * 100 : null;
 
-    return { ltp, todayPct };
+    return { ltp, todayPct, dayHigh, dayLow, prevClose };
   } catch (e: unknown) {
     return { ltp: null, todayPct: null, error: e instanceof Error ? e.message : String(e) };
   } finally {
@@ -229,7 +234,10 @@ Deno.serve(async (req: Request) => {
           ticker: r.ticker,
           ltp: r.ltp,
           todayPct: r.todayPct,
-          ...(r.error ? { error: r.error } : {})
+          dayHigh: r.dayHigh ?? null,
+          dayLow: r.dayLow ?? null,
+          prevClose: r.prevClose ?? null,
+          ...(r.error ? { error: r.error } : {}),
         });
       });
     }

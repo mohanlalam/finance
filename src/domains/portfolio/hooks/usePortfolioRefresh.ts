@@ -45,8 +45,9 @@ export function usePortfolioRefresh({
   }, [portfolios]);
 
   const refreshPrices = useCallback(
-    async (targetPortfolios?: Portfolio[]) => {
-      const currentList = targetPortfolios || portfoliosRef.current;
+    async (targetPortfolios?: Portfolio[] | unknown) => {
+      const currentList = Array.isArray(targetPortfolios) ? targetPortfolios : portfoliosRef.current;
+      if (!Array.isArray(currentList)) return;
       const allHoldings = currentList.flatMap((p) => p.holdings || []);
       if (allHoldings.length === 0) return;
 

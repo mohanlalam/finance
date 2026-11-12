@@ -1,4 +1,4 @@
-import { Portfolio } from '../../../types/portfolio';
+import { Portfolio, LiveStockQuote } from '../../../types/portfolio';
 import { calculateAggregatedPortfolioTotals } from '../calculations/portfolioTotals';
 import { getFDInvestedAmount, getFDEffectiveValue } from '../../assets/fd/calculations/fdCompounding';
 import { getRDInvestedAmount, getRDEffectiveValue } from '../../assets/rd/calculations/rdCompounding';
@@ -95,7 +95,7 @@ export class PortfolioCalculationService {
 
   applyLivePrices(
     portfolios: Portfolio[],
-    priceMap: Record<string, { ltp: number; todayPct: number }>
+    priceMap: Record<string, LiveStockQuote>
   ): Portfolio[] {
     return portfolios.map((portfolio) => {
       const updatedHoldings = portfolio.holdings.map((h) => {
@@ -111,6 +111,9 @@ export class PortfolioCalculationService {
           unrealizedPnL,
           pnlPercent,
           todayPnLPercent: live.todayPct,
+          dayHigh: live.dayHigh ?? h.dayHigh,
+          dayLow: live.dayLow ?? h.dayLow,
+          prevClose: live.prevClose ?? h.prevClose,
         };
       });
 

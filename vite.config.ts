@@ -1,5 +1,7 @@
-import { defineConfig, type UserConfig } from 'vite';
+import { defineConfig, type UserConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+
+declare const process: { env: Record<string, string | undefined> };
 import { VitePWA } from 'vite-plugin-pwa';
 import { compression } from 'vite-plugin-compression2';
 
@@ -66,7 +68,34 @@ export default defineConfig(({ command }): UserConfig => ({
           { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       }
-    })
+    }),
+    {
+      name: 'yahoo-finance-proxy',
+      configureServer(server) {
+        server.middlewares.use('/api/yahoo', async (req, res) => {
+          try {
+            // Allow dev proxy across local network SSL inspection proxies
+            if (typeof process !== 'undefined' && process.env) {
+              process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+            }
+            const targetUrl = `https://query1.finance.yahoo.com${(req as { url?: string }).url || ''}`;
+            const response = await fetch(targetUrl, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'application/json',
+              },
+            });
+            res.statusCode = response.status;
+            res.setHeader('Content-Type', 'application/json');
+            const data = await response.text();
+            res.end(data);
+          } catch (e: unknown) {
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }));
+          }
+        });
+      },
+    } as Plugin
   ].filter(Boolean),
   base: command === 'serve' ? '/' : '/finance/',
   build: {

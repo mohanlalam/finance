@@ -2,8 +2,16 @@ export type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export type AssetTab = 'home' | 'stocks' | 'fd' | 'rd' | 'sip' | 'gold' | 'real_estate' | 'insurance' | 'documents' | 'widgets' | 'tax';
 
+export interface LiveStockQuote {
+  ltp: number;
+  todayPct: number;
+  dayHigh?: number | null;
+  dayLow?: number | null;
+  prevClose?: number | null;
+}
+
 export interface LivePrices {
-  [yahooSymbol: string]: { ltp: number; todayPct: number };
+  [yahooSymbol: string]: LiveStockQuote;
 }
 
 export type PortfolioName = string;
@@ -22,6 +30,9 @@ export interface Holding {
   pnlPercent: number;
   todayPnLPercent: number;
   currentValue: number;
+  dayHigh?: number | null;
+  dayLow?: number | null;
+  prevClose?: number | null;
   weekLow52?: number;
   weekHigh52?: number;
   created_at?: string;

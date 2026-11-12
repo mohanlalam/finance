@@ -3,17 +3,17 @@ import { amfiMarketDataProvider } from './providers/amfiProvider';
 import { mcxGoldDataProvider } from './providers/mcxProvider';
 import { getCachedQuote, getStaleQuote, setCachedQuote } from './marketDataCache';
 import { SYMBOL_ALIASES } from '../../utils/constants';
-import { Holding } from '../../types/portfolio';
+import { Holding, LiveStockQuote } from '../../types/portfolio';
 
 export class MarketDataService {
   private inFlightStockPromise: Promise<{
-    priceMap: Record<string, { ltp: number; todayPct: number }>;
+    priceMap: Record<string, LiveStockQuote>;
     failedSymbols: string[];
   }> | null = null;
 
   async fetchLiveStockPrices(
     holdings: Holding[]
-  ): Promise<{ priceMap: Record<string, { ltp: number; todayPct: number }>; failedSymbols: string[] }> {
+  ): Promise<{ priceMap: Record<string, LiveStockQuote>; failedSymbols: string[] }> {
     if (holdings.length === 0) return { priceMap: {}, failedSymbols: [] };
 
     // Deduplicate concurrent in-flight calls
@@ -44,31 +44,43 @@ export class MarketDataService {
           new Set(queryItems.flatMap((item) => item.candidates))
         );
 
-        const quotesMap = new Map<string, { ltp: number; todayPct: number }>();
+        const quotesMap = new Map<string, LiveStockQuote>();
         try {
           // Tier 1: Live Primary Provider
           const liveQuotes = await yahooMarketDataProvider.getQuotes(allCandidates);
           liveQuotes.forEach((v, k) => {
             if (v.ltp !== null && v.todayPct !== null) {
-              quotesMap.set(k, { ltp: v.ltp, todayPct: v.todayPct });
+              quotesMap.set(k, {
+                ltp: v.ltp,
+                todayPct: v.todayPct,
+                dayHigh: v.dayHigh,
+                dayLow: v.dayLow,
+                prevClose: v.prevClose,
+              });
             }
           });
         } catch {
           // Network failed; fallback to cache tiers below
         }
 
-        const priceMap: Record<string, { ltp: number; todayPct: number }> = {};
+        const priceMap: Record<string, LiveStockQuote> = {};
         const failedSymbols: string[] = [];
 
         queryItems.forEach((item) => {
-          let resolvedQuote: { ltp: number; todayPct: number } | undefined;
+          let resolvedQuote: LiveStockQuote | undefined;
 
           for (const cand of item.candidates) {
             // Tier 1 Check
             const q = quotesMap.get(cand.toUpperCase());
             if (q && q.ltp !== null && q.todayPct !== null) {
-              resolvedQuote = { ltp: q.ltp, todayPct: q.todayPct };
-              setCachedQuote(cand, q.ltp, q.todayPct);
+              resolvedQuote = {
+                ltp: q.ltp,
+                todayPct: q.todayPct,
+                dayHigh: q.dayHigh,
+                dayLow: q.dayLow,
+                prevClose: q.prevClose,
+              };
+              setCachedQuote(cand, q.ltp, q.todayPct, q.dayHigh, q.dayLow, q.prevClose);
               break;
             }
             // Tier 2: Fresh In-Memory TTL Cache

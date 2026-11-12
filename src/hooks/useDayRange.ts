@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { formatFullINR, formatINR } from '../utils/formatters';
+import { Holding } from '../types/portfolio';
 
 export interface DayRange {
   dayHigh: number;
@@ -19,79 +20,75 @@ export function formatPnLValue(val: number): string {
 }
 
 /**
- * Computes Day High and Day Low for today's P&L movement, considering baseline (0 vs current todayPnL)
- * and any previously recorded intraday extremes today.
+ * Compute the portfolio Day High P&L and Day Low P&L from exchange-reported
+ * per-stock intraday extremes (regularMarketDayHigh / regularMarketDayLow).
+ *
+ * Day High P&L = Σ (holding.dayHigh − holding.prevClose) × holding.qty
+ * Day Low P&L  = Σ (holding.dayLow  − holding.prevClose) × holding.qty
+ *
+ * Falls back to the current todayPnL when exchange data is unavailable.
  */
-export function computeDayPnLRange(
-  todayPnL: number,
-  storedRange?: { high: number; low: number } | null
+export function computeExchangeDayRange(
+  holdings: Holding[],
+  todayPnL: number
 ): DayRange {
-  if (typeof todayPnL !== 'number' || isNaN(todayPnL)) {
-    return { dayHigh: 0, dayLow: 0 };
+  if (!holdings || holdings.length === 0) {
+    return { dayHigh: todayPnL, dayLow: todayPnL };
   }
 
-  // Baseline for today: the day starts with 0 P&L.
-  const baseHigh = Math.max(0, todayPnL);
-  const baseLow = Math.min(0, todayPnL);
+  let highPnL = 0;
+  let lowPnL = 0;
+  let hasExchangeData = false;
 
-  if (storedRange && typeof storedRange.high === 'number' && typeof storedRange.low === 'number') {
-    return {
-      dayHigh: Math.max(storedRange.high, baseHigh, todayPnL),
-      dayLow: Math.min(storedRange.low, baseLow, todayPnL),
-    };
+  for (let i = 0; i < holdings.length; i++) {
+    const h = holdings[i];
+    const qty = Number(h.qty) || 0;
+    const prevClose = Number(h.prevClose) || 0;
+    const dh = Number(h.dayHigh) || 0;
+    const dl = Number(h.dayLow) || 0;
+
+    if (qty <= 0 || prevClose <= 0) continue;
+
+    if (dh > 0 && dl > 0) {
+      hasExchangeData = true;
+      highPnL += (dh - prevClose) * qty;
+      lowPnL += (dl - prevClose) * qty;
+    } else {
+      // Stock has no exchange day range — use its current PnL contribution
+      const ltp = Number(h.ltp) || 0;
+      if (ltp > 0) {
+        const currentDelta = (ltp - prevClose) * qty;
+        highPnL += currentDelta;
+        lowPnL += currentDelta;
+      }
+    }
+  }
+
+  if (!hasExchangeData) {
+    return { dayHigh: todayPnL, dayLow: todayPnL };
   }
 
   return {
-    dayHigh: baseHigh,
-    dayLow: baseLow,
+    dayHigh: Math.round(highPnL),
+    dayLow: Math.round(lowPnL),
   };
 }
 
 /**
- * Custom hook tracking and persisting today's high and low recorded Profit/Loss (P&L).
- * - Tracks intraday P&L extremes recorded during the session in localStorage.
- * - Automatically rolls over each day based on date string.
+ * Custom hook computing today's Day High and Day Low P&L from
+ * exchange-reported per-stock intraday extremes (NSE/BSE via Yahoo Finance).
+ *
+ * Unlike session tracking, this works even when the app wasn't open during
+ * market hours — the exchange always records each stock's true intraday
+ * high and low price.
  */
 export function useDayRange(
   todayPnL: number,
-  portfolioId?: string | null
+  holdings?: Holding[] | unknown,
+  _portfolioId?: string | null
 ): DayRange {
-  const [range, setRange] = useState<DayRange>(() => {
-    return computeDayPnLRange(todayPnL);
-  });
-
-  useEffect(() => {
-    if (typeof todayPnL !== 'number' || isNaN(todayPnL)) return;
-
-    const todayStr = new Date().toISOString().split('T')[0];
-    const storageKey = `portfolio_day_pnl_range_${portfolioId || 'all'}_${todayStr}`;
-
-    let storedRange: { high: number; low: number } | null = null;
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const item = window.localStorage.getItem(storageKey);
-        if (item) {
-          storedRange = JSON.parse(item);
-        }
-      }
-    } catch {
-      // localStorage may fail in test or private browsing environments
-    }
-
-    const next = computeDayPnLRange(todayPnL, storedRange);
-    setRange(next);
-
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.setItem(
-          storageKey,
-          JSON.stringify({ high: next.dayHigh, low: next.dayLow })
-        );
-      }
-    } catch {
-      // Ignore quota/security errors
-    }
-  }, [todayPnL, portfolioId]);
-
-  return range;
+  return useMemo(() => {
+    const h = Array.isArray(holdings) ? holdings as Holding[] : [];
+    return computeExchangeDayRange(h, todayPnL);
+  }, [holdings, todayPnL]);
 }

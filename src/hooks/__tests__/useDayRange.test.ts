@@ -1,7 +1,35 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { computeDayPnLRange, useDayRange, formatPnLValue } from '../useDayRange';
+import { describe, it, expect } from 'vitest';
+import { renderHook } from '@testing-library/react';
+import {
+  computeExchangeDayRange,
+  useDayRange,
+  formatPnLValue,
+} from '../useDayRange';
+import { Holding } from '../../types/portfolio';
+
+// Helper to create a minimal holding stub with exchange data
+function makeHolding(overrides: Partial<Holding>): Holding {
+  return {
+    id: 'test',
+    sno: 1,
+    stockName: 'Test',
+    ticker: 'TEST',
+    yahooSymbol: 'TEST.NS',
+    qty: 10,
+    avgPrice: 100,
+    ltp: 110,
+    amountInvested: 1000,
+    unrealizedPnL: 100,
+    pnlPercent: 10,
+    todayPnLPercent: 1,
+    currentValue: 1100,
+    dayHigh: null,
+    dayLow: null,
+    prevClose: null,
+    ...overrides,
+  };
+}
 
 describe('formatPnLValue', () => {
   it('formats positive PnL with plus sign and full INR format', () => {
@@ -22,81 +50,80 @@ describe('formatPnLValue', () => {
   });
 });
 
-describe('computeDayPnLRange', () => {
-  it('computes baseline high and low correctly for positive today PnL', () => {
-    // Today gain = +50,000 -> High = +50,000, Low = 0
-    const result = computeDayPnLRange(50000);
-    expect(result.dayHigh).toBe(50000);
-    expect(result.dayLow).toBe(0);
+describe('computeExchangeDayRange', () => {
+  it('falls back to todayPnL when no holdings', () => {
+    const result = computeExchangeDayRange([], 42224);
+    expect(result.dayHigh).toBe(42224);
+    expect(result.dayLow).toBe(42224);
   });
 
-  it('computes baseline high and low correctly for negative today PnL', () => {
-    // Today loss = -15,000 -> High = 0, Low = -15,000
-    const result = computeDayPnLRange(-15000);
-    expect(result.dayHigh).toBe(0);
-    expect(result.dayLow).toBe(-15000);
+  it('computes high/low from exchange data for a single holding', () => {
+    const holdings = [
+      makeHolding({ qty: 100, prevClose: 500, dayHigh: 520, dayLow: 490, ltp: 510 }),
+    ];
+    // High = (520 - 500) * 100 = 2000
+    // Low  = (490 - 500) * 100 = -1000
+    const result = computeExchangeDayRange(holdings, 1000);
+    expect(result.dayHigh).toBe(2000);
+    expect(result.dayLow).toBe(-1000);
   });
 
-  it('incorporates stored high and low when provided', () => {
-    // Stored had a recorded high of +60,000 and low of -10,000.
-    // Current is +25,000.
-    const stored = { high: 60000, low: -10000 };
-    const result = computeDayPnLRange(25000, stored);
-    expect(result.dayHigh).toBe(60000);
-    expect(result.dayLow).toBe(-10000);
+  it('sums across multiple holdings', () => {
+    const holdings = [
+      makeHolding({ id: 'a', qty: 50, prevClose: 1000, dayHigh: 1050, dayLow: 980, ltp: 1020 }),
+      makeHolding({ id: 'b', qty: 30, prevClose: 200, dayHigh: 210, dayLow: 195, ltp: 205 }),
+    ];
+    // Stock A: High = (1050-1000)*50 = 2500, Low = (980-1000)*50 = -1000
+    // Stock B: High = (210-200)*30 = 300,   Low = (195-200)*30 = -150
+    // Total: High = 2800, Low = -1150
+    const result = computeExchangeDayRange(holdings, 1000);
+    expect(result.dayHigh).toBe(2800);
+    expect(result.dayLow).toBe(-1150);
   });
 
-  it('updates high if current PnL surpasses stored high', () => {
-    const stored = { high: 60000, low: -10000 };
-    const result = computeDayPnLRange(75000, stored);
-    expect(result.dayHigh).toBe(75000);
-    expect(result.dayLow).toBe(-10000);
+  it('falls back to current PnL for holdings without exchange data', () => {
+    const holdings = [
+      makeHolding({ qty: 100, prevClose: 500, dayHigh: null, dayLow: null, ltp: 510 }),
+    ];
+    // No exchange data, so uses current delta: (510 - 500) * 100 = 1000
+    const result = computeExchangeDayRange(holdings, 1000);
+    expect(result.dayHigh).toBe(1000);
+    expect(result.dayLow).toBe(1000);
   });
 
-  it('updates low if current PnL drops below stored low', () => {
-    const stored = { high: 60000, low: -10000 };
-    const result = computeDayPnLRange(-20000, stored);
-    expect(result.dayHigh).toBe(60000);
-    expect(result.dayLow).toBe(-20000);
+  it('mixes holdings with and without exchange data', () => {
+    const holdings = [
+      makeHolding({ id: 'a', qty: 100, prevClose: 500, dayHigh: 520, dayLow: 490, ltp: 510 }),
+      makeHolding({ id: 'b', qty: 50, prevClose: 300, dayHigh: null, dayLow: null, ltp: 310 }),
+    ];
+    // Stock A: High = (520-500)*100 = 2000, Low = (490-500)*100 = -1000
+    // Stock B (no exchange): current delta = (310-300)*50 = 500
+    // Total: High = 2500, Low = -500
+    const result = computeExchangeDayRange(holdings, 1500);
+    expect(result.dayHigh).toBe(2500);
+    expect(result.dayLow).toBe(-500);
   });
 });
 
 describe('useDayRange hook', () => {
-  beforeEach(() => {
-    window.localStorage.clear();
+  it('returns exchange-computed day range from holdings', () => {
+    const holdings = [
+      makeHolding({ qty: 100, prevClose: 500, dayHigh: 520, dayLow: 490, ltp: 510 }),
+    ];
+    const { result } = renderHook(() => useDayRange(1000, holdings, 'all'));
+    expect(result.current.dayHigh).toBe(2000);
+    expect(result.current.dayLow).toBe(-1000);
   });
 
-  it('initializes and saves PnL range to localStorage', () => {
-    const { result } = renderHook(() => useDayRange(43155, 'member-1'));
-    expect(result.current.dayHigh).toBe(43155);
-    expect(result.current.dayLow).toBe(0);
-
-    const todayStr = new Date().toISOString().split('T')[0];
-    const stored = JSON.parse(window.localStorage.getItem(`portfolio_day_pnl_range_member-1_${todayStr}`) || '{}');
-    expect(stored.high).toBe(43155);
-    expect(stored.low).toBe(0);
+  it('falls back gracefully when holdings is empty array', () => {
+    const { result } = renderHook(() => useDayRange(42224, [], 'all'));
+    expect(result.current.dayHigh).toBe(42224);
+    expect(result.current.dayLow).toBe(42224);
   });
 
-  it('updates dynamically as today PnL updates', () => {
-    const { result, rerender } = renderHook(
-      ({ pnl }) => useDayRange(pnl, 'member-1'),
-      { initialProps: { pnl: 43155 } }
-    );
-
-    expect(result.current.dayHigh).toBe(43155);
-
-    // PnL rises to 65000
-    act(() => {
-      rerender({ pnl: 65000 });
-    });
-    expect(result.current.dayHigh).toBe(65000);
-    expect(result.current.dayLow).toBe(0);
-
-    // PnL drops to -5000
-    act(() => {
-      rerender({ pnl: -5000 });
-    });
-    expect(result.current.dayHigh).toBe(65000);
-    expect(result.current.dayLow).toBe(-5000);
+  it('handles non-array holdings gracefully', () => {
+    const { result } = renderHook(() => useDayRange(42224, undefined, null));
+    expect(result.current.dayHigh).toBe(42224);
+    expect(result.current.dayLow).toBe(42224);
   });
 });
