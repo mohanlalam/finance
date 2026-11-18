@@ -9,7 +9,6 @@ import { NetWorthSnapshot } from '../hooks/usePortfolioData';
 import { AnimatedNumber } from './ui/AnimatedNumber';
 import { usePrivacy } from '../contexts/PrivacyContext';
 import { sortPortfolios } from '../domains/portfolio/calculations/portfolioOrdering';
-import { useDayRange, formatPnLValue } from '../hooks/useDayRange';
 
 
 // Hoist static icon elements at module level — prevents new React element
@@ -79,19 +78,6 @@ function MobileHomeSummary({
     if (isBalancesHidden) return <span role="text" aria-label="Amount hidden" title="Amount hidden">••••••</span>;
     return <AnimatedNumber value={val} formatter={formatter} />;
   }, [isBalancesHidden]);
-
-  const currentHoldings = useMemo(() => {
-    if (activePortfolio) {
-      return activePortfolio.holdings || [];
-    }
-    return portfolios.flatMap((p) => p.holdings || []);
-  }, [activePortfolio, portfolios]);
-
-  const { dayHigh } = useDayRange(
-    todayPnL,
-    currentHoldings,
-    activePortfolio?.id ?? null
-  );
 
   // Precalculate family member summaries to avoid un-memoized estimateTodayPnL in render loop
   const memberSummaries = useMemo(() => {
@@ -272,21 +258,6 @@ function MobileHomeSummary({
                   {isTodayGain ? '+' : ''}{isBalancesHidden ? '••••' : formatINR(todayPnL)} ({formatPercent(todayPnLPercent, 1)}) Today
                 </span>
               </span>
-            </div>
-          </div>
-
-          {/* Day High: recorded Profit/Loss */}
-          <div
-            className="shrink-0 flex flex-col justify-center px-2 py-1.5 rounded-[var(--radius-medium)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-right self-end mb-0.5"
-            title="Day's high profit recorded"
-            aria-label={`Day high profit ${formatPnLValue(dayHigh)}`}
-          >
-            <div className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-0.5 text-right">
-              Day High
-            </div>
-            <div className="flex items-center justify-end gap-1.5 text-[11px] font-bold tnum text-[var(--text-primary)]">
-              <span className="text-[9px] px-1 py-0.2 rounded font-extrabold bg-[var(--positive-soft)] text-[var(--positive)] leading-none">H</span>
-              <span className={dayHigh > 0 ? 'text-[var(--positive)]' : ''}>{renderValue(dayHigh, (v) => formatPnLValue(v))}</span>
             </div>
           </div>
         </div>
