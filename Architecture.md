@@ -1,6 +1,6 @@
 # 🏛️ System Architecture — Family Portfolio Tracker
 
-**Document Version**: 3.3  
+**Document Version**: 3.4  
 **Architecture Pattern**: Clean Architecture & Domain-Driven Design (DDD) with Strict Dependency Inversion  
 **Runtime Environment**: Progressive Web App (Vite 8, React 18.3, TypeScript 5.6, Tailwind CSS 3.4, Supabase PostgreSQL & Edge Functions)  
 
@@ -135,6 +135,10 @@ Market quote lookups are coordinated by [`marketDataService.ts`](src/infrastruct
                      │ 4. Stale Database Snapshot  │ ──► Return last known good price
                      └─────────────────────────────┘
 ```
+
+### 4.1 Exchange Day Extremes & Local Development Proxy
+- **Exchange-Reported Extrema**: `MarketQuote` captures `dayHigh`, `dayLow`, and `prevClose` directly from Yahoo Finance payload responses, ensuring accurate post-market valuation baselines without relying on fragile client-side session polling.
+- **Vite Dev Server Proxy**: Local environment utilizes Vite proxy (`/api/yahoo`) to route Yahoo Finance API requests directly during development, circumventing browser CORS restrictions while mirroring Edge Function behavior.
 
 ---
 

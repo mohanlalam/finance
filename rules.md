@@ -1,6 +1,6 @@
 # ⚖️ Engineering Rules & "Do Not Regress" Standards — Family Portfolio Tracker
 
-**Document Version**: 3.3  
+**Document Version**: 3.4  
 **Enforcement**: Strict CI/CD pipeline, pre-commit validation, and agent self-correction  
 **Scope**: All source code, hooks, domain services, infrastructure, and test suites  
 
@@ -45,8 +45,8 @@
    - Always explicitly import every React hook used (`useState`, `useEffect`, `useMemo`, `useCallback`, `useRef`). Vite and Rolldown do not expose React hooks globally.
 2. **Temporal Dead Zone (TDZ) Avoidance**:
    - In React component bodies, never reference a variable inside `useMemo`, `useCallback`, or `useEffect` before its `const` declaration line is reached.
-3. **No Implicit Any**:
-   - All function parameters, return types, and interface properties must be strictly typed.
+3. **No Implicit Any & Underscore-Prefixed Unused Variables**:
+   - All function parameters, return types, and interface properties must be strictly typed. Intentionally unused arguments or variables must be prefixed with an underscore (`_`) per ESLint config.
 4. **Design Token Integrity**:
    - Never introduce hardcoded hex color codes or arbitrary corner radii. Reference CSS custom properties declared in `src/index.css`.
 5. **Zero-Dependency SVG Iconography & Package Guard**:

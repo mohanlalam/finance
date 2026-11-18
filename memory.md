@@ -1,6 +1,6 @@
 # 🧠 Architectural Memory & Engineering Lessons — Family Portfolio Tracker
 
-**Document Version**: 3.3  
+**Document Version**: 3.4  
 **Purpose**: Persistent engineering memory, incident post-mortems, and architectural decision records (ADRs).  
 **Protocol**: After any bug fix, user correction, or major architectural decision, append an entry to prevent regression.  
 
@@ -57,6 +57,11 @@
 - **Context**: Spring-physics and bounce transitions in `MobileBottomNav.tsx` can trigger vestibular motion sensitivity, and opening/closing the More drawer previously lost the user's active keyboard focus context.
 - **Decision**: Introduced `useReducedMotion()` and `getTransition()` helper to instantly disable transitions when the OS preference `prefers-reduced-motion: reduce` is enabled. Added focus trapping within the open sheet and deterministic focus restoration to trigger elements upon dismissal.
 - **Consequence**: Full WCAG 2.1 Level AA compliance, robust assistive technology support, and expanded test coverage with 43 dedicated unit tests.
+
+### ADR-011: Exchange-Reported Day Extremes & Mobile Hero De-densification
+- **Context**: Client-side session tracking of intraday peaks was fragile when opening the app post-market hours, while attempting to display multiple intraday range badges overcrowded the mobile hero card.
+- **Decision**: Plumbed official exchange-reported `dayHigh`, `dayLow`, and `prevClose` directly through the market data layer for backend accuracy, while intentionally removing extra intraday high/low badges from `MobileHomeSummary` to strictly preserve the 2-metric secondary cap and clean visual hierarchy.
+- **Consequence**: Accurate underlying valuation data without mobile UI bloat; 100% test pass rate across all 56 test suites (350 tests).
 
 ---
 

@@ -1,7 +1,7 @@
 # 📋 Project Roadmap & Task Status — Family Portfolio Tracker
 
-**Document Version**: 3.3  
-**Current Release Status**: Milestone 3.3 (Mobile Navigation Accessibility, Reduced-Motion Compliance & Test Expansion) Complete  
+**Document Version**: 3.4  
+**Current Release Status**: Milestone 3.4 (Exchange Quote Plumbing, Dev Proxy & Mobile Hero De-densification) Complete  
 **Verification Pipeline**: 100% Passing (ESLint: 0, TypeScript: 0, Vitest: 350/350, Build: Clean)  
 
 ---
@@ -69,6 +69,12 @@
 - [x] **Notification Badge Formatting**: Formatted badge counters with graceful overflow limits (`9+`, `99+`) and pluralized accessibility labels.
 - [x] **Expanded Unit Test Coverage**: Added 43 unit tests in `MobileBottomNav.test.tsx` verifying tab transitions, drawer opening/closing, focus management, and reduced motion.
 - [x] **Test Suite Milestone**: Reached 56 test files and 350 unit/integration tests with 100% pass rate.
+
+### ✅ Pillar 9: Exchange Quote Field Plumbing & Mobile Hero De-densification
+- [x] **Official Exchange Intraday Extremes**: Plumbed `dayHigh`, `dayLow`, and `prevClose` through Yahoo Finance provider, `marketDataCache`, Edge Functions, and portfolio calculation services for accurate post-market baseline calculations.
+- [x] **Vite Dev Proxy**: Configured local Vite proxy (`/api/yahoo`) enabling direct live quote fetching and debugging during local development.
+- [x] **Strict Mobile Hero De-densification**: Streamlined `MobileHomeSummary.tsx` by removing experimental intraday peak clutter to uphold the strict 2-metric secondary cap and clean visual hierarchy.
+- [x] **ESLint Underscore Parameter Permittance**: Updated `eslint.config.js` to permit underscore-prefixed intentionally unused arguments (`_arg`).
 
 ---
 

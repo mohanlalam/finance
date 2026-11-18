@@ -1,6 +1,6 @@
 # 📄 Product Requirements Document (PRD) — Family Portfolio Tracker
 
-**Document Version**: 3.3  
+**Document Version**: 3.4  
 **Status**: Approved & In Production  
 **Author**: Engineering & Product Architecture  
 **Target Platform**: Progressive Web Application (Desktop, Tablet, iOS & Android Mobile)  

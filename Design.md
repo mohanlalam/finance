@@ -1,6 +1,6 @@
 # 🎨 Design System & Visual Specification — Family Portfolio Tracker
 
-**Document Version**: 3.3  
+**Document Version**: 3.4  
 **Design Philosophy**: Antigravity Cyber-Zen & Liquid Glass Dynamic Navigation  
 **Authoritative Token Source**: `src/index.css` & `Design.md §2`  
 
